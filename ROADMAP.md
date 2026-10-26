@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-25, roadmap review 2026-10-25 (no item reached a terminal status since review 2026-10-23-5; LIBRARY-WRITE-RACE-2, NARRATE-RECONCILE-RESIDUAL-1 and NARRATE-HARNESS-COLDCLICK-1 built and held, their specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md`; RESTAMP-RERUN-RACE-1 built and held; CHAPTER-STEP-CFI-1 stopped at Done-when 1; APP-TABS-1 Wave A built; the met `mode-separation` deadline withdrawn from `policy.roadmap.deadlines`; PAGE-PAGES-READ-1 specified and FURTHEST-PERSIST-1 stubbed, both split from PAGE-SAVE-RESTAMP-3 Wave C; AUTO-ARCHIVE-1 awaiting three owner answers; WORD-INDEX-UNIFY-1 still held for Blurby.Brain's ESM ruling). Earlier, review 2026-10-23-5 and the fourth review of 2026-10-23 (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
+**Last updated**: 2026-10-25, roadmap review 2026-10-25 (no item reached a terminal status since review 2026-10-23-5; LIBRARY-WRITE-RACE-2, NARRATE-RECONCILE-RESIDUAL-1 and NARRATE-HARNESS-COLDCLICK-1 built and held, their specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md`; RESTAMP-RERUN-RACE-1 built and held; CHAPTER-STEP-CFI-1 stopped at Done-when 1; APP-TABS-1 Wave A built; the met `mode-separation` deadline withdrawn from `policy.roadmap.deadlines`; PAGE-PAGES-READ-1 specified and FURTHEST-PERSIST-1 stubbed, both split from PAGE-SAVE-RESTAMP-3 Wave C; AUTO-ARCHIVE-1 awaiting three owner answers; WORD-INDEX-UNIFY-1's hold cleared by Blurby.Brain's ruling (b), two copies with a parity test; Blurby.Brain's rulings 1–8 applied: NARRATE-ARROW-PAUSE-1 (99) and LIBRARY-WRITE-RACE-3 (89) specified, PAGE-PARA-KEYS-1 (115) stubbed, BUG-220 to BUG-223 filed and the BUG-218/219 collision settled, package verifications recorded on seven cards, NARRATE-QUIT-LINGER-1 re-scoped to (b), rule 53 (b) names the live files; standing rules 54 and 55 promoted). Earlier, review 2026-10-23-5 and the fourth review of 2026-10-23 (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: **The Stage 8 release** (owner ruling, 2026-10-22): a published build of `main` once release gates (1) to (11) hold. The 17 merged Stage 8 items then close out on that build's evidence. No dated deadline. Scope: the release gate's eleven conditions ([Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14)); the open gate item is ELECTRON-42-UPGRADE-1 (gate 11), after which gate (1) re-runs on the quiet machine and the batched owner smoke (gate 2) follows. History: the previous finish line, Narration rebuilt, was met on 2026-10-15 (NARRATE-REBUILD-1, TR-074); the reading-mode separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, met, and withdrawn from the policy by roadmap review 2026-10-25 with the owner's approval).
 **Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`). Gate (1) passed on it on 2026-10-23 (run 4: 0 of 51 launches crashed; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`), so the owner's smoke re-check, gate (2), is the one release gate still open. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Built and held for the release (In Flight): PAGE-SAVE-RESTAMP-3 (80, Wave A) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84); BLOCK-TAG-CASE-1 (85) is building Wave A. Dispatch buffer after review 2026-10-23-4 (Queued, Full Spec, post-release): NARRATE-QUIT-LINGER-1 (86) → OVERLAY-THEME-SWEEP-1 (90) → READER-ARROW-GUARD-1 (91) → WIN-TARGET-NSIS-1 (92) → EINK-CONTROLS-1 (96). Stubs 87, 88, 93–95 and 97–99; NARRATE-EXIT-CRASH-1 (89) superseded by ELECTRON-42-UPGRADE-1. BLURBY-SERVER-1 (100, `Path: epic`) and Stage 9 (101–107).
@@ -196,7 +196,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 50. **LL-156 — A waiver moves with its code.** Before dispatch, every Out-of-scope line, waiver and known-failure entry is re-read against the specification's own edit sites. A waiver whose code the item moves, merges or replaces is brought into scope or restated against the new location. **Why:** SETTINGS-WRITE-DURABLE-1's KF-2 exclusion silently became an exclusion of its own new writer; the rule then held in two close-outs. (Promoted at the 2026-10-22 roadmap review.)
 51. **LL-164 — A lesson status is never set back.** At dispatch and again before close-out, every lesson-status line a specification asks the run to append is compared with that lesson's current status (`lessons --open`). If the lesson was promoted or retired since the specification was written, the line becomes a plain outcome note naming the current status, or is dropped. Never append a status that ranks below the current one. **Why:** KF2-WAIVER-RETIRE-1's correct-per-spec append turned LL-156, promoted to rule 50 that same day, back into a live observation, and every Done-when still passed. The rule held in three close-outs. (Promoted at the 2026-10-23 roadmap review.)
 52. **LL-146 — Evidence that looks like a test is a test.** A script or test copied into the repository as evidence or as a spec's red test is saved under a name the test runner does not collect (append `.txt`), until the run copies it into `tests/`. Before merging a docs commit that adds code-like files, confirm with `npx vitest list` that the collected set did not change. **Why:** two `*.test.*` evidence files under `docs/` broke `main`'s full suite on 2026-10-12, and two dispatches stopped or merged red on failures outside their scope. The rule held in two close-outs, and every spec carrying a red test since depends on it. (Promoted at the 2026-10-23 roadmap review.)
-53. **LL-167 — No dispatch merges or closes until its packaged build is verified (owner directive, 2026-10-23, through Blurby.Brain).** (a) Build `npx electron-builder --win --dir` with an explicit arch flag (`--arm64` on this ARM64 machine, the build the owner runs; amended by Blurby.Brain 2026-10-23) from the final commit with `origin/main` merged in, in the dispatch's own worktree, never over another build. (b) Grep the built `main.js` for `BLURBY_USER_DATA_DIR` (builds before `238f47ec` open the live profile), then run `release\win-unpacked\Blurby.exe` on a fresh scratch profile for 25 s on the verifying machine's native arch (arm64 here, so the arm64 native modules in `app.asar.unpacked` load; an x64 build under emulation is optional extra evidence): it stays alive; stdout, stderr and `error.log` hold no error, unhandled-rejection or crash line; no crash dump appears. Known noise in (b), recorded and not a failure: `Backup failed for …library.json: ENOENT` on a fresh profile's first launch (BUG-217, until fixed), and an `EADDRINUSE` on `127.0.0.1:48924` when the owner's installed Blurby (`AppData\Local\Programs\blurby`) is running; check the port's owner with `Get-NetTCPConnection -LocalPort 48924` and record it. (c) `npx asar list` shows each changed `main/` file, and the renderer bundle in `app.asar` matches `dist/`. (d) The automatable Done-when checks re-run against the packaged exe, not dev mode. (e) The outputs go in a "Package verification" section of the close-out; the dispatch sends Blurby.Brain the package path, commit and logs; Blurby.Roadmap gives the merge go only after Brain confirms. A dispatch that changes nothing under `package.json` `build.files` records "package unchanged" with `git diff --name-only` against the last verified commit. It applies to every item not yet closed, In Flight ones included. For a branch built before the rule (Blurby.Brain, 2026-10-23): an earlier packaged `--dir` live check counts toward (b) and (d) only if it was built from the exact commit that will merge, with current `origin/main` already merged in; otherwise rebuild and re-run (a)–(e). (c) and (e) are always required. A `release/` output is never deleted before its dispatch's package is verified.
+53. **LL-167 — No dispatch merges or closes until its packaged build is verified (owner directive, 2026-10-23, through Blurby.Brain).** (a) Build `npx electron-builder --win --dir` with an explicit arch flag (`--arm64` on this ARM64 machine, the build the owner runs; amended by Blurby.Brain 2026-10-23) from the final commit with `origin/main` merged in, in the dispatch's own worktree, never over another build. (b) Grep the built `main.js` for `BLURBY_USER_DATA_DIR` (builds before `238f47ec` open the live profile), then run `release\win-unpacked\Blurby.exe` on a fresh scratch profile for 25 s on the verifying machine's native arch (arm64 here, so the arm64 native modules in `app.asar.unpacked` load; an x64 build under emulation is optional extra evidence): it stays alive; stdout, stderr and `error.log` hold no error, unhandled-rejection or crash line; no crash dump appears. The live profile is untouched: the live files `%APPDATA%\blurby\blurby-data\library.json` and `%APPDATA%\blurby\blurby-data\settings.json` hash the same before and after, named exactly, never the profile root (amended by Blurby.Brain, 2026-10-25). Known noise in (b), recorded and not a failure: `Backup failed for …library.json: ENOENT` on a fresh profile's first launch (BUG-217, until fixed), and an `EADDRINUSE` on `127.0.0.1:48924` when the owner's installed Blurby (`AppData\Local\Programs\blurby`) is running; check the port's owner with `Get-NetTCPConnection -LocalPort 48924` and record it. (c) `npx asar list` shows each changed `main/` file, and the renderer bundle in `app.asar` matches `dist/`. (d) The automatable Done-when checks re-run against the packaged exe, not dev mode. (e) The outputs go in a "Package verification" section of the close-out; the dispatch sends Blurby.Brain the package path, commit and logs; Blurby.Roadmap gives the merge go only after Brain confirms. A dispatch that changes nothing under `package.json` `build.files` records "package unchanged" with `git diff --name-only` against the last verified commit. It applies to every item not yet closed, In Flight ones included. For a branch built before the rule (Blurby.Brain, 2026-10-23): an earlier packaged `--dir` live check counts toward (b) and (d) only if it was built from the exact commit that will merge, with current `origin/main` already merged in; otherwise rebuild and re-run (a)–(e). (c) and (e) are always required. A `release/` output is never deleted before its dispatch's package is verified.
 54. **LL-158 — A live row names a trigger proven to commit the state it checks.** A live smoke or owner re-measure row that checks state persisted across an action (quit, reopen, sync, import) names the action that commits that state. Before the row is written, a no-action control on the base shows that state unchanged without the trigger, and the trace runs end to end at the real data size. **Why:** occurred twice, in rows unreachable for reasons in code the item did not change: SETTINGS-WRITE-DURABLE-1 and QUIT-FLUSH-1 Done-when 9(f), where Page turns never wrote a position (LL-158 status record). Promoted by roadmap review 2026-10-25.
 55. **LL-151 + LL-166 — A verdict counts only from an instrument shown able to give the opposite verdict.** A gate recorder is shown to record a FAIL before its PASS is trusted (LL-151). A no-effect or null verdict needs a detector that reads state, and a press made where the control should act, shown to detect an effect on a case that has one (LL-166). Rule 43 covers this for tests; this rule covers recorders, sweeps and harnesses. **Why:** LL-151 applied and held in 3 close-outs; LL-166 is its second occurrence, on the null side (UI-SWEEP-1 and UI-SWEEP-TRIAGE-1). Promoted by roadmap review 2026-10-25.
 
@@ -709,24 +709,34 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 #### NARRATE-QUIT-LINGER-1 — Pause stops new Kokoro work, and a relaunch during the quit linger reopens Blurby *(position 86 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### NARRATE-QUIT-LINGER-1`). The builder, the merge and the close-out read it there.
+- **Re-scoped by Blurby.Brain (2026-10-25, relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a).** The branch stops at `977bf209`, with work in progress at `f107a761` on `eb/narrate-quit-linger-1-tests`. Re-dispatch with these instructions:
+  - Before finishing, run 3 base runs that pause with one generation in flight and a prefetch queued. If any run posts after the pause, (a) becomes its own item.
+  - Drop Done-when 7's gap comparison.
+  - Defer D6 to Brain's quiet-machine run.
+  - Narrow the outcome sentence to (b): "a relaunch during the quit linger reopens Blurby".
+  - Commit the harness.
+  - **Finding for ELECTRON-42-UPGRADE-1's lane, not this item:** the teardown linger after Node's exit (up to 26.6 s, some runs over 45 s), pending a quiet-host re-measure.
 
 <a id="overlay-theme-sweep-1-spec"></a>
 
 #### OVERLAY-THEME-SWEEP-1 — Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### OVERLAY-THEME-SWEEP-1`). The builder, the merge and the close-out read it there.
+- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `0379b6ca`, tip `ec73f352`. Built and held for the Stage 8 freeze. **Bug-number collision (roadmap review 2026-10-25):** the branch files its bug as BUG-218, which READER-ARROW-GUARD-1 also uses. At merge it becomes **BUG-219** (rename the heading and every mention on the branch before the merge).
 
 <a id="reader-arrow-guard-1-spec"></a>
 
 #### READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+←/→ (see Prerequisites); no shared-core touch)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### READER-ARROW-GUARD-1`). The builder, the merge and the close-out read it there.
+- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `59cffaa7`, tip `51202c1c`. Built and held for the Stage 8 freeze. Its BUG_REPORT hunk files BUG-218, which keeps that number (see BUG_REPORT.md, "Numbers reserved by held branches"). **Follow-up:** NARRATE-ARROW-PAUSE-1 (owner ruling 2026-10-25: Narrate pauses on a modified arrow).
 
 <a id="win-target-nsis-1-spec"></a>
 
 #### WIN-TARGET-NSIS-1 — `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### WIN-TARGET-NSIS-1`). The builder, the merge and the close-out read it there.
+- **Package verification (standing rule 53; Blurby.Brain, 2026-10-25):** (a)–(c) pass for `25cab87c`. (d) waits on Brain's install, launch and uninstall check of the arm64 NSIS installer on the second machine. That check also adds the missing live-hash record.
 
 <a id="flow-para-pause-index-1-spec"></a>
 
@@ -740,7 +750,192 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 #### LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md) (moved by roadmap review 2026-10-25 to keep ROADMAP.md under its length ceiling; the item is In Flight). The branch's staging memo records the build.
+- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `a42c30af`, tip `c46e9332`. Its memo's W2 (Medium, BUG-223), N1 and N2 are specified as LIBRARY-WRITE-RACE-3.
 
+
+
+<a id="narrate-arrow-pause-1"></a>
+
+#### NARRATE-ARROW-PAUSE-1 — In Narrate, an arrow pressed with a modifier key pauses, and the cursor holds its word *(Seq 99 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/reader-arrow-guard-1` @ `51202c1c`; owner ruling 2026-10-25 (tier 3), relayed by Blurby.Brain and Blurby.Roadmap; stacked on READER-ARROW-GUARD-1; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*
+
+- **What:** While Narrate is playing, ←/→ with Shift, Ctrl, Alt or Meta, or any combination of them, pauses playback. The cursor stays on the word it was on, and Space resumes from it. Plain ←/→ and PageUp/PageDown keep their current behaviour: browse away and turn the page.
+- **Why:**
+  - **Owner ruling, 2026-10-25:** "Narrate PAUSES on an arrow pressed with a modifier key."
+  - READER-ARROW-GUARD-1 stopped modified arrows turning the page in Narrate (`isNarrateBrowseKey`, `src/reader/modes/narrate/helpers/narrateBrowseKey.ts:8-11` on `51202c1c`). Since then they do nothing.
+    - `useReaderKeys` (`src/hooks/useKeyboardShortcuts.ts:229-230`, `:235-236`, `:286-287`) sends `seek-words` or `paragraph`.
+    - `NarrateModeRuntime.handleCommand` drops both (`src/reader/modes/narrate/ModeRuntime.ts:463`).
+    - Ctrl+Shift+←/→ sends no command at all.
+  - Measured on READER-ARROW-GUARD-1's fix `59cffaa7` (its memo, k2): in all six modified rows `playing` stayed true and the engine word kept advancing.
+  - Flow differs on purpose. Its modified arrows step the word and keep playing (FLOW-KEYS-FIX-1's owner ruling, 2026-10-23). Narrate has no word step to offer, so it pauses instead.
+- **Design (tier 1, Blurby.Roadmap 2026-10-25):** one place, inside Narrate.
+  - Add `isNarrateModifiedArrow(e)` to `narrateBrowseKey.ts`: true for `ArrowLeft` or `ArrowRight` with any of `shiftKey`, `ctrlKey`, `altKey` or `metaKey`.
+  - In the keyboard effect of `src/reader/modes/narrate/FoliateView.tsx` (`:1420-1444`), before the `isNarrateBrowseKey` branch: when `isNarrateModifiedArrow(e)`, call a new `onModifiedArrow` prop and return. The effect is a window listener, and iframe keys are already forwarded to `window` with their modifiers (`:933-938`), so focus inside the book is covered.
+  - Narrate's mode view wires `onModifiedArrow` to `runtime.pause()` (`ModeRuntime.ts:306-312`). That call is a no-op when not playing.
+  - `handleCommand` is unchanged. Its drop of `seek-words` and `paragraph` stays, so there is no second effect.
+  - Nothing outside `src/reader/modes/narrate/` changes. There are no sibling-runtime imports and no shared-adapter edit, which keeps reading-mode isolation.
+- **Prerequisites:** READER-ARROW-GUARD-1 (built and held, tip `51202c1c`). Cut from that tip. It merges right after it, after the Stage 8 release. Re-grep every cited line at the cut (standing rule 36).
+- **Done when** (PowerShell 7, `pwsh`, from the worktree root):
+  1. **Red first (standing rule 43).** Commit the new tests alone. On the cut, `npx vitest run tests/readerModes/narrateBrowseKey.test.ts` exits 1, because `isNarrateModifiedArrow` is not exported (named through a variable so the file loads). The existing `isNarrateBrowseKey` cases pass. Record the output in the memo.
+     - **(m1)** `it.each` over `["ArrowLeft","ArrowRight"]` × each of Shift, Ctrl, Alt, Meta and Ctrl+Shift: `isNarrateModifiedArrow` is true.
+     - **(m2) control:** plain ←/→, PageUp/PageDown with or without a modifier, ↑/↓ with Ctrl, and Space give false.
+  2. **The change.** `narrateBrowseKey.ts` (the helper), `src/reader/modes/narrate/FoliateView.tsx` (the branch and the prop) and Narrate's mode view (the wiring). `npx vitest run tests/readerModes/narrateBrowseKey.test.ts tests/narrate tests/readerModes` exits 0. The `isNarrateBrowseKey` cases are unchanged.
+  3. `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 on the owner's machine (standing rules 47 and 48).
+  4. **Live, packaged (standing rule 53(a), `--arm64`; a fresh scratch profile proved before the first input, LL-165).**
+     - **Probe.** Copy READER-ARROW-GUARD-1's probe (`C:\Projects\Blurby-artifacts\reader-arrow-guard-1\arrow-guard-probe.mjs`) to `scripts/narrate-arrow-pause/probe.mjs` (standing rule 52; `scripts/` is not collected). Change it to record `playing`, the engine `cursor` and `highlightedWordIndex` right after each press and again 1 s later. Its `ensurePlaying()` (Space) runs only between rows, and "not playing" is a reading, not a probe failure.
+     - **The route:** *Meditations*, a contents jump to INTRODUCTION, then Narrate mode.
+     - **Pass mark.** For each of the six modified keys (Shift, Ctrl, Alt + ← and →), pressed while playing:
+       - `playing` is false at both reads;
+       - the engine cursor and `highlightedWordIndex` are the same at both reads;
+       - `renderer.page` is unchanged and `isBrowsedAway` is false.
+     - **Ctrl+Shift+→,** pressed while playing, does the same.
+     - **Space after a pause** resumes: `playing` is true, and the first engine word after resuming is the held word or the word after it.
+     - **Controls (standing rules 54 and 55):**
+       - Plain → still browses away and turns the page.
+       - The same probe on READER-ARROW-GUARD-1's packaged tip shows `playing` true after a modified arrow. That reading is k2's base, and it is what shows the probe can tell the two apart.
+     - Record every row in the memo.
+  5. **Package verification (standing rule 53):** (a)–(e) on the final commit with `origin/main` merged in. Blurby.Brain confirms.
+  6. **Fence (standing rule 41):** `git diff --name-status <cut>` lists exactly `M src/reader/modes/narrate/helpers/narrateBrowseKey.ts`, `M src/reader/modes/narrate/FoliateView.tsx`, `M` Narrate's mode view, `M tests/readerModes/narrateBrowseKey.test.ts` and `A scripts/narrate-arrow-pause/probe.mjs`, plus the staging memo and the time log.
+- **Effort:** S.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel (standing rule 9); Blurby.Brain for package verification.
+- **Source:** the owner ruling of 2026-10-25; `docs/governance/close-outs/Memo.READER-ARROW-GUARD-1.GovernanceStaging.2026-10-23.md` (k0, k2) on `eb/reader-arrow-guard-1`; the code trace by roadmap review 2026-10-25 on `51202c1c`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** `narrateBrowseKey.ts:8-11`; `narrate/FoliateView.tsx:1420-1444` (the effect) and its props; Narrate's mode view, which renders the FoliateView with the runtime. Grep `src/reader/modes/narrate/ModeView.tsx` at the cut.
+- **Standing rule 50:** READER-ARROW-GUARD-1's Done-when 5 (Narrate keeps playing on a modified arrow) is a live check on that item's own build, and stays true there. This item reverses that behaviour by ruling. Its memo names the reversal, and no committed test pins it.
+- **Constants:** none.
+- **Branch:** `eb/narrate-arrow-pause-1` from `origin/eb/reader-arrow-guard-1` @ `51202c1c`.
+- **Staging plan:** stage the fence paths by exact path (policy.git: push). Hold for the Stage 8 freeze. Merge with `--no-ff` right after READER-ARROW-GUARD-1, once the package is verified.
+- **Shared-core touches:** none.
+- **Lane ownership:** TTS / Narration Engine (the Narrate view), with Reader Engine as the cross-lane owner of key routing. Execution surface C. **Forbidden during a parallel run:** `src/hooks/useKeyboardShortcuts.ts`, the Page, Focus and Flow runtimes, and `ReaderContainer.tsx`. **Merge order:** after READER-ARROW-GUARD-1.
+- **Failure handling:**
+  - **A modified arrow also reaches Narrate through `useReaderKeys` in a way that resumes or steps playback:** stop and report the path. Do not edit `useKeyboardShortcuts.ts`; that needs Blurby.Brain.
+  - **The cursor moves by more than one word between the two reads after a pause:** the pause is not at the heard sample. Report the engine snapshot; this needs Blurby.Brain.
+  - **Rollback:** `git revert -m 1 <merge>`.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red helper cases (m1, m2) committed alone, failure recorded | calculable | positive control | bounded | low | 15m | — | — |
+| 2 | Modified arrow pauses Narrate from its own key listener | calculable | feature | bounded | low | 25m | — | — |
+| 3 | Suite, typecheck, build | calculable | verify | bounded | low | 15m | — | — |
+| 4 | Packaged probe of six modified keys plus Ctrl+Shift, controls, resume; rule 53; memo, time log, push | calculable | live verification | bounded | medium | 50m | — | — |
+
+**Total:** 1h45m (estimate; the timing tool is not installed in this plugin version)
+
+##### Lessons applied
+- **LL-158 / standing rule 54:** the live row names its trigger (the key press), reads state at two times, and runs a control on the base build first.
+- **LL-166 / standing rule 55:** the verdict reads runtime state through the probe. The base control (`playing` true) shows the probe can tell the two cases apart.
+- **LL-165:** the scratch profile is proved before the first input.
+- **LL-161:** "holds its word" is checked by the engine cursor and the highlighted index at two reads, not by a screenshot.
+- **LL-138 / standing rule 43:** red first, with a control (m2).
+- **LL-146 / standing rule 52:** the probe lives under `scripts/`, not as a collected test.
+- **LL-149 / standing rule 48:** typecheck and build are restated.
+- **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="library-write-race-3"></a>
+
+#### LIBRARY-WRITE-RACE-3 — A library edit stamps only what the reader changed, a missing book fails the save, and a save answers only its own form *(Seq 89 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/library-write-race-2` @ `c46e9332`, from that item's memo (W2, N1, N2) and Blurby.Brain's ruling relayed by Blurby.Roadmap 2026-10-25; must merge before BLURBY-SERVER-1's sync is on for anyone; not a Stage 8 release gate)*
+
+- **What:**
+  - **W2 (BUG-223, Medium).** The renderer's library edits send only the fields the reader edited, each with the value the renderer loaded (`from`) and the new value (`to`). Main applies and stamps a field only when its own value still equals `from`.
+  - **N1.** `update-doc` on a missing or deleted id returns `{ error: "not-found" }`, and the Edit form treats that as a failed save.
+  - **N2.** A save's result is applied only to the form that started it, using a request token.
+- **Why:**
+  - **W2.** `setEditedField` (`main/library-write.js:50-55` on the base) compares the incoming value with main's current value. So a stale renderer copy differs from a newer cloud value, gets stamped `editedAt = now`, and beats the cloud value in `mergeEditedFields` (`library-write.js:61-73`, used at `main/sync-engine.js:325-327`). All five whole-library `saveLibrary` callers (`src/components/LibraryContainer.tsx:264`, `:355`, `:426`, `:436`, `:449`) and the Edit form's `applyMetadataUpdates` (`src/components/LibraryView.tsx:301`, which sends both title and author, edited or not) expose it.
+  - **N1.** `update-doc` (`main/ipc/library.js:154-168`) returns `undefined` on every path, so `useLibrary.addDoc` (`src/hooks/useLibrary.ts:40-46`) reads a missing id as success and the form closes.
+  - **N2.** `handleAddDoc`'s success branches (`LibraryView.tsx:310`, `:327`) act on whatever form is showing. Cancel (`:664`) and `startEdit` (`:345-346`) neither reset `saving` nor invalidate the pending save.
+- **Design (tier 1, Blurby.Roadmap 2026-10-25, inside Blurby.Brain's ruling):**
+  - **A new channel** `edit-doc-fields(edits)`, where `edits` is `[{ docId, field, from, to }]`. `field` must be in `RENDERER_FIELDS` (`library.js:50`), and `to` must pass that field's `RENDERER_FIELD_VALID` check (`:53-58`).
+    - For each edit, main skips a missing or deleted doc (it is reported in `missing`).
+    - If main's value `sameValue`s `to`, the edit is a no-op.
+    - If main's value `sameValue`s `from`, main sets the value with a stamp (`setEditedField`).
+    - Otherwise main skips the edit, leaving its value and its stamp untouched, and reports it in `conflicts`.
+    - It saves once and returns `{ applied, conflicts, missing }`, as counts plus the conflicting `{docId, field}` pairs.
+  - **The five `LibraryContainer` callers** move to `editDocFields`. Each sends only the fields it changes, with the value it loaded as `from`. `handleOpenDocById`'s `lastReadAt` is not an edited field. It goes through `update-doc-progress`'s existing `lastReadAt` path, or stays on `save-library` if that path does not set it (record which in the memo).
+  - **`save-library` stops stamping.** `mergeRendererEdits` (`library.js:63-82`) keeps applying valid renderer fields and `lastReadAt` as today, but no longer calls `setEditedField` for them. A stale whole-record save then carries no stamp, and the cloud's stamped value wins at the next sync. Nothing in the app calls it for edits after this item.
+  - **`apply-metadata-updates`** (`library.js:730-766`) accepts an optional `base` per update: `{ docId, updates, base }`.
+    - With `base`, it applies and stamps only keys whose `updates[key]` differs from `base[key]`, and only when main still equals `base[key]`. Other keys are reported in `conflicts`.
+    - Without `base` (MetadataWizard, `src/components/MetadataWizard.tsx:112`), behaviour is unchanged, because the wizard's fields are explicit edits.
+    - The Edit form keeps the loaded title and author as its base at `startEdit`, and sends only the edited keys with `base`. A form with nothing edited closes without a call.
+  - **N1:** `update-doc` returns `{ error: "not-found" }` when `getDocById` finds nothing or the doc is `deleted`, and `{ ok: true }` otherwise. `useLibrary.addDoc` treats `result?.error` as a failure, so the form stays open with the part-2 inline alert ("Couldn't save — try again").
+  - **N2:** `LibraryView` keeps `saveTokenRef`. Each save increments it and captures it. When the save resolves, the result is applied only if the token is still current and `editingId` is unchanged. Cancel and `startEdit` increment the token, reset `saving` and clear `saveFailed`. Cancel stays enabled (owner ruling 2026-10-23, "Stay open, inline retry"). A cancelled save may still land in main, and that is not shown.
+- **Prerequisites:**
+  - LIBRARY-WRITE-RACE-2 (`c46e9332`, held) and LIBRARY-WRITE-RACE-1 (`3b7aaa6f`, held) merge first, after the Stage 8 release.
+  - APP-TABS-1 merges first too, because both touch `src/types.ts`.
+  - Before BLURBY-SERVER-1 (Seq 104).
+  - Cut from `main` once those three have merged. Re-grep every cited line at the cut (standing rule 36).
+- **Done when** (PowerShell 7, `pwsh`, from the worktree root):
+  1. **Red first (standing rule 43).** Commit the new tests alone. On the base, each listed failure appears and every control passes; record the output in the memo.
+     - **`tests/libraryWriteRace3.test.js`** reuses `libraryWriteRace2.test.js`'s harness (`setup`, `seed`, `doc`, `call`, `copy`), copied into this file per standing rule 52 (it is not imported from a test file):
+       - **(w1)** A cloud merge sets `tags` to `["b"]` with a stamp at T1. Then `edit-doc-fields` with `{from: ["a"], to: ["a","x"]}` leaves `tags` `["b"]` and its stamp T1, and returns one conflict. *Fails on the base: the channel does not exist (`call` rejects).*
+       - **(w2)** With main at `["a"]`, the same edit applies `["a","x"]`, stamps `editedAt.tags`, and returns `applied: 1`.
+       - **(w3)** A stale whole-library `save-library` that carries a differing `tags` writes no `editedAt.tags`. *Fails on the base: (t1)'s stamp.*
+       - **(w4)** `apply-metadata-updates` with `base: {title:"A", author:"X"}` and `updates: {title:"B", author:"X"}`, while main's author is `"Y"` (a cloud change), stamps only `title` and leaves author `"Y"` unstamped. *Fails on the base: author is set to "X" and stamped.*
+       - **(n1)** `update-doc` on an unknown id resolves `{ error: "not-found" }`; on a deleted doc too. *Fails on the base: `undefined`.*
+       - **(c1) control:** `apply-metadata-updates` without `base` behaves as (t4)–(t7).
+     - **`tests/editFormSave.test.tsx`**, a new describe `LIBRARY-WRITE-RACE-3`, reusing `deferred`, `renderLibrary`, `openEdit`, `save`, `panel` and `alert`:
+       - **(ef8)** `updateDoc` resolves `{ error: "not-found" }`: the form stays open with the alert. *Fails on the base: the form closes.*
+       - **(ef9)** Hold book A's metadata save with `deferred`, Cancel, open book B's form, then resolve A's save as success: B's form stays open with its typed values, and Save is enabled. *Fails on the base.*
+       - **(ef10)** Editing only the title sends `updates: { title }` with `base: { title, author }`. *Fails on the base: both keys are sent and there is no base.*
+       - **(ef11) control:** the (ef1)–(ef7) rows pass unchanged.
+  2. **The change.** `main/ipc/library.js` (the new handler; `mergeRendererEdits` without stamping; `apply-metadata-updates` with `base`; `update-doc`'s return), `preload.js` (`editDocFields`, one line), `src/types.ts` (`editDocFields`, `updateDoc`'s return type and `applyMetadataUpdates`' `base`), `src/components/LibraryContainer.tsx` (the five callers), `src/components/LibraryView.tsx` (base, token, Cancel/startEdit reset), `src/hooks/useLibrary.ts` (`addDoc` reads `error`) and `src/test-harness/electron-api-stub.ts` (the stub gains `editDocFields`; `updateDoc` returns `{ ok: true }`).
+  3. **Standing rule 50, named and updated in scope:**
+     - `tests/libraryWriteRace2.test.js` (t1) and (t3) move from `save-library` to `edit-doc-fields`, with the same assertions on the stamps.
+     - `tests/saveLibraryMerge.test.js`'s `renderer` object (`:118-130`) and (j1)–(j5) follow the callers' new payloads.
+     - (o)'s source slice of `LibraryView.tsx` still finds `applyMetadataUpdates` between `"if (editMetaMode && editingId) {"` and the first `"return;"`. If the refactor moves it, update the slice markers and record that in the memo.
+     - `tests/libraryWriteThrough.test.js:155`'s pinned `editedAt` stays green unchanged, because it calls `apply-metadata-updates` without `base`.
+     - Run, unedited: `npx vitest run tests/saveLibraryTrust.test.js tests/ipcPathTrust.test.js tests/updateDocProgressLastRead.test.js tests/quitSequence.test.js tests/folderSync.test.js tests/folderUnreachableGuard.test.js`. Any failure is named in the memo and fixed in scope only if it pins the removed stamp.
+  4. `npx vitest run tests/libraryWriteRace3.test.js tests/libraryWriteRace2.test.js tests/editFormSave.test.tsx tests/saveLibraryMerge.test.js tests/libraryWriteThrough.test.js` exits 0. `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 on the owner's machine (standing rules 47 and 48).
+  5. **Live, packaged (standing rule 53(a), `--arm64`; a fresh scratch profile proved before the first input, LL-165).** The trigger that commits state is each edit's IPC save. The check reads `library.json` on the scratch profile after a 2 s settle (standing rule 54).
+     - Toggle a tag on book A: `library.json` shows the tag and `editedAt.tags` only, with no `editedAt.title`.
+     - Edit only book B's title in the Edit form: `editedAt.title` is set and `editedAt.author` is absent.
+     - Toggle unread on book C: `unread` changes and `editedAt.unread` is set.
+     - **Control on a base `--dir` build (standing rule 54):** B's edit also stamps `editedAt.author`. Recording that is what shows the check can see the difference (standing rule 55).
+  6. **Package verification (standing rule 53):** (a)–(e) on the final commit with `origin/main` merged in. `npx asar list` shows `main/ipc/library.js`, `main/library-write.js` (if changed) and `preload.js`. Blurby.Brain confirms.
+  7. **Fence (standing rule 41):** `git diff --name-status <base>` lists exactly the Done-when 2 files, `M main/library-write.js` (only if the stamp helper changes), the test files of Done-when 1 and 3, the staging memo and the time log.
+- **Effort:** M.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel (standing rule 9); Blurby.Brain for package verification and any ruling on a failing pinned test.
+- **Source:** `docs/governance/close-outs/Memo.LIBRARY-WRITE-RACE-2.GovernanceStaging.2026-10-24.md` (W2, N1, N2) on `eb/library-write-race-2`; BUG-223; the code trace by roadmap review 2026-10-25 on `c46e9332`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** the Done-when 2 list, with the base lines cited in Why. The helpers `sameValue`, `setEditedField` and `mergeEditedFields` (`main/library-write.js:44-73`) are reused unchanged.
+- **Constants:** none. The error string `"not-found"` lives beside the handler as `UPDATE_DOC_NOT_FOUND`, exported for the renderer through the result only.
+- **Branch:** `eb/library-write-race-3` from `main` after LIBRARY-WRITE-RACE-1, LIBRARY-WRITE-RACE-2 and APP-TABS-1 merge.
+- **Staging plan:** stage the fence paths by exact path (policy.git: push). Merge with `--no-ff` (Rule 5b) once the package is verified.
+- **Shared-core touches:** `src/types.ts`: the `ElectronAPI` members `editDocFields`, `updateDoc` and `applyMetadataUpdates`. It runs in its own integration window after APP-TABS-1. It must not run in parallel with any item that edits `src/types.ts`.
+- **Lane ownership:** Library & Content; execution surfaces D (main and IPC) and C (the Edit form). **Forbidden during a parallel run:** `src/components/ReaderContainer.tsx`, `main/sync-engine.js` (read only), and the reader modes. **Merge order:** after APP-TABS-1; before BLURBY-SERVER-1.
+- **Failure handling:**
+  - **A pinned test outside Done-when 3's list fails because the stamp moved:** name it in the memo and ask Blurby.Brain before editing it.
+  - **`lastReadAt` has no non-`save-library` path:** keep it on `save-library`, which no longer stamps, and record that.
+  - **The live control does not stamp `editedAt.author` on the base:** the check cannot see the defect. Stop and report.
+  - **Rollback:** `git revert -m 1 <merge>`. The stored data shape is unchanged (`editedAt` already exists from LIBRARY-WRITE-RACE-2).
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red tests (w1–w4, n1, ef8–ef10) and controls committed alone, failures recorded | calculable | positive control | bounded | medium | 40m | — | — |
+| 2 | edit-doc-fields channel; save-library stops stamping; metadata base; update-doc result | calculable | feature | bounded | medium | 50m | — | — |
+| 3 | Renderer callers, Edit form base and request token, addDoc error | calculable | feature | bounded | medium | 45m | — | — |
+| 4 | Rule 50 test updates; suite, typecheck, build | calculable | verify | bounded | medium | 35m | — | — |
+| 5 | Packaged live stamp check with base control; rule 53 verification; memo, time log, push | calculable | live verification | bounded | medium | 50m | — | — |
+
+**Total:** 3h40m (estimate; the timing tool is not installed in this plugin version)
+
+##### Lessons applied
+- **LL-158 / standing rule 54:** the live row names the commit trigger (each edit's IPC save) and runs a base control first.
+- **LL-166 / standing rule 55:** the base control shows the detector sees the extra `editedAt.author` stamp.
+- **LL-165:** the scratch profile is proved before the first input.
+- **LL-138 / standing rule 43:** red first, with controls (c1, ef11).
+- **LL-156 / standing rule 50:** the pinned tests that move with the stamp are named in scope, and the rest run unedited.
+- **LL-146 / standing rule 52:** the harness is copied into the new test file, not imported across test files.
+- **LL-149 / standing rule 48:** typecheck and build are restated in Done-when 4.
+- **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
+- **The memo's lesson candidate (W2):** a spec that sends whole records says whether a stamp follows the renderer's edit or main's diff. This one says: the renderer's edit, with the value it loaded as `from`.
+- **Standing rule 51:** this specification appends no lesson-status line.
 
 
 <a id="word-index-unify-1-spec"></a>
@@ -1006,6 +1201,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 #### NARRATE-HARNESS-COLDCLICK-1 — Cold click is measured on mainstream hardware *(built and held `c90d9e08` on `eb/narrate-harness-coldclick-1`; its reference smoke ran short and was stopped and reported (see the branch's staging memo); Seq 94, In Flight, merge held for the Stage 8 freeze; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md) (moved by roadmap review 2026-10-25 to keep ROADMAP.md under its length ceiling; the item is In Flight). The branch's staging memo records the build.
+- **Package verification (standing rule 53; Blurby.Brain, 2026-10-25):** (a)–(c) pass for `0ca285e5`. Done-when 5, 6 and 10 wait on Brain's quiet-machine runs. The Done-when 5 shortfall on the loaded host is void because of the load, so it is not a stop.
 
 
 
@@ -1209,6 +1405,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 #### RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*
 
 - **Full specification:** [`docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md`](docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
+- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** tip `79e1d9d0`. It is stacked on TOC-JUMP-SAVE-1, then PAGE-SAVE-RESTAMP-3 Wave A, then JUMP-LANDING-SAVE-1, and it touches `src/components/ReaderContainer.tsx` through that stack. **Merge order:** after JUMP-LANDING-SAVE-1.
 
 
 <a id="eink-controls-1"></a>
@@ -1216,6 +1413,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 #### EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### EINK-CONTROLS-1`). The builder, the merge and the close-out read it there.
+- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `8506bf0c`, tip `e6bf358c`. This is the rebuild with Blurby.Brain's ruling (A), a one-line fence widening at `main/ipc/state.js:37` (red `b60c330e`, green `a61752a3`). Built and held for the Stage 8 freeze.
 
 <a id="narrate-start-stack-1"></a>
 
@@ -1341,6 +1539,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
+- <a id="page-para-keys-1"></a>**PAGE-PARA-KEYS-1 — Page's paragraph keys move the highlight to a real paragraph start** *(Seq 115 — stub; added by roadmap review 2026-10-25 from Blurby.Brain's finding during package verification; BUG-220; not a release gate)*. In Page, with the highlight on word 187, Shift+→ moved it to −1 and Shift+← to 0, on a packaged build. The probable cause is the paragraph command's slice index. Specify after a trace of Page's paragraph command (Shift+←/→ through `useReaderKeys`) on the held key-fix stack: FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → FLOW-PARA-KEYS-1 → BLOCK-TAG-CASE-1. Those fixed the same keys in Focus and Flow. Prerequisites: READER-ARROW-GUARD-1 and BLOCK-TAG-CASE-1. Lane: Reader Engine.
 - <a id="furthest-persist-1"></a>**FURTHEST-PERSIST-1 — The furthest page a reader reached is remembered across sessions** *(Seq 114 — stub; added by roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C; tier 2: it changes what the backtrack prompt offers)*. Today the furthest mark lives only in memory for one open (`useProgressTracker.ts:150-164`). `update-doc-progress` (`main/ipc/documents.js:15-33`) saves only `position` and `cfi`, and `useLibrary.updateProgress` (`src/hooks/useLibrary.ts:158-163`) copies only those. `src/types.ts:108` declares `furthestPosition` with an out-of-date comment, has no `furthestCfi`, and main never writes either. So a reader who backs up and quits without the exit prompt loses the furthest page, and the next session's prompt measures from the saved position. A fix saves `furthestPosition` and `furthestCfi`, only when higher, through the progress IPC, and touches `src/types.ts` (shared core), `preload.js:54`, `main/ipc/documents.js`, `useLibrary.ts` and possibly the sync merge (`main/sync-engine.js:328-338`). **Owner question (tier 2):** should a later session's backtrack prompt offer the furthest page ever reached, or only the furthest page of the current session (today)? Recommended: the furthest page ever reached. Lane: Reader Engine.
 
 
