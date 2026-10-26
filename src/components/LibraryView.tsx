@@ -242,7 +242,7 @@ export default function LibraryView({
   const { readingNow, notStarted } = useMemo(() => {
     // "Reading Now" always sorted by closest-to-finished (highest progress % first)
     const rn = filteredLibrary
-      .filter((d) => (d.position || 0) >= FOLIATE_MIN_ENGAGEMENT_POSITION && (d.wordCount ? (d.position || 0) < d.wordCount : true))
+      .filter((d) => (d.position || 0) >= FOLIATE_MIN_ENGAGEMENT_POSITION)
       .sort((a, b) => {
         const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
         const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
