@@ -45,3 +45,7 @@ Next action: resolve the existing integration/ownership window for **LIBRARY-COM
 ## Follow-up owner decision — visibility implementation window
 
 The owner subsequently requested clearing integration and ownership for LIBRARY-COMPLETION-VISIBILITY-1. The [admission decision](2026-10-26-library-visibility-admission.md) grants that item the first exclusive LibraryView/new-test implementation/build-and-hold window. APP-TABS-1 remains built/held and integrates the accepted visibility result later. The general visibility entry-hold statements above are superseded only to that extent. No other item, package qualification, code-merge go or Stage8 release gate is cleared. No implementation is launched by this amendment.
+
+## First-order governance deliverable — owner follow-up
+
+**GOV-SWEEP-FOLLOWTHROUGH-1 (Seq0, Queued / Stub)** owns the approved sweep's refreshed16-action cleanup, evidence-backed held-state descriptions, individual deferred-findings ownership and verified preservation/closure package. [Explicit deliverables and acceptance](2026-10-26-governance-deliverables.md). The source chat completed discovery/approval but stopped implementation on drift; no cleanup is falsely credited. Governance is a primary work product; visibility remains the first application repair with its exclusive window unchanged. No existing status/sequence or release gate is changed.

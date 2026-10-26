@@ -3,7 +3,7 @@
 **Last updated**: 2026-10-26, roadmap-review after approved PhasesA–C: five source-backed smoke specifications, a separate Narrate paused-click child, owner design choices recorded, unresolved diagnoses retained and release holds unchanged. Previous state is preserved in the dated pre-specification snapshot.
 **Current state**: v1.75.1; Page, Focus, Flow and rebuilt Narrate are four independent runtimes (Narrate completed 2026-10-15). Kokoro is the sole narration engine. Source baseline main d8e44864 has the same production code as tested release36ac7466. That release passed quiet gate(1) on 2026-10-23; the owner smoke on 2026-10-26 is RED. See the current review and live Notion register for evidence/status; built/merged held work is not complete.
 **Finish line**: the Stage8 release, only when all eleven gates hold on the approved exact candidate; no dated deadline. Gate(2) remains failed/partial after the 2026-10-26 owner smoke. This planning review does not grant a code integration window, merge go or release exception. Any changed candidate receives the applicable gates anew.
-**Queue**: live Notion is authority. The existing release-fix Seq1–6 and held merge train remain. This review specifies five smoke repairs, first LIBRARY-COMPLETION-VISIBILITY-1; the new paused-click child occupies117 and the residual Narrate visual diagnosis moves to124. Visibility now has an owner-approved exclusive implementation window; the remaining prerequisite, package, merge and release gates still apply. Specifications are not dispatches. The phase brief reports all five readiness findings separately.
+**Queue**: live Notion is authority. First-order governance deliverable GOV-SWEEP-FOLLOWTHROUGH-1 occupies0; its approved cleanup and deferred findings have explicit acceptance, while visibility remains the first app fix. The existing release-fix Seq1–6 and held merge train remain. This review specifies five smoke repairs, first LIBRARY-COMPLETION-VISIBILITY-1; the new paused-click child occupies117 and the residual Narrate visual diagnosis moves to124. Visibility now has an owner-approved exclusive implementation window; the remaining prerequisite, package, merge and release gates still apply. Specifications are not dispatches. The phase brief reports all five readiness findings separately.
 **Last sprint**: SMOKE8-DIAG-1, UI-SWEEP-TRIAGE-1 and UI-SWEEP-1, all completed 2026-10-23 (TR-083, TR-082, TR-081; close-outs in `docs/governance/close-outs/`). Before them, READER-VISUAL-DIAG-1 (TR-080, 2026-10-23) and CI-AUDIT-ALLOWLIST-1 (TR-079, 2026-10-22).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -339,7 +339,6 @@ Completed 2026-10-14 (merge `d21009b3`). The quit saves run in the cancelled fir
 
 - **State:** merged into `main` at `e476aed1` on 2026-10-14. The close-out waits for the Stage 8 release gate: gate (1), the quiet-machine suite on final `main`; gate (2), the batched owner smoke, which carries this item's deferred owner checks; and gate (11), ELECTRON-42-UPGRADE-1.
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-22.md#packaging-fix-1) (moved by roadmap review 2026-10-22; byte-identical to `ROADMAP.md` on `main` @ `284c5695`). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
-
 
 <a id="ux-polish-2"></a>
 
@@ -760,8 +759,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md) (moved by roadmap review 2026-10-25 to keep ROADMAP.md under its length ceiling; the item is In Flight). The branch's staging memo records the build.
 - **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `a42c30af`, tip `c46e9332`. Its memo's W2 (Medium, BUG-223), N1 and N2 are specified as LIBRARY-WRITE-RACE-3.
 
-
-
 <a id="narrate-arrow-pause-1"></a>
 
 #### NARRATE-ARROW-PAUSE-1 — In Narrate, an arrow pressed with a modifier key pauses, and the cursor holds its word *(Seq 99 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/reader-arrow-guard-1` @ `51202c1c`; owner ruling 2026-10-25 (tier 3), relayed by Blurby.Brain and Blurby.Roadmap; stacked on READER-ARROW-GUARD-1; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*
@@ -841,7 +838,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **LL-149 / standing rule 48:** typecheck and build are restated.
 - **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
 - **Standing rule 51:** this specification appends no lesson-status line.
-
 
 <a id="library-write-race-3"></a>
 
@@ -944,7 +940,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
 - **The memo's lesson candidate (W2):** a spec that sends whole records says whether a stamp follows the renderer's edit or main's diff. This one says: the renderer's edit, with the value it loaded as `from`.
 - **Standing rule 51:** this specification appends no lesson-status line.
-
 
 <a id="word-index-unify-1-spec"></a>
 
@@ -1710,6 +1705,11 @@ Owner-authorized targeted roadmap update from the Stage 8 smoke of release 36ac7
 **Existing scope reconciled:** F5 stays with BUG-188 / BAND-ALIGN-1 and BAND-ALIGN-2; R4 removes only Focus's band in a separate follow-up, leaving Flow's fix intact. F15 stays with BUG-187 / FOLIATE-OBSERVER-LEAK-1 and existing log-cap work. EINK-CONTROLS-1 and BOOK-TYPE-SCALE-1 receive new evidence/directions without claiming their held or merged implementations satisfy them. AUTO-ARCHIVE-1 is amended above and loses its prior Full Spec readiness.
 
 Five full specifications below define source-backed changes; the remaining stubs retain explicit investigation/design gates. Rule 6a applies before dispatch. Mode-owned implementations stay isolated, with no sibling-runtime imports or shared mutable stores.
+
+#### GOV-SWEEP-FOLLOWTHROUGH-1 — Finish the approved governance sweep *(Queued; Stub; first governance deliverable; Seq0; Platform & Maintenance)* <a id="gov-sweep-followthrough-1"></a>
+
+- **What / deliverables:** Apply the approved16-action cleanup against the current baseline; reconcile held-work descriptions through an authorized register actor; individually own deferred findings; deliver preservation and closure evidence. [Scope, acceptance and action matrix](docs/planning/roadmap-reviews/2026-10-26-governance-deliverables.md).
+- **State / order:** Discovery and approval complete; sweep implementation stopped on drift with no edits. Governance is first-order; visibility remains the first app repair and keeps its exclusive source window. Preserve all existing statuses/Seq, newer decisions, release gates and the sweep's commit-only boundary. Refresh and reconcile before execution; not dispatch-ready.
 
 #### LIBRARY-COMPLETION-VISIBILITY-1 — Completed reads remain visible in the correct library tab *(Queued; Full Spec; planning rank 1; Seq116; Library & Content)* <a id="library-completion-visibility-1"></a>
 
