@@ -3077,3 +3077,11 @@ Related: LL-165, standing rules 47 and 48.
 
 ### LL-166 — status (2026-10-25, 2026-10-26)
 **Status:** Promoted -> standing rule 55
+
+### LL-168 — An NSIS install replaces an older Blurby's uninstall registration, so an install test exports both keys first
+**Verdict:** The NSIS installer registers under the app's `appId` (`com.blurby.app`, key `Uninstall\3d1a7f75-29ad-505c-9015-d9a83f11b281`). An install replaces the uninstall registration of any older Blurby with the same `appId`, and the new build's uninstall then deletes it. Moving the old install folder aside does not protect it. On the quiet machine, WIN-TARGET-NSIS-1's install check replaced the old 1.1.2 registration. Its keys had not been exported, so they were rebuilt from the template (`reg-1.1.2-reconstructed.reg`). The files are byte-verified as restored.
+**Evidence:** Blurby.Brain's WIN-TARGET-NSIS-1 (d) run on the x64 quiet machine, 2026-10-25 (`C:\Projects\Blurby-artifacts\win-target-nsis-1\quiet-x64\`), relayed by Blurby.Roadmap.
+**Recommendation:** Before any install test on a machine that already has Blurby, export both `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\<guid>` and `HKCU\Software\<guid>` (`reg export`), and record the files' hashes. Restore them after the uninstall and verify the restore. Never rely on moving the install folder.
+**Applies to:** install, uninstall and upgrade checks of a packaged build (standing rule 53 (d) for packaging items); release smoke runs; the release runbook's verify step.
+**Status:** Observation (2026-10-25)
+Related: LL-167 (standing rule 53), WIN-TARGET-NSIS-1, RELEASE-RUNBOOK-1.

@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-26T01:41:00Z",
+  "takenAt": "2026-10-26T01:47:13Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3123,8 +3123,8 @@
       "completed": "",
       "evidence": "Quiet machine: C:/Projects/Blurby-artifacts/narrate-harness-coldclick-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)",
       "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts (quiet x64 run on package 0ca285e5: 80/80 lost-race, spans never ready before first voice); Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner question 1 (A/B/C, spec recommends B) pending.",
-      "revision": "80c082a8a4d94443d8f2794e1eec8394c79421a074e0fa02c57beaa8433bf76b",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts; Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner answer to question 1, 2026-10-25: (B), mainstream cold click = first click while playing in a fresh process once the words are on screen, vs 8,000 ms (clickLatencyMs); quiet x64 passes both rates (1.00x worst 1,609 ms; 2.00x worst 1,746 ms). Charter D6 and second-machine.md:22 amended. Close on this evidence when the branch merges (post-release train).",
+      "revision": "3e20725a009dfefc8dbd2c8e550d42b13e40ab4d7a2a465e9439cdef9b5ec9ec",
       "extra": {
         "url": "https://app.notion.com/3fa7c96cc31e81ca8d3ffa962cabdd31",
         "Workstream": ""
@@ -3675,10 +3675,10 @@
       "branch": "eb/win-target-nsis-1",
       "started": "2026-10-23",
       "completed": "",
-      "evidence": "",
+      "evidence": "Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)",
       "description": "Move package.json's build.win.target from nsis-web to nsis, so each architecture gets a full installer and its own latest.yml without CLI overrides. Update the release runbook, and check that electron-updater picks the right architecture.",
-      "notes": "Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release.",
-      "revision": "37880c2cc3a22b284fc9625131862f451aad17a5c105dff72b67def486af0a0a",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release. Package verified in full under rule 53 by Blurby.Brain 2026-10-25, tip d96435a1: (a)-(c) arm64; (d) x64 quiet machine (installer asar = --dir = installed, sha256 B8FE8246...; silent install and uninstall clean; live hashes unchanged). LL-168 filed. Built and held.",
+      "revision": "cf3668b36bbb43cda3588eb5b3dea68fe66f273945743253af313c4f1347a5ad",
       "extra": {
         "url": "https://app.notion.com/4027c96cc31e8125b455d0a0e9a8d04a",
         "Workstream": ""
