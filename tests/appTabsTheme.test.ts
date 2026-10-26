@@ -29,13 +29,15 @@ function definedInEveryTheme(name: string): number {
 }
 
 const SHARED_TOKENS = ["--mono", "--serif", "--radius-sm", "--radius-md", "--radius-lg", "--transition-fast", "--transition-normal"];
+// Set on the list-row context menu element by DocCard (the spec's Wave B instruction: no inline left/top); not theme colours.
+const ELEMENT_PROPS = ["--menu-x", "--menu-y"];
 
 describe("APP-TABS-1 tab bar theme", () => {
   it("(t1) the stylesheet exists and reads only tokens every theme defines", () => {
     expect(fs.existsSync(path.resolve(__dirname, "..", CSS_PATH))).toBe(true);
     const names = [...css().matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]);
     expect(names.length).toBeGreaterThan(0);
-    const bad = names.filter((n) => !SHARED_TOKENS.includes(n) && definedInEveryTheme(n) !== 4);
+    const bad = names.filter((n) => !SHARED_TOKENS.includes(n) && !ELEMENT_PROPS.includes(n) && definedInEveryTheme(n) !== 4);
     expect(bad).toEqual([]);
   });
 

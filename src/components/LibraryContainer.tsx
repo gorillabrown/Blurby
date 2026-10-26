@@ -102,7 +102,7 @@ export default function LibraryContainer() {
     library, setLibrary, settings, setSettings, loaded, platform, loadingContent, toast,
     addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
-    toggleFavorite, archiveDoc, unarchiveDoc, showToast,
+    toggleFavorite, archiveDoc, unarchiveDoc, moveDocHome, showToast,
   } = useLibrary();
 
   const openBugReport = useCallback(async () => {
@@ -275,6 +275,13 @@ export default function LibraryContainer() {
     openDoc(updated);
   }, [library, openDoc, setLibrary]);
 
+  // APP-TABS-1: choosing an item in the library palette switches to its tab, then opens it
+  const openFromPalette = useCallback((docId: string) => {
+    const doc = library.find((d) => d.id === docId);
+    if (doc) switchTab(homeOf(doc));
+    handleOpenDocById(docId);
+  }, [library, switchTab, handleOpenDocById]);
+
   const handleExitReader = useCallback((_finalPos: number) => {
     // Progress already saved by finishReading in useProgressTracker —
     // just switch back to library view
@@ -294,6 +301,9 @@ export default function LibraryContainer() {
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const kbActionsRef = useRef<any>(null);
   const kbState = useLibraryKeyboard(view, kbActionsRef.current || {});
+
+  // APP-TABS-1: the palettes search every live item on every tab
+  const searchableLibrary = useMemo(() => library.filter((d) => !d.deleted), [library]);
 
   const filteredLibrary = useMemo(() => {
     // APP-TABS-1: the keyboard list is the active tab's items; Podcasts and Marketplace hold none yet
@@ -585,8 +595,8 @@ export default function LibraryContainer() {
           {kbState.activeOverlay === "librarySearch" && (
             <CommandPalette
               mode="library"
-              library={filteredLibrary}
-              onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+              library={searchableLibrary}
+              onSelect={(docId) => { openFromPalette(docId); kbState.setActiveOverlay(null); }}
               onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
               onClose={() => kbState.setActiveOverlay(null)}
               onOpenSettings={handleOpenSettings}
@@ -678,6 +688,8 @@ export default function LibraryContainer() {
               toast={toast}
               activeTab={activeTab}
               onTabChange={switchTab}
+              onMoveDocHome={moveDocHome}
+              onShowToast={showToast}
               onOpenDoc={openDoc}
               onAddDoc={addDoc}
               onAddDocFromUrl={addDocFromUrl}
@@ -729,8 +741,8 @@ export default function LibraryContainer() {
         {kbState.activeOverlay === "librarySearch" && (
           <CommandPalette
             mode="library"
-            library={filteredLibrary}
-            onSelect={(docId) => { handleOpenDocById(docId); kbState.setActiveOverlay(null); }}
+            library={searchableLibrary}
+            onSelect={(docId) => { openFromPalette(docId); kbState.setActiveOverlay(null); }}
             onAction={(action) => { action(); kbState.setActiveOverlay(null); }}
             onClose={() => kbState.setActiveOverlay(null)}
             onOpenSettings={handleOpenSettings}

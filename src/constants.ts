@@ -343,3 +343,6 @@ export const DEFAULT_SETTINGS = {
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
   readingGoals: [] as ReadingGoal[],
 } satisfies BlurbySettings;
+
+// APP-TABS-1: how long the filter menu stays open after the pointer leaves a hover-opened menu
+export const FILTER_MENU_HOVER_CLOSE_MS = 250;

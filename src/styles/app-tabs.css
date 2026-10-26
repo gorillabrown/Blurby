@@ -48,6 +48,78 @@
   margin-top: 16px;
 }
 
+/* Filter dropdown (hover, click or Enter) */
+.filter-menu-wrap {
+  position: relative;
+}
+.filter-menu-button[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+.filter-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 200;
+  min-width: 160px;
+  padding: 4px 0;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.filter-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.filter-menu-item:hover,
+.filter-menu-item:focus-visible {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.filter-menu-item[aria-checked="true"] {
+  color: var(--text);
+  font-weight: 700;
+}
+.filter-menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border);
+}
+
+/* Right-click menu on a list row, positioned by the pointer (set as custom properties on the element) */
+.doc-context-menu--at {
+  position: fixed;
+  left: var(--menu-x);
+  top: var(--menu-y);
+  z-index: 10000;
+}
+
+.search-result-tab {
+  margin-left: auto;
+  padding-left: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.tab-banner {
+  margin: 24px 0;
+  padding: 16px 20px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--mono);
+  color: var(--text-dim);
+}
+
 /* E-ink draws the accent in its ink colour, so the selected tab is marked by weight as well as colour. */
 [data-eink="true"] .app-tab[aria-selected="true"] {
   font-weight: 700;

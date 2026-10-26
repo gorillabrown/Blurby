@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { BlurbyDoc } from "../types";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { homeOf, APP_TAB_LABELS } from "../utils/libraryHome";
 
 interface PaletteItem {
   type: "doc" | "action" | "setting" | "shortcut";
@@ -201,6 +202,7 @@ export default function CommandPalette({
         doc.authorFull,
         doc.sourceDomain,
         ...(doc.tags ?? []),
+        APP_TAB_LABELS[homeOf(doc)],
       ].filter(Boolean).join(" · "),
       onSelect: () => { onSelect(doc.id); onClose(); },
     }));

@@ -77,6 +77,18 @@ function register(ctx) {
     }
   });
 
+  // APP-TABS-1: a manual move between the Library and Newsroom sets only `home` (not modified, not revision), so the
+  // position, highlights, notes and sync state stay. The renderer's library save cannot set it (RENDERER_FIELDS).
+  ipcMain.handle("set-doc-home", (_, docId, home) => {
+    if (typeof docId !== "string" || (home !== "library" && home !== "newsroom")) return { ok: false };
+    const doc = ctx.getDocById(docId);
+    if (!doc || doc.deleted) return { ok: false };
+    doc.home = home;
+    ctx.saveLibrary();
+    ctx.broadcastLibrary();
+    return { ok: true };
+  });
+
   ipcMain.handle("snooze-doc", (_, docId, until) => {
     const library = ctx.getLibrary();
     const doc = library.find((d) => d.id === docId);
