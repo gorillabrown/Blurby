@@ -1,0 +1,23 @@
+{
+  "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+  "decision": "owner-cleared exclusive implementation/build-and-hold window; visibility before APP-TABS source integration",
+  "sourceBaseline": "b8f2bf95520b6c41e08ece78a553685b2f654361",
+  "appTabsHeldTip": "8539ec4c55c5359cdafbd3dfa146de5881f062c9",
+  "partitionByteEquivalent": true,
+  "sourceEdits": false,
+  "applicationTestsRun": false,
+  "liveRegisterItems": 192,
+  "snapshotTakenAt": "2026-10-26T20:23:38Z",
+  "statusAndSequenceChanges": false,
+  "confirmedMutations": 2,
+  "u9": "passed",
+  "u10": "passed",
+  "mainMergeGo": "not granted",
+  "releaseHold": "retained",
+  "implementationBranch": "eb/library-completion-visibility-1",
+  "executionLaunch": "not performed",
+  "scope": [
+    "src/components/LibraryView.tsx",
+    "tests/libraryCompletionVisibility.test.tsx"
+  ]
+}

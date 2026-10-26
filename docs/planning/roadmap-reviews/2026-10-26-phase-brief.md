@@ -41,3 +41,7 @@ Primary risks are overlapping LibraryView ownership and mistaking a synthetic gr
 No deadline is declared, so pace against a date is not computable. Effort-weighted remaining work is not computable because28 existing items lack Effort. Scope-discipline delivery score is not computable (0/0 terminal changes); backlog additions are not delivery. Holding bay:0 absorbed,0 withdrawn,0 open and5 previously closed. Board comments:0 open,0 resolved,0 adopted. Board generation and publication results are recorded in the final validation.
 
 Next action: resolve the existing integration/ownership window for **LIBRARY-COMPLETION-VISIBILITY-1**, then run the dispatch gate against its full specification. This review grants no merge go or release exception.
+
+## Follow-up owner decision — visibility implementation window
+
+The owner subsequently requested clearing integration and ownership for LIBRARY-COMPLETION-VISIBILITY-1. The [admission decision](2026-10-26-library-visibility-admission.md) grants that item the first exclusive LibraryView/new-test implementation/build-and-hold window. APP-TABS-1 remains built/held and integrates the accepted visibility result later. The general visibility entry-hold statements above are superseded only to that extent. No other item, package qualification, code-merge go or Stage8 release gate is cleared. No implementation is launched by this amendment.
