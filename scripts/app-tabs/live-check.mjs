@@ -215,7 +215,7 @@ await row("L5", "frame 4: hover opens the filter menu, Escape closes it; with E-
   // Turn E-ink on in Settings
   await clickSel('.app-tab-bar [aria-label="Settings"]');
   await waitFor(() => has(".menu-flap.open"), "the settings flap");
-  await clickText(".menu-flap button, .menu-flap [role=button], .menu-flap li", /^theme$/i);
+  await clickText(".menu-flap .settings-menu-item", /theme/i);
   await sleep(500);
   await clickSel('[aria-label="Toggle E-Ink display mode"]');
   await sleep(500);
@@ -230,7 +230,7 @@ await row("L5", "frame 4: hover opens the filter menu, Escape closes it; with E-
   // Turn E-ink off again
   await clickSel('.app-tab-bar [aria-label="Settings"]');
   await waitFor(() => has(".menu-flap.open"), "the settings flap");
-  await clickText(".menu-flap button, .menu-flap [role=button], .menu-flap li", /^theme$/i);
+  await clickText(".menu-flap .settings-menu-item", /theme/i);
   await sleep(500);
   await clickSel('[aria-label="Toggle E-Ink display mode"]');
   await sleep(500);
@@ -247,7 +247,7 @@ await row("L6", "themes: the tab bar background is --bg in every theme, E-ink of
   const openTheme = async () => {
     await clickSel('.app-tab-bar [aria-label="Settings"]');
     await waitFor(() => has(".menu-flap.open"), "the settings flap");
-    await clickText(".menu-flap button, .menu-flap [role=button], .menu-flap li", /^theme$/i);
+    await clickText(".menu-flap .settings-menu-item", /theme/i);
     await sleep(400);
   };
   const closeFlap = async () => { await sess.key("Escape"); await sleep(400); if (await has(".menu-flap.open")) { await clickSel(".menu-flap-close-btn"); await sleep(400); } };
@@ -257,7 +257,7 @@ await row("L6", "themes: the tab bar background is --bg in every theme, E-ink of
       await openTheme();
       const isOn = await ev(`document.documentElement.getAttribute('data-eink') === 'true'`);
       if (isOn !== eink) { await clickSel('[aria-label="Toggle E-Ink display mode"]'); await sleep(400); }
-      await clickText(".menu-flap button, .menu-flap [role=button]", new RegExp(`^${theme}$`, "i"));
+      await clickSel(`[aria-label="${theme} theme"]`);
       await sleep(500);
       await closeFlap();
       const s = await bar();
@@ -271,7 +271,7 @@ await row("L6", "themes: the tab bar background is --bg in every theme, E-ink of
   // leave the profile as it was: dark, E-ink off
   await openTheme();
   if (await ev(`document.documentElement.getAttribute('data-eink') === 'true'`)) { await clickSel('[aria-label="Toggle E-Ink display mode"]'); await sleep(400); }
-  await clickText(".menu-flap button, .menu-flap [role=button]", /^dark$/i);
+  await clickSel('[aria-label="dark theme"]');
   await closeFlap();
   return seen;
 });
@@ -289,6 +289,10 @@ await row("L2", "frame 2: Move to Newsroom keeps position, cfi and revision; sur
   await waitFor(() => ev(`document.querySelector('[aria-label="Rescan folder"]')?.innerText.trim() === '⟳'`), "the rescan to finish", 60000);
   await sleep(1500);
   eq(rec("f-pdf").home, "newsroom", "home after rescan");
+  expect(!(await ids()).includes("f-pdf"), "f-pdf is still on the Library tab after the move");
+  await clickSel('.app-tab-bar [role=tab]:nth-child(2)'); // look at it on Newsroom; this is the tab the relaunch should reopen on
+  expect((await ids()).includes("f-pdf"), "f-pdf is not listed on Newsroom after the move and rescan");
+  await sleep(800);
   await relaunch(P1, "p1 relaunch");
   return { home: rec("f-pdf").home, position: rec("f-pdf").position, revision: rec("f-pdf").revision };
 });
