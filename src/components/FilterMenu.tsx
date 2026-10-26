@@ -43,8 +43,13 @@ export default function FilterMenu({ items, value, onSelect, disabled }: FilterM
     const outside = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(null);
     };
+    // Escape closes a hover- or click-opened menu too, when focus is not inside it
+    const escape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setOpen(null); buttonRef.current?.focus(); }
+    };
     document.addEventListener("mousedown", outside);
-    return () => document.removeEventListener("mousedown", outside);
+    document.addEventListener("keydown", escape);
+    return () => { document.removeEventListener("mousedown", outside); document.removeEventListener("keydown", escape); };
   }, [open]);
 
   const onEnter = useCallback(() => {
