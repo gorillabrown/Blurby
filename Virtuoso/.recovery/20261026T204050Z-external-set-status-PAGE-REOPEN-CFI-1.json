@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204050Z-external-set-status-PAGE-REOPEN-CFI-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-REOPEN-CFI-1",
+  "created": "2026-10-26T20:40:50Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-reopen-cfi-1 at 910296ca09fd2fbbc10b90c96800e3b97e7591a3; ancestor of planning baseline=True; ROADMAP heading: PAGE-REOPEN-CFI-1 — Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/page-reopen-cfi-1 at 910296ca09fd2fbbc10b90c96800e3b97e7591a3; ancestor of planning baseline=True; ROADMAP heading: PAGE-REOPEN-CFI-1 — Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "f2b106ec6dbce3f88d1a69c47eb7827b23a9e88b0ed26e179f9ab95948fc4c5f",
+    "idempotencyKey": "parallelgov20261026-PAGE-REOPEN-CFI-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-REOPEN-CFI-1",
+      "idempotencyKey": "parallelgov20261026-PAGE-REOPEN-CFI-1",
+      "actualRevision": "6d1f1ff8f584900358ada639e3696379b2531205d1d19bca13e2bfd6d9965574",
+      "recoveryId": "20261026T204050Z-external-set-status-PAGE-REOPEN-CFI-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:25Z",
+  "outcome": "succeeded"
+}

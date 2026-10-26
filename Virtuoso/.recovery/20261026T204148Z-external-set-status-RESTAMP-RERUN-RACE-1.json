@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204148Z-external-set-status-RESTAMP-RERUN-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "RESTAMP-RERUN-RACE-1",
+  "created": "2026-10-26T20:41:48Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/restamp-rerun-race-1 at 79e1d9d0f738d7db47a18a67a056161f47287303; ancestor of planning baseline=False; ROADMAP heading: RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from PAGE-SAVE-RESTAMP-3's staging memo (fold-in 5). Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/restamp-rerun-race-1 at 79e1d9d0f738d7db47a18a67a056161f47287303; ancestor of planning baseline=False; ROADMAP heading: RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "0775bb4431ef18efeda30b1fb3f1c2af8d6c38fbdcf1c16124d7e34c5c980948",
+    "idempotencyKey": "parallelgov20261026-RESTAMP-RERUN-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RESTAMP-RERUN-RACE-1",
+      "idempotencyKey": "parallelgov20261026-RESTAMP-RERUN-RACE-1",
+      "actualRevision": "398dcdefc12ea4e580ea9f17a4b45a036b31a4ea1f1f9a3fbed7f8d944da8e9c",
+      "recoveryId": "20261026T204148Z-external-set-status-RESTAMP-RERUN-RACE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:16Z",
+  "outcome": "succeeded"
+}

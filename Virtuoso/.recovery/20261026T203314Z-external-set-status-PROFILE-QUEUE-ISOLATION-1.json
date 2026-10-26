@@ -1,0 +1,36 @@
+{
+  "id": "20261026T203314Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+  "operation": "external-set-status",
+  "item_id": "PROFILE-QUEUE-ISOLATION-1",
+  "created": "2026-10-26T20:33:14Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix."
+    },
+    "expectedRevision": "7d903dff32849ae96315e87c233ca42982b2ab09111ce1c9ca941d5c89948c07",
+    "idempotencyKey": "parallelrun20261026-start-PROFILE-QUEUE-ISOLATION-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PROFILE-QUEUE-ISOLATION-1",
+      "idempotencyKey": "parallelrun20261026-start-PROFILE-QUEUE-ISOLATION-1",
+      "actualRevision": "b5fa6bdcae4d1d4bf9cf1dfb63bf4ec04d95a2a996f55a16b040de09fe550b18",
+      "recoveryId": "20261026T203314Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:33:51Z",
+  "outcome": "succeeded"
+}

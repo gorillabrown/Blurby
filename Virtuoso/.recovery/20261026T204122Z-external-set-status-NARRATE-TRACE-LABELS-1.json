@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204122Z-external-set-status-NARRATE-TRACE-LABELS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TRACE-LABELS-1",
+  "created": "2026-10-26T20:41:22Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-trace-labels-1 at 08da0030079d760c90cbedd32187895db51f914c; ancestor of planning baseline=False; ROADMAP heading: NARRATE-TRACE-LABELS-1 — Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate *(built `08da0030` on `eb/narrate-trace-labels-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "ba003e4f3fad6c525615c06fa9e5886d1337ed62e57644a3f70d4d8935645b3e",
+    "idempotencyKey": "parallelgov20261026-NARRATE-TRACE-LABELS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TRACE-LABELS-1",
+      "idempotencyKey": "parallelgov20261026-NARRATE-TRACE-LABELS-1",
+      "actualRevision": "f2c8e20fcc03ced24ce3725592b8714c1029a88ba4c335ebde41ab8499745bf5",
+      "recoveryId": "20261026T204122Z-external-set-status-NARRATE-TRACE-LABELS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:54Z",
+  "outcome": "succeeded"
+}
