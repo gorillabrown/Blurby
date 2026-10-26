@@ -16,7 +16,7 @@
         "storyboard",
         "write-plan",
         "virtuoso",
-        "pointer-closeout",
+        "dispatch-closeout",
         "roadmap-review"
       ],
       "validation": "exists",
@@ -95,9 +95,9 @@
       "owner": "roadmap-review",
       "allowedWriters": [
         "roadmap-review",
-        "next-pointer",
+        "next-dispatch",
         "mid-dispatch-decision",
-        "pointer-closeout",
+        "dispatch-closeout",
         "governance-sweep"
       ],
       "validation": "markdown",
@@ -110,9 +110,9 @@
       "provider": "markdown",
       "authority": "reference",
       "mutability": "append-only",
-      "owner": "pointer-closeout",
+      "owner": "dispatch-closeout",
       "allowedWriters": [
-        "pointer-closeout",
+        "dispatch-closeout",
         "roadmap-review",
         "mid-dispatch-decision"
       ],
@@ -139,9 +139,9 @@
       "provider": "directory",
       "authority": "evidence",
       "mutability": "append-only",
-      "owner": "pointer-closeout",
+      "owner": "dispatch-closeout",
       "allowedWriters": [
-        "pointer-closeout",
+        "dispatch-closeout",
         "virtuoso"
       ],
       "validation": "exists",
@@ -157,8 +157,8 @@
       "owner": "mid-dispatch-decision",
       "allowedWriters": [
         "mid-dispatch-decision",
-        "next-pointer",
-        "pointer-closeout",
+        "next-dispatch",
+        "dispatch-closeout",
         "roadmap-review",
         "governance-sweep"
       ],
@@ -203,9 +203,9 @@
       "owner": "roadmap-review",
       "allowedWriters": [
         "roadmap-review",
-        "next-pointer",
+        "next-dispatch",
         "mid-dispatch-decision",
-        "pointer-closeout"
+        "dispatch-closeout"
       ],
       "validation": "external",
       "classification": "active",
@@ -217,9 +217,9 @@
       "provider": "jsonl",
       "authority": "terminal",
       "mutability": "append-only",
-      "owner": "pointer-closeout",
+      "owner": "dispatch-closeout",
       "allowedWriters": [
-        "pointer-closeout",
+        "dispatch-closeout",
         "roadmap-review"
       ],
       "validation": "exists",
@@ -246,9 +246,9 @@
       "owner": "roadmap-review",
       "allowedWriters": [
         "roadmap-review",
-        "next-pointer",
+        "next-dispatch",
         "mid-dispatch-decision",
-        "pointer-closeout"
+        "dispatch-closeout"
       ],
       "validation": "exists",
       "classification": "active",
@@ -289,8 +289,8 @@
       "owner": "roadmap-review",
       "allowedWriters": [
         "roadmap-review",
-        "pointer-closeout",
-        "next-pointer"
+        "dispatch-closeout",
+        "next-dispatch"
       ],
       "validation": "exists",
       "classification": "active",
@@ -318,7 +318,7 @@
     "terminalLedger": {
       "format": "jsonl",
       "correctionWriters": [
-        "pointer-closeout",
+        "dispatch-closeout",
         "roadmap-review"
       ]
     },
@@ -395,7 +395,8 @@
             ]
           }
         }
-      }
+      },
+      "lengthCeilingLines": 2000
     },
     "git": {
       "policy": "push",

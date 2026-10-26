@@ -57,11 +57,11 @@ This repo uses a strict two-layer planning system:
 
 The Notion Lane field uses the six product domains declared in registry policy.roadmap.lanes: UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
 
-#### Owner priority: rebuild Narrate (removal complete 2026-10-12)
+#### Reading-mode isolation (Narrate rebuilt 2026-10-15)
 
-Reading-mode separation is complete (READER-MODE-SEPARATION-2, 2026-10-11): Page, Focus and Flow own independent state, lifecycle, timers, rendering and tests behind a thin router; Narrate is removed (NARRATE-REMOVE-1, 2026-10-12). Keep that isolation: no sibling-runtime imports, no shared mutable mode store, and the rebuilt Narrate joins as a fourth independent runtime.
+Page, Focus, Flow and Narrate are four independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11; Narrate removed by NARRATE-REMOVE-1, 2026-10-12, and rebuilt by NARRATE-REBUILD-1, completed 2026-10-15). Keep that isolation: no sibling-runtime imports, no shared mutable mode store.
 
-Owner ruling #31: remove Narrate (NARRATE-REMOVE-1, done 2026-10-12, keeping the Kokoro engine dormant with no UI path), then rebuild it from scratch (NARRATE-REBUILD-1, `Path: epic`, in progress: P0–P4 merged by 2026-10-13; state: `docs/planning/epics/2026-10-12-narrate-rebuild/state.md`). The rebuild's Phase 0 proves Kokoro first: the installed export outputs audio only, so Phase 0 first exposes its predicted durations, then checks the table at independently resolved anchors (OutsideAudit.10; LL-142). Its core requirement: the cursor is the word at the current playback sample, from an exact word table, with no estimated timing. The finish line is "Narration rebuilt". See ROADMAP.md Stage 3 and the absorbed storyboard `docs/planning/holding/2026-10-11-narrate-rebuild.md`.
+Narrate's core requirement (owner ruling #31) stands: the cursor is the word at the current playback sample, from an exact word table, with no estimated timing (OutsideAudit.10; LL-142). Epic record: `docs/planning/epics/2026-10-12-narrate-rebuild/state.md`.
 
 #### Parallel Sprint Policy (Execution Surface Ownership)
 
@@ -188,14 +188,14 @@ The dispatch's Task table tells Zeus:
 Before committing, verify ALL of these:
 
 - [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
-- [ ] `npm test` passes (2,080+ tests, 0 failures; count as of 2026-10-14 after QUIT-FLUSH-1) and `npm run typecheck` exits 0
+- [ ] `npm test` passes (2,452+ tests, 0 failures; count as of 2026-10-23, release gate (1) run 4) and `npm run typecheck` exits 0
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
 - [ ] Changes are scoped to the files listed in the dispatch — no drive-by edits
 - [ ] Spec-compliance self-review passed (code matches dispatch spec line-by-line)
 - [ ] Quality self-review passed (architecture rules, known traps, code clarity)
-- [ ] Package verified (standing rule 53, LL-167; owner directive 2026-10-23): `--dir` build of the final commit plus `origin/main`, a 25 s scratch-profile launch with no error or crash, asar contents checked, automatable Done-when re-run on the packaged exe, a "Package verification" section in the close-out, and Blurby.Brain's confirmation before the merge go. If nothing under `build.files` changed, record "package unchanged" with the diff.
+- [ ] Package verified (standing rule 53, LL-167; owner directive 2026-10-23): `--dir --arm64` build of the final commit plus `origin/main`, a 25 s native-arm64 scratch-profile launch with no error or crash, asar contents checked, automatable Done-when re-run on the packaged exe, a "Package verification" section in the close-out, and Blurby.Brain's confirmation before the merge go. If nothing under `build.files` changed, record "package unchanged" with the diff.
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
@@ -309,7 +309,7 @@ When a sprint **completes**:
 
 - **Every sprint completion**: Run steps 1-6 above.
 - **Every 3rd sprint**: Review `docs/` for stale files. Archive anything from completed work.
-- **ROADMAP.md target**: <500 lines. If approaching, check for completed specs that weren't archived.
+- **ROADMAP.md ceiling**: 2,000 lines (`policy.roadmap.lengthCeilingLines`). When crossed, roadmap review moves specs to a dated snapshot in `docs/planning/.Archive/`.
 - **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
 
 ---
@@ -353,7 +353,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — NARRATE-REMOVE-1 completed 2026-10-12)
+## Current System State (v1.75.1 — NARRATE-REBUILD-1 completed 2026-10-15)
 
 ### Codebase (branch: `main`)
 
@@ -361,25 +361,25 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Active guardrails (from completed sprints):**
 - **Diagnostics export guardrail** — Diagnostics exports are evidence artifacts, not user-content artifacts. Do not commit generated local user diagnostics unless an explicit test fixture creates them; raw text and audio-shaped fields must remain redacted/rejected in both producers and validators.
-- **Qwen code deleted** — NARRATE-REMOVE-1 (2026-10-12) deleted every Qwen, MOSS-Nano and Pocket module, handler, preload method, test and packaging entry. The earlier "qwen-disabled" stub no longer exists; no engine other than Kokoro (dormant) is in the tree.
+- **Qwen code deleted** — NARRATE-REMOVE-1 (2026-10-12) deleted every Qwen, MOSS-Nano and Pocket module, handler, preload method, test and packaging entry. The earlier "qwen-disabled" stub no longer exists; no engine other than Kokoro is in the tree.
 
 **Current operational state:**
-- **Engine posture:** Kokoro is the sole engine and is dormant. NARRATE-REMOVE-1 (2026-10-12) removed the Narrate mode and deleted the MOSS-Nano, Pocket and Qwen code; the Kokoro main-process files (`main/tts-engine.js`, `tts-engine-marathon.js`, `tts-worker.js`, `tts-cache.js`, `tts-opus.js`) are byte-identical to the base, their IPC handlers stay registered in `main/ipc/tts.js`, nothing starts Kokoro at launch, and `preload.js` exposes none of those `tts-*` handlers. NARRATE-REBUILD-1 P3 added a second producer (`main/narrate/`, `main/ipc/narrate.js`) and an engine (`src/reader/modes/narrate/engine/`); P4 (`331f8313`) exposed them as preload `narrate*` and added the Narrate mode. NARRATE-REBUILD-1 (completed 2026-10-15) built the new Narrate on it. The reading modes are Page, Focus and Flow; settings schema 13 turns a saved `narrate` mode into `flow`. Desktop v2.0 shipped.
+- **Engine posture:** Kokoro is the sole engine. The rebuilt Narrate (NARRATE-REBUILD-1, completed 2026-10-15) drives it through its own producer (`main/narrate/`, `main/ipc/narrate.js`), engine (`src/reader/modes/narrate/engine/`) and preload `narrate*` methods. The legacy Kokoro files (`main/tts-engine.js` and siblings) keep their `tts-*` handlers in `main/ipc/tts.js`, which `preload.js` does not expose. The reading modes are Page, Focus, Flow and Narrate.
 - **Queue (roadmap review 2026-10-23-4):** Notion database Blurby.Roadmap. Release fix (Seq 1–6, merged, release-fix sha `36ac7466`) and 21 more merged items are held for the owner's smoke re-check (gate (1) passed 2026-10-23, run 4); built branches are held for the Stage 8 freeze, with the post-freeze merge train in `docs/planning/roadmap-reviews/2026-10-23-plan.md`. Built and held: Seq 80–84; BLOCK-TAG-CASE-1 (85) building Wave A. Dispatch buffer (post-release, 5 of 5): NARRATE-QUIT-LINGER-1 (86) → OVERLAY-THEME-SWEEP-1 (90) → READER-ARROW-GUARD-1 (91) → WIN-TARGET-NSIS-1 (92) → EINK-CONTROLS-1 (96); stubs 87, 88, 93–95, 97–99; NARRATE-EXIT-CRASH-1 superseded; BLURBY-SERVER-1 (100, Path: epic); Stage 9 101–107. Finish line: the Stage 8 release. Standing rules: LL-136 is 41; LL-135, LL-138, LL-143, LL-141 are 42–45; LL-153 is 46; LL-147 is 47; LL-149 is 48; LL-148 is 49 and LL-156 is 50 (2026-10-22); LL-164 is 51, LL-146 is 52 and LL-167 is 53 (2026-10-23).
-- **Open bugs:** BUG-195 (an unreachable source folder empties the library of its folder books; High; filed 2026-10-14, FOLDER-UNREACHABLE-GUARD-1), BUG-194 (deleting the sample book deletes the bundled sample file; Low; unscheduled), BUG-191 (years read as cardinals; NARRATE-YEARS-1), BUG-190 (every PDF fails to convert: pdf-parse 2 API mismatch; root cause found 2026-10-22; PDF-IMPORT-DIAG-1), BUG-189 (dev-mode slowness; re-measure still owed), BUG-188 and BUG-187 (READER-VISUAL-DIAG-1), BUG-185 and BUG-184 (resolved in source; close after the G2 smoke), BUG-154 (parked).
+- **Open bugs:** see `docs/governance/BUG_REPORT.md` (BUG-217 is the latest, 2026-10-24); it is the single list, so none are restated here.
 - **Deferred lanes:** Cloud Sync is absorbed by BLURBY-SERVER-1; Android and RSS/News are Stage 9 items; long-form audio export dissolved (KOKORO-EXPORT-1).
 - **Most recent implementation:** NARRATE-REBUILD-1 completed 2026-10-15 (P6 with P6b, merge `f27c7def`; completion record `689edd46`): Narrate rebuilt on Kokoro as a fourth independent mode, the cursor is the word at the playing sample from an exact word table, epic checkers run under the app's Electron ICU (LL-160). Seven Stage 8 items merged the same day (ROADMAP.md Stage 8). Before it, QUIT-FLUSH-1 (merge `d21009b3`, 2026-10-14; `main/quit-sequence.js`; BUG-192 resolved). Earlier history: `docs/planning/CLAUDE_md_archive_session1.md`.
-- Suite on the owner's machine (2026-10-14, QUIT-FLUSH-1 tree `bd1216fc`): 2,080 passed / 1 skipped / 0 failed in 153 files; `npm run typecheck` exits 0; `npm run build` exits 0.
-- CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). The TTS `quality-gate` job was removed by NARRATE-REMOVE-1.
+- Suite (2026-10-23, release gate (1) run 4 on `36ac7466`, quiet machine): 2,452 passed / 1 skipped / 0 failed in 181 files; `npm run typecheck` exits 0 (`docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`).
+- CI: GitHub Actions `ci.yml` runs tests only. Releases are built and published by hand per `docs/governance/RELEASE_RUNBOOK.md` (one full NSIS installer per architecture).
 - Governance tooling: Virtuoso connector-backed register, timestamped snapshots, durable mutation recovery.
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
 ### Tech Stack
 
-- Electron 41 + React 19 + Vite 6 + TypeScript 5.9
+- Electron 42 + React 19 + Vite 6 + TypeScript 5.9
 - Vitest 4.1 for testing, electron-builder 26 for packaging
 - foliate-js for EPUB rendering (primary reader for EPUBs)
-- Kokoro TTS engine (28 voices, worker thread, q4 quantization) — the only engine in the tree, dormant (no UI or launch path) until NARRATE-REBUILD-1. MOSS-Nano, Pocket TTS and Qwen were deleted by NARRATE-REMOVE-1 (2026-10-12).
+- Kokoro TTS engine (28 voices, worker thread, q4 quantization) — the only engine in the tree, driven by the rebuilt Narrate. MOSS-Nano, Pocket TTS and Qwen were deleted by NARRATE-REMOVE-1 (2026-10-12).
 - Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log), opusscript (Opus audio encoding/decoding), mammoth (DOCX→HTML, lazy-loaded)
 
 ### Architecture
