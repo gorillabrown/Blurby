@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204141Z-external-set-status-READER-ARROW-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "READER-ARROW-GUARD-1",
+  "created": "2026-10-26T20:41:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/reader-arrow-guard-1 at 51202c1cf81bc6b7349222193e2b5f8e3aebfa52; ancestor of planning baseline=False; ROADMAP heading: READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+←/→ (see Prerequisites); no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. branch eb/reader-arrow-guard-1 at 51202c1cf81bc6b7349222193e2b5f8e3aebfa52; ancestor of planning baseline=False; ROADMAP heading: READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+←/→ (see Prerequisites); no shared-core touch)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "2d6cf314b614d1b4176f6bfbfc57a6607def16beb21928a3a67b93863bb909e9",
+    "idempotencyKey": "parallelgov20261026-READER-ARROW-GUARD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "READER-ARROW-GUARD-1",
+      "idempotencyKey": "parallelgov20261026-READER-ARROW-GUARD-1",
+      "actualRevision": "56493b6cb62bb0ef2d3004c054bb33ea0f72250c6a49ede5a11ecd2749371802",
+      "recoveryId": "20261026T204141Z-external-set-status-READER-ARROW-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:11Z",
+  "outcome": "succeeded"
+}

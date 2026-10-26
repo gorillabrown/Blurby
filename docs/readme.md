@@ -1,7 +1,6 @@
 # docs/ — Documentation Hub
 
-Top-level home for all Blurby documentation. The authoritative map of where content
-belongs is CLAUDE.md → "Where Things Live"; this readme summarizes the directory.
+Top-level home for all Blurby documentation. Structural authority is Virtuoso/workspace-layout.json; Virtuoso.Governance.Readme.md is its synchronized human view. CLAUDE.md and AGENTS.md carry platform instructions; this readme summarizes the directory.
 
 ## Files
 | File | Type | Purpose |

@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204124Z-external-set-status-NARRATE-KEY-REPEAT-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-KEY-REPEAT-1",
+  "created": "2026-10-26T20:41:24Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-key-repeat-1 at 8b5e9789036395c0c8c002ccf9fdd3b0aebe3f39; ancestor of planning baseline=False; ROADMAP heading: NARRATE-KEY-REPEAT-1 — Narrate's key forwarder keeps a held key's repeat flag *(built `8b5e9789` on `eb/narrate-key-repeat-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "f8268f5b8fbef413725fe523b784e997d545e046728ad46d65f67edb75cb0834",
+    "idempotencyKey": "parallelgov20261026-NARRATE-KEY-REPEAT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-KEY-REPEAT-1",
+      "idempotencyKey": "parallelgov20261026-NARRATE-KEY-REPEAT-1",
+      "actualRevision": "1bddde10440e11c716cce894dbc508401c0053523b21816126da007f704cf373",
+      "recoveryId": "20261026T204124Z-external-set-status-NARRATE-KEY-REPEAT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:55Z",
+  "outcome": "succeeded"
+}

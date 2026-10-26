@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204147Z-external-set-status-CHAPTER-STEP-CFI-1",
+  "operation": "external-set-status",
+  "item_id": "CHAPTER-STEP-CFI-1",
+  "created": "2026-10-26T20:41:47Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "stopped at Done-when1 on796282c2; current control failure awaits the recorded mid-dispatch decision. Evidence: branch eb/chapter-step-cfi-1 at 796282c298fdd3c001f1e4df99267cd425e85acc; ancestor of planning baseline=False; ROADMAP heading: CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): \"First word of chapter\"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from JUMP-LANDING-SAVE-1's live check (e). Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. stopped at Done-when1 on796282c2; current control failure awaits the recorded mid-dispatch decision. branch eb/chapter-step-cfi-1 at 796282c298fdd3c001f1e4df99267cd425e85acc; ancestor of planning baseline=False; ROADMAP heading: CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): \"First word of chapter\"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "b608d034e0968f5e8af13116ca211c37b546eb2f787506dcae7137af6fd711a4",
+    "idempotencyKey": "parallelgov20261026-CHAPTER-STEP-CFI-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CHAPTER-STEP-CFI-1",
+      "idempotencyKey": "parallelgov20261026-CHAPTER-STEP-CFI-1",
+      "actualRevision": "81ed5f2d9036073576623f1fdce1f3d6d03dd7386106a9d87f7e2d56feb45dca",
+      "recoveryId": "20261026T204147Z-external-set-status-CHAPTER-STEP-CFI-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:16Z",
+  "outcome": "succeeded"
+}

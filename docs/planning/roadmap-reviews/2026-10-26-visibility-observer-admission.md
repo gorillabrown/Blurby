@@ -31,4 +31,3 @@ Forbidden: mode runtime/source changes, teardown-order changes, ReaderContainer/
 9. Report final commit, package path, exe/asar hashes and complete raw logs/receipts to parent and Brain for fresh confirmation. Any final docs-only tip needs shipping-input comparison. Parent conducts independent review; merge/release remains separately held.
 
 This is a technical admission with no design choice. It leaves the earlier source-only visibility patch narrow and both original item statuses In Flight. Brain confirmation of a later clean combined package is required; it is not granted by this document.
-

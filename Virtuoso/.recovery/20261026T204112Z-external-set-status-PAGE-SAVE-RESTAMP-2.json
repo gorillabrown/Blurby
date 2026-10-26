@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204112Z-external-set-status-PAGE-SAVE-RESTAMP-2",
+  "operation": "external-set-status",
+  "item_id": "PAGE-SAVE-RESTAMP-2",
+  "created": "2026-10-26T20:41:12Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-save-restamp-2 at c345c584b09f0e7cfdd7ab75be47176878775f06; ancestor of planning baseline=True; ROADMAP heading: PAGE-SAVE-RESTAMP-2 — A failed word count or a jump never loses or overwrites the reader's page *(merged `55a39a35` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "be1c250c7a26f42c938fa8ea129f10f479598cadfa5dda48c4733bf270a82fdd",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-SAVE-RESTAMP-2",
+      "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-2",
+      "actualRevision": "f19d09e62fca4f220919082fb78f198f154224740591a7f88efd995103d5b14d",
+      "recoveryId": "20261026T204112Z-external-set-status-PAGE-SAVE-RESTAMP-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:45Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204055Z-external-set-status-KEEP-FURTHEST-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "KEEP-FURTHEST-FIX-1",
+  "created": "2026-10-26T20:40:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/keep-furthest-fix-1 at 9acbfb610013237fc7d8b9b717527ea8331bb1a4; ancestor of planning baseline=True; ROADMAP heading: KEEP-FURTHEST-FIX-1 — \"Keep at furthest\" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/keep-furthest-fix-1 at 9acbfb610013237fc7d8b9b717527ea8331bb1a4; ancestor of planning baseline=True; ROADMAP heading: KEEP-FURTHEST-FIX-1 — \"Keep at furthest\" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "9570a9089d4f770224c0f77b9fefe764d73b98188c0bad6b90c482c4272d2fb0",
+    "idempotencyKey": "parallelgov20261026-KEEP-FURTHEST-FIX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "KEEP-FURTHEST-FIX-1",
+      "idempotencyKey": "parallelgov20261026-KEEP-FURTHEST-FIX-1",
+      "actualRevision": "249e4229e20e850f17eae1e9869e06daeb84926b69a3fca04502b48d2eafdaa7",
+      "recoveryId": "20261026T204055Z-external-set-status-KEEP-FURTHEST-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:30Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204139Z-external-set-status-LIBRARY-WRITE-RACE-2",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-2",
+  "created": "2026-10-26T20:41:39Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/library-write-race-2 at c46e9332dbaa2cd2dac87b7b29b5a88bb5f28d64; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap when LIBRARY-WRITE-RACE-1 was specified. Stub; needs an owner decision (Edit-form failure UX) and a Brain ruling (modified bump). Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/library-write-race-2 at c46e9332dbaa2cd2dac87b7b29b5a88bb5f28d64; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "df6480fef0a37b7bfc79fc7548b37e487330e4b48428c07090a154fe020fe06d",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-2",
+      "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-2",
+      "actualRevision": "fb3fdbd4b81c1e9053c661a90d90a46035bf10abf3793f15a6b4483d5aafce08",
+      "recoveryId": "20261026T204139Z-external-set-status-LIBRARY-WRITE-RACE-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:10Z",
+  "outcome": "succeeded"
+}

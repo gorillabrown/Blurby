@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204132Z-external-set-status-FLOW-KEYS-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "FLOW-KEYS-FIX-1",
+  "created": "2026-10-26T20:41:32Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/flow-keys-fix-1 at 60b86aff59e39df3c4883729e2c5d7c5785f9377; ancestor of planning baseline=False; ROADMAP heading: FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, → and ← move the speed 300 → 325 → 300, Ctrl+↓ continues, PgDn still pauses and turns the page, against Ctrl+→ stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "359e3d1c9344b5e804741cb7a0725fa922112980e09c6291c388d933b77530c4",
+    "idempotencyKey": "parallelgov20261026-FLOW-KEYS-FIX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FLOW-KEYS-FIX-1",
+      "idempotencyKey": "parallelgov20261026-FLOW-KEYS-FIX-1",
+      "actualRevision": "d440e8f741878ad4114ea8a6add9735b9069f7932d99f3ae22596bf3d3114520",
+      "recoveryId": "20261026T204132Z-external-set-status-FLOW-KEYS-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:03Z",
+  "outcome": "succeeded"
+}

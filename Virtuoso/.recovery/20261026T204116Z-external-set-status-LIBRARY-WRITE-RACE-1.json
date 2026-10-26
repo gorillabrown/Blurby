@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204116Z-external-set-status-LIBRARY-WRITE-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-1",
+  "created": "2026-10-26T20:41:16Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/library-write-race-1 at 3b7aaa6f1e4a65b07eaf81316e4f26621f62e5e6; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-1 — Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub. Full Spec 2026-10-22 (U9/U10 pass; pre-dispatch amendment: no ROADMAP.md edit). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/library-write-race-1 stacked on eb/ws-pair-log-1), built during the Stage 8 freeze and merged after WS-PAIR-LOG-1.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/library-write-race-1 at 3b7aaa6f1e4a65b07eaf81316e4f26621f62e5e6; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-1 — Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "cdb1f928129fe34bf20b8b8b5c49338a95a4d48b7b2eecb4692a444b354e8707",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-1",
+      "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-1",
+      "actualRevision": "5a328ef73255b7d38cd3da021633ff0036a3bffefbe379e93dd3b8f2abaae07b",
+      "recoveryId": "20261026T204116Z-external-set-status-LIBRARY-WRITE-RACE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:49Z",
+  "outcome": "succeeded"
+}

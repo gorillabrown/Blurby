@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204101Z-external-set-status-LARGE-FOLDER-SYNC-1",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-1",
+  "created": "2026-10-26T20:41:01Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/large-folder-sync-1 at 6d98975adad2d69a98e10e7a80fdbe88e096e881; ancestor of planning baseline=True; ROADMAP heading: LARGE-FOLDER-SYNC-1 — Live folder sync that scales to very large folders (technical half) *(merged `0eb46e33` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "bf17212fa936e6ddd37c543af0302b6737668c5bd03fe6a19d2cd3cb3e0e5503",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-1",
+      "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-1",
+      "actualRevision": "be31ea45628f33e4a1ff865661dddaa60e4d012efa4f4fa21260c26e2eafd7e1",
+      "recoveryId": "20261026T204101Z-external-set-status-LARGE-FOLDER-SYNC-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:35Z",
+  "outcome": "succeeded"
+}

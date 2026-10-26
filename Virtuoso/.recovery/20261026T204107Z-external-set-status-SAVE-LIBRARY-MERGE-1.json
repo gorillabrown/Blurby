@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204107Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+  "operation": "external-set-status",
+  "item_id": "SAVE-LIBRARY-MERGE-1",
+  "created": "2026-10-26T20:41:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/save-library-merge-1 at 4c4697fd93ef1cb82ff4f1c9f60e3742d4ba4102; ancestor of planning baseline=True; ROADMAP heading: SAVE-LIBRARY-MERGE-1 — A library save merges instead of replacing *(merged `682676b1` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "1d0ddbd0d17fff2b2da0f11401b06e02bf55fcdd392e2c8075bca5dfdd32ed93",
+    "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-MERGE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "SAVE-LIBRARY-MERGE-1",
+      "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-MERGE-1",
+      "actualRevision": "32531c849df8164aafe50ca28481b890e7660b0deac1f1a0971c67bafe87a2a2",
+      "recoveryId": "20261026T204107Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:40Z",
+  "outcome": "succeeded"
+}

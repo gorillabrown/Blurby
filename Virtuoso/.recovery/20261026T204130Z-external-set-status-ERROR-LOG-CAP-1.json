@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204130Z-external-set-status-ERROR-LOG-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "ERROR-LOG-CAP-1",
+  "created": "2026-10-26T20:41:30Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/error-log-cap-1 at ae17d903bd84653ca28e57c8c6f1d9828579e907; ancestor of planning baseline=False; ROADMAP heading: ERROR-LOG-CAP-1 — error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/error-log-cap-1 at ae17d903bd84653ca28e57c8c6f1d9828579e907; ancestor of planning baseline=False; ROADMAP heading: ERROR-LOG-CAP-1 — error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "d209383181e24aa17930f7f2d708951d56506892e967db004f4cea6b8cd28508",
+    "idempotencyKey": "parallelgov20261026-ERROR-LOG-CAP-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ERROR-LOG-CAP-1",
+      "idempotencyKey": "parallelgov20261026-ERROR-LOG-CAP-1",
+      "actualRevision": "642c7550e6202b30f29b52d0c3a0066b490c3713ac69651987a3f383469c90dd",
+      "recoveryId": "20261026T204130Z-external-set-status-ERROR-LOG-CAP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:01Z",
+  "outcome": "succeeded"
+}
