@@ -372,7 +372,7 @@ describe("GET-STATE-SECRET-1 renderer reads", () => {
     const { SETTINGS_DEFAULTS } = require("../main/migrations.js");
     // Traced: the renderer reads only SETTINGS_DEFAULTS keys from get-state, and no renderer code reads schemaVersion.
     const read = Object.keys(SETTINGS_DEFAULTS).filter((k) => k !== "schemaVersion");
-    expect(read.length).toBe(57);
+    expect(read.length).toBe(58);
     for (const k of read) if (!Object.hasOwn(settings, k)) settings[k] = `value-${k}`;
     const shown = (await call("get-state")).settings;
     for (const k of read) expect(shown[k]).toEqual(settings[k]);

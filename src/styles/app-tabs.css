@@ -1,0 +1,64 @@
+/* APP-TABS-1: the library window's tab bar. Existing theme tokens only, so every theme (E-ink included) styles it. */
+.app-tab-bar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  -webkit-app-region: no-drag;
+}
+.app-tab-list {
+  display: flex;
+  min-width: 0;
+}
+.app-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--bg);
+  padding: 10px 14px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+.app-tab:hover {
+  color: var(--text);
+}
+.app-tab[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.app-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.app-tab-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* The tab panel keeps library.css's spacing below the sticky header (its sibling rules no longer reach inside). */
+.library-sticky-top + .app-tabpanel > div:first-child,
+.app-tabpanel > .doc-grid,
+.app-tabpanel > .doc-list {
+  margin-top: 16px;
+}
+
+/* E-ink draws the accent in its ink colour, so the selected tab is marked by weight as well as colour. */
+[data-eink="true"] .app-tab[aria-selected="true"] {
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .app-tab-bar {
+    padding: 0 8px;
+  }
+  .app-tab {
+    padding: 8px 8px 6px;
+    font-size: 11px;
+  }
+}

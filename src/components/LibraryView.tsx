@@ -14,6 +14,8 @@ import CloudSyncIndicator from "./CloudSyncIndicator";
 import blurbyIcon from "../assets/blurby-icon.png";
 import GoalProgressWidget from "./GoalProgressWidget";
 import FolderNoticeBanner from "./FolderNoticeBanner";
+import AppTabBar from "./AppTabBar";
+import { homeOf, type AppTab } from "../utils/libraryHome";
 
 const api = window.electronAPI;
 
@@ -25,6 +27,8 @@ interface LibraryViewProps {
   folderName: string;
   loadingContent: boolean;
   toast: ToastState | null;
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
   onOpenDoc: (doc: BlurbyDoc, mode?: string) => void;
   onAddDoc: (title: string, content: string, editingId?: string | null) => void;
   onAddDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
@@ -48,7 +52,7 @@ interface LibraryViewProps {
 }
 
 export default function LibraryView({
-  library, settings, wpm, isMac, folderName, loadingContent, toast,
+  library, settings, wpm, isMac, folderName, loadingContent, toast, activeTab, onTabChange,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onOpenSettings, onSettingsChange,
@@ -128,9 +132,13 @@ export default function LibraryView({
   const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual";
   const isBook = (d: BlurbyDoc) => !isArticle(d) && !isPdf(d);
 
+  // APP-TABS-1: Library and Newsroom each list only the items whose home they are; the other two tabs hold none yet
+  const isDocTab = activeTab === "library" || activeTab === "newsroom";
+  const tabLibrary = useMemo(() => library.filter((d) => homeOf(d) === activeTab), [library, activeTab]);
+
   // Filter and sort library
   const filteredLibrary = useMemo(() => {
-    let docs = library;
+    let docs = tabLibrary;
     if (tab === "favorites") docs = docs.filter((d) => d.favorite);
     else if (tab === "archived") docs = docs.filter((d) => d.archived);
     else if (tab === "new") {
@@ -145,7 +153,7 @@ export default function LibraryView({
     if (effectiveSearch) docs = docs.filter((d) => d.title.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
     return [...docs];
-  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
+  }, [tabLibrary, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
 
   // BUG-067 + READINGS-4A: IntersectionObserver to track "new" cards seen in viewport
   // LIBRARY-SETTINGS-FIX-1: cards seen for LIBRARY_SEEN_DWELL_MS are saved in a batch shortly after,
@@ -213,19 +221,19 @@ export default function LibraryView({
   }, [flushSeenDocs, onOpenSettings, onToggleFlap]);
 
   const { activeLibrary, totalWords, newCount, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
-    const active = library.filter((d) => !d.archived);
+    const active = tabLibrary.filter((d) => !d.archived);
     const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
     return {
       activeLibrary: active,
       totalWords: active.reduce((a, d) => a + (d.wordCount || 0), 0),
       newCount: active.filter((d) => (d.created || 0) >= cutoff).length,
-      favCount: library.filter((d) => d.favorite).length,
-      archivedCount: library.filter((d) => d.archived).length,
+      favCount: tabLibrary.filter((d) => d.favorite).length,
+      archivedCount: tabLibrary.filter((d) => d.archived).length,
       articleCount: active.filter(isArticle).length,
       bookCount: active.filter(isBook).length,
       pdfCount: active.filter(isPdf).length,
     };
-  }, [library]);
+  }, [tabLibrary]);
 
   // Live search results (limited to 8 for the dropdown)
   const searchResults = useMemo(() => searchQuery
@@ -353,6 +361,7 @@ export default function LibraryView({
   return (
     <div className="library-container" id="main-content" role="main" aria-label="Library">
       <div className={`library-titlebar ${isMac ? "library-titlebar--mac" : "library-titlebar--win"}`} />
+      <AppTabBar activeTab={activeTab} onTabChange={onTabChange} />
 
       {loadingContent && (
         <div className="library-loading" role="status">
@@ -382,6 +391,7 @@ export default function LibraryView({
 
       <div className="library-scroll">
         {/* Sticky top section: header + filter tabs + divider line */}
+        {isDocTab && (
         <div className="library-sticky-top">
         <div className="library-header">
           <div className="library-header-left">
@@ -544,7 +554,8 @@ export default function LibraryView({
         </div>
         {/* Sort dropdown removed from tabs row — now inline with "Not Started" section label */}
         </div>{/* close library-tabs-row */}
-        </div>{/* close library-sticky-top */}
+        </div>
+        )}{/* close library-sticky-top */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
 
@@ -639,6 +650,12 @@ export default function LibraryView({
           />
         )}
 
+        {!isDocTab && (
+          <section className="app-tabpanel" role="tabpanel" id={`app-tabpanel-${activeTab}`} aria-labelledby={`app-tab-${activeTab}`} />
+        )}
+
+        {isDocTab && (
+        <section className="app-tabpanel" role="tabpanel" id={`app-tabpanel-${activeTab}`} aria-labelledby={`app-tab-${activeTab}`}>
         {/* Empty states per tab */}
         {filteredLibrary.length === 0 && !showAdd && (
           <div className="library-empty">
@@ -778,8 +795,11 @@ export default function LibraryView({
             )}
           </>
         )}
+        </section>
+        )}
 
         {/* Footer */}
+        {isDocTab && (
         <div className="library-footer">
           <div className="library-speed">
             <span>speed</span>
@@ -807,6 +827,7 @@ export default function LibraryView({
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

@@ -66,7 +66,7 @@ describe("help surfaces (UX-POLISH-2)", () => {
       root.render(<HotkeyMapSettings />);
     });
 
-    expect(container.querySelectorAll(".hotkey-row").length).toBe(83);
+    expect(container.querySelectorAll(".hotkey-row").length).toBe(84);
     const duplicateKeyCalls = errorSpy.mock.calls.filter((args) => String(args[0]).includes("same key"));
     expect(duplicateKeyCalls).toEqual([]);
   });

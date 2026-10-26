@@ -317,14 +317,15 @@ const SETTINGS_DEFAULTS = {
   lastReadingMode: undefined, isNarrating: undefined, firstRunCompleted: undefined,
   defaultSort: undefined, defaultViewMode: undefined, libraryCardSize: undefined, libraryCardSpacing: undefined,
   useLegacyRenderer: undefined, ttsCacheEnabled: undefined, pronunciationOverrides: undefined,
-  narrationProfiles: undefined, activeNarrationProfileId: undefined, sortBy: undefined,
+  narrationProfiles: undefined, activeNarrationProfileId: undefined, sortBy: undefined, libraryTab: undefined,
 };
 
 // Never taken from the renderer or the cloud, nor sent to the cloud: main's own keys (migrations set schemaVersion;
 // select-folder and switch-folder set the folder, IPC-PATH-TRUST-1) and the object-prototype names.
 const MAIN_OWNED_SETTINGS = new Set(["schemaVersion", "sourceFolder", "recentFolders", "__proto__", "constructor", "prototype"]);
-// Meaningful only on this device (the OS login item), so never sent to or taken from another device.
-const DEVICE_LOCAL_SETTINGS = new Set(["launchAtLogin"]);
+// Meaningful only on this device (the OS login item; the last-used library tab, APP-TABS-1), so never sent to or
+// taken from another device.
+const DEVICE_LOCAL_SETTINGS = new Set(["launchAtLogin", "libraryTab"]);
 
 /**
  * The real user settings in `input`: its own enumerable keys that are keys of SETTINGS_DEFAULTS, never an

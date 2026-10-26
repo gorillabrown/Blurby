@@ -26,6 +26,7 @@ import { getConsoleBuffer } from "../utils/consoleCapture";
 import { SettingsContext, useSettingsProvider } from "../contexts/SettingsContext";
 import { ToastContext, useToastProvider } from "../contexts/ToastContext";
 import { resolveLoadedDocResult } from "../utils/loadDocResult";
+import { APP_TABS, homeOf, isAppTab, type AppTab } from "../utils/libraryHome";
 
 const api = window.electronAPI;
 
@@ -43,6 +44,8 @@ function useOnlineStatus() { return useSyncExternalStore(subscribeOnline, getOnl
 export default function LibraryContainer() {
   const isOnline = useOnlineStatus();
   const [view, setView] = useState("library");
+  // APP-TABS-1: the library window's tab; the reader leaves it alone, so closing the reader returns to it
+  const [activeTab, setActiveTab] = useState<AppTab>("library");
   const [activeDoc, setActiveDoc] = useState<DocWithContent | null>(null);
   const [wpm, setWpm] = useState(300);
   const [folderName, setFolderName] = useState("My reading list");
@@ -207,8 +210,14 @@ export default function LibraryContainer() {
       setDidInit(true);
       if (settings.wpm) setWpm(settings.wpm);
       if (settings.folderName) setFolderName(settings.folderName);
+      if (isAppTab(settings.libraryTab)) setActiveTab(settings.libraryTab);
     }
-  }, [loaded, didInit, settings.wpm, settings.folderName]);
+  }, [loaded, didInit, settings.wpm, settings.folderName, settings.libraryTab]);
+
+  const switchTab = useCallback((tab: AppTab) => {
+    setActiveTab(tab);
+    settingsValue.updateSettings({ libraryTab: tab });
+  }, [settingsValue]);
 
   // Persist wpm/folderName on change — WPM save is debounced 300ms so rapid keystrokes
   // don't flood disk writes; folderName changes are infrequent and included in the same call.
@@ -287,7 +296,9 @@ export default function LibraryContainer() {
   const kbState = useLibraryKeyboard(view, kbActionsRef.current || {});
 
   const filteredLibrary = useMemo(() => {
-    let docs = library.filter((d) => !d.deleted);
+    // APP-TABS-1: the keyboard list is the active tab's items; Podcasts and Marketplace hold none yet
+    const tabDocs = library.filter((d) => !d.deleted && homeOf(d) === activeTab);
+    let docs = tabDocs;
     if (kbState.activeFilter !== "snoozed") {
       docs = docs.filter((d) => !d.snoozedUntil || d.snoozedUntil <= Date.now());
     }
@@ -303,11 +314,11 @@ export default function LibraryContainer() {
       }
       case "queue": return docs;
       case "recent": return docs.filter((d) => d.lastReadAt).sort((a, b) => (b.lastReadAt || 0) - (a.lastReadAt || 0));
-      case "snoozed": return library.filter((d) => !d.deleted && d.snoozedUntil && d.snoozedUntil > Date.now());
+      case "snoozed": return tabDocs.filter((d) => d.snoozedUntil && d.snoozedUntil > Date.now());
       case "collections": return docs.filter((d) => d.collection);
       default: return docs.filter((d) => !d.archived);
     }
-  }, [library, kbState.activeFilter]);
+  }, [library, kbState.activeFilter, activeTab]);
 
   const kbActions = useMemo(() => ({
     onArchive: (docId: string) => {
@@ -396,7 +407,8 @@ export default function LibraryContainer() {
     },
     getDocIdAtIndex: (index: number) => filteredLibrary[index]?.id,
     getVisibleDocCount: () => filteredLibrary.length,
-  }), [library, filteredLibrary, archiveDoc, unarchiveDoc, toggleFavorite, deleteDoc, showToast, handleOpenDocById, setLibrary, toggleMenuFlap, handleOpenSettings]);
+    onSwitchTab: (index: number) => { if (APP_TABS[index]) switchTab(APP_TABS[index]); },
+  }), [library, filteredLibrary, archiveDoc, unarchiveDoc, toggleFavorite, deleteDoc, showToast, handleOpenDocById, setLibrary, toggleMenuFlap, handleOpenSettings, switchTab]);
 
   // Update the actions ref so the keyboard hook sees latest actions
   kbActionsRef.current = kbActions;
@@ -664,6 +676,8 @@ export default function LibraryContainer() {
               folderName={folderName}
               loadingContent={loadingContent}
               toast={toast}
+              activeTab={activeTab}
+              onTabChange={switchTab}
               onOpenDoc={openDoc}
               onAddDoc={addDoc}
               onAddDocFromUrl={addDocFromUrl}

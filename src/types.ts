@@ -116,6 +116,7 @@ export interface BlurbyDoc {
   convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
   originalFilepath?: string;     // original file path before conversion
   legacyRenderer?: boolean;      // user opted for PageReaderView
+  home?: "library" | "newsroom"; // APP-TABS-1: set only by a user move; absent → derived from source
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -212,6 +213,7 @@ export interface BlurbySettings {
   activeNarrationProfileId?: string | null;  // null = use flat settings (no profile)
   // GOALS-6B: Local-first reading goals
   readingGoals?: ReadingGoal[];
+  libraryTab?: "library" | "newsroom" | "podcasts" | "marketplace"; // APP-TABS-1: the last-used tab, device-local
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
@@ -311,6 +313,7 @@ export interface ElectronAPI {
   toggleFavorite: (docId: string) => Promise<boolean>;
   archiveDoc: (docId: string) => Promise<void>;
   unarchiveDoc: (docId: string) => Promise<void>;
+  setDocHome?: (docId: string, home: "library" | "newsroom") => Promise<{ ok: boolean }>; // APP-TABS-1; optional so the test-harness stub stays as it is
   openReaderWindow: (docId: string) => Promise<void>;
   checkForUpdates: () => Promise<{ status: string; version?: string | null; message?: string }>;
   installUpdate: () => Promise<void>;
