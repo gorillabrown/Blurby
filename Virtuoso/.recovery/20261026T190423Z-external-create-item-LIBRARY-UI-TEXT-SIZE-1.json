@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190423Z-external-create-item-LIBRARY-UI-TEXT-SIZE-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-UI-TEXT-SIZE-1",
+  "created": "2026-10-26T19:04:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Make library interface text comfortably readable",
+      "status": "Queued",
+      "sequence": 131,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#library-ui-text-size-1",
+      "description": "The owner requests larger library UI text; the warning banner and Retry screenshot make the problem especially clear. This is distinct from in-book typography.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Specify a larger library UI type scale covering metadata, tabs, controls and notices; warning/Retry text is readable without clipping at tested display scaling. Do not silently restrict this to the banner.",
+      "id": "LIBRARY-UI-TEXT-SIZE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-LIBRARY-UI-TEXT-SIZE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-UI-TEXT-SIZE-1",
+      "idempotencyKey": "smoke20261026-LIBRARY-UI-TEXT-SIZE-1",
+      "actualRevision": "0acdade3d12f131903d0f763da44ece0dd376cfd20006a87a3485d9385cc47b3",
+      "recoveryId": "20261026T190423Z-external-create-item-LIBRARY-UI-TEXT-SIZE-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8109-8309-ea5f5c2beb44",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:46Z",
+  "outcome": "succeeded"
+}

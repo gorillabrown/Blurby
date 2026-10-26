@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195557Z-external-set-status-LIBRARY-UI-TEXT-SIZE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-UI-TEXT-SIZE-1",
+  "created": "2026-10-26T19:55:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 132
+    },
+    "expectedRevision": "0acdade3d12f131903d0f763da44ece0dd376cfd20006a87a3485d9385cc47b3",
+    "idempotencyKey": "review20261026-integer-seq-LIBRARY-UI-TEXT-SIZE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-UI-TEXT-SIZE-1",
+      "idempotencyKey": "review20261026-integer-seq-LIBRARY-UI-TEXT-SIZE-1",
+      "actualRevision": "d32ee26eed4a403944b5cbabcb58fb1fc3b9ad16c5cc997481c9ca4bfe1e7824",
+      "recoveryId": "20261026T195557Z-external-set-status-LIBRARY-UI-TEXT-SIZE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:18Z",
+  "outcome": "succeeded"
+}

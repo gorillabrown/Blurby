@@ -1,0 +1,52 @@
+{
+  "id": "20261026T190421Z-external-create-item-EINK-VIEW-REFRESH-1",
+  "operation": "external-create-item",
+  "item_id": "EINK-VIEW-REFRESH-1",
+  "created": "2026-10-26T19:04:21Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Refresh E-ink on view changes instead of elapsed time",
+      "status": "Queued",
+      "sequence": 129,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#eink-view-refresh-1",
+      "description": "Flashing is the existing E-ink ghosting overlay, confirmed absent when E-ink is off. No periodic timer defect was established. Owner wants view-change-driven refreshes.",
+      "prerequisites": [
+        "EINK-CONTROLS-1",
+        "EINK-FLOW-VIEWPORT-1",
+        "EINK-NARRATE-VIEWPORT-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources F6, R8. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Page/screen advances, menu changes and book entry/exit trigger the declared refresh policy; idle time and per-word updates do not. Preserve finite flash cleanup/duration and avoid duplicate flashes for one transition.",
+      "id": "EINK-VIEW-REFRESH-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-EINK-VIEW-REFRESH-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "EINK-VIEW-REFRESH-1",
+      "idempotencyKey": "smoke20261026-EINK-VIEW-REFRESH-1",
+      "actualRevision": "831cca358765b209ed03be5783e1d6dbc5df7a8d2b54e8e561a2177bca93dba9",
+      "recoveryId": "20261026T190421Z-external-create-item-EINK-VIEW-REFRESH-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-818b-9dd1-d78abc1d06a5",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:44Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190412Z-external-create-item-PROFILE-QUEUE-ISOLATION-1",
+  "operation": "external-create-item",
+  "item_id": "PROFILE-QUEUE-ISOLATION-1",
+  "created": "2026-10-26T19:04:12Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Explain the normal-profile sync-queue change during isolated QA",
+      "status": "Queued",
+      "sequence": 121,
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#profile-queue-isolation-1",
+      "description": "Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json changed. Which process wrote it and whether isolation was breached are unresolved.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Attribute the writer using bounded evidence, classify intended versus unintended writes, and fix a proven isolation defect if found. Preserve the queue and user data; do not call this data loss or attribute it to the scratch app without proof.",
+      "id": "PROFILE-QUEUE-ISOLATION-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-PROFILE-QUEUE-ISOLATION-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PROFILE-QUEUE-ISOLATION-1",
+      "idempotencyKey": "smoke20261026-PROFILE-QUEUE-ISOLATION-1",
+      "actualRevision": "32a84ef2c4ccdaa3fde64515f53f6d52d75ef24357df06dd261d51a4605c0fb9",
+      "recoveryId": "20261026T190412Z-external-create-item-PROFILE-QUEUE-ISOLATION-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8128-bbb6-f504a34e543d",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:35Z",
+  "outcome": "succeeded"
+}

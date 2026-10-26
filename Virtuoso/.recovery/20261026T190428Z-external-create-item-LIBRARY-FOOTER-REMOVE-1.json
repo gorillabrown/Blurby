@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190428Z-external-create-item-LIBRARY-FOOTER-REMOVE-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-FOOTER-REMOVE-1",
+  "created": "2026-10-26T19:04:28Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Remove the unused settings controls from the library footer",
+      "status": "Queued",
+      "sequence": 135,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#library-footer-remove-1",
+      "description": "Remove the footer speed/WPM slider, Start at login checkbox, Backup and Restore buttons shown by the owner.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P3. Sources R10. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Remove those UI controls only. Preserve backup/restore capability, user data and login support elsewhere; decide placement only if needed. Do not conflate with completed LIBRARY-SETTINGS-FIX-1.",
+      "id": "LIBRARY-FOOTER-REMOVE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-LIBRARY-FOOTER-REMOVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-FOOTER-REMOVE-1",
+      "idempotencyKey": "smoke20261026-LIBRARY-FOOTER-REMOVE-1",
+      "actualRevision": "e2e749ba6afd4f38321377acf15d14137c0701f95de97d2a75321135a13fd90e",
+      "recoveryId": "20261026T190428Z-external-create-item-LIBRARY-FOOTER-REMOVE-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-814a-8e7d-c08fc6617280",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:51Z",
+  "outcome": "succeeded"
+}

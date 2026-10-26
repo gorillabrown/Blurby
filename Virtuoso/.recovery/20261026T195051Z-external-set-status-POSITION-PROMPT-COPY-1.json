@@ -1,0 +1,45 @@
+{
+  "id": "20261026T195051Z-external-set-status-POSITION-PROMPT-COPY-1",
+  "operation": "external-set-status",
+  "item_id": "POSITION-PROMPT-COPY-1",
+  "created": "2026-10-26T19:50:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Keep Previous Position precedes Move Position in the save prompt",
+      "written_status": "full-spec",
+      "effort": "XS",
+      "workstream": "UX polish",
+      "group": "Reader Polish",
+      "branch": "eb/position-prompt-copy-1",
+      "spec_link": "ROADMAP.md#position-prompt-copy-1",
+      "prerequisites": [
+        "KEEP-FURTHEST-FIX-1"
+      ],
+      "description": "Show first Keep Previous Position (pg{furthestPage}), then Move Position (pg{currentPage}); preserve existing handler meanings, primary focus, Enter/Escape and page calculations. This is copy/order only.",
+      "deliverable": "Full specification in ROADMAP.md; U1–U10 checked. Execution remains held by release, prerequisite/ownership and exact-package/owner verification gates."
+    },
+    "expectedRevision": "11f817b496e5681564cc20a0a29824cd79ed449d11e2e8c188f286525a813ecb",
+    "idempotencyKey": "review20261026-spec-POSITION-PROMPT-COPY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "POSITION-PROMPT-COPY-1",
+      "idempotencyKey": "review20261026-spec-POSITION-PROMPT-COPY-1",
+      "actualRevision": "73b85108278c8eb79b574394cc3018fea006f136c84cf9e0ada42a3d44985e46",
+      "recoveryId": "20261026T195051Z-external-set-status-POSITION-PROMPT-COPY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:06Z",
+  "outcome": "succeeded"
+}

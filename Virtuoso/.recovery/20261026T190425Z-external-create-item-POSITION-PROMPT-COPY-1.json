@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190425Z-external-create-item-POSITION-PROMPT-COPY-1",
+  "operation": "external-create-item",
+  "item_id": "POSITION-PROMPT-COPY-1",
+  "created": "2026-10-26T19:04:25Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Put Keep Previous Position before Move Position",
+      "status": "Queued",
+      "sequence": 133,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#position-prompt-copy-1",
+      "description": "Owner wording/order: first Keep Previous Position (pg#), second Move Position (pg#). Keep retains the previous protected position and Move saves the displayed page.",
+      "prerequisites": [
+        "KEEP-FURTHEST-FIX-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R3. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Use those labels in that order with actual page numbers. Preserve the current anchor/furthest calculations; coordinate with FURTHEST-PERSIST-1 without redefining what a saved position means.",
+      "id": "POSITION-PROMPT-COPY-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-POSITION-PROMPT-COPY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "POSITION-PROMPT-COPY-1",
+      "idempotencyKey": "smoke20261026-POSITION-PROMPT-COPY-1",
+      "actualRevision": "11f817b496e5681564cc20a0a29824cd79ed449d11e2e8c188f286525a813ecb",
+      "recoveryId": "20261026T190425Z-external-create-item-POSITION-PROMPT-COPY-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81e7-b4b6-f475807e73cb",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:49Z",
+  "outcome": "succeeded"
+}

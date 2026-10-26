@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190424Z-external-create-item-DROPDOWN-DISMISS-1",
+  "operation": "external-create-item",
+  "item_id": "DROPDOWN-DISMISS-1",
+  "created": "2026-10-26T19:04:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Dropdowns close on outside click and preserve the selection",
+      "status": "Queued",
+      "sequence": 132,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#dropdown-dismiss-1",
+      "description": "The Folder dropdown remains open after outside clicks. The owner requests consistent dismissal across all dropdowns; only Folder is observed failing.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources F12, R11. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Inventory dropdowns, dismiss on outside click without selecting/changing a value, and preserve normal inside clicks and selection. Verify each supported menu rather than assume all are currently broken.",
+      "id": "DROPDOWN-DISMISS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-DROPDOWN-DISMISS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "DROPDOWN-DISMISS-1",
+      "idempotencyKey": "smoke20261026-DROPDOWN-DISMISS-1",
+      "actualRevision": "12f5ca9fb680b7ce5b58f072af920e5492f948ad4f2bd58ce234faa57f0cef59",
+      "recoveryId": "20261026T190424Z-external-create-item-DROPDOWN-DISMISS-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81c6-8aff-d918343a362c",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:48Z",
+  "outcome": "succeeded"
+}
