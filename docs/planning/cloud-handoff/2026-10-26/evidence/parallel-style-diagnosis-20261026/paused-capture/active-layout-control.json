@@ -1,0 +1,20 @@
+{
+  "id": 69,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "at": "2026-10-26T21:15:12.066Z",
+        "connected": true,
+        "contents": [
+          {
+            "document": true,
+            "body": true,
+            "words": 5293
+          }
+        ],
+        "layoutError": null
+      }
+    }
+  }
+}

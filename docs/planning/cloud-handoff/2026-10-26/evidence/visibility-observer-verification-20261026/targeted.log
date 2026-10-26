@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026
+
+
+ Test Files  16 passed (16)
+      Tests  105 passed (105)
+   Start at  15:57:39
+   Duration  4.52s (transform 7.01s, setup 190ms, import 8.03s, tests 6.22s, environment 10.39s)
+

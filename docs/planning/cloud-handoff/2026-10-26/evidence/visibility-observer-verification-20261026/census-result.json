@@ -1,0 +1,84 @@
+{
+  "inFlow20s": {
+    "roErrors": 0,
+    "observerCallbacks": {
+      "new It (file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/paginator-DVT_": {
+        "calls": 2,
+        "sizes": {
+          "div. 987x629": 1,
+          "div. 1002x629": 1
+        }
+      },
+      "new ee (file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/paginator-DVT_": {
+        "calls": 1,
+        "sizes": {
+          "body.x-ebookmaker 720x14366": 1
+        }
+      },
+      "file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/App-iJSC-wbg.js:153:30": {
+        "calls": 2,
+        "sizes": {
+          "div.rm-flow-view 1002x629": 2
+        }
+      }
+    }
+  },
+  "liveObservers": [
+    {
+      "site": "file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/App-iJSC-wbg.js:153:30",
+      "calls": 1,
+      "targets": [
+        {
+          "el": "div.rm-flow-view",
+          "connected": true,
+          "w": 1002,
+          "h": 629
+        }
+      ]
+    },
+    {
+      "site": "file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/App-iJSC-wbg.js:153:30",
+      "calls": 1,
+      "targets": [
+        {
+          "el": "div.rm-flow-view",
+          "connected": true,
+          "w": 1002,
+          "h": 629
+        }
+      ]
+    },
+    {
+      "site": "new It (file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/paginator-DVT_",
+      "calls": 2,
+      "targets": [
+        {
+          "el": "div.",
+          "connected": true,
+          "w": 987,
+          "h": 629
+        }
+      ]
+    },
+    {
+      "site": "new ee (file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/assets/paginator-DVT_",
+      "calls": 1,
+      "targets": [
+        {
+          "el": "body.x-ebookmaker",
+          "connected": true,
+          "w": 720,
+          "h": 14995
+        }
+      ]
+    }
+  ],
+  "geometry": {
+    "legend": "viewClientW|viewScrollH|viewScrollTop|foliateViewH|max-block-size|paginatorDivs",
+    "frames": 181,
+    "changes": 0,
+    "states": {
+      "1002|629|0|629|609px|rm-flow-root:1002x629;rm-flow-view:1002x629;FOLIATE-VIEW:0x0|": 181
+    }
+  }
+}

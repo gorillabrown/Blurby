@@ -1,0 +1,17 @@
+{"at":"2026-10-26T21:17:35.020Z","selector":"document.querySelector(\".doc-card-wrapper .doc-card\")"}
+{"at":"2026-10-26T21:17:47.025Z","selector":"[...document.querySelectorAll(\"button\")].find((x) => x.className.includes(\"rbb-chapter-name\"))"}
+{"at":"2026-10-26T21:17:48.036Z","selector":"[...document.querySelectorAll(\"li.rbb-chapter-option\")].find((x) => x.textContent.trim() === \"INTRODUCTION\")"}
+{"at":"2026-10-26T21:17:54.057Z","selector":"document.querySelector('[aria-label=\"Page mode\"]')"}
+{"at":"2026-10-26T21:17:59.154Z","selector":"document.querySelector('[aria-label=\"Focus mode\"]')"}
+{"at":"2026-10-26T21:18:04.240Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:09.331Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:18:14.431Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:15.943Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:18:17.461Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:18.975Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:18:20.483Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:22.004Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:18:23.518Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:25.034Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:18:26.558Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:18:28.073Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}

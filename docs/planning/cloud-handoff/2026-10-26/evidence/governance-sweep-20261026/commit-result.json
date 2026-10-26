@@ -1,0 +1,21 @@
+{
+  "commit": "60d11b4285447f6b1d9496a7564c0be911848906",
+  "branch": "eb/governance-sweep-2026-10-26",
+  "paths": [
+    "Virtuoso/workspace-layout.json",
+    "Virtuoso.Governance.Readme.md",
+    "ROADMAP.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "docs/governance/TECHNICAL_REFERENCE.md",
+    "docs/governance/DEVELOPMENT_SYNC.md",
+    "docs/readme.md",
+    "docs/planning/readme.md",
+    "docs/governance/Findings.md",
+    "docs/governance/Change.Ledger.jsonl",
+    "docs/governance/GovernanceSweep.2026-10-26.md"
+  ],
+  "merged": false,
+  "pushed": false,
+  "canonicalBlobCheck": true
+}

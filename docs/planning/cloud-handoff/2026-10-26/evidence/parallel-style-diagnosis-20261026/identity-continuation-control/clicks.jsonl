@@ -1,0 +1,31 @@
+{"at":"2026-10-26T21:29:27.663Z","selector":"document.querySelector(\".doc-card-wrapper .doc-card\")"}
+{"at":"2026-10-26T21:29:39.679Z","selector":"[...document.querySelectorAll(\"button\")].find((x) => x.className.includes(\"rbb-chapter-name\"))"}
+{"at":"2026-10-26T21:29:40.685Z","selector":"[...document.querySelectorAll(\"li.rbb-chapter-option\")].find((x) => x.textContent.trim() === \"INTRODUCTION\")"}
+{"at":"2026-10-26T21:29:46.705Z","selector":"document.querySelector('[aria-label=\"Page mode\"]')"}
+{"at":"2026-10-26T21:29:51.783Z","selector":"document.querySelector('[aria-label=\"Focus mode\"]')"}
+{"at":"2026-10-26T21:29:56.875Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:01.974Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:07.080Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:08.602Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:10.114Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:11.626Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:13.136Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:14.648Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:16.160Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:17.679Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:19.194Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:20.702Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:22.213Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:23.721Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:25.231Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:26.745Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:28.256Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:29.776Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:31.287Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:32.803Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:34.315Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:35.827Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:37.336Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:38.849Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}
+{"at":"2026-10-26T21:30:40.362Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:30:41.877Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}

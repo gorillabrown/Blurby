@@ -1,0 +1,437 @@
+[
+  {
+    "item": "PAGE-REOPEN-CFI-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-REOPEN-CFI-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BOOK-TEXT-COLOUR-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BOOK-TEXT-COLOUR-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOLDER-SWITCH-HEADER-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOLDER-SWITCH-HEADER-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-START-STACK-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-START-STACK-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BOOK-TYPE-SCALE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BOOK-TYPE-SCALE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "KEEP-FURTHEST-FIX-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "KEEP-FURTHEST-FIX-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "RELEASE-RUNBOOK-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ELECTRON-42-UPGRADE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ELECTRON-42-UPGRADE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PDF-IMPORT-DIAG-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PACKAGING-FIX-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "UX-POLISH-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "UX-POLISH-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "UX-POLISH-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LARGE-FOLDER-SYNC-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LIBRARY-READ-ALLOW-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-POSITION-SAVE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "DEPS-AUDIT-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "SAVE-LIBRARY-TRUST-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "IPC-PATH-TRUST-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "SAVE-LIBRARY-MERGE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "SETTINGS-KEY-TRUST-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOLDER-UNREACHABLE-GUARD-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "GET-STATE-SECRET-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LARGE-FOLDER-SYNC-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-SAVE-RESTAMP-GUARD-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-SAVE-RESTAMP-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-POSITION-SAVE-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOLDER-NOTICE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ZIP-READ-FOLLOWUPS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LIBRARY-WRITE-RACE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LIBRARY-WRITE-RACE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-YEARS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-SENTENCE-RESUME-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-TOKEN-CAP-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "WS-TOKEN-REGEN-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LARGE-FOLDER-SYNC-3",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-TRACE-LABELS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "TOC-JUMP-SAVE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "TOC-JUMP-SAVE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-KEY-REPEAT-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "RENAME-TMP-RACE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-HELD-TURN-FAIL-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-HELD-TURN-FAIL-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "WS-PAIR-LOG-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BAND-ALIGN-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOLIATE-OBSERVER-LEAK-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-SENTENCE-INITIALS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-SENTENCE-INITIALS-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ERROR-LOG-CAP-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ERROR-LOG-CAP-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FOCUS-KEYS-FIX-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FLOW-KEYS-FIX-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "PAGE-SAVE-RESTAMP-3",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "JUMP-LANDING-SAVE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "JUMP-LANDING-SAVE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ZIP-ASYNC-READ-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "ZIP-ASYNC-READ-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BAND-ALIGN-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BAND-ALIGN-2",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FLOW-PARA-KEYS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FLOW-PARA-KEYS-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BLOCK-TAG-CASE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "BLOCK-TAG-CASE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-QUIT-LINGER-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LIBRARY-WRITE-RACE-2",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "LIBRARY-WRITE-RACE-2",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "OVERLAY-THEME-SWEEP-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "READER-ARROW-GUARD-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "READER-ARROW-GUARD-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "WIN-TARGET-NSIS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-RECONCILE-RESIDUAL-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "NARRATE-HARNESS-COLDCLICK-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "EINK-CONTROLS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "CHAPTER-STEP-CFI-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "CHAPTER-STEP-CFI-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "RESTAMP-RERUN-RACE-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "RESTAMP-RERUN-RACE-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "APP-TABS-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FLOW-PARA-PAUSE-INDEX-1",
+    "field": "deliverable",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  },
+  {
+    "item": "FLOW-PARA-PAUSE-INDEX-1",
+    "field": "notes",
+    "kind": "Notion inline Markdown render; factual text unchanged"
+  }
+]

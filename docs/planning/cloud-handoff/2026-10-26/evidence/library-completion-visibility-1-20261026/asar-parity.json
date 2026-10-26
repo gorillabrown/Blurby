@@ -1,0 +1,97 @@
+{
+  "sourceCommit": "0dd4d94026f2574f735031b2b1569aee09d17120",
+  "exe": "C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1\\release\\win-arm64-unpacked\\Blurby.exe",
+  "archive": "C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1\\release\\win-arm64-unpacked\\resources\\app.asar",
+  "machine": "ARM64 (0xaa64)",
+  "exeSha256": "5e9cae9911e0eafcba67581c9833a9b7af07eb9a0c70410f48d0dafd7b73d608",
+  "asarSha256": "36882f3894b9008e798e6473094031b78c633c55952ead626ed22a5b09090a5e",
+  "mainProfileOverridePresent": true,
+  "mainSourceParity": true,
+  "rendererFiles": 21,
+  "files": [
+    {
+      "path": "dist\\index.html",
+      "sha256": "73de736e701efe36363cdc84d069d2b183c3e00828ab148dba6db5ef1d6a5482"
+    },
+    {
+      "path": "dist\\assets\\App-CaU0PMUH.js",
+      "sha256": "d3aa04122be6892da3bc275d5e988539f19c11f0400ad1fb823eb86630979f32"
+    },
+    {
+      "path": "dist\\assets\\App-DbzqKJv4.css",
+      "sha256": "fdcee1985183c471e8c9013be1758b152f0064dc989d7fde29802d6f81e322fe"
+    },
+    {
+      "path": "dist\\assets\\blurby-icon-ejRjiByq.png",
+      "sha256": "143e2bbffcb60a38202eac6a5728df5bf299bf7f6b3c35cc8222a2d7b28df74b"
+    },
+    {
+      "path": "dist\\assets\\comic-book-DIQGts9b.js",
+      "sha256": "41809c14e3e98a83afb97dfdc8ad62d8bb48489aff1672a886492dc05007814c"
+    },
+    {
+      "path": "dist\\assets\\epub-B3Yu6TKE.js",
+      "sha256": "84b68ecc960ed9927efbd9a4f6a031327ea507ee884b0e9db3331e3d27d622d7"
+    },
+    {
+      "path": "dist\\assets\\fb2-DoA4UCCO.js",
+      "sha256": "ce2144e4b46af9646f603d0c37b9541b70f17027079914e81d4e81d03ad64514"
+    },
+    {
+      "path": "dist\\assets\\fflate-CtUkkcu7.js",
+      "sha256": "165df8eee6bd8c60cefdc67e51acb57335ba0e01762b2698b73c8972027c7991"
+    },
+    {
+      "path": "dist\\assets\\fixed-layout-E39NmGzb.js",
+      "sha256": "f2a0740856add8790b71cd27ecdb232a38deb8a73fef7d0c58643668ee5ec2de"
+    },
+    {
+      "path": "dist\\assets\\index-D3QB8vZK.css",
+      "sha256": "fb3117e0dcfef3e86a83de74620cd44eadfdd956497f70b9e3e513571bedd418"
+    },
+    {
+      "path": "dist\\assets\\index-vO94Fat9.js",
+      "sha256": "e6da6aee0df78bfa4c050b30f67010a14a0818e0085a34416c7861e8dd95423c"
+    },
+    {
+      "path": "dist\\assets\\mobi-CUP3Mkj_.js",
+      "sha256": "32cf44c14ffcc6fbcfe952e2cebef827ff9d3d27d6f99ac2bdb29b2b1530232c"
+    },
+    {
+      "path": "dist\\assets\\paginator-sOM65Gn3.js",
+      "sha256": "6e6e68b0aa176fabc771b0b276ba3eeab2b39046afeea8ed1801b315d7174b0c"
+    },
+    {
+      "path": "dist\\assets\\search-DFtD2c8n.js",
+      "sha256": "a78583928bb6657a128d72570edab7f7f0f4991cb785279ea94b1a480956616c"
+    },
+    {
+      "path": "dist\\assets\\settings-uM7U0W1P.js",
+      "sha256": "717c8b4d7cdaf8e787d2b663b6e9b79211434df5bb8203b6e547fa88bb07430e"
+    },
+    {
+      "path": "dist\\assets\\tts-CfM_63jl.js",
+      "sha256": "958bd7639e959bb0379db0a143b8ec7b67972041e528b48e9b1fb3e182007613"
+    },
+    {
+      "path": "dist\\assets\\tts-HaHKBHMJ.js",
+      "sha256": "e7d8c833106888015672ecd5991e3c73795da55f932d9503c3ce34c4bb79ca04"
+    },
+    {
+      "path": "dist\\assets\\vendor-DXnWpCqd.js",
+      "sha256": "3058905d71c0b5c6c60a017837d013d3fb501313807b386e62e2afe31970294a"
+    },
+    {
+      "path": "dist\\assets\\view-myWu_2Rk.js",
+      "sha256": "9c0bc8ef78658766e8182bd9f21bbd48f3509cebc2332f29aabd30c3a10b2d54"
+    },
+    {
+      "path": "dist\\assets\\zip-Y2spjjw9.js",
+      "sha256": "9654156c7b0b3da6c06520ef276652e9f3d5a17bccf5c6594a214f91fce12afe"
+    },
+    {
+      "path": "dist\\resources\\sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb"
+    }
+  ]
+}

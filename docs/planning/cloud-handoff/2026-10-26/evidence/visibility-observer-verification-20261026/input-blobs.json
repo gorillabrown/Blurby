@@ -1,0 +1,6 @@
+{
+  "patches/foliate-js+1.0.1.patch": "473378888b25aa269adb01de8116080ea458478e",
+  "tests/foliateObserverPatch.test.js": "1ef90dd6597d76396eaac5a889880b9346841de0",
+  "src/components/LibraryView.tsx": "b0fa7ba672b8c5342f8a361a31c816bfb55b9515",
+  "tests/libraryCompletionVisibility.test.tsx": "25ac4c97f1147033cea6d42cceb3bff35130f3d6"
+}

@@ -1,0 +1,148 @@
+{
+  "base": "d8a65cb41f4095a93eb7a198bd91939833c5ea0d",
+  "approval": "owner-approved16-action plan, refreshed parallel-execution instruction",
+  "addedRoles": {
+    "x-codexInstructions": {
+      "path": "AGENTS.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "governance-sweep",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Codex project instructions (companion)"
+    },
+    "x-docsReadme": {
+      "path": "docs/readme.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "governance-sweep",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Documentation hub readme"
+    },
+    "x-planningReadme": {
+      "path": "docs/planning/readme.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "governance-sweep",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Planning hub readme"
+    },
+    "findings": {
+      "path": "docs/governance/Findings.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "append-only",
+      "owner": "governance-sweep",
+      "allowedWriters": [
+        "governance-sweep",
+        "adversarial-review",
+        "virtuoso",
+        "dispatch-closeout",
+        "roadmap-review",
+        "3rd-party-audit"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Findings (append-only)"
+    },
+    "changeLedger": {
+      "path": "docs/governance/Change.Ledger.jsonl",
+      "provider": "jsonl",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "dispatch-closeout",
+        "project-profile"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Change ledger \u2014 when each change took effect (append-only)"
+    },
+    "x-planningArchive": {
+      "path": "docs/planning/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "owner": "dispatch-closeout",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "historical",
+      "origin": "authored",
+      "label": "Protected historical planningArchive"
+    },
+    "x-planArchive": {
+      "path": "docs/planning/plans/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "owner": "dispatch-closeout",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "historical",
+      "origin": "authored",
+      "label": "Protected historical planArchive"
+    },
+    "x-specArchive": {
+      "path": "docs/planning/specs/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "owner": "dispatch-closeout",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "historical",
+      "origin": "authored",
+      "label": "Protected historical specArchive"
+    },
+    "x-processedIssues": {
+      "path": "docs/governance/bug-reports/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "owner": "dispatch-closeout",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "historical",
+      "origin": "authored",
+      "label": "Protected historical processedIssues"
+    }
+  },
+  "boardWriterAddition": "governance-sweep",
+  "schemaErrors": []
+}

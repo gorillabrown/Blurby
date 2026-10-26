@@ -1,0 +1,32 @@
+{
+  "files": {
+    "recoveredLaunch": {
+      "path": "C:/Projects/Blurby-artifacts/foliate-observer-leak-1/launch.ps1",
+      "sha256": "96042b414e538b41519112c92764b835c34e38e6a397e37719fce20d681a7430"
+    },
+    "originalSession": {
+      "path": "C:/Projects/Blurby-artifacts/reader-visual-diag-1/session.mjs",
+      "sha256": "ffeac5f30f6a71547699e3d12464e244f945355a1d7e49a4ec7daff40b290556"
+    },
+    "trackedFixture": {
+      "path": "C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/resources/sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb"
+    },
+    "actualImportedFixture": {
+      "path": "C:/Projects/Blurby-artifacts/visibility-observer-verification-20261026/session-profile/blurby-data/sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb"
+    },
+    "driver": {
+      "path": "C:/Projects/Blurby-artifacts/visibility-observer-verification-20261026/run-observer-route.mjs",
+      "sha256": "87f515f0fd985be7c51b43b84b55136ac6d31b639cd41a2eef37700188aa1774"
+    },
+    "visibilityDriver": {
+      "path": "C:/Projects/Blurby-artifacts/visibility-observer-verification-20261026/package-check.mjs",
+      "sha256": "f8154dd9e390d248fd666db7b8ed84c922872c622dd0dd4e2722a45ae8caae68"
+    }
+  },
+  "fixtureTrackedBlob": "ffa271998c636c689761ac4eb5773dca92208bf0",
+  "sameCurrentImportedBytes": true,
+  "recoveredLaunchContent": "# FOLIATE-OBSERVER-LEAK-1 live runner (scratch; not committed). Scratch profile only; the owner's profile is never used.\nparam([string]$Label, [string]$Script, [string]$ScriptArgList = \"\", [int]$Port = 9351)\n$ScriptArgs = if ($ScriptArgList) { $ScriptArgList -split \"\\|\" } else { @() }\n$wt = \"C:\\Projects\\Blurby\\.worktrees\\foliate-observer-leak-1\"\n$out = \"C:\\Projects\\Blurby-artifacts\\foliate-observer-leak-1\"\n$root = Join-Path $env:TEMP (\"blurby-fol1-$Label-\" + [guid]::NewGuid())\n$env:BLURBY_USER_DATA_DIR = $root\n$errLog = Join-Path $root \"blurby-data\\error.log\"\n$p = Start-Process -FilePath \"$wt\\release\\win-unpacked\\Blurby.exe\" -ArgumentList \"--remote-debugging-port=$Port\" -PassThru\nfor ($i = 0; $i -lt 60; $i++) { try { Invoke-RestMethod \"http://127.0.0.1:$Port/json/list\" | Out-Null; break } catch { Start-Sleep -Milliseconds 500 } }\nStart-Sleep -Seconds 4\n$args2 = @($ScriptArgs | ForEach-Object { $_.Replace(\"{ERRLOG}\", $errLog).Replace(\"{OUT}\", $out) })\nnode $Script $Port @args2\n\"script exit $LASTEXITCODE\"\nGet-Process -Id $p.Id -ErrorAction SilentlyContinue | ForEach-Object { $_.CloseMainWindow() | Out-Null }\nStart-Sleep -Seconds 6\nGet-Process -Name Blurby -ErrorAction SilentlyContinue | Where-Object { $_.Path -like \"$wt*\" } | Stop-Process -Force -ErrorAction SilentlyContinue\n\"profile: $root\"\n$settings = Join-Path $root \"blurby-data\\settings.json\"\nif (Test-Path $settings) { \"sourceFolder: \" + ((Get-Content $settings -Raw | ConvertFrom-Json).sourceFolder | ConvertTo-Json -Compress) }\nif (Test-Path $errLog) {\n  \"error.log ResizeObserver loop lines: \" + (Select-String -Path $errLog -Pattern \"ResizeObserver loop\" -SimpleMatch | Measure-Object).Count\n  \"error.log destructure 'style' lines: \" + (Select-String -Path $errLog -Pattern \"Cannot destructure property 'style'\" -SimpleMatch | Measure-Object).Count\n  \"error.log total lines: \" + (Get-Content $errLog | Measure-Object).Count\n} else { \"error.log: none written\" }\n",
+  "comparability": "Original launch creates fresh default UUID temp profile with sourceFolder null; Meditations sample and 5293-word INTRODUCTION match. Original temp profile/hash no longer exists. Both accepted observer tip and current base track the same resource Git blob. This is source/provenance comparability, not recovered original packaged-byte proof."
+}

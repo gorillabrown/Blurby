@@ -1,0 +1,7 @@
+{
+  "linkAdapterExistingTarget": "pass",
+  "linkAdapterKnownMissingTarget": "detected",
+  "hashVerifierKnownChangedCopy": "detected",
+  "protectedOriginalChanged": false,
+  "rootFilesTouchedByControls": false
+}

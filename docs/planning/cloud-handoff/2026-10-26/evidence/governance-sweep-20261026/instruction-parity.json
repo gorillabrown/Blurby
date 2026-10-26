@@ -1,0 +1,16 @@
+{
+  "sharedFacts": {
+    "queue": true,
+    "engine": true,
+    "openBugs": true,
+    "decisionAuthority": true
+  },
+  "platformDifferencesPreserved": true,
+  "codexConfigurations": [
+    "zeus.toml",
+    "hermes.toml",
+    "hercules.toml",
+    "athena.toml"
+  ],
+  "specialistsAreRolesNotMissingConfigClaims": true
+}

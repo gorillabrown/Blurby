@@ -1,0 +1,13 @@
+
+> blurby@1.75.1 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Projects/Blurby/.worktrees/library-completion-visibility-1
+
+
+ Test Files  182 passed (182)
+      Tests  2469 passed | 2 skipped (2471)
+   Start at  15:35:50
+   Duration  20.80s (transform 16.76s, setup 1.39s, import 21.99s, tests 71.48s, environment 46.34s)
+

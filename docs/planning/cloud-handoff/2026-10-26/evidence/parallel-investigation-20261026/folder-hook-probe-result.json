@@ -1,0 +1,35 @@
+{
+  "at": "2026-10-26T20:37:44.992Z",
+  "productionHook": "src/hooks/useLibrary.ts",
+  "sourceSHA256": "ca4d1f45e8179929d2bca07bfefc308d74a7f60b0cea4643dfea2c7ed5745953",
+  "productionHookUnmodified": true,
+  "environment": "Node + JSDOM + actual React state/effects",
+  "mockedInfrastructure": "electron API promise/data feed only; constants transpiled from real source",
+  "snapshots": [
+    {
+      "label": "initial",
+      "sourceFolder": "C:/owned-A",
+      "ids": [
+        "old-A"
+      ],
+      "loadingContent": false
+    },
+    {
+      "label": "switch-pending",
+      "sourceFolder": "C:/owned-B",
+      "ids": [
+        "old-A"
+      ],
+      "loadingContent": false
+    },
+    {
+      "label": "switch-completed",
+      "sourceFolder": "C:/owned-B",
+      "ids": [
+        "new-B"
+      ],
+      "loadingContent": false
+    }
+  ],
+  "assertionsPassed": true
+}

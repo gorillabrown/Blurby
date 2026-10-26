@@ -1,0 +1,81 @@
+{
+  "label": "modes",
+  "sourceCommit": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
+  "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+  "profile": "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\modes-profile",
+  "fixtureSha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+  "fixtureWords": 80479,
+  "script": "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\diagnostic-modes.mjs",
+  "scriptSha256": "26ac00afedb92dd16446ee984f58f35b01952857f94ab3bb2a0ff8e1513e4302",
+  "bandProbeSha256": "ba1d7aa904798d109104e5e1f3e7b6523df56f41f9c1ad12ff3982544e9a8bc9",
+  "roWrapSha256": "cddd574d85552ae58940a3e73b443590f105f543bf0b619872ee8319abf920ad",
+  "liveBefore": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "startedAt": "2026-10-26T21:11:44.190Z",
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\modes-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 4564,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "uninstrumentedBefore": true,
+  "scriptArgs": [
+    "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\diagnostic-modes.mjs",
+    "9451",
+    "C:/Projects/Blurby-artifacts/parallel-style-diagnosis-20261026"
+  ],
+  "scriptExit": 0,
+  "route": {
+    "open": true,
+    "Page": {
+      "clicked": true,
+      "root": "rm-page-root",
+      "foliateView": true,
+      "words": 5293
+    },
+    "Focus": {
+      "clicked": true,
+      "root": "rm-focus-root",
+      "foliateView": true,
+      "words": 5293
+    },
+    "Flow": {
+      "clicked": true,
+      "root": "rm-flow-root",
+      "foliateView": true,
+      "words": 5293
+    },
+    "Narrate": {
+      "clicked": true,
+      "root": "rm-narrate-root",
+      "foliateView": true,
+      "words": 5293
+    }
+  },
+  "aliveAtMs": 40142,
+  "logCounts": {
+    "total": 1,
+    "resizeObserverLoop": 0,
+    "destructureStyle": 1
+  },
+  "errorLogSha256": "41435d55828b5badcd698d15e3ee1698c0691df04ba5e08f1fd2b74f2a409bab",
+  "errorLog": "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\modes-profile\\blurby-data\\error.log",
+  "capturedCdpEvents": [
+    {
+      "kind": "exception",
+      "text": "TypeError: Cannot destructure property 'style' of 'r' as it is null."
+    }
+  ],
+  "dumpFiles": [],
+  "routeQualified": true,
+  "packageQualified": false,
+  "liveAfter": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "liveUnchanged": true,
+  "finishedAt": "2026-10-26T21:12:24.408Z"
+}

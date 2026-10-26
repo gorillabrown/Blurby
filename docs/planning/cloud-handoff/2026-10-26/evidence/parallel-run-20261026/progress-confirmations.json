@@ -1,0 +1,52 @@
+[
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1",
+    "idempotencyKey": "parallelprogress20261026-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "actualRevision": "858fa6360b9a646039338d2bd73db7ba564a6ff2eafffe354f30b67f980ecad0",
+    "recoveryId": "20261026T205952Z-external-set-status-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "idempotencyKey": "parallelprogress20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+    "actualRevision": "bda90ee0e2ba80a21934682e38b3742271f5b717b3ac14a44a91f2c22bb3d1e2",
+    "recoveryId": "20261026T205953Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLDER-SWITCH-CONTENT-1",
+    "idempotencyKey": "parallelprogress20261026-FOLDER-SWITCH-CONTENT-1",
+    "actualRevision": "7bd4f98ef11e29fc1d4a3e3e1d06791d24a0b62ed71c716c6d662268f6a3476e",
+    "recoveryId": "20261026T205954Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PROFILE-QUEUE-ISOLATION-1",
+    "idempotencyKey": "parallelprogress20261026-PROFILE-QUEUE-ISOLATION-1",
+    "actualRevision": "07092f48202035ddffcfd2766225353813cb7490b8696442633166552a9a9ef3",
+    "recoveryId": "20261026T205955Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLIATE-OBSERVER-LEAK-1",
+    "idempotencyKey": "parallelprogress20261026-FOLIATE-OBSERVER-LEAK-1",
+    "actualRevision": "e8c78ee4982f80833612d04eadcc702077872fa01e79a5171a815109f86c508e",
+    "recoveryId": "20261026T205956Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+    "detail": {}
+  }
+]

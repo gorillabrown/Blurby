@@ -1,0 +1,32 @@
+{
+  "implementationBranch": "eb/library-completion-visibility-1",
+  "head": "a8e31b7363da5c8dd1d8d059915081195d3cc3b6",
+  "remoteHead": "a8e31b7363da5c8dd1d8d059915081195d3cc3b6",
+  "sourceCandidate": "0dd4d94026f2574f735031b2b1569aee09d17120",
+  "base": "d8a65cb41f4095a93eb7a198bd91939833c5ea0d",
+  "paths": [
+    "docs/governance/close-outs/Memo.LIBRARY-COMPLETION-VISIBILITY-1.GovernanceStaging.2026-10-26.md",
+    "docs/governance/close-outs/Timing.LIBRARY-COMPLETION-VISIBILITY-1.jsonl",
+    "src/components/LibraryView.tsx",
+    "tests/libraryCompletionVisibility.test.tsx"
+  ],
+  "packageUnchangedAfterSourceCommit": true,
+  "unrelatedPerfFilePreserved": "M tests/perf-baseline-results.json",
+  "unitAndBuildResult": "PASS",
+  "packageResult": "FAIL: pre-existing ResizeObserver unhandled errors reproduced on unchanged baseline",
+  "mergedToMain": false,
+  "terminalCompletionRecorded": false,
+  "evidenceWording": {
+    "knownPackagedBug187Since": "2026-10-23",
+    "cdpObservation": "no captured Runtime.exceptionThrown events; error.log contains unhandled ResizeObserver events",
+    "unchangedDataScope": "initial display position/wordCount/archive fields plus normal-profile library/settings full-run hashes",
+    "ownedFixtureExit": {
+      "position": 90,
+      "wordCount": 91,
+      "archived": true,
+      "policy": "existing completion behavior"
+    },
+    "combinedObserverWindow": "requested, not granted"
+  },
+  "buildFilesDiffAgainstSourceCandidate": []
+}

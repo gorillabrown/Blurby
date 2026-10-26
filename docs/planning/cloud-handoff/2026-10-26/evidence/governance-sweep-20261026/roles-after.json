@@ -1,0 +1,463 @@
+{
+  "roles": [
+    {
+      "role": "holdingBay",
+      "target": "docs/planning/holding",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "unknown",
+      "origin": "unknown",
+      "presence": "present",
+      "allowedWriters": [
+        "storyboard",
+        "write-plan",
+        "virtuoso",
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "governance",
+      "target": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "operational",
+      "target": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "temp",
+      "target": ".tmp",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [],
+      "writable": false
+    },
+    {
+      "role": "outsideAudits",
+      "target": "docs/studies/audit",
+      "provider": "directory",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "3rd-party-audit"
+      ],
+      "writable": false
+    },
+    {
+      "role": "reference",
+      "target": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "roadmap",
+      "target": "ROADMAP.md",
+      "provider": "markdown",
+      "authority": "live",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-dispatch",
+        "mid-dispatch-decision",
+        "dispatch-closeout",
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "lessons",
+      "target": "docs/governance/LESSONS_LEARNED.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review",
+        "mid-dispatch-decision"
+      ],
+      "writable": false
+    },
+    {
+      "role": "workflowReference",
+      "target": "docs/governance/TECHNICAL_REFERENCE.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "closeOuts",
+      "target": "docs/governance/close-outs",
+      "provider": "directory",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "virtuoso"
+      ],
+      "writable": false
+    },
+    {
+      "role": "issues",
+      "target": "docs/governance/bug-reports",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "mid-dispatch-decision",
+        "next-dispatch",
+        "dispatch-closeout",
+        "roadmap-review",
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "roadmapReviews",
+      "target": "docs/planning/roadmap-reviews",
+      "provider": "directory",
+      "authority": "report",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "generated",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "roadmap-status"
+      ],
+      "writable": false
+    },
+    {
+      "role": "epics",
+      "target": "docs/planning/epics",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "unknown",
+      "origin": "unknown",
+      "presence": "present",
+      "allowedWriters": [
+        "epic"
+      ],
+      "writable": false
+    },
+    {
+      "role": "workRegister",
+      "target": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+      "provider": "connector",
+      "authority": "live",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "external",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-dispatch",
+        "mid-dispatch-decision",
+        "dispatch-closeout"
+      ],
+      "writable": false
+    },
+    {
+      "role": "terminalLedger",
+      "target": "docs/governance/terminal-ledger.jsonl",
+      "provider": "jsonl",
+      "authority": "terminal",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-legacyWorkRegister",
+      "target": "docs/governance/sprint-queue.xlsx",
+      "provider": "xlsx",
+      "authority": "evidence",
+      "mutability": "read-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [],
+      "writable": false
+    },
+    {
+      "role": "snapshot",
+      "target": "Virtuoso/work-register.snapshot.json",
+      "provider": "snapshot",
+      "authority": "mirror",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "generated",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-dispatch",
+        "mid-dispatch-decision",
+        "dispatch-closeout"
+      ],
+      "writable": false,
+      "generatedFrom": "workRegister"
+    },
+    {
+      "role": "x-migrationSource",
+      "target": "docs/planning/roadmap-reviews/2026-09-23-migration-source.json",
+      "provider": "json",
+      "authority": "evidence",
+      "mutability": "read-only",
+      "classification": "historical",
+      "origin": "generated",
+      "presence": "present",
+      "allowedWriters": [],
+      "writable": false
+    },
+    {
+      "role": "x-agentInstructions",
+      "target": "CLAUDE.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "governance-sweep"
+      ],
+      "writable": true
+    },
+    {
+      "role": "board",
+      "target": "roadmap-board.html",
+      "provider": "none",
+      "authority": "report",
+      "mutability": "generated",
+      "classification": "active",
+      "origin": "generated",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "dispatch-closeout",
+        "next-dispatch",
+        "governance-sweep"
+      ],
+      "writable": true,
+      "generatedFrom": "workRegister",
+      "generatedBy": "generate_board"
+    },
+    {
+      "role": "boardComments",
+      "target": "roadmap-board.comments.json",
+      "provider": "json",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "absent",
+      "allowedWriters": [
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-codexInstructions",
+      "target": "AGENTS.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "writable": true
+    },
+    {
+      "role": "x-docsReadme",
+      "target": "docs/readme.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "writable": true
+    },
+    {
+      "role": "x-planningReadme",
+      "target": "docs/planning/readme.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep",
+        "roadmap-review"
+      ],
+      "writable": true
+    },
+    {
+      "role": "findings",
+      "target": "docs/governance/Findings.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "governance-sweep",
+        "adversarial-review",
+        "virtuoso",
+        "dispatch-closeout",
+        "roadmap-review",
+        "3rd-party-audit"
+      ],
+      "writable": true
+    },
+    {
+      "role": "changeLedger",
+      "target": "docs/governance/Change.Ledger.jsonl",
+      "provider": "jsonl",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "classification": "active",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "roadmap-review",
+        "dispatch-closeout",
+        "project-profile"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-planningArchive",
+      "target": "docs/planning/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "classification": "historical",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-planArchive",
+      "target": "docs/planning/plans/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "classification": "historical",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-specArchive",
+      "target": "docs/planning/specs/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "classification": "historical",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    },
+    {
+      "role": "x-processedIssues",
+      "target": "docs/governance/bug-reports/.Archive",
+      "provider": "directory",
+      "authority": "archive",
+      "mutability": "append-only",
+      "classification": "historical",
+      "origin": "authored",
+      "presence": "present",
+      "allowedWriters": [
+        "dispatch-closeout",
+        "roadmap-review"
+      ],
+      "writable": false
+    }
+  ],
+  "schemaVersion": 2
+}

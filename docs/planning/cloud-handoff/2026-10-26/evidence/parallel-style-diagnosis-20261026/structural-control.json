@@ -1,0 +1,31 @@
+{
+  "limitations": "Actual installed View/helper source evaluated unchanged; jsdom native Document; inert ResizeObserver construction substitute does not reproduce Chromium timing or prove host-detachment causality.",
+  "results": [
+    {
+      "name": "valid-document-opposite-control",
+      "error": null,
+      "document": true,
+      "body": true
+    },
+    {
+      "name": "retained-document-null-body-positive-failure",
+      "error": "Cannot destructure property 'style' of 'el' as it is null.",
+      "stack": "TypeError: Cannot destructure property 'style' of 'el' as it is null.\n    at setStylesImportant (evalmachine.<anonymous>:2:13)\n    at View.scrolled (evalmachine.<anonymous>:100:9)\n    at View.render (evalmachine.<anonymous>:88:19)\n    at run (C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\structural-control.cjs:10:29)\n    at Object.<anonymous> (C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\structural-control.cjs:11:84)\n    at Module._compile (node:internal/modules/cjs/loader:1812:14)\n    at Module._extensions..js (node:internal/modules/cjs/loader:1943:10)\n    at Module.load (node:internal/modules/cjs/loader:1533:32)\n    at Module._load (node:internal/modules/cjs/loader:1335:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)",
+      "document": true,
+      "body": false,
+      "documentElement": true
+    },
+    {
+      "name": "restored-body-opposite-control",
+      "error": null,
+      "document": true,
+      "body": true
+    },
+    {
+      "name": "jsdom-detached-iframe-control",
+      "error": null,
+      "document": true,
+      "body": true
+    }
+  ]
+}

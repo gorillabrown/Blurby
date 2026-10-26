@@ -1,0 +1,59 @@
+{
+  "files": [
+    {
+      "file": "Virtuoso.Governance.Readme.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "ROADMAP.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "CLAUDE.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "AGENTS.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "docs/governance/TECHNICAL_REFERENCE.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "docs/governance/DEVELOPMENT_SYNC.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "docs/readme.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "docs/planning/readme.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    },
+    {
+      "file": "docs/governance/Findings.md",
+      "baselineBroken": [],
+      "afterBroken": [],
+      "newBroken": []
+    }
+  ],
+  "newBroken": []
+}

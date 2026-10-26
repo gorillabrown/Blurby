@@ -1,0 +1,415 @@
+[
+  {
+    "config": ".codex\\agents\\zeus.toml",
+    "parses": true
+  },
+  {
+    "config": ".codex\\agents\\hermes.toml",
+    "parses": true
+  },
+  {
+    "config": ".codex\\agents\\hercules.toml",
+    "parses": true
+  },
+  {
+    "config": ".codex\\agents\\athena.toml",
+    "parses": true
+  },
+  {
+    "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "check": "U9",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-090",
+        "LL-030",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "112 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "check": "U10",
+    "exitCode": 0,
+    "result": {
+      "ready": true,
+      "rows": [
+        {
+          "id": 1,
+          "title": "Production-path regression controls distinguish the defect from the accepted behavior",
+          "class": "repeat",
+          "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "positive-control",
+          "estimate": 4,
+          "writtenPredicted": 4,
+          "writtenBasis": "median of 20 runs",
+          "predicted": 4,
+          "basis": "median of 20 runs"
+        },
+        {
+          "id": 2,
+          "title": "The scoped reader/library behavior satisfies its approved contract",
+          "class": "repeat",
+          "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+          "tier": "bounded",
+          "effort": "low",
+          "kind": "renderer-fix",
+          "estimate": 2,
+          "writtenPredicted": 2,
+          "writtenBasis": "median of 5 runs",
+          "predicted": 2,
+          "basis": "median of 5 runs"
+        },
+        {
+          "id": 3,
+          "title": "Local gates, independent review and exact-package evidence are complete",
+          "class": "repeat",
+          "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "packaging-verify",
+          "estimate": 12,
+          "writtenPredicted": 12,
+          "writtenBasis": "median of 4 runs",
+          "predicted": 12,
+          "basis": "median of 4 runs"
+        }
+      ],
+      "total": "chain 18m \u00b7 sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+    }
+  },
+  {
+    "item": "NARRATE-PAUSED-CLICK-1",
+    "check": "U9",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-072",
+        "LL-108",
+        "LL-073",
+        "LL-031",
+        "LL-109",
+        "LL-160",
+        "LL-161",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "107 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "NARRATE-PAUSED-CLICK-1",
+    "check": "U10",
+    "exitCode": 0,
+    "result": {
+      "ready": true,
+      "rows": [
+        {
+          "id": 1,
+          "title": "Production-path regression controls distinguish the defect from the accepted behavior",
+          "class": "repeat",
+          "item": "NARRATE-PAUSED-CLICK-1",
+          "tier": "bounded",
+          "effort": "high",
+          "kind": "positive-control",
+          "estimate": 4,
+          "writtenPredicted": 4,
+          "writtenBasis": "median of 20 runs",
+          "predicted": 4,
+          "basis": "median of 20 runs"
+        },
+        {
+          "id": 2,
+          "title": "The scoped reader/library behavior satisfies its approved contract",
+          "class": "repeat",
+          "item": "NARRATE-PAUSED-CLICK-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "renderer-fix",
+          "estimate": 2,
+          "writtenPredicted": 2,
+          "writtenBasis": "median of 5 runs",
+          "predicted": 2,
+          "basis": "median of 5 runs"
+        },
+        {
+          "id": 3,
+          "title": "Local gates, independent review and exact-package evidence are complete",
+          "class": "repeat",
+          "item": "NARRATE-PAUSED-CLICK-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "packaging-verify",
+          "estimate": 12,
+          "writtenPredicted": 12,
+          "writtenBasis": "median of 4 runs",
+          "predicted": 12,
+          "basis": "median of 4 runs"
+        }
+      ],
+      "total": "chain 18m \u00b7 sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+    }
+  },
+  {
+    "item": "PAGE-ENTRY-KEYS-1",
+    "check": "U9",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-031",
+        "LL-080",
+        "LL-160",
+        "LL-161",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "110 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "PAGE-ENTRY-KEYS-1",
+    "check": "U10",
+    "exitCode": 0,
+    "result": {
+      "ready": true,
+      "rows": [
+        {
+          "id": 1,
+          "title": "Production-path regression controls distinguish the defect from the accepted behavior",
+          "class": "repeat",
+          "item": "PAGE-ENTRY-KEYS-1",
+          "tier": "bounded",
+          "effort": "high",
+          "kind": "positive-control",
+          "estimate": 4,
+          "writtenPredicted": 4,
+          "writtenBasis": "median of 20 runs",
+          "predicted": 4,
+          "basis": "median of 20 runs"
+        },
+        {
+          "id": 2,
+          "title": "The scoped reader/library behavior satisfies its approved contract",
+          "class": "repeat",
+          "item": "PAGE-ENTRY-KEYS-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "renderer-fix",
+          "estimate": 2,
+          "writtenPredicted": 2,
+          "writtenBasis": "median of 5 runs",
+          "predicted": 2,
+          "basis": "median of 5 runs"
+        },
+        {
+          "id": 3,
+          "title": "Local gates, independent review and exact-package evidence are complete",
+          "class": "repeat",
+          "item": "PAGE-ENTRY-KEYS-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "packaging-verify",
+          "estimate": 12,
+          "writtenPredicted": 12,
+          "writtenBasis": "median of 4 runs",
+          "predicted": 12,
+          "basis": "median of 4 runs"
+        }
+      ],
+      "total": "chain 18m \u00b7 sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+    }
+  },
+  {
+    "item": "FOCUS-WORD-ONLY-1",
+    "check": "U9",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-090",
+        "LL-120",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "112 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "FOCUS-WORD-ONLY-1",
+    "check": "U10",
+    "exitCode": 0,
+    "result": {
+      "ready": true,
+      "rows": [
+        {
+          "id": 1,
+          "title": "Production-path regression controls distinguish the defect from the accepted behavior",
+          "class": "repeat",
+          "item": "FOCUS-WORD-ONLY-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "positive-control",
+          "estimate": 4,
+          "writtenPredicted": 4,
+          "writtenBasis": "median of 20 runs",
+          "predicted": 4,
+          "basis": "median of 20 runs"
+        },
+        {
+          "id": 2,
+          "title": "The scoped reader/library behavior satisfies its approved contract",
+          "class": "repeat",
+          "item": "FOCUS-WORD-ONLY-1",
+          "tier": "bounded",
+          "effort": "low",
+          "kind": "ui-fix",
+          "estimate": 5,
+          "writtenPredicted": 5,
+          "writtenBasis": "median of 3 runs",
+          "predicted": 5,
+          "basis": "median of 3 runs"
+        },
+        {
+          "id": 3,
+          "title": "Local gates, independent review and exact-package evidence are complete",
+          "class": "repeat",
+          "item": "FOCUS-WORD-ONLY-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "packaging-verify",
+          "estimate": 12,
+          "writtenPredicted": 12,
+          "writtenBasis": "median of 4 runs",
+          "predicted": 12,
+          "basis": "median of 4 runs"
+        }
+      ],
+      "total": "chain 21m \u00b7 sum 21m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+    }
+  },
+  {
+    "item": "POSITION-PROMPT-COPY-1",
+    "check": "U9",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-073",
+        "LL-090",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "112 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "POSITION-PROMPT-COPY-1",
+    "check": "U10",
+    "exitCode": 0,
+    "result": {
+      "ready": true,
+      "rows": [
+        {
+          "id": 1,
+          "title": "Production-path regression controls distinguish the defect from the accepted behavior",
+          "class": "repeat",
+          "item": "POSITION-PROMPT-COPY-1",
+          "tier": "bounded",
+          "effort": "low",
+          "kind": "positive-control",
+          "estimate": 4,
+          "writtenPredicted": 4,
+          "writtenBasis": "median of 20 runs",
+          "predicted": 4,
+          "basis": "median of 20 runs"
+        },
+        {
+          "id": 2,
+          "title": "The scoped reader/library behavior satisfies its approved contract",
+          "class": "repeat",
+          "item": "POSITION-PROMPT-COPY-1",
+          "tier": "bounded",
+          "effort": "low",
+          "kind": "ui-fix",
+          "estimate": 5,
+          "writtenPredicted": 5,
+          "writtenBasis": "median of 3 runs",
+          "predicted": 5,
+          "basis": "median of 3 runs"
+        },
+        {
+          "id": 3,
+          "title": "Local gates, independent review and exact-package evidence are complete",
+          "class": "repeat",
+          "item": "POSITION-PROMPT-COPY-1",
+          "tier": "bounded",
+          "effort": "medium",
+          "kind": "packaging-verify",
+          "estimate": 12,
+          "writtenPredicted": 12,
+          "writtenBasis": "median of 4 runs",
+          "predicted": 12,
+          "basis": "median of 4 runs"
+        }
+      ],
+      "total": "chain 21m \u00b7 sum 21m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+    }
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "label": "candidate-v2",
+  "exe": "C:/Projects/Blurby/.worktrees/library-completion-visibility-1/release/win-arm64-unpacked/Blurby.exe",
+  "profile": "C:\\Projects\\Blurby-artifacts\\library-completion-visibility-1-20261026\\candidate-v2-profile",
+  "sourceCommit": "0dd4d94026f2574f735031b2b1569aee09d17120",
+  "before": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "steps": [
+    {
+      "check": "initial-grid-all",
+      "ids": [
+        "owned-complete",
+        "owned-control"
+      ]
+    },
+    {
+      "check": "render-does-not-change-progress-or-archive",
+      "passed": true
+    }
+  ],
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\library-completion-visibility-1-20261026\\candidate-v2-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 58956,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "passed": false,
+  "failure": "Error: Timed out: ((()=>{const roots=[document],words=new Set();for(let i=0;i<roots.length;i++){const r=roots[i];for(const e of r.querySelectorAll('*')){if(e.shadowRoot)roots.push(e.shadowRoot);if(e.tagName==='IFRAME'&&e.contentDocument)roots.push(e.contentDocument);if(e.tagName==='P')for(const w of (e.textContent.match(/ownedword[0-9]+/g)||[]))words.add(w);}}return [...words];})()).length===91\n    at waitFor (file:///C:/Projects/Blurby-artifacts/library-completion-visibility-1-20261026/package-check.mjs:48:149)\n    at async file:///C:/Projects/Blurby-artifacts/library-completion-visibility-1-20261026/package-check.mjs:78:5",
+  "afterStop": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  }
+}

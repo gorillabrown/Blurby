@@ -1,0 +1,7 @@
+{"at":"2026-10-26T21:34:58.036Z","selector":"document.querySelector(\".doc-card-wrapper .doc-card\")"}
+{"at":"2026-10-26T21:35:10.056Z","selector":"[...document.querySelectorAll(\"button\")].find((x) => x.className.includes(\"rbb-chapter-name\"))"}
+{"at":"2026-10-26T21:35:11.071Z","selector":"[...document.querySelectorAll(\"li.rbb-chapter-option\")].find((x) => x.textContent.trim() === \"INTRODUCTION\")"}
+{"at":"2026-10-26T21:35:17.086Z","selector":"document.querySelector('[aria-label=\"Page mode\"]')"}
+{"at":"2026-10-26T21:35:22.161Z","selector":"document.querySelector('[aria-label=\"Focus mode\"]')"}
+{"at":"2026-10-26T21:35:27.241Z","selector":"document.querySelector('[aria-label=\"Flow mode\"]')"}
+{"at":"2026-10-26T21:35:32.313Z","selector":"document.querySelector('[aria-label=\"Narrate mode\"]')"}

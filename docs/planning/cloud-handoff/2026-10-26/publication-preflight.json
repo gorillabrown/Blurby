@@ -1,0 +1,11 @@
+{
+  "stagedPaths": 341,
+  "allowedScope": true,
+  "evidenceGitBlobHashesVerified": 331,
+  "hashMismatches": 0,
+  "completedSummaryPreserved": true,
+  "roadmapLines": 1966,
+  "shippingChangesFrom4c9724e6": false,
+  "packageVerdict": "WITHHOLD",
+  "providerCreationConfirmed": true
+}

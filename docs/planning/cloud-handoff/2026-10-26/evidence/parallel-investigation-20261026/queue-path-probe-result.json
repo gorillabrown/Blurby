@@ -1,0 +1,138 @@
+{
+  "at": "2026-10-26T20:41:20.557Z",
+  "pid": 23016,
+  "productionModules": [
+    "main/ipc/state.js",
+    "main/sync-queue.js",
+    "main/json-store.js"
+  ],
+  "sourceHashes": {
+    "main/ipc/state.js": "f61a02f5aae10800caa0f1de2813ff19d10aab1f7555eec60615add0268689d1",
+    "main/sync-queue.js": "4837b6408eabfa4d34e009fc047655704f0b5c3813d860186542d260b87eabbd",
+    "main/json-store.js": "7267157d1e6b21046a43a19e4d881b0f94a1cf3e85957e94d9be4322db4b7e58"
+  },
+  "mockedInfrastructure": [
+    "electron IPC registration",
+    "window theme side effect",
+    "sync-engine status revision0"
+  ],
+  "actualWrites": true,
+  "writeGuardRoot": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026",
+  "actualTarget": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data",
+  "noCallControl": {
+    "hashesUnchanged": true,
+    "writes": 0
+  },
+  "noopSettingsControl": {
+    "libraryContentUnchanged": true,
+    "settingsContentUnchanged": true,
+    "queueContentChanged": true,
+    "queueOps": [
+      {
+        "op": "update-settings",
+        "revision": 0,
+        "timestamp": 1793047280548
+      }
+    ],
+    "writes": [
+      {
+        "kind": "writeFile",
+        "pid": 23016,
+        "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json.tmp",
+        "at": "2026-10-26T20:41:20.548Z",
+        "stack": [
+          "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+        ]
+      },
+      {
+        "kind": "writeFile",
+        "pid": 23016,
+        "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json.tmp",
+        "at": "2026-10-26T20:41:20.549Z",
+        "stack": [
+          "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+        ]
+      },
+      {
+        "kind": "rename",
+        "pid": 23016,
+        "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json",
+        "at": "2026-10-26T20:41:20.550Z"
+      },
+      {
+        "kind": "rename",
+        "pid": 23016,
+        "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json",
+        "at": "2026-10-26T20:41:20.550Z"
+      }
+    ]
+  },
+  "changedSettingsControl": {
+    "settingsContentChanged": true
+  },
+  "otherProfileUnchanged": true,
+  "normalProfileHashesUnchanged": true,
+  "allWrites": [
+    {
+      "kind": "writeFile",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json.tmp",
+      "at": "2026-10-26T20:41:20.548Z",
+      "stack": [
+        "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+      ]
+    },
+    {
+      "kind": "writeFile",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json.tmp",
+      "at": "2026-10-26T20:41:20.549Z",
+      "stack": [
+        "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+      ]
+    },
+    {
+      "kind": "rename",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json",
+      "at": "2026-10-26T20:41:20.550Z"
+    },
+    {
+      "kind": "rename",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json",
+      "at": "2026-10-26T20:41:20.550Z"
+    },
+    {
+      "kind": "writeFile",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json.tmp",
+      "at": "2026-10-26T20:41:20.553Z",
+      "stack": [
+        "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+      ]
+    },
+    {
+      "kind": "writeFile",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json.tmp",
+      "at": "2026-10-26T20:41:20.553Z",
+      "stack": [
+        "    at C:\\Projects\\Blurby\\main\\json-store.js:39:22"
+      ]
+    },
+    {
+      "kind": "rename",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\settings.json",
+      "at": "2026-10-26T20:41:20.554Z"
+    },
+    {
+      "kind": "rename",
+      "pid": 23016,
+      "path": "C:\\Projects\\Blurby-artifacts\\parallel-investigation-20261026\\queue-fixture-1793047280530-23016\\blurby-data\\sync-queue.json",
+      "at": "2026-10-26T20:41:20.554Z"
+    }
+  ],
+  "assertionsPassed": true
+}

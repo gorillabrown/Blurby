@@ -1,0 +1,11 @@
+{
+  "timing": {
+    "openToProbe": 15013,
+    "introductionToFocus": 8023,
+    "focusPausedToFlow": 60032,
+    "flowPlayingToPause": 180228,
+    "finalPaused": 60011
+  },
+  "sessionScriptSha256": "ffeac5f30f6a71547699e3d12464e244f945355a1d7e49a4ec7daff40b290556",
+  "receiptSha256": "4a82cbb7470a43c15ac1fc3e2fa26b3225ab524343ac02d2629175508e420d4b"
+}
