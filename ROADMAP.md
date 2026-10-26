@@ -1,6 +1,6 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-25, roadmap review 2026-10-25 (no item reached a terminal status since review 2026-10-23-5; LIBRARY-WRITE-RACE-2, NARRATE-RECONCILE-RESIDUAL-1 and NARRATE-HARNESS-COLDCLICK-1 built and held, their specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md`; RESTAMP-RERUN-RACE-1 built and held; CHAPTER-STEP-CFI-1 stopped at Done-when 1; APP-TABS-1 Wave A built; the met `mode-separation` deadline withdrawn from `policy.roadmap.deadlines`; PAGE-PAGES-READ-1 specified and FURTHEST-PERSIST-1 stubbed, both split from PAGE-SAVE-RESTAMP-3 Wave C; AUTO-ARCHIVE-1 awaiting three owner answers; WORD-INDEX-UNIFY-1's hold cleared by Blurby.Brain's ruling (b), two copies with a parity test; Blurby.Brain's rulings 1–8 applied: NARRATE-ARROW-PAUSE-1 (99) and LIBRARY-WRITE-RACE-3 (89) specified, PAGE-PARA-KEYS-1 (115) stubbed, BUG-220 to BUG-223 filed and the BUG-218/219 collision settled, package verifications recorded on seven cards, NARRATE-QUIT-LINGER-1 re-scoped to (b), rule 53 (b) names the live files; standing rules 54 and 55 promoted). Earlier, review 2026-10-23-5 and the fourth review of 2026-10-23 (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
+**Last updated**: 2026-10-25, roadmap review 2026-10-25 (no item reached a terminal status since review 2026-10-23-5; LIBRARY-WRITE-RACE-2, NARRATE-RECONCILE-RESIDUAL-1 and NARRATE-HARNESS-COLDCLICK-1 built and held, their specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md`; RESTAMP-RERUN-RACE-1 built and held; CHAPTER-STEP-CFI-1 stopped at Done-when 1; APP-TABS-1 Wave A built; the met `mode-separation` deadline withdrawn from `policy.roadmap.deadlines`; PAGE-PAGES-READ-1 specified and FURTHEST-PERSIST-1 stubbed, both split from PAGE-SAVE-RESTAMP-3 Wave C; AUTO-ARCHIVE-1 specified with the owner's answers; FURTHEST-PERSIST-1's question ruled (furthest page ever reached); WORD-INDEX-UNIFY-1's hold cleared by Blurby.Brain's ruling (b), two copies with a parity test; Blurby.Brain's rulings 1–8 applied: NARRATE-ARROW-PAUSE-1 (99) and LIBRARY-WRITE-RACE-3 (89) specified, PAGE-PARA-KEYS-1 (115) stubbed, BUG-220 to BUG-223 filed and the BUG-218/219 collision settled, package verifications recorded on seven cards, NARRATE-QUIT-LINGER-1 re-scoped to (b), rule 53 (b) names the live files; standing rules 54 and 55 promoted). Earlier, review 2026-10-23-5 and the fourth review of 2026-10-23 (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: **The Stage 8 release** (owner ruling, 2026-10-22): a published build of `main` once release gates (1) to (11) hold. The 17 merged Stage 8 items then close out on that build's evidence. No dated deadline. Scope: the release gate's eleven conditions ([Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14)); the open gate item is ELECTRON-42-UPGRADE-1 (gate 11), after which gate (1) re-runs on the quiet machine and the batched owner smoke (gate 2) follows. History: the previous finish line, Narration rebuilt, was met on 2026-10-15 (NARRATE-REBUILD-1, TR-074); the reading-mode separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, met, and withdrawn from the policy by roadmap review 2026-10-25 with the owner's approval).
 **Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`). Gate (1) passed on it on 2026-10-23 (run 4: 0 of 51 launches crashed; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`), so the owner's smoke re-check, gate (2), is the one release gate still open. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Built and held for the release (In Flight): PAGE-SAVE-RESTAMP-3 (80, Wave A) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84); BLOCK-TAG-CASE-1 (85) is building Wave A. Dispatch buffer after review 2026-10-23-4 (Queued, Full Spec, post-release): NARRATE-QUIT-LINGER-1 (86) → OVERLAY-THEME-SWEEP-1 (90) → READER-ARROW-GUARD-1 (91) → WIN-TARGET-NSIS-1 (92) → EINK-CONTROLS-1 (96). Stubs 87, 88, 93–95 and 97–99; NARRATE-EXIT-CRASH-1 (89) superseded by ELECTRON-42-UPGRADE-1. BLURBY-SERVER-1 (100, `Path: epic`) and Stage 9 (101–107).
@@ -1550,10 +1550,130 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **LL-156 / standing rule 50:** no existing test is edited. The KEEP-FURTHEST-FIX-1 tests pass unchanged.
 - **Standing rule 51:** this specification appends no lesson-status line.
 
+<a id="auto-archive-1-spec"></a>
+
+#### AUTO-ARCHIVE-1 — A finished book archives itself, with Undo *(Seq 111 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `main` @ `1736bfee`, from the owner's request of 2026-10-23 and the owner's answers of 2026-10-25 (tier 3, all three recommended options); post-release, in its own `ReaderContainer.tsx` integration window; not a release gate)*
+
+- **What:**
+  1. **Mark complete.**
+     - A **Mark complete** button sits on the list card, beside Archive, and a **Mark complete** item sits in the grid card's context menu.
+     - Pressing either marks the book complete: its position moves to the last word, it counts as a completed book in history, and it is archived.
+  2. **Exit at the end.** Leaving the reader when the book is finished archives it, as today, and now also in Page mode:
+     - in Page, when the book's last page is on screen;
+     - in Focus, Flow and Narrate, when the last word is reached (today's rule).
+  3. **Undo.** Every auto-archive (both cases above) shows a toast for 5 s: `Archived "<title>"`, with an **Undo** button.
+     - Undo unarchives the book.
+     - For Mark complete, Undo also restores the book's previous position and cfi.
+     - Undo after an exit at the end only unarchives.
+- **Why:**
+  - **The owner's request:** "auto archive when manually marked complete or 0% remaining + exit".
+  - **Owner answers, 2026-10-25:**
+    - (1) the library card, list and grid;
+    - (2) a toast with Undo for 5 s;
+    - (3) "0% remaining" is the last page on screen in Page, or the last word in the other modes.
+  - **Traced on `1736bfee` by roadmap review 2026-10-25:**
+    - No "Mark complete" control exists. "Marked as read" only toggles `unread` (`LibraryContainer.tsx:349-357`). The list card hides Archive once a book is complete (`DocCard.tsx:208-219`).
+    - The exit archive exists already: `useProgressTracker._persistAndLog` calls `markDocCompleted`, `onBookCompleted` and `onArchiveDoc` when `savePos >= resolvedTotalWords - 1` (`src/hooks/useProgressTracker.ts:278-282`).
+    - Page saves the first word of each page (`page/ModeRuntime.ts:575-595`), so paging to the end never meets that test.
+    - The exit archive's toast is `useLibrary.archiveDoc`'s "Document archived", which has no Undo (`useLibrary.ts:178-189`). Undo exists only as the keyboard Z after E (`LibraryContainer.tsx:313-320`).
+    - The toast already supports an action button (`showToast(message, duration, action)`, `useLibrary.ts:32`; rendered at `LibraryView.tsx:363-372`).
+    - `mark-doc-completed` only counts the completion in history (`main/ipc/documents.js:125-129`).
+- **Design (tier 1, Blurby.Roadmap 2026-10-25, inside the owner's answers):**
+  - **Page knows its last page.** foliate's paginator exposes `atEnd`: no next section, and the last page of this one (`node_modules/foliate-js/paginator.js:1088-1090`).
+    - Page's FoliateView relocate listener (`src/reader/modes/page/FoliateView.tsx:797-801`) adds `atEnd: view.renderer?.atEnd === true` to the detail it reports.
+    - `PageModeRuntime.onRelocate` (`page/ModeRuntime.ts:436-440`) passes it to `ports.shell.reportRelocate`, whose value type (`src/reader/ports/ReaderPorts.ts:54`) gains an optional `atEnd?: boolean`. Focus, Flow and Narrate send no `atEnd`, so they are unchanged.
+    - The shell (`ReaderContainer.tsx:367-371`) stores it in `pageAtEndRef` and passes the ref to `useProgressTracker` as `atBookEndRef`.
+  - **The exit rule.** In `_persistAndLog`, when `readingMode === "page"` and `atBookEndRef.current` is true, `savePos` becomes `resolvedTotalWords - 1`, and the save keeps the last page's cfi. The completion test at `:278` is then met. Other modes are unchanged.
+  - **One archive-with-Undo handler** in `LibraryContainer`: `archiveWithUndo(docId, restore?)` calls `archiveDoc` and replaces its toast with `showToast(\`Archived "${title}"\`, UNDO_DISMISS_MS, { label: "Undo", onClick })`. `UNDO_DISMISS_MS = 5000` already exists (`src/constants.ts:152`).
+    - `onClick` calls `unarchiveDoc(docId)`, then `restore?.()`.
+    - `useLibrary.archiveDoc` takes an optional `{ silent: true }`, so it shows no toast of its own.
+    - `ReaderContainer`'s `onArchiveDoc` prop (`LibraryContainer.tsx:555`, `:677`) becomes `archiveWithUndo`, with no restore.
+  - **Mark complete** in `LibraryContainer`: `markComplete(doc)` records `prev = { position, cfi }`, then:
+    - `api.updateDocProgress(doc.id, doc.wordCount - 1, doc.cfi)`, which keeps the cfi, because main sets `cfi` only when given (`documents.js:24`);
+    - `api.markDocCompleted()`;
+    - `archiveWithUndo(doc.id, () => api.updateDocProgress(doc.id, prev.position, prev.cfi))`.
+    - With no `wordCount`, it skips the position move and still archives.
+    - The history completion count is not taken back on Undo, because main has no decrement. This is recorded as accepted.
+    - The reading-goal books count (`onBookCompleted`) is not touched from the library. Only a finish in the reader counts toward the goal, as today.
+  - **Controls.**
+    - `DocCard` shows the Mark complete icon button only when the book is neither complete nor archived, next to Archive. Its label is `aria-label="Mark complete"`.
+    - `DocGridCard`'s context menu gets a "Mark complete" item under the same condition.
+    - `LibraryView` passes `onMarkComplete` down.
+    - Icons use existing `icon-btn` styles. No inline styles (standing rule 2).
+  - **Unchanged:** the legacy standalone reader window (`src/App.tsx:74-89`) and the keyboard E/Z undo.
+- **Prerequisites:**
+  - The Stage 8 release and the post-freeze merge train. Cut from `main` after it.
+  - PAGE-PAGES-READ-1 merges first: both edit `ReaderContainer.tsx` and `useProgressTracker.ts`.
+  - Re-grep every cited line at the cut (standing rule 36).
+- **Done when** (PowerShell 7, `pwsh`, from the worktree root):
+  1. **Red first (standing rule 43).** Commit the new tests alone. On the base, each listed failure appears and each control passes; record the output in the memo.
+     - **`tests/useProgressTracker.test.ts`**, a new describe `AUTO-ARCHIVE-1 exit at the end`, mounting the hook as `tests/keepFurthest.test.tsx` does, with `markDocCompleted`, `onArchiveDoc` and `onBookCompleted` as spies:
+       - **(ae1)** Page mode, `atBookEndRef.current = true`, on screen at word 79,900 of 80,000. `finishReading(79900)` saves position 79,999 and calls `markDocCompleted`, `onBookCompleted` and `onArchiveDoc` once each. *Fails on the base: saves 79,900 and no archive.*
+       - **(ae2) control:** Page, `atBookEndRef.current = false`: it saves 79,900 and does not archive.
+       - **(ae3) control:** Focus at word 79,999: it archives, as today.
+     - **`tests/readerModes/page.contract.test.ts`** (or the Page test file that drives `onRelocate` with fake ports; name it in the memo): **(ae4)** `onRelocate({ cfi, fraction, atEnd: true })` reaches `shell.reportRelocate` with `atEnd: true`. *Fails on the base: the field is dropped.*
+     - **`tests/autoArchive.test.tsx`** (new), rendering the library with `tests/editFormSave.test.tsx`'s harness pattern (`createElectronApiMock`, `renderLibrary`, `toastTexts`), copied, not imported (standing rule 52):
+       - **(am1)** The list card of an unfinished book has a "Mark complete" button. Pressing it calls `updateDocProgress(id, wordCount - 1, cfi)`, `markDocCompleted()` and `archiveDoc(id)`, and shows a toast `Archived "<title>"` with an "Undo" button. *Fails on the base: no button.*
+       - **(am2)** Pressing Undo calls `unarchiveDoc(id)` and `updateDocProgress(id, <previous position>, <previous cfi>)`.
+       - **(am3)** The grid card's context menu has "Mark complete" with the same effect as (am1).
+       - **(am4) control:** a complete or archived book shows no Mark complete button.
+  2. **The change** in the files of Done-when 7. `npx vitest run tests/useProgressTracker.test.ts tests/autoArchive.test.tsx tests/keepFurthest.test.tsx tests/readerModes tests/useLibrary.test.ts tests/features.test.js` exits 0.
+  3. **Standing rule 50:** `tests/features.test.js` "auto-archive at 100% completion" and "does not auto-archive if not complete" are logic re-implementations that stay green unedited. Any test that asserts the toast text "Document archived" on the exit path is named in the memo and updated in scope.
+  4. `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 on the owner's machine (standing rules 47 and 48).
+  5. **Live, packaged (standing rule 53(a), `--arm64`; a fresh scratch profile proved before the first input, LL-165).** The trigger that commits state is the exit save and the archive IPC. The check reads the scratch profile's `library.json` after a 2 s settle, plus the toast through a DOM probe (standing rule 54).
+     - **Page:** open a short sample book, go to its last page (the contents list's last entry, then Next page until `renderer.atEnd` reads true in the probe), and exit to the library. `library.json` shows `archived: true` and `position` equal to `wordCount - 1`, and the toast reads `Archived "<title>"` with Undo. Press Undo: `archived: false`.
+     - **Mark complete:** on another book at 10%, press Mark complete on its list card. It is `archived: true` at `position = wordCount - 1`. Press Undo: `archived: false`, with the previous `position` and `cfi`.
+     - **Control on a base `--dir` build (standing rules 54 and 55):** the same Page route leaves `archived` false. That shows the check sees the difference.
+  6. **Package verification (standing rule 53):** (a)–(e) on the final commit with `origin/main` merged in. Blurby.Brain confirms.
+  7. **Fence (standing rule 41):** `git diff --name-status <base>` lists exactly the following, plus the staging memo and the time log:
+     - `M src/reader/modes/page/FoliateView.tsx`, `M src/reader/modes/page/ModeRuntime.ts`, `M src/reader/ports/ReaderPorts.ts`;
+     - `M src/components/ReaderContainer.tsx`, `M src/hooks/useProgressTracker.ts`, `M src/hooks/useLibrary.ts`;
+     - `M src/components/LibraryContainer.tsx`, `M src/components/LibraryView.tsx`, `M src/components/DocCard.tsx`, `M src/components/DocGridCard.tsx`;
+     - `M tests/useProgressTracker.test.ts`, the Page test file of (ae4), and `A tests/autoArchive.test.tsx`.
+- **Effort:** M.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel (standing rule 9); Blurby.Brain for package verification.
+- **Source:** the owner's request (2026-10-23) and answers (2026-10-25); the stub at `#auto-archive-1`; the code trace by roadmap review 2026-10-25 on `1736bfee`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** the Done-when 7 list, with the lines cited in Design.
+- **Constants:** `UNDO_DISMISS_MS` (`src/constants.ts:152`, 5000), reused. No new constant.
+- **Branch:** `eb/auto-archive-1` from `main` after the post-freeze merge train and PAGE-PAGES-READ-1.
+- **Staging plan:** stage the fence paths by exact path (policy.git: push). Merge with `--no-ff` (Rule 5b) once the package is verified.
+- **Shared-core touches:** `src/components/ReaderContainer.tsx` (the `atEnd` ref in `reportRelocate` and its pass to `useProgressTracker`). It runs in its own integration window, after PAGE-PAGES-READ-1. It must not run in parallel with any item that edits `ReaderContainer.tsx`.
+- **Lane ownership:** Library & Content, with Reader Engine as the cross-lane owner of Page's relocate detail. Execution surfaces C (cards, toast) and A (the exit rule). **Forbidden during a parallel run:** `src/types.ts`, `src/utils/FlowScrollEngine.ts`, and the Focus, Flow and Narrate runtimes. **Merge order:** after PAGE-PAGES-READ-1.
+- **Mode isolation:** the new `atEnd` field travels the existing shell port. No mode imports another.
+- **Failure handling:**
+  - **`renderer.atEnd` is never true on the last page of a sample book (the probe shows false):** stop and report the paginator's `page` and `pages` there. Do not substitute a fraction threshold without a Blurby.Brain ruling.
+  - **The toast host does not render action buttons on the exit path:** the library view renders the toast after it returns (`LibraryContainer.tsx:666`). If the button is missing, report it. Do not add a second toast system.
+  - **Rollback:** `git revert -m 1 <merge>`. No stored data changes shape.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red tests (ae1–ae4, am1–am4) and controls committed alone, failures recorded | calculable | positive control | bounded | medium | 40m | — | — |
+| 2 | Page reports its last page; the exit rule archives a Page book at the end | calculable | feature | bounded | medium | 35m | — | — |
+| 3 | Archive with Undo toast; Mark complete on list and grid cards | calculable | feature | bounded | medium | 45m | — | — |
+| 4 | Suite, typecheck, build | calculable | verify | bounded | low | 15m | — | — |
+| 5 | Packaged live Page-end and Mark-complete checks with base control; rule 53; memo, time log, push | calculable | live verification | bounded | medium | 55m | — | — |
+
+**Total:** 3h10m (estimate; the timing tool is not installed in this plugin version)
+
+##### Lessons applied
+- **LL-158 / standing rule 54:** the live rows name their commit triggers (the exit save and the archive IPC) and run a base control first.
+- **LL-166 / standing rule 55:** the verdict reads `library.json` and the paginator's `atEnd` through a probe. The base control shows the check sees the difference.
+- **LL-165:** the scratch profile is proved before the first input.
+- **LL-138 / standing rule 43:** red first, with controls (ae2, ae3, am4).
+- **LL-146 / standing rule 52:** the library harness is copied into the new test file.
+- **LL-156 / standing rule 50:** the logic re-implementation tests stay unedited, and any pinned "Document archived" assertion is named.
+- **LL-149 / standing rule 48:** typecheck and build are restated.
+- **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 - <a id="page-para-keys-1"></a>**PAGE-PARA-KEYS-1 — Page's paragraph keys move the highlight to a real paragraph start** *(Seq 115 — stub; added by roadmap review 2026-10-25 from Blurby.Brain's finding during package verification; BUG-220; not a release gate)*. In Page, with the highlight on word 187, Shift+→ moved it to −1 and Shift+← to 0, on a packaged build. The probable cause is the paragraph command's slice index. Specify after a trace of Page's paragraph command (Shift+←/→ through `useReaderKeys`) on the held key-fix stack: FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → FLOW-PARA-KEYS-1 → BLOCK-TAG-CASE-1. Those fixed the same keys in Focus and Flow. Prerequisites: READER-ARROW-GUARD-1 and BLOCK-TAG-CASE-1. Lane: Reader Engine.
-- <a id="furthest-persist-1"></a>**FURTHEST-PERSIST-1 — The furthest page a reader reached is remembered across sessions** *(Seq 114 — stub; added by roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C; tier 2: it changes what the backtrack prompt offers)*. Today the furthest mark lives only in memory for one open (`useProgressTracker.ts:150-164`). `update-doc-progress` (`main/ipc/documents.js:15-33`) saves only `position` and `cfi`, and `useLibrary.updateProgress` (`src/hooks/useLibrary.ts:158-163`) copies only those. `src/types.ts:108` declares `furthestPosition` with an out-of-date comment, has no `furthestCfi`, and main never writes either. So a reader who backs up and quits without the exit prompt loses the furthest page, and the next session's prompt measures from the saved position. A fix saves `furthestPosition` and `furthestCfi`, only when higher, through the progress IPC, and touches `src/types.ts` (shared core), `preload.js:54`, `main/ipc/documents.js`, `useLibrary.ts` and possibly the sync merge (`main/sync-engine.js:328-338`). **Owner question (tier 2):** should a later session's backtrack prompt offer the furthest page ever reached, or only the furthest page of the current session (today)? Recommended: the furthest page ever reached. Lane: Reader Engine.
+- <a id="furthest-persist-1"></a>**FURTHEST-PERSIST-1 — The furthest page a reader reached is remembered across sessions** *(Seq 114 — stub; added by roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C; tier 2: it changes what the backtrack prompt offers)*. Today the furthest mark lives only in memory for one open (`useProgressTracker.ts:150-164`). `update-doc-progress` (`main/ipc/documents.js:15-33`) saves only `position` and `cfi`, and `useLibrary.updateProgress` (`src/hooks/useLibrary.ts:158-163`) copies only those. `src/types.ts:108` declares `furthestPosition` with an out-of-date comment, has no `furthestCfi`, and main never writes either. So a reader who backs up and quits without the exit prompt loses the furthest page, and the next session's prompt measures from the saved position. A fix saves `furthestPosition` and `furthestCfi`, only when higher, through the progress IPC, and touches `src/types.ts` (shared core), `preload.js:54`, `main/ipc/documents.js`, `useLibrary.ts` and possibly the sync merge (`main/sync-engine.js:328-338`). **Owner ruling (2026-10-25, tier 2): the furthest page ever reached.** The backtrack prompt in a later session offers the furthest page the reader has ever reached in that book. It still needs a full specification (the edit sites above); it is beyond the buffer. Lane: Reader Engine.
 
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
@@ -1599,7 +1719,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1** is now a full specification: [RESTAMP-RERUN-RACE-1](#restamp-rerun-race-1-spec) (roadmap review 2026-10-23-5).
 - <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — SUPERSEDED (roadmap review 2026-10-23-5):** folded into [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec). Both edit Focus's `navigateTo`, the `go-to-href` case and `onRelocate`, and the owner's "first word of chapter" ruling needs the landing hook that fix adds. The ruling is carried there.
 - <a id="flow-toc-jump-word-1"></a>**FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter's first word** *(position 110 — stub; owner ruling 2026-10-23: "Yes, as a follow-up" to CHAPTER-STEP-CFI-1; after CHAPTER-STEP-CFI-1)*. Flow gets the same paused cursor on the jumped-to chapter's first word that CHAPTER-STEP-CFI-1 gives Focus, using that item's landing hook. Specify it after CHAPTER-STEP-CFI-1's Done-when 1 has recorded what Flow shows today. Lane: Reader Engine.
-- <a id="auto-archive-1"></a>**AUTO-ARCHIVE-1 — A finished book archives itself** *(position 111 — stub; added 2026-10-23 at the owner's request; not a release gate)*. Owner's request: "auto archive when manually marked complete or 0% remaining + exit". A book archives itself (1) when the reader marks it complete by hand, or (2) when it is at 0% remaining and the reader exits it. Found while filing: the legacy reader-window close handler already does (2) (`src/App.tsx:83-85` calls `markDocCompleted` then `archiveDoc` when `finalPos >= words.length - 1`), but the main reader (`ReaderContainer`) path and any manual "mark complete" control need checking: `mark-doc-completed` (`main/ipc/documents.js:125`) only counts a completion in history and archives nothing. Specify after a live check of what each mode does today. Owner questions to settle at spec time: whether there is a visible "Mark complete" control today and where; whether an auto-archived book shows a toast with Undo; whether "0% remaining" means the last word or the last page. Lane: Library & Content.
+- <a id="auto-archive-1"></a>**AUTO-ARCHIVE-1** is now a full specification: [AUTO-ARCHIVE-1](#auto-archive-1-spec) (roadmap review 2026-10-25, with the owner's answers).
 - <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).

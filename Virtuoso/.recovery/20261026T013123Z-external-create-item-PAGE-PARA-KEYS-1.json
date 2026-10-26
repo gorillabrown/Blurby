@@ -1,0 +1,52 @@
+{
+  "id": "20261026T013123Z-external-create-item-PAGE-PARA-KEYS-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-PARA-KEYS-1",
+  "created": "2026-10-26T01:31:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Page paragraph keys move the highlight to a real paragraph start",
+      "status": "Queued",
+      "sequence": 115,
+      "written_status": "Stub",
+      "effort": "S",
+      "prerequisites": [
+        "READER-ARROW-GUARD-1",
+        "BLOCK-TAG-CASE-1"
+      ],
+      "group": "Reader Polish",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#page-para-keys-1",
+      "description": "BUG-220: in Page, Shift+right moves the highlight from 187 to -1 and Shift+left to 0; probably the paragraph command's slice index.",
+      "notes": "origin: Blurby.Brain finding during package verification, filed by roadmap review 2026-10-25. Stub; needs a trace on the held key-fix stack. Not a release gate.",
+      "id": "PAGE-PARA-KEYS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T01:09:26Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-PARA-KEYS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-PARA-KEYS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-PARA-KEYS-1",
+      "actualRevision": "",
+      "recoveryId": "20261026T013123Z-external-create-item-PAGE-PARA-KEYS-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-815d-bb12-fd8623475643",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T01:31:55Z",
+  "outcome": "succeeded"
+}

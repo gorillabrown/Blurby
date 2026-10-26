@@ -1,0 +1,39 @@
+{
+  "id": "20261026T014015Z-external-set-status-AUTO-ARCHIVE-1",
+  "operation": "external-set-status",
+  "item_id": "AUTO-ARCHIVE-1",
+  "created": "2026-10-26T01:40:15Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "prerequisites": "PAGE-PAGES-READ-1",
+      "spec_link": "ROADMAP.md#auto-archive-1-spec",
+      "branch": "eb/auto-archive-1",
+      "effort": "M",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Owner answers 2026-10-25 (tier 3): Mark complete on list and grid cards; toast with Undo for 5 s; Page archives at its last page on screen, other modes at the last word. Full Spec by roadmap review 2026-10-25 (U9 pass). Shared core: ReaderContainer.tsx, own window after PAGE-PAGES-READ-1. Not a release gate."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:AUTO-ARCHIVE-1:[('branch', 'eb/auto-archive-1'), ('effort', 'M'), ('notes', 'Created 2026-10-23 by Blurby.Roadmap at the owner request. Owner answers 2026-10-25 (tier 3): Mark complete on list and grid cards; toast with Undo for 5 s; Page archives at its last page on screen, other modes at the last word. Full Spec by roadmap review 2026-10-25 (U9 pass). Shared core: ReaderContainer.tsx, own window after PAGE-PAGES-READ-1. Not a release gate.'), ('prerequisites', 'PAGE-PAGES-READ-1'), ('spec_link', 'ROADMAP.md#auto-archive-1-spec'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "AUTO-ARCHIVE-1",
+      "idempotencyKey": "set-status:AUTO-ARCHIVE-1:[('branch', 'eb/auto-archive-1'), ('effort', 'M'), ('notes', 'Created 2026-10-23 by Blurby.Roadmap at the owner request. Owner answers 2026-10-25 (tier 3): Mark complete on list and grid cards; toast with Undo for 5 s; Page archives at its last page on screen, other modes at the last word. Full Spec by roadmap review 2026-10-25 (U9 pass). Shared core: ReaderContainer.tsx, own window after PAGE-PAGES-READ-1. Not a release gate.'), ('prerequisites', 'PAGE-PAGES-READ-1'), ('spec_link', 'ROADMAP.md#auto-archive-1-spec'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261026T014015Z-external-set-status-AUTO-ARCHIVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T01:40:59Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,53 @@
+{
+  "id": "20261026T013121Z-external-create-item-LIBRARY-WRITE-RACE-3",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-WRITE-RACE-3",
+  "created": "2026-10-26T01:31:21Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A library edit stamps only what the reader changed; a missing book fails the save; a save answers only its own form",
+      "status": "Queued",
+      "sequence": 89,
+      "written_status": "Full Spec",
+      "effort": "M",
+      "prerequisites": [
+        "LIBRARY-WRITE-RACE-2",
+        "APP-TABS-1"
+      ],
+      "group": "Platform Health",
+      "workstream": "Library & Content",
+      "spec_link": "ROADMAP.md#library-write-race-3",
+      "branch": "eb/library-write-race-3",
+      "description": "W2 (BUG-223): edit-doc-fields sends edited fields with loaded values and main stamps only those; N1: update-doc on a missing id errors; N2: a request token ties a save to its form.",
+      "notes": "origin: LIBRARY-WRITE-RACE-2 memo (W2, N1, N2); Blurby.Brain ruling relayed by Blurby.Roadmap 2026-10-25; specified by roadmap review 2026-10-25 (U9 pass). Shared core: src/types.ts, own window after APP-TABS-1. Must merge before BLURBY-SERVER-1.",
+      "id": "LIBRARY-WRITE-RACE-3"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T01:09:26Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-3",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-WRITE-RACE-3",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-3",
+      "actualRevision": "",
+      "recoveryId": "20261026T013121Z-external-create-item-LIBRARY-WRITE-RACE-3",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-819f-9655-c23d0f41dce9",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T01:31:54Z",
+  "outcome": "succeeded"
+}

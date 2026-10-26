@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-26T01:09:26Z",
+  "takenAt": "2026-10-26T01:41:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3017,8 +3017,8 @@
       "completed": "",
       "evidence": "",
       "description": "The main extractor joins adjacent word segments through one ICU-independent function shared with segmentWordSpans, segments whole blocks, and guards against an Electron ICU change; saved positions remapped once through their cfi, word text unchanged.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "45d7e2fc267d8fedfedeb35472e84d0491ce6f03f31b3b47a78911a07efa6db5",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate. Hold cleared 2026-10-25: Blurby.Brain ruling (b), two copies (CommonJS main/word-segments.js, TS source of truth) with a parity test; spec corrected by roadmap review 2026-10-25. Dispatch-ready (U9 pass).",
+      "revision": "2e629a00e4af8631e661b5b83de5a08c19b4f8a35c7d80c8b55a0647c07111e7",
       "extra": {
         "url": "https://app.notion.com/3fa7c96cc31e81b1ba5ef996ae1f16c5",
         "Workstream": ""
@@ -3095,8 +3095,8 @@
       "completed": "",
       "evidence": "",
       "description": "The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a \"Coming Soon\" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highli",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "640a6c30198b9d2db5d9915568a82dbcfbbc8fce165e2b72a6ab7f598c193c18",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9). Storyboarded and fully specified 2026-10-23 (docs/planning/specs/2026-10-23-5/APP-TABS-1.md). Package verified under rule 53 by Blurby.Brain 2026-10-25: package 48da10c8, tip 8539ec4c; suite 2,493 passed / 2 skipped / 0 failed. Built and held; touches src/types.ts (3 lines), post-release train, no other types.ts branch merges around it without a rebase. Not a release gate.",
+      "revision": "ff9059087739c48b3ea6cb075590117f6b973a2fcf18430dcd3a2155efa4f05a",
       "extra": {
         "url": "https://app.notion.com/3fa7c96cc31e81c48b78ecaba7e48282",
         "Workstream": ""
@@ -3121,10 +3121,10 @@
       "branch": "eb/narrate-harness-coldclick-1",
       "started": "2026-10-23",
       "completed": "",
-      "evidence": "",
+      "evidence": "Quiet machine: C:/Projects/Blurby-artifacts/narrate-harness-coldclick-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)",
       "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate.",
-      "revision": "9308ea18adf47a2b70410eb5d1b2338d1e252db9112ab4a3187d1c745b58bab2",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts (quiet x64 run on package 0ca285e5: 80/80 lost-race, spans never ready before first voice); Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner question 1 (A/B/C, spec recommends B) pending.",
+      "revision": "80c082a8a4d94443d8f2794e1eec8394c79421a074e0fa02c57beaa8433bf76b",
       "extra": {
         "url": "https://app.notion.com/3fa7c96cc31e81ca8d3ffa962cabdd31",
         "Workstream": ""
@@ -3863,8 +3863,8 @@
       "completed": "",
       "evidence": "",
       "description": "Quit does not wait on a running Kokoro job, and a quick relaunch is not lost.",
-      "notes": "",
-      "revision": "0b3e902848e7240f85549c0e1fced9811614d3b652f7b0809746a5d4d0009b24",
+      "notes": "Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).",
+      "revision": "4910313b6f9ce5f623b3a79644cf11fc4c8219cd3cdd42c5da55631629866831",
       "extra": {
         "url": "https://app.notion.com/4027c96cc31e81729f5aff9465019610",
         "Workstream": ""
@@ -4306,21 +4306,23 @@
       "sequence": 111,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
-      "prerequisites": [],
-      "effort": "S",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "PAGE-PAGES-READ-1"
+      ],
+      "effort": "M",
       "workstream": "Library & Content",
       "deliverable": "",
       "group": "",
-      "spec_link": "ROADMAP.md#auto-archive-1",
-      "branch": "",
+      "spec_link": "ROADMAP.md#auto-archive-1-spec",
+      "branch": "eb/auto-archive-1",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "A book archives itself when marked complete by hand, or when it is at 0% remaining and the reader exits it.",
-      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub. Not a release gate.",
-      "revision": "ddfefd286cea89d87e9c5e6eb3c322c03ecc7a6d9f1255f012e696b473af115d",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Owner answers 2026-10-25 (tier 3): Mark complete on list and grid cards; toast with Undo for 5 s; Page archives at its last page on screen, other modes at the last word. Full Spec by roadmap review 2026-10-25 (U9 pass). Shared core: ReaderContainer.tsx, own window after PAGE-PAGES-READ-1. Not a release gate.",
+      "revision": "dfc97440c03786fbfe68649c9e00a9df1d605b79e66a07bd68f3f435880ae3b4",
       "extra": {
         "url": "https://app.notion.com/4037c96cc31e81aa917dd5af10cade87",
         "Workstream": ""
@@ -4437,6 +4439,148 @@
       "revision": "fcd29169aa16948ba7d84c26aa64145f43adae7ed9456407d439ad6e938a8446",
       "extra": {
         "url": "https://app.notion.com/4037c96cc31e81fbbccced3552d9af43",
+        "Workstream": ""
+      }
+    },
+    {
+      "id": "PAGE-PARA-KEYS-1",
+      "title": "Page paragraph keys move the highlight to a real paragraph start",
+      "sequence": 115,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "READER-ARROW-GUARD-1",
+        "BLOCK-TAG-CASE-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-para-keys-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "BUG-220: in Page, Shift+right moves the highlight from 187 to -1 and Shift+left to 0; probably the paragraph command's slice index.",
+      "notes": "origin: Blurby.Brain finding during package verification, filed by roadmap review 2026-10-25. Stub; needs a trace on the held key-fix stack. Not a release gate.",
+      "revision": "434038a4bd3331e508ae8af761b8cd010ce4a3c8105c1960a73621f9f076f4a9",
+      "extra": {
+        "url": "https://app.notion.com/4057c96cc31e815dbb12fd8623475643",
+        "Workstream": ""
+      }
+    },
+    {
+      "id": "PAGE-PAGES-READ-1",
+      "title": "Page turns count toward the pages-read goal",
+      "sequence": 113,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "KEEP-FURTHEST-FIX-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-pages-read-1",
+      "branch": "eb/page-pages-read-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Page-mode forward turns add their words to the reading goal's pages count, with carry between turns; the furthest mark owns the count.",
+      "notes": "origin: roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C. Full Spec (U9 pass). Shared-core touch: ReaderContainer.tsx, own integration window after the Stage 8 merge train. Not a release gate.",
+      "revision": "0241ced9b0693308b337db52a89fd205edb2e9e254126d0efe29ede448797d96",
+      "extra": {
+        "url": "https://app.notion.com/4057c96cc31e817fbee8f0612d51cb27",
+        "Workstream": ""
+      }
+    },
+    {
+      "id": "LIBRARY-WRITE-RACE-3",
+      "title": "A library edit stamps only what the reader changed; a missing book fails the save; a save answers only its own form",
+      "sequence": 89,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "LIBRARY-WRITE-RACE-2",
+        "APP-TABS-1"
+      ],
+      "effort": "M",
+      "workstream": "Library & Content",
+      "deliverable": "",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#library-write-race-3",
+      "branch": "eb/library-write-race-3",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "W2 (BUG-223): edit-doc-fields sends edited fields with loaded values and main stamps only those; N1: update-doc on a missing id errors; N2: a request token ties a save to its form.",
+      "notes": "origin: LIBRARY-WRITE-RACE-2 memo (W2, N1, N2); Blurby.Brain ruling relayed by Blurby.Roadmap 2026-10-25; specified by roadmap review 2026-10-25 (U9 pass). Shared core: src/types.ts, own window after APP-TABS-1. Must merge before BLURBY-SERVER-1.",
+      "revision": "ae15bfe24ae7356aa062e0e6aee74317191724edda04aaa5f2ae889c12cd7c19",
+      "extra": {
+        "url": "https://app.notion.com/4057c96cc31e819f9655c23d0f41dce9",
+        "Workstream": ""
+      }
+    },
+    {
+      "id": "FURTHEST-PERSIST-1",
+      "title": "The furthest page a reader reached is remembered across sessions",
+      "sequence": 114,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "PAGE-PAGES-READ-1"
+      ],
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#furthest-persist-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Save furthestPosition and furthestCfi (only when higher) through the progress IPC, so the backtrack prompt survives a quit.",
+      "notes": "origin: roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C. Owner ruling 2026-10-25 (tier 2): the backtrack prompt offers the furthest page ever reached. Stub, needs a full spec; touches src/types.ts (shared core). Not a release gate.",
+      "revision": "f96c3bc8c24c2f8c1b13e8f75906d38c3c8349cffad7b7ee6e12a8f83c5e878f",
+      "extra": {
+        "url": "https://app.notion.com/4057c96cc31e81a4967dfbc4f01e7d63",
+        "Workstream": ""
+      }
+    },
+    {
+      "id": "NARRATE-ARROW-PAUSE-1",
+      "title": "In Narrate, an arrow with a modifier key pauses and the cursor holds its word",
+      "sequence": 99,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ARROW-GUARD-1"
+      ],
+      "effort": "S",
+      "workstream": "TTS / Narration Engine",
+      "deliverable": "",
+      "group": "Narration UX",
+      "spec_link": "ROADMAP.md#narrate-arrow-pause-1",
+      "branch": "eb/narrate-arrow-pause-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Owner ruling 2026-10-25: Shift/Ctrl/Alt/Meta + left/right pauses Narrate; plain arrows and PageUp/Down unchanged; Narrate-local key listener.",
+      "notes": "origin: owner ruling 2026-10-25 via Blurby.Brain; specified by roadmap review 2026-10-25 (U9 pass). Stacked on READER-ARROW-GUARD-1 tip 51202c1c; build-and-hold. Not a release gate.",
+      "revision": "f3749244a0bcd6a9bc0bef2dfe00c42b36459fe6709ef9bbb6656e356b6d054b",
+      "extra": {
+        "url": "https://app.notion.com/4057c96cc31e81ffa0edd9a1ca705083",
         "Workstream": ""
       }
     }
