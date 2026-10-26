@@ -26,18 +26,20 @@ function flushPromises() {
   return Promise.resolve().then(() => Promise.resolve()).then(() => Promise.resolve());
 }
 
-function liveLibrary() {
+type Patch = Record<string, Record<string, unknown>>;
+
+function liveLibrary(patch: Patch = {}) {
   return FIXTURE.docs
     .filter((d: any) => !d.deleted)
-    .map((d: any) => ({ ...JSON.parse(JSON.stringify(d)), content: d.content ?? `Text of ${d.title}.` }));
+    .map((d: any) => ({ ...JSON.parse(JSON.stringify(d)), content: d.content ?? `Text of ${d.title}.`, ...(patch[d.id] || {}) }));
 }
 
 // tests/folderNoticeBanner.test.tsx's mock, plus loadDocContent.
-function createElectronApiMock(settingsOver: Record<string, unknown>) {
+function createElectronApiMock(settingsOver: Record<string, unknown>, patch: Patch = {}) {
   const api: any = {
     getState: vi.fn().mockResolvedValue({
       settings: { ...DEFAULT_SETTINGS, firstRunCompleted: true, viewMode: "grid", ...settingsOver },
-      library: liveLibrary(),
+      library: liveLibrary(patch),
     }),
     getPlatform: vi.fn().mockResolvedValue("win32"),
     saveSettings: vi.fn().mockResolvedValue(undefined),
@@ -102,8 +104,8 @@ const settle = async () => {
   for (let i = 0; i < 5; i++) await act(async () => { await flushPromises(); });
 };
 
-async function renderLibrary(settingsOver: Record<string, unknown> = {}) {
-  api = createElectronApiMock(settingsOver);
+async function renderLibrary(settingsOver: Record<string, unknown> = {}, patch: Patch = {}) {
+  api = createElectronApiMock(settingsOver, patch);
   (window as any).electronAPI = api;
   const { default: LibraryContainer } = await import("../src/components/LibraryContainer");
   await act(async () => {
@@ -219,5 +221,230 @@ describe("APP-TABS-1 tab shell (Wave A)", () => {
     expect(document.querySelector(".menu-flap.open")).toBeNull();
     await click(document.querySelector("[aria-label=\"Open menu\"]"));
     expect(document.querySelector(".menu-flap.open")).not.toBeNull();
+  }, 30_000);
+});
+
+// ── Wave B: search, filters, moves and the two unbuilt tabs ────────────────────────────────────────────────────
+
+const hoverCloseMs = async () => ((await import("../src/constants")) as any).FILTER_MENU_HOVER_CLOSE_MS as number;
+const barButton = (label: string) => document.querySelector<HTMLButtonElement>(`.app-tab-bar [aria-label="${label}"]`);
+const filterButton = () => barButton("Filter");
+const menu = () => document.querySelector("[role=\"menu\"]");
+const menuItems = () => Array.from(document.querySelectorAll<HTMLElement>("[role=\"menu\"] [role=\"menuitemradio\"]"));
+const menuItemTexts = () => menuItems().map((i) => i.textContent);
+const checkedItem = () => menuItems().find((i) => i.getAttribute("aria-checked") === "true")?.textContent ?? null;
+const toastText = () => Array.from(document.querySelectorAll(".toast")).map((t) => t.textContent || "").join(" | ");
+const fire = async (el: Element | null, type: string, init: Record<string, unknown> = {}) => {
+  expect(el, `element for ${type}`).not.toBeNull();
+  await act(async () => {
+    const Ctor: any = type.startsWith("key") ? KeyboardEvent : MouseEvent;
+    el!.dispatchEvent(new Ctor(type, { bubbles: !["mouseenter", "mouseleave"].includes(type), cancelable: true, ...init }));
+    await flushPromises();
+  });
+};
+// React reads enter and leave from mouseover and mouseout, so a hover dispatches both, as a browser does.
+const hover = async (el: Element | null) => {
+  await fire(el, "mouseover", { relatedTarget: document.body });
+  await fire(el, "mouseenter", { relatedTarget: document.body });
+};
+const unhover = async (el: Element | null) => {
+  await fire(el, "mouseout", { relatedTarget: document.body });
+  await fire(el, "mouseleave", { relatedTarget: document.body });
+};
+async function typeInto(el: HTMLInputElement | HTMLTextAreaElement | null, value: string) {
+  expect(el, "input").not.toBeNull();
+  await act(async () => {
+    const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(el, value);
+    el!.dispatchEvent(new Event("input", { bubbles: true }));
+    await flushPromises();
+  });
+  await settle();
+}
+const searchRows = () => Array.from(document.querySelectorAll<HTMLElement>(".search-result-item"));
+const searchRow = (title: string) => searchRows().find((r) => r.querySelector(".search-result-title")?.textContent === title) || null;
+async function searchMeditations() {
+  await click(barButton("Search"));
+  await typeInto(document.querySelector<HTMLInputElement>("[aria-label=\"Search library\"]"), "meditations");
+}
+const openCardMenu = async (id: string) => {
+  await fire(card(id), "contextmenu", { clientX: 10, clientY: 10 });
+  await settle();
+  return document.querySelector(".doc-context-menu");
+};
+const menuButton = (scope: Element | null, text: string) =>
+  (Array.from(scope?.querySelectorAll("button") || []).find((b) => b.textContent === text) || null) as HTMLButtonElement | null;
+
+describe("APP-TABS-1 search, filters, moves and the unbuilt tabs (Wave B)", () => {
+  it("(b1) frame 3: search covers every tab, labels each result, and opens on its tab", async () => {
+    await renderLibrary();
+    await searchMeditations();
+    expect(searchRows().map((r) => r.querySelector(".search-result-title")?.textContent).sort())
+      .toEqual(["Meditations", "Meditations on modern Stoicism"]);
+    expect(searchRow("Meditations")?.querySelector(".search-result-tab")?.textContent).toBe("Library");
+    expect(searchRow("Meditations on modern Stoicism")?.querySelector(".search-result-tab")?.textContent).toBe("Newsroom");
+    await fire(searchRow("Meditations on modern Stoicism"), "mousedown");
+    await settle();
+    expect(readerStub()?.getAttribute("data-doc")).toBe("u-art");
+    await exitReader();
+    expect(selectedTab()).toBe("Newsroom");
+  }, 30_000);
+
+  it("(b2) the same search on Podcasts lists the same two labelled results", async () => {
+    await renderLibrary();
+    await click(tabNamed("Podcasts"));
+    await searchMeditations();
+    expect(searchRows().map((r) => r.querySelector(".search-result-tab")?.textContent).sort()).toEqual(["Library", "Newsroom"]);
+  }, 30_000);
+
+  it("(b3) the command palette lists both homes, labelled, and opens on the item's tab", async () => {
+    await renderLibrary();
+    await key({ key: "/", code: "Slash" });
+    const items = Array.from(document.querySelectorAll<HTMLElement>(".command-palette-item"));
+    const labelled = (label: string) => items.find((i) => i.querySelector(".command-palette-label")?.textContent === label) || null;
+    const sub = (el: Element | null) => el?.querySelector(".command-palette-sublabel")?.textContent ?? "";
+    expect(items.length).toBe(8);
+    expect(sub(labelled("Meditations"))).toMatch(/(^| · )Library$/);
+    expect(sub(labelled("Meditations on modern Stoicism"))).toMatch(/(^| · )Newsroom$/);
+    for (const i of items) expect(sub(i)).toMatch(/(^| · )(Library|Newsroom)$/);
+    await click(labelled("Meditations on modern Stoicism"));
+    expect(readerStub()?.getAttribute("data-doc")).toBe("u-art");
+    await exitReader();
+    expect(selectedTab()).toBe("Newsroom");
+  }, 30_000);
+
+  it("(b4) frame 4: hovering the filter opens Newsroom's four filters; leaving closes it", async () => {
+    await renderLibrary();
+    await click(tabNamed("Newsroom"));
+    expect(filterButton()?.getAttribute("aria-haspopup")).toBe("menu");
+    await hover(filterButton());
+    expect(menu()).not.toBeNull();
+    expect(menuItemTexts()).toEqual(["All", "New", "Favorites", "Archived"]);
+    expect(filterButton()?.getAttribute("aria-expanded")).toBe("true");
+    const ms = await hoverCloseMs();
+    expect(typeof ms).toBe("number");
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    await unhover(filterButton());
+    await act(async () => { vi.advanceTimersByTime(ms); });
+    vi.useRealTimers();
+    expect(menu()).toBeNull();
+  }, 30_000);
+
+  it("(b5) click toggles; Enter opens and focuses; arrows move; Escape closes to the button", async () => {
+    await renderLibrary();
+    await click(filterButton());
+    expect(menu()).not.toBeNull();
+    await click(filterButton());
+    expect(menu()).toBeNull();
+    filterButton()!.focus();
+    await fire(filterButton(), "keydown", { key: "Enter", code: "Enter" });
+    expect(menu()).not.toBeNull();
+    expect(document.activeElement).toBe(menuItems()[0]);
+    await fire(document.activeElement, "keydown", { key: "ArrowDown", code: "ArrowDown" });
+    expect(document.activeElement).toBe(menuItems()[1]);
+    await fire(document.activeElement, "keydown", { key: "Escape", code: "Escape" });
+    expect(menu()).toBeNull();
+    expect(document.activeElement).toBe(filterButton());
+  }, 30_000);
+
+  it("(b6) frame 4 on E-ink: a tap (enter then click) opens the menu; a second tap closes it", async () => {
+    await renderLibrary({ einkMode: true });
+    await hover(filterButton());
+    await click(filterButton());
+    expect(menu()).not.toBeNull();
+    await click(filterButton());
+    expect(menu()).toBeNull();
+  }, 30_000);
+
+  it("(b7) each tab keeps its own filters", async () => {
+    await renderLibrary({}, { "f-epub": { favorite: true } });
+    await click(filterButton());
+    expect(menuItemTexts()).toEqual(["All", "New", "Favorites", "Archived", "All types", "Books", "PDFs"]);
+    expect(Array.from(menu()?.children || [])[4]?.classList.contains("filter-menu-sep")).toBe(true);
+    await click(menuItems().find((i) => i.textContent === "Favorites") || null);
+    await click(tabNamed("Newsroom"));
+    await click(filterButton());
+    expect(checkedItem()).toBe("All");
+    await click(filterButton());
+    await click(tabNamed("Library"));
+    await click(filterButton());
+    expect(checkedItem()).toBe("Favorites");
+    await click(filterButton());
+    expect(visibleIds()).toEqual(["f-epub"]);
+  }, 30_000);
+
+  it("(b8) frame 2: Move to Newsroom from a grid card", async () => {
+    await renderLibrary();
+    await click(menuButton(await openCardMenu("f-pdf"), "Move to Newsroom"));
+    expect(api.setDocHome).toHaveBeenCalledWith("f-pdf", "newsroom");
+    expect(card("f-pdf")).toBeNull();
+    expect(toastText()).toContain("Moved to Newsroom");
+    await click(tabNamed("Newsroom"));
+    expect(card("f-pdf")).not.toBeNull();
+    expect(menuButton(await openCardMenu("f-pdf"), "Move to Library")).not.toBeNull();
+  }, 30_000);
+
+  it("(b9) frame 2 in list view: list rows have the same menu", async () => {
+    await renderLibrary({ viewMode: "list" });
+    expect(card("f-pdf")?.classList.contains("doc-card")).toBe(true);
+    const m = await openCardMenu("f-pdf");
+    expect(m?.classList.contains("doc-context-menu")).toBe(true);
+    await click(menuButton(m, "Move to Newsroom"));
+    expect(api.setDocHome).toHaveBeenCalledWith("f-pdf", "newsroom");
+    expect(card("f-pdf")).toBeNull();
+    await click(tabNamed("Newsroom"));
+    expect(card("f-pdf")).not.toBeNull();
+  }, 30_000);
+
+  it("(b10) a failed move leaves the card and says so", async () => {
+    await renderLibrary();
+    api.setDocHome.mockResolvedValue({ ok: false });
+    await click(menuButton(await openCardMenu("f-pdf"), "Move to Newsroom"));
+    expect(api.setDocHome).toHaveBeenCalledWith("f-pdf", "newsroom");
+    expect(card("f-pdf")).not.toBeNull();
+    expect(toastText()).toContain("Could not move this item — please try again.");
+  }, 30_000);
+
+  it("(b11) frame 5: the Podcasts empty state, the Marketplace banner, a disabled filter; search and Ctrl+1-4 work", async () => {
+    await renderLibrary();
+    await click(tabNamed("Podcasts"));
+    expect(document.querySelector("#app-tabpanel-podcasts")?.textContent).toContain("No podcasts yet");
+    await click(tabNamed("Marketplace"));
+    expect(document.querySelector("#app-tabpanel-marketplace [role=\"status\"]")?.textContent).toBe("Coming soon");
+    for (const n of [3, 4]) {
+      await ctrlDigit(n);
+      expect(filterButton()?.getAttribute("aria-disabled")).toBe("true");
+      await hover(filterButton());
+      await click(filterButton());
+      expect(menu()).toBeNull();
+    }
+    await searchMeditations();
+    expect(searchRows().length).toBe(2);
+    for (let n = 1; n <= 4; n++) {
+      await ctrlDigit(n);
+      expect(selectedTab()).toBe(TAB_NAMES[n - 1]);
+    }
+  }, 30_000);
+
+  it("(b12) owner question 3: an article added from the Library tab says Saved to Newsroom", async () => {
+    await renderLibrary();
+    api.addDocFromUrl.mockResolvedValue({ doc: { id: "u-new", title: "New Article", source: "url", wordCount: 10, position: 0, created: 1 } });
+    await click(document.querySelector("[aria-label=\"Add from URL\"]"));
+    await typeInto(document.querySelector<HTMLInputElement>("[aria-label=\"Article URL\"]"), "https://example.com/new");
+    await click(Array.from(document.querySelectorAll("button")).find((b) => b.textContent === "fetch") || null);
+    expect(api.addDocFromUrl).toHaveBeenCalledWith("https://example.com/new");
+    expect(toastText()).toContain("Saved to Newsroom");
+    expect(selectedTab()).toBe("Library");
+  }, 30_000);
+
+  it("(b13) control: + add still opens the Add form, and the metadata save still applies", async () => {
+    await renderLibrary();
+    await click(document.querySelector("[aria-label=\"Add document\"]"));
+    expect(document.querySelector("[aria-label=\"Document title\"]")).not.toBeNull();
+    await click(menuButton(document.querySelector(".add-edit-actions"), "cancel"));
+    await click(menuButton(await openCardMenu("f-epub"), "Edit Metadata"));
+    await typeInto(document.querySelector<HTMLInputElement>("[aria-label=\"Document title\"]"), "Meditations II");
+    await click(menuButton(document.querySelector(".add-edit-actions"), "save"));
+    expect(api.applyMetadataUpdates).toHaveBeenCalledWith([{ docId: "f-epub", updates: expect.objectContaining({ title: "Meditations II" }) }]);
   }, 30_000);
 });
