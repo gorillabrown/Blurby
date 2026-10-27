@@ -1,10 +1,10 @@
-# PROFILE-QUEUE-ISOLATION-1 — proposed ETW attribution contract, revision 7
+# PROFILE-QUEUE-ISOLATION-1 — proposed ETW attribution contract, revision 8
 Date: 2026-10-27. Local planning continuation of durable cloud thread 01a17a3a-dcdb-7308-8560-3989bd32a015.
 Proposal only; packet ROADMAP Seq121 In Flight / Stub is historical; the live provider is authoritative. No execution admission, data repair, main merge, release or terminal status.
 Source handoff: 762d38ac53f22245a56f89e489ab367c905dcd91; publication incorporates protocol-only descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2. Revision 2 input f10311a0d8440bcf00c7a3a1a57be2e94601996e; immutable revision 3 commit 6d15e5b16bd6e915a7bba50135508ef74806305c; local branch eb/local-folder-profile-planning-20261027.
 Owned writes for this task: only new item-specific reports in docs/planning/roadmap-reviews/cloud-20261026/.
 
-Revision 7 preserves the P1/P2-Q profile contract from immutable independently approved revision 4 e5f39215f956ed3012d28cf94f098b6e026b99ad. Revision 7 companion folder/cloud prerequisite incorporates selected complete D1–D4 execution-ready PROPOSED contract; its independent exact review/register/custody/admission remain. Profile qualification gates remain separate and unchanged. No profile repair/source/harness/capture authority is added. Revision 7 FOUR-report exact delta requires independent review.
+Revision 8 preserves the P1/P2-Q profile contract from immutable independently approved revision 4 e5f39215f956ed3012d28cf94f098b6e026b99ad. Revision 8 companion folder/cloud prerequisite incorporates selected complete D1–D4 execution-ready PROPOSED contract; its independent exact review/register/custody/admission remain. Profile qualification gates remain separate and unchanged. No profile repair/source/harness/capture authority is added. Revision 8 FOUR-report exact delta requires independent review.
 
 ## Goal and evidence boundary
 Produce a decisive, bounded future writer/path experiment and conditional repair admission contract. Preserve the completed approved investigation docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md unchanged.
