@@ -1,0 +1,55 @@
+# Roadmap review2026-10-27 — Phase D forward brief and held gates
+
+Owner approved Phases A/B/C. Phase D produced detailed authored contracts, source-backed corrections, a protected archive and lessons; it did not establish dispatch readiness or activate verification. Recommendation: clear the finite-sequence helper integrity gate through its separately admitted/qualified source-controlled remedy, then reconcile the two approved prerequisite identities and links. Finish GROUP source-correspondence and WORD consumer-admission contracts before prospective numbering measurements. Native executable/static qualification is independently scoped; no app/source/experiment starts from this report.
+
+## Current state and what changed
+
+WORD now separates current candidate/base/wrong public measurements from historical original-numbering evidence. It preserves the owner's exact bracket→opening-quote split, unchanged unquoted-bracket policy, TypeScript-first/CJS parity, run/cue source offsets, provenance-safe clamp, original CFI and unresolved legacy/new-numbering handoff HOLD. Old80352/2963 numbers and owner-copy routes were removed from the active acceptance contract and preserved verbatim in the full pre-review archive. Exact executable transforms/goldens/fingerprint/historical support/consumer tests remain absent, so no fabricated numeric table was published.
+
+GROUP's four-helper-only preservation premise failed read-only source analysis: differing note-target acceptance, lossy/duplicate-occurrence canonical wrapping and pre-canonical mode fallback/start/persistence cannot be certified by keeping main's array unchanged. New card/issue and LL-170 capture accepted-text, canonical authority, hydration and semantic paragraph gates, with no silent scope expansion or new owner functionality choice.
+
+NATIVE's operational13-file/branch-only contract retains actual owned PID/main-family/engine/queue/data/queue-path proof, strict descriptors and source-family witnesses, exact permitted identity/API bodies, one whole10s deadline including cleanup ACKs, same-PID independent position-grammar qualification and true128-module controls. Brain clarified natural fixture-entry/direct main-family+engine→queue topology, native root/main-family alias and17/16 identity pairs; process/deadline ceilings did not increase. Literal executable predicates/request counts/cases/commands/manifests remain unqualified, so native capability is not cleared.
+
+The registered roadmap remains inline. Archive is docs/planning/.Archive/ROADMAP.pre-word-native-review.2026-10-27.md, exact pre-edit SHA256de6a49eca06b81f1f6ec48e44514bcd824b5f48b9fc861f4a64278b69aaf0c53. Only superseded WORD content, new proposed cards, current summary and obsolete October14 comment are reconciled; every other active full specification is preserved. Final layout/integrity/line-count and raw staged/committed byte checks are publication gates. Existing held source branches, package, source freeze and release holds remain untouched.
+
+## Separate readiness findings
+
+| Authored contract | Specification | Prerequisites | Repository | External register | Execution environment |
+|---|---|---|---|---|---|
+| Native scratch-path proof (NATIVE-PATH-ATTESTATION-1) | NOT READY: literal executable/source-position/control/count/command/schema gates and exact independent review outstanding | No pending product prerequisite; held package is static input, never a Foliate completion cycle | Exact13-path branch-only plan; no tool worktree/source entry admitted | UNREGISTERED proposal, approved67.5 cannot survive current helper | Not qualified; runtime copy/matrices/no-input canary NOT RUN |
+| Ordered block text (BLOCK-TEXT-ORDER-1) | Stub/NOT READY: accepted text, non-lossy correspondence, hydration authority, paragraph semantics and minimal consumer fence | Wait completed Narrate plus nonterminal FLOW/BLOCK and proposed NATIVE | Exact f61 trace, no corrected minimal source fence/base admitted | UNREGISTERED proposal87.5; no invented URL | No GROUP/native process admitted |
+| One numbering (WORD-INDEX-UNIFY-1) | NOT READY U3/U4/U7: no frozen executable/oracle/results/fingerprint/history support or safe actual consumer handoff tests | Narrate completed; FLOW/BLOCK nonterminal; proposed GROUP/NATIVE not created | f61 stack exists; actual GROUP+current-main product base and exclusive source window absent | Existing Queued/Seq88 and historical Full Spec flag unchanged; dependency additions HELD | Fresh A inputs, candidate/history receipts and qualified observer absent |
+
+Mechanical U9/U10 only establishes lesson/task-list syntax. It does not confer source readiness, consumer behavior, tooling qualification, native acceptance, merge go or release. No generic Ready kickoff is emitted.
+
+## Work-register outcome — precise partial result
+
+Provider: live Notion notion:database/3f87c96cc31e800580cfe019c89a56ca, source collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c. Full194-row connector refresh2026-10-27T22:53:13Z was imported normally through the helper. Counts:39 Queued,68 In Flight,1 Blocked,71 Completed,9 Dissolved,6 Superseded;194 unique codes. These are snapshot-backed figures, not a later live status claim.
+
+No external write was performed. Create preview for67.5 silently truncated to67, already occupied; preview recovery20261027T225328Z-external-create-item-NATIVE-PATH-ATTESTATION-1 was abandoned with the no-write reason and recovery readback outstanding=[]. Brain confirmed shared parser/creation/import truncation and float-to-text project serialization. No rounding/ties/resequence/cache editing/raw connector bypass/installed-cache patch was used. Approved67.5/87.5 remain proposals until a separately qualified managed helper correction preserves finite JSON numeric values end to end. See Issue.REGISTER-SEQUENCE-PRECISION-1.2026-10-27.md and2026-10-27-sequence-precision-decision.md.
+
+Thus the intended create2 and add dependency links to WORD/Foliate remain NOT APPLIED. No live194→196 claim, invented item URLs, unrelated field update or completion record. Every existing status/Seq remains unchanged. FOLIATE-DISPLAY-LIFETIME-1 stays Blocked/built-and-held; exhausted original collector budget, original native functional gates and final Brain package confirmation remain. Visibility remains the first application repair; current release-fix order is not replaced by proposed prerequisite positions.
+
+## Buffer, holding bay, pace and scope
+
+Registered target5; current helper reports4 populated and0 mechanically ready. Detailed human findings above remain NOT READY even if a historical Full Spec flag persists. New contracts do not fill that gap. All existing queued Full Spec cards were rechecked for live lessons, with U9 passing but promoted-ID citation warnings carried under the preserve-other-specs fence. No successor elevation.
+
+Holding bay:0 open,5 closed;0 absorbed,0 withdrawn,0 still in-flight holding entries in this review. Board comments:0 open at Phase A; no new resolution invented. Generated board regeneration follows final roadmap write; it is ignored build output, not committed authority. It must show true194 snapshot-backed rows and may surface the deliberate unregistered-proposal drift. No .gitignore change or provider storage migration is needed.
+
+Count terminal share44.3% includes completed/dissolved/superseded as the helper defines it. Effort-weighted totals/percent remain NOT COMPUTABLE because24 items lack effort. No declared dated deadline means no required delivery pace/late verdict; starting-load has no bound-session open event and is not computable. Task prices from historical kinds are forecasts, never elapsed duration or activated budgets. WORD has16m priced chain/sum plus two frontier timeboxes≤4h; GROUP3m priced plus two≤3h; NATIVE task pricing/actual helper output is recorded on its card. No overnight/time-to-complete promise follows.
+
+## Next admissible actions and evidence limits
+
+1. Separately admit/qualify managed helper finite-sequence correction with actual production parser/create/serializer/import/recovery/order positive/opposing tests, no Notion writes. Pin one corrected helper root; then NEW transaction identities, exact numeric field preview, connector writes, full live readback, confirm/import and unchanged-existing-row comparison. No direct installed-cache repair.
+2. Brain completes exact GROUP acceptance/alignment/hydration/paragraph correction and WORD per-document numbering handoff source/test contracts. Source-fence expansion needs independent review; changed start/wait/speech functionality belongs to the owner if an actual choice arises.
+3. Operational observer executable authoring is separate from this specification review. Literal bodies/schema/request counts/grammar candidates/real fixtures/commands are independently reviewed before any named static/setup/matrix admission. Controlled qualification precedes the one fresh-exclusive no-input canary. No experiment or source budget has activated in this review.
+
+The review resolves design questions as far as actual source/tool evidence permits and persists exact remaining gates. It does not claim the native-observation blocker, measurement constants, dispatch buffer or source prerequisites are cleared. No normal library/settings/queue was parsed, copied, restored or changed; no app/install/measurement/fixture/native route was run. Terminal ledger unchanged, no completion or release exception.
+
+## Final readback and validation — 2026-10-27
+
+Fresh full SQL read2026-10-27T23:07:40Z returned194 unique rows, byte-equivalent canonical field values to the initial194-row before-state:0 changed rows,0 created rows, every existing Seq/status unchanged. Full snapshot imported through the registered helper; no manual cache write. Counts above remain exact at this final readback. New identities/links are NOT APPLIED. Recovery outstanding=[].
+
+ROADMAP is1969lines under2000; protected archive byte identity verified. Integration receipt verifies116 original non-WORD item sections unchanged and the native Rev3 body preserved through whitespace/heading-only layout compaction. All three authored cards pass actual U9/U10 helpers; no readiness inference. WORD's new promoted-label citation warning was corrected; existing unrelated cards remain byte-preserved. Document integrity PASS. Board regenerated from current roadmap/snapshot and remains ignored generated output; no .gitignore change. Independent governance review approved bounded publication. Raw staged/commit/remote checks remain publication gates; the external publication receipt will record them once performed.
+
+Final lesson helper:117 live,142 total identifiers,25 closed; yield1.65/close-out, held rate0.98, promotion rate0.12, median application3.5days, repeated-trap rate0.03(inferred). No new promotion/retirement/status overwrite. Terminal ledger SHA256f80cbaa4980cecf023d9f2d37bd153b75bd73c60d86ba132e5f3a8875929ce1c remains unchanged.
