@@ -2,15 +2,15 @@
   "item": "FOLIATE-DISPLAY-LIFETIME-1",
   "url": "https://app.notion.com/4057c96cc31e81469399c4a0739493c4",
   "sequence": 68,
-  "status": "Queued",
+  "status": "In Flight",
   "writtenStatus": "Full Spec",
   "providerItems": 194,
-  "providerReadbackAt": "2026-10-26T21:56:10Z",
-  "providerRevision": "541aef5caf3e8269c3585120f5829981e0ef919c061658a603514cc0c6148a61",
+  "providerReadbackAt": "2026-10-27T14:42:03Z",
+  "providerRevision": "4f7447a3a886db221d7835945617e2acc91e6bcf012ad405c7be165a9040b3b8",
   "providerCreationConfirmed": true,
   "branch": "eb/foliate-display-lifetime-1",
-  "executionOwner": "FOLIATE-DISPLAY-LIFETIME-1 \u2014 cloud implementation",
-  "actualThreadId": "01a17a3a-7d81-71bf-93be-37c6ca352037",
+  "executionOwner": "FOLIATE-DISPLAY-LIFETIME-1 \u2014 local repair",
+  "actualThreadId": "01a17dcd-3e4d-7161-bb2f-d8c273de5afb",
   "sourceBase": "4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7",
   "shippingBase": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
   "mainPin": "85e6e5aaedccb0501c529dbc9f739e50a0689fd7",
@@ -39,5 +39,15 @@
     "reviewCoordinator": "01a17a3a-d94f-760e-8d37-5805cd713020"
   },
   "cloudHost": "durable",
-  "coordinationCapability": "Cloud workers report no direct cross-chat/Brain messaging tool. Parent relays while connected; independent reviewer can inspect published Git branches. A later missing material technical ruling is a real hold, not permission to improvise."
+  "coordinationCapability": "Cloud workers report no direct cross-chat/Brain messaging tool. Parent relays while connected; independent reviewer can inspect published Git branches. A later missing material technical ruling is a real hold, not permission to improvise.",
+  "previousCloudThreadId": "01a17a3a-7d81-71bf-93be-37c6ca352037",
+  "executionHost": "local",
+  "localWorktree": "C:/Projects/Blurby/.worktrees/foliate-display-lifetime-20261027",
+  "localReturnDate": "2026-10-27",
+  "started": "2026-10-27",
+  "localPeers": {
+    "review": "01a17dce-1533-7d32-9532-c6a5b0123fb0",
+    "planning": "01a17dce-1a85-7e90-bce3-97196b180c90"
+  },
+  "localCapability": "Normal clean npm ci/root patch postinstall, typecheck and build PASS. First baseline suite exposed a lazy Electron download/extraction race; original failure retained. Normal package installation completed without deletion/module edits. One justified full rerun PASS183files2471passed2skipped0failed. Exact new detector red/opposite controls still required before claiming a repair."
 }
