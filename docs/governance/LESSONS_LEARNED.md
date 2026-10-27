@@ -3085,3 +3085,17 @@ Related: LL-165, standing rules 47 and 48.
 **Applies to:** install, uninstall and upgrade checks of a packaged build (standing rule 53 (d) for packaging items); release smoke runs; the release runbook's verify step.
 **Status:** Observation (2026-10-25)
 Related: LL-167 (standing rule 53), WIN-TARGET-NSIS-1, RELEASE-RUNBOOK-1.
+
+
+
+### LL-169 — Operation currentness and retained-resource lifetime need separate guards (FOLIATE-DISPLAY-LIFETIME-1, 2026-10-27)
+**Verdict:** A newer display or anchor intent can retire publication, scrolling and focus while the same retained View still legitimately owns pending load, font and resize callbacks. A single generation predicate for both lifetimes cancels valid work or permits stale side effects.
+**Evidence:** Source e1c1c11ceac16e8cba808714172420942e8801fa and its identical installed-production detector: candidate 51 passes; base 35 behavior assertion failures and 16 active controls, with four extra old-production rejections classified separately. Native acceptance remains NOT RUN; collector qualification is not a Foliate defect finding.
+**Recommendation:** Model operation currentness and retained-resource liveness separately; check captured identity before each effect and after reentry/await. Cancel pending loads once without changing fulfilled outcomes, and dispose only the captured obsolete resource.
+**Applies to:** Async reader/dependency lifecycles, same-resource intent changes, native-load continuation, callbacks and teardown.
+**Status:** Observation
+Related: LL-029, LL-031, LL-109; CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md.
+
+### LL-165 — status (FOLIATE-DISPLAY-LIFETIME-1, 2026-10-27)
+**Status:** Held as a safety gate: no Blurby input or native route was attempted because actual initialized scratch data/queue paths were not proved. Two controlled collector attempts failed before cache/cell traversal; synthetic parser passes did not substitute for actual path proof. Native acceptance remains NOT RUN.
+**Evidence:** CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; controlled Run1 receipt 999bf5062e7743bf9978c62ab99cc38562c3e436e2e7c6ce40f4cc29072c4e76 and Run2 receipt e2815173d54fc205c9b051c8eba89631121db8a9b9766488810277e48fabbf26; final Brain and independent CAPABILITY HOLD.

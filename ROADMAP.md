@@ -13,6 +13,10 @@
 
 ---
 
+### Held dispatch update - 2026-10-27
+
+FOLIATE-DISPLAY-LIFETIME-1 is **BUILT-AND-HELD / Blocked**, Seq68 unchanged. Source e1c1c11c and held tip2df0f920 remain published on eb/foliate-display-lifetime-1; 51 portable lifecycle cases, the full2522-pass/two-skipped suite and static ARM64 package checks retain their bounded approvals. The data-only observation collector is NOT QUALIFIED after both permitted controlled runs; actual runtime controls and native Blurby routes were NOT RUN. Brain and independent review require a separately reviewed observation design and explicit new qualification budget/custody. No completion record, successor elevation, application merge or release. [Held-dispatch report](docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md); [open issue](docs/governance/bug-reports/Issue.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md). This note records status only; the full admitted spec remains on the held source branch.
+
 ## Work lanes
 
 The owner requested product lanes on 2026-09-23. Each Notion record has one primary Lane; shared delivery dependencies remain in the spec and prerequisites. Registry policy.roadmap.lanes declares these six categories.
