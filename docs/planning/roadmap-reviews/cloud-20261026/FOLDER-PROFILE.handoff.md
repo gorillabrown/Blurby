@@ -1,4 +1,4 @@
-# Folder/profile local planning handoff — revision 4, 2026-10-27
+# Folder/profile local planning handoff — revision 5, 2026-10-27
 Local continuation of durable cloud planner 01a17a3a-dcdb-7308-8560-3989bd32a015.
 Parent:01a0cf7f-62f6-7450-abc9-5bb2750923f4. Brain technical authority:01a179e8-7a40-75c0-93f4-d3045ad99027.
 Revision 2 independent reviewer: 01a17a3a-d94f-760e-8d37-5805cd713020. Local revision 3 reviewer: 01a17dce-1533-7d32-9532-c6a5b0123fb0 (parent-supplied). Local Foliate implementation: 01a17dcd-3e4d-7161-bb2f-d8c273de5afb; preserve its source/test/desktop custody.
@@ -19,7 +19,7 @@ Repository gorillabrown/Blurby; revision 2 branch eb/cloud-folder-profile-specs-
 The table above identifies immutable revision 2 contents only. Independent review 38a787be APPROVED those bounded planning artifacts, including F3 as an open question set. It does not approve revision 3 amendments. Immutable revision 3 is 6d15e5b16bd6e915a7bba50135508ef74806305c; its publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision3-publication.json. Revision 4 records selected P1/P2-Q planning choices; its exact publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision4-publication.json. F3 remains OPEN; revision 4 requires independent delta review. Both reports remain bounded PLANNING proposals. New exact schema/helper/test names are proposed contracts, not application files created here. Source admission remains withheld. No app/harness/recorder/test/source/shared-governance/provider/main/release/terminal mutation occurred.
 
 ## Incorporated Brain planning rulings
-Revision 2 incorporated parent-relayed Brain rulings after Brain source tracing/hash verification of460cd25d; cloud private-thread access was unavailable then. The local continuation has read Brain directly and sent the six F3 producer questions, stock-profile scope and clean-path readback questions through local thread tools. Dispatch is not acknowledgment or a ruling. F3 remains OPEN pending an explicit returned ruling.
+Revision 2 incorporated parent-relayed Brain rulings after Brain source tracing/hash verification of460cd25d; cloud private-thread access was unavailable then. The local continuation has read Brain directly and sent the six F3 producer questions, stock-profile scope and clean-path readback questions through local thread tools. The explicit F3 technical ruling was subsequently read directly in Brain turn 01a17dce-7c65-76f0-9148-7c036d4a9130 and parent-relayed; revision 5 incorporates it in folder section6. Force-download owner cutoff and exact technical finalization questions remain OPEN; no source admission follows.
 
 Folder F1/F2 CLOSED AS CHOICES:
 - MAIN FIFO across BOTH select-folder and switch-folder, all senders and legacy/new channels, including dialog/validation/commit/watcher/sync/response construction. No renderer-only ordering, disabled input, coalescing or dropped accepted requests.
@@ -29,8 +29,14 @@ Folder F1/F2 CLOSED AS CHOICES:
 - Captured scan/watcher/run origins checked before actual effects, including same-path A-B-A, stale per-file refresh/removal, notice/Retry, startup and post-save continuation.
 - Human loading/optimistic-header/visibility-first/record/mode/account/device choices preserved.
 
-NEW folder F3 OPEN from actual producer trace:
-Independent rescan can replace an old array after awaits; drop import is an accepted user operation; URL/ws conversion patches held doc objects; cloud merge and force-download can apply whole-library results after network work. Report§6 specifies exact proposed source sites, controls and minimum handling. Brain must accept/amend those rows, especially force-download overlap ordering, before exact writable fence/source admission. No silent cancellation of imports, new cloud policy or automatic retry. This is a material technical/functional boundary, not a fresh diagnosis of the already completed stale-card defect.
+Folder F3 selected technical choices, with exact remaining gates:
+- Rescan stages without live aliases, validates main session/folder epoch/replacement authority/content generation and settles superseded on drift. It stays outside select/switch FIFO.
+- Each drop file captures destination before copy, finishes as accepted global intent against current library with existing partial-success/pruning behavior.
+- Sample/lazy/URL/ws/rescan derived fields have explicit per-producer allowlists, current nondeleted incarnation/source/content checks and attempt-owned output/cache paths. Shared docId output overwrite is forbidden even if stale metadata is rejected. Converter/helper source remains read-only; actual convertToEpub nesting is preserved in caller arguments.
+- Normal cloud local application reuses mergeLibrary with CURRENT live local and ORIGINAL immutable remote operand, preserving GC/rules; replacement authority invalidates old candidates. Raw syncFile retry/upload provenance, truthful actual-byte hashes and captured-operation acknowledgment need exact Brain finalization; local rebase does not prove remote atomicity.
+- Upload completion conditionally patches contentHash only for exact current source/content and storage/account session, never newer pending work.
+- Force-download retains whole replacement and a synchronous main-owned replacement barrier separate from folder epoch. Owner PRECLICK-import cutoff remains OPEN; Brain already asked, so no duplicate question/new workflow. Exact drain/admission/commit tests wait.
+- Precise additional technical gate: documents.js expiry mutates before potentially throwing Notification effects; central delayed save alone cannot prove generation coverage. Proposed explicit mutation note and authoritative main lookup plus potential sync-queue captured-operation API fence await Brain ruling. No claim only the owner gate remains.
 
 Profile P1–P3 CLOSED AS PLANNING DIRECTIONS:
 - Prefer Windows ETW FileIO via WPR; Brain's read-only local check reports wpr.exe10.0.26100/FileIO and tracerpt availability. This is NOT recorder/parser qualification.
@@ -87,3 +93,8 @@ Ruling provenance: exact Brain ruling relayed by parent/source thread 01a0cf7f-6
 - Empty application repair fence, historical UNKNOWN, 120-second schedule, >=25-second survival, normal-data custody and native/package/release holds remain.
 
 This amendment preserves immutable revision 3 and changes planning choices only. Its exact commit and committed-byte hashes are recorded in revision4-publication.json; no source admission or independent revision 4 approval is claimed.
+
+## Revision 5 F3 continuation and review boundary
+Immutable revision 4 e5f39215f956ed3012d28cf94f098b6e026b99ad is independently approved for bounded planning. Revision 5 exact delta is NOT independently approved. Brain F3 ruling provenance is direct turn 01a17dce-7c65-76f0-9148-7c036d4a9130, technical send to parent 01a0cf7f-62f6-7450-abc9-5bb2750923f4, also parent-relayed on 2026-10-27. Section6 replaces earlier questions with selected technical contracts while retaining the owner force cutoff and the exact additional technical questions above. No implementation is admitted. Current source readback adds converter991–997/cache helpers, syncFile509–614/conditionalWrite479–501, queue snapshot187/drain194–196 and documents expiry154–174. The observed queue drain call is sync-engine895 at this pin; resolve by symbol after rebase.
+
+The parent reviewed this bounded planning delta for publication; the exact commit and committed-byte hashes are in C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision5-publication.json. Independent reviewer must review that immutable revision 5; source-dispatch remains NOT READY. Technical mutation-generation/queue-provenance finalizations and owner force cutoff remain explicitly OPEN. P1/P2-Q, normal-data protection, empty profile repair fence and all native/package/release holds remain intact.
