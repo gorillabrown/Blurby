@@ -22,8 +22,8 @@ A single formal Blocked item is not the full blocked share of deliverable work: 
 
 ## Opinion and recommendation
 
-Select TWO separate evidence tracks:
-1. A frozen public-fixture numbering pilot inside WORD's planning finalization. It produces the canonical measured candidate table, not a product fix or package acceptance.
+Select TWO evidence tracks, with an explicit separate grouping-correctness prerequisite feeding the numbering track:
+1. A frozen public-fixture numbering pilot inside WORD's planning finalization, using a separately reviewed prospective grouping correction or an accepted immutable upstream grouping pin. It produces the canonical measured candidate table, not a product fix or package acceptance.
 2. A separately registered infrastructure prerequisite, proposed NATIVE-PATH-ATTESTATION-1, to qualify the constructor-free children-graph observer on controlled Node/Electron fixtures and then one separately admitted no-input packaged canary.
 
 Do not spend another attempt on the exhausted DATA-constructor design. Do not conflate static design approval, synthetic parser success, controlled fixture qualification, actual packaged canary qualification or functional native route acceptance. They are five different claims.
@@ -74,6 +74,30 @@ All eight are technical contract questions routed to Brain. No owner functionali
 
 Brain's amendments are inputs to PhaseC, not experimental authority. Exact scripts/static manifests and independent byte-bound review must precede any process allowance; this assessment does not replace them.
 
+## Consolidated Brain amendments - planning choices, not admission
+
+See2026-10-27-brain-contract-amendments.md for the exact ruling. The original pilot comparing a newly DOM-ordered main extractor against unchanged f61 Page grouping is NOT EXECUTABLE as written. The actual Map-based helper can collect outer-before and outer-after text ahead of its nested child; an adapter cannot normalize that away or call it lexical DOM order.
+
+Propose a distinct BLOCK-TEXT-ORDER-1 correctness prerequisite (name only, not registered): contiguous DOM-ordered text runs, nested entry/exit boundaries, fresh run on returning to the same parent, unchanged inline/raw/suppression/cue policies and stable distinct ordinals. Trace every consumer and preserve independent Page/Focus/Flow/Narrate runtimes without sibling imports/shared mutable state. Exact source fence and causal markup controls need separate specification/review. PhaseC must either freeze an independently reviewed prospective grouping diff as a separately labelled pilot input or wait for its immutable source; it cannot run the old pilot. No source work is admitted by proposing this dependency.
+
+Brain fixed serial measurement order J1 baseElectron42, J2 baseNode24, J3 prescribedElectron, J4 prescribedNode, J5 wrongElectron, J6 wrongNode. Each90s covers both books/edge controls and cleanup. First failure stops later jobs with NOT RUN reasons. A valid baseline-count disagreement is BASELINE-RECONCILIATION HOLD requiring reviewed planning amendment and explicit continuation, not automatic use of unused jobs. Final numerical propagation requires all intended receipts; a HOLD report does not fabricate six completed jobs. Exact closure also includes frozen main/constants.js.
+
+Observer modes are fixed by reviewed manifests: node-fixture-core (Electron pair NOT_APPLICABLE), real electron-fixture (actual isPackaged=false), native-package (actual true). Graph arrays have own integer length0..128, contiguous own DATA numeric slots and strict collision/proxy/accessor/duplicate rejection. Only precisely enumerated startup-null/missing/unloaded states BEFORE a complete S0 may retry inside the SAME absolute10s; after S0 any loss/replacement/change fails.
+
+S0 and S1 independently select root/engine/queue Modules, both children-array objects, ctx, all9 functions, app where applicable, and actual cached paths. Strict reference equality uses a NEW explicitly proposed fixed pure callFunctionOn comparator, function(other){"use strict";return this===other;}, not opaque objectId-string equality. This is an additional bounded RPC capability that PhaseC must expose and separately admit, alongside the exact one Electron read-pair body. Role-specific booleans persist; raw IDs/scopes do not. This proves bounded before/after consistency, never atomic/ABA-proof observation.
+
+Controlled fixture transitions use a separate nonce/PID/sequence-bound OS child-process IPC command/case allowlist, with actual ACKs and a declared S0_COMPLETE host-only scheduling barrier. No arbitrary JS/path payload, collector-CDP mutation or Blurby handler. Native mode rejects all fixture-control callbacks/transport. The production collector RPC whitelist stays distinct; the existing exhausted budget remains immutable. Independent review of these exact amendments and later exact-byte script freeze remain required.
+
+## Legacy provenance and final observer limits
+
+Exact decisions:2026-10-27-brain-legacy-contract.md,2026-10-27-brain-identity-refinement.md and2026-10-27-brain-observer-limits.md. These supersede conflicting earlier proposal wording; every budget remains inactive.
+
+The six-job42/Node pilot establishes candidate numbering/parity only. Historical remap support additionally requires a static shipping-history census and a separately proposed TWO public-fixture comparison jobs under pinned41.1.0 and42.11.18, not extra slots inside the six-job allowance. A legacy contract binds original algorithm/grouping/normalization/dependencies/runtime/ICU behavior AND document content identity. Schema6, current lock, timestamps, CFI section and equal counts cannot establish origin. Automatic remap is supported only with established origin or a justified CLOSED plausible-contract set yielding the same unique source occurrence/new index with adequate content identity. Unknown history, changed/unavailable content or disagreeing mappings stays AMBIGUOUS/UNSUPPORTED HOLD with saved position/CFI intact; it is not a parse failure or reset. The full migration claim remains Not ready. A product fallback/UX choice is deferred until evidence shows one is required; none is selected here.
+
+Observer child uniqueness uses one fixed PURE bounded tuple identity body, not thousands of pairwiseRPCs. S0/S1 requires strict identity for root/engine/queue, BOTH selected children-array objects, ctx,9 functions and applicable app:16 pairs with app/15 without. Tuple uniqueness is at most4RPCs; the one-argument comparator handles only the sameness pairs. Exactly these TWO pure bodies plus ONE existing Electron read-pair body are proposed; every comparison's required result is boolean true. No objectId shortcut or arbitrary callFunctionOn.
+
+Before admission, review literal helper request-count derivation and enforce/log its ceiling. An actual maximum-shape case with128 real loaded Modules in each selected array must pass in BOTH already-budgeted runtime fixtures, using the samePIDs. It must complete S0/app-pair-as-applicable/S1/identity/release/inspector-CLOSE within10s. No timeout/cap increase or replacement process follows from a failure. The absolute10s includes fixture barriers, ACK(min1000ms/remaining), everyRPC, releaseACK and closeACK. Cleanup after expiry remains mandatory but cannot convert HOLD into PASS. These close proposal-level direction; exact code/manifest review and runtime evidence remain future gates.
+
 ## Five readiness findings now
 
 | Finding | Result | Reason |
@@ -109,9 +133,15 @@ Zero open board comments require resolution; no holding-bay absorption is propos
 ## Phase B recommendation and checkpoint
 
 Approve the two-track strategy and continue to the delivery plan:
-- WORD planning measurement, with no application source edits or owner-profile access;
+- WORD candidate and separate historical public-fixture measurements, gated by a separately specified grouping-correctness prerequisite or reviewed prospective grouping input, with no actual application source edits or owner-profile access;
 - a separate proposed native-path observation infrastructure prerequisite, with no dependency on consumers being functionally accepted;
 - frozen technical amendments and independent review before any admission;
 - retain all current statuses, order, exhausted old budget, package and release holds.
 
 PhaseB approval authorizes planning continuation only. PhaseC must name every exact setup/static/measurement/matrix/canary gate and owner-approved placement before any live item is created or experiment allowance activated. No new owner design question is asked by this assessment.
+
+## Final bounded independent design disposition
+
+The consolidated amendments, identity/legacy ruling and final observer limits were independently reviewed. G1-G8 and R1-R3 are CLOSED AT PROPOSAL LEVEL; no residual material proposal-design gap was identified. Exact executable artifacts, source/control closure, request-count proof, grouping prospective input/upstream pin, historical supported-contract evidence and actual runtime qualification remain future gates. No experiment GO or feasibility PASS is granted.
+
+Evidence: C:/Projects/Blurby-artifacts/local-resume-20261027/review/word-native-observer-amendments-review.md SHAe82879a02be89d21e39287b703a93b24e8434db491760d1674ad515012a30b23; final C:/Projects/Blurby-artifacts/local-resume-20261027/review/word-native-identity-legacy-review.md SHA8b78ac8fc7bd66b490e666b13c9f450959e247ed8a85fff315691896e95aa151. The original WITH CONCERNS report remains historical evidence; these later bounded rulings close proposal-level concerns without replacing exact-byte or runtime review.
