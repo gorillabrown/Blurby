@@ -899,7 +899,11 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 #### WORD-INDEX-UNIFY-1 — One word numbering in every runtime *(position 43, Seq 88 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from Blurby.Brain's tier-1 ruling of 2026-10-15; cut from `eb/flow-para-pause-index-1` @ `f61ae02d`; build-and-hold under the Stage 8 freeze; not a release gate)*
 
-- **Hold cleared: Blurby.Brain ruling, 2026-10-25 (tier 1), option (b), two copies with a parity test.** Main stays CommonJS with no exception and no census entry. Brain's reason: the cited precedent cuts the other way. `main/tts-worker.js:65`'s `await import("kokoro-js")` is the dev-mode branch only. Packaged builds `require` the CommonJS builds (`:60-61`), so main has never loaded ESM in a packaged app. The TypeScript `src/utils/segmentWords.ts` is the source of truth. The CommonJS copy `main/word-segments.js` names it and the parity test in its header, and every edit goes to the TypeScript file first. Roadmap review 2026-10-25 applied Brain's five corrections below; the item is dispatch-ready.
+**Dispatch gate 2026-10-27: NOT READY.** Source stack f61ae02ddf16a023314369685d4dbfcab1ac9a36 is available and carries BLOCK-TAG-CASE-1, but FLOW-PARA-PAUSE-INDEX-1 and BLOCK-TAG-CASE-1 remain In Flight; both are required prerequisites/merge dependencies, alongside completed NARRATE-REBUILD-1. The held-source branch plan remains valid for future separately admitted source work; it does not make these prerequisites terminal. Native execution also remains blocked: no qualified actual scratch data/queue path proof or new observation budget. [Gate issue and exact Brain ruling](docs/governance/bug-reports/Issue.WORD-INDEX-UNIFY-1.2026-10-27.md). No Ready kickoff or source entry.
+Future source entry, only after separate parent admission/custody: isolated eb/word-index-unify-1 from exact f61ae02ddf16a023314369685d4dbfcab1ac9a36 with current origin/main merged safely; verify remote pin/BLOCK ancestry, retain current governance and both upstream census fixes, stop for changed pin/divergence/conflicts. Re-grep edit sites on that combined tree and run base controls/inherited suite before edits; obey count STOP, characterization/red-first and parity gates, measure the decided split-policy counts rather than guess fingerprints. Scope WORD delta against the combined baseline; serialize main/IPC/migrations/constants/census ownership against other work. Push build-and-hold only. Merge waits for BLOCK+FLOW authorized landing/order, current-main reintegration, fresh package verification and Brain confirmation. This paragraph is a retained plan, not source/native admission.
+
+
+- **Hold cleared: Blurby.Brain ruling, 2026-10-25 (tier 1), option (b), two copies with a parity test.** Main stays CommonJS with no exception and no census entry. Brain's reason: the cited precedent cuts the other way. `main/tts-worker.js:65`'s `await import("kokoro-js")` is the dev-mode branch only. Packaged builds `require` the CommonJS builds (`:60-61`), so main has never loaded ESM in a packaged app. The TypeScript `src/utils/segmentWords.ts` is the source of truth. The CommonJS copy `main/word-segments.js` names it and the parity test in its header, and every edit goes to the TypeScript file first. Roadmap review 2026-10-25 applied Brain's five corrections below; the technical design was accepted; current dispatch readiness is governed by the dated gate above.
 
 - **What:**
   - The main-process extractor (`main/epub-word-extractor.js`) numbers a book's words the same way under every runtime: the app's Electron, plain Node and Vitest.
@@ -1035,7 +1039,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
       - the sample *Meditations* at position 2970 (today's "ancient") with a cfi in section 2;
       - g0 at position 900 with a cfi in section 1.
 
-      Launch, open *Meditations* in Focus, and read the runtime state through a probe (LL-166): the current word index is 2963 and its text is "ancient". Then check:
+      Launch, open *Meditations* in Focus, and read the runtime state through a probe (Standing rule 55): the current word index is 2963 and its text is "ancient". Then check:
       - `library.json` shows position 2963, the same cfi string, no `wordIndexRemap`, `schemaVersion` 7, and the pre-migration backup file;
       - g0's position is unchanged at 900, and its mark is cleared on open;
       - Page reopens *Meditations* on the cfi's page;
@@ -1083,7 +1087,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
    - (b) Treat a closing bracket followed by an opening quote as a boundary in the join (the TypeScript source, then the CommonJS copy). This also changes Page's spans and the numbering again.
    - (c) Strip leading section-number brackets in Focus display only.
 
-   The spec is dispatch-ready on (a). Choosing (b) changes only the probe expectations and the step-6 count.
+   The historical options remain below the recorded owner decision (b), which controls. Its split-policy counts and anchors must be measured and propagated consistently before their acceptance gates are used; the dated dispatch hold above remains.
 
 ##### Implementation detail
 - **Edit sites** (grep-verified on `main` @ `d2a70ff1`, 2026-10-23; none of these files differs on `origin/eb/flow-para-pause-index-1` except `boundary-policy.json`; re-grep at the cut, standing rule 36):
@@ -1127,6 +1131,8 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 | 8 | Packaged live remap check on a seeded scratch profile, read from state | calculable | live verification | bounded | medium | 50m | — | — |
 | 9 | Suite, typecheck, build; rule 53 package verification; memo, time log, push | calculable | verify | bounded | medium | 1h | — | — |
 
+Total: chain 47m; sum 47m; timeboxes excluded (9/9 estimated tasks calibrated by timing --rows-from-spec, 2026-10-27).
+
 ##### Lessons applied
 - **LL-160:** the copy parity also runs under the packaged exe's runtime (step 9b), not only in vitest. Every count and fingerprint is measured under the app's Electron (app-node) and under plain Node. After the change they must agree, which is the item's purpose.
 - **LL-142:** the counts and anchors were measured before this spec was written. The run measures them again before and after.
@@ -1134,7 +1140,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **LL-161:** the remap and the live check compare word text at the position, not only the index.
 - **LL-162:** the remap and parity are swept over the whole owner corpus offline, not a few sampled books.
 - **LL-165:** the live launch proves its scratch profile before the first input, and the live-profile hashes stay unchanged.
-- **LL-166:** the live verdict reads the runtime's current word, not a screenshot.
+- **Standing rule 55:** the live verdict reads the runtime's current word, not a screenshot.
 - **Standing rule 53:** the item is not done until the packaged arm64 build is verified and Blurby.Brain confirms.
 - **Standing rule 29 (SRL-067):** the stub's "one-counter rule" is this rule, not standing rule 41 (the time-log fence exemption) that it cites.
 - **Standing rule 39:** characterization goes first, before the CommonJS copy of `segmentWordSpans`'s loop is made.
