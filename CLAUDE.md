@@ -17,6 +17,7 @@
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
 11. **Decision authority (owner ruling2026-10-26).** All technical questions go to [Blurby.Brain](thread://01a179e8-7a40-75c0-93f4-d3045ad99027?hostId=local), which has the owner's delegated authority to make technical decisions. Design and functionality questions remain the owner's to answer. Mixed questions separate the technical ruling from the design/functionality choice; technical delegation never substitutes for owner design approval. Existing package, source-freeze and release gates remain unless explicitly changed by an authorized ruling.
+11a. **Registry helper guard (2026-10-27).** Installed Virtuoso1.16.1 truncates fractional Seq. Before registry, snapshot-import or board commands, follow the pinned-root/hash/import checks and process-local override in `docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md` and its qualified-helper manifest. Use the retained managed fix or HOLD; never allow launcher fallback, round67.5/87.5 or change global install settings. This tooling correction grants no WORD/GROUP/native implementation or release authority.
 
 ---
 

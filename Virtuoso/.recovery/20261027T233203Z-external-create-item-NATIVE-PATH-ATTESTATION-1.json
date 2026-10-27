@@ -1,0 +1,50 @@
+{
+  "id": "20261027T233203Z-external-create-item-NATIVE-PATH-ATTESTATION-1",
+  "operation": "external-create-item",
+  "item_id": "NATIVE-PATH-ATTESTATION-1",
+  "created": "2026-10-27T23:32:03Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NATIVE-PATH-ATTESTATION-1",
+      "title": "Prove native scratch data and queue paths before input",
+      "status": "Queued",
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "effort": "L",
+      "prerequisites": [],
+      "branch": "eb/native-path-attestation-1",
+      "spec_link": "ROADMAP.md#native-path-attestation-1",
+      "notes": "Owner approved Phase C2026-10-27 and explicitly directed qualified registry-helper repair followed by registration at67.5. Authored NOT READY observer contract; exact executable/control/request-bound/runtime/native qualification gates remain. Registration activates no setup, fixture, measurement, native process or consumer implementation. Original exhausted two-run collector budget and existing release holds remain unchanged.",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md",
+      "deliverable": "Qualify actual native scratch data and queue path observer with bounded controlled tests and one separately admitted no-input canary",
+      "sequence": 67.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-27T23:32:00Z",
+    "idempotencyKey": "registry-helper-fix-20261027-native-create-v2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NATIVE-PATH-ATTESTATION-1",
+      "idempotencyKey": "registry-helper-fix-20261027-native-create-v2",
+      "actualRevision": "2060e3a73020a5d8d585a744c5a12df59986c58b82488b3df9e15d06bbda98e3",
+      "recoveryId": "20261027T233203Z-external-create-item-NATIVE-PATH-ATTESTATION-1",
+      "detail": {},
+      "providerItemId": "4067c96c-c31e-8179-bdd5-cc7b17e90e7f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-27T23:33:18Z",
+  "outcome": "succeeded"
+}

@@ -3107,3 +3107,11 @@ Related: LL-029, LL-031, LL-109; CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.
 **Applies to:** Reader block grouping, canonical word stamping, source alignment, provisional/hydrated selection and persistence, mode-local fallback word sources.
 **Status:** Observation — specification hold; no runtime failure or correction acceptance is claimed.
 Related: LL-028, LL-071, LL-072, LL-081, LL-139, LL-160; standing rules29 and36.
+
+### LL-171 — Preserve sequence values and numeric types across every provider boundary (registry-helper repair, 2026-10-27)
+**Verdict:** int(float(...)) truncated approved67.5/87.5 placements and rounded large integral values; generic row truthiness erased raw0, scalar flattening hid typed bools, and numeric Seq serialization could become text. Direct parser tests alone missed actual import/update/persist/recovery routes.
+**Evidence:** qualified private helper commitfcfa92959b757828f29bdac6a54aa99015b2b525; identical detector base73 assertion failures/26 opposing passes, candidate99 passes, relevant full399 passes with unchanged source hashes; docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md and registry-registration-verification.json. Live196-row readback confirms exact half positions and unchanged original194 positions/statuses.
+**Recommendation:** normalize finite numeric sequence before any mutation key/recovery side effect, preserve exact integers and supported decimal float roundtrips, distinguish explicit clear from invalid, and retain mapped raw sequence scalar types through import. Test actual production create/update/alias/import/store/read/order/recovery paths, with causal controls for fractions, zero, bool, precision and nonfinite values. Compare raw live provider values against plans before confirmation; a snapshot mirror cannot prove provider ordering.
+**Applies to:** Work-register sequence normalization, provider adapters, planned external mutations, snapshot import, canonical ordering and helper activation.
+**Status:** Observation — bounded helper repair and registration verified; no application/native qualification or official plugin release claim.
+Related: LL-130, LL-137, LL-155, LL-163; Issue.REGISTER-SEQUENCE-PRECISION-1.2026-10-27.md.
