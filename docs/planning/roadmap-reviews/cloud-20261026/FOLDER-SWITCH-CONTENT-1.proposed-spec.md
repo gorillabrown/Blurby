@@ -1,11 +1,11 @@
-# FOLDER-SWITCH-CONTENT-1 — proposed main FIFO and coherent publication specification, revision 2
-Date: 2026-10-26. Actual durable planner: 01a17a3a-dcdb-7308-8560-3989bd32a015.
+# FOLDER-SWITCH-CONTENT-1 — proposed main FIFO and coherent publication specification, revision 3
+Date: 2026-10-27. Local planning continuation of durable cloud planner 01a17a3a-dcdb-7308-8560-3989bd32a015.
 PROPOSAL FOR INDEPENDENT REVIEW AND PARENT/BRAIN ADMISSION. No application, harness or test execution/edit admission.
-Publication branch: eb/cloud-folder-profile-specs-20261026. Planning inputs: exact460cd25dd37dbfd92e628c4756a364a604bb6a04; inherited source/test base unchanged from762d38ac53f22245a56f89e489ab367c905dcd91 through protocol descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2.
+Publication branch: eb/local-folder-profile-planning-20261027. Revision 2 input: f10311a0d8440bcf00c7a3a1a57be2e94601996e; protocol f299675d is an ancestor. Planning inputs: exact460cd25dd37dbfd92e628c4756a364a604bb6a04; inherited source/test base unchanged from762d38ac53f22245a56f89e489ab367c905dcd91 through protocol descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2.
 Only this report and the item-owned handoff/profile planning report may be revised here. Shared ROADMAP/register remain authoritative (packet Seq120 In Flight / Stub is not a fresh provider readback).
 
 ## 0. Rulings, immutable diagnosis and remaining review boundary
-Parent thread01a0cf7f-62f6-7450-abc9-5bb2750923f4 relayed Blurby.Brain technical PLANNING rulings after Brain traced source and verified the exact460cd25d reports. This relay is evidence of the ruling; this worker did not read Brain's private transcript. All technical decisions belong to Brain01a179e8-7a40-75c0-93f4-d3045ad99027. Human owns design/functionality. No direct cross-chat read/send/wait_threads tool is available.
+Parent thread01a0cf7f-62f6-7450-abc9-5bb2750923f4 relayed Blurby.Brain technical PLANNING rulings after Brain traced source and verified the exact460cd25d reports. This relay is evidence of the original cloud ruling; the local continuation has now read Brain's thread directly. All technical decisions belong to Brain01a179e8-7a40-75c0-93f4-d3045ad99027. Human owns design/functionality. The original cloud tool limitation is historical. Local read_thread/send_message_to_thread coordination is available and used for the F3 ruling request; no response is inferred from dispatch.
 
 Adopted F1: MAIN serializes every accepted select-folder and switch-folder request FIFO, including dialogs, validation, commit, watcher, sync and response construction. No disabled input, dropped/coalesced requests, new retry or renderer-only serialization substitute. Failures cannot poison the queue.
 Adopted F2: main-owned request correlation, epoch at every accepted folder COMMIT including same-path commits, and monotonic coherent publication revision scoped to a main-process session. Precommit refusal/dialog cancel does not advance epoch. Keep additive typed IPC and legacy array/getState contracts. Reject stale producers before mutation; stamping old data with a newer version is not ownership.
@@ -15,6 +15,8 @@ Existing human choices remain: loading replaces old cards, recent-folder header 
 The completed approved diagnosis at docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md is unchanged. Real hook: B header + A cards + loadingContent=false. Real folderSync controls: hung cancellation budget30,000 ms versus prompt settlement0 virtual ms; slow final batch broadcast30,100 ms versus fast100 ms. No contemporaneous per-phase trace apportions original93.2 s.
 
 This report fixes F1/F2 choices and specifies proposed concrete names/schema/paths. NEW SOURCE-TRACE GATE F3 (§6) concerns existing independently accepted rescan/import/cloud whole-library writers. Brain must review their exact ownership classification before a final source fence/admission. This is not license to cancel accepted imports or alter force-download behavior. Independent review of this entire revision is required before source-admission request.
+
+Revision 2 was independently APPROVED for bounded planning only at review commit 38a787be6ea06ea4ea7774788c9534851aee53aa. That approval does not cover revision 3 amendments, grant source admission, or resolve F3. Revision 3 awaits independent review. The existing F1/F2 producer, transport and test contract below is preserved pending Brain's explicit F3 amendment.
 
 ## 1. Exact read order and traced source anchors
 All anchors are one-based at460cd25d; resolve by symbol after any admitted rebase.

@@ -1,7 +1,7 @@
-# PROFILE-QUEUE-ISOLATION-1 — proposed ETW attribution contract, revision 2
-Date: 2026-10-26. Planning owner: durable cloud thread 01a17a3a-dcdb-7308-8560-3989bd32a015.
-Proposal only; packet ROADMAP Seq121 In Flight / Stub remains authoritative. No execution admission, data repair, main merge, release or terminal status.
-Source handoff: 762d38ac53f22245a56f89e489ab367c905dcd91; publication incorporates protocol-only descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2. Branch eb/cloud-folder-profile-specs-20261026.
+# PROFILE-QUEUE-ISOLATION-1 — proposed ETW attribution contract, revision 3
+Date: 2026-10-27. Local planning continuation of durable cloud thread 01a17a3a-dcdb-7308-8560-3989bd32a015.
+Proposal only; packet ROADMAP Seq121 In Flight / Stub is historical; the live provider is authoritative. No execution admission, data repair, main merge, release or terminal status.
+Source handoff: 762d38ac53f22245a56f89e489ab367c905dcd91; publication incorporates protocol-only descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2. Revision 2 input f10311a0d8440bcf00c7a3a1a57be2e94601996e; local branch eb/local-folder-profile-planning-20261027.
 Owned writes for this task: only new item-specific reports in docs/planning/roadmap-reviews/cloud-20261026/.
 
 ## Goal and evidence boundary
@@ -14,9 +14,9 @@ The real save-settings -> sync-queue -> json-store scratch control persisted equ
 Recommendation for Brain: admit an observation/harness experiment first; authorize no application repair until PID/path evidence identifies an actual defect. No queue reset, restore, clear, payload export or speculative singleton redesign. A new clean run cannot recover a missing historical writer.
 
 ## Authority, adopted Brain planning directions and remaining entry gates
-All technical rulings belong to Brain thread01a179e8-7a40-75c0-93f4-d3045ad99027; human retains functionality/account/device choices. Parent01a0cf7f-62f6-7450-abc9-5bb2750923f4 relayed P1–P3 directions for this refinement. No private Brain/peer transcript is accessible; no direct cross-thread read/send/wait_threads tool is exposed. These are PLANNING directions, not harness-write, trace-start, installation, application repair or native-capture admission.
+All technical rulings belong to Brain thread01a179e8-7a40-75c0-93f4-d3045ad99027; human retains functionality/account/device choices. Parent01a0cf7f-62f6-7450-abc9-5bb2750923f4 relayed P1–P3 directions for this refinement. The cloud transcript/tool limitation is historical; the local continuation has read Brain directly and sent technical questions through local thread tools. A request is not a ruling. These are PLANNING directions, not harness-write, trace-start, installation, application repair or native-capture admission.
 
-Adopted P1: Windows ETW file-I/O via WPR is preferred. Brain's READ-ONLY local check reports C:/Windows/System32/wpr.exe version10.0.26100 lists FileIO and tracerpt.exe is available. This cloud planner has not inspected those binaries or executed local tools. Their exact hashes, profiles, decoded schema and loss accounting are NOT qualified. Procmon/WPA not on PATH does not prove absent everywhere.
+Adopted P1: Windows ETW file-I/O via WPR is preferred. Brain's READ-ONLY local check reports C:/Windows/System32/wpr.exe version10.0.26100 lists FileIO and tracerpt.exe is available. The original cloud planner did not inspect those binaries. The local continuation has performed the read-only inventory below; decoded schema, profile bytes, parser and loss accounting remain NOT qualified. Procmon/WPA not on PATH does not prove absent everywhere.
 Adopted P2: separate observation-only owned scratch process plus an independent CLEAN packaged counterpart under the SAME OS recorder; actual initialized data/queue paths after EVERY launch before input. Instrumented/inspector route never becomes clean qualification. No new unrestricted IPC or startup hook.
 Adopted P3:120 seconds PER native observation from recorder start through graceful shutdown and recorder stop; >=25 seconds actual native survival; fresh owned profile, identity and exclusive custody for each run. Fixed phases below. Overrun is FAIL/INCONCLUSIVE, no retry-until-green/retroactive shortening; two harness repair passes maximum.
 
@@ -27,6 +27,31 @@ Entry gates still OPEN:
 - P2-Q actual existing approved mechanism that reads initialized getDataPath AND queue destination before input in each instrumented/clean launch. Directly attributed init IO may support clean route only if decisive. If clean queue initialization makes no file I/O sufficient for this readback, it is BLOCKED; the proven init no-write behavior makes absence of writes unsurprising. A new observation hook requires separate fenced proposal, not a guessed implementation.
 - P3-Q exact native owner/custody/source/package/harness pins and120-second schedule qualification. Broader raw capture footprint requires a narrow configuration or explicit Brain ruling BEFORE capture.
 The original historical writer remains UNKNOWN; no source fix is presumed.
+
+## Local read-only qualification inventory — 2026-10-27
+Revision 2 received bounded documentation approval in independent review commit 38a787be6ea06ea4ea7774788c9534851aee53aa. This local revision 3 inventory requires new review; it is not recorder, parser, clean-package, harness or capture admission.
+
+| Read-only inventory field | Actual readback |
+|---|---|
+| OS API / architecture / privilege | Windows NT 10.0.26300.0; native Arm64; process Arm64; non-elevated |
+| WPR | C:/Windows/System32/wpr.exe; file version 10.0.26100.9711; SHA256 A19275562A4ED8F329CE1AB248A44CB4AF60C1091EA2F275097DEE43761BD693 |
+| tracerpt | C:/Windows/System32/tracerpt.exe; file version 10.0.26100.1; SHA256 1ACDC2556DAE42A0BC8503A43BB385E5C5ADDD2AAE608969B60BFA3D98529533 |
+| Signing | Both Authenticode status Valid, Microsoft Windows signer |
+| Banner distinction | tracerpt help reports 10.0.26100.9711; preserve separately from its measured file version |
+| WPR status | Not recording at read time; this is not a claim about other recorder technologies |
+| Requested profile / resolved profile | FileIO / FileIO.Verbose.Memory |
+| System Collector | 1024 KB buffers, 3250 buffers |
+| Event Collector | 1024 KB buffers, 650 buffers |
+
+Read commands were Get-Item/VersionInfo, Get-FileHash, Get-AuthenticodeSignature, wpr -status, wpr -profiles, wpr -profiledetails FileIO and tracerpt -?. No recorder was started, stopped or canceled. A help command's nonzero exit is not a failed recording or a privilege test.
+
+The resolved system keywords are CpuConfig, DiskIO, FileIO, FileIOInit, HardFaults, IdealProcessor, Loader, ProcessCounter, ProcessThread and ThreadPriority. Stacks include FileCreate, FileCleanup, FileClose, FileRead, FileWrite, FileSetInformation, FileDelete, FileRename, FileDirEnum, FileFlush, FileQueryInformation, FileFSCTL, FileOpEnd, FileDirNotify and ThreadDCEnd. The event collector includes antimalware, JScript, .NET, NCSI, Win32k, WLAN, BrokerInfrastructure, ProcessStateManager, WPR control and kernel event tracing providers; save-time capture-state providers include JScript, .NET/runtime rundown and power. This is an observed broad raw footprint, not an exact exported profile/host event-schema qualification.
+
+Recommendation: do not capture with the stock FileIO.Verbose.Memory profile. Qualify a narrower custom profile, or obtain an explicit Brain ruling approving the exact broader raw scope before any start. FileIO name/stack presence does not establish complete successful operation/rename-endpoint coverage. The read-only inventory partially fills P1-Q1 but does not close profile-byte/hash, provider/event-version/schema, actual privilege/start capability, parser, loss, rename, storage ACL or ownership gates.
+
+P2-Q remains a concrete source-backed blocker: main.js:41-44 caches getDataPath in module-local _dataPath; main/sync-queue.js:15 holds private queuePath, initialized at 153-154 before loadQueue reads the target. Initialization need not write a file. Existing scripts/ui-sweep/sweep.mjs:250-275 reads userData through the inspector, checks covers existence and library/settings hashes; it does not read initialized getDataPath or the actual queue destination. Covers, command-line arguments and a forced queue initialization cannot fill the gap. The clean counterpart remains BLOCKED pending an existing approved passive proof or a separately fenced and approved observation route. No hook is added by this proposal, and instrumented evidence must not be relabeled clean.
+
+No desktop/app launch, recording, harness write, normal-profile read/write or capability control occurred during this inventory. Application repair fence remains EMPTY; the original historical writer PID remains UNKNOWN.
 
 ## Exact read order
 1. AGENTS.md technical authority, source/lane/package rules.
@@ -148,4 +173,4 @@ Wave B (<40): one native instrumented observation and clean counterpart with per
 Wave C (<40): independent trace/classification review and exact-candidate evidence index; proposal for a minimal repair ONLY if a branch is proven. App repair requires separate Full Spec/admission; this experiment is not authority.
 On any unexpected normal-target write: stop further input, preserve trace and current files, capture PID/executable/profile identity, shut down only owned scratch process safely and retain write/quit evidence. Do not restore files, append cleanup operations or try a queue reset. An error during shutdown is evidence, not grounds to delete artifacts.
 If a later source patch is admitted: actual culprit regression must fail the real base and pass candidate; startup tests exercise real main initialization and actual save-settings/quit durable target. Then normal suite/typecheck/build and native exact-package gates remain. Harness-only changes cannot claim a source isolation fix.
-No installation, trace start, harness write or local capture occurred in this cloud planning task. Microsoft sources were read as public documentation only. Parent handoff pointer is NON-DISPATCHABLE until P1-Q1/Q2/Q3, P2-Q, P3-Q and exact source/harness fences integrated under separate admission: PROFILE-QUEUE-ISOLATION-1 / packet Seq121 / live URL and final baseline supplied by parent / proposed spec at this path. Parent alone integrates ROADMAP/register. No completion/merge/release or normal data mutation is authorized.
+No installation, trace start, harness write or local capture occurred in this planning task. The local continuation performed only the explicitly listed read-only binary/profile/source inventory. Microsoft sources were read as public documentation only. Parent handoff pointer is NON-DISPATCHABLE until P1-Q1/Q2/Q3, P2-Q, P3-Q and exact source/harness fences integrated under separate admission: PROFILE-QUEUE-ISOLATION-1 / packet Seq121 / live URL and final baseline supplied by parent / proposed spec at this path. Parent alone integrates ROADMAP/register. No completion/merge/release or normal data mutation is authorized.
