@@ -99,3 +99,9 @@ This is a non-terminal held-dispatch crossing, explicitly authorized by the owne
 5. On any partial failure retain its durable recovery record naming what landed; do not retry the whole crossing or report completion.
 
 No terminal append or successor elevation is part of this plan. The issue remains open for separately admitted observation design and native qualification.
+
+## Recording verification - 2026-10-27
+
+Owner-confirmed non-terminal recording completed: live Notion readback is Blocked at Seq68, with Completed unset. All194 live item identities and sequence values match the pre-write census; only this item's Status, Notes, Deliverable and Evidence changed. Exact SQL plain-text field readback passed. Recovery20261027T190211Z-external-set-status-FOLIATE-DISPLAY-LIFETIME-1 is resolved at revision538dcb86dc4bedf3cd37edbcb807567c21e3f18d75302ffad6724baf5381ac6b; registry recovery reports no outstanding records.
+
+Report, issue, LL-169 and LL-165 status were first published in governance-only commitcbfbe8b2 before the external write. The fresh full snapshot and resolved recovery record are persisted in the following governance-only commit. The registered ignored board was regenerated locally. The lesson gate passed and all pre-existing lesson bytes remain an identical prefix. Terminal ledger SHA256 remains f80cbaa4980cecf023d9f2d37bd153b75bd73c60d86ba132e5f3a8875929ce1c: no record appended or altered. No successor elevation, completion date, application source merge, native launch, installation or release occurred. Source branch remains2df0f920a7963f8fa81ff2e68eeef352e4d8a418. This hold does not drain the completion buffer.
