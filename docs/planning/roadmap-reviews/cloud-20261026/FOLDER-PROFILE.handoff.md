@@ -1,77 +1,30 @@
-# Folder/profile local planning handoff — revision 5, 2026-10-27
-Local continuation of durable cloud planner 01a17a3a-dcdb-7308-8560-3989bd32a015.
-Parent:01a0cf7f-62f6-7450-abc9-5bb2750923f4. Brain technical authority:01a179e8-7a40-75c0-93f4-d3045ad99027.
-Revision 2 independent reviewer: 01a17a3a-d94f-760e-8d37-5805cd713020. Local revision 3 reviewer: 01a17dce-1533-7d32-9532-c6a5b0123fb0 (parent-supplied). Local Foliate implementation: 01a17dcd-3e4d-7161-bb2f-d8c273de5afb; preserve its source/test/desktop custody.
+# Folder/profile local planning handoff — revision 6, 2026-10-27
+PROPOSED PLANNING ONLY; no application/source/queue/test/harness/recorder/capture admission, main merge/release/terminal transition.
+Parent:01a0cf7f-62f6-7450-abc9-5bb2750923f4. Technical authority Brain:01a179e8-7a40-75c0-93f4-d3045ad99027. Local independent reviewer:01a17dce-1533-7d32-9532-c6a5b0123fb0. Owner retains design/functionality. Foliate peer01a17dcd-3e4d-7161-bb2f-d8c273de5afb source/test/desktop custody is separate.
 
-## Session-start and evidence limits
-The local continuation read AGENTS.md, the Zeus protocol, relevant LESSONS_LEARNED guardrails, ROADMAP references, exact revision 2 reports and independent review commit 38a787be6ea06ea4ea7774788c9534851aee53aa before changing these owned planning reports. Managed isolated worktree: C:/Users/estra/.codex/worktrees/local-folder-profile-planning-20261027/Blurby; branch eb/local-folder-profile-planning-20261027; starting tip f10311a0d8440bcf00c7a3a1a57be2e94601996e with f299675d protocol ancestor. Primary dirt is preserved. No source/test/harness/shared ROADMAP/provider/ledger edits are authorized.
+## Session-start / ownership
+The local continuation read AGENTS/Zeus/relevant LESSONS_LEARNED/ROADMAP, exact cloud revision2 and review, then direct Brain source-backed rulings before these owned planning amendments. Managed isolated worktree C:/Users/estra/.codex/worktrees/local-folder-profile-planning-20261027/Blurby; branch eb/local-folder-profile-planning-20261027. Primary dirt preserved. No shared ROADMAP/provider/ledger edits. Parent alone refreshes register and integrates specifications; packet Seq120/121 and queue counts are historical, not live authority. Parent earlier reported nine Queued Full Specs/main85e6e5aa, not this worker's direct provider read.
 
-The parent reports nine Queued Full Specs and unchanged main/origin at 85e6e5aa; this is parent readback, not a direct provider read or a new admission claim. Only the parent integrates shared specifications and live register state.
+## Immutable history and exact review scope
+- Cloud revision2 f10311a0d8440bcf00c7a3a1a57be2e94601996e, independent bounded planning APPROVE38a787be6ea06ea4ea7774788c9534851aee53aa. Historical source/test base762d38ac through protocol-onlyf299675d.
+- Local revision3 6d15e5b16bd6e915a7bba50135508ef74806305c independent APPROVE: C:/Projects/Blurby-artifacts/local-resume-20261027/review/planning-revision3-independent-review.md.
+- Revision4 e5f39215f956ed3012d28cf94f098b6e026b99ad and revision5 6f9a01e924bbcbde9617040575bc143fa03b4ff5 independently approved for bounded planning, parent-recorded. Their immutable publication receipts live in planning/revision4-publication.json and revision5-publication.json under the artifact root below.
+- Revision6 is FOUR reports requiring a new exact-delta independent review. Earlier approvals do not approve this delta or confer execution authority. New CLOUD-WRITER-PREREQUISITE.proposed-spec.md has NO real Sprint Code/Seq/status; parent registers only after appropriate decisions.
 
-## Historical revision 2 deliverables and exact hashes
-Repository gorillabrown/Blurby; revision 2 branch eb/cloud-folder-profile-specs-20261026, tip f10311a0d8440bcf00c7a3a1a57be2e94601996e. Revision 3 continues on eb/local-folder-profile-planning-20261027. Revision 2 followed immutable planning460cd25dd37dbfd92e628c4756a364a604bb6a04; inherited production/test base remains handoff762d38ac53f22245a56f89e489ab367c905dcd91 plus protocol-onlyf299675dd8251e550f06ab47abb7c4b6ff1889f2.
+## Deliverables / selected rulings
+1. FOLDER-SWITCH-CONTENT-1.proposed-spec.md: selected F1/F2 MAIN FIFO across all accepted select/switch senders/stages, separate sanitized coherent session/request/epoch/revision snapshots and newest presentation intent, legacy shapes preserved, actual partial failures. F3 now selected: staged rescan with origin/replacement/contentgen validation; per-file accepted drops finish under captured destination/current library; current-incarnation derived-only conversion commits and caller-only safe artifact IDs preserve exact existing cache roots; explicit logical live mutation notes/authoritative current lookup; cloud prerequisite below. Import functionality/pruning/modes/visibility-first choices retained.
+2. PROFILE-QUEUE-ISOLATION-1.proposed-spec.md: P1 NO stock FileIO capture, custom NARROW profile/decoder qualification required. P2-Q separate fenced actual initialized data+queue observation design required; clean route BLOCKED. P3 fixed120s/>=25s survival/normal-data preservation/two repair passes. Application repair fence EMPTY; historical writer UNKNOWN. Instrumented/clean evidence separate; no hook/export/IPC admitted.
+3. CLOUD-WRITER-PREREQUISITE.proposed-spec.md: separate full bounded prerequisite with Goal/Baseline/WHERE/tasks/sequence/success/lane/freeze/merge order; proposed exact internal successful-byte provenance and typed opaque preview token/result/consumer contracts, captured durable operation identity/compaction boundaries, private lease before awaits, per-op representation map, force-upload same boundary and force whole replacement fresh-choice workflow. All APIs are proposed spelling for review, not existing/admitted code. FullReconciliation/downloadDocContent/init lease interaction and exact representation algorithms/contract qualification remain explicit technical gates.
+4. This handoff records provenance, evidence limits and parent review/admission steps.
 
-| Proposed report | SHA256 UTF-8 contents | Report update commit |
-|---|---|---|
-| [FOLDER-SWITCH-CONTENT-1.proposed-spec.md](FOLDER-SWITCH-CONTENT-1.proposed-spec.md) | 332fb3beaa2f39de2f33460de15654d1335a3acda0194c8641c0b457e263279c | 07011a533ea4353765344eb5ec06b04b7bcc3937 |
-| [PROFILE-QUEUE-ISOLATION-1.proposed-spec.md](PROFILE-QUEUE-ISOLATION-1.proposed-spec.md) | 976362f48ef19082b8742aef597468b3a530fe34323bd2b774309c2fb7a03566 | 523038a281b8a2e5c4806623b12b11d512ea004f |
+Exact Brain amendments were read directly in turn01a17dce-7c65-76f0-9148-7c036d4a9130 send_message_to_thread to parent, also parent-relayed on2026-10-27: documents/cache, cloud provenance/captured batch/private lease and final F3.5 force workflow. Owner force decision VERIFIED “Require a fresh choice” for imports accepted after preview before click. That owner question is CLOSED; no duplicate question. Proposed exact schema spellings require review; selected direction does not admit implementation.
 
-The table above identifies immutable revision 2 contents only. Independent review 38a787be APPROVED those bounded planning artifacts, including F3 as an open question set. It does not approve revision 3 amendments. Immutable revision 3 is 6d15e5b16bd6e915a7bba50135508ef74806305c; its publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision3-publication.json. Revision 4 records selected P1/P2-Q planning choices; its exact publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision4-publication.json. F3 remains OPEN; revision 4 requires independent delta review. Both reports remain bounded PLANNING proposals. New exact schema/helper/test names are proposed contracts, not application files created here. Source admission remains withheld. No app/harness/recorder/test/source/shared-governance/provider/main/release/terminal mutation occurred.
-
-## Incorporated Brain planning rulings
-Revision 2 incorporated parent-relayed Brain rulings after Brain source tracing/hash verification of460cd25d; cloud private-thread access was unavailable then. The local continuation has read Brain directly and sent the six F3 producer questions, stock-profile scope and clean-path readback questions through local thread tools. The explicit F3 technical ruling was subsequently read directly in Brain turn 01a17dce-7c65-76f0-9148-7c036d4a9130 and parent-relayed; revision 5 incorporates it in folder section6. Force-download owner cutoff and exact technical finalization questions remain OPEN; no source admission follows.
-
-Folder F1/F2 CLOSED AS CHOICES:
-- MAIN FIFO across BOTH select-folder and switch-folder, all senders and legacy/new channels, including dialog/validation/commit/watcher/sync/response construction. No renderer-only ordering, disabled input, coalescing or dropped accepted requests.
-- Epoch advances synchronously at actual main commit, including same-path commit; refusal/dialog cancellation before commit does not advance. Separate main-session identity, request identity and monotonic publication revision.
-- Additive exact proposed IPC methods/channels/envelopes; immutable coherent sanitized settings+library snapshots; guarded renderer acceptance and final settlement barrier; raw legacy arrays remain compatible but never a second authority for migrated hook.
-- Partial failures report actual commit/save/watch/sync stage. A postcommit failure cannot roll sourceFolder back from a renderer snapshot.
-- Captured scan/watcher/run origins checked before actual effects, including same-path A-B-A, stale per-file refresh/removal, notice/Retry, startup and post-save continuation.
-- Human loading/optimistic-header/visibility-first/record/mode/account/device choices preserved.
-
-Folder F3 selected technical choices, with exact remaining gates:
-- Rescan stages without live aliases, validates main session/folder epoch/replacement authority/content generation and settles superseded on drift. It stays outside select/switch FIFO.
-- Each drop file captures destination before copy, finishes as accepted global intent against current library with existing partial-success/pruning behavior.
-- Sample/lazy/URL/ws/rescan derived fields have explicit per-producer allowlists, current nondeleted incarnation/source/content checks and attempt-owned output/cache paths. Shared docId output overwrite is forbidden even if stale metadata is rejected. Converter/helper source remains read-only; actual convertToEpub nesting is preserved in caller arguments.
-- Normal cloud local application reuses mergeLibrary with CURRENT live local and ORIGINAL immutable remote operand, preserving GC/rules; replacement authority invalidates old candidates. Raw syncFile retry/upload provenance, truthful actual-byte hashes and captured-operation acknowledgment need exact Brain finalization; local rebase does not prove remote atomicity.
-- Upload completion conditionally patches contentHash only for exact current source/content and storage/account session, never newer pending work.
-- Force-download retains whole replacement and a synchronous main-owned replacement barrier separate from folder epoch. Owner PRECLICK-import cutoff remains OPEN; Brain already asked, so no duplicate question/new workflow. Exact drain/admission/commit tests wait.
-- Precise additional technical gate: documents.js expiry mutates before potentially throwing Notification effects; central delayed save alone cannot prove generation coverage. Proposed explicit mutation note and authoritative main lookup plus potential sync-queue captured-operation API fence await Brain ruling. No claim only the owner gate remains.
-
-Profile P1–P3 CLOSED AS PLANNING DIRECTIONS:
-- Prefer Windows ETW FileIO via WPR; Brain's read-only local check reports wpr.exe10.0.26100/FileIO and tracerpt availability. This is NOT recorder/parser qualification.
-- Separate instrumented scratch process and independent clean counterpart under SAME OS recorder; actual initialized data/queue targets EVERY launch BEFORE input.
--120-second per-native-observation schedule from recorder start through shutdown/recorder stop; >=25-second native survival, fresh profiles/exclusive custody, fixed no-input/same-value/different-value/flush/quit phases; two harness repair passes maximum.
-
-Profile qualification gates OPEN:
-P1-Q1 exact local executable/profile/provider/schema/hash/privileges/session/raw-footprint manifest.
-P1-Q2 qualified decoder/export/parser and PID/start/exe/TID/file-object/path/rename BOTH endpoints/completion correlation.
-P1-Q3 loss/decode/truncation/unresolved-map accounting, unknown never0.
-P2-Q selected choice: separately fenced observation-design admission REQUIRED; actual per-launch initialized getDataPath+queuePath proof and clean-route qualification remain OPEN. No hook/export/IPC is authorized.
-P3-Q exact native custody/source/package/harness pins, schedule qualification and separately authorized raw capture footprint.
-No WPR start/install/capture/harness write admitted. Missing mapping, failed recorder control, event loss or broader-than-approved raw trace makes INCONCLUSIVE/hold. Normal files remain read-only; application repair fence EMPTY until a real culprit is proven.
-
-## Source/evidence work actually performed
-Read exact460cd25d production contents through connected GitHub: main coordinator/state/context/broadcast/save/startup; folderSync/watcher/notice; IPC library/documents/misc/cloud/reader/stats and registration; sync engine and WebSocket article writer; preload/types/useLibrary; LibraryContainer/View/SettingsContext; App/ThemeProvider/Onboarding/root components/hooks/contexts and nested settings for relevant symbol census; test harness and existing tests/package scripts.
-This is source tracing for a proposed contract, not application code execution or repeated diagnosis.
-Existing seven packet evidence hashes were verified in first planning publication; immutable report history preserves that receipt. No diagnosis/probe was rerun.
-Public Microsoft documentation was read to ground ETW event families, begin/end correlation and loss requirements. Profile report has full source URLs. No generic disk-event assumption was substituted for a qualified host FileIO schema.
-Historical revision 2 evidence limit: its cloud planner accessed no Windows C: filesystem, local installed binary, OS trace, clean package or peer environment; GitHub remote APIs published those commits directly. Revision 3 instead uses the managed local worktree and the explicit read-only binary/profile/source inventory in the profile report. No app/native launch, trace start, normal-profile read/write or harness change occurred.
-
-## Review evidence and limits
-Self-review checked chosen F1/F2 against relay, exact transport names/schema, source/test/producer inventory, per-effect origin checks, meaningful base/opposite controls, partial failures, renderer/import separation and native holds. Profile self-review checked120-second schedules, event loss/rename/process identity gaps and empty repair fence.
-Revision 2 self-review was followed by independent bounded planning approval at38a787be. Immutable revision 3 commit 6d15e5b16bd6e915a7bba50135508ef74806305c received independent APPROVE, recorded at C:/Projects/Blurby-artifacts/local-resume-20261027/review/planning-revision3-independent-review.md. This approval is bounded planning only and does not cover revision 4, which has no independent approval yet. The local reviewer must examine the final exact revision 4 commit/hashes. No prior approval grants source, recorder, harness or capture admission.
-No tests/build/package/native capture ran, appropriate to planning-only scope. Input/source reads and report hash/readback checks do not substitute for production behavioral acceptance.
-
-## Parent admission handoff
-1. Independently review exact revision 4 report hashes/commit, including selected P1/P2-Q choices and any returned F3 ruling/producer fence; preserve earlier approval as exact-revision historical scope only.
-2. Obtain Brain F3 ruling; integrate exact chosen producer/global-writer contract and resulting test paths. Core F1/F2 are resolved choices, not options to reopen without reason.
-3. Close profile capability/qualification gates with exact native manifests and explicit capture/harness admission; planning P1–P3 directions alone are not permission to record.
-4. Parent alone refreshes authoritative provider/register, integrates full ROADMAP specifications and records actual live URLs/Seq/status/source/branch/writer custody. PacketSeq120/121 remain historical observations, not live state claims.
-5. Serialize visibility integration/LibraryView ownership, src/types.ts shared-core window and native desktop custody. Do not overlap Foliate peer edits.
-6. Keep native Windows ARM64, exact package/parity/defaults/onboarding/owner-machine and final Brain confirmation holds. No main merge, freeze lift, release/install/distribution or terminal status.
-
-CLI pointers remain NON-DISPATCHABLE until those specific gates close. The bounded local planning continuation is prepared for publication/review, with explicit unresolved contracts rather than false execution readiness.
+## Current remaining gates / parent handoff
+1. Independent review of final FOUR-report revision6 exact committed bytes and publication receipt; no self-review relabeled independent.
+2. Finalize/approve exact per-operation representation and ack mapping, adjacent reconciliation/download/init ownership/lease interaction, typed API compatibility and accepted-intent/barrier implementation contract. Missing proof retains operations. No claim only owner gate remains: owner choice is closed, these technical qualification gates remain.
+3. Parent alone integrates/registers prerequisite + dependent full specs with real live URLs/Seq/status, source baselines/lane custody and exclusive shared-core src/types/main/preload/cloud UI window. Visibility remains first app repair; preserve Foliate peer scope and desktop serialization.
+4. Separate source/harness/capture admission, exact native ARM64 package/ASAR/dist parity/defaults/onboarding/owner-machine routes/>=25s survival and final Brain confirmation remain held. Profile recorder/schema/loss/rename/readback controls are not closed by portable contracts or binary presence.
+5. No main merge/freeze lift/install/distribution/release/terminal. Planning reports are reviewable proposals; no tests/build/package/trace run or shipping behavior proven by this document.
 
 ## Local content-free read-only evidence index
 Storage: C:/Projects/Blurby-artifacts/local-resume-20261027/planning/. These files contain capability/profile inventory, not an ETL trace or user payload. Local orchestrator persisted and supplied these hashes; this document does not claim an independent rehash by the documentation worker.
@@ -85,16 +38,7 @@ Storage: C:/Projects/Blurby-artifacts/local-resume-20261027/planning/. These fil
 
 WPR status and profiledetails commands both exited 0. Their output establishes profile inventory and no WPR recording at that read, not recorder qualification. Selected Brain P1 ruling forbids stock FileIO.Verbose.Memory capture because its measured raw footprint is too broad; require a custom NARROW profile/decoder qualification. Broader-scope approval is not a current alternative; redacted publication is not raw-scope permission. Profile bytes/hash, schema, parser/loss/rename correlation and privilege/start controls remain open. Selected P2-Q ruling requires SEPARATELY FENCED observation-design admission: existing userData-only preflight does not prove actual initialized getDataPath/queuePath, so clean observation remains BLOCKED until that design is separately approved and recorder controls qualify. No application repair is specified; its fence remains EMPTY and historical writer PID UNKNOWN.
 
-## Revision 4 selected Brain P1/P2-Q amendment
-Ruling provenance: exact Brain ruling relayed by parent/source thread 01a0cf7f-62f6-7450-abc9-5bb2750923f4 on 2026-10-27. Direct Brain turn 01a17dce-7c65-76f0-9148-7c036d4a9130 commentary independently confirms narrow recorder and separate path-observation requirements. F3/force-download remains OPEN; no ruling is inferred from that commentary.
 
-- P1 choice CLOSED: NO stock FileIO capture. Require custom NARROW profile/decoder exact bytes/hash, privileges, host schemas, full mapping/outcome/loss coverage and owned detector controls. No installation/start/capture is admitted; published-index redaction is never broader raw-scope approval. A different future scope requires an explicit superseding ruling.
-- P2-Q choice CLOSED as separate fenced observation-design admission REQUIRED. A future proposal may use causally proven passive attribution of actual startup reads of exact queue/settings/library targets or a strict read-only MAIN inspector of actual initialized values. No formula/userData inference/forced init substitute. New hook/export/IPC requires its own fence and security review; none is authorized. Clean remains BLOCKED until separate design approval and recorder entry qualification; paused/debugger is not clean, and instrumented/clean runs stay separate.
-- Empty application repair fence, historical UNKNOWN, 120-second schedule, >=25-second survival, normal-data custody and native/package/release holds remain.
-
-This amendment preserves immutable revision 3 and changes planning choices only. Its exact commit and committed-byte hashes are recorded in revision4-publication.json; no source admission or independent revision 4 approval is claimed.
-
-## Revision 5 F3 continuation and review boundary
-Immutable revision 4 e5f39215f956ed3012d28cf94f098b6e026b99ad is independently approved for bounded planning. Revision 5 exact delta is NOT independently approved. Brain F3 ruling provenance is direct turn 01a17dce-7c65-76f0-9148-7c036d4a9130, technical send to parent 01a0cf7f-62f6-7450-abc9-5bb2750923f4, also parent-relayed on 2026-10-27. Section6 replaces earlier questions with selected technical contracts while retaining the owner force cutoff and the exact additional technical questions above. No implementation is admitted. Current source readback adds converter991–997/cache helpers, syncFile509–614/conditionalWrite479–501, queue snapshot187/drain194–196 and documents expiry154–174. The observed queue drain call is sync-engine895 at this pin; resolve by symbol after rebase.
-
-The parent reviewed this bounded planning delta for publication; the exact commit and committed-byte hashes are in C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision5-publication.json. Independent reviewer must review that immutable revision 5; source-dispatch remains NOT READY. Technical mutation-generation/queue-provenance finalizations and owner force cutoff remain explicitly OPEN. P1/P2-Q, normal-data protection, empty profile repair fence and all native/package/release holds remain intact.
+## Evidence limits and publication
+Original cloud planning did not inspect local Windows binaries; local revisions performed only stated read-only version/hash/signature/profile/source inventory. No normal-profile read/write, app launch, installation, recorder start, harness write or native capture occurred here. Public Microsoft references in profile report ground requirements, not local qualification. Existing diagnosis/evidence remains immutable; no repeated approved investigation is represented as new proof.
+Revision6 publication commit/hashes will be recorded in C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision6-publication.json after bounded local review/publication. Parent approval follows independent review. Until publication/review, exact draft is not an approved immutable contract. All four reports remain NON-DISPATCHABLE while listed entry gates remain.
