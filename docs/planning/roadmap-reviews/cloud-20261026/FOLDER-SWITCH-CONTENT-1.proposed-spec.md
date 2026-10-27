@@ -1,4 +1,4 @@
-# FOLDER-SWITCH-CONTENT-1 — proposed main FIFO and coherent publication specification, revision 3
+# FOLDER-SWITCH-CONTENT-1 — proposed main FIFO and coherent publication specification, revision 4
 Date: 2026-10-27. Local planning continuation of durable cloud planner 01a17a3a-dcdb-7308-8560-3989bd32a015.
 PROPOSAL FOR INDEPENDENT REVIEW AND PARENT/BRAIN ADMISSION. No application, harness or test execution/edit admission.
 Publication branch: eb/local-folder-profile-planning-20261027. Revision 2 input: f10311a0d8440bcf00c7a3a1a57be2e94601996e; protocol f299675d is an ancestor. Planning inputs: exact460cd25dd37dbfd92e628c4756a364a604bb6a04; inherited source/test base unchanged from762d38ac53f22245a56f89e489ab367c905dcd91 through protocol descendant f299675dd8251e550f06ab47abb7c4b6ff1889f2.
@@ -16,7 +16,7 @@ The completed approved diagnosis at docs/studies/investigations/FOLDER-SWITCH-CO
 
 This report fixes F1/F2 choices and specifies proposed concrete names/schema/paths. NEW SOURCE-TRACE GATE F3 (§6) concerns existing independently accepted rescan/import/cloud whole-library writers. Brain must review their exact ownership classification before a final source fence/admission. This is not license to cancel accepted imports or alter force-download behavior. Independent review of this entire revision is required before source-admission request.
 
-Revision 2 was independently APPROVED for bounded planning only at review commit 38a787be6ea06ea4ea7774788c9534851aee53aa. That approval does not cover revision 3 amendments, grant source admission, or resolve F3. Revision 3 awaits independent review. The existing F1/F2 producer, transport and test contract below is preserved pending Brain's explicit F3 amendment.
+Revision 2 was independently APPROVED for bounded planning only at review commit 38a787be6ea06ea4ea7774788c9534851aee53aa. That approval does not cover revision 3 amendments, grant source admission, or resolve F3. Immutable revision 3 was published at 6d15e5b16bd6e915a7bba50135508ef74806305c. Revision 4 records the separate P1/P2-Q profile planning ruling in the companion report and handoff; its exact delta requires independent review. F1/F2 remain unchanged; F3 and force-download ordering remain OPEN pending an explicit ruling, not commentary.
 
 ## 1. Exact read order and traced source anchors
 All anchors are one-based at460cd25d; resolve by symbol after any admitted rebase.

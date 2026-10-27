@@ -1,4 +1,4 @@
-# Folder/profile local planning handoff — revision 3, 2026-10-27
+# Folder/profile local planning handoff — revision 4, 2026-10-27
 Local continuation of durable cloud planner 01a17a3a-dcdb-7308-8560-3989bd32a015.
 Parent:01a0cf7f-62f6-7450-abc9-5bb2750923f4. Brain technical authority:01a179e8-7a40-75c0-93f4-d3045ad99027.
 Revision 2 independent reviewer: 01a17a3a-d94f-760e-8d37-5805cd713020. Local revision 3 reviewer: 01a17dce-1533-7d32-9532-c6a5b0123fb0 (parent-supplied). Local Foliate implementation: 01a17dcd-3e4d-7161-bb2f-d8c273de5afb; preserve its source/test/desktop custody.
@@ -16,7 +16,7 @@ Repository gorillabrown/Blurby; revision 2 branch eb/cloud-folder-profile-specs-
 | [FOLDER-SWITCH-CONTENT-1.proposed-spec.md](FOLDER-SWITCH-CONTENT-1.proposed-spec.md) | 332fb3beaa2f39de2f33460de15654d1335a3acda0194c8641c0b457e263279c | 07011a533ea4353765344eb5ec06b04b7bcc3937 |
 | [PROFILE-QUEUE-ISOLATION-1.proposed-spec.md](PROFILE-QUEUE-ISOLATION-1.proposed-spec.md) | 976362f48ef19082b8742aef597468b3a530fe34323bd2b774309c2fb7a03566 | 523038a281b8a2e5c4806623b12b11d512ea004f |
 
-The table above identifies immutable revision 2 contents only. Independent review 38a787be APPROVED those bounded planning artifacts, including F3 as an open question set. It does not approve revision 3 amendments. Revision 3 report hashes/commit must be supplied in the final publication receipt for new independent review. Both reports remain bounded PLANNING proposals. New exact schema/helper/test names are proposed contracts, not application files created here. Source admission remains withheld. No app/harness/recorder/test/source/shared-governance/provider/main/release/terminal mutation occurred.
+The table above identifies immutable revision 2 contents only. Independent review 38a787be APPROVED those bounded planning artifacts, including F3 as an open question set. It does not approve revision 3 amendments. Immutable revision 3 is 6d15e5b16bd6e915a7bba50135508ef74806305c; its publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision3-publication.json. Revision 4 records selected P1/P2-Q planning choices; its exact publication receipt is C:/Projects/Blurby-artifacts/local-resume-20261027/planning/revision4-publication.json. F3 remains OPEN; revision 4 requires independent delta review. Both reports remain bounded PLANNING proposals. New exact schema/helper/test names are proposed contracts, not application files created here. Source admission remains withheld. No app/harness/recorder/test/source/shared-governance/provider/main/release/terminal mutation occurred.
 
 ## Incorporated Brain planning rulings
 Revision 2 incorporated parent-relayed Brain rulings after Brain source tracing/hash verification of460cd25d; cloud private-thread access was unavailable then. The local continuation has read Brain directly and sent the six F3 producer questions, stock-profile scope and clean-path readback questions through local thread tools. Dispatch is not acknowledgment or a ruling. F3 remains OPEN pending an explicit returned ruling.
@@ -41,7 +41,7 @@ Profile qualification gates OPEN:
 P1-Q1 exact local executable/profile/provider/schema/hash/privileges/session/raw-footprint manifest.
 P1-Q2 qualified decoder/export/parser and PID/start/exe/TID/file-object/path/rename BOTH endpoints/completion correlation.
 P1-Q3 loss/decode/truncation/unresolved-map accounting, unknown never0.
-P2-Q existing approved per-launch actual getDataPath+queue-destination observation, including clean-route proof; no hook added under this proposal.
+P2-Q selected choice: separately fenced observation-design admission REQUIRED; actual per-launch initialized getDataPath+queuePath proof and clean-route qualification remain OPEN. No hook/export/IPC is authorized.
 P3-Q exact native custody/source/package/harness pins, schedule qualification and separately authorized raw capture footprint.
 No WPR start/install/capture/harness write admitted. Missing mapping, failed recorder control, event loss or broader-than-approved raw trace makes INCONCLUSIVE/hold. Normal files remain read-only; application repair fence EMPTY until a real culprit is proven.
 
@@ -54,11 +54,11 @@ Historical revision 2 evidence limit: its cloud planner accessed no Windows C: f
 
 ## Review evidence and limits
 Self-review checked chosen F1/F2 against relay, exact transport names/schema, source/test/producer inventory, per-effect origin checks, meaningful base/opposite controls, partial failures, renderer/import separation and native holds. Profile self-review checked120-second schedules, event loss/rename/process identity gaps and empty repair fence.
-Revision 2 self-review was followed by independent bounded planning approval at38a787be. Revision 3 is not independently reviewed yet; the local reviewer must examine the exact committed revision 3 and its final hashes. Neither approval grants source, recorder, harness or capture admission.
+Revision 2 self-review was followed by independent bounded planning approval at38a787be. Immutable revision 3 commit 6d15e5b16bd6e915a7bba50135508ef74806305c received independent APPROVE, recorded at C:/Projects/Blurby-artifacts/local-resume-20261027/review/planning-revision3-independent-review.md. This approval is bounded planning only and does not cover revision 4, which has no independent approval yet. The local reviewer must examine the final exact revision 4 commit/hashes. No prior approval grants source, recorder, harness or capture admission.
 No tests/build/package/native capture ran, appropriate to planning-only scope. Input/source reads and report hash/readback checks do not substitute for production behavioral acceptance.
 
 ## Parent admission handoff
-1. Independently review exact revision 3 report hashes/commit, especially any returned F3 ruling and expanded producer/test fence; preserve revision 2 approval as historical scope only.
+1. Independently review exact revision 4 report hashes/commit, including selected P1/P2-Q choices and any returned F3 ruling/producer fence; preserve earlier approval as exact-revision historical scope only.
 2. Obtain Brain F3 ruling; integrate exact chosen producer/global-writer contract and resulting test paths. Core F1/F2 are resolved choices, not options to reopen without reason.
 3. Close profile capability/qualification gates with exact native manifests and explicit capture/harness admission; planning P1–P3 directions alone are not permission to record.
 4. Parent alone refreshes authoritative provider/register, integrates full ROADMAP specifications and records actual live URLs/Seq/status/source/branch/writer custody. PacketSeq120/121 remain historical observations, not live state claims.
@@ -77,4 +77,13 @@ Storage: C:/Projects/Blurby-artifacts/local-resume-20261027/planning/. These fil
 | wpr-FileIO-profiledetails.txt | 4CBAE79D1475FC6574BFEFB438D40DBBE961AB1F696E3761F85D0EFEEE435C8D |
 | wpr-status.txt | A77BA39043544BBF814BEA3CB05B5AC87B89A8B56894548AB6ED3A07CF4B9CA3 |
 
-WPR status and profiledetails commands both exited 0. Their output establishes profile inventory and no WPR recording at that read, not recorder qualification. Stock FileIO.Verbose.Memory has a broad raw footprint: recommend no stock capture; qualify a narrower custom profile or receive an exact broader-scope ruling. Profile bytes/hash, schema, parser/loss/rename correlation and privilege/start controls remain open. Existing userData-only preflight does not prove initialized getDataPath/queue destination, so clean observation remains BLOCKED. No application repair is specified; its fence remains EMPTY and historical writer PID UNKNOWN.
+WPR status and profiledetails commands both exited 0. Their output establishes profile inventory and no WPR recording at that read, not recorder qualification. Selected Brain P1 ruling forbids stock FileIO.Verbose.Memory capture because its measured raw footprint is too broad; require a custom NARROW profile/decoder qualification. Broader-scope approval is not a current alternative; redacted publication is not raw-scope permission. Profile bytes/hash, schema, parser/loss/rename correlation and privilege/start controls remain open. Selected P2-Q ruling requires SEPARATELY FENCED observation-design admission: existing userData-only preflight does not prove actual initialized getDataPath/queuePath, so clean observation remains BLOCKED until that design is separately approved and recorder controls qualify. No application repair is specified; its fence remains EMPTY and historical writer PID UNKNOWN.
+
+## Revision 4 selected Brain P1/P2-Q amendment
+Ruling provenance: exact Brain ruling relayed by parent/source thread 01a0cf7f-62f6-7450-abc9-5bb2750923f4 on 2026-10-27. Direct Brain turn 01a17dce-7c65-76f0-9148-7c036d4a9130 commentary independently confirms narrow recorder and separate path-observation requirements. F3/force-download remains OPEN; no ruling is inferred from that commentary.
+
+- P1 choice CLOSED: NO stock FileIO capture. Require custom NARROW profile/decoder exact bytes/hash, privileges, host schemas, full mapping/outcome/loss coverage and owned detector controls. No installation/start/capture is admitted; published-index redaction is never broader raw-scope approval. A different future scope requires an explicit superseding ruling.
+- P2-Q choice CLOSED as separate fenced observation-design admission REQUIRED. A future proposal may use causally proven passive attribution of actual startup reads of exact queue/settings/library targets or a strict read-only MAIN inspector of actual initialized values. No formula/userData inference/forced init substitute. New hook/export/IPC requires its own fence and security review; none is authorized. Clean remains BLOCKED until separate design approval and recorder entry qualification; paused/debugger is not clean, and instrumented/clean runs stay separate.
+- Empty application repair fence, historical UNKNOWN, 120-second schedule, >=25-second survival, normal-data custody and native/package/release holds remain.
+
+This amendment preserves immutable revision 3 and changes planning choices only. Its exact commit and committed-byte hashes are recorded in revision4-publication.json; no source admission or independent revision 4 approval is claimed.
