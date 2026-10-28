@@ -111,4 +111,3 @@ No Native status transition, completion ledger, consumer elevation or release ch
 ## Publication and verification
 
 Only Native's entry annotation, this resolved gate issue and refreshed snapshot are published. All other specifications are preserved byte-for-byte. Final U9/U10, exact stage/commit bytes and remote identity are checked before the kickoff is printed; the external publication receipt is C:/Projects/Blurby-artifacts/native-next-dispatch-20261027/publication-receipt.json. This resolved issue records the stage/readability decisions and preserves all later capability holds.
-
