@@ -1,0 +1,35 @@
+status: blocked
+failureClass: runtime-contract
+failureNote: Provisioning completed, but scripts/moss_nano_probe.py invokes the cloned Nano infer_onnx.py with unsupported arguments.
+
+expected source:
+- https://github.com/OpenMOSS/MOSS-TTS-Nano.git -> .runtime/moss/MOSS-TTS-Nano (exists: true)
+
+expected assets:
+- OpenMOSS-Team/MOSS-TTS-Nano-100M-ONNX -> .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX (exists: true)
+- OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX -> .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX (exists: true)
+
+commands attempted:
+- git clone https://github.com/OpenMOSS/MOSS-TTS-Nano.git .runtime/moss/MOSS-TTS-Nano -> failed in sandbox; escalated retry succeeded
+- git clone https://huggingface.co/OpenMOSS-Team/MOSS-TTS-Nano-100M-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX -> failed in sandbox; escalated retry succeeded
+- git clone https://huggingface.co/OpenMOSS-Team/MOSS-Audio-Tokenizer-Nano-ONNX .runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX -> failed in sandbox; escalated retry succeeded
+- node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json -> failed: spawn EPERM
+- node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json -> escalated retry blocked on system Python missing onnxruntime
+- node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json --python .runtime/moss/.venv/Scripts/python.exe -> failed: missing sentencepiece
+- .runtime/moss/.venv/Scripts/python.exe -m pip install sentencepiece -> failed in sandbox; escalated retry succeeded
+- .runtime/moss/.venv/Scripts/python.exe -m pip install torch==2.7.0 torchaudio==2.7.0 -> failed: no torch==2.7.0 wheel for Python 3.14
+- py -3.13 -m venv .runtime/moss/.venv-nano -> failed: access denied; escalated retry succeeded
+- .runtime/moss/.venv-nano/Scripts/python.exe -m pip install numpy soundfile onnxruntime sentencepiece torch==2.7.0 torchaudio==2.7.0 -> succeeded
+- node scripts/moss_nano_probe.mjs --run-id moss-nano-1-short --passage short-smoke --out artifacts/moss --json --python .runtime/moss/.venv-nano/Scripts/python.exe -> failed: cloned infer_onnx.py rejects --threads
+
+stdout tail:
+
+stderr tail:
+infer_onnx.py: error: unrecognized arguments: --threads 4
+
+blocker summary:
+- artifacts/moss/moss-nano-1-provisioning-blocked/summary.json
+- artifacts/moss/moss-nano-1-provisioning-blocked/summary.txt
+
+note:
+The canonical artifacts/moss/moss-nano-1-short/summary.json path was later overwritten by successful post-fix short-probe evidence.

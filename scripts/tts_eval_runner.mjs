@@ -1,0 +1,1327 @@
+import fs from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { calculateAggregateMetrics, formatAggregateSummary } from "./tts_eval_metrics.mjs";
+import { getSoakProfile } from "./tts_eval_profiles.mjs";
+import { formatGateReport, runGateEvaluation } from "./tts_eval_gate.mjs";
+
+const DEFAULT_FIXTURE_MANIFEST = "tests/fixtures/narration/manifest.json";
+const DEFAULT_MATRIX_MANIFEST = "tests/fixtures/narration/matrix.manifest.json";
+const DEFAULT_GATES_PATH = "docs/testing/tts_quality_gates.v1.json";
+const MOSS_NANO_PRODUCT_MODES = Object.freeze(["page", "focus", "flow", "narrate"]);
+const MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION = "moss-nano-live-evidence.v2";
+const MOSS_NANO_LIVE_EVIDENCE_KIND = "real-app-selected-nano";
+const MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION = "moss-nano-13c";
+const MOSS_NANO_PRODUCT_EVIDENCE_KEYS = Object.freeze([
+  "liveBookMatrix",
+  "settingsPreviewTruth",
+  "sidecarLifecycle",
+  "cachePrefetchContinuity",
+  "segmentFollowingProgress",
+  "fakeWordTimestamps",
+  "explicitFallbackOnly",
+  "packageRuntimeReadiness",
+  "kokoroAvailable",
+]);
+const MOSS_NANO_LIVE_EVIDENCE_KEYS = Object.freeze([
+  "live",
+  "nanoSelected",
+  "startable",
+  "segmentProgressUnderstandable",
+  "noUnderlineRace",
+  "cachePrefetchContinuity",
+  "noStalePlayback",
+  "pauseResumeSameMode",
+  "modeSwitchAnchorPreserved",
+  "explicitFallback",
+  "sidecarLifecycleStable",
+]);
+
+const MOSS_NANO_LIVE_PROVENANCE_KEYS = Object.freeze([
+  "source",
+  "runArtifactPath",
+  "traceEventCount",
+  "recordedAt",
+  "scenarioId",
+  "selectedEngine",
+  "timingTruth",
+  "wordTimestamps",
+  "runtime",
+  "nanoSegmentLatencyMs",
+  "nanoCache",
+  "nanoPrefetch",
+  "recycleObservations",
+  "observedEngineSelection",
+  "observedFallbackPolicy",
+]);
+
+function isMossNanoProductScenario(scenario) {
+  const gate = scenario?.nanoGate ?? {};
+  return scenario?.engine === "nano"
+    && gate.selectedEngine === "nano"
+    && gate.readiness === "required"
+    && gate.settingsPreviewTruth === true
+    && gate.sidecarLifecycle === true
+    && gate.cachePrefetchContinuity === true
+    && gate.segmentTiming === "segment-following"
+    && gate.wordTimestamps === false
+    && gate.fallback === "explicit-only"
+    && gate.runtimeReadiness === "documented"
+    && gate.kokoroAvailable === true;
+}
+
+function evidencePassed(key, value) {
+  if (key === "fakeWordTimestamps") return value === "absent" || value === false;
+  return value === "pass" || value === true;
+}
+
+export function evaluateMossNanoProductGate({ matrixManifest, evidence = {} } = {}) {
+  const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
+  const nanoProductScenarios = scenarios.filter(isMossNanoProductScenario);
+  const requiredModesPresent = Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      nanoProductScenarios.some((scenario) => scenario.readingMode === mode),
+    ]),
+  );
+
+  const reasons = [];
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    if (!requiredModesPresent[mode]) {
+      reasons.push(`Missing selected-Nano live-book matrix mode: ${mode}`);
+    }
+  }
+
+  for (const key of MOSS_NANO_PRODUCT_EVIDENCE_KEYS) {
+    if (!evidencePassed(key, evidence[key])) {
+      reasons.push(`Missing or failing MOSS-NANO-11 evidence: ${key}`);
+    }
+  }
+
+  const maxDecision = reasons.length ? "NANO_EXPERIMENTAL_ONLY" : "NANO_DEFAULT_CANDIDATE";
+  return {
+    requiredModes: [...MOSS_NANO_PRODUCT_MODES],
+    requiredModesPresent,
+    scenarioCount: nanoProductScenarios.length,
+    evidence,
+    reasons,
+    maxDecision,
+  };
+}
+
+function isMossNanoLiveEvidenceScenario(scenario) {
+  const gate = scenario?.nanoGate ?? {};
+  return scenario?.engine === "nano"
+    && gate.selectedEngine === "nano"
+    && gate.readiness === "required"
+    && (scenario.tags || []).includes("moss-nano-12")
+    && (scenario.tags || []).includes("nano-live-evidence");
+}
+
+function isObject(value) {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+function countTraceEventsAtPath(runArtifactPath) {
+  if (!runArtifactPath || typeof runArtifactPath !== "string") return null;
+  try {
+    const raw = fsSyncReadJson(runArtifactPath);
+    return Array.isArray(raw?.events) ? raw.events.length : null;
+  } catch {
+    return null;
+  }
+}
+
+function fsSyncReadJson(filePath) {
+  return JSON.parse(readFileSync(filePath, "utf8"));
+}
+
+function validateMossNanoLiveEvidenceMode(mode, modeEvidence, reasons) {
+  if (!isObject(modeEvidence) || modeEvidence.live !== true) {
+    reasons.push(`Missing live selected-Nano evidence for ${mode}`);
+    return false;
+  }
+
+  let valid = true;
+  if (modeEvidence.source !== MOSS_NANO_LIVE_EVIDENCE_KIND) {
+    reasons.push(`Rejected simulated or hand-authored live evidence for ${mode}`);
+    valid = false;
+  }
+  for (const key of MOSS_NANO_LIVE_PROVENANCE_KEYS) {
+    if (!(key in modeEvidence)) {
+      reasons.push(`Missing MOSS-NANO-13c provenance field ${key} in ${mode}`);
+      valid = false;
+    }
+  }
+  if (modeEvidence.selectedEngine !== "nano") {
+    reasons.push(`Live evidence did not prove selected Nano in ${mode}`);
+    valid = false;
+  }
+  if (
+    !isObject(modeEvidence.observedEngineSelection)
+    || modeEvidence.observedEngineSelection.kind !== "engine-selection"
+    || modeEvidence.observedEngineSelection.selectedEngine !== "nano"
+  ) {
+    reasons.push(`Missing observed engine-selection provenance in ${mode}`);
+    valid = false;
+  }
+  if (
+    !isObject(modeEvidence.observedFallbackPolicy)
+    || modeEvidence.observedFallbackPolicy.kind !== "fallback-policy"
+    || modeEvidence.observedFallbackPolicy.policy !== "explicit-only"
+  ) {
+    reasons.push(`Missing observed fallback-policy provenance in ${mode}`);
+    valid = false;
+  }
+  if (modeEvidence.timingTruth !== "segment-following" || modeEvidence.wordTimestamps !== null) {
+    reasons.push(`Live evidence did not preserve segment-following timing truth in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.runtime) || modeEvidence.runtime.syntheticAudio !== false) {
+    reasons.push(`Live evidence did not prove real non-synthetic Nano audio in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoSegmentLatencyMs) || typeof modeEvidence.nanoSegmentLatencyMs.p50 !== "number") {
+    reasons.push(`Missing quantitative Nano latency provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoCache) || typeof modeEvidence.nanoCache.hits !== "number" || typeof modeEvidence.nanoCache.misses !== "number") {
+    reasons.push(`Missing quantitative Nano cache provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.nanoPrefetch) || typeof modeEvidence.nanoPrefetch.ready !== "number") {
+    reasons.push(`Missing quantitative Nano prefetch provenance in ${mode}`);
+    valid = false;
+  }
+  if (!isObject(modeEvidence.recycleObservations)) {
+    reasons.push(`Missing Nano recycle observation provenance in ${mode}`);
+    valid = false;
+  }
+
+  const eventCount = countTraceEventsAtPath(modeEvidence.runArtifactPath);
+  if (eventCount == null) {
+    reasons.push(`Missing linked trace artifact for ${mode}`);
+    valid = false;
+  } else if (eventCount !== modeEvidence.traceEventCount) {
+    reasons.push(`Trace event count mismatch for ${mode}`);
+    valid = false;
+  }
+
+  return valid;
+}
+
+export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence = {} } = {}) {
+  const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
+  const nanoLiveScenarios = scenarios.filter(isMossNanoLiveEvidenceScenario);
+  const modes = liveEvidence?.modes ?? {};
+  const requiredModesPresent = Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      nanoLiveScenarios.some((scenario) => scenario.readingMode === mode),
+    ]),
+  );
+
+  const reasons = [];
+  const pauseReasons = [];
+
+  if (liveEvidence.schemaVersion !== MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION) {
+    reasons.push(`Live evidence schemaVersion must be ${MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION}.`);
+  }
+  if (liveEvidence.evidenceKind !== MOSS_NANO_LIVE_EVIDENCE_KIND) {
+    reasons.push("Live evidence artifact is not real app-selected Nano evidence.");
+  }
+  if (liveEvidence.evidenceProducerVersion !== MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION) {
+    reasons.push(`Live evidence producer must be ${MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION}.`);
+  }
+  if (!liveEvidence.generatedAt || !liveEvidence.appCommit || !liveEvidence.generatedBy) {
+    reasons.push("Live evidence artifact is missing top-level provenance.");
+  }
+
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    if (!requiredModesPresent[mode]) {
+      reasons.push(`Missing selected-Nano live evidence mode: ${mode}`);
+      continue;
+    }
+
+    const modeEvidence = modes[mode];
+    if (!validateMossNanoLiveEvidenceMode(mode, modeEvidence, reasons)) {
+      continue;
+    }
+
+    if (modeEvidence.segmentProgressUnderstandable !== true) {
+      pauseReasons.push(`Segment-following progress was not understandable in ${mode}`);
+    }
+
+    for (const key of MOSS_NANO_LIVE_EVIDENCE_KEYS) {
+      if (modeEvidence[key] !== true) {
+        const label = key === "segmentProgressUnderstandable"
+          ? `Segment-following progress was not understandable in ${mode}`
+          : `Missing or failing MOSS-NANO-12 ${key} evidence in ${mode}`;
+        if (key === "segmentProgressUnderstandable" && pauseReasons.includes(label)) continue;
+        if (["noUnderlineRace", "noStalePlayback", "explicitFallback", "sidecarLifecycleStable"].includes(key)) {
+          pauseReasons.push(label);
+        } else {
+          reasons.push(label);
+        }
+      }
+    }
+  }
+
+  const allReasons = [...reasons, ...pauseReasons];
+  const decision = pauseReasons.length
+    ? "PAUSE_NANO_PRODUCTIZATION"
+    : reasons.length
+      ? "NANO_EXPERIMENTAL_ONLY"
+      : "NANO_RECOMMENDED_OPT_IN";
+
+  return {
+    requiredModes: [...MOSS_NANO_PRODUCT_MODES],
+    requiredModesPresent,
+    scenarioCount: nanoLiveScenarios.length,
+    liveEvidence,
+    reasons: allReasons,
+    decision,
+  };
+}
+
+export function parseArgs(argv) {
+  const args = {
+    fixtures: [],
+    fixtureManifestPath: DEFAULT_FIXTURE_MANIFEST,
+    matrixManifestPath: DEFAULT_MATRIX_MANIFEST,
+    outDir: "artifacts/tts-eval",
+    mode: "flow",
+    rate: 1,
+    runId: "run",
+    matrix: false,
+    soakProfile: null,
+    checkpointEvery: null,
+    tags: [],
+    gates: false,
+    streaming: false,
+    nanoLiveEvidencePath: null,
+    nanoLiveEvidenceOutPath: null,
+    nanoLiveTracePaths: {},
+    appCommit: process.env.GITHUB_SHA || process.env.APP_COMMIT || "unknown",
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (token === "--fixture" || token === "--fixtures") {
+      args.fixtures = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      i += 1;
+      continue;
+    }
+    if (token === "--fixture-manifest") {
+      args.fixtureManifestPath = argv[i + 1] || args.fixtureManifestPath;
+      i += 1;
+      continue;
+    }
+    if (token === "--matrix-manifest") {
+      args.matrixManifestPath = argv[i + 1] || args.matrixManifestPath;
+      i += 1;
+      continue;
+    }
+    if (token === "--out") {
+      args.outDir = argv[i + 1] || args.outDir;
+      i += 1;
+      continue;
+    }
+    if (token === "--mode") {
+      args.mode = argv[i + 1] || args.mode;
+      i += 1;
+      continue;
+    }
+    if (token === "--rate") {
+      args.rate = Number(argv[i + 1] || "1");
+      i += 1;
+      continue;
+    }
+    if (token === "--run-id") {
+      args.runId = argv[i + 1] || args.runId;
+      i += 1;
+      continue;
+    }
+    if (token === "--matrix") {
+      args.matrix = true;
+      continue;
+    }
+    if (token === "--soak-profile") {
+      args.soakProfile = argv[i + 1] || "short";
+      i += 1;
+      continue;
+    }
+    if (token === "--checkpoint-every") {
+      args.checkpointEvery = Number(argv[i + 1] || "0") || null;
+      i += 1;
+      continue;
+    }
+    if (token === "--tag" || token === "--tags") {
+      const tags = argv[i + 1] ? argv[i + 1].split(",").map((s) => s.trim()).filter(Boolean) : [];
+      args.tags = [...args.tags, ...tags];
+      i += 1;
+      continue;
+    }
+    if (token === "--gates") {
+      const next = argv[i + 1];
+      if (next && !next.startsWith("--")) {
+        args.gates = next;
+        i += 1;
+      } else {
+        args.gates = true;
+      }
+      continue;
+    }
+    if (token === "--streaming") {
+      args.streaming = true;
+      continue;
+    }
+    if (token === "--nano-live-evidence") {
+      args.nanoLiveEvidencePath = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (token === "--nano-live-evidence-out") {
+      args.nanoLiveEvidenceOutPath = argv[i + 1] || null;
+      i += 1;
+      continue;
+    }
+    if (token === "--nano-live-trace") {
+      const value = argv[i + 1] || "";
+      const separator = value.indexOf("=");
+      if (separator > 0) {
+        args.nanoLiveTracePaths[value.slice(0, separator)] = value.slice(separator + 1);
+      }
+      i += 1;
+      continue;
+    }
+    if (token === "--app-commit") {
+      args.appCommit = argv[i + 1] || args.appCommit;
+      i += 1;
+      continue;
+    }
+  }
+
+  return args;
+}
+
+export function summarizeTrace(trace) {
+  const lifecycle = trace.events.filter((e) => e.kind === "lifecycle");
+  const words = trace.events.filter((e) => e.kind === "word");
+  const flow = trace.events.filter((e) => e.kind === "flow-position");
+  const transitions = trace.events.filter((e) => e.kind === "transition");
+  const nanoSegments = trace.events.filter((e) => e.kind === "nano-segment");
+  const start = lifecycle.find((e) => e.state === "start");
+  const firstAudio = lifecycle.find((e) => e.state === "first-audio");
+  const pauses = lifecycle.filter((e) => e.state === "pause").length;
+  const resumes = lifecycle.filter((e) => e.state === "resume").length;
+
+  const transitionCounts = {
+    section: transitions.filter((e) => e.transition === "section").length,
+    chapter: transitions.filter((e) => e.transition === "chapter").length,
+    book: transitions.filter((e) => e.transition === "book").length,
+    handoff: transitions.filter((e) => e.transition === "handoff").length,
+  };
+  const sectionHandoffLatencyMs =
+    transitions.find((e) => e.transition === "section" && typeof e.latencyMs === "number")?.latencyMs ?? null;
+  const crossBookResumeLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "handoff"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? transitions.find(
+      (e) =>
+        e.transition === "book"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("cross-book"),
+    )?.latencyMs
+    ?? null;
+  const rateResponseLatencyMs =
+    transitions.find(
+      (e) =>
+        e.transition === "rate-response"
+        && typeof e.latencyMs === "number"
+        && e.context?.includes("same-bucket"),
+    )?.latencyMs
+    ?? null;
+
+  const failureClasses = [];
+  const startLatencyMs =
+    typeof firstAudio?.latencyMs === "number"
+      ? firstAudio.latencyMs
+      : start && firstAudio
+        ? Math.max(0, firstAudio.ts - start.ts)
+        : null;
+  const warmPreviewLatencyMs =
+    start && typeof start.previewLatencyMs === "number"
+      ? start.previewLatencyMs
+      : null;
+  const warmFirstAudioLatencyMs = startLatencyMs;
+  const startupSpikeThresholdMs =
+    start && typeof start.spikeWarningThresholdMs === "number"
+      ? start.spikeWarningThresholdMs
+      : null;
+  const startupSpikeCount = startupSpikeThresholdMs == null
+    ? 0
+    : [warmPreviewLatencyMs, warmFirstAudioLatencyMs].filter(
+        (latency) => typeof latency === "number" && latency > startupSpikeThresholdMs,
+      ).length;
+  const startupCacheMode = start?.cacheMode ?? null;
+  const openingChunkWordCounts = Array.isArray(start?.openingChunkWordCounts)
+    ? [...start.openingChunkWordCounts]
+    : [];
+  const percentile = (sortedValues, percentileValue) => {
+    if (!sortedValues.length) return null;
+    if (sortedValues.length === 1) return sortedValues[0];
+    const position = (sortedValues.length - 1) * percentileValue;
+    const lower = Math.floor(position);
+    const upper = Math.ceil(position);
+    if (lower === upper) return sortedValues[lower];
+    const weight = position - lower;
+    return sortedValues[lower] * (1 - weight) + sortedValues[upper] * weight;
+  };
+  const nanoLatencies = nanoSegments
+    .map((event) => event.latencyMs)
+    .filter((latency) => typeof latency === "number" && Number.isFinite(latency))
+    .sort((a, b) => a - b);
+  const nanoCacheHits = nanoSegments.filter((event) => event.cacheHit === true).length;
+  const nanoCacheMisses = nanoSegments.filter((event) => event.cacheHit === false).length;
+  const nanoCacheTotal = nanoCacheHits + nanoCacheMisses;
+  const nanoPrefetchReady = nanoSegments.filter((event) => event.prefetchReady === true).length;
+  const nanoPrefetchStale = nanoSegments.filter((event) => event.phase === "prefetch-stale").length;
+  const nanoPrefetchCancelled = nanoSegments.filter((event) => event.phase === "prefetch-cancelled").length;
+
+  if (startLatencyMs != null && startLatencyMs > 2500) failureClasses.push("start-latency");
+  if (pauses !== resumes) failureClasses.push("pause-resume-error");
+  if (transitionCounts.book > 0 && transitionCounts.handoff === 0) failureClasses.push("handoff-error");
+  if (nanoSegments.length > 0 && nanoPrefetchReady === 0) failureClasses.push("cache-prefetch-continuity");
+  if (nanoPrefetchStale > 0 || nanoPrefetchCancelled > 0) failureClasses.push("stale-playback");
+
+  const maxDrift = flow.reduce((max, f) => {
+    const nearby = words
+      .filter((w) => Math.abs(w.ts - f.ts) <= 300)
+      .map((w) => Math.abs(w.wordIndex - f.wordIndex));
+    const drift = nearby.length ? Math.max(...nearby) : 0;
+    return Math.max(max, drift);
+  }, 0);
+  if (maxDrift > 12) failureClasses.push("cursor-highlight-drift");
+
+  return {
+    fixtureId: trace.fixture.id,
+    scenarioId: trace.scenarioId || null,
+    runId: trace.runId,
+    startLatencyMs,
+    warmPreviewLatencyMs,
+    warmFirstAudioLatencyMs,
+    startupSpikeThresholdMs,
+    startupSpikeCount,
+    maxDrift,
+    wordEventCount: words.length,
+    flowEventCount: flow.length,
+    startupCacheMode,
+    openingChunkWordCounts,
+    pauseResumeIntegrity: { pauses, resumes, balanced: pauses === resumes },
+    transitionCounts,
+    sectionHandoffLatencyMs,
+    crossBookResumeLatencyMs,
+    rateResponseLatencyMs,
+    nanoSegmentLatencyMs: {
+      p50: percentile(nanoLatencies, 0.5),
+      p95: percentile(nanoLatencies, 0.95),
+      min: nanoLatencies.length ? nanoLatencies[0] : null,
+      max: nanoLatencies.length ? nanoLatencies[nanoLatencies.length - 1] : null,
+    },
+    nanoCache: {
+      hits: nanoCacheHits,
+      misses: nanoCacheMisses,
+      hitRate: nanoCacheTotal > 0 ? nanoCacheHits / nanoCacheTotal : null,
+    },
+    nanoPrefetch: {
+      ready: nanoPrefetchReady,
+      stale: nanoPrefetchStale,
+      cancelled: nanoPrefetchCancelled,
+    },
+    failureClasses,
+  };
+}
+
+function traceHasOnlySegmentFollowingNano(trace) {
+  const nanoSegments = Array.isArray(trace?.events)
+    ? trace.events.filter((event) => event.kind === "nano-segment")
+    : [];
+  return nanoSegments.length > 0
+    && nanoSegments.every(
+      (event) => event.timingTruth === "segment-following" && event.wordTimestamps === null,
+    );
+}
+
+function runtimeFromTrace(trace) {
+  const runtimeEvent = Array.isArray(trace?.events)
+    ? trace.events.find((event) => event.kind === "nano-runtime" || event.kind === "nano-synthesis")
+    : null;
+  return {
+    backend: runtimeEvent?.backend ?? trace?.runtime?.backend ?? null,
+    modelVariant: runtimeEvent?.modelVariant ?? trace?.runtime?.modelVariant ?? null,
+    syntheticAudio: runtimeEvent?.syntheticAudio ?? trace?.runtime?.syntheticAudio ?? null,
+  };
+}
+
+function traceProvesRealAppSelectedNano(trace) {
+  return trace?.evidenceSource === MOSS_NANO_LIVE_EVIDENCE_KIND
+    || trace?.provenance?.source === MOSS_NANO_LIVE_EVIDENCE_KIND;
+}
+
+function eventList(trace) {
+  return Array.isArray(trace?.events) ? trace.events : [];
+}
+
+function observedEngineSelection(trace) {
+  return eventList(trace).find(
+    (event) => event.kind === "engine-selection" && event.selectedEngine === "nano",
+  ) ?? null;
+}
+
+function observedExplicitFallbackPolicy(trace) {
+  return eventList(trace).find(
+    (event) => event.kind === "fallback-policy" && event.policy === "explicit-only",
+  ) ?? null;
+}
+
+function summarizeObservedEvent(event, keys) {
+  return Object.fromEntries(
+    keys
+      .filter((key) => event[key] !== undefined)
+      .map((key) => [key, event[key]]),
+  );
+}
+
+export async function buildMossNanoLiveEvidenceArtifact({
+  appCommit,
+  modes,
+  generatedAt = new Date().toISOString(),
+  generatedBy = "scripts/tts_eval_runner.mjs",
+  evidenceProducerVersion = MOSS_NANO_LIVE_EVIDENCE_PRODUCER_VERSION,
+} = {}) {
+  if (!appCommit) throw new Error("appCommit is required for MOSS Nano live evidence.");
+  if (!isObject(modes)) throw new Error("modes are required for MOSS Nano live evidence.");
+
+  const modeEvidenceEntries = [];
+  for (const mode of MOSS_NANO_PRODUCT_MODES) {
+    const config = modes[mode];
+    if (!isObject(config) || typeof config.runArtifactPath !== "string") {
+      throw new Error(`runArtifactPath is required for ${mode} live evidence.`);
+    }
+    const trace = await readJson(config.runArtifactPath);
+    if (!traceProvesRealAppSelectedNano(trace)) {
+      throw new Error(`Trace artifact for ${mode} is not marked as real app-selected Nano evidence.`);
+    }
+    const summary = summarizeTrace(trace);
+    const traceEventCount = Array.isArray(trace.events) ? trace.events.length : 0;
+    const engineSelection = observedEngineSelection(trace);
+    if (!engineSelection) {
+      throw new Error(`Trace artifact for ${mode} does not prove observed selected Nano.`);
+    }
+    const fallbackPolicy = observedExplicitFallbackPolicy(trace);
+    if (!fallbackPolicy) {
+      throw new Error(`Trace artifact for ${mode} does not prove observed explicit fallback policy.`);
+    }
+    const selectedEngine = engineSelection.selectedEngine;
+    const segmentFollowing = traceHasOnlySegmentFollowingNano(trace);
+    const failureClasses = new Set(summary.failureClasses || []);
+    const runtime = runtimeFromTrace(trace);
+    if (runtime.syntheticAudio !== false) {
+      throw new Error(`Trace artifact for ${mode} does not prove real non-synthetic Nano audio.`);
+    }
+
+    modeEvidenceEntries.push([
+      mode,
+      {
+        live: true,
+        nanoSelected: selectedEngine === "nano",
+        startable: summary.startLatencyMs != null || summary.nanoSegmentLatencyMs.p50 != null,
+        segmentProgressUnderstandable: config.segmentProgressUnderstandable === true,
+        noUnderlineRace: !failureClasses.has("cursor-highlight-drift"),
+        cachePrefetchContinuity: !failureClasses.has("cache-prefetch-continuity"),
+        noStalePlayback: !failureClasses.has("stale-playback"),
+        pauseResumeSameMode: summary.pauseResumeIntegrity.balanced,
+        modeSwitchAnchorPreserved: !failureClasses.has("handoff-error"),
+        explicitFallback: fallbackPolicy.policy === "explicit-only",
+        sidecarLifecycleStable: !failureClasses.has("sidecar-lifecycle"),
+        source: MOSS_NANO_LIVE_EVIDENCE_KIND,
+        runArtifactPath: config.runArtifactPath,
+        traceEventCount,
+        recordedAt: config.recordedAt ?? generatedAt,
+        scenarioId: config.scenarioId ?? summary.scenarioId,
+        selectedEngine,
+        timingTruth: segmentFollowing ? "segment-following" : "unknown",
+        wordTimestamps: segmentFollowing ? null : "unknown",
+        runtime,
+        nanoSegmentLatencyMs: summary.nanoSegmentLatencyMs,
+        nanoCache: summary.nanoCache,
+        nanoPrefetch: summary.nanoPrefetch,
+        recycleObservations: {
+          restarts: trace.recycleObservations?.restarts ?? 0,
+          cleanShutdowns: trace.recycleObservations?.cleanShutdowns ?? 0,
+        },
+        observedEngineSelection: summarizeObservedEvent(engineSelection, ["kind", "selectedEngine", "source", "ts"]),
+        observedFallbackPolicy: summarizeObservedEvent(fallbackPolicy, ["kind", "policy", "selectedEngine", "ts"]),
+      },
+    ]);
+  }
+
+  return {
+    schemaVersion: MOSS_NANO_LIVE_EVIDENCE_SCHEMA_VERSION,
+    evidenceKind: MOSS_NANO_LIVE_EVIDENCE_KIND,
+    generatedBy,
+    generatedAt,
+    appCommit,
+    evidenceProducerVersion,
+    modes: Object.fromEntries(modeEvidenceEntries),
+  };
+}
+
+export function simulateTrace({ fixture, mode, rate, runId, scenarioId, runOrdinal }) {
+  const words = fixture.text.split(/\s+/).filter(Boolean);
+  const now = 1_700_000_000_000 + runOrdinal * 10_000;
+  const baseStep = Math.max(40, Math.round(160 / Math.max(0.5, rate)));
+  const startupCacheMode =
+    scenarioId?.includes("startup-parity-cached")
+      ? "cached"
+      : scenarioId?.includes("startup-parity-uncached")
+        ? "uncached"
+        : null;
+  const openingChunkWordCounts = startupCacheMode ? [13, 26, 52, 104, 148] : null;
+  const spikeWarningThresholdMs = 3000;
+  const warmPreviewLatencyMs = startupCacheMode === "cached"
+    ? 820 + Math.min(180, words.length * 12)
+    : startupCacheMode === "uncached"
+      ? 980 + Math.min(200, words.length * 14)
+      : 900 + Math.min(220, words.length * 13);
+  const startLatencyMs = startupCacheMode === "cached"
+    ? 180 + Math.min(200, words.length * 5)
+    : startupCacheMode === "uncached"
+      ? 280 + Math.min(240, words.length * 6)
+      : 220 + Math.min(1400, words.length * 7);
+  const sectionHandoffLatencyMs = 90 + Math.min(220, Math.max(1, words.length) * 6);
+  const crossBookResumeLatencyMs = 240 + Math.min(480, Math.max(1, words.length) * 9);
+  const rateResponseLatencyMs = 70 + Math.min(140, Math.max(1, words.length) * 4);
+  const events = [];
+
+  events.push({
+    ts: now,
+    kind: "lifecycle",
+    state: "start",
+    wordIndex: 0,
+    mode,
+    isNarrating: true,
+    previewLatencyMs: warmPreviewLatencyMs,
+    spikeWarningThresholdMs,
+    spikeWarning: warmPreviewLatencyMs > spikeWarningThresholdMs,
+    ...(startupCacheMode ? { cacheMode: startupCacheMode, openingChunkWordCounts } : {}),
+  });
+  events.push({
+    ts: now + startLatencyMs,
+    kind: "lifecycle",
+    state: "first-audio",
+    wordIndex: 0,
+    latencyMs: startLatencyMs,
+    spikeWarningThresholdMs,
+    spikeWarning: startLatencyMs > spikeWarningThresholdMs,
+    mode,
+    isNarrating: true,
+  });
+
+  let pauseInserted = false;
+  for (let i = 0; i < words.length; i += 1) {
+    const ts = now + startLatencyMs + i * baseStep;
+    events.push({ ts, kind: "word", source: "audio", wordIndex: i });
+    if (i % 3 === 0) {
+      events.push({
+        ts: ts + 20,
+        kind: "flow-position",
+        lineIndex: Math.floor(i / 8),
+        totalLines: Math.max(1, Math.ceil(words.length / 8)),
+        wordIndex: i,
+        totalWords: words.length,
+        bookPct: words.length > 1 ? i / (words.length - 1) : 1,
+      });
+    }
+    if (!pauseInserted && fixture.id === "pause-resume" && i > Math.floor(words.length / 2)) {
+      events.push({ ts: ts + 30, kind: "lifecycle", state: "pause", wordIndex: i, mode, isNarrating: true });
+      events.push({ ts: ts + 420, kind: "lifecycle", state: "resume", wordIndex: i, mode, isNarrating: true });
+      pauseInserted = true;
+    }
+  }
+
+  if (fixture.id.includes("section")) {
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 20,
+      kind: "transition",
+      transition: "section",
+      from: 0,
+      to: 1,
+      context: "flow-narration-section-handoff",
+      latencyMs: sectionHandoffLatencyMs,
+    });
+  }
+  if (fixture.id.includes("chapter")) {
+    events.push({ ts: now + startLatencyMs + words.length * baseStep + 20, kind: "transition", transition: "chapter", from: 1, to: 2, context: "fixture-chapter" });
+  }
+  if (fixture.id.includes("queued-handoff")) {
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 20,
+      kind: "transition",
+      transition: "book",
+      from: "book-a",
+      to: "book-b",
+      context: "cross-book-flow-narration",
+    });
+    events.push({
+      ts: now + startLatencyMs + words.length * baseStep + 25,
+      kind: "transition",
+      transition: "handoff",
+      from: "book-a",
+      to: "book-b",
+      context: "cross-book-flow-narration",
+      latencyMs: crossBookResumeLatencyMs,
+    });
+  }
+  if (scenarioId?.includes("rate-edit")) {
+    events.push({
+      ts: now + startLatencyMs + Math.max(baseStep * 2, 120),
+      kind: "transition",
+      transition: "rate-response",
+      from: Math.max(1, Number((rate - 0.1).toFixed(1))),
+      to: rate,
+      context: "same-bucket-segmented-live-rate",
+      latencyMs: rateResponseLatencyMs,
+    });
+  }
+
+  events.push({
+    ts: now + startLatencyMs + words.length * baseStep + 60,
+    kind: "lifecycle",
+    state: "stop",
+    wordIndex: Math.max(0, words.length - 1),
+    mode,
+    isNarrating: false,
+  });
+
+  return {
+    schemaVersion: "1.0",
+    runId,
+    scenarioId: scenarioId || null,
+    createdAt: new Date(now).toISOString(),
+    fixture: {
+      id: fixture.id,
+      title: fixture.title,
+      sourceType: fixture.sourceType,
+      expectedCoverage: fixture.expectedCoverage,
+      notes: fixture.notes || "",
+    },
+    events,
+  };
+}
+
+async function readJson(filePath) {
+  return JSON.parse(await fs.readFile(path.resolve(filePath), "utf8"));
+}
+
+async function writeJsonAtomic(filePath, value) {
+  const tempPath = `${filePath}.tmp`;
+  await fs.writeFile(tempPath, JSON.stringify(value, null, 2), "utf8");
+  await fs.rename(tempPath, filePath);
+}
+
+function slug(value) {
+  return String(value || "value")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function formatRunArtifactBase({ runLabel, scenarioId, iteration }) {
+  return `${slug(runLabel)}__${slug(scenarioId)}__it${String(iteration).padStart(3, "0")}`;
+}
+
+function createFixtureLookup(fixtureManifest, fixtureRoot) {
+  const map = new Map();
+  for (const fixture of fixtureManifest.fixtures || []) {
+    map.set(fixture.id, {
+      ...fixture,
+      textPath: path.resolve(fixtureRoot, fixture.file),
+    });
+  }
+  return map;
+}
+
+async function readFixtureText(fixtureInfo) {
+  const text = await fs.readFile(fixtureInfo.textPath, "utf8");
+  return { ...fixtureInfo, text };
+}
+
+function filterScenariosByTags(scenarios, tags) {
+  if (!tags.length) return scenarios;
+  return scenarios.filter((scenario) => tags.every((tag) => (scenario.tags || []).includes(tag)));
+}
+
+function isExplicitNanoProductGateRun(args) {
+  return args.tags.includes("moss-nano-11")
+    || args.tags.includes("moss-nano-12")
+    || args.tags.includes("nano-product-gate")
+    || args.tags.includes("nano-live-evidence");
+}
+
+function isExplicitNanoLiveEvidenceRun(args) {
+  return args.tags.includes("moss-nano-12")
+    || args.tags.includes("moss-nano-13c")
+    || args.tags.includes("nano-live-evidence")
+    || Boolean(args.nanoLiveEvidencePath)
+    || Boolean(args.nanoLiveEvidenceOutPath);
+}
+
+function buildNanoLiveEvidenceModeConfigs(tracePaths) {
+  return Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode) => [
+      mode,
+      {
+        selectedEngine: "nano",
+        runArtifactPath: tracePaths[mode],
+        segmentProgressUnderstandable: true,
+      },
+    ]),
+  );
+}
+
+function isRunnableMatrixScenario(scenario, args) {
+  if (scenario.engine === "qwen-streaming" || scenario.fixtureId == null) return false;
+  if (scenario.engine === "nano") return isExplicitNanoProductGateRun(args);
+  return true;
+}
+
+async function writeRunArtifacts({ outDir, runBase, trace, summary }) {
+  const tracePath = path.join(outDir, "traces", `${runBase}.trace.json`);
+  const summaryPath = path.join(outDir, "summaries", `${runBase}.summary.json`);
+  await writeJsonAtomic(tracePath, trace);
+  await writeJsonAtomic(summaryPath, summary);
+  return { tracePath, summaryPath };
+}
+
+async function loadRuntimeInputs(args) {
+  const fixtureManifest = await readJson(args.fixtureManifestPath);
+  const matrixManifest = await readJson(args.matrixManifestPath);
+  const fixtureRoot = path.dirname(path.resolve(args.fixtureManifestPath));
+  const fixtureLookup = createFixtureLookup(fixtureManifest, fixtureRoot);
+  return { fixtureManifest, matrixManifest, fixtureLookup };
+}
+
+async function ensureOutLayout(outDir) {
+  await fs.mkdir(path.join(outDir, "traces"), { recursive: true });
+  await fs.mkdir(path.join(outDir, "summaries"), { recursive: true });
+  await fs.mkdir(path.join(outDir, "checkpoints"), { recursive: true });
+}
+
+export async function executeMatrix({
+  args,
+  scenarios,
+  fixtureLookup,
+  outDir,
+  runLabel,
+  shouldStop = () => false,
+}) {
+  await ensureOutLayout(outDir);
+  if (!scenarios.length) throw new Error("No scenarios matched the matrix selection.");
+
+  const summaries = [];
+  const runIndex = { value: 0 };
+
+  for (const scenario of scenarios) {
+    if (shouldStop()) break;
+    runIndex.value += 1;
+    const fixture = fixtureLookup.get(scenario.fixtureId);
+    if (!fixture) throw new Error(`Scenario "${scenario.id}" references unknown fixture "${scenario.fixtureId}"`);
+    const fixtureWithText = await readFixtureText(fixture);
+    const runBase = formatRunArtifactBase({
+      runLabel,
+      scenarioId: scenario.id,
+      iteration: runIndex.value,
+    });
+
+    const trace = simulateTrace({
+      fixture: fixtureWithText,
+      mode: args.mode,
+      rate: scenario.requestedRate ?? args.rate,
+      runId: runBase,
+      scenarioId: scenario.id,
+      runOrdinal: runIndex.value,
+    });
+    const summary = {
+      ...summarizeTrace(trace),
+      scenario: {
+        id: scenario.id,
+        voiceId: scenario.voiceId,
+        requestedRate: scenario.requestedRate,
+        durationClass: scenario.durationClass,
+        tags: scenario.tags || [],
+      },
+    };
+    summaries.push(summary);
+    await writeRunArtifacts({ outDir, runBase, trace, summary });
+  }
+
+  return {
+    summaries,
+    interrupted: shouldStop(),
+  };
+}
+
+export async function executeSoak({
+  args,
+  profile,
+  baseScenarios,
+  fixtureLookup,
+  outDir,
+  runLabel,
+  shouldStop = () => false,
+  checkpointEvery = null,
+}) {
+  await ensureOutLayout(outDir);
+  const scenarios = baseScenarios.slice(0, profile.scenarioLimit);
+  if (!scenarios.length) throw new Error(`Soak profile "${profile.name}" has no scenarios to execute.`);
+
+  const summaries = [];
+  let runCounter = 0;
+  const effectiveCheckpointEvery = checkpointEvery || profile.checkpointEvery;
+  let interrupted = false;
+
+  for (let iteration = 1; iteration <= profile.iterations; iteration += 1) {
+    for (const scenario of scenarios) {
+      if (shouldStop()) {
+        interrupted = true;
+        break;
+      }
+      runCounter += 1;
+      const fixture = fixtureLookup.get(scenario.fixtureId);
+      if (!fixture) throw new Error(`Scenario "${scenario.id}" references unknown fixture "${scenario.fixtureId}"`);
+      const fixtureWithText = await readFixtureText(fixture);
+
+      const runBase = formatRunArtifactBase({
+        runLabel,
+        scenarioId: `${scenario.id}-loop${String(iteration).padStart(2, "0")}`,
+        iteration: runCounter,
+      });
+
+      const trace = simulateTrace({
+        fixture: fixtureWithText,
+        mode: args.mode,
+        rate: scenario.requestedRate ?? args.rate,
+        runId: runBase,
+        scenarioId: scenario.id,
+        runOrdinal: runCounter,
+      });
+      const summary = {
+        ...summarizeTrace(trace),
+        scenario: {
+          id: scenario.id,
+          voiceId: scenario.voiceId,
+          requestedRate: scenario.requestedRate,
+          durationClass: scenario.durationClass,
+          tags: scenario.tags || [],
+        },
+        soakIteration: iteration,
+      };
+      summaries.push(summary);
+      await writeRunArtifacts({ outDir, runBase, trace, summary });
+
+      if (effectiveCheckpointEvery && runCounter % effectiveCheckpointEvery === 0) {
+        const aggregate = calculateAggregateMetrics(summaries);
+        await writeJsonAtomic(
+          path.join(outDir, "checkpoints", `${slug(runLabel)}__checkpoint_${String(runCounter).padStart(4, "0")}.json`),
+          {
+            runCount: runCounter,
+            profile: profile.name,
+            interrupted: false,
+            aggregate,
+          }
+        );
+      }
+    }
+    if (interrupted) break;
+  }
+
+  return { summaries, interrupted };
+}
+
+export async function runHarness(args, runtime = null) {
+  const { fixtureManifest, matrixManifest, fixtureLookup } = runtime ?? await loadRuntimeInputs(args);
+  const outDir = path.resolve(args.outDir);
+  await ensureOutLayout(outDir);
+
+  const state = { interrupted: false };
+  const onSigint = () => {
+    state.interrupted = true;
+  };
+  process.on("SIGINT", onSigint);
+
+  try {
+    let summaries = [];
+    let interrupted = false;
+    let runMode = "fixtures";
+
+    if (args.soakProfile) {
+      runMode = "soak";
+      const profile = getSoakProfile(args.soakProfile);
+      const taggedScenarios = filterScenariosByTags(matrixManifest.scenarios || [], args.tags);
+      const result = await executeSoak({
+        args,
+        profile,
+        baseScenarios: taggedScenarios,
+        fixtureLookup,
+        outDir,
+        runLabel: `${args.runId}-soak-${profile.name}`,
+        shouldStop: () => state.interrupted,
+        checkpointEvery: args.checkpointEvery,
+      });
+      summaries = result.summaries;
+      interrupted = result.interrupted;
+    } else if (args.matrix) {
+      runMode = "matrix";
+      const allScenarios = filterScenariosByTags(matrixManifest.scenarios || [], args.tags);
+      const scenarios = allScenarios.filter((s) => isRunnableMatrixScenario(s, args));
+      const result = await executeMatrix({
+        args,
+        scenarios,
+        fixtureLookup,
+        outDir,
+        runLabel: `${args.runId}-matrix`,
+        shouldStop: () => state.interrupted,
+      });
+      summaries = result.summaries;
+      interrupted = result.interrupted;
+    } else {
+      const selectedFixtures = args.fixtures.length
+        ? fixtureManifest.fixtures.filter((fixture) => args.fixtures.includes(fixture.id))
+        : fixtureManifest.fixtures;
+      if (!selectedFixtures.length) throw new Error("No fixtures matched the requested ids.");
+
+      let ordinal = 0;
+      for (const fixture of selectedFixtures) {
+        if (state.interrupted) break;
+        ordinal += 1;
+        const fixtureWithText = await readFixtureText(fixtureLookup.get(fixture.id));
+        const runBase = formatRunArtifactBase({
+          runLabel: `${args.runId}-fixture`,
+          scenarioId: fixture.id,
+          iteration: ordinal,
+        });
+        const trace = simulateTrace({
+          fixture: fixtureWithText,
+          mode: args.mode,
+          rate: args.rate,
+          runId: runBase,
+          scenarioId: fixture.id,
+          runOrdinal: ordinal,
+        });
+        const summary = summarizeTrace(trace);
+        summaries.push(summary);
+        await writeRunArtifacts({ outDir, runBase, trace, summary });
+      }
+      interrupted = state.interrupted;
+    }
+
+    const aggregate = calculateAggregateMetrics(summaries);
+    const aggregateText = formatAggregateSummary(aggregate);
+    const mossNanoProductGate = args.matrix && args.tags.includes("moss-nano-11")
+      ? evaluateMossNanoProductGate({ matrixManifest })
+      : null;
+    let nanoLiveEvidence = {};
+    if (args.nanoLiveEvidenceOutPath) {
+      nanoLiveEvidence = await buildMossNanoLiveEvidenceArtifact({
+        appCommit: args.appCommit,
+        modes: buildNanoLiveEvidenceModeConfigs(args.nanoLiveTracePaths),
+      });
+      const evidencePath = path.resolve(args.nanoLiveEvidenceOutPath);
+      await fs.mkdir(path.dirname(evidencePath), { recursive: true });
+      await writeJsonAtomic(evidencePath, nanoLiveEvidence);
+    } else if (args.nanoLiveEvidencePath) {
+      nanoLiveEvidence = await readJson(args.nanoLiveEvidencePath);
+    }
+    const mossNanoLiveEvidenceGate = args.matrix && isExplicitNanoLiveEvidenceRun(args)
+      ? evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence: nanoLiveEvidence })
+      : null;
+    const rollup = {
+      generatedAt: new Date().toISOString(),
+      mode: runMode,
+      interrupted,
+      fixtureCount: summaries.length,
+      summaries,
+      aggregate,
+      ...(mossNanoProductGate ? { mossNanoProductGate } : {}),
+      ...(mossNanoLiveEvidenceGate ? { mossNanoLiveEvidenceGate } : {}),
+    };
+
+    await writeJsonAtomic(path.join(outDir, "summary.json"), rollup);
+    await writeJsonAtomic(path.join(outDir, "aggregate-summary.json"), aggregate);
+
+    let gate = null;
+    if (args.gates) {
+      const gatePath = typeof args.gates === "string" ? args.gates : DEFAULT_GATES_PATH;
+      const { report, jsonPath, textPath } = await runGateEvaluation({
+        aggregatePath: path.join(outDir, "aggregate-summary.json"),
+        gatePath,
+        outDir,
+        reportBaseName: "gate-report",
+      });
+      gate = {
+        pass: report.pass,
+        hardFailures: report.counts.hardFailures,
+        warnings: report.counts.warnings,
+        jsonPath,
+        textPath,
+      };
+      rollup.gateReport = report;
+      await writeJsonAtomic(path.join(outDir, "summary.json"), rollup);
+    }
+
+    const lines = [
+      `TTS eval ${runMode} run complete (${summaries.length} run${summaries.length === 1 ? "" : "s"})${interrupted ? " [INTERRUPTED]" : ""}`,
+      ...summaries.map(
+        (s) =>
+          `- ${s.scenario?.id || s.fixtureId}: latency=${s.startLatencyMs ?? "n/a"}ms drift=${s.maxDrift ?? "n/a"} failures=${s.failureClasses.join(",") || "none"}`
+      ),
+      "",
+      aggregateText,
+    ];
+    if (gate) {
+      lines.push("", formatGateReport(rollup.gateReport).trim(), `Gate artifacts: ${gate.jsonPath} | ${gate.textPath}`);
+    }
+    if (mossNanoProductGate) {
+      lines.push(
+        "",
+        `MOSS-NANO-11 max decision: ${mossNanoProductGate.maxDecision}`,
+        `MOSS-NANO-11 gate reasons: ${mossNanoProductGate.reasons.join("; ") || "none"}`,
+      );
+    }
+    if (mossNanoLiveEvidenceGate) {
+      lines.push(
+        "",
+        `MOSS-NANO-13c live evidence decision: ${mossNanoLiveEvidenceGate.decision}`,
+        `MOSS-NANO-13c live evidence gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
+      );
+    }
+    await fs.writeFile(path.join(outDir, "summary.txt"), `${lines.join("\n")}\n`, "utf8");
+    return { rollup, lines, gate };
+  } finally {
+    process.off("SIGINT", onSigint);
+  }
+}
+
+export async function runStreamingScenarios(args) {
+  const matrixManifest = await readJson(args.matrixManifestPath);
+  const gatesDoc = await readJson(DEFAULT_GATES_PATH);
+  const gateThresholds = gatesDoc.streaming || {};
+
+  const streamingScenarios = (matrixManifest.scenarios || []).filter(
+    (s) => s.engine === "qwen-streaming",
+  );
+
+  if (!streamingScenarios.length) {
+    throw new Error("No qwen-streaming scenarios found in matrix manifest.");
+  }
+
+  const outDir = path.resolve(args.outDir, "streaming-baseline");
+  await fs.mkdir(outDir, { recursive: true });
+
+  const results = [];
+
+  for (const scenario of streamingScenarios) {
+    const wordsAchieved = (scenario.text || "").split(/\s+/).filter(Boolean).length;
+
+    // Determine which gate keys this scenario expects to validate.
+    const expectedGates = scenario.expectedGates || [];
+
+    // Build gate results — mark pending because actual sidecar metrics are not
+    // available in the eval runner context (no live sidecar process).
+    const gateResults = {};
+    for (const gateKey of expectedGates) {
+      const gateDef = gateThresholds[gateKey];
+      gateResults[gateKey] = {
+        gate: gateDef || null,
+        status: "pending_live_data",
+      };
+    }
+
+    results.push({
+      id: scenario.id,
+      label: scenario.label || scenario.id,
+      metrics: {
+        firstAudioLatencyMs: null,
+        interSegmentGapMs: null,
+        totalStreamDurationMs: null,
+        wordsAchieved,
+        stallCount: 0,
+      },
+      gateResults,
+    });
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const artifactPath = path.join(outDir, `streaming-summary-${timestamp}.json`);
+  const artifact = {
+    generatedAt: new Date().toISOString(),
+    scenarioCount: results.length,
+    scenarios: results,
+    gateThresholds,
+    note: "Metrics are placeholders — populate with live sidecar run data",
+  };
+
+  await writeJsonAtomic(artifactPath, artifact);
+
+  // eslint-disable-next-line no-console
+  console.log("\nStreaming scenario baseline:");
+  // eslint-disable-next-line no-console
+  console.table(
+    results.map((r) => ({
+      id: r.id,
+      wordsAchieved: r.metrics.wordsAchieved,
+      firstAudioLatencyMs: r.metrics.firstAudioLatencyMs,
+      stallCount: r.metrics.stallCount,
+      gateStatuses: Object.values(r.gateResults)
+        .map((g) => g.status)
+        .join(", ") || "none",
+    })),
+  );
+  // eslint-disable-next-line no-console
+  console.log(`Streaming artifact written: ${artifactPath}`);
+
+  return { artifact, artifactPath };
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  if (args.streaming) {
+    const { artifactPath } = await runStreamingScenarios(args);
+    // eslint-disable-next-line no-console
+    console.log(`Streaming baseline complete. Artifact: ${artifactPath}`);
+    return;
+  }
+
+  const { lines, gate } = await runHarness(args);
+  // eslint-disable-next-line no-console
+  console.log(lines.join("\n"));
+  if (gate && !gate.pass) {
+    process.exitCode = 2;
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error("[tts_eval_runner] failed:", error.message);
+    process.exitCode = 1;
+  });
+}

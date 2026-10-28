@@ -1,0 +1,20 @@
+MOSS Nano Probe
+===============
+Status: blocked
+Failure class: runtime-contract
+Run ID: moss-nano-5-adjacent-segments-resident
+Passage: long-form-3min
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-5-adjacent-segments-resident\output_003.wav
+Total seconds: 17.4437
+First WAV bytes seconds: 0.475
+Internal first decoded seconds: 0.475
+Audio duration seconds: 26.24
+RTF: 0.6648
+Peak memory: 1900.7 MB
+Process mode: warm
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 3
+Error: adjacent RTF trend exceeds 15%

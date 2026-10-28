@@ -1,0 +1,334 @@
+{
+  "status": "ok",
+  "runId": "moss-nano-2-cold-punctuation-realtext",
+  "passageId": "punctuation-heavy-mid",
+  "failureClass": null,
+  "summary": {
+    "ok": true,
+    "status": "ok",
+    "runId": "moss-nano-2-cold-punctuation-realtext",
+    "passageId": "punctuation-heavy-mid",
+    "backend": "moss-nano-onnx",
+    "device": "cpu",
+    "modelVariant": "moss-tts-nano-onnx",
+    "pythonExecutable": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe",
+    "threads": 4,
+    "sampleRate": 48000,
+    "maxNewFrames": 375,
+    "sampleMode": "fixed",
+    "streaming": true,
+    "voice": "Junhao",
+    "repoDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano",
+    "modelDir": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX",
+    "expectedModelSubdirs": [
+      "MOSS-TTS-Nano-100M-ONNX",
+      "MOSS-Audio-Tokenizer-Nano-ONNX"
+    ],
+    "promptAudio": null,
+    "wordCount": 14,
+    "totalSec": 21.4322,
+    "firstAudioSec": 0.0634,
+    "firstAudioObservedSec": 0.0634,
+    "firstAudioObservation": {
+      "kind": "file-observed-wav-bytes",
+      "thresholdBytes": 44,
+      "fieldAliases": [
+        "firstAudioSec"
+      ],
+      "internalFirstDecodedAudioSec": null,
+      "internalFirstDecodedAudioSupported": false
+    },
+    "audioDurationSec": 11.76,
+    "rtf": 1.8225,
+    "peakMemoryMb": null,
+    "outputWavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav",
+    "stdoutTail": "",
+    "stderrTail": "2026-04-28 15:17:02,113 INFO root: text normalization method=robust language=n/a text_chars=95\r\n2026-04-28 15:17:02,114 INFO root: using built-in voice preset: Junhao\r\n2026-04-28 15:17:09,691 INFO root: saved generated audio to C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav sample_rate=48000 frames=147 sample_mode=fixed streaming=True",
+    "commandMetadata": {
+      "executable": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe",
+      "argv": [
+        "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano\\infer_onnx.py",
+        "--text",
+        "Wait... really? Yes: commas, semicolons; dashes, quotes, and parentheses all need a calm voice.",
+        "--output-audio-path",
+        "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav",
+        "--model-dir",
+        "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX",
+        "--cpu-threads",
+        "4",
+        "--max-new-frames",
+        "375",
+        "--sample-mode",
+        "fixed",
+        "--voice",
+        "Junhao",
+        "--realtime-streaming-decode",
+        "1",
+        "--disable-wetext-processing"
+      ],
+      "cwd": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano",
+      "requested": {
+        "threads": 4,
+        "maxNewFrames": 375,
+        "sampleMode": "fixed",
+        "voice": "Junhao",
+        "promptAudio": null,
+        "processMode": "cold",
+        "iterations": 2,
+        "warmupRuns": 0,
+        "prewarm": "none",
+        "profileStages": true,
+        "segmentPolicy": "none",
+        "segmentMaxTokens": null,
+        "segmentMaxChars": null,
+        "segmentMinChars": null,
+        "segmentSource": "raw",
+        "writeSegmentWavs": false,
+        "precomputeInputs": false
+      },
+      "effective": {
+        "threads": 4,
+        "maxNewFrames": 375,
+        "sampleMode": "fixed",
+        "streaming": true,
+        "disableWetextProcessing": true,
+        "voice": "Junhao",
+        "promptAudio": null,
+        "processMode": "cold",
+        "iterations": 2,
+        "warmupRuns": 0,
+        "prewarm": "none",
+        "profileStages": true,
+        "segmentPolicy": "none",
+        "segmentSource": "raw",
+        "writeSegmentWavs": false,
+        "precomputeInputs": false
+      }
+    },
+    "checks": [
+      {
+        "key": "pythonVersion",
+        "status": "pass",
+        "detail": "Python 3.13.13 is supported.",
+        "failureClass": null
+      },
+      {
+        "key": "sourceRepo",
+        "status": "pass",
+        "detail": "Nano source repo is present at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\MOSS-TTS-Nano.",
+        "failureClass": null
+      },
+      {
+        "key": "modelRoot",
+        "status": "pass",
+        "detail": "Nano ONNX model root is present at C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "onnxAssets",
+        "status": "pass",
+        "detail": "Found 5 ONNX file(s) in C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-TTS-Nano-100M-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "onnxAssets",
+        "status": "pass",
+        "detail": "Found 3 ONNX file(s) in C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\weights\\MOSS-TTS-Nano-ONNX\\MOSS-Audio-Tokenizer-Nano-ONNX.",
+        "failureClass": null
+      },
+      {
+        "key": "pythonDependency",
+        "status": "pass",
+        "detail": "Required Python dependencies onnxruntime, numpy, sentencepiece, torch, torchaudio are importable.",
+        "failureClass": null
+      },
+      {
+        "key": "entrypoint",
+        "status": "pass",
+        "detail": "Using local Nano command: C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe.",
+        "failureClass": null
+      }
+    ],
+    "failureClass": null,
+    "error": null,
+    "benchmark": {
+      "processMode": "cold",
+      "iterationsRequested": 2,
+      "warmupRunsRequested": 0,
+      "prewarm": "none",
+      "runtimeReuseRequested": false,
+      "runtimeReuseSupported": false,
+      "runtimeReuseActual": false,
+      "precomputeInputsRequested": false
+    },
+    "segmentation": {
+      "policy": "none",
+      "source": "raw",
+      "maxTokens": null,
+      "maxChars": null,
+      "minChars": null,
+      "writeSegmentWavs": false,
+      "segments": [
+        {
+          "index": 0,
+          "charCount": 95,
+          "wordCount": 14
+        }
+      ]
+    },
+    "ort": {
+      "requested": {
+        "providers": [],
+        "intraOpThreads": null,
+        "interOpThreads": null,
+        "executionMode": null,
+        "graphOptimization": null,
+        "enableCpuMemArena": null,
+        "enableMemPattern": null,
+        "enableMemReuse": null,
+        "usePerSessionThreads": null
+      },
+      "available": {
+        "directSessionConfiguration": false,
+        "reason": "Probe executes the repo-local Nano CLI as a subprocess and cannot safely mutate its ONNX Runtime SessionOptions."
+      },
+      "appliedToCommand": false,
+      "unsupported": false
+    },
+    "stageProfile": {
+      "enabled": true,
+      "supported": false,
+      "limitations": "Probe observes subprocess wall time and output WAV file growth only; internal tokenize/prepare/ORT/decode stage timings are unavailable without runtime instrumentation.",
+      "stagesSec": {
+        "precomputeInputs": null,
+        "runtimeStartup": null,
+        "modelLoad": null,
+        "tokenize": null,
+        "prepareInputs": null,
+        "onnxInference": null,
+        "decode": null,
+        "writeWav": null,
+        "internalFirstDecodedAudio": null
+      }
+    },
+    "iterations": [
+      {
+        "iterationIndex": 0,
+        "processMode": "cold",
+        "runtimeReuseActual": false,
+        "segmentCount": 1,
+        "totalSec": 18.8214,
+        "firstAudioObservedSec": 18.2049,
+        "firstAudioSec": 18.2049,
+        "audioDurationSec": 11.76,
+        "rtf": 1.6005,
+        "segments": [
+          {
+            "iterationIndex": 0,
+            "segmentIndex": 0,
+            "measured": true,
+            "returnCode": 0,
+            "totalSec": 18.8214,
+            "firstAudioObservedSec": 18.2049,
+            "firstAudioSec": 18.2049,
+            "audioDurationSec": 11.76,
+            "rtf": 1.6005,
+            "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav",
+            "stdoutTail": "",
+            "stderrTail": "2026-04-28 15:16:41,657 INFO root: text normalization method=robust language=n/a text_chars=95\r\n2026-04-28 15:16:41,657 INFO root: using built-in voice preset: Junhao\r\n2026-04-28 15:16:48,330 INFO root: saved generated audio to C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav sample_rate=48000 frames=147 sample_mode=fixed streaming=True",
+            "stageProfile": {
+              "enabled": true,
+              "supported": false,
+              "limitations": "Probe observes subprocess wall time and output WAV file growth only; internal tokenize/prepare/ORT/decode stage timings are unavailable without runtime instrumentation.",
+              "stagesSec": {
+                "precomputeInputs": null,
+                "runtimeStartup": null,
+                "modelLoad": null,
+                "tokenize": null,
+                "prepareInputs": null,
+                "onnxInference": null,
+                "decode": null,
+                "writeWav": null,
+                "internalFirstDecodedAudio": null
+              }
+            }
+          }
+        ]
+      },
+      {
+        "iterationIndex": 1,
+        "processMode": "cold",
+        "runtimeReuseActual": false,
+        "segmentCount": 1,
+        "totalSec": 21.4322,
+        "firstAudioObservedSec": 0.0634,
+        "firstAudioSec": 0.0634,
+        "audioDurationSec": 11.76,
+        "rtf": 1.8225,
+        "segments": [
+          {
+            "iterationIndex": 1,
+            "segmentIndex": 0,
+            "measured": true,
+            "returnCode": 0,
+            "totalSec": 21.4322,
+            "firstAudioObservedSec": 0.0634,
+            "firstAudioSec": 0.0634,
+            "audioDurationSec": 11.76,
+            "rtf": 1.8225,
+            "wavPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav",
+            "stdoutTail": "",
+            "stderrTail": "2026-04-28 15:17:02,113 INFO root: text normalization method=robust language=n/a text_chars=95\r\n2026-04-28 15:17:02,114 INFO root: using built-in voice preset: Junhao\r\n2026-04-28 15:17:09,691 INFO root: saved generated audio to C:\\Users\\estra\\Projects\\Blurby\\artifacts\\moss\\moss-nano-2-cold-punctuation-realtext\\output.wav sample_rate=48000 frames=147 sample_mode=fixed streaming=True",
+            "stageProfile": {
+              "enabled": true,
+              "supported": false,
+              "limitations": "Probe observes subprocess wall time and output WAV file growth only; internal tokenize/prepare/ORT/decode stage timings are unavailable without runtime instrumentation.",
+              "stagesSec": {
+                "precomputeInputs": null,
+                "runtimeStartup": null,
+                "modelLoad": null,
+                "tokenize": null,
+                "prepareInputs": null,
+                "onnxInference": null,
+                "decode": null,
+                "writeWav": null,
+                "internalFirstDecodedAudio": null
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "warmups": [],
+    "aggregate": {
+      "iterations": 2,
+      "warmupsExcluded": 0,
+      "totalSec": {
+        "min": 18.8214,
+        "max": 21.4322,
+        "p50": 20.1268,
+        "p95": 21.3017
+      },
+      "firstAudioObservedSec": {
+        "min": 0.0634,
+        "max": 18.2049,
+        "p50": 9.1341,
+        "p95": 17.2978
+      },
+      "audioDurationSec": {
+        "min": 11.76,
+        "max": 11.76,
+        "p50": 11.76,
+        "p95": 11.76
+      },
+      "rtf": {
+        "min": 1.6005,
+        "max": 1.8225,
+        "p50": 1.7115,
+        "p95": 1.8114
+      }
+    }
+  },
+  "pythonExecutable": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\.venv-nano\\Scripts\\python.exe",
+  "pythonProbePath": "C:\\Users\\estra\\Projects\\Blurby\\scripts\\moss_nano_probe.py"
+}

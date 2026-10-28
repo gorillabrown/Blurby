@@ -1,0 +1,3 @@
+Start narration here, pause after the second sentence, and resume without changing ownership of the canonical cursor.
+If resume drifts backward, the run should be flagged.
+

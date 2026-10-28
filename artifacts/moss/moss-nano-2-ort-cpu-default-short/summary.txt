@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-2-ort-cpu-default-short
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-2-ort-cpu-default-short\output.wav
+Total seconds: 16.846
+First WAV bytes seconds: 16.1736
+Internal first decoded seconds: unsupported
+Audio duration seconds: 3.68
+RTF: 4.5777
+Peak memory: unknown MB
+Process mode: cold
+Runtime reuse actual: false
+Prewarm: none
+Iterations: 1

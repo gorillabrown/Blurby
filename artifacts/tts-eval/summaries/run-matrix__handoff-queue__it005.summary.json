@@ -1,0 +1,40 @@
+{
+  "fixtureId": "queued-handoff",
+  "scenarioId": "handoff-queue",
+  "runId": "run-matrix__handoff-queue__it005",
+  "startLatencyMs": 402,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 402,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 26,
+  "flowEventCount": 9,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 1,
+    "handoff": 1
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": 474,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "handoff-queue",
+    "voiceId": "af_bella",
+    "requestedRate": 1.4,
+    "durationClass": "medium",
+    "tags": [
+      "handoff",
+      "transition"
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "status": "ok",
+  "runId": "moss-host-2-wsl-ready",
+  "checkedAt": "2026-04-28T13:57:21.639Z",
+  "configPath": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\config.json",
+  "host": {
+    "platform": "win32",
+    "arch": "arm64"
+  },
+  "shapes": {
+    "x64Windows": {
+      "status": "available",
+      "binaryPath": "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\moss\\llama.cpp\\build-vs-x64\\bin\\Release\\llama-moss-tts.exe",
+      "detail": "Configured x64 Windows MOSS binary is present."
+    },
+    "nativeArm64Clang": {
+      "status": "blocked",
+      "blocker": "clang-unavailable",
+      "detail": "spawn clang ENOENT",
+      "wouldRun": true,
+      "configureCommand": {
+        "command": "cmake",
+        "args": [
+          "--preset",
+          "arm64-windows-llvm-release"
+        ]
+      },
+      "buildCommand": {
+        "command": "cmake",
+        "args": [
+          "--build",
+          "--preset",
+          "arm64-windows-llvm-release"
+        ]
+      },
+      "preset": "arm64-windows-llvm-release"
+    },
+    "wsl2Linux": {
+      "status": "available",
+      "detail": "Ubuntu-24.04 shell gate confirmed WSL runtime and host2 aarch64 MOSS binary.",
+      "distro": "Ubuntu-24.04",
+      "binaryPath": "/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts",
+      "machine": "aarch64",
+      "wslStatus": {
+        "status": "available",
+        "detail": "wsl.exe --status indicates WSL2 is available.",
+        "stdoutTail": "Default Distribution: docker-desktop-data\r\nDefault Version: 2\r\n",
+        "stderrTail": ""
+      },
+      "gateCommand": {
+        "command": "wsl.exe",
+        "args": [
+          "-d",
+          "Ubuntu-24.04",
+          "-u",
+          "root",
+          "--",
+          "bash",
+          "-lc",
+          "echo WSL_OK && test -x /mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts && uname -m"
+        ]
+      },
+      "stdoutTail": "WSL_OK\naarch64\n",
+      "stderrTail": ""
+    }
+  }
+}
