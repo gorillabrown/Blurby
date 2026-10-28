@@ -1,0 +1,156 @@
+import { describe, it, expect } from "vitest";
+import * as fs from "fs";
+import * as path from "path";
+import * as migrations from "../main/migrations.js";
+
+const read = (rel: string) => fs.readFileSync(path.resolve(__dirname, "..", rel), "utf-8");
+
+describe("NARR-LAYER-1B consolidation", () => {
+  it("promotes narrate into the shared ReaderMode contract", () => {
+    const src = read("src/hooks/useReaderMode.ts");
+    expect(src).toContain("import type { BlurbySettings, ReaderMode } from \"../types\";");
+    expect(src).not.toContain("type ReadingMode = \"page\" | \"focus\" | \"flow\";");
+    expect(src).not.toContain("\"narration\"");
+  });
+
+  it("uses shared four-mode aliases for persisted readingMode types", () => {
+    const src = read("src/types.ts");
+    expect(src).toContain("export type ReaderMode = \"page\" | \"focus\" | \"flow\" | \"narrate\";");
+    expect(src).toContain("export type ReaderLastMode = \"focus\" | \"flow\" | \"narrate\";");
+    expect(src).toContain("readingMode: ReaderMode;");
+    expect(src).toContain("lastReadingMode: ReaderLastMode;");
+  });
+
+  it("adds isNarrating flag to settings type", () => {
+    const src = read("src/types.ts");
+    expect(src).toContain("isNarrating: boolean;");
+  });
+
+  it("includes isNarrating in default settings", () => {
+    const src = read("src/constants.ts");
+    expect(src).toContain("isNarrating: false,");
+  });
+
+  it("includes isNarrating in test harness defaults", () => {
+    const src = read("src/test-harness/electron-api-stub.ts");
+    expect(src).toContain("isNarrating: false,");
+  });
+
+  it("deletes NarrateMode implementation file", () => {
+    const file = path.resolve(__dirname, "..", "src/modes/NarrateMode.ts");
+    expect(fs.existsSync(file)).toBe(false);
+  });
+
+  it("removes NarrateMode export from modes barrel", () => {
+    const src = read("src/modes/index.ts");
+    expect(src).not.toContain("NarrateMode");
+  });
+
+  it("ModeType excludes narration", () => {
+    const src = read("src/modes/ModeInterface.ts");
+    expect(src).toContain("export type ModeType = \"page\" | \"focus\" | \"flow\";");
+    expect(src).not.toContain("\"narration\"");
+  });
+
+  it("reading mode instance only supports page/focus/flow", () => {
+    const src = read("src/hooks/useReadingModeInstance.ts");
+    expect(src).toContain('case "page":');
+    expect(src).toContain('case "focus":');
+    expect(src).toContain('case "flow":');
+    expect(src).not.toContain('case "narration"');
+  });
+
+  it("pending resume in mode instance is flow-only", () => {
+    const src = read("src/hooks/useReadingModeInstance.ts");
+    expect(src).toContain("mode: \"flow\"");
+    expect(src).not.toContain("mode: \"narration\"");
+  });
+
+  it("FoliatePageView no longer renders narration overlay node", () => {
+    const src = read("src/components/FoliatePageView.tsx");
+    expect(src).not.toContain("foliate-narration-highlight");
+    expect(src).not.toContain("highlightRef");
+  });
+
+  it("FoliatePageView highlight API styleHint is flow-only", () => {
+    const src = read("src/components/FoliatePageView.tsx");
+    expect(src).toMatch(/export interface FoliateHighlightOptions\s*{[\s\S]*allowMotion\?:\s*boolean;[\s\S]*}/);
+    expect(src).toMatch(/highlightWordByIndex:\s*\(wordIndex:\s*number,\s*styleHint\?:\s*"flow",\s*options\?:\s*FoliateHighlightOptions\)\s*=>\s*boolean;/);
+    expect(src).not.toMatch(/styleHint\?:\s*(?:string|ReadingMode|"page"|"narrate"|"flow"\s*\|)/);
+  });
+
+  it("ReaderContainer treats narrate as the narration-selected source of truth", () => {
+    const src = read("src/components/ReaderContainer.tsx");
+    expect(src).toContain("readingMode === \"narrate\"");
+    expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
+    expect(src).toContain("(readingMode === \"page\" && settings.lastReadingMode === \"narrate\")");
+    expect(src).not.toContain("(readingMode === \"page\" && settings.isNarrating === true)");
+  });
+
+  it("ReaderBottomBar computes narration-selected from paused or active narrate selection", () => {
+    const src = read("src/components/ReaderBottomBar.tsx");
+    expect(src).toContain("const isNarrationSelected = readingMode === \"narrate\" || isNarrating;");
+  });
+
+  it("DocumentLifecycle accepts isNarrating", () => {
+    const src = read("src/hooks/useDocumentLifecycle.ts");
+    expect(src).toContain("isNarrating: boolean;");
+  });
+
+  it("FoliateSync accepts isNarrating", () => {
+    const src = read("src/hooks/useFoliateSync.ts");
+    expect(src).toContain("isNarrating: boolean;");
+  });
+
+  it("NarrationCaching accepts isNarrating", () => {
+    const src = read("src/hooks/useNarrationCaching.ts");
+    expect(src).toContain("isNarrating: boolean;");
+  });
+
+  it("NarrationCaching resolves Kokoro cache buckets through the shared rate plan", () => {
+    const src = read("src/hooks/useNarrationCaching.ts");
+    expect(src).toContain("resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket");
+    expect(src).not.toContain("resolveKokoroBucket(settings.ttsRate || 1.0)");
+  });
+
+  it("removes narration overlay CSS selector", () => {
+    const css = read("src/styles/page-reader.css");
+    expect(css).not.toContain(".foliate-narration-highlight");
+  });
+
+  it("keeps the NARR-LAYER-1B migration before the current schema", () => {
+    expect(migrations.CURRENT_SETTINGS_SCHEMA).toBeGreaterThanOrEqual(8);
+    expect(migrations.settingsMigrations[7].toString()).toContain("data.schemaVersion = 8");
+  });
+
+  it("migration maps readingMode narration -> flow + isNarrating true", () => {
+    const data = { schemaVersion: 7, readingMode: "narration", lastReadingMode: "focus" };
+    const migrated = migrations.runMigrations(data, migrations.settingsMigrations, migrations.CURRENT_SETTINGS_SCHEMA);
+    expect(migrated.readingMode).toBe("flow");
+    expect(migrated.isNarrating).toBe(true);
+  });
+
+  it("migration maps lastReadingMode narration -> flow", () => {
+    const data = { schemaVersion: 7, readingMode: "page", lastReadingMode: "narration" };
+    const migrated = migrations.runMigrations(data, migrations.settingsMigrations, migrations.CURRENT_SETTINGS_SCHEMA);
+    expect(migrated.lastReadingMode).toBe("flow");
+  });
+
+  it("migration adds isNarrating false when missing", () => {
+    const data = { schemaVersion: 7, readingMode: "flow", lastReadingMode: "flow" };
+    const migrated = migrations.runMigrations(data, migrations.settingsMigrations, migrations.CURRENT_SETTINGS_SCHEMA);
+    expect(migrated.isNarrating).toBe(false);
+  });
+
+  it("migration preserves existing isNarrating false", () => {
+    const data = { schemaVersion: 7, readingMode: "flow", lastReadingMode: "focus", isNarrating: false };
+    const migrated = migrations.runMigrations(data, migrations.settingsMigrations, migrations.CURRENT_SETTINGS_SCHEMA);
+    expect(migrated.isNarrating).toBe(false);
+  });
+
+  it("migration preserves non-narration readingMode", () => {
+    const data = { schemaVersion: 7, readingMode: "page", lastReadingMode: "focus" };
+    const migrated = migrations.runMigrations(data, migrations.settingsMigrations, migrations.CURRENT_SETTINGS_SCHEMA);
+    expect(migrated.readingMode).toBe("page");
+  });
+});

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "baselineVersion": "v1",
+  "createdAt": "2026-04-16T19:23:42.7604019-05:00",
+  "source": {
+    "runType": "matrix",
+    "runId": "baseline-v1",
+    "commitShortSha": "75b4082",
+    "artifactsDir": "artifacts/tts-eval/baseline-v1"
+  },
+  "manifests": {
+    "fixtureManifestPath": "tests/fixtures/narration/manifest.json",
+    "fixtureManifestSha256": "C7BFCA6D0717B952FBB9A445109D25B55199BAB62AB58B2F61041D4467912F27",
+    "matrixManifestPath": "tests/fixtures/narration/matrix.manifest.json",
+    "matrixManifestSha256": "EC057EEF52F4FF6AB3D24EE8ABCA7A02FB758740DFBB23E3061E52928F5920DE"
+  },
+  "gateConfig": {
+    "path": "docs/testing/tts_quality_gates.v1.json",
+    "gateVersion": "v1"
+  },
+  "aggregate": {
+    "runCount": 5,
+    "startupLatency": {
+      "p50": 465,
+      "p95": 502.8,
+      "min": 402,
+      "max": 507
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    }
+  }
+}

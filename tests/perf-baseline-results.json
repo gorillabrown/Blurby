@@ -1,0 +1,183 @@
+{
+  "timestamp": "2026-05-18T21:05:51.241Z",
+  "version": "1.75.1",
+  "node_version": "v24.14.0",
+  "platform": "win32",
+  "arch": "arm64",
+  "automated": {
+    "tokenize_1k": {
+      "mean_ms": 0.06227800000000286,
+      "p50_ms": 0.05520000000001346,
+      "p99_ms": 0.08139999999997372,
+      "min_ms": 0.035900000000026466,
+      "max_ms": 1.0860000000000127,
+      "iterations": 100,
+      "threshold_ms": 10,
+      "pass": true
+    },
+    "tokenize_10k": {
+      "mean_ms": 0.3742749999999967,
+      "p50_ms": 0.32550000000003365,
+      "p99_ms": 0.7950999999999908,
+      "min_ms": 0.309599999999989,
+      "max_ms": 1.1066999999999894,
+      "iterations": 100,
+      "threshold_ms": 100,
+      "pass": true
+    },
+    "tokenize_50k": {
+      "mean_ms": 5.012055999999998,
+      "p50_ms": 3.452699999999936,
+      "p99_ms": 28.32009999999991,
+      "min_ms": 2.2981999999999516,
+      "max_ms": 28.32009999999991,
+      "iterations": 50,
+      "threshold_ms": 500,
+      "pass": true
+    },
+    "tokenize_100k": {
+      "mean_ms": 8.322865000000002,
+      "p50_ms": 6.764800000000037,
+      "p99_ms": 18.735500000000002,
+      "min_ms": 4.558299999999917,
+      "max_ms": 18.735500000000002,
+      "iterations": 20,
+      "threshold_ms": 1000,
+      "pass": true
+    },
+    "tokenizeWithMeta_1k": {
+      "mean_ms": 0.06628299999999968,
+      "p50_ms": 0.07129999999995107,
+      "p99_ms": 0.09979999999995925,
+      "min_ms": 0.046399999999948704,
+      "max_ms": 0.12639999999998963,
+      "iterations": 100,
+      "threshold_ms": 20,
+      "pass": true
+    },
+    "tokenizeWithMeta_10k": {
+      "mean_ms": 0.5727399999999886,
+      "p50_ms": 0.4916000000000622,
+      "p99_ms": 1.2550000000001091,
+      "min_ms": 0.45289999999999964,
+      "max_ms": 1.262899999999945,
+      "iterations": 100,
+      "threshold_ms": 200,
+      "pass": true
+    },
+    "tokenizeWithMeta_50k": {
+      "mean_ms": 3.2489700000000084,
+      "p50_ms": 2.695299999999861,
+      "p99_ms": 11.095199999999977,
+      "min_ms": 2.380000000000109,
+      "max_ms": 11.095199999999977,
+      "iterations": 50,
+      "threshold_ms": 1000,
+      "pass": true
+    },
+    "tokenizeWithMeta_100k": {
+      "mean_ms": 7.346045000000004,
+      "p50_ms": 5.749399999999923,
+      "p99_ms": 20.77130000000011,
+      "min_ms": 4.6155999999998585,
+      "max_ms": 20.77130000000011,
+      "iterations": 20,
+      "threshold_ms": 2000,
+      "pass": true
+    },
+    "countWords_1k": {
+      "mean_ms": 0.02207199999998693,
+      "p50_ms": 0.027000000000043656,
+      "p99_ms": 0.06979999999998654,
+      "min_ms": 0.012799999999970169,
+      "max_ms": 0.09930000000008476,
+      "iterations": 100,
+      "threshold_ms": 5,
+      "pass": true
+    },
+    "countWords_10k": {
+      "mean_ms": 0.1739619999999968,
+      "p50_ms": 0.12910000000010768,
+      "p99_ms": 0.6869000000001506,
+      "min_ms": 0.12639999999987594,
+      "max_ms": 1.1462999999998829,
+      "iterations": 100,
+      "threshold_ms": 50,
+      "pass": true
+    },
+    "countWords_50k": {
+      "mean_ms": 0.9367160000000012,
+      "p50_ms": 0.6803999999999633,
+      "p99_ms": 7.597999999999956,
+      "min_ms": 0.6319999999998345,
+      "max_ms": 7.597999999999956,
+      "iterations": 50,
+      "threshold_ms": 250,
+      "pass": true
+    },
+    "countWords_100k": {
+      "mean_ms": 1.5264500000000043,
+      "p50_ms": 1.3503000000000611,
+      "p99_ms": 5.58829999999989,
+      "min_ms": 1.2878000000000611,
+      "max_ms": 5.58829999999989,
+      "iterations": 50,
+      "threshold_ms": 500,
+      "pass": true
+    },
+    "word_advance_single": {
+      "mean_ms": 0.0006846000000009553,
+      "p50_ms": 0.0006000000000767614,
+      "p99_ms": 0.003500000000030923,
+      "min_ms": 0.0001999999999497959,
+      "max_ms": 0.028099999999994907,
+      "iterations": 1000,
+      "threshold_ms": 2,
+      "pass": true
+    },
+    "word_advance_1k_bulk": {
+      "mean_ms": 0.35825300000000426,
+      "p50_ms": 0.279700000000048,
+      "p99_ms": 1.049600000000055,
+      "min_ms": 0.27310000000011314,
+      "max_ms": 2.6592000000000553,
+      "iterations": 100,
+      "threshold_ms": 100,
+      "pass": true
+    }
+  },
+  "manual": {
+    "startupCold": {
+      "threshold": 3000,
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#startup-time"
+    },
+    "startupWarm": {
+      "threshold": 1500,
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#startup-time"
+    },
+    "memoryStartup": {
+      "unit": "MB",
+      "procedure": "See docs/testing/perf-manual.md#memory-usage"
+    },
+    "flowFps": {
+      "threshold": 55,
+      "unit": "fps",
+      "procedure": "See docs/testing/perf-manual.md#scroll-fps"
+    },
+    "syncCycleTime": {
+      "unit": "ms",
+      "procedure": "See docs/testing/perf-manual.md#sync-cycle-time"
+    }
+  },
+  "thresholds": {
+    "doc_open_50k_ms": 500,
+    "word_advance_p99_ms": 2,
+    "word_advance_bulk_1k_ms": 100,
+    "startup_cold_s": 3,
+    "startup_warm_s": 1.5,
+    "flow_fps_min": 55
+  },
+  "pass": true
+}

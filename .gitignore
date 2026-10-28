@@ -1,0 +1,47 @@
+node_modules/
+dist/
+release/
+.DS_Store
+*.log
+
+# Large binary assets (keep on disk, not in repo)
+Blurby Brand/
+Blurby Brand.zip
+Example book/
+{src,public}/
+
+# Superpowers working files
+.superpowers/
+.tmp/
+
+# Claude Code working files
+.Backup/
+.claude/worktrees/
+Example App/
+
+# JetBrains project files are intentionally tracked
+!.idea/
+
+artifacts/tts-eval/engine-scan/**
+!artifacts/tts-eval/engine-scan/README.md
+
+# Generated evidence hygiene: keep bulky outputs local unless explicitly promoted.
+#
+# SK-HYG-2 Option B: bulk experiment artifacts stay local/ignored. Curated
+# canonical evidence is copied into tracked docs/evidence/ instead.
+artifacts/
+tmp/
+tmp_brandcheck*
+!docs/evidence/
+!docs/evidence/**
+
+artifacts/**/*.wav
+artifacts/**/*.mp3
+artifacts/**/*.flac
+artifacts/**/*.opus
+artifacts/**/*.bin
+artifacts/**/*.log
+artifacts/**/tmp/**
+artifacts/**/traces/**
+artifacts/**/*profile*.json
+artifacts/**/*profile*.txt

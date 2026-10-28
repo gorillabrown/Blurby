@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "literary-punctuation",
+      "title": "Literary Punctuation Stress",
+      "file": "literary-punctuation.txt",
+      "sourceType": "prose",
+      "goals": ["punctuation-prosody", "phrase-shaping"]
+    },
+    {
+      "id": "long-sentence-cadence",
+      "title": "Long Sentence Cadence",
+      "file": "long-sentence-cadence.txt",
+      "sourceType": "prose",
+      "goals": ["long-sentence-cadence", "breath-grouping"]
+    },
+    {
+      "id": "dialogue-attribution",
+      "title": "Dialogue and Attribution",
+      "file": "dialogue-attribution.txt",
+      "sourceType": "dialogue",
+      "goals": ["dialogue-phrasing", "attribution-prosody"]
+    },
+    {
+      "id": "heading-short-lines",
+      "title": "Headings and Short Lines",
+      "file": "heading-short-lines.txt",
+      "sourceType": "layout",
+      "goals": ["short-line-reset", "heading-tone"]
+    },
+    {
+      "id": "continuous-chapter-passage",
+      "title": "Continuous Chapter Passage",
+      "file": "continuous-chapter-passage.txt",
+      "sourceType": "long-form",
+      "goals": ["continuity", "seam-audibility", "voice-fatigue"]
+    },
+    {
+      "id": "transition-reentry",
+      "title": "Transition Re-entry",
+      "file": "transition-reentry.txt",
+      "sourceType": "transition",
+      "goals": ["section-reentry", "restart-naturalness"]
+    }
+  ]
+}
