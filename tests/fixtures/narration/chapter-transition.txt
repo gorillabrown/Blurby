@@ -1,0 +1,6 @@
+Chapter 1
+The operator started playback and observed a stable highlight.
+
+Chapter 2
+The next chapter loaded, and narration resumed at the expected global index.
+

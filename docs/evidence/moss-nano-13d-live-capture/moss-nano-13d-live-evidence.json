@@ -1,0 +1,242 @@
+{
+  "schemaVersion": "moss-nano-live-evidence.v2",
+  "evidenceKind": "real-app-selected-nano",
+  "generatedBy": "scripts/moss_nano_live_capture.mjs",
+  "generatedAt": "2026-05-03T20:07:33.117Z",
+  "appCommit": "6540e7cdbf43558949fcff7f444a7b5d80e2bc96",
+  "evidenceProducerVersion": "moss-nano-13c",
+  "modes": {
+    "page": {
+      "live": true,
+      "nanoSelected": true,
+      "startable": true,
+      "segmentProgressUnderstandable": true,
+      "noUnderlineRace": true,
+      "cachePrefetchContinuity": true,
+      "noStalePlayback": true,
+      "pauseResumeSameMode": true,
+      "modeSwitchAnchorPreserved": true,
+      "explicitFallback": true,
+      "sidecarLifecycleStable": true,
+      "source": "real-app-selected-nano",
+      "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\page.trace.json",
+      "traceEventCount": 42,
+      "recordedAt": "2026-05-03T19:38:32.216Z",
+      "scenarioId": "moss-nano-13c-page-live-evidence",
+      "selectedEngine": "nano",
+      "timingTruth": "segment-following",
+      "wordTimestamps": null,
+      "runtime": {
+        "backend": "moss-nano-onnx",
+        "modelVariant": "moss-tts-nano-onnx",
+        "syntheticAudio": false
+      },
+      "nanoSegmentLatencyMs": {
+        "p50": 21992,
+        "p95": 32324,
+        "min": 10512,
+        "max": 33472
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 4,
+        "hitRate": 0
+      },
+      "nanoPrefetch": {
+        "ready": 1,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "recycleObservations": {
+        "restarts": 0,
+        "cleanShutdowns": 1
+      },
+      "observedEngineSelection": {
+        "kind": "engine-selection",
+        "selectedEngine": "nano",
+        "source": "app-settings",
+        "ts": 1777837134435
+      },
+      "observedFallbackPolicy": {
+        "kind": "fallback-policy",
+        "policy": "explicit-only",
+        "selectedEngine": "nano",
+        "ts": 1777837134436
+      }
+    },
+    "focus": {
+      "live": true,
+      "nanoSelected": true,
+      "startable": true,
+      "segmentProgressUnderstandable": true,
+      "noUnderlineRace": true,
+      "cachePrefetchContinuity": true,
+      "noStalePlayback": true,
+      "pauseResumeSameMode": true,
+      "modeSwitchAnchorPreserved": true,
+      "explicitFallback": true,
+      "sidecarLifecycleStable": true,
+      "source": "real-app-selected-nano",
+      "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\focus.trace.json",
+      "traceEventCount": 44,
+      "recordedAt": "2026-05-03T19:40:16.044Z",
+      "scenarioId": "moss-nano-13c-focus-live-evidence",
+      "selectedEngine": "nano",
+      "timingTruth": "segment-following",
+      "wordTimestamps": null,
+      "runtime": {
+        "backend": "moss-nano-onnx",
+        "modelVariant": "moss-tts-nano-onnx",
+        "syntheticAudio": false
+      },
+      "nanoSegmentLatencyMs": {
+        "p50": 7467.5,
+        "p95": 8606.45,
+        "min": 6202,
+        "max": 8733
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 4,
+        "hitRate": 0
+      },
+      "nanoPrefetch": {
+        "ready": 1,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "recycleObservations": {
+        "restarts": 0,
+        "cleanShutdowns": 1
+      },
+      "observedEngineSelection": {
+        "kind": "engine-selection",
+        "selectedEngine": "nano",
+        "source": "app-settings",
+        "ts": 1777837230982
+      },
+      "observedFallbackPolicy": {
+        "kind": "fallback-policy",
+        "policy": "explicit-only",
+        "selectedEngine": "nano",
+        "ts": 1777837230982
+      }
+    },
+    "flow": {
+      "live": true,
+      "nanoSelected": true,
+      "startable": true,
+      "segmentProgressUnderstandable": true,
+      "noUnderlineRace": true,
+      "cachePrefetchContinuity": true,
+      "noStalePlayback": true,
+      "pauseResumeSameMode": true,
+      "modeSwitchAnchorPreserved": true,
+      "explicitFallback": true,
+      "sidecarLifecycleStable": true,
+      "source": "real-app-selected-nano",
+      "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\flow.trace.json",
+      "traceEventCount": 43,
+      "recordedAt": "2026-05-03T19:40:52.170Z",
+      "scenarioId": "moss-nano-13c-flow-live-evidence",
+      "selectedEngine": "nano",
+      "timingTruth": "segment-following",
+      "wordTimestamps": null,
+      "runtime": {
+        "backend": "moss-nano-onnx",
+        "modelVariant": "moss-tts-nano-onnx",
+        "syntheticAudio": false
+      },
+      "nanoSegmentLatencyMs": {
+        "p50": 7954.5,
+        "p95": 8732.55,
+        "min": 7090,
+        "max": 8819
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 4,
+        "hitRate": 0
+      },
+      "nanoPrefetch": {
+        "ready": 1,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "recycleObservations": {
+        "restarts": 0,
+        "cleanShutdowns": 1
+      },
+      "observedEngineSelection": {
+        "kind": "engine-selection",
+        "selectedEngine": "nano",
+        "source": "app-settings",
+        "ts": 1777837266600
+      },
+      "observedFallbackPolicy": {
+        "kind": "fallback-policy",
+        "policy": "explicit-only",
+        "selectedEngine": "nano",
+        "ts": 1777837266601
+      }
+    },
+    "narrate": {
+      "live": true,
+      "nanoSelected": true,
+      "startable": true,
+      "segmentProgressUnderstandable": true,
+      "noUnderlineRace": true,
+      "cachePrefetchContinuity": true,
+      "noStalePlayback": true,
+      "pauseResumeSameMode": true,
+      "modeSwitchAnchorPreserved": true,
+      "explicitFallback": true,
+      "sidecarLifecycleStable": true,
+      "source": "real-app-selected-nano",
+      "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\narrate.trace.json",
+      "traceEventCount": 39,
+      "recordedAt": "2026-05-03T19:41:28.051Z",
+      "scenarioId": "moss-nano-13c-narrate-live-evidence",
+      "selectedEngine": "nano",
+      "timingTruth": "segment-following",
+      "wordTimestamps": null,
+      "runtime": {
+        "backend": "moss-nano-onnx",
+        "modelVariant": "moss-tts-nano-onnx",
+        "syntheticAudio": false
+      },
+      "nanoSegmentLatencyMs": {
+        "p50": 10727,
+        "p95": 13145.3,
+        "min": 8040,
+        "max": 13414
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 4,
+        "hitRate": 0
+      },
+      "nanoPrefetch": {
+        "ready": 1,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "recycleObservations": {
+        "restarts": 0,
+        "cleanShutdowns": 1
+      },
+      "observedEngineSelection": {
+        "kind": "engine-selection",
+        "selectedEngine": "nano",
+        "source": "app-settings",
+        "ts": 1777837304220
+      },
+      "observedFallbackPolicy": {
+        "kind": "fallback-policy",
+        "policy": "explicit-only",
+        "selectedEngine": "nano",
+        "ts": 1777837304220
+      }
+    }
+  }
+}

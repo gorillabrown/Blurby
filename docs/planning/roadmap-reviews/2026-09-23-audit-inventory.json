@@ -1,0 +1,1062 @@
+{
+  "provenance": {
+    "provider": "connector+snapshot",
+    "source": "monday:board/18432450217",
+    "takenAt": "2026-09-23T18:38:41Z",
+    "fields": [
+      "title",
+      "status",
+      "id",
+      "sequence",
+      "written_status",
+      "prerequisites",
+      "effort",
+      "lane",
+      "group",
+      "spec_link",
+      "branch",
+      "started",
+      "completed",
+      "evidence",
+      "description",
+      "notes"
+    ],
+    "stale": false
+  },
+  "counts": {
+    "queued": 3,
+    "blocked": 2,
+    "completed": 40,
+    "dissolved": 6,
+    "superseded": 1
+  },
+  "items": [
+    {
+      "id": "UX-POLISH-1",
+      "title": "Space-bar resumes last-used reading mode",
+      "boardStatus": "queued",
+      "seq": 4,
+      "roadmapClaim": "active spec",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:35:57Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
+      "notes": "Deferred until reader-mode runtime controls stop churning."
+    },
+    {
+      "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "title": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "boardStatus": "queued",
+      "seq": 2,
+      "roadmapClaim": "active spec",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:35:58Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840646",
+      "notes": "Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers)."
+    },
+    {
+      "id": "NARRATE-HEARD-CURSOR-1",
+      "title": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "boardStatus": "queued",
+      "seq": 1,
+      "roadmapClaim": "active spec",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:35:57Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863178",
+      "notes": "2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation."
+    },
+    {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "boardStatus": "blocked",
+      "seq": 3,
+      "roadmapClaim": "active spec",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:35:57Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808496",
+      "notes": "GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1."
+    },
+    {
+      "id": "KOKORO-EXPORT-1",
+      "title": "Long-Form Audio Export",
+      "boardStatus": "blocked",
+      "seq": null,
+      "roadmapClaim": "deferred",
+      "evidenceReference": "",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.KOKORO-EXPORT-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856529",
+      "notes": "Deferred to post-TTS-Architecture phase. Worktree preserved at .worktrees/kokoro-export-1 (37 tests pass)."
+    },
+    {
+      "id": "TTS-DIAG-1",
+      "title": "Narration Diagnostics Bundle",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-DIAG-1.2026-05-15.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-DIAG-1.2026-05-15.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:29Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840645",
+      "notes": ""
+    },
+    {
+      "id": "TTS-CACHE-TIMING-1",
+      "title": "Cache Identity & Timing Sidecars",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832408",
+      "notes": ""
+    },
+    {
+      "id": "TTS-INTEGRATE-1",
+      "title": "Integrate Sync & Diagnostics",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-INTEGRATE-1.2026-05-16.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-INTEGRATE-1.2026-05-16.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863177",
+      "notes": "Dispatch-ready; dormancy gate complete."
+    },
+    {
+      "id": "KOKORO-DEEPEN-1",
+      "title": "Kokoro Readiness & Preflight",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "—",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118791925",
+      "notes": ""
+    },
+    {
+      "id": "KOKORO-DEEPEN-3",
+      "title": "Voice Mixing Feasibility",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "—",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841616",
+      "notes": ""
+    },
+    {
+      "id": "ENGINE-DORMANCY-1",
+      "title": "Disable MOSS-Nano & Pocket TTS",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818984",
+      "notes": "Dormant at settings/IPC; code preserved; Nano probes opt-in."
+    },
+    {
+      "id": "TTS-CACHE-HARDEN-1",
+      "title": "Cache/Pipeline Hardening",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833358",
+      "notes": "Findings-driven: impl review A8 + lit review §4.6"
+    },
+    {
+      "id": "TTS-SYNC-1",
+      "title": "Highlight Sync Controller",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-SYNC-1.2026-05-15.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-SYNC-1.2026-05-15.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856198",
+      "notes": ""
+    },
+    {
+      "id": "TTS-REGISTRY-1",
+      "title": "Provider Capability Registry",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808495",
+      "notes": ""
+    },
+    {
+      "id": "TTS-EVENT-SYNC-1",
+      "title": "Event-Driven Word Sync",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819556",
+      "notes": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2"
+    },
+    {
+      "id": "KOKORO-DEEPEN-2",
+      "title": "Natural Chunk Highlight",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "—",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840647",
+      "notes": ""
+    },
+    {
+      "id": "TTS-RENDER-MAP-1",
+      "title": "Word Position Index",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819999",
+      "notes": "Research: sioyek. Landed 2eabf36, merged 8545895."
+    },
+    {
+      "id": "TTS-PIPELINE-1",
+      "title": "Pipeline Integration Tests",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841422",
+      "notes": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218."
+    },
+    {
+      "id": "NORMALIZER-ENRICH-1",
+      "title": "Normalizer Gap Fill",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:31Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833144",
+      "notes": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8."
+    },
+    {
+      "id": "TTS-NORMALIZE-1",
+      "title": "Segment Normalizer",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:31Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863192",
+      "notes": ""
+    },
+    {
+      "id": "NARR-SPOKEN-1",
+      "title": "Spoken/Display Word Separation",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARR-SPOKEN-1.2026-05-18.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863341",
+      "notes": ""
+    },
+    {
+      "id": "READER-ISO-1E",
+      "title": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-ISO-1E.2026-05-27.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832563",
+      "notes": "Narrate starts at exact selected/current word and never follows Flow engine."
+    },
+    {
+      "id": "NARR-CURSOR-2",
+      "title": "Silence-Aware Cursor Hold",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARR-CURSOR-2.2026-05-18.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARR-CURSOR-2.2026-05-18.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833585",
+      "notes": ""
+    },
+    {
+      "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "title": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/.Archive/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842117",
+      "notes": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR."
+    },
+    {
+      "id": "READER-ISO-1C",
+      "title": "Focus Adapter + Passive Surface Contract Start",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-ISO-1C.2026-05-26.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847249",
+      "notes": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types."
+    },
+    {
+      "id": "BASELINE-SYNC-1",
+      "title": "Commit Phase 0 + Governance Sweep Baseline",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832411",
+      "notes": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence."
+    },
+    {
+      "id": "READER-ISO-1B",
+      "title": "Orchestrator Shell + Mode Selection Semantics",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-ISO-1B.2026-05-25.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847250",
+      "notes": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction."
+    },
+    {
+      "id": "TTS-PARITY-1",
+      "title": "Cache/Progress/Resume Parity Hardening",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-PARITY-1.2026-05-18.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-PARITY-1.2026-05-18.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840970",
+      "notes": "OutsideAudit.9 hardening gate. Three defects, three tests."
+    },
+    {
+      "id": "TEST-GREEN-1",
+      "title": "Broad Suite Failure Triage",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TEST-GREEN-1.2026-05-22.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TEST-GREEN-1.2026-05-22.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856777",
+      "notes": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented."
+    },
+    {
+      "id": "NARR-MEDIA-1",
+      "title": "MediaSession Integration",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARR-MEDIA-1.2026-05-17.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARR-MEDIA-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862674",
+      "notes": ""
+    },
+    {
+      "id": "NARR-PAUSE-1",
+      "title": "Named-Pause State Machine",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARR-PAUSE-1.2026-05-18.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARR-PAUSE-1.2026-05-18.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118864160",
+      "notes": ""
+    },
+    {
+      "id": "READER-ISO-1A",
+      "title": "Adapter Contracts + Current Word Anchor Service",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-ISO-1A.2026-05-24.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118886594",
+      "notes": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint."
+    },
+    {
+      "id": "TTS-EVAL-3",
+      "title": "Quality Evaluation + CI Gate",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-EVAL-3.2026-05-18.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-EVAL-3.2026-05-18.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840971",
+      "notes": ""
+    },
+    {
+      "id": "TTS-ARCH-DOC-1",
+      "title": "Architecture Decisions Doc",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862481",
+      "notes": "Architecture decision record. Landed 66a73b1, merged 65629bc."
+    },
+    {
+      "id": "READER-ISO-1D",
+      "title": "Flow Adapter + Section Handoff Restart Ownership",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.READER-ISO-1D.2026-05-26.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841621",
+      "notes": "Flow owns section-handoff restart; no Narrate truth-sync changes."
+    },
+    {
+      "id": "GOV-HUMAN-REVIEW-1",
+      "title": "Deferred Governance Review Items",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840660",
+      "notes": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule."
+    },
+    {
+      "id": "TTS-QUAL-CI-1",
+      "title": "CI Regression Gate Wiring",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TTS-QUAL-CI-1.2026-05-28.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118827986",
+      "notes": "Deferred until broad-suite health is clean or formally classified."
+    },
+    {
+      "id": "THEME-SYNC-1",
+      "title": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.THEME-SYNC-1.2026-05-29.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.THEME-SYNC-1.2026-05-29.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841260",
+      "notes": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency."
+    },
+    {
+      "id": "SINGLE-INSTANCE-LOCK-1",
+      "title": "Electron Main-Process Single-Instance Gate",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832662",
+      "notes": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only)."
+    },
+    {
+      "id": "EXT-PAIR-1",
+      "title": "Chrome Extension Pairing Auth Timeout Repair",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.EXT-PAIR-1.2026-05-29.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.EXT-PAIR-1.2026-05-29.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:45Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818711",
+      "notes": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1."
+    },
+    {
+      "id": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "title": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810192",
+      "notes": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed."
+    },
+    {
+      "id": "NARRATE-A5-RATE-RESEED-1",
+      "title": "Rate-Change Reseed from Heard Position",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "NARRATE-A5-RATE-RESEED-liveqa-gate-report.md",
+      "existingEvidencePaths": [
+        "docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825485",
+      "notes": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02."
+    },
+    {
+      "id": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "title": "Narrate Cursor Tracking Diagnostic",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810126",
+      "notes": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md."
+    },
+    {
+      "id": "NARRATE-INTENT-CURSOR-1",
+      "title": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118801914",
+      "notes": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes."
+    },
+    {
+      "id": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "title": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "boardStatus": "completed",
+      "seq": null,
+      "roadmapClaim": "completed",
+      "evidenceReference": "NARRATE-DUAL-SOURCE-DIAG-1.md (verdict)",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811955",
+      "notes": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed."
+    },
+    {
+      "id": "NARR-PAUSE-STATE-1",
+      "title": "Named Pause State Machine",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "absent from summary",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118837533",
+      "notes": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)"
+    },
+    {
+      "id": "HYG-XLSX-DASHBOARD-RESTORE",
+      "title": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "boardStatus": "superseded",
+      "seq": null,
+      "roadmapClaim": "superseded",
+      "evidenceReference": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
+      "existingEvidencePaths": [
+        "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825193",
+      "notes": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented."
+    },
+    {
+      "id": "TTS-REGISTRY-DISPATCH-1",
+      "title": "Registry-Driven Dispatch",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "dissolved",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811322",
+      "notes": "Dissolved 2026-05-15 — single active engine"
+    },
+    {
+      "id": "NARRATE-CLOSED-LOOP-CURSOR",
+      "title": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "dissolved",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118797794",
+      "notes": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification"
+    },
+    {
+      "id": "TTS-CANARY-1",
+      "title": "Engine Readiness Probes",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "dissolved",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811197",
+      "notes": "Dissolved 2026-05-15 — sidecar engines dormant"
+    },
+    {
+      "id": "TEST-HARNESS-1",
+      "title": "Test Harness Stability",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "dissolved",
+      "evidenceReference": "",
+      "existingEvidencePaths": [
+        "docs/governance/close-outs/CloseOut.TEST-HARNESS-1.2026-05-15.md"
+      ],
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842583",
+      "notes": "Dissolved 2026-05-15 — Nano probes irrelevant"
+    },
+    {
+      "id": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "title": "MediaSession Controls",
+      "boardStatus": "dissolved",
+      "seq": null,
+      "roadmapClaim": "absent from summary",
+      "evidenceReference": "",
+      "existingEvidencePaths": [],
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811133",
+      "notes": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work."
+    }
+  ],
+  "roadmapCompleted": [
+    {
+      "id": "KOKORO-DEEPEN-1",
+      "date": "2026-05-11",
+      "result": "Kokoro readiness and preflight checks",
+      "evidence": "—"
+    },
+    {
+      "id": "KOKORO-DEEPEN-2",
+      "date": "2026-05-11",
+      "result": "Natural chunk highlighting for Kokoro TTS",
+      "evidence": "—"
+    },
+    {
+      "id": "KOKORO-DEEPEN-3",
+      "date": "2026-05-11",
+      "result": "Voice mixing feasibility study",
+      "evidence": "—"
+    },
+    {
+      "id": "TTS-REGISTRY-1",
+      "date": "2026-05-12",
+      "result": "Provider capability truth in ttsProviderRegistry",
+      "evidence": "ROADMAP_ARCHIVE_2026-05-14.md"
+    },
+    {
+      "id": "TTS-NORMALIZE-1",
+      "date": "2026-05-13",
+      "result": "English-first spoken-text normalization",
+      "evidence": "ROADMAP_ARCHIVE_2026-05-14.md"
+    },
+    {
+      "id": "TTS-CACHE-TIMING-1",
+      "date": "2026-05-13",
+      "result": "Schema-versioned v2 cache identities and atomic timing sidecars",
+      "evidence": "CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md"
+    },
+    {
+      "id": "TTS-SYNC-1",
+      "date": "2026-05-15",
+      "result": "Centralized narration highlight sync policy",
+      "evidence": "CloseOut.TTS-SYNC-1.2026-05-15.md"
+    },
+    {
+      "id": "TTS-DIAG-1",
+      "date": "2026-05-15",
+      "result": "Provider-neutral diagnostics bundle",
+      "evidence": "CloseOut.TTS-DIAG-1.2026-05-15.md"
+    },
+    {
+      "id": "ENGINE-DORMANCY-1",
+      "date": "2026-05-16",
+      "result": "Disabled dormant sidecar engines at settings/IPC",
+      "evidence": "CloseOut.ENGINE-DORMANCY-1.2026-05-16.md"
+    },
+    {
+      "id": "TTS-INTEGRATE-1",
+      "date": "2026-05-16",
+      "result": "Merged sync and diagnostics branches to main",
+      "evidence": "CloseOut.TTS-INTEGRATE-1.2026-05-16.md"
+    },
+    {
+      "id": "TTS-CACHE-HARDEN-1",
+      "date": "2026-05-16",
+      "result": "Cache-hit timing parity, type harmonization, IPC validation",
+      "evidence": "CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md"
+    },
+    {
+      "id": "TTS-EVENT-SYNC-1",
+      "date": "2026-05-16",
+      "result": "Event-driven word sync from research",
+      "evidence": "CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md"
+    },
+    {
+      "id": "NORMALIZER-ENRICH-1",
+      "date": "2026-05-17",
+      "result": "Normalizer gap fill from abogen research",
+      "evidence": "CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md"
+    },
+    {
+      "id": "TTS-RENDER-MAP-1",
+      "date": "2026-05-17",
+      "result": "Sioyek-inspired word position index",
+      "evidence": "CloseOut.TTS-RENDER-MAP-1.2026-05-17.md"
+    },
+    {
+      "id": "TTS-PIPELINE-1",
+      "date": "2026-05-17",
+      "result": "End-to-end pipeline integration tests",
+      "evidence": "CloseOut.TTS-PIPELINE-1.2026-05-17.md"
+    },
+    {
+      "id": "TTS-ARCH-DOC-1",
+      "date": "2026-05-17",
+      "result": "Architecture decision records for TTS",
+      "evidence": "CloseOut.TTS-ARCH-DOC-1.2026-05-17.md"
+    },
+    {
+      "id": "SK-HYG-2",
+      "date": "2026-05-16",
+      "result": "Directory reorganization (Lane E governance)",
+      "evidence": "CloseOut.SK-HYG-2.2026-05-16.md"
+    },
+    {
+      "id": "NARR-MEDIA-1",
+      "date": "2026-05-17",
+      "result": "MediaSession integration — OS media controls for narration",
+      "evidence": "CloseOut.NARR-MEDIA-1.2026-05-17.md"
+    },
+    {
+      "id": "NARR-PAUSE-1",
+      "date": "2026-05-18",
+      "result": "Named-pause state machine — 7 pause reasons with auto-resume",
+      "evidence": "CloseOut.NARR-PAUSE-1.2026-05-18.md"
+    },
+    {
+      "id": "TTS-PARITY-1",
+      "date": "2026-05-18",
+      "result": "Cache/progress/resume parity hardening — 3 OutsideAudit.9 defects",
+      "evidence": "CloseOut.TTS-PARITY-1.2026-05-18.md"
+    },
+    {
+      "id": "NARR-SPOKEN-1",
+      "date": "2026-05-18",
+      "result": "Spoken/display word separation — punctuation-only token filtering",
+      "evidence": "CloseOut.NARR-SPOKEN-1.2026-05-18.md"
+    },
+    {
+      "id": "NARR-CURSOR-2",
+      "date": "2026-05-18",
+      "result": "Silence-aware cursor hold — gaps and pause-reason freeze",
+      "evidence": "CloseOut.NARR-CURSOR-2.2026-05-18.md"
+    },
+    {
+      "id": "TTS-EVAL-3",
+      "date": "2026-05-18",
+      "result": "Quality evaluation + CI gate — Kokoro v2 baseline + `npm run test:quality",
+      "evidence": "CloseOut.TTS-EVAL-3.2026-05-18.md"
+    },
+    {
+      "id": "FLOW-ZONE-AUTO",
+      "date": "2026-05-19",
+      "result": "Descending auto-advancing reading zone + render-loop fix",
+      "evidence": "—"
+    },
+    {
+      "id": "READER-MODE-ISOLATION-1 Phase 0",
+      "date": "2026-05-21",
+      "result": "Preflight stabilization for Foliate Flow/Narrate word-0 recentering and browse-away reset",
+      "evidence": "CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md"
+    },
+    {
+      "id": "GOVERNANCE-SWEEP",
+      "date": "2026-05-22",
+      "result": "Doc hygiene sweep: moved 1 memo, archived 7 dispatch files, created 6 hub readmes, repaired queue/agent references",
+      "evidence": "—"
+    },
+    {
+      "id": "BASELINE-SYNC-1",
+      "date": "2026-05-22",
+      "result": "Committed Phase 0 reader stabilization, governance sweep, and roadmap queue recovery in three pushed commits",
+      "evidence": "CloseOut.BASELINE-SYNC-1.2026-05-22.md"
+    },
+    {
+      "id": "TEST-GREEN-1",
+      "date": "2026-05-22",
+      "result": "Classified and resolved 12 broad-suite failures: 10 fixed, 1 quarantined, obsolete tests removed, and environmental flakes documented",
+      "evidence": "CloseOut.TEST-GREEN-1.2026-05-22.md"
+    },
+    {
+      "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "date": "2026-05-24",
+      "result": "Repaired persistent-anchor UX (S1/S4/S8/S12 exact-start/S18); S5 partial, S9 deferred; S13 Narrate sync proven a unified post-isolation closed-loop problem; merged at `25b6a26",
+      "evidence": "CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md"
+    },
+    {
+      "id": "READER-ISO-1A",
+      "date": "2026-05-24",
+      "result": "Added typed reader-mode adapter contracts and current-word anchor service with 73 tests and no runtime behavior change",
+      "evidence": "CloseOut.READER-ISO-1A.2026-05-24.md"
+    },
+    {
+      "id": "READER-ISO-1B",
+      "date": "2026-05-25",
+      "result": "Extracted mode routing into `useReaderModeOrchestrator` while preserving current reader behavior",
+      "evidence": "CloseOut.READER-ISO-1B.2026-05-25.md"
+    },
+    {
+      "id": "READER-ISO-1C",
+      "date": "2026-05-26",
+      "result": "FocusModeAdapter + passive surface command types with 27 adapter tests",
+      "evidence": "CloseOut.READER-ISO-1C.2026-05-26.md"
+    },
+    {
+      "id": "READER-ISO-1D",
+      "date": "2026-05-26",
+      "result": "FlowModeAdapter + section-handoff resolution + browse-away with 40 adapter tests",
+      "evidence": "CloseOut.READER-ISO-1D.2026-05-26.md"
+    },
+    {
+      "id": "READER-ISO-1E",
+      "date": "2026-05-27",
+      "result": "NarrateModeAdapter + audio truth-sync ownership with 45 adapter tests",
+      "evidence": "CloseOut.READER-ISO-1E.2026-05-27.md"
+    },
+    {
+      "id": "GOV-HUMAN-REVIEW-1",
+      "date": "2026-05-27",
+      "result": "Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled",
+      "evidence": "CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md"
+    },
+    {
+      "id": "TTS-QUAL-CI-1",
+      "date": "2026-05-28",
+      "result": "CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS",
+      "evidence": "CloseOut.TTS-QUAL-CI-1.2026-05-28.md"
+    },
+    {
+      "id": "EXT-PAIR-1",
+      "date": "2026-05-29",
+      "result": "Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` (5 min) replaces 5s initial auth window, structured WS logging, 8 new tests, BUG-183 closed",
+      "evidence": "CloseOut.EXT-PAIR-1.2026-05-29.md"
+    },
+    {
+      "id": "SINGLE-INSTANCE-LOCK-1",
+      "date": "2026-05-29",
+      "result": "Electron single-instance lock — `app.requestSingleInstanceLock()` + `second-instance` focus handler prevents duplicate windows",
+      "evidence": "CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md"
+    },
+    {
+      "id": "THEME-SYNC-1",
+      "date": "2026-05-29",
+      "result": "Vite circular chunk fix — 5 shared TTS modules moved to TTS chunk, eliminated `settings -> tts -> settings` cycle; BUG-182 confirmed fixed by live smoke on v1.75.1 dev build",
+      "evidence": "CloseOut.THEME-SYNC-1.2026-05-29.md"
+    },
+    {
+      "id": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "date": "2026-05-30",
+      "result": "Instrumented gate replay validated A4 root cause: REFUTED in-hook dual-source race, CONFIRMED never-cleared reader-layer resumeAnchor; A5 = wrong rate-change seed source. Reshaped Stage-2 sequence.",
+      "evidence": "NARRATE-DUAL-SOURCE-DIAG-1.md (verdict)"
+    },
+    {
+      "id": "NARRATE-INTENT-CURSOR-1",
+      "date": "2026-05-31",
+      "result": "PARTIAL: resume-anchor consume lifecycle (`shouldConsumeResumeAnchorOnAdvance`, CONSUME on first word-advance past anchor in both truth-sync + onWordAdvance paths, CLEAR-before-SET in onWordClick). A1 PASS regression held; A4 FAIL 0-of-3 — consume is reactive (fires after seed), not preventive. Necessary infrastructure for PAUSE-RESUME-UNIFY-1. 19 new tests. Promoted SRL-089 to Standing Rule #37 after 2nd parallel-dispatch-without-isolation occurrence.",
+      "evidence": "CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md"
+    },
+    {
+      "id": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "date": "2026-05-31",
+      "result": "Source fix merged plus follow-up anchor-correctness hotfix: `resumeTargetRef` captured at pause, cold-start resume seed prioritized live/resume anchor truth, bottom-bar play/pause uses one Narrate lifecycle, and live narration advancement publishes the persistent anchor. Live A4 retest still recommended before declaring the user-facing gate closed.",
+      "evidence": "CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md"
+    },
+    {
+      "id": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "date": "2026-05-31",
+      "result": "Live-QA cursor-tracking trace (Meditations): scheduler-signal hypothesis REFUTED (`schedulerActiveWord` ≡ `heardFloor`, both lead the ear; `wordIndex` closest but leads & drifts). Authority verdict: lag-compensated visible cursor (~350ms WASAPI). Verdict folded into HEARD-CURSOR-1 + SUBSCRIBER-CURSOR-1.",
+      "evidence": "CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md"
+    },
+    {
+      "id": "NARRATE-A5-RATE-RESEED-1",
+      "date": "2026-05-31",
+      "result": "Rate-change reseeds from heard position (`getHeardFloorWordIndex()`), not the pre-fetch head — position preserved 3-of-3 live-QA. Residual 1.4x-bucket audio overlap handed to APPLYRATECHANGE-COLLAPSE-1. (No formal close-out; see live-QA gate report.)",
+      "evidence": "NARRATE-A5-RATE-RESEED-liveqa-gate-report.md"
+    }
+  ],
+  "roadmapDissolved": [
+    {
+      "id": "TEST-HARNESS-1",
+      "result": "— Nano probes irrelevant after Kokoro-only pivot (2026-05-15)"
+    },
+    {
+      "id": "TTS-CANARY-1",
+      "result": "— Sidecar engines dormant, canary probes unnecessary (2026-05-15)"
+    },
+    {
+      "id": "TTS-REGISTRY-DISPATCH-1",
+      "result": "— Single active engine, registry dispatch unnecessary (2026-05-15)"
+    },
+    {
+      "id": "NARRATE-CLOSED-LOOP-CURSOR",
+      "result": "— Half-step approach: introduced `getHeardPositionWordIndex()` oracle at `audioScheduler.ts:521,1036` but consumed it in only ONE call site (Kokoro re-entry seed). 2026-05-29 live-QA gate showed A4 FAIL (\"play→pause→play restarts from book beginning\") despite the oracle landing. ULTRATHINK 2026-05-29 (`docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md`) identified dual-source race (`cursorWordIndex` ⟷ `lastConfirmedAudioWordRef`) as root cause; Evan's two-cursor framing (subscriber + intent with explicit authority lifecycle) is the right destination. Superseded by `NARRATE-DUAL-SOURCE-DIAG-1` → `NARRATE-INTENT-CURSOR-1` → `NARRATE-PAUSE-RESUME-UNIFY-1` → `NARRATE-CURSOR-TRACKING-DIAG-1` → `NARRATE-APPLYRATECHANGE-COLLAPSE-1` → `NARRATE-SUBSCRIBER-CURSOR-1`. Branch preserved at `sprint/narrate-closed-loop-cursor` commit `0f1b2c8` for reference."
+    }
+  ],
+  "roadmapActiveSpecs": [
+    "NARRATE-HEARD-CURSOR-1",
+    "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "NARRATE-SUBSCRIBER-CURSOR-1",
+    "UX-POLISH-1"
+  ],
+  "roadmapDeferred": [
+    "**KOKORO-EXPORT-1** — Long-form audio export (M4B/SRT/ASS). Optional future after Reading Experience v2.",
+    "**Normalizer alignment map** — `normalizedToOriginalMap` transform contract. Revisit when word-position rendering needs original-text cross-reference.",
+    "**Registry-driven strategy dispatch** — Wire `createStrategy?` seam in `ttsProviderRegistry.ts`. Premature while non-Kokoro engines are dormant.",
+    "**Playback-buffered-seconds backpressure** — `scheduler.getBufferedSeconds()` throttle. Revisit if TTS-EVAL-3 soak run reveals buffer pressure.",
+    "**Track B** — Chrome Extension (EXT-ENR-C and beyond)",
+    "**Track C** — Android APK (APK-0 through APK-4)",
+    "**Phase 7** — Cloud Sync",
+    "**Phase 8** — RSS/News",
+    "**Idea Themes A-K** — See `docs/governance/IDEAS.md`"
+  ],
+  "roadmapOnlyCompleted": [
+    {
+      "id": "SK-HYG-2",
+      "date": "2026-05-16",
+      "result": "Directory reorganization (Lane E governance)",
+      "evidence": "CloseOut.SK-HYG-2.2026-05-16.md"
+    },
+    {
+      "id": "FLOW-ZONE-AUTO",
+      "date": "2026-05-19",
+      "result": "Descending auto-advancing reading zone + render-loop fix",
+      "evidence": "—"
+    },
+    {
+      "id": "READER-MODE-ISOLATION-1 Phase 0",
+      "date": "2026-05-21",
+      "result": "Preflight stabilization for Foliate Flow/Narrate word-0 recentering and browse-away reset",
+      "evidence": "CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md"
+    },
+    {
+      "id": "GOVERNANCE-SWEEP",
+      "date": "2026-05-22",
+      "result": "Doc hygiene sweep: moved 1 memo, archived 7 dispatch files, created 6 hub readmes, repaired queue/agent references",
+      "evidence": "—"
+    }
+  ]
+}

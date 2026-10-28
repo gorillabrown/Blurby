@@ -1,0 +1,786 @@
+[
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "UX-POLISH-1",
+    "idempotencyKey": "set-status:UX-POLISH-1:[('lane', 'UX polish')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-UX-POLISH-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "UX polish",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118847895"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840646"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-HEARD-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-HEARD-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118863178"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-SUBSCRIBER-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-SUBSCRIBER-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118808496"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "KOKORO-EXPORT-1",
+    "idempotencyKey": "set-status:KOKORO-EXPORT-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-EXPORT-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118856529"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-DIAG-1",
+    "idempotencyKey": "set-status:TTS-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-DIAG-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840645"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-CACHE-TIMING-1",
+    "idempotencyKey": "set-status:TTS-CACHE-TIMING-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-CACHE-TIMING-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118832408"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-INTEGRATE-1",
+    "idempotencyKey": "set-status:TTS-INTEGRATE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-INTEGRATE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118863177"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "KOKORO-DEEPEN-1",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118791925"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "KOKORO-DEEPEN-3",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-3:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-3",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118841616"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "ENGINE-DORMANCY-1",
+    "idempotencyKey": "set-status:ENGINE-DORMANCY-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-ENGINE-DORMANCY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118818984"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-CACHE-HARDEN-1",
+    "idempotencyKey": "set-status:TTS-CACHE-HARDEN-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-CACHE-HARDEN-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118833358"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-SYNC-1",
+    "idempotencyKey": "set-status:TTS-SYNC-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118856198"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-REGISTRY-1",
+    "idempotencyKey": "set-status:TTS-REGISTRY-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-REGISTRY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118808495"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-EVENT-SYNC-1",
+    "idempotencyKey": "set-status:TTS-EVENT-SYNC-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-EVENT-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118819556"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "KOKORO-DEEPEN-2",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-2:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-2",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840647"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-RENDER-MAP-1",
+    "idempotencyKey": "set-status:TTS-RENDER-MAP-1:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-RENDER-MAP-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118819999"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-PIPELINE-1",
+    "idempotencyKey": "set-status:TTS-PIPELINE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-PIPELINE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118841422"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NORMALIZER-ENRICH-1",
+    "idempotencyKey": "set-status:NORMALIZER-ENRICH-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NORMALIZER-ENRICH-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118833144"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-NORMALIZE-1",
+    "idempotencyKey": "set-status:TTS-NORMALIZE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-NORMALIZE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118863192"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-SPOKEN-1",
+    "idempotencyKey": "set-status:NARR-SPOKEN-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-SPOKEN-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118863341"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1E",
+    "idempotencyKey": "set-status:READER-ISO-1E:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:25Z",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1E",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118832563"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-CURSOR-2",
+    "idempotencyKey": "set-status:NARR-CURSOR-2:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-CURSOR-2",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118833585"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "idempotencyKey": "set-status:READER-PERSISTENT-ANCHOR-STEP3-REPAIR:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118842117"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1C",
+    "idempotencyKey": "set-status:READER-ISO-1C:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1C",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118847249"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "BASELINE-SYNC-1",
+    "idempotencyKey": "set-status:BASELINE-SYNC-1:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-BASELINE-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118832411"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1B",
+    "idempotencyKey": "set-status:READER-ISO-1B:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1B",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118847250"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-PARITY-1",
+    "idempotencyKey": "set-status:TTS-PARITY-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-PARITY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840970"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TEST-GREEN-1",
+    "idempotencyKey": "set-status:TEST-GREEN-1:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-TEST-GREEN-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118856777"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-MEDIA-1",
+    "idempotencyKey": "set-status:NARR-MEDIA-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-MEDIA-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118862674"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-PAUSE-1",
+    "idempotencyKey": "set-status:NARR-PAUSE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-PAUSE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118864160"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1A",
+    "idempotencyKey": "set-status:READER-ISO-1A:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-ISO-1A",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118886594"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-EVAL-3",
+    "idempotencyKey": "set-status:TTS-EVAL-3:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-EVAL-3",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840971"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-ARCH-DOC-1",
+    "idempotencyKey": "set-status:TTS-ARCH-DOC-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-ARCH-DOC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118862481"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1D",
+    "idempotencyKey": "set-status:READER-ISO-1D:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-ISO-1D",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118841621"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "GOV-HUMAN-REVIEW-1",
+    "idempotencyKey": "set-status:GOV-HUMAN-REVIEW-1:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-GOV-HUMAN-REVIEW-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118840660"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-QUAL-CI-1",
+    "idempotencyKey": "set-status:TTS-QUAL-CI-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-QUAL-CI-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118827986"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "THEME-SYNC-1",
+    "idempotencyKey": "set-status:THEME-SYNC-1:[('lane', 'UX polish')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-THEME-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "UX polish",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118841260"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "SINGLE-INSTANCE-LOCK-1",
+    "idempotencyKey": "set-status:SINGLE-INSTANCE-LOCK-1:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-SINGLE-INSTANCE-LOCK-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118832662"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "EXT-PAIR-1",
+    "idempotencyKey": "set-status:EXT-PAIR-1:[('lane', 'Chrome Extension')]",
+    "actualRevision": "2026-09-23T19:00:26Z",
+    "recoveryId": "20260923T190011Z-external-set-status-EXT-PAIR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Chrome Extension",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118818711"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+    "idempotencyKey": "set-status:NARRATE-PAUSE-RESUME-UNIFY-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-PAUSE-RESUME-UNIFY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118810192"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-A5-RATE-RESEED-1",
+    "idempotencyKey": "set-status:NARRATE-A5-RATE-RESEED-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-A5-RATE-RESEED-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118825485"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+    "idempotencyKey": "set-status:NARRATE-CURSOR-TRACKING-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-CURSOR-TRACKING-DIAG-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118810126"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-INTENT-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-INTENT-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-INTENT-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118801914"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+    "idempotencyKey": "set-status:NARRATE-DUAL-SOURCE-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-DUAL-SOURCE-DIAG-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118811955"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "SK-HYG-2",
+    "idempotencyKey": "set-status:SK-HYG-2:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-SK-HYG-2",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13119055963"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "FLOW-ZONE-AUTO",
+    "idempotencyKey": "set-status:FLOW-ZONE-AUTO:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-FLOW-ZONE-AUTO",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13119055220"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+    "idempotencyKey": "set-status:READER-MODE-ISOLATION-1-PHASE-0:[('lane', 'Reader Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-MODE-ISOLATION-1-PHASE-0",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Reader Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13119034606"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "GOVERNANCE-SWEEP",
+    "idempotencyKey": "set-status:GOVERNANCE-SWEEP:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-GOVERNANCE-SWEEP",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13119074046"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-PAUSE-STATE-1",
+    "idempotencyKey": "set-status:NARR-PAUSE-STATE-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARR-PAUSE-STATE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118837533"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+    "idempotencyKey": "set-status:HYG-XLSX-DASHBOARD-RESTORE:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-HYG-XLSX-DASHBOARD-RESTORE",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118825193"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-REGISTRY-DISPATCH-1",
+    "idempotencyKey": "set-status:TTS-REGISTRY-DISPATCH-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-REGISTRY-DISPATCH-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118811322"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+    "idempotencyKey": "set-status:NARRATE-CLOSED-LOOP-CURSOR:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-CLOSED-LOOP-CURSOR",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118797794"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-CANARY-1",
+    "idempotencyKey": "set-status:TTS-CANARY-1:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-CANARY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118811197"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TEST-HARNESS-1",
+    "idempotencyKey": "set-status:TEST-HARNESS-1:[('lane', 'Platform & Maintenance')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-TEST-HARNESS-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "Platform & Maintenance",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118842583"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "idempotencyKey": "set-status:LEGACY-NARR-MEDIA-1-DISSOLVED:[('lane', 'TTS / Narration Engine')]",
+    "actualRevision": "2026-09-23T19:00:28Z",
+    "recoveryId": "20260923T190011Z-external-set-status-LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:01:01Z",
+      "lane": "TTS / Narration Engine",
+      "otherFieldsUnchanged": true
+    },
+    "providerItemId": "13118811133"
+  }
+]

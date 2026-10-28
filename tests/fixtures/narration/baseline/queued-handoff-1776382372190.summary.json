@@ -1,0 +1,19 @@
+{
+  "fixtureId": "queued-handoff",
+  "runId": "queued-handoff-1776382372190",
+  "startLatencyMs": 402,
+  "wordEventCount": 26,
+  "flowEventCount": 9,
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 1,
+    "handoff": 1
+  },
+  "failureClasses": []
+}

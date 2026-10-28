@@ -1,0 +1,1278 @@
+# Blurby — Running Bug Report
+
+**Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
+
+**Last updated:** 2026-05-29
+
+---
+
+## Incomplete
+
+### BUG-184 — E-Ink Display Mode toggle strips Settings panel background (transparent overlay)
+**Reported:** 2026-05-29 (THEME-SYNC-1 smoke test retest on v1.75.1)
+**Severity:** MEDIUM (visual; Settings panel becomes transparent when einkMode is ON)
+**Status:** OPEN
+**Location:** `src/styles/themes.css` line 145 (`[data-eink="true"] *:hover { background-color: inherit; }`)
+**Description:** When the E-Ink Display Mode toggle (at the top of Settings → Theme sub-page) is ON, the Settings panel (`.menu-flap`) becomes transparent — library content (covers, tabs, reading stats) bleeds through. Toggling einkMode OFF immediately restores opacity. Reproduced deterministically on v1.75.1 dev build.
+**Root cause:** `themes.css:145` has `[data-eink="true"] *:hover { background-color: inherit; }` — a nuclear wildcard hover rule that overrides `.menu-flap`'s `background: var(--bg-raised)` when the cursor is over the panel. The `inherit` value pulls from the parent element's background, which is transparent (the app container behind the fixed-position flap).
+**Fix path:** XS — either scope the hover rule to exclude `.menu-flap` (e.g., `[data-eink="true"] *:not(.menu-flap):hover`), or add `[data-eink="true"] .menu-flap { background: var(--bg-raised); }` after line 151. Reader surfaces work correctly with einkMode ON — the bug is Settings panel only.
+**Severity rationale:** einkMode is an opt-in power feature (toggle OFF by default), so impact is narrow. But the transparency makes Settings completely unusable when enabled.
+
+### BUG-183 — Chrome extension cannot pair with Blurby desktop (auth handshake timeout)
+**Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
+**Severity:** MEDIUM (Chrome extension surface is unusable; not core reader)
+**Status:** RESOLVED (2026-05-29, EXT-PAIR-1 sprint — root cause: `WS_AUTH_TIMEOUT_MS = 5000` too short for human code entry; fix: added `WS_PAIRING_TIMEOUT_MS = 300000` (5 min) as initial auth window, matching `SHORT_CODE_TTL_MS`; verified by 8 new unit tests in `tests/wsServerAuth.test.js`; awaits manual smoke test post-rebuild)
+**Location:** `main/ws-server.js` (auth handshake), `main/constants.js`
+**Root cause:** Hypothesis A confirmed — the 5s `WS_AUTH_TIMEOUT_MS` window was designed for the post-paired auto-auth path (extension sends stored token immediately on connect), but was applied uniformly to ALL connections including first-time pairing. First-time pair connections send no message on open (service-worker.js:45-48 only sends auth if a stored token exists), so the server killed them after 5s. The extension's auto-reconnect loop (1s → 2s → 4s backoff) created the terminal flood.
+**Resolution evidence:** `Aristotle.EXT-PAIR-1.2026-05-29.md` (diagnosis); `tests/wsServerAuth.test.js` fixtures (a)-(d) all pass; `npm test` green (3,014 tests).
+
+### BUG-182 — Settings panel does not track theme switch (light↔dark)
+**Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
+**Severity:** MEDIUM (visual; degrades Settings usability on theme toggle)
+**Status:** RESOLVED (2026-05-29, THEME-SYNC-1 sprint — circular chunk `settings -> tts -> settings` eliminated by moving 5 shared TTS-adjacent modules to TTS chunk in `vite.config.js`; confirmed fixed by live smoke on v1.75.1 dev build: all 5 themes × 9 sub-pages repaint cleanly with einkMode OFF)
+**Location:** `vite.config.js` (manual chunk logic), `src/components/settings/` (Settings panel container + sub-pages)
+**Root cause:** The Vite build's `manualChunks` function created a circular dependency between the `settings` and `tts` chunks. Five utility modules (`kokoroStatus`, `qwenStatus`, `kokoroRatePlan`, `ttsProviderRegistry`, `tempoStretch`) were shared between settings UI and TTS runtime code. Rollup assigned them to the settings chunk, causing TTS-chunk modules (e.g., `useNarration.ts`) to import from the settings chunk while settings-chunk modules imported from TTS — a bidirectional dependency. This can cause nondeterministic module initialization order.
+**Resolution evidence:** `npm run build` emits NO circular chunk warning after fix; `npm test` green (3,014 tests); full investigation at `docs/studies/investigations/THEME-SYNC-1-investigation.md`.
+**Severity rationale:** Doesn't block reading, but Settings is a frequently-used surface and the mixed-theme state looks broken.
+
+### BUG-176 - Flow mode drops to Page mode at EPUB section/chapter boundary
+**Reported:** 2026-05-20
+**Severity:** CRIT (reproduced 2x — blocks Flow reading of any multi-section EPUB)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useFlowScrollSync.ts` lines 265-284
+**Description:** When Flow mode's reading zone reaches the end of a chapter/section in an EPUB, the app spontaneously switches from Flow to Page mode. Play stops, the bottom bar shows Page highlighted, text reflows to narrow Page column, and the user loses reading position and mode context. Reproduced twice on Meditations EPUB at 325 wpm — zone descends through ~3 paragraphs, consumes all words in the section, then mode drops.
+**Root cause:** `useFlowScrollSync.ts` `onComplete` callback fires when `FlowScrollEngine.animateLine()` exhausts all lines. The handler checked for a next queued *book* (`getNextQueuedBook`), but if none existed it unconditionally called `setReadingMode("page")`. It never checked whether more *sections* remained in the current EPUB. In a multi-section EPUB, "section done" ≠ "book done."
+**Fix applied:** Added `bookWordMetaRef` (lines 174-175) and section-advance logic in `onComplete` (lines 267-284). Before falling through to the book-end path, the handler now checks `bookWordMeta.sections` for a section whose `startWordIdx` exceeds the current word. If found, it calls `goToSection()` → `waitForSectionReady()` → `rebuildLineMap()` to advance Flow into the next section. Mirrors the proven narration section-advance pattern at lines 458-491 in the same file.
+**Verification:** TypeScript compilation clean (`npx tsc --noEmit`). Live verification blocked by stale production build — requires `npm run build` + app restart.
+**SOW reference:** `docs/testing/flow-narrate-sow-closeout-2026-05-20.md`
+
+### BUG-180 - Narration band active chunk is white-on-white in light mode (invisible text)
+**Reported:** 2026-05-20
+**Severity:** HIGH (narrated text is completely invisible in light theme)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix)
+**Location:** `src/utils/foliateStyles.ts` line 62
+**Description:** In light mode (white/cream background), the narration band's active chunk renders white text on a white background. The dimmed surrounding text (above and below the active chunk) is visible as grayed-out text, but the currently-spoken words inside the highlight band are completely invisible — white on white.
+**Root cause:** `.page-word--chunk-active` in `foliateStyles.ts` hardcoded `color: #ffffff`. This worked in dark themes (white text pops against dark bg) but created zero contrast in light mode where the background is also white/cream.
+**Fix applied:** Changed `color: #ffffff` to `color: ${fg}` where `fg` is resolved from `--text` CSS custom property (dark in light mode, light in dark mode). Active chunk words now use the theme-appropriate foreground color. The `--active-word` background glow and `--glide-adj` highlights continue to provide visual emphasis for the narration position.
+**Verified:** Live-tested in Narrate mode with light theme — active chunk text is fully readable with good contrast.
+
+### BUG-179 - Focus mode renders empty reading zone (no text visible)
+**Reported:** 2026-05-20
+**Severity:** HIGH (Focus mode is completely unusable)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useReaderMode.ts` lines 489-513 (`handleSelectMode`)
+**Description:** After entering Focus mode from any other mode and pressing "resume reading" or Play, the reading zone band appears (beige horizontal strip across the screen with blue boundary markers at top and bottom) but no text/words are visible inside it. The zone is completely empty. Focus mode is actively "playing" (pause button shows) but rendering zero content. Tested on Meditations EPUB.
+**Root cause:** `handleSelectMode` only set the mode label (`setReadingMode`) without actually starting the Focus engine. It never called `startFocus()`, so the RSVP word pipeline was never initialized — the visual zone appeared (CSS-driven) but had no word source.
+**Fix applied:** `handleSelectMode` now calls `startFocus()` for Focus mode, `startFlow({ resumeNarration: true, targetMode: "narrate" })` for Narrate, and `startFlow()` for Flow. These functions handle `stopAllModes()`, word extraction, anchor resolution, and engine creation internally. Same root cause as BUG-178.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-178 - Mode switching causes catastrophic position loss (Flow↔Narrate)
+**Reported:** 2026-05-20
+**Severity:** HIGH (position jumps backward on every mode switch, compounding)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/hooks/useReaderMode.ts` lines 489-513 (`handleSelectMode`)
+**Description:** Switching between Flow and Narrate modes causes the reading position to jump backward. Observed sequence: (1) Page mode at "THE SECOND BOOK" (~12% progress), (2) Switch to Flow → position correct at 12%, (3) Switch Flow→Narrate → position jumps backward from 12% to 6%, (4) Switch Narrate→Flow → position jumps further backward from 6% to 0%. Each mode switch resets position further backward — catastrophic compounding position loss.
+**Root cause:** `handleSelectMode` called `stopAllModes()` then `setReadingMode(mode)` then `updateSettings()` — but never actually started the target mode's engine. The mode label changed, the old mode stopped, but the new mode's word pipeline/anchor resolution never ran. The global word anchor contract from READER-4M-3 was intact but never consumed because the engine startup (which reads the anchor) was skipped.
+**Fix applied:** `handleSelectMode` now calls `startFocus()`/`startFlow()` directly instead of the label-only approach. These functions internally handle `stopAllModes()`, `captureCurrentAnchor()`, word extraction, anchor resolution, and engine creation. The anchor is captured before stopping and consumed during the new engine's startup. Same root cause as BUG-179.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-177 - Progress indicator inconsistency in Narrate mode (6% bar vs 12% label)
+**Reported:** 2026-05-20
+**Severity:** LOW (cosmetic — two different progress readings shown simultaneously)
+**Status:** RESOLVED (2026-05-20, Cowork direct fix — awaits rebuild for live verification)
+**Location:** `src/components/ReaderBottomBar.tsx` line 415
+**Description:** In Narrate mode, the thin progress bar at the bottom-left shows "6%" while the text label at the bottom-right shows "12% · ~219 min left". Two different progress values displayed simultaneously.
+**Root cause:** The progress bar and Row 3 info line both used `foliateFraction` (Foliate's authoritative CFI-based book progress, 0.0-1.0), but the percentage text label at line 415 used `flowProgress.bookPct` (a word-ratio-based estimate). The two metrics diverge because word-ratio doesn't account for EPUB structural content (TOC, front matter, etc.).
+**Fix applied:** Changed the text label from `Math.round(flowProgress.bookPct * 100)` to `Math.round((foliateFraction != null ? foliateFraction : flowProgress.bookPct) * 100)`. Now all three display elements (bar, label, Row 3) use `foliateFraction` when available.
+**Verification:** TypeScript compilation clean. Live verification blocked by stale production build.
+
+### BUG-181 - Production build crashes on book open (stale tokenizeWithMeta guard)
+**Reported:** 2026-05-20
+**Severity:** CRIT (installed app cannot open any book)
+**Status:** RESOLVED — confirmed 2026-05-28 after `npm run build` (v1.75.1); Meditations opens cleanly from Reading Now, reader renders text and bottom bar. Same crash was re-observed on 2026-05-27 in a stale-build live-QA pass (sweep captured the `r.split is not a function` stack at `App-m6JliGkQ.js:2:3439` as "F2"); rebuild eliminated it. No additional code change required.
+**Location:** `src/utils/text.ts` line 138 (`tokenizeWithMeta`)
+**Description:** The installed production build (`AppData/Local/Programs/blurby/resources/app.asar/dist/`) crashes with `Uncaught TypeError: r.split is not a function` when opening any book. White screen with no reader content rendered. Stack trace: `Nn` (minified `tokenizeWithMeta`) → `useMemo` → React render tree.
+**Root cause:** The production build was compiled from an older version of `text.ts` that had `if (!r)` as the guard (catches null/undefined/empty-string but not non-string types like numbers or objects). The current source code at line 138 has the correct guard: `if (typeof text !== "string" || !text)`. The build is simply stale.
+**Fix:** Rebuild the app with `npm run build` and restart. The source code already has the correct type guard. No code change needed. **(Applied 2026-05-28; verified.)**
+
+### BUG-175 - Manual Recenter Box needs measurable chunk-start alignment
+**Reported:** 2026-05-18
+**Severity:** Medium/High (live Flow/Narrate recovery and QA gap)
+**Status:** RESOLVED - 2026-05-18, explicit recenter API/button with pixel-tolerance accuracy test
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Flow/Narrate automatic following is still being tuned, but users also need a manual lower-right control to recenter the reading box on the current text after scrolling. The recenter behavior must be testable: it should align the active sentence/chunk start to the top of the selected reading box, not merely jump somewhere near the active word.
+**Root cause (confirmed 2026-05-18):** The chunk scroll helper had a single target policy: follow trusted `activeWordIndex` when available, otherwise use the chunk start. That was correct for live automatic following, but it made a manual "recenter the box" action impossible to specify because recenter needs chunk-start alignment even when an active word exists.
+**Fix:** Added an explicit `ChunkReadingScrollTarget` policy with `"follow-word"` as the default and `"chunk-start"` for manual recenter. `FoliatePageView` now exposes `recenterChunkReadingBox()`, the lower-right button is available whenever Flow/Narrate chunk visuals exist, and `ReaderContainer` routes the button through the recenter API before falling back to legacy narration return.
+**Accuracy test:** `tests/foliateChunkHighlight.test.ts` now measures the expected scroll position as `currentScrollTop + chunkStartTop - containerTop - readingBoxTopOffset` and asserts the result is within `0.5px`, while also proving the lower active-word position was not used.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-174 - Flow/Narrate chunk highlight does not follow active word inside the selected zone
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode sync regression)
+**Status:** RESOLVED - 2026-05-18, active-word follow scroll and zone-center alignment
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Flow/Narrate could briefly settle into the right infinite-scroll layout, but once playback started the highlighted chunk/text block did not stay centered inside the selected reading zone. The active word could advance visually while the scroll surface stayed anchored to the first word of the same natural chunk.
+**Root cause (confirmed 2026-05-18):** `FoliatePageView` only re-scrolled when the active chunk range changed, and `scrollChunkReadingVisualStateToTopOfRoots(...)` always targeted `activeChunkRange.startWordIndex`. Word-boundary updates inside the same chunk updated `.page-word--active-word`, but they did not create a new scroll key or target the active word. The offset also aligned to the zone top rather than the zone center.
+**Fix:** Chunk visual scrolling now resolves an explicit follow word: trusted `activeWordIndex` when available, otherwise the chunk start for chunk-only fallback. The scroll key includes active-word progress, so Flow/Narrate can keep following within a single chunk. `FoliatePageView` now passes the selected zone center as the follow offset, keeping the active spoken/read word centered in the highlighted reading zone while preserving chunk-only fallback behavior.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/foliate-bridge.test.ts tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-173 - Flow/Narrate chunk zone alignment drifts with Foliate iframe offsets and Narrate segment starts
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode sync regression)
+**Status:** RESOLVED - 2026-05-18, Foliate iframe-aware scroll math and audio segment-start chunk sync
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Flow/Narrate appeared closer to correct when the window was truncated, but fullscreen placement drifted and Narrate's light chunk highlight did not keep pace with spoken progress. The active chunk must sit in the selected zone regardless of viewport size, and Narrate's chunk-only fallback must advance from real audio playback starts.
+**Root cause (confirmed 2026-05-18):** `scrollChunkReadingVisualStateToTopOfRoots(...)` compared iframe-local word-span coordinates directly to the outer Foliate scroll container, ignoring the iframe's own offset. This made the computed scroll target viewport-size dependent. Separately, Kokoro scheduler segment-start events were only used for tracing, so when trusted word timing was unavailable the chunk visual path could wait until a later handoff/boundary instead of moving when the audible segment actually started.
+**Fix:** Foliate chunk scroll now resolves both target and scroll-container positions through frame-aware viewport coordinates before applying the selected-zone offset. `FoliatePageView` computes synthetic leading/trailing zone space from the actual Foliate scroll viewport when available. `useNarration` exposes a visual-only segment-start callback, and `ReaderContainer` converts segment starts into chunk-synced Narrate visual state while preserving trusted word-boundary updates for bold active-word highlighting.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/useNarrationRateUpdate.test.tsx --configLoader runner`; `npx vitest run tests/useReaderMode.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-172 - Flow/Narrate cannot place first or final book content inside the selected zone
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode positioning regression)
+**Status:** RESOLVED - 2026-05-18, Flow/Narrate chunk alignment now targets the selected zone with synthetic start/end scroll space
+**Location:** `src/utils/foliateWordHighlight.ts`, `src/utils/foliateStyles.ts`, `src/components/FoliatePageView.tsx`, `src/utils/FlowScrollEngine.ts`
+**Description:** At the start of a book, the first heading or paragraph could not be selected into the active Flow/Narrate zone because there was no content above it. The same geometry applies at the end of a book: without content below the final paragraph, the final chunk cannot scroll into the selected zone. Flow and Narrate need an infinite-scroll surface with enough synthetic blank space at both ends for the active chunk to sit inside the chosen zone.
+**Root cause (confirmed 2026-05-18):** The Foliate chunk visual path initially aligned chunk starts against the scroll container top and relied on native scroll clamping. At `scrollTop = 0` or max scroll, the browser could not move the first/final content into the selected zone because the EPUB iframe body had no leading/trailing spacer. FlowScrollEngine also preserved a chunk-top alignment path that bypassed its normal zone-position math.
+**Fix:** Foliate iframe styles now expose `--blurby-flow-leading-inset` and `--blurby-flow-trailing-inset`, with `FoliatePageView` setting them from the selected zone and viewport height. `scrollChunkReadingVisualStateToTopOfRoots(...)` subtracts the zone top offset when controlling the real Foliate scroll container, and `FlowScrollEngine` routes active chunk starts through its normal zone-aligned word scroll path instead of pinning them to the container top.
+**Verification:** `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js tests/useReaderMode.test.ts tests/foliate-bridge.test.ts tests/flowReadingZone.test.ts tests/flowTimerCursor.test.ts tests/chunkReadingVisualState.test.ts --configLoader runner`.
+
+### BUG-171 - Narrate trusted word boundaries do not update chunk active-word highlight
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode visual sync regression)
+**Status:** RESOLVED - 2026-05-18, trusted Narrate word sync now updates chunk visual active word
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Flow and Narrate show the active chunk band, but the current spoken/advanced word does not visibly track as the cursor progresses. In Narrate, this leaves the chunk highlighted without the required bold active word.
+**Root cause (confirmed 2026-05-18):** Narrate's trusted scheduler word-boundary callback still routed through the legacy `highlightWordByIndex(...)` Foliate path. Chunk visual mode suppresses that old flow-cursor/highlight path, so trusted spoken-word events reached the app but did not update the `ChunkReadingVisualState.activeWordIndex` owner that paints `.page-word--active-word`.
+**Fix:** `useReaderMode` now exposes trusted Narrate word sync to the chunk visual owner. `ReaderContainer` converts that trusted boundary into a `word-synced` Narrate `ChunkReadingVisualState`, while missing/untrusted timing remains chunk-only because `setOnTruthSync` is not invoked for untrusted fallback word timing.
+**Verification:** `npx vitest run tests/useReaderMode.test.ts --configLoader runner`; `npx vitest run tests/useReaderMode.test.ts tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-170 - Flow cursor persists when switching from Flow to Narrate
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode visual duplication)
+**Status:** RESOLVED - 2026-05-18, Flow cursor unmounted outside real Flow mode
+**Location:** `src/components/FoliatePageView.tsx`, `src/styles/flow.css`
+**Description:** Switching from Flow to Narrate can leave the old shrinking Flow cursor visible while Narrate's chunk/word highlight is also active, producing duplicate cursors on the shared infinite-scroll surface.
+**Root cause (confirmed 2026-05-18):** The Foliate surface renders the FlowScrollEngine cursor whenever `flowMode` is true. Narrate also uses `flowMode` for infinite scroll, so the Flow cursor remained mounted in Narrate and could preserve stale inline styles written by FlowScrollEngine.
+**Fix:** The shrinking Flow cursor now renders only when `readingMode === "flow"`. Chunk visual CSS also uses `display: none !important` for cursor suppression so stale inline `display: block` cannot override chunk/Narrate ownership.
+**Verification:** `npx vitest run tests/foliate-bridge.test.ts --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts tests/flow-scroll-engine.test.js --configLoader runner`.
+
+### BUG-166 - Narrate/Flow start anchor does not pin to the active view top
+**Reported:** 2026-05-18
+**Severity:** High (current live reading-mode positioning regression)
+**Status:** RESOLVED - 2026-05-18, chunk-top infinite-scroll positioning
+**Location:** `src/utils/FlowScrollEngine.ts`, `src/components/FoliatePageView.tsx`, `src/utils/foliateWordHighlight.ts`
+**Description:** Flow/Narrate can start from the selected word but leave the visual page anchored to an older top-of-page/resume position instead of placing the active chunk/word at the top of the active reading view. The bug report says "FLow and narrate doesn't start at the top of the page" while the app is in `readingMode: narrate`.
+**Evidence:** The report shows `position: 375`, `cursorWordIndex: 0`, `totalWords: 0`, and `extractionComplete: false` at capture, followed by full-book extraction. Console logs repeatedly report `[TTS-7M] onRelocate: resume anchor active at 375 - skipping approx ...`, then exact selection at `globalWordIndex: 187 word: INTRODUCTION`, plus repeated `word-position-index-miss` diagnostics and direct fallback hits. This suggests the resume-anchor relocation guard is fighting the newly selected visual anchor during Foliate relocation/index fallback.
+**Root cause (confirmed 2026-05-18):** Flow chunk jumps still used the selected reading-zone math (`line.y - containerHeight * zonePosition`), so a center/lower zone deliberately placed the active chunk below the top. Narrate's declared chunk visual path applied chunk/word classes but did not move the Foliate rendered root at all.
+**Fix:** Natural chunk mode now treats the active chunk start as the scroll owner. `FlowScrollEngine` top-aligns the active chunk start line when chunks are present, while non-chunk fallback still uses the selected reading-zone behavior. Foliate chunk rendering now scrolls the active chunk start span with `block: "start"` when a new Flow/Narrate chunk becomes active, so Narrate and Flow both behave as infinite-scroll chunk readers.
+**Verification:** `npx vitest run tests/flow-scroll-engine.test.js --configLoader runner`; `npx vitest run tests/foliateChunkHighlight.test.ts --configLoader runner`.
+
+### BUG-167 - Narrate start speed is derived from WPM instead of the TTS speed setting
+**Reported:** 2026-05-18
+**Severity:** Critical (current narration pacing can become unusably fast)
+**Status:** RESOLVED - 2026-05-18, direct fix in `src/hooks/useNarration.ts`
+**Location:** `src/hooks/useNarration.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useNarrationSync.ts`
+**Description:** Narration can start at 1.5x even when the side panel and report say TTS speed is 1.0x. The bug report says "Too fast narration at 1.0x speed." The diagnostic snapshot confirms `ttsSpeed: 1`, `wpm: 375`, but active runtime `rate: 1.5` / `rateBucket: 1.5`.
+**Root cause candidate (confirmed by code inspection 2026-05-18):** `useNarration.ts` computes mode-start speed with `wpmToRate(wpm)`, and `useReaderMode.ts` passes `effectiveWpm` into `narration.startCursorDriven(...)`. At 375 WPM, `375 / 150 = 2.5`, clamped to `TTS_MAX_RATE = 1.5`. `useNarrationSync.ts` only adjusts rate when `settings.ttsRate` changes, so it does not reliably correct the start-derived 1.5x rate.
+**Fix:** `startCursorDriven(...)` and `resyncToCursor(...)` now use the current selected narration/TTS rate instead of converting visual WPM into audio speed. Regression coverage proves `ttsRate: 1.0` plus `wpm: 375` starts Kokoro Narrate at 1.0x, while existing same-bucket live-rate behavior remains explicit via TTS rate setup in tests.
+**Verification:** `npx vitest run tests/useNarrationRateUpdate.test.tsx --configLoader runner`; `npx vitest run tests/useNarrationRateUpdate.test.tsx tests/useReaderMode.test.ts tests/kokoroRateBuckets.test.ts tests/useNarrationQwen.test.tsx tests/qwenPlaybackReliability.test.tsx --configLoader runner`; `npm run typecheck`.
+
+### BUG-168 - Opening narration chunks can ignore natural/header boundaries
+**Reported:** 2026-05-18
+**Severity:** High (current audiobook pacing/chunking regression)
+**Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/narrationPlanner.ts`, `src/utils/naturalChunks.ts`
+**Description:** Narrate can begin with a chunk boundary in the wrong location and provide no break after a header. The report says "no break after header" and "Chunk are happening in the wrong location." The console shows narration starts at `globalWordIndex: 187 word: INTRODUCTION`, then emits a first chunk of 13 words.
+**Root cause candidate (confirmed by code inspection 2026-05-18):** The opening ramp path uses small chunks before cruise generation. `snapToSentenceBoundary(...)` returns the raw end when the chunk is `<= 20` words, so the first 13-word ramp chunk bypasses sentence/header/line-break snapping. Separately, `narrationPlanner.ts` documents clause-boundary fallback but currently searches sentence boundaries and then falls back to raw target, so clause/header breaks are underused.
+**Fix spec (CLI-ready):**
+1. Route opening ramp chunks through the same natural chunk/source-boundary model used for chunk visuals, or add an opening-ramp guard that honors headings, source line breaks, and terminal punctuation before raw word count.
+2. Add a regression fixture where a heading without punctuation is followed by prose; the heading must be its own chunk or receive a deliberate post-heading break.
+3. Restore/implement clause-boundary fallback in the planner in the documented priority order before raw target fallback.
+4. Preserve latency goals by allowing small first chunks only when they end on a natural boundary.
+
+### BUG-169 - React maximum update depth loop during Narrate/Flow relocation
+**Reported:** 2026-05-18
+**Severity:** High (can destabilize live reading modes)
+**Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-10-16Z.json` and `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
+**Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`, `src/hooks/useDocumentLifecycle.ts`
+**Description:** Both fresh bug captures include React `Maximum update depth exceeded` console errors while Foliate relocation, resume-anchor skipping, and selection/highlight diagnostics are active. This is likely related to BUG-166, but it should remain separately tracked because it can freeze or destabilize the app even if anchoring is fixed.
+**Evidence:** The 21:10 report records two maximum-depth errors; the 21:27 report records four. Both include repeated `[TTS-7M] onRelocate: resume anchor active ... skipping approx ...` logs around the same session window.
+**Fix spec (CLI-ready):**
+1. Reproduce with console open by selecting a word, entering Narrate/Flow, and forcing a Foliate relocate while background extraction is still settling.
+2. Identify effects that write state in response to relocation/highlight changes without a stable dependency or equality guard.
+3. Add equality guards or ref-based suppression where relocation attempts to write the same anchor/highlight state repeatedly.
+4. Add a regression test or harness guard that repeated relocate events do not trigger repeated React state writes for an unchanged anchor.
+
+### BUG-151 — Narration band spans full page height instead of single line
+**Reported:** 2026-04-06
+**Severity:** High (visual regression)
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
+**Location:** `src/components/FoliatePageView.tsx` (lines 571, 692, 860)
+**Description:** After TTS-7R (v1.37.0), the narration overlay band renders as a page-tall rectangle instead of the intended single-line-height 3-word gliding cursor.
+**Root cause (confirmed by code analysis 2026-04-06):** Three fallback paths in FoliatePageView.tsx use uncapped height values when `narrationBandLineHeightRef.current === 0`:
+- Line 571: `const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.max(12, from.height);`
+- Line 692: same pattern with `fromWindow.height`
+- Line 860: `... : currentWindow.height;`
+When the user navigates away from the narrated section, `measureNarrationBandDimensions()` (called only at narration start) becomes stale. The fallback uses `currentWindow.height` or `from.height` from `measureNarrationWindow()`, which can be hundreds of pixels if the 3-word window spans across lines or sections.
+**Fix spec (CLI-ready):**
+1. Cap all three fallback heights to `Math.min(value, 40)` (~2 line-heights, safe maximum):
+   - Line 571: `Math.max(12, from.height)` → `Math.min(Math.max(12, from.height), 40)`
+   - Line 692: `fromWindow.height` → `Math.min(fromWindow.height, 40)`
+   - Line 860: `currentWindow.height` → `Math.min(currentWindow.height, 40)`
+2. Re-run `measureNarrationBandDimensions()` on Foliate section change (onLoad/onRelocate), not just at narration start. Add call in the `onRelocate` handler when `readingMode === "narration"`.
+
+### BUG-152 — Focus mode blank screen
+**Reported:** 2026-04-06
+**Severity:** High (feature broken)
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
+**Location:** `src/components/ReaderContainer.tsx` (line 1362)
+**Description:** Clicking Focus shows a blank white screen with only tiny up/down arrow icons (▼/▲) in the center — no word text visible. The RSVP display renders but shows empty text.
+**Screenshot:** `docs/governance/bug-reports/.Archive/bug-2026-04-06T13-48-57Z.png` — blank white screen with centered arrows.
+**Root cause (confirmed by code analysis 2026-04-06):** Data-flow split between the mode timer and the display component.
+- `ReaderContainer.tsx:1362` passes `words={foliateWordStrings}` to ReaderView — this is a DOM-section slice (~1000 words from the currently visible Foliate section).
+- The FocusMode timer uses `getEffectiveWords()` which returns `bookWordsRef.current.words` (173,727 words from full-book extraction) when available.
+- The mode timer advances `wordIndex` through the full 173,727-word index space (e.g., wordIndex=5114).
+- But `foliateWordStrings[5114]` is `undefined` because the array only has ~1000 entries from the current DOM section.
+- `ReaderView.tsx:216` computes `currentWord = words[wordIndex] || ""` → empty string → blank display.
+- The focus-mark arrows (▼/▲) at `ReaderView.tsx:340,358` render regardless of word content, producing the "blank screen with arrows" appearance.
+**Fix spec (CLI-ready):**
+1. `ReaderContainer.tsx:1362` — Change `words={foliateWordStrings}` to:
+   `words={bookWordsRef.current?.complete ? bookWordsRef.current.words : foliateWordStrings}`
+   This ensures ReaderView receives the same word source that the mode timer uses.
+2. Apply the same fix at any other location where `foliateWordStrings` is passed to a component that uses the global `wordIndex` (grep for `words={foliateWordStrings}` in ReaderContainer).
+
+### BUG-153 — No word selection contract (soft/hard selection missing)
+**Reported:** 2026-04-06
+**Severity:** High (design gap affecting all reading modes)
+**Status:** RESOLVED — 2026-04-06, SELECTION-1 (v1.38.0)
+**Location:** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** When navigating to any page, no word is highlighted. Reading modes (Focus, Flow, Narrate) don't know where to start because there's no persistent "current word" anchor. Users reported: "If no word is selected, where does each reading mode start?" and "there must always be a word selected."
+**Screenshots:** `docs/governance/bug-reports/bug-2026-04-06T13-49-14Z.png`, `bug-2026-04-06T13-50-16Z.png`, `bug-2026-04-06T13-50-34Z.png`
+**Investigation:** Full investigation report at `docs/studies/investigations/SELECTION-1-investigation.md`. 4 word lists mapped, per-mode start resolution traced, 6 gaps identified, position data flow diagrammed.
+**Design (Cowork 2026-04-06):** Three-tier word anchor contract:
+- **Soft selection** (`softWordIndexRef`) — First visible word on every page, auto-updated via `findFirstVisibleWordIndex()` on `onRelocate`/`onLoad`. Visual: `.page-word--soft-selected` (2px left-border accent). Only visible in page mode.
+- **Hard selection** (`highlightedWordIndex`, existing) — User clicks a word → distinct highlight, persists across page turns. Takes visual priority over soft.
+- **Resume anchor** (`resumeAnchorRef`, existing) — Internal ref, consumed on mode start.
+- **Resolution order:** `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+**Sprint:** SELECTION-1 in ROADMAP.md — 15 tasks, 15 success criteria, Quick tier. Also absorbs BUG-151 and BUG-152.
+
+### ~~BUG-159~~ ✅ Fixed — HOTFIX-15 (v1.43.1, 2026-04-07)
+**Reported:** 2026-04-07 | **Resolved:** 2026-04-07
+**Severity:** Medium (visual regression)
+**Status:** RESOLVED — HOTFIX-15 (v1.43.1)
+**Location:** `src/components/FoliatePageView.tsx` (lines 701, 929)
+**Description:** During narration, the collapsing cursor band occasionally stretches to the full page width instead of staying within the current text column. Occurs after narrating through several pages — not immediate.
+**Root cause (Cowork analysis 2026-04-07):** The `colRight` measurement resolves the current word's container via `wordEl?.closest("p") || wordEl?.parentElement` (line 701 in `ensureAudioProgressGlideLoop`, line 929 in `positionNarrationOverlay`). Two failure modes:
+1. **Missing `<p>` ancestor:** Some EPUB structures place text directly inside `<div>` or `<section>`. The fallback `|| wordEl?.parentElement` picks up a full-width container, causing `colRight` to jump to the page edge.
+2. **Null `wordEl`:** If the querySelector for `data-word-index` returns null (word scrolled out of view, Foliate re-rendered the page), `pEl` becomes undefined and the coordinate transform produces garbage — `colRight` retains a stale or invalid value.
+**Fix:** Ancestor resolution tightened to `closest("p, blockquote, li, figcaption")`. Width guard added: if resolved element exceeds 95% of scroll container width, falls back to container edge minus 16px margin. Null guard added: if `wordEl` is null, measurement tick is skipped entirely.
+
+### ~~BUG-160~~ ✅ Fixed — HOTFIX-15 (v1.43.1, 2026-04-07)
+**Reported:** 2026-04-07 | **Resolved:** 2026-04-07
+**Severity:** Low (visual polish)
+**Status:** RESOLVED — HOTFIX-15 (v1.43.1)
+**Location:** `src/components/FoliatePageView.tsx` (line 518), `src/styles/global.css` (line 3867)
+**Description:** The narration cursor band is approximately 1/3 too tall. The gradient fade height should be tighter and should scale with text size changes.
+**Root cause (Cowork analysis 2026-04-07):** Band height is set once at narration start via `measureNarrationBandDimensions()` (line 518): `narrationBandLineHeightRef.current = lineHeight + 4`. Two problems:
+1. **Fixed `+ 4` padding:** 4px is generous at normal text sizes. At the user's current font size the band visually overshoots. Should be proportional (e.g., `lineHeight * 1.08`) rather than fixed-pixel.
+2. **Measure-once-never-update:** Height is never re-measured after narration starts. If the EPUB has mixed font sizes (headings, blockquotes) or the user changes text size mid-narration, the band stays at the original height.
+**Fix:** `measureNarrationBandDimensions()` now uses `Math.ceil(lineHeight * 1.08)` (proportional) instead of `lineHeight + 4` (fixed). Re-measurement added inside `ensureAudioProgressGlideLoop` word-change block: if new word's computed `lineHeight` differs from stored value by >2px, `narrationBandLineHeightRef` is updated.
+
+### ~~BUG-161~~ ✅ FULLY RESOLVED — HOTFIX-15 (partial, v1.43.1) + NARR-TIMING (full, v1.44.0, 2026-04-07)
+**Reported:** 2026-04-07 | **Fully resolved:** 2026-04-07
+**Severity:** Medium (core UX regression)
+**Status:** RESOLVED — NARR-TIMING (v1.44.0) replaced `computeWordWeights` heuristic with real per-word timestamps from Kokoro's duration tensor, eliminating drift entirely. HOTFIX-15 partial fix (truth-sync interval 12→6 words) subsumed.
+**Location:** `src/utils/audioScheduler.ts` (lines 53-72, 211-239), `src/constants.ts` (line 100)
+**Description:** After narrating through several sentences, the cursor visibly outpaces the audio — it runs ahead by 1-3 words. On pause and resume, the cursor snaps back to the correct audio position, confirming the audio position is accurate but the visual interpolation drifts.
+**Root cause (Cowork analysis 2026-04-07):** `computeWordWeights()` distributes chunk duration proportionally to `clamp(word.length, 2, 20)`. Short function words ("the", "of", "is", "a") get weight 2 but in speech take almost no time. Long content words get weight 10-20 but take proportionally less time than their character count suggests. The cumulative effect: during passages with many short function words (most English prose), the cursor burns through its time budget faster than the audio speaks, then hits long words where the budget runs short. Drift compounds across words within a chunk.
+On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back to the real audio word index — confirming the audio scheduler is authoritative but the visual interpolation heuristic is wrong.
+**Fix (partial — HOTFIX-15):** `TTS_CURSOR_TRUTH_SYNC_INTERVAL` reduced from 12 to 6 words, doubling re-anchor frequency to limit maximum visible drift to ~6 words. **Full fix:** NARR-TIMING sprint replaces the character-count heuristic with real word-level timestamps from Kokoro's duration tensor, eliminating the drift entirely.
+
+### BUG-162 — Book-open freeze (~5s, no loading feedback)
+**Reported:** 2026-04-07
+**Severity:** High (UX — perceived hang)
+**Status:** RESOLVED — fixed in STAB-1A (v1.45.0)
+**Location:** `src/components/FoliatePageView.tsx` (lines 188-205, 236-266, 1111-1277, 1883), `src/styles/global.css`
+**Description:** Opening a book freezes the UI for ~5 seconds with no visual feedback. The `onSectionLoad` handler runs synchronous DOM walk (`extractWordsFromView`) + synchronous DOM mutation (`wrapWordsInSpans`) on the main thread, blocking everything. A `.foliate-loading` div exists in JSX (line 1883) but has no CSS — invisible loading indicator.
+**Fix spec:** Add `.foliate-loading` CSS for visible feedback. Refactor `wrapWordsInSpans` to async with `setTimeout` yields between block-group batches.
+
+### BUG-163 — TTS cold-start latency (model loads on play, not on book open)
+**Reported:** 2026-04-07
+**Severity:** Medium (UX delay)
+**Status:** RESOLVED — fixed in STAB-1A (v1.45.0)
+**Location:** `main/tts-engine.js` (lines 189-229, 234-246, 270-272), `main/ipc/tts.js` (lines 59-66)
+**Description:** First-ever TTS play requires loading the Kokoro model (~5-30s). The model loads lazily on first `generate()` call (tts-engine.js:237). An existing `tts-kokoro-preload` IPC handler and `preload()` method exist but aren't called during book open.
+**Fix spec:** Wire `tts-kokoro-preload` into the book-open path (fire-and-forget) so the model is warm by the time the user presses play.
+
+### BUG-164 — TTS chunk-boundary sentence-snap tolerance too narrow
+**Reported:** 2026-04-07
+**Severity:** Low (audio quality)
+**Status:** RESOLVED — fixed in STAB-1A (v1.45.0)
+**Location:** `src/utils/generationPipeline.ts` (line 114)
+**Description:** Sentence-snapping tolerance for ramp-up chunks is ±15 words — too narrow for some paragraph structures, causing mid-sentence chunk boundaries that produce audible pauses.
+**Fix spec:** Widen tolerance from ±15 to ±25 words.
+
+### BUG-165 — Flow mode scroll/offset failure (zombie engine state)
+**Reported:** 2026-04-07
+**Severity:** High (feature broken)
+**Status:** RESOLVED — fixed in STAB-1A (v1.45.0)
+**Location:** `src/utils/FlowScrollEngine.ts` (lines 78-117, 259-286, 364-375), `src/components/ReaderContainer.tsx` (lines 1082-1134)
+**Description:** Flow mode text doesn't auto-scroll and content starts at the top instead of the reading zone. Root cause: `buildLineMap()` silently returns an empty array when DOM word spans aren't rendered yet (race condition with FoliatePageView's rendering pipeline). The engine enters a zombie state where `running=true` but `lines=[]`, and every call to `animateLine()` exits early at line 298. No recovery path exists.
+**Fix spec:** Add retry/wait on `buildLineMap()` in `start()` — retry up to 5 times with 100ms delay. Use instant (not smooth) scroll for initial position.
+
+### BUG-154 — Flow mode should switch to scrolled layout on click, not on play
+**Reported:** 2026-04-06
+**Severity:** Medium
+**Status:** PARKED — code already switches on click. Needs live verification. Not included in SELECTION-1.
+**Location:** `src/components/FoliatePageView.tsx` (line 1527), `src/components/ReaderContainer.tsx` (line 1293)
+**Description:** User reports clicking "Flow" doesn't switch to scrolled layout until play starts.
+**Screenshot:** `docs/governance/bug-reports/.Archive/bug-2026-04-06T13-47-33Z.png`
+**Code analysis (2026-04-06):** The code already handles this correctly:
+- `ReaderContainer.tsx:1293` sets `flowMode={readingMode === "flow"}` — updates immediately on button click.
+- `FoliatePageView.tsx:1527` applies `view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated")` via a useEffect with `[flowMode]` dependency — fires when prop changes.
+- The layout switch SHOULD happen on click, before play.
+**Probable explanation:** The Foliate renderer may take a noticeable moment to reflow from paginated to scrolled mode (especially on large documents like 171k words), perceived as "doesn't switch." Or the user was in narration mode where the visual difference between paginated and scrolled is subtle.
+**Next step:** Live verification — click Flow, watch for reflow timing. If it works but is slow, this is a UX polish item (add loading indicator), not a bug.
+
+### ~~BUG-155~~ ✅ Fixed — HOTFIX-14 (v1.38.2, 2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
+**Severity:** High
+**Location:** `main/url-extractor.js`, `main/ipc/library.js`
+**Description:** URL extraction fails with "Could not extract article from this URL. Try opening it in your browser instead." Tested with `https://www.ebsco.com/research-starters/history/simonides`. May be site-specific (EBSCO may require auth/cookies) or a broader Readability regression.
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-51-56Z.png` — library view showing error message.
+**Fix:** Added `fetchWithBrowser` fallback to the no-login branch of `main/ipc/misc.js`. Electron's built-in `fetch()` triggers WAF rejection on EBSCO and Cloudflare-protected sites (HTTP 400 — Chromium TLS fingerprint detected as bot). The fallback uses a hidden BrowserWindow with full session cookies, bypassing WAF detection.
+
+### ~~BUG-156~~ ✅ Fixed — HOTFIX-14 (v1.38.2, 2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
+**Severity:** Medium
+**Location:** `main/ws-server.js`, `src/components/settings/ConnectorsSettings.tsx`
+**Description:** Connectors settings page shows "Extension is paired and connected" with green indicator when no Chrome extension is actually connected. The WebSocket server was reporting "listening" (server running) as "connected" (client attached).
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-52-39Z.png`
+**Fix:** `getClientCount()` now filters to authenticated clients only. `ConnectorsSettings.tsx` polls status every 5 seconds. WebSocket heartbeat interval reduced from 30s to 15s for faster stale-connection detection.
+
+### ~~BUG-157~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
+**Severity:** Medium (enhancement)
+**Location:** `src/components/settings/ConnectorsSettings.tsx`
+**Description:** No way to disconnect or reset the Chrome extension connection from within Blurby. Users need a button to force-disconnect and regenerate pairing token.
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-53-06Z.png`
+**Fix:** Added "Disconnect" button that clears pairing token and drops any active WebSocket connection. Added "Reconnect" button that generates a new pairing code.
+
+### ~~BUG-158~~ ✅ Fixed — HOTFIX-14 partial (2026-04-06)
+**Reported:** 2026-04-06 | **Resolved:** 2026-04-06
+**Severity:** Low (UX simplification)
+**Location:** `src/components/ReadingQueueFlap.tsx` or equivalent flap component
+**Description:** Reading queue flap showed many categories. User requested simplification: only show "Now Reading" and "Queue" in that order.
+**Screenshot:** `docs/governance/bug-reports/bug-2026-04-06T13-53-40Z.png`
+**Fix:** Filtered flap sections to only "Now Reading" and "Queue". Removed other categories.
+
+### ~~BUG-145~~ ✅ Fixed — TTS-7R (v1.37.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/styles/global.css`
+**Description:** After `TTS-7Q`, the narration band was still over-corrected, laggy, and distractingly precise due to three cascading sub-issues: resize jitter from per-frame bounding box measurement (BUG-145a), band outrunning audio via the wall-clock estimator (BUG-145b), and chunk restart from the visual cursor position instead of the last confirmed audio position (BUG-145c).
+**Fix (TTS-7R):**
+- **BUG-145a:** Fixed-size overlay band — line-height measured once at narration start, width = content-area width; `measureNarrationWindow` removed from hot path; no per-frame width/height changes.
+- **BUG-145b:** `SIMPLE_NARRATION_GLIDE` removed; audio-progress glide loop (`ensureAudioProgressGlideLoop`) now active for Kokoro; wall-clock fallback gated to Web Speech only.
+- **BUG-145c:** Added `lastConfirmedAudioWordRef` to `useNarration.ts`; `speakNextChunkKokoro` reads from it instead of `cursorWordIndex`; truth-sync corrects visual overlay position only, does not write narration state.
+- Removed `.page-word--narration-context` per-word highlight CSS.
+
+### ~~BUG-146~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Cosmetic
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Chapter dropdown didn't update to reflect current section during narration — used `wordIndex` (reading position) instead of narration cursor position.
+**Fix:** Added `narrationWordIndex` prop to ReaderBottomBar. ReaderContainer passes `cursorWordIndex` when `narrationStatus === “speaking”`, null otherwise. `currentChapterIndex()` uses `narrationWordIndex ?? wordIndex`.
+
+### ~~BUG-147~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Minor (enhancement)
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Description:** No visible affordance to jump back to narration position when user pages away from currently-narrated section.
+**Fix:** Floating “Return to narration” pill button added to ReaderContainer. Appears when narration is active and `cursorWordIndex` is outside the currently-visible word range. Navigates to narration cursor on click. Auto-hides when narration range becomes visible again or narration stops.
+
+### ~~BUG-148~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Minor
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** No visual feedback when reading position is restored after app reopen — users perceived the correct restore as “starting fresh.”
+**Fix:** Brief toast “Restored to your last position” shown on initial book open when resume anchor restores a position > 0. Gated by `hasShownRestoreToast` ref to prevent re-showing on subsequent page turns. Auto-dismisses after 2 seconds.
+
+### ~~BUG-149~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Broken
+**Location:** `main/epub-word-extractor.js`, `src/components/ReaderContainer.tsx`
+**Description:** Opening a large EPUB (264k words) blocked the UI — nothing was selectable for several seconds during extraction.
+**Fix:** Extraction loop now yields between sections via `await new Promise(r => setImmediate(r))`, keeping the main-process event loop responsive. Renderer extraction delay increased from 1s to 2s for books > 100k words.
+
+### ~~BUG-150~~ ✅ Fixed — HOTFIX-12 (v1.37.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Broken
+**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/BugReportModal.tsx`
+**Description:** Global keyboard shortcuts (Ctrl+Left/Right) were intercepted inside the bug reporter textarea, preventing standard text navigation. No Ctrl+Enter shortcut existed to submit.
+**Fix:** (1) `useKeyboardShortcuts.ts` early-returns if `e.target` is `<textarea>`, `<input>`, or `[contenteditable]`. (2) `BugReportModal.tsx` calls `handleSave()` on Ctrl+Enter keydown.
+
+### ~~BUG-143~~ ✅ Fixed — TTS-7Q (v1.36.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/FoliatePageView.tsx`
+**Description:** After `TTS-7O` and follow-on live fixes, the narration cursor now moves, pause/replay preserves an anchor, and the left-right twitch is largely gone. This is stable enough to keep. But the visual band still feels stepped and laggy compared with smooth Kokoro audio. Users perceive the 3-word cursor as “better, but not silky.”
+**Root cause:** The visual band is still being driven from coarse word/window target updates and renderer-side interpolation, not a dedicated audio-aligned progress model tied to the actual scheduled playback clock.
+**Fix:** Introduced `AudioProgressReport` type and `getAudioProgress()` on `audioScheduler.ts`. RAF-based glide loop in `FoliatePageView.tsx` reads exclusively from `getAudioProgress()` to drive the 3-word narration band from audio-time progress instead of DOM target chasing.
+
+### ~~BUG-144~~ ✅ Fixed — TTS-7Q (v1.36.1)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** At chunk boundaries, narration can appear to pick up from wherever the visual band was stuck or ahead, rather than the last audio-confirmed narrated word. Users notice that pause/replay or next-chunk continuation can start where the cursor sat instead of where speech truly left off.
+**Root cause:** Canonical narration progress and visual interpolation are not fully separated. Some handoff/resume paths still allow visual state to influence the perceived or resumed start position.
+**Fix:** `onChunkHandoff` callback wired through `kokoroStrategy.ts` → `useNarration.ts` → `FoliatePageView.tsx`. On every chunk boundary, the scheduler's chunk context is synchronized before the next RAF frame. The visual band is a pure follower of `AudioProgressReport` and has no write path to any anchor or resume position. `getAudioProgress()` exposed on `useNarration` hook return via `ReaderContainer.tsx` → `FoliatePageView.tsx` prop.
+
+### ~~BUG-141~~ ✅ Fixed — EXT-5C (v1.35.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/epub-converter.js`, `main/ws-server.js`
+**Description:** Articles imported via in-app URL import or the Chrome extension lost too much of the source article experience. Imported reading content flattened structure and commonly dropped inline article images/figures, even when the original article clearly contained hero and body images.
+**Root cause:** The article import flow extracted cleaned HTML but still behaved as a text-first pipeline. It downloaded only one lead image for `coverPath` and did not consistently collect, download, rewrite, and embed the rest of the article’s inline assets into the generated EPUB.
+**Fix:** Added a full article asset pipeline: `collectArticleAssets`, parallel `downloadArticleImages` with graceful partial failure, rewritten `contentHtml` to local EPUB asset paths, and shared the same logic across in-app URL imports and extension imports.
+
+### ~~BUG-142~~ ✅ Fixed — EXT-5C (v1.35.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `main/url-extractor.js`, `main/ipc/misc.js`, `main/ws-server.js`, `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
+**Description:** Imported article cards often fell back to a monogram or a weak image choice even when the source article had a strong hero image. The reading card should use the article’s real hero/lead image whenever a valid one exists.
+**Root cause:** Hero selection was too shallow and card promotion too fragile. The importer picked or validated only a single lead image path, often via metadata, without enough article-aware ranking or guaranteed `coverPath` promotion for URL docs.
+**Fix:** Replaced the flat hero cascade with article-aware `rankHeroImage`, filtered junk image URLs, and ensured the winning hero is promoted to `coverPath` for both URL and extension article imports so existing card components render it.
+
+### ~~BUG-138~~ ✅ Fixed — TTS-7O (v1.34.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** `TTS-7N` made pause settings affect chunk snapping and cursor timing, but the Kokoro path still does not produce sufficiently literal audible pause differences from the listener’s perspective. Punctuation handling still relies too much on baked model prosody. Users need real pause slider effects in playback, not just better cursor weighting.
+**Root cause:** Pause config reaches chunk planning and scheduler weights, but the pipeline still does not inject real audio silence at classified chunk boundaries. The scheduler influences cursor pacing more than the waveform heard by the user.
+**Fix:** `classifyChunkBoundary()` classifies chunk edges as comma/clause/sentence/paragraph. Pipeline injects silence samples proportional to user pause config. `snapToSentenceBoundary()` expanded to search full word range — chunks never end mid-sentence. `silenceMs` tracked on `ScheduledChunk` so word timing excludes silence tail.
+
+### ~~BUG-139~~ ✅ Fixed — TTS-7O (v1.34.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/utils/audioScheduler.ts`
+**Description:** Even when narration starts from the correct selected word, the visual cursor still feels jumpy and approximate. Users need a readable 3-word narration window where the first word is the real anchor and the cursor glides smoothly across words/spaces rather than snapping harshly.
+**Root cause:** The current narration highlight is still fundamentally word-step based. There is no explicit three-word visual window and no dedicated glide layer that preserves a single authoritative first-word anchor.
+**Fix:** 3-word narration window (`page-word--narration-context` for words N+1, N+2). CSS transitions for smooth glide (0.15s ease). Periodic truth-sync every 12 words + on chunk boundary + on resume via `onTruthSync` callback. First word remains canonical anchor.
+
+### ~~BUG-140~~ ✅ Fixed — TTS-7P (v1.36.0)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/pauseDetection.ts`, `src/utils/rhythm.ts`, `src/hooks/useNarration.ts`
+**Description:** Chunk splitting, silence insertion, resume targeting, and dialogue handling still relied on local heuristics at the moment of playback. Even with sentence snapping and audible silence injection, long-form narration quality was constrained by having no rolling structure plan for the active text window.
+**Root cause:** The Kokoro path had no local pause-boundary planner that looked ahead across the next few chunks. Each concern made boundary decisions independently instead of sharing one active planning structure.
+**Fix:** Added `src/utils/narrationPlanner.ts` (270 lines) — `buildNarrationPlan` builds a rolling boundary plan for the active text window (~400 words ahead). `PlannedChunk`, `NarrationPlan`, `computeSilenceMs`, `planNeedsRebuild`, and dialogue detection are exported. `generationPipeline.ts` now consults the plan for chunk selection and silence injection. `kokoroStrategy.ts` passes `getParagraphBreaks` to the pipeline; `useNarration.ts` passes paragraph breaks ref. Two new planner constants: `TTS_PLANNER_WINDOW_WORDS` (400), `TTS_PLANNER_MIN_CHUNK_WORDS` (10). The planner is now the single authority that forbids mid-sentence chunk endings. 33 new tests.
+
+### ~~BUG-136~~ ✅ Fixed — TTS-7N (v1.33.9)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/generationPipeline.ts`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** Kokoro pause sliders were inert — `pauseConfigRef` was stored but never read. Chunk boundaries used fixed sizes with no sentence awareness.
+**Root cause:** `pauseConfigRef` in useNarration was a dead-end ref. generationPipeline used fixed chunk sizes. audioScheduler used hardcoded 1.12x/1.05x punctuation weights.
+**Fix:** (1) generationPipeline snaps chunk boundaries to nearest sentence ending via `snapToSentenceBoundary`. (2) audioScheduler `computeWordWeights` accepts `WordWeightConfig` with configurable sentence/clause factors. (3) useNarration derives weight factors from pauseConfig and passes through kokoroStrategy → pipeline → scheduler.
+
+### ~~BUG-137~~ ✅ Fixed — TTS-7N (v1.33.9)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/CommandPalette.tsx`
+**Description:** 5 TTS-related Command Palette entries routed to `speed-reading` instead of `tts`.
+**Root cause:** Stale routing from before TTS had its own settings page.
+**Fix:** Remapped Narration (TTS), Enable TTS, Voice Engine, TTS Voice, Speech Rate to `"tts"`. Speed-reading entries unchanged.
+
+### ~~BUG-135~~ ✅ Fixed — TTS-7M (v1.33.8)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Passive Foliate `onLoad`/`onRelocate` restore logic could replace the authoritative restart anchor with an early soft page word after narration pause or book reopen. Replay or reopen jumped back to first visible word instead of the true last read position.
+**Root cause:** No persistent resume-anchor ownership. Time-limited `preservePlaybackAnchorUntilRef` expired before next play, and reopen had no anchor at all.
+**Fix:** Replaced time-limited ref with persistent `resumeAnchorRef`. Set from: narration cursor on pause, saved position on reopen. Consumed on mode start, cleared on explicit selection. `onLoad`/`onRelocate` gated when anchor active. Progress saves also gated behind engagement + no-anchor.
+
+### ~~BUG-134~~ ✅ Fixed — TTS-7L (v1.33.7)
+**Reported:** 2026-04-05 | **Resolved:** 2026-04-05
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** After `TTS-7K`, EPUB narration now starts from the correct global source and exact click/global-index selection works. But the native text-selection path still drops the exact selected `globalWordIndex`: `selectionchange` reports only `(cfi, word)`, and `ReaderContainer` falls back to scanning for the first normalized text match. On repeated/common words, narrate can start from a different occurrence than the one the user selected.
+**Root cause:** `selectionchange` does not preserve the selected `.page-word[data-word-index]` identity, so the parent loses exact occurrence information and guesses by word text.
+**Fix:** `selectionchange` now resolves exact `.page-word` span via `anchorNode.parentElement.closest("[data-word-index]")`, sends full unified payload matching click. First-match text fallback in ReaderContainer demoted to diagnostic log + no-op.
+
+### ~~BUG-131~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** Critical
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Narration started from tiny DOM-slice word counts (14, 674, 293) instead of full-book extraction (69160 words). `getEffectiveWords()` always used `foliateApiRef.current.getWords()` (DOM viewport) even when `bookWordsRef.current.words` was available. `extractFoliateWords()` and `onWordsReextracted` unconditionally replaced `wordsRef.current` with the DOM slice.
+**Root cause:** No full-book word-source awareness in `getEffectiveWords()`, `extractFoliateWords()`, or `onWordsReextracted`.
+**Fix:** `getEffectiveWords()` returns `bookWordsRef.current.words` when complete. Both other functions skip `wordsRef` replacement when full-book source exists.
+
+### ~~BUG-132~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/utils/startWordIndex.ts`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** First-play explicit selection ignored on EPUBs. User selected word 1603 but narration started at word 0. `resolveFoliateStartWord` validated against 14-word DOM slice, discarding the valid global index. `getSectionForWordIndex` also failed for global indices.
+**Root cause:** No global word count parameter in start-word validation. Section lookup only used DOM-local array.
+**Fix:** Added `globalWordsLength` parameter to `resolveFoliateStartWord`. `getSectionForWordIndex` uses `bookWordSections` for global lookup.
+
+### ~~BUG-133~~ ✅ Fixed — TTS-7K (v1.33.6)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-05
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Page-mode navigation blocked past third page even without narration. Section-boundary `goToSection()` effect fired in page mode, interfering with foliate's native page turning.
+**Root cause:** Section-boundary effect only guarded for narration (TTS-7J), not page mode.
+**Fix:** Effect now only fires for `focus` and `flow` modes. Page and narration fully isolated.
+
+### ~~BUG-128~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Narration startup on EPUB blinked from double section navigation. Two independent `goToSection()` paths: (1) miss-recovery in useReadingModeInstance (exact word → section lookup with cooldown) and (2) section-boundary effect in ReaderContainer (watches highlightedWordIndex, fires on every section change). Both fired during narration, causing competing page navigations and cursor destabilization.
+**Root cause:** TTS-7I added miss-recovery but didn't remove the older ReaderContainer section-boundary effect for narration. Both owned section navigation independently.
+**Fix:** Guard the ReaderContainer section-boundary effect to skip when `readingMode === "narration"`. Miss-recovery is the sole section-sync owner during narration.
+
+### ~~BUG-129~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Word source duplicated during section reload/recovery. Logs showed `words: 8770` followed by `words: 17540` for the same book. The active-mode `onSectionLoad` handler appended section words to `foliateWordsRef.current` without checking if that `sectionIndex` already existed, so recovery/reload of the same section doubled the array.
+**Root cause:** Blind append in `onSectionLoad` — `foliateWordsRef.current = [...existing, ...newSectionWords]` with no sectionIndex filter.
+**Fix:** Filter out existing words with the same `sectionIndex` before appending (dedupe by identity). Added diagnostic events for word-source-refresh and word-source-growth-warning.
+
+### ~~BUG-130~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** First-start narration did not reliably begin from the user's chosen location. User would click a word, then press play, but narration started from the saved/default position instead. The `onLoad` callback ran `setHighlightedWordIndex(savedPos)` after a 200ms delay, overwriting the user's explicit click before first narration start.
+**Root cause:** Delayed `onLoad` restore logic had no way to know the user had already explicitly selected a start point.
+**Fix:** Added `userExplicitSelectionRef` — set `true` on `onWordClick`, checked in `onLoad` to skip restore. Also unified startNarration to use `resolveFoliateStartWord` (same policy as startFocus/startFlow).
+
+### ~~BUG-090~~ ✅ Fixed — HOTFIX-7 (v1.4.3) + HOTFIX-8 (v1.4.4)
+**Reported:** 2026-03-26 | **Resolved:** 2026-03-29
+**Severity:** CRITICAL
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** Narration looped: cursor reset from mid-book (e.g., 1312) to 0, replaying from start. Two distinct failure modes:
+1. **Stale onended** (HOTFIX-7): Async `source.onended` from stopped source fired on new session's callbacks. Fixed with epoch counter.
+2. **Premature onended** (HOTFIX-8): Scheduler fired onEnd when `activeSources.length === 0` before pipeline delivered chunk 2 via IPC. First ramp-up chunk (13 words, ~3s) finished before async generation completed. Fixed with `pipelineDone` flag — scheduler only fires onEnd when both conditions met (no sources + pipeline done). Restores dual-condition logic from pre-NAR-2 audioQueue.
+**Root cause:** NAR-2 replaced audioQueue (which checked `endIdx >= words.length && queue.length === 0`) with audioScheduler (which only checked `activeSources.length === 0`). See LL-053, LL-054.
+**Status:** Fixed. Narration pipeline chain complete (NAR-2 → NAR-3 → NAR-4 → HOTFIX-5 → HOTFIX-6 → HOTFIX-7 → HOTFIX-8).
+
+### ~~BUG-093~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
+**Severity:** High
+**Location:** `src/utils/audioScheduler.ts`
+**Description:** Word highlight cursor desynced from narration audio. Root cause: `setSpeed()` boundary recalculation was a no-op (`remaining[i].time = now + (remaining[i].time - now)`). Fix: removed `playbackRate` entirely — generate at actual speed, word boundaries naturally match audio duration.
+
+### ~~BUG-094~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts` (stop)
+**Description:** Brief second voice overlap when extraction completes mid-narration. `source.stop()` doesn't instantly silence buffered audio. Fix: `source.disconnect()` before `source.stop()` prevents buffer drain overlap.
+
+### ~~BUG-095~~ ✅ Fixed — HOTFIX-9 (v1.4.5)
+**Reported:** 2026-03-30 | **Resolved:** 2026-03-30
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`
+**Description:** Speed changes via `playbackRate` caused pitch distortion (vinyl record effect). Fix: removed `playbackRate` entirely, pipeline generates at actual speed via `config.getSpeed()`, speed changes use debounced stop+restart.
+
+### ~~BUG-092~~ ✅ Fixed — see Complete section
+
+### BUG-031: Bottom bar not visible in Focus mode or Flow mode
+**Reported:** 2026-03-25
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx` (render), `src/styles/global.css` (.reader-container, .reader-view-area)
+**Description:** When entering Focus mode (RSVP) or Flow mode (silent cursor), the unified bottom bar disappears. The `.reader-container` was `position: fixed; inset: 0` which covered everything. Changed to `flex: 1` with `.reader-view-area` wrapper, but user reports bar still missing.
+**Status:** Partially fixed. Wrapper added but bar still missing in FSM/FLM — needs verification.
+
+### ~~BUG-032~~ ✅ Fixed — TTS-6D (v1.15.0)
+**Reported:** 2026-03-25 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `main/tts-engine.js`, `main/tts-worker.js`
+**Description:** When Kokoro TTS is first activated, there is a brief "Not Responding" flash in the Windows title bar while the ONNX model initializes. The worker thread handles inference but the initial `import("kokoro-js")` and `KokoroTTS.from_pretrained()` still causes some main thread blocking during IPC setup.
+**Status:** Resolved. TTS-6D added unified engine-status events (`warming`/`ready`/`retrying`/`error`), explicit warming state in narration, delayed prewarm (2s after reader open), and visible "Starting Kokoro..." indicator. Cold start, idle re-warm, and crash recovery are now deterministic and user-visible.
+
+### BUG-033: Book formatting stripped too aggressively
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `main/epub-converter.js`
+**Description:** All book formats (EPUB, MOBI, PDF, HTML) are parsed to plain text, stripping lists, headers, bold/italic, tables, and images. Lists appear concatenated on single lines. Parsers use `cheerio.text()` or regex strip which discards HTML structure.
+**Status:** RESOLVED (EPUB-2A, v1.5.0). PDF uses `structuredTextToHtml()` for heading/list detection. MOBI uses `parseMobiHtml()` to preserve HTML formatting. HTML preserves structural elements with sanitization. DOCX uses mammoth for rich HTML.
+
+### BUG-034: Images in books stripped during import
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `main/epub-converter.js`
+**Description:** Inline images within EPUB, MOBI, and HTML books are completely removed during content extraction. Only cover images are preserved. Same root cause as BUG-033 — text-only extraction pipeline.
+**Status:** RESOLVED (EPUB-2A, v1.5.0). `buildEpubZip()` accepts `images[]` array. HTML converter extracts base64/local images. MOBI converter extracts image records. DOCX converter uses mammoth image handler. All embedded in EPUB `OEBPS/Images/` with OPF manifest entries.
+
+### BUG-039: Space bar should start last-used reading mode
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx` (handleTogglePlay)
+**Description:** When in Page view, Space always enters Flow mode. It should start whichever mode the user last used (Focus, Flow, or Narration), with the preference persisted across sessions via `settings.json`. First-ever use defaults to Flow.
+**Status:** ✅ RESOLVED — `useReaderMode.ts` persists `lastReadingMode` in settings. Space bar enters last-used mode. Implemented during TD-1 (Mode Verticals).
+
+### BUG-040: Focus mode covers bottom bar — visible but not clickable
+**Reported:** 2026-03-25
+**Severity:** High
+**Location:** `src/styles/global.css` (.reader-container), `src/components/ReaderContainer.tsx`
+**Description:** In all reading sub-modes, the bottom bar is visible underneath the reader overlay but cannot be clicked. The `.reader-container` uses `position: fixed` which intercepts pointer events above the bar. Fix needed: give the bottom bar `z-index: 20` (above overlay's z-index: 10).
+**Status:** Open. Root cause and fix identified but not applied.
+
+### ~~BUG-053~~ ✅ Fixed — TTS-6C + TTS-6G (v1.18.0)
+**Reported:** 2026-03-25 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderContainer.tsx`
+**Description:** During Narration mode, Up/Down arrow keys adjust WPM (irrelevant in NM). They should adjust TTS speech rate by 0.1 increments (0.5-2.0 range), immediately applied to slider and audio.
+**Status:** Resolved. TTS-6C wired `adjustSpeed` (engine-aware: Kokoro steps buckets 1.0x/1.2x/1.5x, Web Speech uses 0.1 increments). TTS-6G added Kokoro bucket buttons to bottom bar and accessibility polish.
+
+### BUG-054: Small/misaligned click areas in menu flap buttons
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/MenuFlap.tsx`, `src/styles/global.css`
+**Description:** Buttons inside the menu flap have very small clickable areas. Users must click precisely on the text/icon — surrounding padding does nothing. Suspected cause: button elements have small intrinsic size with non-forwarding parent padding, or overlapping invisible elements absorb pointer events.
+**Status:** Open.
+
+### BUG-049: Window control buttons don't match theme background
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `main/window-manager.js` (BrowserWindow config), `src/styles/global.css`
+**Description:** Minimize/maximize/close buttons use default Windows title bar color instead of matching the app's theme. Requires either `titleBarStyle: "hidden"` with custom CSS buttons, or `titleBarOverlay` with color matching.
+**Status:** ✅ RESOLVED — `window-manager.js` uses `titleBarOverlay` with per-theme colors from `getThemeColors()`. `updateWindowTheme()` calls `setTitleBarOverlay()` on theme change.
+
+### BUG-063: Define word includes punctuation
+**Reported:** 2026-03-25
+**Severity:** Medium
+**Location:** `src/components/PageReaderView.tsx` (word selection), `src/components/HighlightMenu.tsx` (define action)
+**Description:** When right-clicking a word and selecting "Define", the word includes adjacent punctuation (e.g., "word." or "word,"), causing dictionary API lookup failure. Punctuation must be stripped before lookup.
+**Status:** Open.
+
+### BUG-064: Definition popup cannot be dismissed by clicking elsewhere
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/components/DefinitionPopup.tsx`
+**Description:** After viewing a word definition, clicking elsewhere on the screen does not close the popup. Only the close button or Escape key works.
+**Status:** Open.
+
+### BUG-065: Word highlight color should use theme accent
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/styles/global.css` (highlight styles)
+**Description:** Word selection/highlight in Page view uses hardcoded values instead of `var(--accent)`.
+**Status:** Open.
+
+### BUG-066: UI accent elements should all use theme accent color
+**Reported:** 2026-03-25
+**Severity:** Low
+**Location:** `src/styles/global.css`
+**Description:** WPM slider thumb/track, selected mode button background, flow cursor underline, and narration word highlight should use `var(--accent)` — some currently use hardcoded colors.
+**Status:** Open.
+
+### ~~BUG-101~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Narration start blocked main thread 200ms–1,400ms. Fix: added `setTimeout(0)` yield between extraction result processing and ref updates. DOM restamp already deferred via `requestIdleCallback`.
+**Status:** Resolved. Sprint: TTS-7C.
+
+### ~~BUG-102~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** CRITICAL
+**Location:** `src/hooks/narration/kokoroStrategy.ts`, `src/utils/ttsCache.ts`, `main/tts-cache.js`
+**Description:** `kokoroStrategy.ts` sliced 148 words for any cache hit. Fix: store actual `wordCount` in cache entry at write time (manifest + IPC), read it back on cache hit. `loadCachedChunk` uses real word count to slice correctly.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-103~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Background cacher used `settings.kokoroVoice`. Fix: changed to `settings.ttsVoiceName` (the actual settings field).
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-104~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`
+**Description:** Background cacher omitted override hash from cache key. Fix: added `overrideHash()` to `cacheBook()` and `isBookFullyCached()`, matching kokoroStrategy identity.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-105~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Background cacher seeded from persisted position. Fix: added `updateCursorPosition()` method, wired to `onWordAdvance` in ReaderContainer. When narration is active, warms ahead of live cursor; falls back to persisted position otherwise.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-106~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`
+**Description:** File header claimed 3-slot priority system, but runLoop was serial. Fix: removed misleading comment, documented actual serial behavior. Kept serial design (sufficient for use case).
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-107~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** EPUB word clicks bypassed TTS resync path. Fix: foliate `onWordClick` now routes through `handleHighlightedWordChange` instead of raw `setHighlightedWordIndex`. Handler only resyncs when `narration.speaking` (not when paused), implementing the dual cursor contract.
+**Status:** Resolved. Sprint: TTS-7B.
+
+### ~~BUG-108~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/PageReaderView.tsx`
+**Description:** Pause after browse-away didn't reconcile cursor. Fix: `handlePauseToPage` now reads the current page's start word via `getCurrentPageStart()` when `isBrowsedAway` is true, updating `highlightedWordIndex` before stopping narration. Next resume plays from the browsed-to position.
+**Status:** Resolved. Sprint: TTS-7B.
+
+### ~~BUG-109~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useNarration.ts`
+**Description:** Kokoro fallback started Web Speech without stopping Kokoro first. Fix: `onFallbackToWeb` now calls `kokoroStrategy.stop()` before switching engine, with a `setTimeout(0)` yield before starting Web Speech. Diagnostics event recorded.
+**Status:** Resolved. Sprint: TTS-7B.
+
+### ~~BUG-110~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`
+**Description:** Rhythm pause controls visible but non-functional for Kokoro. Fix: conditionally hide rhythm pause toggles when `ttsEngine === "kokoro"`, show explanatory note instead. Controls remain for Web Speech engine.
+**Status:** Resolved. Sprint: TTS-7C.
+
+### ~~BUG-111~~ ✅ Fixed — TTS-7B (v1.30.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/hooks/useNarration.ts`
+**Description:** Kokoro pause only suspended audio, not chunk emission. Fix: added `pause()`/`resume()` to GenerationPipeline (buffers chunks internally when paused, flushes on resume). Kokoro strategy wires both scheduler + pipeline pause/resume. `useNarration.resume()` accepts optional `currentWordIndex` for cursor-moved-during-pause resync.
+**Status:** Resolved. Sprint: TTS-7B.
+
+### ~~BUG-112~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`
+**Description:** Duplicate concurrent extraction. Fix: module-level `dedupeExtractWords()` returns existing promise for same book ID. Both extraction paths (background + narration-start) use the dedupe wrapper.
+**Status:** Resolved. Sprint: TTS-7C.
+
+### ~~BUG-113~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/ttsCache.ts`, `main/ipc/tts.js`
+**Description:** Cache IPC used `Array.from()` round-trips. Fix: pass `Float32Array` directly — Electron structured clone preserves typed arrays. IPC handler accepts both Float32Array and plain array for backward compat.
+**Status:** Resolved. Sprint: TTS-7C.
+
+### ~~BUG-114~~ ✅ Fixed — TTS-7A (v1.29.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/LibraryContainer.tsx`, `src/hooks/useNarration.ts`
+**Description:** Bug reporter read wrong field names and had no live diagnostics call sites. Fix: corrected `ttsVoice`→`ttsVoiceName`, `ttsSpeed`→`ttsRate`. Added `recordSnapshot()` at narration start, chunk delivery (web + kokoro), and stop. Added `recordDiagEvent()` at start/stop/pause/resume.
+**Status:** Resolved. Sprint: TTS-7A.
+
+### ~~BUG-115~~ ✅ Fixed — TTS-7C (v1.31.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/generationPipeline.ts`, `src/hooks/narration/kokoroStrategy.ts`
+**Description:** No backpressure enforcement. Fix: pipeline tracks `pendingChunks` counter, holds emission when `>= TTS_QUEUE_DEPTH` (5). `acknowledgeChunk()` called by kokoroStrategy on scheduler consumption. Backpressure self-heals on acknowledgment.
+**Status:** Resolved. Sprint: TTS-7C.
+
+### ~~BUG-116~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Narration started before Foliate finished rendering the target page DOM, producing `highlightWordByIndex miss` logs and visible page motion. Fix: `TTS-7F` replaced UI-mutating readiness probing with pure `isWordInDom()` checks and closed the duplicate-launch path with a single-launch token.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-117~~ ✅ Verified resolved — TTS-7G (v1.33.2)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `message` handler (renderer IPC response path for `tts-generate`)
+**Description:** `[Violation] 'message' handler took 910ms` logged on first narration start of a new book. The response handler deserialized the audio payload and fired `onChunkReady` + `scheduler.scheduleChunk()` in one synchronous block.
+**Root cause analysis (TTS-7G):** Three prior fixes eliminated the root causes:
+1. **TTS-7C (BUG-113):** Switched IPC audio transport from `Array.from()` round-trips to native `Float32Array` structured clone — eliminated the dominant deserialization cost.
+2. **NAR-5 ramp-up:** First chunk is now 13 words (~1s audio, ~24k samples) instead of the old larger sizing — reduced the data volume in the critical first-chunk path.
+3. **TTS-7E:** Deferred `pipeline.acknowledgeChunk()` via `queueMicrotask` — broke the synchronous block into two tasks.
+**Verification evidence (TTS-7G):** Code-level analysis of the synchronous path: Float32Array copy (~48k samples, <0.5ms) + AudioBuffer creation (<0.5ms) + word boundary computation (13 words, trivial) = total synchronous work < 2ms. Well under the 50ms steady-state budget. DEV instrumentation added (`first-chunk-response` and `schedule-chunk` perf events with meta) for ongoing monitoring. 6 regression tests confirm the response path is bounded.
+**Status:** Resolved. No additional hardening needed — existing fixes are sufficient.
+
+### ~~BUG-118~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Readiness gate caused page jump + duplicate launch. Fix: replaced `highlightWordByIndex` (UI-mutating) with pure `isWordInDom` probe (read-only DOM query). Added `narrationLaunchRef` single-launch token to prevent reentrant starts.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-122~~ ✅ Fixed — TTS-7H (v1.33.3)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Fresh logs show `render gate passed — launching at word N`, immediately followed by `highlightWordByIndex miss: word N not in DOM`. The current readiness contract was false-positive: `isWordInDom()` proved only that a word exists somewhere in loaded contents, not that it is on the active visible page.
+**Fix:** Replaced `isWordInDom()` gate with `isWordVisibleOnPage()` — new API method that checks viewport visibility (bounding rect within iframe viewport), not just DOM presence. Gate success now truthfully means the word is highlightable.
+**Status:** Resolved as a first-pass fix. Residual follow-on behavior still exists; see BUG-124 and BUG-126.
+
+### ~~BUG-123~~ ✅ Fixed — TTS-7H (v1.33.3)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Repeated cold-start attempts bounced among different launch words (`82`, `68`, `80`, `0`, `9004`), indicating the chosen start index was not frozen per play action. On timeout, startup fell back to `goTo(startIdx)` which treated a raw global word index as a Foliate navigation target.
+**Fix:** Two changes: (1) Launch index frozen as `const frozenLaunchIdx` immediately after computation — used throughout gate polling, success path, and timeout path. (2) Timeout fallback replaced `goTo(startIdx)` with `getSectionForWordIndex()` → `goToSection()`, navigating by section ownership instead of raw word index.
+**Status:** Resolved as a first-pass fix. Residual follow-on behavior still exists; see BUG-124, BUG-125, and BUG-126.
+
+### ~~BUG-124~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Startup gate and live highlight disagreed — gate said “visible” but highlight immediately missed.
+**Fix:** Introduced `resolveWordState()` as the single truth source for both startup gate and live highlight. Both now resolve the exact same span/visibility through one shared function.
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-125~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** Two competing narration follow-scroll owners caused mid-narration paragraph jumps.
+**Fix:** Removed the duplicate React `narrationWordIndex` effect that called `scrollIntoView({ behavior: "smooth" })`. Imperative bridge (`highlightWordByIndex` via `onWordAdvance`) is now the sole scroll owner. Additionally, `highlightWordByIndex` now only scrolls when the target word is off-page (not on every word advance).
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-126~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Narration highlight misses were silently ignored after full-book extraction, leaving voice moving without cursor recovery.
+**Fix:** Replaced `bookWordsCompleteRef.current => return` guard with section-aware exact recovery: `getSectionForWordIndex()` → `goToSection()` with 800ms cooldown token to prevent recovery storms. Misses now always attempt recovery regardless of extraction state.
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-127~~ ✅ Fixed — TTS-7I (v1.33.4)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/FoliatePageView.tsx`
+**Description:** Return-to-narration scrolled to the right area but did not restore the visible narration cursor/highlight.
+**Fix:** `returnToNarration()` now uses `resolveWordState()` to re-apply the highlight class through the same unified path that live narration uses. If the word is off-page, it triggers exact section recovery via `goToSection()` before claiming success.
+**Status:** Resolved. Sprint: TTS-7I.
+
+### ~~BUG-128~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReadingModeInstance.ts`, `src/components/FoliatePageView.tsx`
+**Description:** Fresh post-`TTS-7I` logs still show immediate miss recovery (`word 13 → section 2`) right after fast startup, while `ReaderContainer` also retains its own narration section-boundary `goToSection()` effect. These competing section movers can still blink the page and destabilize visible cursor ownership.
+**Fix:** Guarded the `ReaderContainer` section-boundary effect so narration no longer owns a second `goToSection()` path. Miss recovery is now the sole section-sync owner during narration.
+**Status:** Resolved. Sprint: TTS-7J.
+
+### ~~BUG-129~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Description:** In one session, narrate starts reported `words: 8770`, then later `words: 17540` for the same book. Active-mode section load handling currently appends section words into `foliateWordsRef.current` without dedupe by `sectionIndex`, so recovery/reload can duplicate slices and corrupt cursor mapping.
+**Fix:** Active-mode section loads now dedupe by `sectionIndex` before appending/replacing word slices, keeping `foliateWordsRef.current` and `getWords()` stable across recovery and reload.
+**Status:** Resolved. Sprint: TTS-7J.
+
+### ~~BUG-130~~ ✅ Fixed — TTS-7J (v1.33.5)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/components/FoliatePageView.tsx`
+**Description:** User testing shows first-play narration does not reliably start at the chosen selected word, while pause-and-reselect usually does. The likely cause is delayed onLoad/page-restore logic resetting `highlightedWordIndex` back to saved/visible defaults after the user has already chosen a start point.
+**Fix:** Added explicit user-selection protection so delayed onLoad restore cannot overwrite a chosen start point, and unified start-word resolution across modes via `resolveFoliateStartWord`.
+**Status:** Resolved. Sprint: TTS-7J.
+
+### BUG-131: EPUB narration still starts from loaded DOM slice instead of full-book words
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`
+**Description:** Even after full-book extraction completes (for example `69160` words), narrate start still uses tiny loaded DOM word counts like `14`, `674`, or `293`. Active EPUB modes are still sourcing words from `foliateApiRef.current.getWords()` rather than the global extracted book word source, so narration is built on a moving partial viewport instead of the full book.
+**Status:** Open. Sprint: TTS-7K.
+
+### BUG-132: Cursor and narration are using mixed EPUB index spaces
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** Logs show explicit global selections like `1603`, but narrate still freezes launch at `0` because the start-word resolver validates against the small currently loaded DOM word array. Cursor/highlight/progress are tracking global EPUB indices while narration/chunk generation still runs on partial local slices, causing visible desync.
+**Status:** Open. Sprint: TTS-7K.
+
+### BUG-133: Page mode is still coupled to narration-only EPUB repair state
+**Reported:** 2026-04-04
+**Severity:** High
+**Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
+**Description:** User could not advance past the third page even without narration on. Page-mode behavior is still likely being influenced by mutable narration-specific word-source refresh and/or section-repair state, so ordinary page turning is not isolated from the EPUB narration machinery.
+**Status:** Open. Sprint: TTS-7K.
+
+### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`
+**Description:** Cold-start ramp had long pauses. Fix: proactive entry-coverage system caches first 5 minutes of narration audio for every non-archived reading. Opening a book queues entry-coverage job immediately. Playback starts from cached audio instead of reactive ramp-up.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-120~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/backgroundCacher.ts`, `src/components/ReaderContainer.tsx`, `main/tts-cache.js`
+**Description:** No guaranteed opening narration coverage. Fix: `ENTRY_COVERAGE_TARGET_MS` (300000ms / 5 min) constant. `getOpeningCoverageMs()` manifest inspector. Background cacher `queueEntryCoverage()` method stops at 5-minute target. Entry-coverage jobs run at highest priority in the cacher loop.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-121~~ ✅ Fixed — TTS-7F (v1.33.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/components/ReaderContainer.tsx`, `src/utils/backgroundCacher.ts`
+**Description:** Opening a reading didn’t start cruise cache warming. Fix: ReaderContainer queues entry-coverage job on reader mount when Kokoro + cache enabled. Active book set as priority-1 for full cruise warming via existing setActiveBook path.
+**Status:** Resolved. Sprint: TTS-7F.
+
+### ~~BUG-096~~ ✅ Fixed — TTS-6S (v1.28.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/audioScheduler.ts`
+**Description:** Cursor highlight drifted from spoken audio during long Kokoro narration.
+**Status:** Resolved. TTS-6S: tick() now advances ALL crossed word boundaries in one pass instead of one-per-tick, eliminating accumulating drift from setTimeout jitter.
+
+### ~~BUG-097~~ ✅ Fixed — TTS-6S (v1.28.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Medium
+**Location:** `src/utils/audioScheduler.ts`
+**Description:** Inappropriate pauses mid-clause and double-pausing at sentence boundaries during Kokoro narration.
+**Status:** Resolved. TTS-6S: Reduced punctuation weight boosts in `computeWordWeights` from 1.4/1.15 to 1.12/1.05 — Kokoro already bakes prosodic pauses into generated audio, so extra scheduler-side inflation caused stacking.
+
+### ~~BUG-098~~ ✅ Fixed — TTS-6S (v1.28.0)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** High
+**Location:** `src/utils/generationPipeline.ts`
+**Description:** Audible silence gaps during Kokoro narration from backlog/cache starvation and duplicate chunk dispatches.
+**Status:** Resolved. TTS-6S: First two ramp-up chunks now fire in parallel (overlap IPC) instead of sequential. Duplicate-chunk guard (`lastEmittedStartIdx`) prevents repeated emission at the same cursor position.
+
+### ~~BUG-099~~ ✅ Fixed — HOTFIX-11 (v1.27.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Low (tooling)
+**Location:** `src/utils/bugReportState.ts`, `src/components/BugReportModal.tsx`
+**Description:** The bug report dialog captures a screenshot and basic app state but did not capture narration-specific diagnostics.
+**Status:** Resolved. HOTFIX-11 added `narrateDiagSnapshot` and `narrateDiagEvents` to `BugReportAppState`, wired from `narrateDiagnostics.ts`. Modal shows collapsible "Narration Diagnostics" section with snapshot + event log.
+
+### ~~BUG-100~~ ✅ Fixed — HOTFIX-11 (v1.27.1)
+**Reported:** 2026-04-04 | **Resolved:** 2026-04-04
+**Severity:** Low (tooling)
+**Location:** `src/utils/consoleCapture.ts`, `src/main.tsx`
+**Description:** Console output was not included in the bug report JSON.
+**Status:** Resolved. HOTFIX-11 added `consoleCapture.ts` ring buffer (200 entries), installed before React mount. `consoleLog` field added to `BugReportAppState`. Modal shows collapsible "Console Log" section with color-coded entries.
+
+---
+
+## Complete
+
+### BUG-092: EPUB Focus mode starts from wrong position
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-27
+**Location:** `src/hooks/useReaderMode.ts` (startFocus, startFlow)
+**Problem:** Focus/Flow on EPUBs started from word 0 because `wordsRef` wasn't populated with foliate words before the mode started. On cover pages or freshly loaded EPUBs, `getWords()` returned empty.
+**Solution:** Added section-load retry: if `effectiveWords.length === 0` on an EPUB, trigger `renderer.next()` and retry after `FOLIATE_SECTION_LOAD_WAIT_MS` (same pattern already used by startNarration). Also switched from `reader.wordsRef.current.length` to `effectiveWords.length` for start word resolution, avoiding stale ref reads (Sprint TD-2, commit 237ecb4).
+
+### BUG-091: EPUB Flow mode cursor not working
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-27
+**Location:** `src/components/FoliatePageView.tsx` (highlightWordByIndex), `src/styles/global.css`
+**Problem:** FlowCursorController couldn't find `[data-word-index]` spans in foliate shadow DOM iframes. External overlay div couldn't reach across the shadow DOM boundary.
+**Solution:** Two-part fix: (1) FlowMode class drives word-by-word timing for EPUBs via `useReadingModeInstance`, calling `highlightWordByIndex` on each advance. (2) `highlightWordByIndex` applies `page-word--flow-cursor` CSS class (3px accent underline) when `readingModeRef.current === "flow"`, injected into EPUB iframes via `injectStyles` (Sprint TD-2, commit 237ecb4).
+
+### BUG-080: Kokoro AI button unclickable in Speed Reading settings
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`, `src/styles/global.css`
+**Problem:** The System/Kokoro AI toggle buttons rendered visually but clicking "Kokoro AI" had no effect due to `-webkit-app-region: drag` inheritance.
+**Solution:** Added `-webkit-app-region: no-drag` to `.settings-mode-toggle` and `.settings-mode-btn` in global.css.
+
+### BUG-081: Auto-updater latest.yml only contains ARM64 architecture
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `.github/workflows/release.yml`
+**Problem:** Two-job matrix build caused ARM64 job to overwrite `latest.yml`, leaving x64 users unable to receive updates.
+**Solution:** Replaced two-job matrix with single-job multi-arch build (`--x64 --arm64`). electron-builder produces single latest.yml natively.
+
+### BUG-082: EPUB starts on page ~3 instead of cover
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** New EPUBs (no saved position) skipped cover/TOC and landed on the first text content section.
+**Solution:** Guard initial CFI — only pass `lastLocation` when saved CFI exists. Explicit `goToFraction(0)` fallback for first open.
+
+### BUG-083: Opening a book falsely marks it as "started" with >0% progress
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/ReaderContainer.tsx`, `src/types.ts`
+**Problem:** EPUB word extraction started at first real text word (past cover), giving non-zero word index and >0% progress on open.
+**Solution:** Engagement-gated progress via `hasEngagedRef`. Progress only saved after mode start, word click, or deliberate page turn. Added high-water mark backtrack prompt.
+
+### BUG-084: Flow mode invisible on EPUBs (no underline cursor)
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/FoliatePageView.tsx`, `src/utils/FlowCursorController.ts`
+**Problem:** FlowCursorController looked for `[data-word-index]` DOM elements that don't exist in foliate's shadow DOM.
+**Solution:** Range-based overlay cursor using `getOverlayPosition()` with iframe coordinate transform. GPU-accelerated `translate3d()`.
+
+### BUG-085: Focus mode not centered in foliate overlay for EPUBs
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Problem:** Focus mode word display appeared offset from center, positioned relative to foliate's container.
+**Solution:** Changed Focus overlay from `position: absolute` to `position: fixed` with `inset: 0` for viewport-level centering.
+
+### BUG-086: Narration highlight doesn't advance in foliate DOM for EPUBs
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** During narration on EPUBs, word highlight stayed on first word or disappeared after page turn. `<mark>` injection broke when foliate re-rendered sections.
+**Solution:** Replaced `<mark>` DOM injection with overlay highlight div. Removed all `surroundContents` code.
+
+### BUG-087: Word click maps to wrong position in EPUB
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/FoliatePageView.tsx`
+**Problem:** Clicking a common word highlighted the first occurrence. Click handler used `split(/\s+/)` while word extractor used `Intl.Segmenter`, producing different word counts.
+**Solution:** Unified click handler tokenization with `countWordsSegmenter()` from shared `segmentWords.ts` utility.
+
+### BUG-088: Stale Range objects after foliate page navigation
+**Reported:** 2026-03-26 | **Fixed:** 2026-03-26
+**Location:** `src/components/FoliatePageView.tsx`
+**Problem:** Words extracted from section N held DOM Range references that threw or returned garbage after foliate navigated to section M.
+**Solution:** Re-extract words on section change via merge algorithm. `isConnected` guards on all Range operations.
+
+### BUG-073: NM page browsing yanks user back to narration position
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Location:** `src/components/PageReaderView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** During active narration, manual page navigation was immediately overridden by the page-sync effect snapping back to the narration word.
+**Solution:** Decouple view from highlight when narration paused. Added `ReturnToReadingPill` component with Enter key shortcut.
+
+### BUG-052: NM speed changes should take effect immediately
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** TTS rate slider changes during narration did not apply until the next chunk.
+**Solution:** Added `generationIdRef` guard to discard stale Kokoro IPC results. Pre-buffer invalidated synchronously on rate change.
+
+### BUG-072: Time-to-complete should reflect active mode's speed
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/components/LibraryView.tsx`
+**Problem:** Time remaining display always used WPM, not mode-aware (Narration should use TTS rate).
+**Solution:** Replaced magic number 150 with `TTS_RATE_BASELINE_WPM` constant. Mode-aware calculation was already wired.
+
+### BUG-051: Clicking a mode button should select it, not auto-start it
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-26
+**Location:** `src/components/ReaderContainer.tsx`
+**Problem:** Clicking Focus, Flow, or Narrate in the bottom bar immediately started the mode instead of only selecting it.
+**Solution:** Narrate button already routed through `handleSelectMode`. Added mode deselect (clicking already-selected mode reverts to flow).
+
+### BUG-041: Focus mode paragraph artifact
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderContainer.tsx`, `src/styles/global.css`
+**Problem:** Paragraph text artifact flashed when entering Focus mode.
+**Solution:** Opaque `.reader-container` background now covers page content.
+
+### BUG-044: Last-used mode button accent fill
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/styles/global.css` (.rbb-mode-btn--last)
+**Problem:** Last-used mode button only had a subtle bottom border, not prominent enough.
+**Solution:** Changed to `background: var(--accent-faded); border-color: var(--accent)` for visible tinted fill.
+
+### BUG-045: Cannot click words during Narration to change position
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderContainer.tsx`
+**Problem:** Clicking a word during narration did not resync TTS to that position.
+**Solution:** Created `handleHighlightedWordChange` wrapper that calls `narration.resyncToCursor(index, wpm)` in narration mode.
+
+### BUG-046: Narration speed follows WPM instead of TTS rate setting
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderContainer.tsx`
+**Problem:** Narration derived speech rate from WPM (350 WPM -> 2.0x) instead of user's `ttsRate` setting.
+**Solution:** After `startCursorDriven()`, call `narration.adjustRate(settings.ttsRate)` to override WPM-derived rate.
+
+### BUG-068: Blurby theme should lock accent/font modifications
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/settings/ThemeSettings.tsx`
+**Problem:** When "Blurby" brand theme was selected, accent color and font were still editable.
+**Solution:** Wrapped accent color and font sections in `{settings.theme !== "blurby" && (...)}` guard.
+
+### BUG-071: Tab key not opening settings flap in Library view
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useKeyboardShortcuts.ts`
+**Problem:** Tab in Library view did nothing. Handler referenced `s.toggleFlap?.()` (reader scope) instead of `a.onToggleFlap?.()` (library scope).
+**Solution:** Fixed variable reference from `s.toggleFlap?.()` to `a.onToggleFlap?.()`.
+
+### BUG-001: Stray checkbox in top-left window corner
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/DocGridCard.tsx`
+**Problem:** Every library grid card rendered a selection checkbox because `selected !== undefined` was always true for booleans.
+**Solution:** Guard changed to only show checkbox when card is actually selected.
+
+### BUG-002: Grid gaps block scrolling and clicks
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/styles/global.css` (body element)
+**Problem:** `-webkit-app-region: drag` on `body` made all empty space act as window drag zones, blocking scrolling and clicks.
+**Solution:** Removed `drag` from `body`. Added dedicated `.reader-drag-handle` and `.library-titlebar` for window dragging.
+
+### BUG-003: Progress not saving through book
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderContainer.tsx` (handleExitReader)
+**Problem:** Exiting after reading 100+ pages showed 0% progress because exit handler used Focus mode's `wordIndexRef` (always 0 if Focus never entered).
+**Solution:** `handleExitReader` now calls `finishReading(highlightedWordIndex)` directly. Added debounced auto-save (2s).
+
+### BUG-004: Progress percentage shows 0% for early positions
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/DocGridCard.tsx`, `src/components/DocCard.tsx`
+**Problem:** `Math.round()` rounded small progress to 0% (e.g., word 200 of 100,000).
+**Solution:** Added minimum 1% display: `rawPct > 0 && rawPct < 1 ? 1 : Math.round(rawPct)`.
+
+### BUG-005: Accent color not applying instantly
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/settings/ThemeSettings.tsx`, `src/components/ThemeProvider.tsx`
+**Problem:** Changing accent color saved to settings but didn't update ThemeProvider state until restart.
+**Solution:** ThemeSettings now calls `setAccentColor()` and `setFontFamily()` directly on the ThemeContext.
+
+### BUG-006: Filter tabs wrapping on narrow windows
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/styles/global.css` (.library-tabs responsive rule)
+**Problem:** Filter tabs wrapped to multiple lines on narrow windows with count numbers cut off.
+**Solution:** Changed to `flex-wrap: nowrap` with `overflow-x: auto` and hidden scrollbar.
+
+### BUG-007: N key doesn't toggle narration in Page view
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useKeyboardShortcuts.ts`
+**Problem:** N was only mapped to "next chapter" in non-page modes, with no handler for page mode.
+**Solution:** Added `KeyN` -> `toggleNarration` in page-mode keyboard handler.
+
+### BUG-008: Command palette settings actions not working
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/CommandPalette.tsx`
+**Problem:** ACTION items in Ctrl+K palette (Toggle Theme, Open Reading Log) did nothing when clicked.
+**Solution:** Fixed the `act()` helper and added sub-section entries for all settings pages.
+
+### BUG-009: Bottom bar controls not centered
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/styles/global.css` (.reader-bottom-bar-controls)
+**Problem:** Bottom bar controls were left-aligned instead of centered.
+**Solution:** Added `justify-content: center`.
+
+### BUG-010: No play/pause button in Page view
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderBottomBar.tsx`, `src/styles/global.css`
+**Problem:** No visible play/pause control existed in the bottom bar.
+**Solution:** Added `.rbb-play-btn` circular button with play/pause icons, accent border.
+
+### BUG-011: Click-anywhere page navigation interferes with word selection
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** Left/right page halves acted as navigation zones, conflicting with word selection and interaction.
+**Solution:** Removed click-zone handler. Added persistent translucent arrow buttons on page edges.
+
+### BUG-012: Kokoro TTS crashes on speed change
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useNarration.ts`
+**Problem:** Concurrent `kokoroGenerate()` IPC calls raced without serialization, corrupting engine state.
+**Solution:** Added `kokoroInFlightRef` guard. Speed change takes effect on next chunk. Added buffer invalidation on speed change.
+
+### BUG-013: Kokoro TTS freezes app on first use
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `main/tts-engine.js`, `main/tts-worker.js`
+**Problem:** First Kokoro request triggered model download + ONNX initialization on the main thread, freezing the window for 10-60 seconds.
+**Solution:** Moved inference to `worker_threads`. Added model preloading and warm-up inference. Switched to q4 quantization.
+
+### BUG-014: Pauses between Kokoro TTS audio chunks
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useNarration.ts`
+**Problem:** 200-500ms silence between chunks due to sequential generation with no overlap.
+**Solution:** Added pre-buffering — next chunk generates while current plays.
+
+### BUG-015: TTS settings not synced to narration engine
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/settings/SpeedReadingSettings.tsx`, `src/hooks/useNarration.ts`
+**Problem:** Changing voice/rate in settings had no effect on playback. `useNarration` maintained independent state.
+**Solution:** Added `useEffect` syncs bridging settings to `narration.selectVoice()`, `narration.adjustRate()`, and `narration.setEngine()`.
+
+### BUG-016: TTS choppy speech quality
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useNarration.ts`, `src/constants.ts`
+**Problem:** Web Speech API was extremely choppy with audible gaps between 4-word chunks.
+**Solution:** Increased `TTS_CHUNK_SIZE` from 4 to 40 words. Added sentence-boundary detection for natural chunking.
+
+### BUG-017: Flow cursor and TTS running simultaneously on different pages
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`, `src/components/ReaderContainer.tsx`
+**Problem:** Flow cursor controller and TTS advanced independently, causing cursor to draw at stale positions.
+**Solution:** When `ttsActive`, flow cursor controller is disabled. TTS drives word position directly.
+
+### BUG-018: Focus mode conflicting with narration
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderContainer.tsx`
+**Problem:** Toggling narration then entering Focus caused both to run simultaneously, crashing on ESC.
+**Solution:** Implemented 4-mode mutually exclusive architecture. `stopAllModes()` called before entering any mode.
+
+### BUG-019: Play/pause button not reflecting narration state
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderBottomBar.tsx`
+**Problem:** Play/pause button showed play icon during narration because `playing` was tied to Focus mode state.
+**Solution:** Changed `playing` prop to `readingMode !== "page"`.
+
+### BUG-020: Narration button styled differently from Focus/Flow buttons
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderBottomBar.tsx`
+**Problem:** Narration was a small speaker icon separate from the Focus/Flow button group.
+**Solution:** Moved narration into `.rbb-mode-group` as a proper `rbb-mode-btn` labeled "Narrate".
+
+### BUG-021: C hotkey for chapter list
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderBottomBar.tsx`
+**Problem:** No keyboard shortcut existed to open chapter navigation dropdown.
+**Solution:** Added `KeyC` binding. ReaderBottomBar exposes `chapterListRef` with `toggle()` method.
+
+### BUG-022: Flow cursor slow start delay
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/utils/FlowCursorController.ts`, `src/components/PageReaderView.tsx`
+**Problem:** 16ms+ delay between pressing Space and cursor appearing.
+**Solution:** Removed unnecessary `setTimeout`. Used forced reflow (`offsetWidth` read) to eliminate delays.
+
+### BUG-023: Flow cursor position not saving on pause/resume
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** Pausing and resuming flow caused cursor to jump back to original position due to React batch updates.
+**Solution:** Added `flowStopPosRef` to pass position synchronously between effect cleanup and re-run.
+
+### BUG-024: Flow cursor stale closures after page turn
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/utils/FlowCursorController.ts`, `src/components/PageReaderView.tsx`
+**Problem:** Controller callbacks captured stale `currentPage` from render closure.
+**Solution:** Added `currentPageRef` that updates on every render. Callbacks read from ref.
+
+### BUG-025: Flow cursor invisible after React re-render
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/utils/FlowCursorController.ts`, `src/components/PageReaderView.tsx`
+**Problem:** Controller's div was orphaned when React re-renders destroyed/recreated the container.
+**Solution:** React renders the cursor div (always present). Controller receives ref and only styles it.
+
+### BUG-026: Flow mode rendering as infinite scroll
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** Flow mode rendered all words in document, creating enormous DOM.
+**Solution:** Flow cursor operates on same paginated word set as page mode. Controller handles page turns.
+
+### BUG-027: Page text truncated at bottom
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** Text overflowed past visible page area with last line cut off.
+**Solution:** Tuned character width estimation. Adjusted footer position from `bottom: 120px` to `70px`.
+
+### BUG-028: Page turn delay too long in flow mode
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/constants.ts` (FLOW_PAGE_TURN_PAUSE_MS)
+**Problem:** 600ms pause at end of page felt sluggish.
+**Solution:** Reduced `FLOW_PAGE_TURN_PAUSE_MS` to 200ms.
+
+### BUG-029: Underline cursor rendering through text
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/utils/FlowCursorController.ts`
+**Problem:** Flow cursor underline drew through middle of text due to incorrect Y positions when TTS was active.
+**Solution:** When TTS is active, cursor controller is disabled. TTS drives highlighting directly.
+
+### BUG-030: -webkit-app-region: drag on body breaks all clickability
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/styles/global.css`
+**Problem:** `drag` on `body` made every element a potential drag zone, breaking flap buttons, toggles, and other UI.
+**Solution:** Removed `drag` from `body`. Added dedicated drag regions.
+
+### BUG-042: Flow/Narration mode page auto-advance delay (~24 seconds)
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** ~24-second delay before page turn at end of page during Flow/Narration. Stale closure for `currentPage`.
+**Solution:** Added `currentPage` to page-sync effect's dependency array.
+
+### BUG-043: Narration mode page auto-advance (same as BUG-042)
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/PageReaderView.tsx`
+**Problem:** Same root cause as BUG-042.
+**Solution:** Same fix — page-sync effect now watches `currentPage` in deps.
+
+### BUG-047: Bottom bar dimmed during active reading modes
+**Reported:** 2026-03-25 | **Fixed:** 2026-03-25
+**Location:** `src/components/ReaderBottomBar.tsx`
+**Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
+**Solution:** Remov

@@ -1,0 +1,574 @@
+{
+  "kind": "candidate handoff, NOT terminal ledger entries",
+  "routedTo": "pointer-closeout",
+  "provenance": {
+    "provider": "connector+snapshot",
+    "source": "monday:board/18432450217",
+    "takenAt": "2026-09-23T18:45:55Z",
+    "fields": [
+      "title",
+      "status",
+      "id",
+      "sequence",
+      "written_status",
+      "prerequisites",
+      "effort",
+      "lane",
+      "group",
+      "spec_link",
+      "branch",
+      "started",
+      "completed",
+      "evidence",
+      "description",
+      "notes"
+    ],
+    "stale": false
+  },
+  "ordinaryAppendAuthorizedForRoadmapReview": false,
+  "candidates": [
+    {
+      "itemId": "TTS-DIAG-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-15",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-DIAG-1.2026-05-15.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:29Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-CACHE-TIMING-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-13",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-INTEGRATE-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-INTEGRATE-1.2026-05-16.md",
+      "notes": "Dispatch-ready; dormancy gate complete.",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date"
+      ]
+    },
+    {
+      "itemId": "KOKORO-DEEPEN-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-11",
+      "evidenceReference": "\u2014",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "KOKORO-DEEPEN-3",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-11",
+      "evidenceReference": "\u2014",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "ENGINE-DORMANCY-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-16",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+      "notes": "Dormant at settings/IPC; code preserved; Nano probes opt-in.",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-CACHE-HARDEN-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md",
+      "notes": "Findings-driven: impl review A8 + lit review \u00a74.6",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date"
+      ]
+    },
+    {
+      "itemId": "TTS-SYNC-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-15",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-SYNC-1.2026-05-15.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-REGISTRY-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-12",
+      "evidenceReference": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-EVENT-SYNC-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-16",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+      "notes": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "KOKORO-DEEPEN-2",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-11",
+      "evidenceReference": "\u2014",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "TTS-RENDER-MAP-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-17",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+      "notes": "Research: sioyek. Landed 2eabf36, merged 8545895.",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-PIPELINE-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-17",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+      "notes": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218.",
+      "providerRevision": "2026-09-23T18:29:30Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NORMALIZER-ENRICH-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-17",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+      "notes": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8.",
+      "providerRevision": "2026-09-23T18:29:31Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-NORMALIZE-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-13",
+      "evidenceReference": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:31Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARR-SPOKEN-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-18",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-ISO-1E",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-27",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md",
+      "notes": "Narrate starts at exact selected/current word and never follows Flow engine.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARR-CURSOR-2",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-18",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARR-CURSOR-2.2026-05-18.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-24",
+      "evidenceReference": "docs/governance/close-outs/.Archive/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md",
+      "notes": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-ISO-1C",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-26",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md",
+      "notes": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "BASELINE-SYNC-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-22",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+      "notes": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-ISO-1B",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-25",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md",
+      "notes": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-PARITY-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-18",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-PARITY-1.2026-05-18.md",
+      "notes": "OutsideAudit.9 hardening gate. Three defects, three tests.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TEST-GREEN-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-22",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TEST-GREEN-1.2026-05-22.md",
+      "notes": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARR-MEDIA-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-17",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARR-MEDIA-1.2026-05-17.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARR-PAUSE-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-18",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARR-PAUSE-1.2026-05-18.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-ISO-1A",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-24",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md",
+      "notes": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-EVAL-3",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-18",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-EVAL-3.2026-05-18.md",
+      "notes": "",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-ARCH-DOC-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-17",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+      "notes": "Architecture decision record. Landed 66a73b1, merged 65629bc.",
+      "providerRevision": "2026-09-23T18:29:43Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "READER-ISO-1D",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-26",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md",
+      "notes": "Flow owns section-handoff restart; no Narrate truth-sync changes.",
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "GOV-HUMAN-REVIEW-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-27",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+      "notes": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule.",
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-QUAL-CI-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-28",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+      "notes": "Deferred until broad-suite health is clean or formally classified.",
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "THEME-SYNC-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-29",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.THEME-SYNC-1.2026-05-29.md",
+      "notes": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency.",
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "SINGLE-INSTANCE-LOCK-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-29",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+      "notes": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only).",
+      "providerRevision": "2026-09-23T18:29:44Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "EXT-PAIR-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-29",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.EXT-PAIR-1.2026-05-29.md",
+      "notes": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1.",
+      "providerRevision": "2026-09-23T18:29:45Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-31",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+      "notes": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARRATE-A5-RATE-RESEED-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-31",
+      "evidenceReference": "docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md",
+      "notes": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-31",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+      "notes": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARRATE-INTENT-CURSOR-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-31",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+      "notes": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-30",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md",
+      "notes": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "SK-HYG-2",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-16",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry and close-out Outcome PASS; not new delivery.",
+      "requiresVerification": true,
+      "missingInputs": [],
+      "providerRevision": "2026-09-23T18:45:30Z"
+    },
+    {
+      "itemId": "FLOW-ZONE-AUTO",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-19",
+      "evidenceReference": "git:abbca5c; git:5c46aee",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry. Merge abbca5c ancestry verified against cd384b78; 5c46aee records the close-out and LL-119. No separate CloseOut file is asserted.",
+      "requiresVerification": true,
+      "missingInputs": [],
+      "providerRevision": "2026-09-23T18:45:30Z"
+    },
+    {
+      "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-21",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Canonical Sprint Code from close-out frontmatter; roadmap display alias was READER-MODE-ISOLATION-1 Phase 0. Commit 563072e verified on HEAD. Close-out preserves unrelated broad-suite failures; not a claim of current test health.",
+      "requiresVerification": true,
+      "missingInputs": [],
+      "providerRevision": "2026-09-23T18:45:30Z"
+    },
+    {
+      "itemId": "GOVERNANCE-SWEEP",
+      "claimedResult": "completed",
+      "claimedCompletedDate": "2026-05-22",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md; git:dbc3a63",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry; BASELINE-SYNC close-out records dbc3a63. Historical administrative work, not new delivery.",
+      "requiresVerification": true,
+      "missingInputs": [],
+      "providerRevision": "2026-09-23T18:45:31Z"
+    },
+    {
+      "itemId": "NARR-PAUSE-STATE-1",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "",
+      "evidenceReference": "",
+      "notes": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date",
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+      "claimedResult": "superseded",
+      "claimedCompletedDate": "2026-09-23",
+      "evidenceReference": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
+      "notes": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented.",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": []
+    },
+    {
+      "itemId": "TTS-REGISTRY-DISPATCH-1",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "",
+      "evidenceReference": "",
+      "notes": "Dissolved 2026-05-15 \u2014 single active engine",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date",
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "2026-05-29",
+      "evidenceReference": "",
+      "notes": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification",
+      "providerRevision": "2026-09-23T18:29:46Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "TTS-CANARY-1",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "",
+      "evidenceReference": "",
+      "notes": "Dissolved 2026-05-15 \u2014 sidecar engines dormant",
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date",
+        "evidence reference"
+      ]
+    },
+    {
+      "itemId": "TEST-HARNESS-1",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "",
+      "evidenceReference": "docs/governance/close-outs/CloseOut.TEST-HARNESS-1.2026-05-15.md",
+      "notes": "Dissolved 2026-05-15 \u2014 Nano probes irrelevant",
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date"
+      ]
+    },
+    {
+      "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "claimedResult": "dissolved",
+      "claimedCompletedDate": "",
+      "evidenceReference": "",
+      "notes": "Dissolved \u2014 duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work.",
+      "providerRevision": "2026-09-23T18:29:47Z",
+      "requiresVerification": true,
+      "missingInputs": [
+        "completed date",
+        "evidence reference"
+      ]
+    }
+  ],
+  "pendingRoadmapOnlyBatch": [],
+  "approvedRoadmapOnlyBatch": [
+    "SK-HYG-2",
+    "FLOW-ZONE-AUTO",
+    "READER-MODE-ISOLATION-1-PHASE-0",
+    "GOVERNANCE-SWEEP"
+  ]
+}

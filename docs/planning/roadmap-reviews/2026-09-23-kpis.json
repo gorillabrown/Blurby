@@ -1,0 +1,115 @@
+{
+  "metrics": [
+    {
+      "name": "total-items",
+      "value": 56,
+      "unit": "items"
+    },
+    {
+      "name": "count-queued",
+      "value": 3,
+      "unit": "items"
+    },
+    {
+      "name": "count-in-flight",
+      "value": 0,
+      "unit": "items"
+    },
+    {
+      "name": "count-blocked",
+      "value": 2,
+      "unit": "items"
+    },
+    {
+      "name": "count-completed",
+      "value": 44,
+      "unit": "items"
+    },
+    {
+      "name": "count-dissolved",
+      "value": 6,
+      "unit": "items"
+    },
+    {
+      "name": "count-superseded",
+      "value": 1,
+      "unit": "items"
+    },
+    {
+      "name": "count-unknown",
+      "value": 0,
+      "unit": "items"
+    },
+    {
+      "name": "percent-complete-by-count",
+      "value": 91.1,
+      "unit": "%"
+    },
+    {
+      "name": "total-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 4 item(s): SK-HYG-2, FLOW-ZONE-AUTO, READER-MODE-ISOLATION-1-PHASE-0, GOVERNANCE-SWEEP",
+        "effort scale entries for: 1, 2, 3, 8"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "completed-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 4 item(s): SK-HYG-2, FLOW-ZONE-AUTO, READER-MODE-ISOLATION-1-PHASE-0, GOVERNANCE-SWEEP",
+        "effort scale entries for: 1, 2, 3, 8"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "percent-complete-by-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 4 item(s): SK-HYG-2, FLOW-ZONE-AUTO, READER-MODE-ISOLATION-1-PHASE-0, GOVERNANCE-SWEEP",
+        "effort scale entries for: 1, 2, 3, 8"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "dispatch-buffer-target",
+      "value": 5,
+      "unit": "items"
+    },
+    {
+      "name": "dispatch-buffer-filled",
+      "value": 5,
+      "unit": "items"
+    }
+  ],
+  "provenance": {
+    "provider": "connector+snapshot",
+    "source": "monday:board/18432450217",
+    "takenAt": "2026-09-23T18:45:55Z",
+    "fields": [
+      "title",
+      "status",
+      "id",
+      "sequence",
+      "written_status",
+      "prerequisites",
+      "effort",
+      "lane",
+      "group",
+      "spec_link",
+      "branch",
+      "started",
+      "completed",
+      "evidence",
+      "description",
+      "notes"
+    ],
+    "stale": false
+  },
+  "pace": [],
+  "invalidDeadlines": []
+}

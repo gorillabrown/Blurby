@@ -1,0 +1,3048 @@
+[
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-1",
+    "fields": {
+      "id": "KOKORO-DEEPEN-1",
+      "title": "Kokoro Readiness & Preflight",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "Deepening",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-11",
+      "evidence": "",
+      "description": "Kokoro readiness and preflight checks",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-1",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "KOKORO-DEEPEN-1",
+      "name": "Kokoro Readiness & Preflight",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Deepening",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-11",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Kokoro readiness and preflight checks",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'KOKORO-DEEPEN-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-2",
+    "fields": {
+      "id": "KOKORO-DEEPEN-2",
+      "title": "Natural Chunk Highlight",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "Deepening",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-11",
+      "evidence": "",
+      "description": "Natural chunk highlighting for Kokoro TTS",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-2",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-2",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "KOKORO-DEEPEN-2",
+      "name": "Natural Chunk Highlight",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Deepening",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-11",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Natural chunk highlighting for Kokoro TTS",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'KOKORO-DEEPEN-2' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-3",
+    "fields": {
+      "id": "KOKORO-DEEPEN-3",
+      "title": "Voice Mixing Feasibility",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "1",
+      "lane": "Deepening",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-11",
+      "evidence": "",
+      "description": "Voice mixing feasibility study",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-3",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-3",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "KOKORO-DEEPEN-3",
+      "name": "Voice Mixing Feasibility",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "Deepening",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-11",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Voice mixing feasibility study",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'KOKORO-DEEPEN-3' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-REGISTRY-1",
+    "fields": {
+      "id": "TTS-REGISTRY-1",
+      "title": "Provider Capability Registry",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "Foundation",
+      "group": "TTS Architecture",
+      "spec_link": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-12",
+      "evidence": "",
+      "description": "Provider capability truth in ttsProviderRegistry",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-REGISTRY-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-REGISTRY-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-REGISTRY-1",
+      "name": "Provider Capability Registry",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Foundation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-12",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Provider capability truth in ttsProviderRegistry",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-REGISTRY-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-NORMALIZE-1",
+    "fields": {
+      "id": "TTS-NORMALIZE-1",
+      "title": "Segment Normalizer",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "Foundation",
+      "group": "TTS Architecture",
+      "spec_link": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-13",
+      "evidence": "",
+      "description": "English-first spoken-text normalization",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-NORMALIZE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-NORMALIZE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-NORMALIZE-1",
+      "name": "Segment Normalizer",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Foundation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-13",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "English-first spoken-text normalization",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-NORMALIZE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CACHE-TIMING-1",
+    "fields": {
+      "id": "TTS-CACHE-TIMING-1",
+      "title": "Cache Identity & Timing Sidecars",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "Foundation",
+      "group": "TTS Architecture",
+      "spec_link": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-13",
+      "evidence": "",
+      "description": "Schema-versioned v2 cache identities and atomic timing sidecars",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CACHE-TIMING-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CACHE-TIMING-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-CACHE-TIMING-1",
+      "name": "Cache Identity & Timing Sidecars",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Foundation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-13",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Schema-versioned v2 cache identities and atomic timing sidecars",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-CACHE-TIMING-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-SYNC-1",
+    "fields": {
+      "id": "TTS-SYNC-1",
+      "title": "Highlight Sync Controller",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-CACHE-TIMING-1"
+      ],
+      "effort": "8",
+      "lane": "Sync & Diagnostics",
+      "group": "TTS Architecture",
+      "spec_link": "docs/Close-Outs/CloseOut.TTS-SYNC-1.2026-05-15.md",
+      "branch": "sprint/tts-sync-1-highlight-controller",
+      "started": "",
+      "completed": "2026-05-15",
+      "evidence": "",
+      "description": "Centralized narration highlight sync policy",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-SYNC-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-SYNC-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-SYNC-1",
+      "name": "Highlight Sync Controller",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-CACHE-TIMING-1",
+      "text_mm7ftzsz": "8",
+      "text_mm7fhjb6": "Sync & Diagnostics",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/Close-Outs/CloseOut.TTS-SYNC-1.2026-05-15.md",
+      "text_mm7fs69e": "sprint/tts-sync-1-highlight-controller",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-15",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Centralized narration highlight sync policy",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-SYNC-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-CACHE-TIMING-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-DIAG-1",
+    "fields": {
+      "id": "TTS-DIAG-1",
+      "title": "Narration Diagnostics Bundle",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-SYNC-1"
+      ],
+      "effort": "3",
+      "lane": "Sync & Diagnostics",
+      "group": "TTS Architecture",
+      "spec_link": "docs/Close-Outs/CloseOut.TTS-DIAG-1.2026-05-15.md",
+      "branch": "sprint/tts-diag-1-diagnostics-bundle",
+      "started": "",
+      "completed": "2026-05-15",
+      "evidence": "",
+      "description": "Provider-neutral diagnostics bundle",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-DIAG-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-DIAG-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-DIAG-1",
+      "name": "Narration Diagnostics Bundle",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-SYNC-1",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Sync & Diagnostics",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/Close-Outs/CloseOut.TTS-DIAG-1.2026-05-15.md",
+      "text_mm7fs69e": "sprint/tts-diag-1-diagnostics-bundle",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-15",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Provider-neutral diagnostics bundle",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-DIAG-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-SYNC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "ENGINE-DORMANCY-1",
+    "fields": {
+      "id": "ENGINE-DORMANCY-1",
+      "title": "Disable MOSS-Nano & Pocket TTS",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "None"
+      ],
+      "effort": "1",
+      "lane": "Consolidation",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-16",
+      "evidence": "",
+      "description": "Disable dormant sidecar engines",
+      "notes": "Dormant at settings/IPC; code preserved; Nano probes opt-in."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:ENGINE-DORMANCY-1",
+    "recoveryId": "20260923T182909Z-external-create-item-ENGINE-DORMANCY-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "ENGINE-DORMANCY-1",
+      "name": "Disable MOSS-Nano & Pocket TTS",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "None",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "Consolidation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-16",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Disable dormant sidecar engines",
+      "long_text_mm7fncbd": "Dormant at settings/IPC; code preserved; Nano probes opt-in."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'ENGINE-DORMANCY-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'None' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-INTEGRATE-1",
+    "fields": {
+      "id": "TTS-INTEGRATE-1",
+      "title": "Integrate Sync & Diagnostics",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "ENGINE-DORMANCY-1"
+      ],
+      "effort": "2",
+      "lane": "Consolidation",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Merge sync and diagnostics branches to main",
+      "notes": "Dispatch-ready; dormancy gate complete."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-INTEGRATE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-INTEGRATE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-INTEGRATE-1",
+      "name": "Integrate Sync & Diagnostics",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "ENGINE-DORMANCY-1",
+      "text_mm7ftzsz": "2",
+      "text_mm7fhjb6": "Consolidation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Merge sync and diagnostics branches to main",
+      "long_text_mm7fncbd": "Dispatch-ready; dormancy gate complete."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-INTEGRATE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'ENGINE-DORMANCY-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CACHE-HARDEN-1",
+    "fields": {
+      "id": "TTS-CACHE-HARDEN-1",
+      "title": "Cache/Pipeline Hardening",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-INTEGRATE-1"
+      ],
+      "effort": "2",
+      "lane": "Consolidation",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Cache-hit timing parity, type harmonization, IPC validation",
+      "notes": "Findings-driven: impl review A8 + lit review §4.6"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CACHE-HARDEN-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CACHE-HARDEN-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-CACHE-HARDEN-1",
+      "name": "Cache/Pipeline Hardening",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-INTEGRATE-1",
+      "text_mm7ftzsz": "2",
+      "text_mm7fhjb6": "Consolidation",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Cache-hit timing parity, type harmonization, IPC validation",
+      "long_text_mm7fncbd": "Findings-driven: impl review A8 + lit review §4.6"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-CACHE-HARDEN-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-INTEGRATE-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-EVENT-SYNC-1",
+    "fields": {
+      "id": "TTS-EVENT-SYNC-1",
+      "title": "Event-Driven Word Sync",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-CACHE-HARDEN-1 (completed 2026-05-16)"
+      ],
+      "effort": "3",
+      "lane": "Stage 2: Event-Driven Sync",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+      "branch": "sprint/tts-event-sync-1-word-boundary-sync",
+      "started": "",
+      "completed": "2026-05-16",
+      "evidence": "",
+      "description": "Event-driven word sync from research",
+      "notes": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-EVENT-SYNC-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-EVENT-SYNC-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-EVENT-SYNC-1",
+      "name": "Event-Driven Word Sync",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-CACHE-HARDEN-1 (completed 2026-05-16)",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Stage 2: Event-Driven Sync",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+      "text_mm7fs69e": "sprint/tts-event-sync-1-word-boundary-sync",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-16",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Event-driven word sync from research",
+      "long_text_mm7fncbd": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-EVENT-SYNC-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-CACHE-HARDEN-1 (completed 2026-05-16)' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NORMALIZER-ENRICH-1",
+    "fields": {
+      "id": "NORMALIZER-ENRICH-1",
+      "title": "Normalizer Gap Fill",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-EVENT-SYNC-1"
+      ],
+      "effort": "3",
+      "lane": "Stage 2: Normalizer Enrichment",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+      "branch": "sprint/normalizer-enrich-1-kokoro-text-normalization",
+      "started": "",
+      "completed": "2026-05-17",
+      "evidence": "",
+      "description": "Fill normalizer gaps from abogen research",
+      "notes": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NORMALIZER-ENRICH-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NORMALIZER-ENRICH-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NORMALIZER-ENRICH-1",
+      "name": "Normalizer Gap Fill",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-EVENT-SYNC-1",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Stage 2: Normalizer Enrichment",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+      "text_mm7fs69e": "sprint/normalizer-enrich-1-kokoro-text-normalization",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-17",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Fill normalizer gaps from abogen research",
+      "long_text_mm7fncbd": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NORMALIZER-ENRICH-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-EVENT-SYNC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-RENDER-MAP-1",
+    "fields": {
+      "id": "TTS-RENDER-MAP-1",
+      "title": "Word Position Index",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NORMALIZER-ENRICH-1"
+      ],
+      "effort": "3",
+      "lane": "Stage 2: Word Position Index",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+      "branch": "sprint/tts-render-map-1-word-position-index",
+      "started": "2026-05-17",
+      "completed": "2026-05-17",
+      "evidence": "",
+      "description": "Sioyek-inspired word position index",
+      "notes": "Research: sioyek. Landed 2eabf36, merged 8545895."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-RENDER-MAP-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-RENDER-MAP-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-RENDER-MAP-1",
+      "name": "Word Position Index",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NORMALIZER-ENRICH-1",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "Stage 2: Word Position Index",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+      "text_mm7fs69e": "sprint/tts-render-map-1-word-position-index",
+      "date_mm7f6dw": "2026-05-17",
+      "date_mm7fw9mx": "2026-05-17",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Sioyek-inspired word position index",
+      "long_text_mm7fncbd": "Research: sioyek. Landed 2eabf36, merged 8545895."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-RENDER-MAP-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NORMALIZER-ENRICH-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-PIPELINE-1",
+    "fields": {
+      "id": "TTS-PIPELINE-1",
+      "title": "Pipeline Integration Tests",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-RENDER-MAP-1"
+      ],
+      "effort": "1",
+      "lane": "Stage 3: Pipeline Truth",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+      "branch": "sprint/tts-pipeline-1-integration-test",
+      "started": "2026-05-17",
+      "completed": "2026-05-17",
+      "evidence": "",
+      "description": "End-to-end pipeline integration tests",
+      "notes": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-PIPELINE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-PIPELINE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-PIPELINE-1",
+      "name": "Pipeline Integration Tests",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-RENDER-MAP-1",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "Stage 3: Pipeline Truth",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+      "text_mm7fs69e": "sprint/tts-pipeline-1-integration-test",
+      "date_mm7f6dw": "2026-05-17",
+      "date_mm7fw9mx": "2026-05-17",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "End-to-end pipeline integration tests",
+      "long_text_mm7fncbd": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-PIPELINE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-RENDER-MAP-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-ARCH-DOC-1",
+    "fields": {
+      "id": "TTS-ARCH-DOC-1",
+      "title": "Architecture Decisions Doc",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "All above"
+      ],
+      "effort": "1",
+      "lane": "Stage 4: Governance",
+      "group": "TTS Architecture",
+      "spec_link": "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+      "branch": "sprint/tts-arch-doc-1-architecture-decisions",
+      "started": "2026-05-17",
+      "completed": "2026-05-17",
+      "evidence": "",
+      "description": "Architecture decision records for TTS",
+      "notes": "Architecture decision record. Landed 66a73b1, merged 65629bc."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-ARCH-DOC-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-ARCH-DOC-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-ARCH-DOC-1",
+      "name": "Architecture Decisions Doc",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "All above",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "Stage 4: Governance",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+      "text_mm7fs69e": "sprint/tts-arch-doc-1-architecture-decisions",
+      "date_mm7f6dw": "2026-05-17",
+      "date_mm7fw9mx": "2026-05-17",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Architecture decision records for TTS",
+      "long_text_mm7fncbd": "Architecture decision record. Landed 66a73b1, merged 65629bc."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-ARCH-DOC-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'All above' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TEST-HARNESS-1",
+    "fields": {
+      "id": "TEST-HARNESS-1",
+      "title": "Test Harness Stability",
+      "status": "Dissolved",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "2",
+      "lane": "",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Test harness stability work",
+      "notes": "Dissolved 2026-05-15 — Nano probes irrelevant"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TEST-HARNESS-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TEST-HARNESS-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TEST-HARNESS-1",
+      "name": "Test Harness Stability",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "2",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Test harness stability work",
+      "long_text_mm7fncbd": "Dissolved 2026-05-15 — Nano probes irrelevant"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TEST-HARNESS-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CANARY-1",
+    "fields": {
+      "id": "TTS-CANARY-1",
+      "title": "Engine Readiness Probes",
+      "status": "Dissolved",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "1",
+      "lane": "",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Engine readiness probe system",
+      "notes": "Dissolved 2026-05-15 — sidecar engines dormant"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CANARY-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CANARY-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-CANARY-1",
+      "name": "Engine Readiness Probes",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Engine readiness probe system",
+      "long_text_mm7fncbd": "Dissolved 2026-05-15 — sidecar engines dormant"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-CANARY-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-REGISTRY-DISPATCH-1",
+    "fields": {
+      "id": "TTS-REGISTRY-DISPATCH-1",
+      "title": "Registry-Driven Dispatch",
+      "status": "Dissolved",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "3",
+      "lane": "",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Registry-driven engine dispatch",
+      "notes": "Dissolved 2026-05-15 — single active engine"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-REGISTRY-DISPATCH-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-REGISTRY-DISPATCH-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-REGISTRY-DISPATCH-1",
+      "name": "Registry-Driven Dispatch",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "3",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Registry-driven engine dispatch",
+      "long_text_mm7fncbd": "Dissolved 2026-05-15 — single active engine"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-REGISTRY-DISPATCH-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-EXPORT-1",
+    "fields": {
+      "id": "KOKORO-EXPORT-1",
+      "title": "Long-Form Audio Export",
+      "status": "Blocked",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-ARCH-DOC-1"
+      ],
+      "effort": "8",
+      "lane": "",
+      "group": "TTS Architecture",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Long-form audio export from Kokoro",
+      "notes": "Deferred to post-TTS-Architecture phase. Worktree preserved at .worktrees/kokoro-export-1 (37 tests pass)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-EXPORT-1",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-EXPORT-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "KOKORO-EXPORT-1",
+      "name": "Long-Form Audio Export",
+      "status": "Blocked",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-ARCH-DOC-1",
+      "text_mm7ftzsz": "8",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "TTS Architecture",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Long-form audio export from Kokoro",
+      "long_text_mm7fncbd": "Deferred to post-TTS-Architecture phase. Worktree preserved at .worktrees/kokoro-export-1 (37 tests pass)."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'KOKORO-EXPORT-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-ARCH-DOC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "fields": {
+      "id": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "title": "MediaSession Controls",
+      "status": "Dissolved",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-ARCH-DOC-1"
+      ],
+      "effort": "1",
+      "lane": "Post-Architecture Polish",
+      "group": "Narration UX",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "OS media transport controls for active narration",
+      "notes": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "recoveryId": "20260923T182909Z-external-create-item-LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "name": "MediaSession Controls",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-ARCH-DOC-1",
+      "text_mm7ftzsz": "1",
+      "text_mm7fhjb6": "Post-Architecture Polish",
+      "text_mm7ftkmm": "Narration UX",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "OS media transport controls for active narration",
+      "long_text_mm7fncbd": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'LEGACY-NARR-MEDIA-1-DISSOLVED' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-ARCH-DOC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-PAUSE-STATE-1",
+    "fields": {
+      "id": "NARR-PAUSE-STATE-1",
+      "title": "Named Pause State Machine",
+      "status": "Dissolved",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARR-MEDIA-1"
+      ],
+      "effort": "2",
+      "lane": "Post-Architecture Polish",
+      "group": "Narration UX",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Reason-aware pause and resume state transitions",
+      "notes": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-PAUSE-STATE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-PAUSE-STATE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARR-PAUSE-STATE-1",
+      "name": "Named Pause State Machine",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARR-MEDIA-1",
+      "text_mm7ftzsz": "2",
+      "text_mm7fhjb6": "Post-Architecture Polish",
+      "text_mm7ftkmm": "Narration UX",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Reason-aware pause and resume state transitions",
+      "long_text_mm7fncbd": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARR-PAUSE-STATE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARR-MEDIA-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-MEDIA-1",
+    "fields": {
+      "id": "NARR-MEDIA-1",
+      "title": "MediaSession Integration",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "None"
+      ],
+      "effort": "S",
+      "lane": "1a",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.NARR-MEDIA-1.2026-05-17.md",
+      "branch": "sprint/narr-media-1-mediasession",
+      "started": "",
+      "completed": "2026-05-17",
+      "evidence": "",
+      "description": "OS media controls via Electron MediaSession API",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-MEDIA-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-MEDIA-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARR-MEDIA-1",
+      "name": "MediaSession Integration",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "None",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "1a",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.NARR-MEDIA-1.2026-05-17.md",
+      "text_mm7fs69e": "sprint/narr-media-1-mediasession",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-17",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "OS media controls via Electron MediaSession API",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARR-MEDIA-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'None' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-PAUSE-1",
+    "fields": {
+      "id": "NARR-PAUSE-1",
+      "title": "Named-Pause State Machine",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "None"
+      ],
+      "effort": "M",
+      "lane": "1a",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.NARR-PAUSE-1.2026-05-18.md",
+      "branch": "sprint/narr-pause-1-named-pause",
+      "started": "",
+      "completed": "2026-05-18",
+      "evidence": "",
+      "description": "PauseReason discriminant for smarter resume behavior",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-PAUSE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-PAUSE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARR-PAUSE-1",
+      "name": "Named-Pause State Machine",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "None",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "1a",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.NARR-PAUSE-1.2026-05-18.md",
+      "text_mm7fs69e": "sprint/narr-pause-1-named-pause",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-18",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "PauseReason discriminant for smarter resume behavior",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARR-PAUSE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'None' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-PARITY-1",
+    "fields": {
+      "id": "TTS-PARITY-1",
+      "title": "Cache/Progress/Resume Parity Hardening",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARR-PAUSE-1"
+      ],
+      "effort": "S",
+      "lane": "1a",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.TTS-PARITY-1.2026-05-18.md",
+      "branch": "sprint/tts-parity-1",
+      "started": "",
+      "completed": "2026-05-18",
+      "evidence": "",
+      "description": "Fix cache silence parity, trusted progress lag, resume backpressure",
+      "notes": "OutsideAudit.9 hardening gate. Three defects, three tests."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-PARITY-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-PARITY-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-PARITY-1",
+      "name": "Cache/Progress/Resume Parity Hardening",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARR-PAUSE-1",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "1a",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.TTS-PARITY-1.2026-05-18.md",
+      "text_mm7fs69e": "sprint/tts-parity-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-18",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Fix cache silence parity, trusted progress lag, resume backpressure",
+      "long_text_mm7fncbd": "OutsideAudit.9 hardening gate. Three defects, three tests."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-PARITY-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARR-PAUSE-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-CURSOR-2",
+    "fields": {
+      "id": "NARR-CURSOR-2",
+      "title": "Silence-Aware Cursor Hold",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARR-PAUSE-1",
+        "TTS-PARITY-1",
+        "NARR-SPOKEN-1"
+      ],
+      "effort": "S",
+      "lane": "1a",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.NARR-CURSOR-2.2026-05-18.md",
+      "branch": "sprint/narr-cursor-2-silence-hold",
+      "started": "",
+      "completed": "2026-05-18",
+      "evidence": "",
+      "description": "Freeze cursor during inter-word silence using real endTime timestamps",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-CURSOR-2",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-CURSOR-2",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARR-CURSOR-2",
+      "name": "Silence-Aware Cursor Hold",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARR-PAUSE-1, TTS-PARITY-1, NARR-SPOKEN-1",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "1a",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.NARR-CURSOR-2.2026-05-18.md",
+      "text_mm7fs69e": "sprint/narr-cursor-2-silence-hold",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-18",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Freeze cursor during inter-word silence using real endTime timestamps",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARR-CURSOR-2' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARR-PAUSE-1' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'TTS-PARITY-1' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'NARR-SPOKEN-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-EVAL-3",
+    "fields": {
+      "id": "TTS-EVAL-3",
+      "title": "Quality Evaluation + CI Gate",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "None"
+      ],
+      "effort": "M",
+      "lane": "1b",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.TTS-EVAL-3.2026-05-18.md",
+      "branch": "sprint/tts-eval-3-quality-ci-gate",
+      "started": "",
+      "completed": "2026-05-18",
+      "evidence": "",
+      "description": "Extend eval harness with quality scoring dimensions and CI gate config",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-EVAL-3",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-EVAL-3",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-EVAL-3",
+      "name": "Quality Evaluation + CI Gate",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "None",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "1b",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.TTS-EVAL-3.2026-05-18.md",
+      "text_mm7fs69e": "sprint/tts-eval-3-quality-ci-gate",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-18",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Extend eval harness with quality scoring dimensions and CI gate config",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-EVAL-3' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'None' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-SPOKEN-1",
+    "fields": {
+      "id": "NARR-SPOKEN-1",
+      "title": "Spoken/Display Word Separation",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TTS-PARITY-1"
+      ],
+      "effort": "M",
+      "lane": "1a",
+      "group": "TTS Quality + Reading Exp v2",
+      "spec_link": "CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+      "branch": "sprint/narr-spoken-1",
+      "started": "",
+      "completed": "2026-05-18",
+      "evidence": "",
+      "description": "Filter punctuation-only tokens from phoneme alignment input",
+      "notes": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-SPOKEN-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-SPOKEN-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARR-SPOKEN-1",
+      "name": "Spoken/Display Word Separation",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TTS-PARITY-1",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "1a",
+      "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+      "long_text_mm7f66fk": "CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+      "text_mm7fs69e": "sprint/narr-spoken-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-18",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Filter punctuation-only tokens from phoneme alignment input",
+      "long_text_mm7fncbd": ""
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARR-SPOKEN-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-PARITY-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "BASELINE-SYNC-1",
+    "fields": {
+      "id": "BASELINE-SYNC-1",
+      "title": "Commit Phase 0 + Governance Sweep Baseline",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-MODE-ISOLATION-1 Phase 0",
+        "GOVERNANCE-SWEEP"
+      ],
+      "effort": "M",
+      "lane": "0",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+      "branch": "main/current dirty baseline sync",
+      "started": "",
+      "completed": "2026-05-22",
+      "evidence": "",
+      "description": "Review, stage, verify, and commit Phase 0 plus governance sweep baseline",
+      "notes": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:BASELINE-SYNC-1",
+    "recoveryId": "20260923T182909Z-external-create-item-BASELINE-SYNC-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "BASELINE-SYNC-1",
+      "name": "Commit Phase 0 + Governance Sweep Baseline",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-MODE-ISOLATION-1 Phase 0, GOVERNANCE-SWEEP",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "0",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+      "text_mm7fs69e": "main/current dirty baseline sync",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-22",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Review, stage, verify, and commit Phase 0 plus governance sweep baseline",
+      "long_text_mm7fncbd": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'BASELINE-SYNC-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-MODE-ISOLATION-1 Phase 0' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'GOVERNANCE-SWEEP' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TEST-GREEN-1",
+    "fields": {
+      "id": "TEST-GREEN-1",
+      "title": "Broad Suite Failure Triage",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "BASELINE-SYNC-1"
+      ],
+      "effort": "M",
+      "lane": "1",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.TEST-GREEN-1.2026-05-22.md",
+      "branch": "sprint/test-green-1-broad-suite-triage",
+      "started": "",
+      "completed": "2026-05-22",
+      "evidence": "",
+      "description": "Reproduce and classify broad-suite failures before CI gating",
+      "notes": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TEST-GREEN-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TEST-GREEN-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TEST-GREEN-1",
+      "name": "Broad Suite Failure Triage",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "BASELINE-SYNC-1",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "1",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.TEST-GREEN-1.2026-05-22.md",
+      "text_mm7fs69e": "sprint/test-green-1-broad-suite-triage",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-22",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Reproduce and classify broad-suite failures before CI gating",
+      "long_text_mm7fncbd": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TEST-GREEN-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'BASELINE-SYNC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "fields": {
+      "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "title": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "Step 3.5 manual QA: S13 split -> Bug2 content omission (this)",
+        "Bug1 visual lead deferred post-ISO"
+      ],
+      "effort": "L",
+      "lane": "1",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md",
+      "branch": "hotfix/reader-persistent-anchor",
+      "started": "2026-05-24",
+      "completed": "2026-05-24",
+      "evidence": "",
+      "description": "Fix content omission: seed automatic chunk continuation from produced-end (nextGenWordIndexRef), not lastConfirmedAudioWordRef (cursor twin); hard-click still re-anchors. Add schedule-vs-wallclock log. Gate: no words omitted by ear in The Raven. See ROADMAP Step 3.6.",
+      "notes": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "name": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "Step 3.5 manual QA: S13 split -> Bug2 content omission (this), Bug1 visual lead deferred post-ISO",
+      "text_mm7ftzsz": "L",
+      "text_mm7fhjb6": "1",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md",
+      "text_mm7fs69e": "hotfix/reader-persistent-anchor",
+      "date_mm7f6dw": "2026-05-24",
+      "date_mm7fw9mx": "2026-05-24",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Fix content omission: seed automatic chunk continuation from produced-end (nextGenWordIndexRef), not lastConfirmedAudioWordRef (cursor twin); hard-click still re-anchors. Add schedule-vs-wallclock log. Gate: no words omitted by ear in The Raven. See ROADMAP Step 3.6.",
+      "long_text_mm7fncbd": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-PERSISTENT-ANCHOR-STEP3-REPAIR' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'Step 3.5 manual QA: S13 split -> Bug2 content omission (this)' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'Bug1 visual lead deferred post-ISO' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1A",
+    "fields": {
+      "id": "READER-ISO-1A",
+      "title": "Adapter Contracts + Current Word Anchor Service",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+        "TEST-GREEN-1"
+      ],
+      "effort": "M",
+      "lane": "2",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md",
+      "branch": "sprint/reader-iso-1a-adapter-anchor-contracts",
+      "started": "2026-05-24",
+      "completed": "2026-05-24",
+      "evidence": "",
+      "description": "Add adapter contracts and tested shared current-word anchor service",
+      "notes": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1A",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1A",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-ISO-1A",
+      "name": "Adapter Contracts + Current Word Anchor Service",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR, TEST-GREEN-1",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "2",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md",
+      "text_mm7fs69e": "sprint/reader-iso-1a-adapter-anchor-contracts",
+      "date_mm7f6dw": "2026-05-24",
+      "date_mm7fw9mx": "2026-05-24",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Add adapter contracts and tested shared current-word anchor service",
+      "long_text_mm7fncbd": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-ISO-1A' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-PERSISTENT-ANCHOR-STEP3-REPAIR' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'TEST-GREEN-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1B",
+    "fields": {
+      "id": "READER-ISO-1B",
+      "title": "Orchestrator Shell + Mode Selection Semantics",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ISO-1A"
+      ],
+      "effort": "L",
+      "lane": "2",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md",
+      "branch": "sprint/reader-iso-1b-orchestrator-shell",
+      "started": "2026-05-25",
+      "completed": "2026-05-25",
+      "evidence": "",
+      "description": "Extract mode orchestrator shell while preserving exact-start and no-auto-start semantics",
+      "notes": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1B",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1B",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-ISO-1B",
+      "name": "Orchestrator Shell + Mode Selection Semantics",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-ISO-1A",
+      "text_mm7ftzsz": "L",
+      "text_mm7fhjb6": "2",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md",
+      "text_mm7fs69e": "sprint/reader-iso-1b-orchestrator-shell",
+      "date_mm7f6dw": "2026-05-25",
+      "date_mm7fw9mx": "2026-05-25",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Extract mode orchestrator shell while preserving exact-start and no-auto-start semantics",
+      "long_text_mm7fncbd": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-ISO-1B' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-ISO-1A' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1C",
+    "fields": {
+      "id": "READER-ISO-1C",
+      "title": "Focus Adapter + Passive Surface Contract Start",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ISO-1B"
+      ],
+      "effort": "M",
+      "lane": "2",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md",
+      "branch": "sprint/reader-iso-1c-focus-adapter",
+      "started": "2026-05-26",
+      "completed": "2026-05-26",
+      "evidence": "",
+      "description": "Move Focus behind adapter and begin passive surface command typing",
+      "notes": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1C",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1C",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-ISO-1C",
+      "name": "Focus Adapter + Passive Surface Contract Start",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-ISO-1B",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "2",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md",
+      "text_mm7fs69e": "sprint/reader-iso-1c-focus-adapter",
+      "date_mm7f6dw": "2026-05-26",
+      "date_mm7fw9mx": "2026-05-26",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Move Focus behind adapter and begin passive surface command typing",
+      "long_text_mm7fncbd": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-ISO-1C' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-ISO-1B' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1D",
+    "fields": {
+      "id": "READER-ISO-1D",
+      "title": "Flow Adapter + Section Handoff Restart Ownership",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ISO-1C",
+        "persistent-anchor repair lane closed by explicit disposition",
+        "Flow S9 lazy-follow deferred"
+      ],
+      "effort": "L",
+      "lane": "2",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md",
+      "branch": "sprint/reader-iso-1d-flow-adapter",
+      "started": "",
+      "completed": "2026-05-26",
+      "evidence": "",
+      "description": "Move Flow lifecycle and FlowScrollEngine ownership behind Flow adapter",
+      "notes": "Flow owns section-handoff restart; no Narrate truth-sync changes."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1D",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1D",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-ISO-1D",
+      "name": "Flow Adapter + Section Handoff Restart Ownership",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-ISO-1C, persistent-anchor repair lane closed by explicit disposition, Flow S9 lazy-follow deferred",
+      "text_mm7ftzsz": "L",
+      "text_mm7fhjb6": "2",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md",
+      "text_mm7fs69e": "sprint/reader-iso-1d-flow-adapter",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-26",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Move Flow lifecycle and FlowScrollEngine ownership behind Flow adapter",
+      "long_text_mm7fncbd": "Flow owns section-handoff restart; no Narrate truth-sync changes."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-ISO-1D' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-ISO-1C' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'persistent-anchor repair lane closed by explicit disposition' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'Flow S9 lazy-follow deferred' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1E",
+    "fields": {
+      "id": "READER-ISO-1E",
+      "title": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ISO-1D"
+      ],
+      "effort": "L",
+      "lane": "2",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-27",
+      "evidence": "",
+      "description": "Move Narrate lifecycle behind audio truth-sync owned adapter",
+      "notes": "Narrate starts at exact selected/current word and never follows Flow engine."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1E",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1E",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "READER-ISO-1E",
+      "name": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-ISO-1D",
+      "text_mm7ftzsz": "L",
+      "text_mm7fhjb6": "2",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-27",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Move Narrate lifecycle behind audio truth-sync owned adapter",
+      "long_text_mm7fncbd": "Narrate starts at exact selected/current word and never follows Flow engine."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-ISO-1E' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-ISO-1D' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "GOV-HUMAN-REVIEW-1",
+    "fields": {
+      "id": "GOV-HUMAN-REVIEW-1",
+      "title": "Deferred Governance Review Items",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "BASELINE-SYNC-1"
+      ],
+      "effort": "S",
+      "lane": "Governance",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+      "branch": "",
+      "started": "",
+      "completed": "2026-05-27",
+      "evidence": "",
+      "description": "Resolve deferred governance-sweep human-review items",
+      "notes": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:GOV-HUMAN-REVIEW-1",
+    "recoveryId": "20260923T182909Z-external-create-item-GOV-HUMAN-REVIEW-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "GOV-HUMAN-REVIEW-1",
+      "name": "Deferred Governance Review Items",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "BASELINE-SYNC-1",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Governance",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-27",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Resolve deferred governance-sweep human-review items",
+      "long_text_mm7fncbd": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'GOV-HUMAN-REVIEW-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'BASELINE-SYNC-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-QUAL-CI-1",
+    "fields": {
+      "id": "TTS-QUAL-CI-1",
+      "title": "CI Regression Gate Wiring",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TEST-GREEN-1",
+        "TTS-EVAL-3"
+      ],
+      "effort": "S",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+      "branch": "sprint/tts-qual-ci-1",
+      "started": "2026-05-28",
+      "completed": "2026-05-28",
+      "evidence": "",
+      "description": "Wire TTS quality gates into CI after suite health and reader runtime are stable",
+      "notes": "Deferred until broad-suite health is clean or formally classified."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-QUAL-CI-1",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-QUAL-CI-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-QUAL-CI-1",
+      "name": "CI Regression Gate Wiring",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "TEST-GREEN-1, TTS-EVAL-3",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+      "text_mm7fs69e": "sprint/tts-qual-ci-1",
+      "date_mm7f6dw": "2026-05-28",
+      "date_mm7fw9mx": "2026-05-28",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Wire TTS quality gates into CI after suite health and reader runtime are stable",
+      "long_text_mm7fncbd": "Deferred until broad-suite health is clean or formally classified."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-QUAL-CI-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TEST-GREEN-1' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'TTS-EVAL-3' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "UX-POLISH-1",
+    "fields": {
+      "id": "UX-POLISH-1",
+      "title": "Space-bar resumes last-used reading mode",
+      "sequence": 4,
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "Reader runtime stable"
+      ],
+      "effort": "XS",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "",
+      "branch": "sprint/ux-polish-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
+      "notes": "Deferred until reader-mode runtime controls stop churning."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:UX-POLISH-1",
+    "recoveryId": "20260923T182909Z-external-create-item-UX-POLISH-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "UX-POLISH-1",
+      "name": "Space-bar resumes last-used reading mode",
+      "numeric_mm7fsex9": 4,
+      "status": "Queued",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "Reader runtime stable",
+      "text_mm7ftzsz": "XS",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "sprint/ux-polish-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
+      "long_text_mm7fncbd": "Deferred until reader-mode runtime controls stop churning."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'UX-POLISH-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'Reader runtime stable' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+    "fields": {
+      "id": "NARRATE-CLOSED-LOOP-CURSOR",
+      "title": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "status": "Dissolved",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "READER-ISO-1E (Narrate adapter) complete"
+      ],
+      "effort": "L",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "See Disposition of Superseded Branches in ROADMAP.md; branch preserved at sprint/narrate-closed-loop-cursor commit 0f1b2c8",
+      "branch": "sprint/narrate-closed-loop-cursor",
+      "started": "",
+      "completed": "2026-05-29",
+      "evidence": "",
+      "description": "Make currently-playing audio source's real word position the SINGLE source of truth for cursor + re-entry seeding; retire ahead-of-heard refs; bound prefetch window.",
+      "notes": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-CLOSED-LOOP-CURSOR",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-CLOSED-LOOP-CURSOR",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-CLOSED-LOOP-CURSOR",
+      "name": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "status": "Dissolved",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "READER-ISO-1E (Narrate adapter) complete",
+      "text_mm7ftzsz": "L",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "See Disposition of Superseded Branches in ROADMAP.md; branch preserved at sprint/narrate-closed-loop-cursor commit 0f1b2c8",
+      "text_mm7fs69e": "sprint/narrate-closed-loop-cursor",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-29",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Make currently-playing audio source's real word position the SINGLE source of truth for cursor + re-entry seeding; retire ahead-of-heard refs; bound prefetch window.",
+      "long_text_mm7fncbd": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-CLOSED-LOOP-CURSOR' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'READER-ISO-1E (Narrate adapter) complete' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "EXT-PAIR-1",
+    "fields": {
+      "id": "EXT-PAIR-1",
+      "title": "Chrome Extension Pairing Auth Timeout Repair",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "XS",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.EXT-PAIR-1.2026-05-29.md",
+      "branch": "sprint/ext-pair-1",
+      "started": "2026-05-29",
+      "completed": "2026-05-29",
+      "evidence": "",
+      "description": "Split WS_AUTH_TIMEOUT_MS into a generous pairing window (5 min) for first-time human pair and the existing tight 5s window for stored-token re-auth. Closes BUG-183.",
+      "notes": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:EXT-PAIR-1",
+    "recoveryId": "20260923T182909Z-external-create-item-EXT-PAIR-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "EXT-PAIR-1",
+      "name": "Chrome Extension Pairing Auth Timeout Repair",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "XS",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.EXT-PAIR-1.2026-05-29.md",
+      "text_mm7fs69e": "sprint/ext-pair-1",
+      "date_mm7f6dw": "2026-05-29",
+      "date_mm7fw9mx": "2026-05-29",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Split WS_AUTH_TIMEOUT_MS into a generous pairing window (5 min) for first-time human pair and the existing tight 5s window for stored-token re-auth. Closes BUG-183.",
+      "long_text_mm7fncbd": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'EXT-PAIR-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "SINGLE-INSTANCE-LOCK-1",
+    "fields": {
+      "id": "SINGLE-INSTANCE-LOCK-1",
+      "title": "Electron Main-Process Single-Instance Gate",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "XS",
+      "lane": "Completed",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+      "branch": "sprint/single-instance-lock-1",
+      "started": "2026-05-29",
+      "completed": "2026-05-29",
+      "evidence": "",
+      "description": "Add app.requestSingleInstanceLock() + second-instance handler to focus existing window instead of spawning duplicate BrowserWindow. ~5 LOC. Closes F1 from discovery sweep.",
+      "notes": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:SINGLE-INSTANCE-LOCK-1",
+    "recoveryId": "20260923T182909Z-external-create-item-SINGLE-INSTANCE-LOCK-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "SINGLE-INSTANCE-LOCK-1",
+      "name": "Electron Main-Process Single-Instance Gate",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "XS",
+      "text_mm7fhjb6": "Completed",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+      "text_mm7fs69e": "sprint/single-instance-lock-1",
+      "date_mm7f6dw": "2026-05-29",
+      "date_mm7fw9mx": "2026-05-29",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Add app.requestSingleInstanceLock() + second-instance handler to focus existing window instead of spawning duplicate BrowserWindow. ~5 LOC. Closes F1 from discovery sweep.",
+      "long_text_mm7fncbd": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only)."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'SINGLE-INSTANCE-LOCK-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "THEME-SYNC-1",
+    "fields": {
+      "id": "THEME-SYNC-1",
+      "title": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Completed",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.THEME-SYNC-1.2026-05-29.md",
+      "branch": "sprint/theme-sync-1",
+      "started": "2026-05-29",
+      "completed": "2026-05-29",
+      "evidence": "",
+      "description": "Resolve settings↔tts circular chunk warning and audit theme-context subscription across Settings sub-pages. Closes BUG-182.",
+      "notes": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:THEME-SYNC-1",
+    "recoveryId": "20260923T182909Z-external-create-item-THEME-SYNC-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "THEME-SYNC-1",
+      "name": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Completed",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.THEME-SYNC-1.2026-05-29.md",
+      "text_mm7fs69e": "sprint/theme-sync-1",
+      "date_mm7f6dw": "2026-05-29",
+      "date_mm7fw9mx": "2026-05-29",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Resolve settings↔tts circular chunk warning and audit theme-context subscription across Settings sub-pages. Closes BUG-182.",
+      "long_text_mm7fncbd": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'THEME-SYNC-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+    "fields": {
+      "id": "HYG-XLSX-DASHBOARD-RESTORE",
+      "title": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "status": "Superseded",
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "",
+      "branch": "sprint/hyg-xlsx-dashboard-restore",
+      "started": "",
+      "completed": "2026-09-23",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
+      "description": "Restore Dashboard KPIs as live Excel formulas + normalize Catalog vocab/LOE + recalc.py Dashboard guardrail + SPREADSHEET_CONVENTIONS.md. Dashboard confirmed inert (0 formula cells).",
+      "notes": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:HYG-XLSX-DASHBOARD-RESTORE",
+    "recoveryId": "20260923T182909Z-external-create-item-HYG-XLSX-DASHBOARD-RESTORE",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "HYG-XLSX-DASHBOARD-RESTORE",
+      "name": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "status": "Superseded",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "sprint/hyg-xlsx-dashboard-restore",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-09-23",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
+      "long_text_mm7fv3sg": "Restore Dashboard KPIs as live Excel formulas + normalize Catalog vocab/LOE + recalc.py Dashboard guardrail + SPREADSHEET_CONVENTIONS.md. Dashboard confirmed inert (0 formula cells).",
+      "long_text_mm7fncbd": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'HYG-XLSX-DASHBOARD-RESTORE' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+    "fields": {
+      "id": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "title": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-CLOSED-LOOP-CURSOR dissolved"
+      ],
+      "effort": "XS",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md",
+      "branch": "sprint/narrate-dual-source-diag-1",
+      "started": "",
+      "completed": "2026-05-30",
+      "evidence": "",
+      "description": "1-day investigation: instrument every audio-decision read in useNarration.ts, re-run live-QA A1/A4/A5, produce verdict report confirming/refuting dual-source diagnosis from 2026-05-29 ULTRATHINK",
+      "notes": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-DUAL-SOURCE-DIAG-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-DUAL-SOURCE-DIAG-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "name": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-CLOSED-LOOP-CURSOR dissolved",
+      "text_mm7ftzsz": "XS",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md",
+      "text_mm7fs69e": "sprint/narrate-dual-source-diag-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-30",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "1-day investigation: instrument every audio-decision read in useNarration.ts, re-run live-QA A1/A4/A5, produce verdict report confirming/refuting dual-source diagnosis from 2026-05-29 ULTRATHINK",
+      "long_text_mm7fncbd": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-DUAL-SOURCE-DIAG-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-CLOSED-LOOP-CURSOR dissolved' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-INTENT-CURSOR-1",
+    "fields": {
+      "id": "NARRATE-INTENT-CURSOR-1",
+      "title": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)"
+      ],
+      "effort": "S",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+      "branch": "sprint/narrate-intent-cursor-1",
+      "started": "",
+      "completed": "2026-05-31",
+      "evidence": "",
+      "description": "Introduce intentCursorRef as user-intent half of Evan's two-cursor model; retire nextKokoroExactStartRef (the secret cursor); resyncToCursor becomes thin wrapper that sets intent + triggers restartGeneration if playing",
+      "notes": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-INTENT-CURSOR-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-INTENT-CURSOR-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-INTENT-CURSOR-1",
+      "name": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+      "text_mm7fs69e": "sprint/narrate-intent-cursor-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-31",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Introduce intentCursorRef as user-intent half of Evan's two-cursor model; retire nextKokoroExactStartRef (the secret cursor); resyncToCursor becomes thin wrapper that sets intent + triggers restartGeneration if playing",
+      "long_text_mm7fncbd": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-INTENT-CURSOR-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+    "fields": {
+      "id": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "title": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)"
+      ],
+      "effort": "S",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+      "branch": "sprint/narrate-pause-resume-unify-1",
+      "started": "",
+      "completed": "2026-05-31",
+      "evidence": "",
+      "description": "Introduce resumeTargetRef; pause() captures heardFloor BEFORE strategy clears scheduler sources; resume() reads from priority chain intent ?? resumeTarget ?? subscriber. Fixes A4 (play->pause->play resets to book start).",
+      "notes": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-PAUSE-RESUME-UNIFY-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-PAUSE-RESUME-UNIFY-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "name": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+      "text_mm7fs69e": "sprint/narrate-pause-resume-unify-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-31",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Introduce resumeTargetRef; pause() captures heardFloor BEFORE strategy clears scheduler sources; resume() reads from priority chain intent ?? resumeTarget ?? subscriber. Fixes A4 (play->pause->play resets to book start).",
+      "long_text_mm7fncbd": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-PAUSE-RESUME-UNIFY-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "fields": {
+      "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "title": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "sequence": 2,
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-PAUSE-RESUME-UNIFY-1 (restartGeneration helper to extend)"
+      ],
+      "effort": "M",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "",
+      "branch": "sprint/narrate-applyratechange-collapse-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Collapse 14 speakNextChunk paths in applyRateChange (lines 1722-1871) into single restartGeneration(reason) helper; delete Web/Qwen/Pocket/Nano reseed branches per Kokoro-only design constraint; fold applyVoiceChange into same helper. Fixes A5 (rate-change skip).",
+      "notes": "Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "name": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "numeric_mm7fsex9": 2,
+      "status": "Queued",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-PAUSE-RESUME-UNIFY-1 (restartGeneration helper to extend)",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "sprint/narrate-applyratechange-collapse-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Collapse 14 speakNextChunk paths in applyRateChange (lines 1722-1871) into single restartGeneration(reason) helper; delete Web/Qwen/Pocket/Nano reseed branches per Kokoro-only design constraint; fold applyVoiceChange into same helper. Fixes A5 (rate-change skip).",
+      "long_text_mm7fncbd": "Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers)."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-APPLYRATECHANGE-COLLAPSE-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-PAUSE-RESUME-UNIFY-1 (restartGeneration helper to extend)' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "fields": {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "sequence": 3,
+      "status": "Blocked",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-CURSOR-TRACKING-DIAG-1",
+        "NARRATE-APPLYRATECHANGE-COLLAPSE-1"
+      ],
+      "effort": "M",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "",
+      "branch": "sprint/narrate-subscriber-cursor-1",
+      "started": "2026-05-31",
+      "completed": "",
+      "evidence": "",
+      "description": "If NARRATE-CURSOR-TRACKING-DIAG-1 confirms the subscriber/direct-callback model, rename lastConfirmedAudioWordRef -> subscriberCursorRef, remove cursorWordIndex from React reducer state, remove WORD_ADVANCE action, and wire visual/view follow via the verdict-approved live target.",
+      "notes": "GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-SUBSCRIBER-CURSOR-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-SUBSCRIBER-CURSOR-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "name": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "numeric_mm7fsex9": 3,
+      "status": "Blocked",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-CURSOR-TRACKING-DIAG-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "text_mm7ftzsz": "M",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "sprint/narrate-subscriber-cursor-1",
+      "date_mm7f6dw": "2026-05-31",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "If NARRATE-CURSOR-TRACKING-DIAG-1 confirms the subscriber/direct-callback model, rename lastConfirmedAudioWordRef -> subscriberCursorRef, remove cursorWordIndex from React reducer state, remove WORD_ADVANCE action, and wire visual/view follow via the verdict-approved live target.",
+      "long_text_mm7fncbd": "GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-SUBSCRIBER-CURSOR-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-CURSOR-TRACKING-DIAG-1' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'NARRATE-APPLYRATECHANGE-COLLAPSE-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-A5-RATE-RESEED-1",
+    "fields": {
+      "id": "NARRATE-A5-RATE-RESEED-1",
+      "title": "Rate-Change Reseed from Heard Position",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-DUAL-SOURCE-DIAG-1"
+      ],
+      "effort": "S",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md",
+      "branch": "sprint/narrate-a5-rate-reseed-1",
+      "started": "",
+      "completed": "2026-05-31",
+      "evidence": "",
+      "description": "Reseed applyRateChange Kokoro bucket-change from heardFloor, not nextGenWordIndexRef (A5 fix)",
+      "notes": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-A5-RATE-RESEED-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-A5-RATE-RESEED-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-A5-RATE-RESEED-1",
+      "name": "Rate-Change Reseed from Heard Position",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md",
+      "text_mm7fs69e": "sprint/narrate-a5-rate-reseed-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "2026-05-31",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Reseed applyRateChange Kokoro bucket-change from heardFloor, not nextGenWordIndexRef (A5 fix)",
+      "long_text_mm7fncbd": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-A5-RATE-RESEED-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-DUAL-SOURCE-DIAG-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+    "fields": {
+      "id": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "title": "Narrate Cursor Tracking Diagnostic",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-PAUSE-RESUME-UNIFY-1",
+        "revert fcea6a8"
+      ],
+      "effort": "S",
+      "lane": "Active Conveyor Belt",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+      "branch": "sprint/narrate-cursor-tracking-diag-1",
+      "started": "2026-05-31",
+      "completed": "2026-05-31",
+      "evidence": "",
+      "description": "Instrument cursor, heard-floor, anchor, Foliate, and Flow follow signals to prove which source should drive visible cursor and view-follow before another fix.",
+      "notes": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-CURSOR-TRACKING-DIAG-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-CURSOR-TRACKING-DIAG-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "name": "Narrate Cursor Tracking Diagnostic",
+      "status": "Completed",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-PAUSE-RESUME-UNIFY-1, revert fcea6a8",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Active Conveyor Belt",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+      "text_mm7fs69e": "sprint/narrate-cursor-tracking-diag-1",
+      "date_mm7f6dw": "2026-05-31",
+      "date_mm7fw9mx": "2026-05-31",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Instrument cursor, heard-floor, anchor, Foliate, and Flow follow signals to prove which source should drive visible cursor and view-follow before another fix.",
+      "long_text_mm7fncbd": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-CURSOR-TRACKING-DIAG-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-PAUSE-RESUME-UNIFY-1' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'revert fcea6a8' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "fields": {
+      "id": "NARRATE-HEARD-CURSOR-1",
+      "title": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "sequence": 1,
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-CURSOR-TRACKING-DIAG-1 (verdict)",
+        "NARRATE-PAUSE-RESUME-UNIFY-1"
+      ],
+      "effort": "S",
+      "lane": "Narration Dual-Source Unification",
+      "group": "Reader Runtime Solidification",
+      "spec_link": "",
+      "branch": "sprint/narrate-heard-cursor-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Route both the visible highlight and FlowScrollEngine.followWord through ONE lag-compensated heard cursor (getAudioProgress / heard-floor clamp); extract tunable TTS_VISUAL_CURSOR_LAG_MS; tune by ear. No reducer/WORD_ADVANCE change. Live-QA verdict gates SUBSCRIBER-CURSOR-1.",
+      "notes": "2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-HEARD-CURSOR-1",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-HEARD-CURSOR-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:28:34Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "NARRATE-HEARD-CURSOR-1",
+      "name": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "numeric_mm7fsex9": 1,
+      "status": "Queued",
+      "color_mm7fspz9": "Full Spec",
+      "long_text_mm7fgw3w": "NARRATE-CURSOR-TRACKING-DIAG-1 (verdict), NARRATE-PAUSE-RESUME-UNIFY-1",
+      "text_mm7ftzsz": "S",
+      "text_mm7fhjb6": "Narration Dual-Source Unification",
+      "text_mm7ftkmm": "Reader Runtime Solidification",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "sprint/narrate-heard-cursor-1",
+      "date_mm7f6dw": "",
+      "date_mm7fw9mx": "",
+      "long_text_mm7fyyfy": "",
+      "long_text_mm7fv3sg": "Route both the visible highlight and FlowScrollEngine.followWord through ONE lag-compensated heard cursor (getAudioProgress / heard-floor clamp); extract tunable TTS_VISUAL_CURSOR_LAG_MS; tune by ear. No reducer/WORD_ADVANCE change. Live-QA verdict gates SUBSCRIBER-CURSOR-1.",
+      "long_text_mm7fncbd": "2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation."
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'NARRATE-HEARD-CURSOR-1' exists in monday:board/18432450217 — search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'NARRATE-CURSOR-TRACKING-DIAG-1 (verdict)' is not in the register snapshot taken 2026-09-23T18:28:34Z",
+      "prerequisite 'NARRATE-PAUSE-RESUME-UNIFY-1' is not in the register snapshot taken 2026-09-23T18:28:34Z"
+    ]
+  }
+]

@@ -1,0 +1,514 @@
+{
+  "checkedAt": "2026-09-23T19:24:08.788204+00:00",
+  "branch": "main",
+  "commit": "cd384b78cd5325e96429fe867c8b080ce1b39bb8",
+  "packageVersion": "1.75.1",
+  "files": [
+    {
+      "path": "src/components/ReaderContainer.tsx",
+      "sha256": "1c94dd6c2899881fb0e168cb051859e93cded1be3f80947b96855d18e14c6f3b",
+      "lines": 1729,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/useReaderModeOrchestrator.ts",
+      "sha256": "1225f4d0422de47c33c32894437786186e3d00e72c809da3290deec2d0e6c861",
+      "lines": 307,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useReaderMode.ts",
+      "sha256": "42486910a4782b60bc95c573f15b498989736f89e2d0c2c98666e68ee2b5eaa9",
+      "lines": 512,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useReadingModeInstance.ts",
+      "sha256": "e1bbdf74c6acf4092d9644dd7e3b771255782ddc0a6c2a80d99ba87fab3a4187",
+      "lines": 254,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useDocumentLifecycle.ts",
+      "sha256": "21af6676290bed65f7101d29fb6be52b15466e51605988548521b824d65d5faa",
+      "lines": 269,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/usePersistentReadingAnchor.ts",
+      "sha256": "f3cd73e6d7466d899177c1e865ed0b2539f4593f9b09f252657eb5d50ac88962",
+      "lines": 152,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/anchors/useCurrentWordAnchor.ts",
+      "sha256": "d6a2108bec092fbb746bb2c2a4c5dbde0f741193840fa1665a19bb9dffd4ad3a",
+      "lines": 199,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/startWordIndex.ts",
+      "sha256": "9fe2068505d36ebecf918ebbeab09e96183bd132ee2ba0b0ef3ca572370c49f8",
+      "lines": 125,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/persistentReadingAnchor.ts",
+      "sha256": "c6eecceadc65e102c3a3a86b61d7cdb96b109d4964e4334a158914578bf6c096",
+      "lines": 122,
+      "kind": "source"
+    },
+    {
+      "path": "src/modes/PageMode.ts",
+      "sha256": "bdd97df0809348111b40b4baaf7c8f17b1356750b1dd4599558fcad27da6e9cd",
+      "lines": 60,
+      "kind": "source"
+    },
+    {
+      "path": "src/modes/FocusMode.ts",
+      "sha256": "91999ad081ffdaf3bfed47e1503ad112fe177ef5fc88d578a6e162ea66aad4e0",
+      "lines": 144,
+      "kind": "source"
+    },
+    {
+      "path": "src/modes/FlowMode.ts",
+      "sha256": "6edbae52db506dc2819dfc545b4e576f023e81eecbb6a8083ed23ef0c114928f",
+      "lines": 163,
+      "kind": "source"
+    },
+    {
+      "path": "src/modes/ModeInterface.ts",
+      "sha256": "f7dd810c9b9efea653102c9aafd604418580799f18fad55c6dc55adb6d58c131",
+      "lines": 132,
+      "kind": "source"
+    },
+    {
+      "path": "src/modes/index.ts",
+      "sha256": "d8e26989133ea7bb23fd743e6ef80cbcee85fdd249d657d0c44d23ad33645787",
+      "lines": 4,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/modes/ReaderModeAdapter.ts",
+      "sha256": "f7d5daaf8267f529e009a0be02db0045c44931b565fe00b4ad9df1c2ebe5001e",
+      "lines": 105,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/modes/FocusModeAdapter.ts",
+      "sha256": "d6479a748394ec4a9a72a396cb5b973336e62d6fae86f10b5f9b7afabf3e8151",
+      "lines": 140,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/modes/FlowModeAdapter.ts",
+      "sha256": "d7bcd2fe9736a8f29094f9723152ba4bb0e0ae2fc49b9ea8a015889a51baae38",
+      "lines": 201,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/modes/NarrateModeAdapter.ts",
+      "sha256": "744c2775dc734eeaf199d1b93fb60a672e1f55378beb567e4bb03724360e783a",
+      "lines": 186,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useReader.ts",
+      "sha256": "b6d4789801723928e90e5f01ee078a95e5c1041d389f029233e8de47f7b995f5",
+      "lines": 209,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/ReaderView.tsx",
+      "sha256": "454a026a0b8a9f703418c9b5a6de5188cbec18f64cc8ce54398db5438670c5c4",
+      "lines": 405,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useFlowScrollSync.ts",
+      "sha256": "c9d9c4a92c4e4b8e0d29be089c9cf4a7af8ff5c807e28c3c3a76d69a00c7716f",
+      "lines": 617,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/FlowScrollEngine.ts",
+      "sha256": "1a0fbc62866aea420ea6df6f8a9d988101df7bb87413617f8a18c87390efb3a0",
+      "lines": 855,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/FlowCursorController.ts",
+      "sha256": "5c1c7db5ea6ad21c8a2a2c2d1bf9be34d75264bbc54c38466160beb274b7ee4f",
+      "lines": 84,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/FlowText.tsx",
+      "sha256": "836453147229e9d246ed1dad48fc83a8d1d6f25dc7cabee4a8db9caf1f64ae2c",
+      "lines": 125,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useFoliateSync.ts",
+      "sha256": "ac0ff62f15c5b79ae035edcf0b4ef52874b359ac68d70aa5f78eed947a26070a",
+      "lines": 250,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useNarrationSync.ts",
+      "sha256": "8ce50fdde42f69e46d15f99a8b17365b701b01cac1687bac325f6071a00bdb42",
+      "lines": 203,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useNarrationCaching.ts",
+      "sha256": "13c44a4ceb2bd6b986cf15181c9e63204044eb84e7f56aab59c21bad0b9d9427",
+      "lines": 265,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/FoliatePageView.tsx",
+      "sha256": "d770468d58a12dcf24368f9dbcd91f3ae504e8f0044b217f633745d89888bb08",
+      "lines": 1991,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/PageReaderView.tsx",
+      "sha256": "d828f9693016f0d486bcdd5156fa847353604a4ab9c174dba44c38d7b465f219",
+      "lines": 684,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/ScrollReaderView.tsx",
+      "sha256": "5aee620b749f66e2eadc10681098673b1cac6b360eafbbb6060e16743a3d02aa",
+      "lines": 462,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/VirtualScrollText.tsx",
+      "sha256": "3da14dd6372deb244a9147b9ae16cc4479f2de0b92d1848e7c561ada6233430d",
+      "lines": 55,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/PausedTextView.tsx",
+      "sha256": "1c9bde7a5eecf909250bd1d7cbe9d4ce11aa2bd2b6c2ab09912289df435a84dc",
+      "lines": 120,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateStyles.ts",
+      "sha256": "c9e02c471fd50c7cc2f1cfeefc5c690e5533f62771ed796cd4d60cf5b876442a",
+      "lines": 76,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateWordHighlight.ts",
+      "sha256": "3b1ee3784abd2c44afb8efba72aaf7ab97a0f585f991f305163f04e040545d3d",
+      "lines": 204,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateAnchorNavigation.ts",
+      "sha256": "675efb77756fda436f425817c032f3dd173bad4db748ad01dfe061bc4099ddf5",
+      "lines": 45,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/wordPositionIndex.ts",
+      "sha256": "f4253703891bf697505c14d81c81fe0fce73b477eeeeebc86d8e3e5af40fdacc",
+      "lines": 143,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/chunkReadingVisualState.ts",
+      "sha256": "952ead7fdb0200c5c155408793a9d1fa5776bcbec199289f9f492ade9016e7e2",
+      "lines": 54,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/silenceAwareCursor.ts",
+      "sha256": "f60d52935e4dc26b024464badd5f09e7da137ac83f15b1d3f0ed311ba7c01e3c",
+      "lines": 61,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateHelpers.ts",
+      "sha256": "92b66f0f6993438e51d206292d83c96674413739e0da4e62a2b70b5b5076eb8a",
+      "lines": 266,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateWordWrapping.ts",
+      "sha256": "3855f9e383b8fb9e25adc18f37b9167ef388214fbb9107afa971e681eb014211",
+      "lines": 149,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateLayout.ts",
+      "sha256": "9f2c5812d22fc17bc61da83b765291fcc11c4b8342dc7a8aa272f8a7945f4592",
+      "lines": 11,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/foliateWordOffsets.ts",
+      "sha256": "c4c19ea7db66ab1289abea1753d3b439450fc49cd61f004092c85cfc8add66e3",
+      "lines": 159,
+      "kind": "source"
+    },
+    {
+      "path": "src/reader/surface/SurfaceCommand.ts",
+      "sha256": "717b2a02c0f5fdf51c43086ccec35e66240f9f3d1e12af281c163beaa2029766",
+      "lines": 24,
+      "kind": "source"
+    },
+    {
+      "path": "src/types.ts",
+      "sha256": "ed0748140fdab164cf2f87ce0d3fa2a6a86bbc6fb98162f39742a3414e602284",
+      "lines": 734,
+      "kind": "source"
+    },
+    {
+      "path": "src/types/chunkReading.ts",
+      "sha256": "4008dce777ecf7db161976398a20ead15292888ba3997af51ac10a37c6aad358",
+      "lines": 40,
+      "kind": "source"
+    },
+    {
+      "path": "src/types/narration.ts",
+      "sha256": "5e32cd539f7efa38ed53f5b1ed9dae7f858acf1889a5b9ee4388d6b6a7246b23",
+      "lines": 281,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useKeyboardShortcuts.ts",
+      "sha256": "b160a492c11140549809a5daf4cec4a25b2b55d1344f929f822b37b5586ed836",
+      "lines": 690,
+      "kind": "source"
+    },
+    {
+      "path": "src/components/ReaderBottomBar.tsx",
+      "sha256": "2bf09f578176a773f813953759d6c0f8e7575e7dc7627d3b63163afc208c4a6c",
+      "lines": 500,
+      "kind": "source"
+    },
+    {
+      "path": "src/constants.ts",
+      "sha256": "d7ece1b869257034b497a8cc4d977235d0d6f08919e236878231b224f65a989a",
+      "lines": 578,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/reader.css",
+      "sha256": "46d87666a0e55fd1e3620371fc0efdb5c8e61afd2e2acc794787e456729c6127",
+      "lines": 610,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/page-reader.css",
+      "sha256": "4f3a187d903c643c41646d31b7a8f0aa1cb780b114fa36d733f84c83e5799065",
+      "lines": 798,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/flow.css",
+      "sha256": "9b2f2b4d357b18790def7d7bbc83ceaacbf288898fa508ed82e7ff36012cf4d5",
+      "lines": 173,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/base.css",
+      "sha256": "d07bff9517eb5b9214dd4e5010e0859fabecebb33114df1da1b2c9a315646f18",
+      "lines": 479,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/index.css",
+      "sha256": "c20e8c11c16ebfd13ae0fbb8d0804132650796095410e625b90d06587161cf4c",
+      "lines": 9,
+      "kind": "source"
+    },
+    {
+      "path": "src/styles/themes.css",
+      "sha256": "6fd49a241993fa024cc6aebcffd18c30b0f81a61330f4aedccc35d4732a7efe4",
+      "lines": 363,
+      "kind": "source"
+    },
+    {
+      "path": "src/hooks/useNarration.ts",
+      "sha256": "6f44d2474bb113fc39086490316541de7ea31a2328d62f041f9aab86d1d95c51",
+      "lines": 2769,
+      "kind": "source"
+    },
+    {
+      "path": "src/utils/audioScheduler.ts",
+      "sha256": "cae0ae0cb99942556243d867051c76afeb3e9b2cd8d1b3ef3e01484fd0d02353",
+      "lines": 1089,
+      "kind": "source"
+    },
+    {
+      "path": "tests/readerModeAdapterContract.test.ts",
+      "sha256": "9fc99d8019bd5987c0461031024f8a7ff44751fc997d7959203c6f74d3430c3e",
+      "lines": 313,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/focusModeAdapter.test.ts",
+      "sha256": "94d554b0f2b49f1ef4dc25703781a30fd1e51d66b8e39f903062e857f5d894e6",
+      "lines": 289,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/flowModeAdapter.test.ts",
+      "sha256": "868cf0936c4fcffa51620544d6bc296a1c368ae3e3dcf6c8b5c357677a9c4dcb",
+      "lines": 410,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/narrateModeAdapter.test.ts",
+      "sha256": "f5367b72e31bf6dd1bba216f4d87629f9d7746423f3efb419cbd63f5411ac837",
+      "lines": 531,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/modes.test.ts",
+      "sha256": "71f027634cec86a874e688bc5d2c94d2548a4b72d94a6d5ea04017a817de451a",
+      "lines": 59,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/useReadingModeInstance.test.ts",
+      "sha256": "e9a762e9fb2d1034dae44d6a9d2c88865c20cb64f78504235a73a449a1233e59",
+      "lines": 37,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/useReaderMode.test.ts",
+      "sha256": "22221753f02347faf5b02fd585080412de566edd2197de26df6fe68d5e3cffde",
+      "lines": 1747,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/readerModeControls.test.tsx",
+      "sha256": "08c410f7782b393425b579d7bc3c02fe1b7861baca923e8ae63778f48b6ef52f",
+      "lines": 95,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/readerKeyboard.test.tsx",
+      "sha256": "a5151dd6cac3396ec7d994927527ce30bd631e8c8f1f1d37329e699dfb153d39",
+      "lines": 66,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/useKeyboardShortcuts.test.ts",
+      "sha256": "256ef0b731608ae19e2a94646016302377527dfd6abe11407bcc941fe372e0a9",
+      "lines": 411,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/documentLifecycleModeRestore.test.ts",
+      "sha256": "86d8fb073d7439b9ee1b1ce5b315c2bbbcf67a6a80b8dfd9bc65afa8dac27bb2",
+      "lines": 19,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/currentWordAnchor.test.ts",
+      "sha256": "b58c7c308e38c5fdcb0aab1b4024bd82a1a1c957d060da68b67f059b2a49265c",
+      "lines": 446,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/persistentReadingAnchor.test.ts",
+      "sha256": "6ba6ca47d681be564dc24fe4b4f0861f25b532df0e41c22d3b1a92b0f0cc5dc5",
+      "lines": 234,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/crossBookFlow.test.ts",
+      "sha256": "f12441af268ca5de6c2a25193964d36855518d710efc45251d2c5e876052fb0e",
+      "lines": 335,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/flowTimerCursor.test.ts",
+      "sha256": "3c36df855de8ac49773c988fe16e10a3d30e48f861a7d9c01ee56beef38fbce5",
+      "lines": 452,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/flowReadingZone.test.ts",
+      "sha256": "a5bc796f88dc40e5b99d95820e37a7895e3722cd6b1d2abbf7d9277806c39921",
+      "lines": 222,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/flowZoneAuto.test.ts",
+      "sha256": "6244f793b11876b46c0c66f5b5d97bfa46fc70c24f67aa20e215fc37a2221797",
+      "lines": 263,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/flow-scroll-engine.test.js",
+      "sha256": "c595f6f493a1ce05b083da0a0193f0e19177d3c6cb9f4bb3a84a065827a1b4cc",
+      "lines": 916,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/three-mode-reader.test.js",
+      "sha256": "e3f846082e249b2fe77f74532544c91915796b3c9c7b15d71b07e49176db969d",
+      "lines": 455,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/foliate-bridge.test.ts",
+      "sha256": "eefd1b629c5d43080beebc67cea38fe3e198f8e207e11e90ac0ce4cc81cc3c03",
+      "lines": 115,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/foliateWordHighlight.test.ts",
+      "sha256": "5e32abe18dd264a72e8d02557f8fc76060c96c33a55e730d02178dfcf380705c",
+      "lines": 48,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/foliateChunkHighlight.test.ts",
+      "sha256": "6a66f11d06c3745ec69a0812fe1c8c542997d2b65446198cac52c855b5c1574d",
+      "lines": 474,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/foliateAnchorNavigation.test.ts",
+      "sha256": "a27d1861d78a69161f4674027777e72875ca5d2c01d4d7253f2bf0f9a583fe18",
+      "lines": 95,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/narrationIntegration.test.ts",
+      "sha256": "4313f8a8ae74516686d5d218ead3be8b1db5bcbcb5961b2f5304c1196fdb10ed",
+      "lines": 83,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/narrateA5RateReseed.test.ts",
+      "sha256": "c4fe2f9cc4851262fa38f8cb19494f501d5bf9a27ef1e91c8aee0fe2c64dac50",
+      "lines": 252,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/narratePauseResumeUnify.test.ts",
+      "sha256": "2e0d257e4c4fc77a009dc3a8087dac92cc1fe82fa814d2c63b3bf10c076bf044",
+      "lines": 262,
+      "kind": "existing test"
+    },
+    {
+      "path": "tests/narrateIntentCursor.test.ts",
+      "sha256": "50c8b59421cccc57566bdced044772c81222952752f9a6c3ed79faacdf81c23a",
+      "lines": 245,
+      "kind": "existing test"
+    }
+  ],
+  "applicationTestsRun": false,
+  "futureTests": "Named in inline specification; not yet implemented"
+}

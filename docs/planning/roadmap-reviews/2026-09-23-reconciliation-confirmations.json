@@ -1,0 +1,263 @@
+[
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "ENGINE-DORMANCY-1",
+    "idempotencyKey": "set-status:ENGINE-DORMANCY-1:[('notes', 'Dormant at settings/IPC; code preserved; Nano probes opt-in.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-ENGINE-DORMANCY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "ENGINE-DORMANCY-1",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        }
+      ]
+    },
+    "providerItemId": "13118818984"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-EVENT-SYNC-1",
+    "idempotencyKey": "set-status:TTS-EVENT-SYNC-1:[('notes', 'Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"TTS-CACHE-HARDEN-1 (completed 2026-05-16)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'TTS-CACHE-HARDEN-1')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-TTS-EVENT-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118819556"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "idempotencyKey": "set-status:READER-PERSISTENT-ANCHOR-STEP3-REPAIR:[('notes', 'Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"Step 3.5 manual QA: S13 split -> Bug2 content omission (this); Bug1 visual lead deferred post-ISO\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:45Z",
+    "recoveryId": "20260923T193144Z-external-set-status-READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        }
+      ]
+    },
+    "providerItemId": "13118842117"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "BASELINE-SYNC-1",
+    "idempotencyKey": "set-status:BASELINE-SYNC-1:[('notes', 'Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-MODE-ISOLATION-1 Phase 0; GOVERNANCE-SWEEP\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'READER-MODE-ISOLATION-1-PHASE-0; GOVERNANCE-SWEEP')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-BASELINE-SYNC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118832411"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-MEDIA-1",
+    "idempotencyKey": "set-status:NARR-MEDIA-1:[('notes', '\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARR-MEDIA-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "NARR-MEDIA-1",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        },
+        {
+          "id": "NARR-MEDIA-1",
+          "field": "notes",
+          "normalization": "Monday trimmed two leading newlines on formerly empty notes"
+        }
+      ]
+    },
+    "providerItemId": "13118862674"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARR-PAUSE-1",
+    "idempotencyKey": "set-status:NARR-PAUSE-1:[('notes', '\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARR-PAUSE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "NARR-PAUSE-1",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        },
+        {
+          "id": "NARR-PAUSE-1",
+          "field": "notes",
+          "normalization": "Monday trimmed two leading newlines on formerly empty notes"
+        }
+      ]
+    },
+    "providerItemId": "13118864160"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-EVAL-3",
+    "idempotencyKey": "set-status:TTS-EVAL-3:[('notes', '\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:45Z",
+    "recoveryId": "20260923T193144Z-external-set-status-TTS-EVAL-3",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "TTS-EVAL-3",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        },
+        {
+          "id": "TTS-EVAL-3",
+          "field": "notes",
+          "normalization": "Monday trimmed two leading newlines on formerly empty notes"
+        }
+      ]
+    },
+    "providerItemId": "13118840971"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "TTS-ARCH-DOC-1",
+    "idempotencyKey": "set-status:TTS-ARCH-DOC-1:[('notes', 'Architecture decision record. Landed 66a73b1, merged 65629bc.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"All above\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', '')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-TTS-ARCH-DOC-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": [
+        {
+          "id": "TTS-ARCH-DOC-1",
+          "field": "prerequisites",
+          "normalization": "Blank long-text object has text=''; canonical value is empty string"
+        }
+      ]
+    },
+    "providerItemId": "13118862481"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "READER-ISO-1D",
+    "idempotencyKey": "set-status:READER-ISO-1D:[('notes', 'Flow owns section-handoff restart; no Narrate truth-sync changes.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-ISO-1C; persistent-anchor repair lane closed by explicit disposition; Flow S9 lazy-follow deferred\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'READER-ISO-1C')]",
+    "actualRevision": "2026-09-23T19:31:49Z",
+    "recoveryId": "20260923T193144Z-external-set-status-READER-ISO-1D",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118841621"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+    "idempotencyKey": "set-status:NARRATE-PAUSE-RESUME-UNIFY-1:[('notes', 'Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'NARRATE-INTENT-CURSOR-1')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARRATE-PAUSE-RESUME-UNIFY-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118810192"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+    "idempotencyKey": "set-status:NARRATE-CURSOR-TRACKING-DIAG-1:[('notes', 'Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-PAUSE-RESUME-UNIFY-1; revert fcea6a8\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'NARRATE-PAUSE-RESUME-UNIFY-1')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARRATE-CURSOR-TRACKING-DIAG-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118810126"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-INTENT-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-INTENT-CURSOR-1:[('notes', 'PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'NARRATE-DUAL-SOURCE-DIAG-1')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARRATE-INTENT-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118801914"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+    "idempotencyKey": "set-status:NARRATE-DUAL-SOURCE-DIAG-1:[('notes', 'Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed.\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-CLOSED-LOOP-CURSOR dissolved\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'NARRATE-CLOSED-LOOP-CURSOR')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARRATE-DUAL-SOURCE-DIAG-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118811955"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+    "idempotencyKey": "set-status:NARRATE-CLOSED-LOOP-CURSOR:[('notes', 'Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification\\n\\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-ISO-1E (Narrate adapter) complete\". The structured field now contains only unambiguous register IDs. Non-ID conditions, \\'None\\', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.'), ('prerequisites', 'READER-ISO-1E')]",
+    "actualRevision": "2026-09-23T19:31:46Z",
+    "recoveryId": "20260923T193144Z-external-set-status-NARRATE-CLOSED-LOOP-CURSOR",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:33:07Z",
+      "statusAndSequenceUnchanged": true,
+      "originalPrerequisiteTextRetained": true,
+      "readbackNormalizations": []
+    },
+    "providerItemId": "13118797794"
+  }
+]

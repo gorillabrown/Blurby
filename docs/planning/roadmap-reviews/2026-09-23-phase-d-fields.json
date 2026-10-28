@@ -1,0 +1,15 @@
+{
+  "title": "Separate Page, Focus, Flow, and Narrate runtimes",
+  "sequence": 1,
+  "status": "Queued",
+  "written_status": "Full Spec",
+  "prerequisites": "READER-ISO-1A; READER-ISO-1B; READER-ISO-1C; READER-ISO-1D; READER-ISO-1E",
+  "effort": "XL",
+  "lane": "Reader Engine",
+  "group": "Reader Runtime Solidification",
+  "spec_link": "ROADMAP.md#reader-mode-separation-2",
+  "branch": "eb/reader-mode-separation-2",
+  "description": "Owner-mandated step 1: independent Page, Focus, Flow and Narrate state, lifecycle, timers, callbacks, DOM/rendering and styles. Matching private module layouts and public contracts permit a later consolidation decision. Approved waves: A baseline/contracts; B Page + Focus; C Flow; D Narrate; E remove shared behavior and prove isolation. Acceptance covers import boundaries, private resource ownership, 12 cross-mode transitions, four same-mode cases, stale-session rejection, preserved per-mode behavior and live audio/UI evidence.",
+  "evidence": "docs/planning/roadmap-reviews/2026-09-23-readiness.md; docs/planning/roadmap-reviews/2026-09-23-source-evidence.json",
+  "notes": "Owner set mode isolation first and approved Phase C on 2026-09-23. Phase D: U1–U8 PASS for the specification; no project extensions. Full inline spec has exact paths, test assertions, gates, two-correction ceiling and per-wave rollback. Execution requires a clean isolated checkout and fresh baseline tests/build; no code, tests or live QA have run in this review. Existing ISO-1 adapters remain completed historical groundwork. No TTS tuning, feature additions or deduplication. Four downstream items remain Blocked/Stub until separation closes and their edit sites are re-specified."
+}
