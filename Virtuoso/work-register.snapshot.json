@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-27T23:36:49Z",
+  "takenAt": "2026-10-28T00:35:15Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -4481,8 +4481,8 @@
       "sequence": 67.5,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
       "effort": "L",
       "workstream": "Platform & Maintenance",
@@ -4492,10 +4492,10 @@
       "branch": "eb/native-path-attestation-1",
       "started": "",
       "completed": "",
-      "evidence": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md; docs/planning/roadmap-reviews/2026-10-27-native-final-technical-contract.md; docs/planning/roadmap-reviews/2026-10-27-native-final-spec-review.md; docs/planning/roadmap-reviews/2026-10-27-native-spec-finalization.md",
       "description": "",
-      "notes": "Owner approved Phase C2026-10-27 and explicitly directed qualified registry-helper repair followed by registration at67.5. Authored NOT READY observer contract; exact executable/control/request-bound/runtime/native qualification gates remain. Registration activates no setup, fixture, measurement, native process or consumer implementation. Original exhausted two-run collector budget and existing release holds remain unchanged.",
-      "revision": "2060e3a73020a5d8d585a744c5a12df59986c58b82488b3df9e15d06bbda98e3",
+      "notes": "Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted.",
+      "revision": "6a5113430ca34ec55bf84679e6ab7b5141109c6cd3c1b33d2eced397b64c94d2",
       "extra": {
         "id": "4067c96c-c31e-8179-bdd5-cc7b17e90e7f",
         "url": "https://app.notion.com/4067c96cc31e8179bdd5cc7b17e90e7f",
