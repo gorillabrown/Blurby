@@ -1,0 +1,2052 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blurby.local/schemas/native-path-attestation/result.v1",
+  "title": "Native path attestation closed receipt union",
+  "$comment": "Cross-field numeric ordering, assertion-count equality, frozen expected path/hash values and external receipt linkage are additionally checked by the driver; JSON Schema cannot compare sibling values.",
+  "$defs": {
+    "sha256": {"type":"string","pattern":"^[0-9a-f]{64}$"},
+    "commit": {"type":"string","pattern":"^[0-9a-f]{40}$"},
+    "uuid": {"type":"string","pattern":"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"},
+    "utc": {"type":"string","format":"date-time","pattern":"Z$"},
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "groupsAttempted": {"type":"integer","minimum":0,"maximum":3},
+        "groupsAcked": {"type":"integer","minimum":0,"maximum":3},
+        "socketCloseAck": {"type":"boolean"},
+        "forcedStop": {"type":"boolean"},
+        "absenceProved": {"type":"boolean"},
+        "overrunMs": {"type":"number","minimum":0}
+      },
+      "required": ["groupsAttempted","groupsAcked","socketCloseAck","forcedStop","absenceProved","overrunMs"]
+    },
+    "custody": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "helperPid": {"anyOf":[{"type":"integer","minimum":1,"maximum":9007199254740991},{"type":"null"}]},
+        "executableSha256": {"$ref":"#/$defs/sha256"},
+        "programSha256": {"$ref":"#/$defs/sha256"},
+        "explicitRequests": {"type":"integer","minimum":0,"maximum":10},
+        "periodicSnapshots": {"type":"integer","minimum":0,"maximum":2500},
+        "receiptSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "exitAck": {"type":"boolean"},
+        "absenceProved": {"type":"boolean"}
+      },
+      "required": ["helperPid","executableSha256","programSha256","explicitRequests","periodicSnapshots","receiptSha256","exitAck","absenceProved"]
+    },
+    "spawnBracket": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"beforeUtc":{"$ref":"#/$defs/utc"},"afterUtc":{"$ref":"#/$defs/utc"},"beforeMonotonicMs":{"type":"number","minimum":0},"afterMonotonicMs":{"type":"number","minimum":0}},
+      "required": ["beforeUtc","afterUtc","beforeMonotonicMs","afterMonotonicMs"]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "exeCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "exeSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "arch": {"anyOf":[{"type":"string","minLength":1,"maxLength":64},{"type":"null"}]},
+        "versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "node": {"type":"string","minLength":1,"maxLength":64},
+            "electron": {"type":"string","minLength":1,"maxLength":64},
+            "chrome": {"type":"string","minLength":1,"maxLength":64},
+            "v8": {"type":"string","minLength":1,"maxLength":64},
+            "icu": {"type":"string","minLength":1,"maxLength":64},
+            "modules": {"type":"string","minLength":1,"maxLength":64}
+          }
+        },
+        "resourcesCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]}
+      },
+      "required": ["exeCanonical","exeSha256","arch","versions","resourcesCanonical"]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rpcSent": {"type":"integer","minimum":0,"maximum":1268},
+        "maxInFlight": {"type":"integer","minimum":0,"maximum":8},
+        "s0Attempts": {"type":"integer","minimum":0,"maximum":3},
+        "rootChildren": {"anyOf":[{"type":"integer","minimum":0,"maximum":128},{"type":"null"}]},
+        "engineChildren": {"anyOf":[{"type":"integer","minimum":0,"maximum":128},{"type":"null"}]},
+        "forbiddenGetterCalls": {"type":"integer","minimum":0,"maximum":9007199254740991}
+      },
+      "required": ["rpcSent","maxInFlight","s0Attempts","rootChildren","engineChildren","forbiddenGetterCalls"]
+    },
+    "positions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "policy": {"anyOf":[{"enum":["D","F","P","B"]},{"type":"null"}]},
+        "families": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "role": {"const":"main"},
+                "scriptId": {"type":"string","minLength":1,"maxLength":128,"pattern":"\\S"},
+                "targetPositions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"getDataPath"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"getLibrary"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"saveHistory"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 0,
+                  "maxItems": 3
+                },
+                "probePositions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {"type":"string","minLength":1,"maxLength":128},
+                      "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                      "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                    },
+                    "required": ["name","line","column"]
+                  },
+                  "minItems": 0,
+                  "maxItems": 3
+                }
+              },
+              "required": ["role","scriptId","targetPositions","probePositions"]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "role": {"const":"engine"},
+                "scriptId": {"type":"string","minLength":1,"maxLength":128,"pattern":"\\S"},
+                "targetPositions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"initSyncEngine"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"getSyncStatus"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"stopAutoSync"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 0,
+                  "maxItems": 3
+                },
+                "probePositions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {"type":"string","minLength":1,"maxLength":128},
+                      "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                      "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                    },
+                    "required": ["name","line","column"]
+                  },
+                  "minItems": 0,
+                  "maxItems": 3
+                }
+              },
+              "required": ["role","scriptId","targetPositions","probePositions"]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "role": {"const":"queue"},
+                "scriptId": {"type":"string","minLength":1,"maxLength":128,"pattern":"\\S"},
+                "targetPositions": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"initSyncQueue"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"getPendingOps"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"name":{"const":"getDeviceId"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                      "required": ["name","line","column"]
+                    }
+                  ],
+                  "items": false,
+                  "minItems": 0,
+                  "maxItems": 3
+                },
+                "probePositions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {"type":"string","minLength":1,"maxLength":128},
+                      "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                      "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                    },
+                    "required": ["name","line","column"]
+                  },
+                  "minItems": 0,
+                  "maxItems": 3
+                }
+              },
+              "required": ["role","scriptId","targetPositions","probePositions"]
+            }
+          ],
+          "items": false,
+          "minItems": 0,
+          "maxItems": 3
+        },
+        "externalSourceHashes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {"relativePath":{"type":"string","minLength":1,"maxLength":4096},"sha256":{"$ref":"#/$defs/sha256"}},
+            "required": ["relativePath","sha256"]
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "required": ["policy","families","externalSourceHashes"]
+    },
+    "graph": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rootCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "mainFamilyCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "engineCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "queueCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "nativeRootAlias": {"anyOf":[{"type":"boolean"},{"type":"null"}]},
+        "selectedEdgesValid": {"anyOf":[{"type":"boolean"},{"type":"null"}]},
+        "loadedFlagsValid": {"anyOf":[{"type":"boolean"},{"type":"null"}]},
+        "tupleDistinct": {"type":"array","items":{"type":"boolean"},"minItems":0,"maxItems":4}
+      },
+      "required": ["rootCanonical","mainFamilyCanonical","engineCanonical","queueCanonical","nativeRootAlias","selectedEdgesValid","loadedFlagsValid","tupleDistinct"]
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dataCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "queueCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]},
+        "syncStateCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]}
+      },
+      "required": ["dataCanonical","queueCanonical","syncStateCanonical"]
+    },
+    "comparisons": {
+      "type": "array",
+      "prefixItems": [
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"root"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"main-family"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"engine"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"queue"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"rootArray"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"engineArray"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"ctx"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"engine/initSyncEngine"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"engine/getSyncStatus"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"engine/stopAutoSync"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"queue/initSyncQueue"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"queue/getPendingOps"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"queue/getDeviceId"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"main/getDataPath"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"main/getLibrary"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"main/saveHistory"},"equal":{"type":"boolean"}},"required":["role","equal"]},
+        {"type":"object","additionalProperties":false,"properties":{"role":{"const":"app"},"equal":{"type":"boolean"}},"required":["role","equal"]}
+      ],
+      "items": false,
+      "minItems": 0,
+      "maxItems": 17
+    },
+    "appRead": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"userDataCanonical":{"type":"string","minLength":1,"maxLength":4096},"isPackaged":{"type":"boolean"}},
+      "required": ["userDataCanonical","isPackaged"]
+    },
+    "reason": {
+      "enum": [
+        "NONE",
+        "OWNERSHIP",
+        "ENDPOINT",
+        "IDENTITY_PID",
+        "IDENTITY_EXE",
+        "IDENTITY_VERSION",
+        "IDENTITY_ARCH",
+        "NONCE",
+        "TRANSPORT",
+        "PROTOCOL_SHAPE",
+        "CAP_OVERFLOW",
+        "DATA_DESCRIPTOR",
+        "MODULE_ROOT",
+        "MODULE_FILENAME",
+        "MODULE_LOADED",
+        "DIRECT_EDGE_MISSING",
+        "DIRECT_EDGE_AMBIGUOUS",
+        "CHILD_ARRAY_SHAPE",
+        "CHILD_SLOT_SHAPE",
+        "CHILD_DUPLICATE_IDENTITY",
+        "FUNCTION_LOCATION_MISSING",
+        "FUNCTION_LOCATION_MALFORMED",
+        "FUNCTION_LOCATION_AMBIGUOUS",
+        "FUNCTION_POSITION",
+        "FUNCTION_SCRIPT_FAMILY",
+        "PROBE_POSITION",
+        "PROBE_DATA_MISSING",
+        "SCOPE_SHAPE",
+        "SCOPE_BINDING_MISSING",
+        "SCOPE_BINDING_AMBIGUOUS",
+        "SCOPE_BINDING_OPTIMIZED",
+        "PATH_UNINITIALIZED",
+        "PATH_WRONG",
+        "PATH_ALIAS",
+        "PATH_NORMAL",
+        "REFERENCE_CHANGED",
+        "APP_PACKAGED",
+        "APP_USERDATA",
+        "EXCEPTION",
+        "STARTUP_EXHAUSTED",
+        "CONTROL_NOT_EXERCISED",
+        "DEADLINE",
+        "RELEASE",
+        "CLOSE",
+        "PROCESS_READY",
+        "PROCESS_EXIT",
+        "PROCESS_STOP",
+        "PROCESS_ABSENCE",
+        "RUNTIME_PARITY",
+        "INPUT_PIN",
+        "GRANT_INVALID",
+        "NORMAL_CHANGED",
+        "LOG_ERROR",
+        "DUMP_FOUND",
+        "OUTPUT_ROOT",
+        "STATIC_ASSERTION",
+        "HELPER",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "caseReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "caseId": {
+          "enum": [
+            "BASELINE",
+            "DELAYED_INITIALIZATION",
+            "MAX128",
+            "FINAL_RESTORED",
+            "PATH_DATA_NULL",
+            "PATH_DATA_UNDEFINED",
+            "PATH_DATA_MISSING",
+            "PATH_DATA_AMBIGUOUS",
+            "PATH_DATA_WRONG",
+            "PATH_QUEUE_NULL",
+            "PATH_QUEUE_UNDEFINED",
+            "PATH_QUEUE_MISSING",
+            "PATH_QUEUE_AMBIGUOUS",
+            "PATH_QUEUE_WRONG",
+            "PATH_SYNCSTATE_NULL",
+            "PATH_SYNCSTATE_UNDEFINED",
+            "PATH_SYNCSTATE_MISSING",
+            "PATH_SYNCSTATE_AMBIGUOUS",
+            "PATH_SYNCSTATE_WRONG",
+            "FORBIDDEN_NORMAL_SURROGATE",
+            "ALIAS_JUNCTION",
+            "REPARSE_ANCESTOR",
+            "ROOT_ABSENT",
+            "ROOT_WRONG_FILENAME",
+            "ROOT_UNLOADED",
+            "MAIN_MISSING",
+            "MAIN_DUPLICATE_FILENAME",
+            "MAIN_WRONG_FILENAME",
+            "MAIN_UNLOADED",
+            "ENGINE_MISSING",
+            "ENGINE_DUPLICATE_FILENAME",
+            "ENGINE_WRONG_FILENAME",
+            "ENGINE_UNLOADED",
+            "QUEUE_MISSING",
+            "QUEUE_DUPLICATE_FILENAME",
+            "QUEUE_WRONG_FILENAME",
+            "QUEUE_UNLOADED",
+            "CHILD_DUPLICATE_IDENTITY",
+            "CHILD_SPARSE",
+            "CHILD_SLOT_ACCESSOR",
+            "CHILD_ARRAY_PROXY",
+            "CHILD_LENGTH_129",
+            "CHILD_EXTRA_NUMERIC",
+            "CHILD_PARENT_SHADOW",
+            "DATA_PATH_ACCESSOR",
+            "QUEUE_PATH_ACCESSOR",
+            "ENGINE_EXPORT_ACCESSOR",
+            "FOREIGN_initSyncEngine",
+            "FOREIGN_getSyncStatus",
+            "FOREIGN_stopAutoSync",
+            "FOREIGN_initSyncQueue",
+            "FOREIGN_getPendingOps",
+            "FOREIGN_getDeviceId",
+            "FOREIGN_getDataPath",
+            "FOREIGN_getLibrary",
+            "FOREIGN_saveHistory",
+            "BOUND_WITNESS_MAIN",
+            "BOUND_WITNESS_ENGINE",
+            "BOUND_WITNESS_QUEUE",
+            "WITNESS_REPLACED_WITH_TARGET_MAIN",
+            "WITNESS_REPLACED_WITH_TARGET_ENGINE",
+            "WITNESS_REPLACED_WITH_TARGET_QUEUE",
+            "MISSING_DATA_WITNESS_MAIN",
+            "MISSING_DATA_WITNESS_ENGINE",
+            "MISSING_DATA_WITNESS_QUEUE",
+            "WRONG_STATIC_POSITION_MAIN",
+            "WRONG_STATIC_POSITION_ENGINE",
+            "WRONG_STATIC_POSITION_QUEUE",
+            "NEW_CTX_SAME_PATH",
+            "NEW_MODULE_SAME_FILENAME_ROOT",
+            "NEW_MODULE_SAME_FILENAME_MAIN",
+            "NEW_MODULE_SAME_FILENAME_ENGINE",
+            "NEW_MODULE_SAME_FILENAME_QUEUE",
+            "NEW_ARRAY_SAME_CONTENTS_ROOT",
+            "NEW_ARRAY_SAME_CONTENTS_ENGINE",
+            "NEW_FUNCTION_SAME_POSITION_MAIN",
+            "NEW_FUNCTION_SAME_POSITION_ENGINE",
+            "NEW_FUNCTION_SAME_POSITION_QUEUE",
+            "CHANGE_PATH_DATA",
+            "CHANGE_PATH_QUEUE",
+            "CHANGE_PATH_SYNCSTATE",
+            "WRONG_PID",
+            "WRONG_EXE",
+            "WRONG_VERSION",
+            "WRONG_ARCH",
+            "WRONG_NONCE",
+            "APP_EXPECT_PACKAGED_TRUE",
+            "APP_USERDATA_WRONG"
+          ]
+        },
+        "receiptSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "disposition": {"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","NOT_APPLICABLE","FAIL"]}
+      },
+      "required": ["caseId","receiptSha256","disposition"]
+    },
+    "namedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type":"string","pattern":"^(D(0[1-9]|1[0-9]|2[0-2])|L(0[1-9]|1[01]))$"},
+        "label": {"type":"string","minLength":1,"maxLength":256},
+        "outcome": {"enum":["PASS","FAIL"]},
+        "assertionsPassed": {"type":"integer","minimum":0,"maximum":9007199254740991},
+        "assertionsExpected": {"type":"integer","minimum":1,"maximum":9007199254740991}
+      },
+      "required": ["id","label","outcome","assertionsPassed","assertionsExpected"]
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const":"npa.result.v1"},
+        "kind": {"const":"static"},
+        "runId": {"$ref":"#/$defs/uuid"},
+        "runNonce": {"type":"string","pattern":"^[0-9a-f]{32}$"},
+        "bundleManifestSha256": {"$ref":"#/$defs/sha256"},
+        "toolCommit": {"$ref":"#/$defs/commit"},
+        "inputManifestSha256": {"$ref":"#/$defs/sha256"},
+        "startedUtc": {"$ref":"#/$defs/utc"},
+        "elapsedMs": {"type":"number","minimum":0},
+        "outcome": {"enum":["PASS","FAIL","HOLD"]},
+        "reason": {"$ref":"#/$defs/reason"},
+        "stage": {"enum":["PRECHECK","IDENTITY","GRAPH","SCOPES","GRAMMAR","S0_COMPLETE","APP_READ","S1","COMPARE","CLEANUP","COMPLETE"]},
+        "custody": {"type":"null"},
+        "cleanup": {"$ref":"#/$defs/cleanup"},
+        "namedCases": {
+          "type": "array",
+          "prefixItems": [
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D01"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D02"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D03"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D04"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D05"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D06"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D07"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D08"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D09"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D10"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D11"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D12"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D13"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D14"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D15"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D16"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D17"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D18"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D19"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D20"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D21"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"D22"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L01"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L02"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L03"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L04"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L05"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L06"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L07"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L08"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L09"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L10"}}}]},
+            {"allOf":[{"$ref":"#/$defs/namedCase"},{"properties":{"id":{"const":"L11"}}}]}
+          ],
+          "items": false,
+          "minItems": 33,
+          "maxItems": 33
+        },
+        "forbiddenGetterCalls": {"const":0},
+        "sourceManifestSha256": {"$ref":"#/$defs/sha256"},
+        "requestScheduleSha256": {"$ref":"#/$defs/sha256"}
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "runId",
+        "runNonce",
+        "bundleManifestSha256",
+        "toolCommit",
+        "inputManifestSha256",
+        "startedUtc",
+        "elapsedMs",
+        "outcome",
+        "reason",
+        "stage",
+        "custody",
+        "cleanup",
+        "namedCases",
+        "forbiddenGetterCalls",
+        "sourceManifestSha256",
+        "requestScheduleSha256"
+      ],
+      "allOf": [
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {"properties":{"reason":{"const":"NONE"},"stage":{"const":"COMPLETE"}}},
+          "else": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "OWNERSHIP",
+                  "ENDPOINT",
+                  "IDENTITY_PID",
+                  "IDENTITY_EXE",
+                  "IDENTITY_VERSION",
+                  "IDENTITY_ARCH",
+                  "NONCE",
+                  "TRANSPORT",
+                  "PROTOCOL_SHAPE",
+                  "CAP_OVERFLOW",
+                  "DATA_DESCRIPTOR",
+                  "MODULE_ROOT",
+                  "MODULE_FILENAME",
+                  "MODULE_LOADED",
+                  "DIRECT_EDGE_MISSING",
+                  "DIRECT_EDGE_AMBIGUOUS",
+                  "CHILD_ARRAY_SHAPE",
+                  "CHILD_SLOT_SHAPE",
+                  "CHILD_DUPLICATE_IDENTITY",
+                  "FUNCTION_LOCATION_MISSING",
+                  "FUNCTION_LOCATION_MALFORMED",
+                  "FUNCTION_LOCATION_AMBIGUOUS",
+                  "FUNCTION_POSITION",
+                  "FUNCTION_SCRIPT_FAMILY",
+                  "PROBE_POSITION",
+                  "PROBE_DATA_MISSING",
+                  "SCOPE_SHAPE",
+                  "SCOPE_BINDING_MISSING",
+                  "SCOPE_BINDING_AMBIGUOUS",
+                  "SCOPE_BINDING_OPTIMIZED",
+                  "PATH_UNINITIALIZED",
+                  "PATH_WRONG",
+                  "PATH_ALIAS",
+                  "PATH_NORMAL",
+                  "REFERENCE_CHANGED",
+                  "APP_PACKAGED",
+                  "APP_USERDATA",
+                  "EXCEPTION",
+                  "STARTUP_EXHAUSTED",
+                  "CONTROL_NOT_EXERCISED",
+                  "DEADLINE",
+                  "RELEASE",
+                  "CLOSE",
+                  "PROCESS_READY",
+                  "PROCESS_EXIT",
+                  "PROCESS_STOP",
+                  "PROCESS_ABSENCE",
+                  "RUNTIME_PARITY",
+                  "INPUT_PIN",
+                  "GRANT_INVALID",
+                  "NORMAL_CHANGED",
+                  "LOG_ERROR",
+                  "DUMP_FOUND",
+                  "OUTPUT_ROOT",
+                  "STATIC_ASSERTION",
+                  "HELPER",
+                  "INTERNAL_ERROR"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "cleanup": {
+              "properties": {"groupsAttempted":{"const":0},"groupsAcked":{"const":0},"socketCloseAck":{"const":false},"forcedStop":{"const":false},"absenceProved":{"const":true},"overrunMs":{"const":0}}
+            }
+          }
+        },
+        {"if":{"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},"then":{"properties":{"namedCases":{"items":{"properties":{"outcome":{"const":"PASS"}}}}}}}
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const":"npa.result.v1"},
+        "kind": {"const":"collection"},
+        "runId": {"$ref":"#/$defs/uuid"},
+        "runNonce": {"type":"string","pattern":"^[0-9a-f]{32}$"},
+        "bundleManifestSha256": {"$ref":"#/$defs/sha256"},
+        "toolCommit": {"$ref":"#/$defs/commit"},
+        "inputManifestSha256": {"$ref":"#/$defs/sha256"},
+        "startedUtc": {"$ref":"#/$defs/utc"},
+        "elapsedMs": {"type":"number","minimum":0},
+        "outcome": {"enum":["PASS","FAIL","HOLD"]},
+        "reason": {"$ref":"#/$defs/reason"},
+        "stage": {"enum":["PRECHECK","IDENTITY","GRAPH","SCOPES","GRAMMAR","S0_COMPLETE","APP_READ","S1","COMPARE","CLEANUP","COMPLETE"]},
+        "custody": {"type":"null"},
+        "cleanup": {"$ref":"#/$defs/cleanup"},
+        "mode": {"enum":["node-fixture-core","electron-fixture","native-package"]},
+        "caseId": {
+          "enum": [
+            "BASELINE",
+            "DELAYED_INITIALIZATION",
+            "MAX128",
+            "FINAL_RESTORED",
+            "PATH_DATA_NULL",
+            "PATH_DATA_UNDEFINED",
+            "PATH_DATA_MISSING",
+            "PATH_DATA_AMBIGUOUS",
+            "PATH_DATA_WRONG",
+            "PATH_QUEUE_NULL",
+            "PATH_QUEUE_UNDEFINED",
+            "PATH_QUEUE_MISSING",
+            "PATH_QUEUE_AMBIGUOUS",
+            "PATH_QUEUE_WRONG",
+            "PATH_SYNCSTATE_NULL",
+            "PATH_SYNCSTATE_UNDEFINED",
+            "PATH_SYNCSTATE_MISSING",
+            "PATH_SYNCSTATE_AMBIGUOUS",
+            "PATH_SYNCSTATE_WRONG",
+            "FORBIDDEN_NORMAL_SURROGATE",
+            "ALIAS_JUNCTION",
+            "REPARSE_ANCESTOR",
+            "ROOT_ABSENT",
+            "ROOT_WRONG_FILENAME",
+            "ROOT_UNLOADED",
+            "MAIN_MISSING",
+            "MAIN_DUPLICATE_FILENAME",
+            "MAIN_WRONG_FILENAME",
+            "MAIN_UNLOADED",
+            "ENGINE_MISSING",
+            "ENGINE_DUPLICATE_FILENAME",
+            "ENGINE_WRONG_FILENAME",
+            "ENGINE_UNLOADED",
+            "QUEUE_MISSING",
+            "QUEUE_DUPLICATE_FILENAME",
+            "QUEUE_WRONG_FILENAME",
+            "QUEUE_UNLOADED",
+            "CHILD_DUPLICATE_IDENTITY",
+            "CHILD_SPARSE",
+            "CHILD_SLOT_ACCESSOR",
+            "CHILD_ARRAY_PROXY",
+            "CHILD_LENGTH_129",
+            "CHILD_EXTRA_NUMERIC",
+            "CHILD_PARENT_SHADOW",
+            "DATA_PATH_ACCESSOR",
+            "QUEUE_PATH_ACCESSOR",
+            "ENGINE_EXPORT_ACCESSOR",
+            "FOREIGN_initSyncEngine",
+            "FOREIGN_getSyncStatus",
+            "FOREIGN_stopAutoSync",
+            "FOREIGN_initSyncQueue",
+            "FOREIGN_getPendingOps",
+            "FOREIGN_getDeviceId",
+            "FOREIGN_getDataPath",
+            "FOREIGN_getLibrary",
+            "FOREIGN_saveHistory",
+            "BOUND_WITNESS_MAIN",
+            "BOUND_WITNESS_ENGINE",
+            "BOUND_WITNESS_QUEUE",
+            "WITNESS_REPLACED_WITH_TARGET_MAIN",
+            "WITNESS_REPLACED_WITH_TARGET_ENGINE",
+            "WITNESS_REPLACED_WITH_TARGET_QUEUE",
+            "MISSING_DATA_WITNESS_MAIN",
+            "MISSING_DATA_WITNESS_ENGINE",
+            "MISSING_DATA_WITNESS_QUEUE",
+            "WRONG_STATIC_POSITION_MAIN",
+            "WRONG_STATIC_POSITION_ENGINE",
+            "WRONG_STATIC_POSITION_QUEUE",
+            "NEW_CTX_SAME_PATH",
+            "NEW_MODULE_SAME_FILENAME_ROOT",
+            "NEW_MODULE_SAME_FILENAME_MAIN",
+            "NEW_MODULE_SAME_FILENAME_ENGINE",
+            "NEW_MODULE_SAME_FILENAME_QUEUE",
+            "NEW_ARRAY_SAME_CONTENTS_ROOT",
+            "NEW_ARRAY_SAME_CONTENTS_ENGINE",
+            "NEW_FUNCTION_SAME_POSITION_MAIN",
+            "NEW_FUNCTION_SAME_POSITION_ENGINE",
+            "NEW_FUNCTION_SAME_POSITION_QUEUE",
+            "CHANGE_PATH_DATA",
+            "CHANGE_PATH_QUEUE",
+            "CHANGE_PATH_SYNCSTATE",
+            "WRONG_PID",
+            "WRONG_EXE",
+            "WRONG_VERSION",
+            "WRONG_ARCH",
+            "WRONG_NONCE",
+            "APP_EXPECT_PACKAGED_TRUE",
+            "APP_USERDATA_WRONG"
+          ]
+        },
+        "pid": {"anyOf":[{"type":"integer","minimum":1,"maximum":9007199254740991},{"type":"null"}]},
+        "spawnBracket": {"anyOf":[{"$ref":"#/$defs/spawnBracket"},{"type":"null"}]},
+        "identity": {"anyOf":[{"$ref":"#/$defs/identity"},{"type":"null"}]},
+        "counts": {"$ref":"#/$defs/counts"},
+        "positions": {"$ref":"#/$defs/positions"},
+        "graph": {"$ref":"#/$defs/graph"},
+        "paths": {"$ref":"#/$defs/paths"},
+        "comparisons": {"$ref":"#/$defs/comparisons"},
+        "appRead": {"anyOf":[{"$ref":"#/$defs/appRead"},{"type":"null"}]}
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "runId",
+        "runNonce",
+        "bundleManifestSha256",
+        "toolCommit",
+        "inputManifestSha256",
+        "startedUtc",
+        "elapsedMs",
+        "outcome",
+        "reason",
+        "stage",
+        "custody",
+        "cleanup",
+        "mode",
+        "caseId",
+        "pid",
+        "spawnBracket",
+        "identity",
+        "counts",
+        "positions",
+        "graph",
+        "paths",
+        "comparisons",
+        "appRead"
+      ],
+      "allOf": [
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {"properties":{"reason":{"const":"NONE"},"stage":{"const":"COMPLETE"}}},
+          "else": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "OWNERSHIP",
+                  "ENDPOINT",
+                  "IDENTITY_PID",
+                  "IDENTITY_EXE",
+                  "IDENTITY_VERSION",
+                  "IDENTITY_ARCH",
+                  "NONCE",
+                  "TRANSPORT",
+                  "PROTOCOL_SHAPE",
+                  "CAP_OVERFLOW",
+                  "DATA_DESCRIPTOR",
+                  "MODULE_ROOT",
+                  "MODULE_FILENAME",
+                  "MODULE_LOADED",
+                  "DIRECT_EDGE_MISSING",
+                  "DIRECT_EDGE_AMBIGUOUS",
+                  "CHILD_ARRAY_SHAPE",
+                  "CHILD_SLOT_SHAPE",
+                  "CHILD_DUPLICATE_IDENTITY",
+                  "FUNCTION_LOCATION_MISSING",
+                  "FUNCTION_LOCATION_MALFORMED",
+                  "FUNCTION_LOCATION_AMBIGUOUS",
+                  "FUNCTION_POSITION",
+                  "FUNCTION_SCRIPT_FAMILY",
+                  "PROBE_POSITION",
+                  "PROBE_DATA_MISSING",
+                  "SCOPE_SHAPE",
+                  "SCOPE_BINDING_MISSING",
+                  "SCOPE_BINDING_AMBIGUOUS",
+                  "SCOPE_BINDING_OPTIMIZED",
+                  "PATH_UNINITIALIZED",
+                  "PATH_WRONG",
+                  "PATH_ALIAS",
+                  "PATH_NORMAL",
+                  "REFERENCE_CHANGED",
+                  "APP_PACKAGED",
+                  "APP_USERDATA",
+                  "EXCEPTION",
+                  "STARTUP_EXHAUSTED",
+                  "CONTROL_NOT_EXERCISED",
+                  "DEADLINE",
+                  "RELEASE",
+                  "CLOSE",
+                  "PROCESS_READY",
+                  "PROCESS_EXIT",
+                  "PROCESS_STOP",
+                  "PROCESS_ABSENCE",
+                  "RUNTIME_PARITY",
+                  "INPUT_PIN",
+                  "GRANT_INVALID",
+                  "NORMAL_CHANGED",
+                  "LOG_ERROR",
+                  "DUMP_FOUND",
+                  "OUTPUT_ROOT",
+                  "STATIC_ASSERTION",
+                  "HELPER",
+                  "INTERNAL_ERROR"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties":{"pid":{"type":"null"}},"required":["pid"]},
+          "then": {"properties":{"spawnBracket":{"type":"null"}}},
+          "else": {"properties":{"spawnBracket":{"$ref":"#/$defs/spawnBracket"}}}
+        },
+        {
+          "if": {"properties":{"mode":{"const":"node-fixture-core"}},"required":["mode"]},
+          "then": {
+            "properties": {
+              "counts": {"properties":{"rpcSent":{"type":"integer","minimum":0,"maximum":1266}}},
+              "appRead": {"type":"null"},
+              "comparisons": {"maxItems":16},
+              "identity": {"anyOf":[{"type":"null"},{"properties":{"resourcesCanonical":{"type":"null"},"versions":{"not":{"anyOf":[{"required":["electron"]},{"required":["chrome"]}]}}}}]}
+            }
+          }
+        },
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {
+            "properties": {
+              "pid": {"type":"integer","minimum":1,"maximum":9007199254740991},
+              "spawnBracket": {"$ref":"#/$defs/spawnBracket"},
+              "identity": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "exeCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "exeSha256": {"$ref":"#/$defs/sha256"},
+                  "arch": {"const":"arm64"},
+                  "versions": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "node": {"type":"string","minLength":1,"maxLength":64},
+                      "electron": {"type":"string","minLength":1,"maxLength":64},
+                      "chrome": {"type":"string","minLength":1,"maxLength":64},
+                      "v8": {"type":"string","minLength":1,"maxLength":64},
+                      "icu": {"type":"string","minLength":1,"maxLength":64},
+                      "modules": {"type":"string","minLength":1,"maxLength":64}
+                    }
+                  },
+                  "resourcesCanonical": {"anyOf":[{"type":"string","minLength":1,"maxLength":4096},{"type":"null"}]}
+                },
+                "required": ["exeCanonical","exeSha256","arch","versions","resourcesCanonical"]
+              },
+              "counts": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "rpcSent": {"type":"integer","minimum":0,"maximum":1268},
+                  "maxInFlight": {"type":"integer","minimum":0,"maximum":8},
+                  "s0Attempts": {"type":"integer","minimum":1,"maximum":3},
+                  "rootChildren": {"type":"integer","minimum":0,"maximum":128},
+                  "engineChildren": {"type":"integer","minimum":0,"maximum":128},
+                  "forbiddenGetterCalls": {"const":0}
+                },
+                "required": ["rpcSent","maxInFlight","s0Attempts","rootChildren","engineChildren","forbiddenGetterCalls"]
+              },
+              "positions": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "policy": {"enum":["D","F","P","B"]},
+                  "families": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "role": {"const":"main"},
+                          "scriptId": {"type":"string","minLength":1,"maxLength":128},
+                          "targetPositions": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"getDataPath"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"getLibrary"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"saveHistory"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "probePositions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {"type":"string","minLength":1,"maxLength":128},
+                                "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                                "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                              },
+                              "required": ["name","line","column"]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["role","scriptId","targetPositions","probePositions"]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "role": {"const":"engine"},
+                          "scriptId": {"type":"string","minLength":1,"maxLength":128},
+                          "targetPositions": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"initSyncEngine"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"getSyncStatus"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"stopAutoSync"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "probePositions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {"type":"string","minLength":1,"maxLength":128},
+                                "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                                "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                              },
+                              "required": ["name","line","column"]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["role","scriptId","targetPositions","probePositions"]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "role": {"const":"queue"},
+                          "scriptId": {"type":"string","minLength":1,"maxLength":128},
+                          "targetPositions": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"initSyncQueue"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"getPendingOps"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {"name":{"const":"getDeviceId"},"line":{"type":"integer","minimum":0,"maximum":9007199254740991},"column":{"type":"integer","minimum":0,"maximum":9007199254740991}},
+                                "required": ["name","line","column"]
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "probePositions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "additionalProperties": false,
+                              "properties": {
+                                "name": {"type":"string","minLength":1,"maxLength":128},
+                                "line": {"type":"integer","minimum":0,"maximum":9007199254740991},
+                                "column": {"type":"integer","minimum":0,"maximum":9007199254740991}
+                              },
+                              "required": ["name","line","column"]
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": ["role","scriptId","targetPositions","probePositions"]
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "externalSourceHashes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {"relativePath":{"type":"string","minLength":1,"maxLength":4096},"sha256":{"$ref":"#/$defs/sha256"}},
+                      "required": ["relativePath","sha256"]
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": ["policy","families","externalSourceHashes"]
+              },
+              "graph": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "rootCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "mainFamilyCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "engineCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "queueCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "nativeRootAlias": {"type":"boolean"},
+                  "selectedEdgesValid": {"const":true},
+                  "loadedFlagsValid": {"const":true},
+                  "tupleDistinct": {"type":"array","items":{"const":true},"minItems":4,"maxItems":4}
+                },
+                "required": ["rootCanonical","mainFamilyCanonical","engineCanonical","queueCanonical","nativeRootAlias","selectedEdgesValid","loadedFlagsValid","tupleDistinct"]
+              },
+              "paths": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "dataCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "queueCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                  "syncStateCanonical": {"type":"string","minLength":1,"maxLength":4096}
+                },
+                "required": ["dataCanonical","queueCanonical","syncStateCanonical"]
+              },
+              "comparisons": {"items":{"properties":{"equal":{"const":true}}}},
+              "cleanup": {"properties":{"socketCloseAck":{"const":true},"overrunMs":{"const":0}}}
+            },
+            "allOf": [
+              {
+                "anyOf": [
+                  {"properties":{"cleanup":{"properties":{"groupsAttempted":{"const":1},"groupsAcked":{"const":1}}}}},
+                  {"properties":{"cleanup":{"properties":{"groupsAttempted":{"const":2},"groupsAcked":{"const":2}}}}},
+                  {"properties":{"cleanup":{"properties":{"groupsAttempted":{"const":3},"groupsAcked":{"const":3}}}}}
+                ]
+              },
+              {
+                "if": {"properties":{"mode":{"const":"node-fixture-core"}},"required":["mode"]},
+                "then": {
+                  "properties": {"comparisons":{"minItems":16,"maxItems":16},"identity":{"properties":{"versions":{"required":["node","v8","icu","modules"],"properties":{"node":{"const":"24.14.0"}}}}}}
+                },
+                "else": {
+                  "properties": {
+                    "comparisons": {"minItems":17,"maxItems":17},
+                    "appRead": {"$ref":"#/$defs/appRead"},
+                    "identity": {
+                      "properties": {
+                        "resourcesCanonical": {"type":"string","minLength":1,"maxLength":4096},
+                        "versions": {"required":["node","electron","chrome","v8","icu","modules"],"properties":{"electron":{"const":"42.11.18"}}}
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "if": {"properties":{"mode":{"const":"electron-fixture"}},"required":["mode"]},
+                "then": {"properties":{"appRead":{"properties":{"isPackaged":{"const":false}}},"graph":{"properties":{"nativeRootAlias":{"const":false}}}}}
+              },
+              {
+                "if": {"properties":{"mode":{"const":"native-package"}},"required":["mode"]},
+                "then": {"properties":{"appRead":{"properties":{"isPackaged":{"const":true}}},"graph":{"properties":{"nativeRootAlias":{"const":true}}}}}
+              },
+              {
+                "if": {"properties":{"caseId":{"const":"DELAYED_INITIALIZATION"}},"required":["caseId"]},
+                "then": {"properties":{"counts":{"properties":{"s0Attempts":{"type":"integer","minimum":2,"maximum":3}}}}}
+              },
+              {
+                "if": {"properties":{"mode":{"const":"native-package"}},"required":["mode"]},
+                "then": {
+                  "properties": {
+                    "positions": {
+                      "properties": {
+                        "families": {
+                          "prefixItems": [
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"getSettingsPath"}}},{"properties":{"name":{"const":"backupFile"}}},{"properties":{"name":{"const":"recordReadingSession"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            },
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"sha256"}}},{"properties":{"name":{"const":"setSyncStatus"}}},{"properties":{"name":{"const":"loadSyncState"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            },
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"generateDeviceId"}}},{"properties":{"name":{"const":"loadQueue"}}},{"properties":{"name":{"const":"saveQueue"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "else": {
+                  "properties": {
+                    "positions": {
+                      "properties": {
+                        "families": {
+                          "prefixItems": [
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"probeSync"}}},{"properties":{"name":{"const":"probeAsync"}}},{"properties":{"name":{"const":"probeMultiline"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            },
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"probeSync"}}},{"properties":{"name":{"const":"probeAsync"}}},{"properties":{"name":{"const":"probeMultiline"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            },
+                            {
+                              "properties": {
+                                "probePositions": {
+                                  "prefixItems": [{"properties":{"name":{"const":"probeSync"}}},{"properties":{"name":{"const":"probeAsync"}}},{"properties":{"name":{"const":"probeMultiline"}}}],
+                                  "items": false,
+                                  "minItems": 3,
+                                  "maxItems": 3
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "if": {"properties":{"caseId":{"const":"WRONG_NONCE"}},"required":["caseId"]},
+          "then": {
+            "properties": {
+              "outcome": {"const":"FAIL"},
+              "reason": {"const":"NONCE"},
+              "stage": {"const":"PRECHECK"},
+              "identity": {"type":"null"},
+              "counts": {"properties":{"s0Attempts":{"const":0},"rpcSent":{"const":0},"maxInFlight":{"const":0},"rootChildren":{"type":"null"},"engineChildren":{"type":"null"}}},
+              "positions": {"properties":{"policy":{"type":"null"},"families":{"maxItems":0}}},
+              "graph": {
+                "properties": {
+                  "rootCanonical": {"type":"null"},
+                  "mainFamilyCanonical": {"type":"null"},
+                  "engineCanonical": {"type":"null"},
+                  "queueCanonical": {"type":"null"},
+                  "nativeRootAlias": {"type":"null"},
+                  "selectedEdgesValid": {"type":"null"},
+                  "loadedFlagsValid": {"type":"null"},
+                  "tupleDistinct": {"maxItems":0}
+                }
+              },
+              "paths": {"properties":{"dataCanonical":{"type":"null"},"queueCanonical":{"type":"null"},"syncStateCanonical":{"type":"null"}}},
+              "comparisons": {"maxItems":0},
+              "appRead": {"type":"null"},
+              "cleanup": {"properties":{"groupsAttempted":{"const":0},"groupsAcked":{"const":0},"socketCloseAck":{"const":false}}}
+            }
+          }
+        },
+        {
+          "if": {"properties":{"mode":{"const":"native-package"}},"required":["mode"]},
+          "then": {
+            "properties": {
+              "positions": {
+                "properties": {
+                  "externalSourceHashes": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {"relativePath":{"const":"main.js"},"sha256":{"const":"ae989d990786c87a0ced9ded8dd78c4f8f01776a5963bf8113e5e4386a227f8f"}},
+                        "required": ["relativePath","sha256"]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {"relativePath":{"const":"main/sync-engine.js"},"sha256":{"const":"50f28caf027b02eb4d9a4f07bd1d008ef472c65b59d653ad9109def0fb9020a3"}},
+                        "required": ["relativePath","sha256"]
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {"relativePath":{"const":"main/sync-queue.js"},"sha256":{"const":"4837b6408eabfa4d34e009fc047655704f0b5c3813d860186542d260b87eabbd"}},
+                        "required": ["relativePath","sha256"]
+                      }
+                    ],
+                    "items": false,
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const":"npa.result.v1"},
+        "kind": {"const":"matrix"},
+        "runId": {"$ref":"#/$defs/uuid"},
+        "runNonce": {"type":"string","pattern":"^[0-9a-f]{32}$"},
+        "bundleManifestSha256": {"$ref":"#/$defs/sha256"},
+        "toolCommit": {"$ref":"#/$defs/commit"},
+        "inputManifestSha256": {"$ref":"#/$defs/sha256"},
+        "startedUtc": {"$ref":"#/$defs/utc"},
+        "elapsedMs": {"type":"number","minimum":0},
+        "outcome": {"enum":["PASS","FAIL","HOLD"]},
+        "reason": {"$ref":"#/$defs/reason"},
+        "stage": {"enum":["PRECHECK","IDENTITY","GRAPH","SCOPES","GRAMMAR","S0_COMPLETE","APP_READ","S1","COMPARE","CLEANUP","COMPLETE"]},
+        "custody": {"$ref":"#/$defs/custody"},
+        "cleanup": {"$ref":"#/$defs/cleanup"},
+        "runNumber": {"enum":[1,2]},
+        "populations": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "mode": {"const":"node-fixture-core"},
+                "pid": {"anyOf":[{"type":"integer","minimum":1,"maximum":9007199254740991},{"type":"null"}]},
+                "caseReceipts": {
+                  "type": "array",
+                  "prefixItems": [
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BASELINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"DELAYED_INITIALIZATION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAX128"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FINAL_RESTORED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FORBIDDEN_NORMAL_SURROGATE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ALIAS_JUNCTION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"REPARSE_ANCESTOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_ABSENT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_DUPLICATE_IDENTITY"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_SPARSE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_SLOT_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_ARRAY_PROXY"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_LENGTH_129"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_EXTRA_NUMERIC"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_PARENT_SHADOW"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"DATA_PATH_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_PATH_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_EXPORT_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_initSyncEngine"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getSyncStatus"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_stopAutoSync"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_initSyncQueue"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getPendingOps"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getDeviceId"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getDataPath"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getLibrary"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_saveHistory"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_CTX_SAME_PATH"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_ROOT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_ARRAY_SAME_CONTENTS_ROOT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_ARRAY_SAME_CONTENTS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_DATA"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_SYNCSTATE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_PID"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_EXE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_VERSION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_ARCH"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_NONCE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"APP_EXPECT_PACKAGED_TRUE"},"disposition":{"const":"NOT_APPLICABLE"}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"APP_USERDATA_WRONG"},"disposition":{"const":"NOT_APPLICABLE"}}}]}
+                  ],
+                  "items": false,
+                  "minItems": 88,
+                  "maxItems": 88
+                },
+                "outcome": {"enum":["PASS","FAIL","HOLD"]}
+              },
+              "required": ["mode","pid","caseReceipts","outcome"]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "mode": {"const":"electron-fixture"},
+                "pid": {"anyOf":[{"type":"integer","minimum":1,"maximum":9007199254740991},{"type":"null"}]},
+                "caseReceipts": {
+                  "type": "array",
+                  "prefixItems": [
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BASELINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"DELAYED_INITIALIZATION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAX128"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FINAL_RESTORED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_DATA_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_QUEUE_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_NULL"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_UNDEFINED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_AMBIGUOUS"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"PATH_SYNCSTATE_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FORBIDDEN_NORMAL_SURROGATE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ALIAS_JUNCTION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"REPARSE_ANCESTOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_ABSENT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ROOT_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MAIN_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_MISSING"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_DUPLICATE_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_WRONG_FILENAME"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_UNLOADED"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_DUPLICATE_IDENTITY"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_SPARSE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_SLOT_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_ARRAY_PROXY"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_LENGTH_129"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_EXTRA_NUMERIC"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHILD_PARENT_SHADOW"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"DATA_PATH_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"QUEUE_PATH_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"ENGINE_EXPORT_ACCESSOR"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_initSyncEngine"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getSyncStatus"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_stopAutoSync"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_initSyncQueue"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getPendingOps"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getDeviceId"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getDataPath"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_getLibrary"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"FOREIGN_saveHistory"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"BOUND_WITNESS_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WITNESS_REPLACED_WITH_TARGET_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"MISSING_DATA_WITNESS_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_STATIC_POSITION_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_CTX_SAME_PATH"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_ROOT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_MODULE_SAME_FILENAME_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_ARRAY_SAME_CONTENTS_ROOT"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_ARRAY_SAME_CONTENTS_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_MAIN"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_ENGINE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {
+                      "allOf": [{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"NEW_FUNCTION_SAME_POSITION_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]
+                    },
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_DATA"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_QUEUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"CHANGE_PATH_SYNCSTATE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_PID"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_EXE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_VERSION"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_ARCH"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"WRONG_NONCE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"APP_EXPECT_PACKAGED_TRUE"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]},
+                    {"allOf":[{"$ref":"#/$defs/caseReceipt"},{"properties":{"caseId":{"const":"APP_USERDATA_WRONG"},"disposition":{"enum":["EXPECTED_ACCEPT","EXPECTED_REJECT","FAIL"]}}}]}
+                  ],
+                  "items": false,
+                  "minItems": 88,
+                  "maxItems": 88
+                },
+                "outcome": {"enum":["PASS","FAIL","HOLD"]}
+              },
+              "required": ["mode","pid","caseReceipts","outcome"]
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "reviewRequired": {"const":true}
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "runId",
+        "runNonce",
+        "bundleManifestSha256",
+        "toolCommit",
+        "inputManifestSha256",
+        "startedUtc",
+        "elapsedMs",
+        "outcome",
+        "reason",
+        "stage",
+        "custody",
+        "cleanup",
+        "runNumber",
+        "populations",
+        "reviewRequired"
+      ],
+      "allOf": [
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {"properties":{"reason":{"const":"NONE"},"stage":{"const":"COMPLETE"}}},
+          "else": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "OWNERSHIP",
+                  "ENDPOINT",
+                  "IDENTITY_PID",
+                  "IDENTITY_EXE",
+                  "IDENTITY_VERSION",
+                  "IDENTITY_ARCH",
+                  "NONCE",
+                  "TRANSPORT",
+                  "PROTOCOL_SHAPE",
+                  "CAP_OVERFLOW",
+                  "DATA_DESCRIPTOR",
+                  "MODULE_ROOT",
+                  "MODULE_FILENAME",
+                  "MODULE_LOADED",
+                  "DIRECT_EDGE_MISSING",
+                  "DIRECT_EDGE_AMBIGUOUS",
+                  "CHILD_ARRAY_SHAPE",
+                  "CHILD_SLOT_SHAPE",
+                  "CHILD_DUPLICATE_IDENTITY",
+                  "FUNCTION_LOCATION_MISSING",
+                  "FUNCTION_LOCATION_MALFORMED",
+                  "FUNCTION_LOCATION_AMBIGUOUS",
+                  "FUNCTION_POSITION",
+                  "FUNCTION_SCRIPT_FAMILY",
+                  "PROBE_POSITION",
+                  "PROBE_DATA_MISSING",
+                  "SCOPE_SHAPE",
+                  "SCOPE_BINDING_MISSING",
+                  "SCOPE_BINDING_AMBIGUOUS",
+                  "SCOPE_BINDING_OPTIMIZED",
+                  "PATH_UNINITIALIZED",
+                  "PATH_WRONG",
+                  "PATH_ALIAS",
+                  "PATH_NORMAL",
+                  "REFERENCE_CHANGED",
+                  "APP_PACKAGED",
+                  "APP_USERDATA",
+                  "EXCEPTION",
+                  "STARTUP_EXHAUSTED",
+                  "CONTROL_NOT_EXERCISED",
+                  "DEADLINE",
+                  "RELEASE",
+                  "CLOSE",
+                  "PROCESS_READY",
+                  "PROCESS_EXIT",
+                  "PROCESS_STOP",
+                  "PROCESS_ABSENCE",
+                  "RUNTIME_PARITY",
+                  "INPUT_PIN",
+                  "GRANT_INVALID",
+                  "NORMAL_CHANGED",
+                  "LOG_ERROR",
+                  "DUMP_FOUND",
+                  "OUTPUT_ROOT",
+                  "STATIC_ASSERTION",
+                  "HELPER",
+                  "INTERNAL_ERROR"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {
+            "properties": {
+              "cleanup": {"properties":{"absenceProved":{"const":true},"forcedStop":{"const":false},"overrunMs":{"const":0}}},
+              "custody": {
+                "properties": {"helperPid":{"type":"integer","minimum":1,"maximum":9007199254740991},"receiptSha256":{"$ref":"#/$defs/sha256"},"exitAck":{"const":true},"absenceProved":{"const":true}}
+              },
+              "populations": {
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "pid": {"type":"integer","minimum":1,"maximum":9007199254740991},
+                      "outcome": {"const":"PASS"},
+                      "caseReceipts": {
+                        "prefixItems": [
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"type":"null"},"disposition":{"const":"NOT_APPLICABLE"}}},
+                          {"properties":{"receiptSha256":{"type":"null"},"disposition":{"const":"NOT_APPLICABLE"}}}
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "pid": {"type":"integer","minimum":1,"maximum":9007199254740991},
+                      "outcome": {"const":"PASS"},
+                      "caseReceipts": {
+                        "prefixItems": [
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_ACCEPT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}},
+                          {"properties":{"receiptSha256":{"$ref":"#/$defs/sha256"},"disposition":{"const":"EXPECTED_REJECT"}}}
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {"const":"npa.result.v1"},
+        "kind": {"const":"canary"},
+        "runId": {"$ref":"#/$defs/uuid"},
+        "runNonce": {"type":"string","pattern":"^[0-9a-f]{32}$"},
+        "bundleManifestSha256": {"$ref":"#/$defs/sha256"},
+        "toolCommit": {"$ref":"#/$defs/commit"},
+        "inputManifestSha256": {"$ref":"#/$defs/sha256"},
+        "startedUtc": {"$ref":"#/$defs/utc"},
+        "elapsedMs": {"type":"number","minimum":0},
+        "outcome": {"enum":["PASS","FAIL","HOLD"]},
+        "reason": {"$ref":"#/$defs/reason"},
+        "stage": {"enum":["PRECHECK","IDENTITY","GRAPH","SCOPES","GRAMMAR","S0_COMPLETE","APP_READ","S1","COMPARE","CLEANUP","COMPLETE"]},
+        "custody": {"$ref":"#/$defs/custody"},
+        "cleanup": {"$ref":"#/$defs/cleanup"},
+        "collectionReceiptSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "survivalMs": {"type":"number","minimum":0},
+        "unexpectedExit": {"type":"boolean"},
+        "stdoutManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "stderrManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "errorLogManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "dumpManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "protectedBeforeManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "protectedAfterManifestSha256": {"anyOf":[{"$ref":"#/$defs/sha256"},{"type":"null"}]},
+        "normalUnchanged": {"type":"boolean"},
+        "stopKind": {"enum":["FORCE_TERMINATED","UNEXPECTED_EXIT","STOP_FAILED"]},
+        "observationalOutcome": {"enum":["PASS","FAIL"]},
+        "productQuitQualified": {"const":false}
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "runId",
+        "runNonce",
+        "bundleManifestSha256",
+        "toolCommit",
+        "inputManifestSha256",
+        "startedUtc",
+        "elapsedMs",
+        "outcome",
+        "reason",
+        "stage",
+        "custody",
+        "cleanup",
+        "collectionReceiptSha256",
+        "survivalMs",
+        "unexpectedExit",
+        "stdoutManifestSha256",
+        "stderrManifestSha256",
+        "errorLogManifestSha256",
+        "dumpManifestSha256",
+        "protectedBeforeManifestSha256",
+        "protectedAfterManifestSha256",
+        "normalUnchanged",
+        "stopKind",
+        "observationalOutcome",
+        "productQuitQualified"
+      ],
+      "allOf": [
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {"properties":{"reason":{"const":"NONE"},"stage":{"const":"COMPLETE"}}},
+          "else": {
+            "properties": {
+              "reason": {
+                "enum": [
+                  "OWNERSHIP",
+                  "ENDPOINT",
+                  "IDENTITY_PID",
+                  "IDENTITY_EXE",
+                  "IDENTITY_VERSION",
+                  "IDENTITY_ARCH",
+                  "NONCE",
+                  "TRANSPORT",
+                  "PROTOCOL_SHAPE",
+                  "CAP_OVERFLOW",
+                  "DATA_DESCRIPTOR",
+                  "MODULE_ROOT",
+                  "MODULE_FILENAME",
+                  "MODULE_LOADED",
+                  "DIRECT_EDGE_MISSING",
+                  "DIRECT_EDGE_AMBIGUOUS",
+                  "CHILD_ARRAY_SHAPE",
+                  "CHILD_SLOT_SHAPE",
+                  "CHILD_DUPLICATE_IDENTITY",
+                  "FUNCTION_LOCATION_MISSING",
+                  "FUNCTION_LOCATION_MALFORMED",
+                  "FUNCTION_LOCATION_AMBIGUOUS",
+                  "FUNCTION_POSITION",
+                  "FUNCTION_SCRIPT_FAMILY",
+                  "PROBE_POSITION",
+                  "PROBE_DATA_MISSING",
+                  "SCOPE_SHAPE",
+                  "SCOPE_BINDING_MISSING",
+                  "SCOPE_BINDING_AMBIGUOUS",
+                  "SCOPE_BINDING_OPTIMIZED",
+                  "PATH_UNINITIALIZED",
+                  "PATH_WRONG",
+                  "PATH_ALIAS",
+                  "PATH_NORMAL",
+                  "REFERENCE_CHANGED",
+                  "APP_PACKAGED",
+                  "APP_USERDATA",
+                  "EXCEPTION",
+                  "STARTUP_EXHAUSTED",
+                  "CONTROL_NOT_EXERCISED",
+                  "DEADLINE",
+                  "RELEASE",
+                  "CLOSE",
+                  "PROCESS_READY",
+                  "PROCESS_EXIT",
+                  "PROCESS_STOP",
+                  "PROCESS_ABSENCE",
+                  "RUNTIME_PARITY",
+                  "INPUT_PIN",
+                  "GRANT_INVALID",
+                  "NORMAL_CHANGED",
+                  "LOG_ERROR",
+                  "DUMP_FOUND",
+                  "OUTPUT_ROOT",
+                  "STATIC_ASSERTION",
+                  "HELPER",
+                  "INTERNAL_ERROR"
+                ]
+              }
+            }
+          }
+        },
+        {"properties":{"custody":{"properties":{"periodicSnapshots":{"type":"integer","minimum":0,"maximum":45}}}}},
+        {
+          "if": {"properties":{"outcome":{"const":"PASS"}},"required":["outcome"]},
+          "then": {
+            "properties": {
+              "cleanup": {"properties":{"forcedStop":{"const":true},"absenceProved":{"const":true}}},
+              "custody": {
+                "properties": {"helperPid":{"type":"integer","minimum":1,"maximum":9007199254740991},"receiptSha256":{"$ref":"#/$defs/sha256"},"exitAck":{"const":true},"absenceProved":{"const":true}}
+              },
+              "collectionReceiptSha256": {"$ref":"#/$defs/sha256"},
+              "survivalMs": {"type":"number","minimum":25000},
+              "unexpectedExit": {"const":false},
+              "stdoutManifestSha256": {"$ref":"#/$defs/sha256"},
+              "stderrManifestSha256": {"$ref":"#/$defs/sha256"},
+              "errorLogManifestSha256": {"$ref":"#/$defs/sha256"},
+              "dumpManifestSha256": {"$ref":"#/$defs/sha256"},
+              "protectedBeforeManifestSha256": {"$ref":"#/$defs/sha256"},
+              "protectedAfterManifestSha256": {"$ref":"#/$defs/sha256"},
+              "normalUnchanged": {"const":true},
+              "stopKind": {"const":"FORCE_TERMINATED"},
+              "observationalOutcome": {"const":"PASS"}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
