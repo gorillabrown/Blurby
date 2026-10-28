@@ -1,0 +1,144 @@
+{
+  "generatedAt": "2026-04-21T04:33:52.300Z",
+  "scenarioCount": 5,
+  "scenarios": [
+    {
+      "id": "streaming-cold-start",
+      "label": "Streaming — cold start latency",
+      "metrics": {
+        "firstAudioLatencyMs": null,
+        "interSegmentGapMs": null,
+        "totalStreamDurationMs": null,
+        "wordsAchieved": 19,
+        "stallCount": 0
+      },
+      "gateResults": {
+        "streamingFirstAudioMs": {
+          "gate": {
+            "metric": "firstAudioLatencyMs",
+            "threshold": 3000,
+            "comparison": "lte",
+            "percentile": "p95",
+            "description": "Streaming first audio must arrive within 3000ms at p95"
+          },
+          "status": "pending_live_data"
+        }
+      }
+    },
+    {
+      "id": "streaming-warm-start",
+      "label": "Streaming — warm start latency",
+      "metrics": {
+        "firstAudioLatencyMs": null,
+        "interSegmentGapMs": null,
+        "totalStreamDurationMs": null,
+        "wordsAchieved": 21,
+        "stallCount": 0
+      },
+      "gateResults": {
+        "streamingFirstAudioMs": {
+          "gate": {
+            "metric": "firstAudioLatencyMs",
+            "threshold": 3000,
+            "comparison": "lte",
+            "percentile": "p95",
+            "description": "Streaming first audio must arrive within 3000ms at p95"
+          },
+          "status": "pending_live_data"
+        }
+      }
+    },
+    {
+      "id": "streaming-long-chapter",
+      "label": "Streaming — sustained long chapter playback",
+      "metrics": {
+        "firstAudioLatencyMs": null,
+        "interSegmentGapMs": null,
+        "totalStreamDurationMs": null,
+        "wordsAchieved": 113,
+        "stallCount": 0
+      },
+      "gateResults": {
+        "streamingWordsPerMinute": {
+          "gate": {
+            "metric": "wordsPerMinute",
+            "threshold": 120,
+            "comparison": "gte",
+            "rateMultiplier": 1,
+            "description": "Streaming must sustain ≥120 WPM at 1.0x rate"
+          },
+          "status": "pending_live_data"
+        },
+        "streamingStallCount": {
+          "gate": {
+            "metric": "stallCount",
+            "threshold": 0,
+            "comparison": "eq",
+            "window": "per5min",
+            "description": "Zero stall events per 5-minute window"
+          },
+          "status": "pending_live_data"
+        }
+      }
+    },
+    {
+      "id": "streaming-rapid-cancel",
+      "label": "Streaming — rapid cancel stress test",
+      "metrics": {
+        "firstAudioLatencyMs": null,
+        "interSegmentGapMs": null,
+        "totalStreamDurationMs": null,
+        "wordsAchieved": 9,
+        "stallCount": 0
+      },
+      "gateResults": {}
+    },
+    {
+      "id": "streaming-stall-recovery",
+      "label": "Streaming — stall detection and recovery",
+      "metrics": {
+        "firstAudioLatencyMs": null,
+        "interSegmentGapMs": null,
+        "totalStreamDurationMs": null,
+        "wordsAchieved": 14,
+        "stallCount": 0
+      },
+      "gateResults": {
+        "streamingStallCount": {
+          "gate": {
+            "metric": "stallCount",
+            "threshold": 0,
+            "comparison": "eq",
+            "window": "per5min",
+            "description": "Zero stall events per 5-minute window"
+          },
+          "status": "pending_live_data"
+        }
+      }
+    }
+  ],
+  "gateThresholds": {
+    "streamingFirstAudioMs": {
+      "metric": "firstAudioLatencyMs",
+      "threshold": 3000,
+      "comparison": "lte",
+      "percentile": "p95",
+      "description": "Streaming first audio must arrive within 3000ms at p95"
+    },
+    "streamingStallCount": {
+      "metric": "stallCount",
+      "threshold": 0,
+      "comparison": "eq",
+      "window": "per5min",
+      "description": "Zero stall events per 5-minute window"
+    },
+    "streamingWordsPerMinute": {
+      "metric": "wordsPerMinute",
+      "threshold": 120,
+      "comparison": "gte",
+      "rateMultiplier": 1,
+      "description": "Streaming must sustain ≥120 WPM at 1.0x rate"
+    }
+  },
+  "note": "Metrics are placeholders — populate with live sidecar run data"
+}

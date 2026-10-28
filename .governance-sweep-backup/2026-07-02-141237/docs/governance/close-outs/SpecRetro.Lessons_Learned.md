@@ -1,0 +1,740 @@
+# Spec Retrospective — Lessons Learned
+
+Running log of workflow and dispatch-spec lessons from phase close-outs. Entries are grouped by category. When the same pattern appears twice, promote it to a standing rule in the appropriate governance document.
+
+---
+
+## Effort Calibration
+
+## Sizing
+
+### SRL-005 — Architectural pivot sprints benefit from explicit foundation/consolidation splitting (NARR-LAYER-1A, 2026-04-16)
+**Verdict:** Splitting the narration-layer migration into a foundation sprint before the cleanup sprint appears to have reduced implementation risk without stalling progress.
+**Evidence:** `NARR-LAYER-1A` landed follower mode, state plumbing, UI integration, and overlay suppression while keeping backward compatibility intact. The summary indicates `NARR-LAYER-1B` can now focus on deletion and consolidation rather than simultaneous foundation work.
+**Recommendation:** For major runtime architecture pivots, prefer a two-step sequence of foundation first and removal second instead of combining both in one sprint.
+**Applies to:** Architectural migration sprints that replace a legacy runtime path
+**Status:** Observation
+
+### SRL-008 — Deletion-heavy consolidation sprints need dedicated migration + contract tests (NARR-LAYER-1B, 2026-04-16)
+**Verdict:** The consolidation was stable because migration and contract coverage were treated as first-class work, not post-cleanup extras.
+**Evidence:** `NARR-LAYER-1B` removed narration mode surfaces and `NarrateMode.ts`, added a schema migration (`7 -> 8`) for narration-mode settings, and introduced `tests/narrLayer1bConsolidation.test.ts` with 25 targeted checks while preserving green full-suite/build verification.
+**Recommendation:** For deletion-heavy architecture consolidations, require an explicit migration task and a dedicated contract/regression test file in the same sprint.
+**Applies to:** Runtime consolidation sprints that remove mode values, branches, or legacy classes
+**Status:** Observation
+
+## Agent Routing
+
+### SRL-001 — Quality review pays for itself in coverage sprints (TEST-COV-1, 2026-04-16)
+**Verdict:** The quality-review layer materially improved the final sprint outcome. This was not redundant verification; it surfaced the most important defect discovered during the sprint.
+**Evidence:** `plato` found the missing forced-refresh handling on 401 across Google and OneDrive paths, plus missing URL-scheme regression coverage, after implementation and first compliance review had already passed.
+**Recommendation:** Keep a dedicated quality-review pass mandatory for Full-tier coverage/security sprints, even when the implementation is already test-heavy.
+**Applies to:** Full-tier coverage, security, and hardening sprints
+**Status:** Observation
+
+### SRL-006 — Focused engine-plus-integration coverage is the right shape for UI architecture sprints (NARR-LAYER-1A, 2026-04-16)
+**Verdict:** The sprint summary suggests the new test mix was well targeted: low-level engine behavior, state plumbing, and UI integration were all covered without requiring a giant end-to-end harness.
+**Evidence:** The new `tests/narrationLayer.test.ts` covered FlowScrollEngine follower mode, flow-sync wiring, ReaderContainer state plumbing, bottom-bar behavior, overlay suppression, and keyboard handling, while the full suite and build remained green.
+**Recommendation:** For UI/runtime architecture sprints, default to one focused cross-layer regression file that combines engine assertions, state wiring checks, and visible control-surface behavior instead of scattering all new coverage into isolated micro-suites.
+**Applies to:** UI architecture and state-machine migration sprints
+**Status:** Observation
+
+### SRL-009 — Keep mode-removal work and evaluation harness work sequenced, not fully concurrent (NARR-LAYER-1B, 2026-04-16)
+**Verdict:** Consolidating the mode architecture first reduces measurement noise for later evaluation work.
+**Evidence:** `NARR-LAYER-1B` removed the standalone narration path and normalized runtime ownership before `TTS-EVAL-1` instrumentation begins, reducing the chance that harness data is polluted by dual-path behavior.
+**Recommendation:** When a sprint removes legacy runtime paths and the next sprint adds evaluation instrumentation, sequence consolidation first and run harness integration after merge; parallelize only fixture/docs/scaffolding.
+**Applies to:** Back-to-back runtime consolidation + evaluation-harness sprint pairs
+**Status:** Observation
+
+## Dispatch Precision
+
+### SRL-002 — Re-verification prompts need tighter fences after follow-up fixes (TEST-COV-1, 2026-04-16)
+**Verdict:** The sprint spec was precise overall, but the first re-verification pass drifted when the prompt was not narrowly bounded to the changed surfaces.
+**Evidence:** The first Solon rerun wandered into an unrelated roadmap section and had to be discarded, then rerun with a tighter prompt focused on the follow-up fixes.
+**Recommendation:** After review-driven follow-up fixes, explicitly fence compliance reruns to the touched files, changed behaviors, and affected success criteria instead of restating the full sprint.
+**Applies to:** Any sprint with follow-up fixes between first verification and final closeout
+**Status:** Observation
+
+## Discovery Yield
+
+### SRL-003 — Layered verification is high-yield for critical-path sprinting (TEST-COV-1, 2026-04-16)
+**Verdict:** This sprint had strong discovery yield because implementation, compliance, and quality review each exposed different classes of issues.
+**Evidence:** The sprint finished with 75 new tests and a green suite/build, but still surfaced a real auth/cloud defect only during the quality-review layer. The resulting fix and regression tests materially improved the final state.
+**Recommendation:** Preserve implementation -> verification -> quality-review sequencing for high-risk critical-path sprints rather than collapsing review into a single validation pass.
+**Applies to:** Critical-path hardening, auth/cloud, and regression-coverage sprints
+**Status:** Observation
+
+## General Workflow
+
+### SRL-004 — Non-blocking build warnings should be dispositioned explicitly at closeout (TEST-COV-1, 2026-04-16)
+**Verdict:** Leaving a known warning unnamed at closeout creates ambiguity about whether it is accepted debt or a missed defect.
+**Evidence:** The `settings -> tts -> settings` circular chunk warning remained present after a green build. It was not a blocker, but it still required an explicit `Defer` call to avoid closeout ambiguity.
+**Recommendation:** Require closeout reports to classify lingering build warnings explicitly as `Defer`, `Fix Now`, or `Log` so they do not become background noise.
+**Applies to:** Build-producing sprints with non-blocking warnings
+**Status:** Observation
+
+### SRL-007 — Dirty worktree constraints should be surfaced as execution setup, not hidden branch drift (NARR-LAYER-1A, 2026-04-16)
+**Verdict:** The sprint itself stayed on-plan, but execution had to diverge from the nominal sprint branch because the repo already contained unrelated local changes.
+**Evidence:** The run was blocked on repo state rather than the code plan, and the chosen safe path was to execute on the current branch while leaving unrelated local changes untouched and unstaged.
+**Recommendation:** When a sprint spec targets a dedicated branch but the worktree is already dirty, force an explicit execution-choice checkpoint up front: stay on current branch, stop for cleanup, or confirm safe branch switch.
+**Applies to:** Any sprint executed in a dirty repo state
+**Status:** Observation
+
+## Sizing
+
+### SRL-010 — Sprints exceeding 40 tool calls should be pre-split into waves at spec time (READER-4M-2, 2026-04-20)
+**Verdict:** Tool-count policy violation. The sprint used 152 tool calls against a 40-use ceiling, but completed cleanly because task complexity was individually low.
+**Evidence:** 9 tasks across implement/test/verify/docs/git consumed 152 tool calls total. Wave A (implement + test: tasks 1-5) would have been ~60 calls; Wave B (verify + docs + git: tasks 6-9) ~90 calls.
+**Recommendation:** Add a `Budget` section to sprint specs with estimated tool uses and token budget. When estimated total exceeds 80 (2x the 40-ceiling), pre-split into waves at spec time.
+**Applies to:** All sprints with ≥5 tasks
+**Second occurrence:** QWEN-STREAM-1 (2026-04-20) — 216 tool calls, ~838k tokens, 14 tasks (including 2 unplanned). See SRL-014.
+**Status:** Promoted → CLAUDE.md "Dispatch sizing" standing rule.
+
+### SRL-014 — Cross-language protocol sprints need aggressive wave-splitting and fix-up task budgets (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** Second occurrence of tool-count ceiling violation. Cross-language sprints compound the issue because unplanned fix-up tasks from contract mismatches add 40-60 tool calls beyond the original plan.
+**Evidence:** QWEN-STREAM-1 planned 12 tasks but executed 14 (2 unplanned fix-ups from cross-language defects). 216 total tool calls. A 3-wave split would have stayed within ceiling per wave.
+**Recommendation:** Cross-language protocol sprints should (a) pre-split into 3 waves at spec time, (b) budget one fix-up task slot, and (c) include the Contract Concordance table (SRL-013).
+**Applies to:** All sprints creating new cross-language IPC/protocol channels
+**Status:** Observation (but SRL-010, the parent pattern, is now promoted)
+
+## Effort Calibration
+
+### SRL-011 — Verify/fix tasks with low fix probability should start at sonnet, not opus (READER-4M-2, 2026-04-20)
+**Verdict:** Over-effort. A read-only opus pass confirmed no change was needed — a sonnet check would have produced the same result at ~40% of the token cost.
+**Evidence:** Task 3 (pause/resume verification) used 19 opus-tier Athena tool calls and ~68k tokens to confirm that pause-stays-in-mode already worked from prior sprints.
+**Recommendation:** When a task says "verify X works, fix if not" and prior sprints already implemented X, dispatch a sonnet-tier read-only check first.
+**Applies to:** Any verify/fix task where the fix probability is low based on prior sprint history
+**Status:** Observation
+
+## Agent Routing
+
+### SRL-012 — Parallelize read-only verification tasks (Solon + Plato) in sprint specs (READER-4M-2, 2026-04-20)
+**Verdict:** Missed parallelization opportunity. Spec compliance and quality review are both read-only passes; running them sequentially added ~90s with zero benefit.
+**Evidence:** Tasks 6 (Solon, 13 calls, ~65k) and 7 (Plato, 13 calls, ~79k) ran sequentially. Neither writes files.
+**Recommendation:** In sprint task tables, mark Solon and Plato as parallel-eligible. Default: `Tasks N, N+1 (Solon + Plato) — parallel, both read-only`.
+**Applies to:** All Full-tier sprints with both spec-compliance and quality-review tasks
+**Second occurrence:** QWEN-STREAM-2 (2026-04-20) — spec marked Solon + Plato as parallel, CLI executed them in parallel, saved ~65s. Validates the recommendation.
+**Status:** Promoted → CLAUDE.md "Spec-compliance review before quality review" standing rule. Addition: "For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible in the execution sequence. Both are read-only — sequential execution wastes time with zero benefit."
+
+## Dispatch Precision
+
+### SRL-013 — Cross-language IPC sprints need a Contract Concordance table (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** All three discovered integration bugs were key-name or payload-shape mismatches across the Python↔JS↔TypeScript boundary that a single concordance table would have caught at spec time.
+**Evidence:** Python sidecar used "cmd" but JS expected "command." Preload bridge payload shape disagreed with TypeScript interface. Both caught by quality review post-implementation, costing 59 tool calls and ~179k tokens in discovery+fix.
+**Recommendation:** For sprints creating new IPC channels spanning Python, JS, and TypeScript, add a "Contract Concordance" section to the spec.
+**Applies to:** All cross-language protocol/IPC sprints
+**Status:** Observation
+
+### SRL-015 — Prescribe app-access patterns for IPC handler tasks dispatched to Hermes (QWEN-STREAM-1, 2026-04-20)
+**Verdict:** Hermes spent 2.5x expected tool calls discovering the context-object/app-access pattern at runtime.
+**Evidence:** Task 4 (IPC handlers, haiku) used 25 tool calls vs. expected ~10. Fix required an additional opus-tier unplanned task (9b, 14 calls).
+**Recommendation:** When dispatching Hermes to write new IPC handlers, include the exact module access pattern as a prescribed code snippet.
+**Applies to:** Any Hermes-tier IPC handler task in Electron main process
+**Status:** Observation
+
+### SRL-016 — Sprint specs should use imperative git language to prevent CLI from skipping close-out (READER-4M-3, 2026-04-20)
+**Verdict:** Ambiguous git instructions led CLI to leave the worktree uncommitted/unmerged.
+**Evidence:** READER-4M-3 completed all implementation and verification tasks but left the repo with uncommitted changes.
+**Recommendation:** Git close-out tasks in sprint specs should use imperative language: "Stage these files. Commit with this message. Merge to main with --no-ff. Push."
+**Applies to:** All sprint specs with git close-out tasks
+**Status:** Observation
+
+### SRL-017 — Require detailed utilization reporting in CLI close-out summaries (READER-4M-3, 2026-04-20)
+**Verdict:** Compact summary format made retrospective analysis shallow — no token counts, no per-task tool-call breakdown, no runtime.
+**Evidence:** READER-4M-3 close-out used a compact format that omitted runtime, token usage, and per-agent utilization. Prior close-outs provided full agent utilization tables.
+**Recommendation:** Sprint specs should mandate the full close-out format (runtime, token count, per-task tool calls, agent utilization table) in the reporting task.
+**Applies to:** All sprint close-out / reporting tasks
+**Status:** Observation
+
+## Sizing
+
+### SRL-018 — Tool-call budgets should account for investigative reads, not just file creates (QWEN-STREAM-2, 2026-04-20)
+**Verdict:** Budget underestimate. Spec estimated ~65 tool calls; actual was ~185. Sprint completed cleanly in 20 minutes (operationally harmless), but the budget formula was wrong.
+**Evidence:** The CLAUDE.md formula "1 tool use per file read, 1-2 per file write" doesn't capture that agents read 5-7 context files before each write. Task 6 used 19 tools for ~15 lines of edits (investigating insertion point in useNarration.ts). Task 7 used 32 tools for 21 tests (7 context reads before writing).
+**Recommendation:** Replace the per-file formula with: `(new_files × 8) + (edited_files × 12) + (test_files × 15) + (verification_tasks × 10) + (docs_git × 10)`. For QWEN-STREAM-2: 3×8 + 2×12 + 1×15 + 2×10 + 2×10 = 103 — still under actual but 60% more accurate than the 65 estimate.
+**Applies to:** All sprint Budget sections
+**Status:** Observation
+
+## General Workflow
+
+### SRL-019 — Uncommitted governance edits are at risk during git pull (QWEN-STREAM-2, 2026-04-20)
+**Verdict:** Process gap. Cowork's governance doc edits (ROADMAP specs, SPRINT_QUEUE entries, close-out files) were wiped when CLI ran git pull to sync local checkout before the sprint.
+**Evidence:** All three sprint specs, queue entries, CLAUDE.md state updates, retro entries, and close-out files from the READER-4M-2/QWEN-STREAM-1/READER-4M-3 close-outs had to be re-created. The CLI recovered the QWEN-STREAM-2 spec from git stash, but queue state was lost.
+**Recommendation:** Before any CLI dispatch that will run git pull, either (a) commit governance doc updates as a standalone docs-only commit, or (b) include the spec inline in the dispatch pointer rather than relying on uncommitted file state. Option (a) is preferred — it's one extra commit and makes the spec durable.
+**Applies to:** All dispatch sequences where Cowork writes specs to working-directory files before CLI syncs
+**Status:** Observation
+
+## Dispatch Precision
+
+### SRL-020 — Streaming strategy sprints should audit end-of-stream signal delivery as an explicit task (QWEN-STREAM-3, 2026-04-20)
+**Verdict:** The spec covered error paths (stall, crash, cancel) but missed the happy-path completion signal. Stream-finished needed a full IPC wire that wasn't in the spec.
+**Evidence:** Plato found `acc.flush()` was never called on normal stream end. Fix required adding `tts-qwen-stream-finished` through 4 layers (engine→IPC→preload→renderer→acc.flush()→onEnd). The effort note recommends future streaming tasks annotate `{high}` for end-of-stream plumbing review.
+**Recommendation:** For streaming strategy sprints, add an explicit "end-of-stream signal audit" sub-task that verifies every lifecycle event (start, data, finish, error, cancel) has a complete transport chain from producer to consumer. This is the streaming-specific instantiation of SRL-013's concordance table pattern.
+**Applies to:** All sprints that add or modify streaming IPC channels
+**Status:** Observation
+
+## Discovery Yield
+
+### SRL-021 — Plato BLOCKER discovery validates full-tier investment for cross-system streaming work (QWEN-STREAM-3, 2026-04-20)
+**Verdict:** Third validated occurrence of quality review catching a production-critical defect invisible to spec compliance (SRL-001 pattern).
+**Evidence:** Solon passed 14/14 criteria. The missing flush was not a spec violation (the spec didn't require it explicitly), but it would have caused silent data loss in every streamed narration. Only Plato's architectural review caught the gap.
+**Recommendation:** SRL-001 now has three occurrences (TEST-COV-1, QWEN-STREAM-1, QWEN-STREAM-3). Consider promoting to a stronger standing rule: "Plato is mandatory for any sprint touching IPC or cross-layer data flow, regardless of tier."
+**Applies to:** All sprints with cross-layer signal flow (IPC, preload bridge, event chains)
+**Status:** Observation (third occurrence of SRL-001 pattern — promotion candidate)
+
+## Agent Routing
+
+### SRL-022 — Herodotus pre-composed diffs: second consecutive miss (QWEN-STREAM-4, 2026-04-20)
+**Verdict:** The Herodotus efficiency rule (pre-compose old_string/new_string diffs in the dispatch to cut tool calls by ~50%) was not applied in QWEN-STREAM-3 or QWEN-STREAM-4. Both sprints saw 24+ tool calls for docs-only updates.
+**Evidence:** QWEN-STREAM-3 Herodotus used ~24 tool calls. QWEN-STREAM-4 Herodotus used exactly 24 tool calls. The standing rule in CLAUDE.md already says "Zeus SHOULD pre-compose exact old_string/new_string edit diffs for doc updates." It's not being enforced at dispatch time because Zeus doesn't compose them unless prompted.
+**Recommendation:** Add a mandatory line to the Herodotus task in sprint specs: `Pre-composed diffs: [yes/no]. If yes, include diffs inline.` When "no," note why (e.g., complex multi-section updates). This makes the decision explicit rather than silently defaulting to the expensive path.
+**Applies to:** All sprint Herodotus/documentation tasks
+**Status:** Second occurrence — promotion candidate. First: QWEN-STREAM-3 (close-out mismatch note). Second: QWEN-STREAM-4.
+
+### SRL-023 — Release-polish specs must preserve product posture as an explicit invariant (POLISH-1, 2026-05-04)
+**Verdict:** POLISH-1 succeeded because it treated engine posture as a release invariant, not incidental settings copy.
+**Evidence:** The sprint touched settings labels, ARIA state, empty states, and switch accessibility while preserving Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen disabled.
+**Recommendation:** Late-stage polish specs should list non-negotiable product posture invariants directly in the task and test criteria, especially when copy/status/accessibility edits could accidentally imply a product decision change.
+**Applies to:** Release-polish and settings/product-copy sprints
+**Status:** Observation
+
+### SRL-025 — Post-release audit remediation should be sequenced by dependency order, not severity alone (POSTV2-AUDIT-REMEDIATION, 2026-05-04)
+**Verdict:** The remediation worked because release/package truth landed before engine/type cleanup, and engine/type cleanup landed before Narrate/security/artifact hygiene.
+**Evidence:** POSTV2-REL-1 established package/version/update truth first; POSTV2-ENGINE-1 then made typecheck green and enforced engine posture across IPC/preload/persistence; POSTV2-NARR-1 finally tightened Narrate behavior, URL safety, artifact policy, and debt mapping.
+**Recommendation:** For future post-release audits, split remediation into dependency-ordered lanes: release truth first, contract/posture enforcement second, behavior/security/artifact cleanup third.
+**Applies to:** Post-release audits, stabilization bundles, and multi-lane remediation specs
+**Status:** Observation
+
+### SRL-026 — Storage migrations should pair structured identity with timing-truth sidecars (TTS-CACHE-TIMING-1, 2026-05-14)
+**Verdict:** The cache migration stayed safe because it versioned identity fields explicitly, preserved legacy reads, and persisted timing truth as adjacent metadata instead of inferring it later.
+**Evidence:** TTS-CACHE-TIMING-1 added v2 structured cache identities, atomic `.timing.json` sidecars, trusted/heuristic timing classification, corrupt-sidecar fallback, and v1 compatibility without a destructive global cache wipe.
+**Recommendation:** Future cache or timing changes should version structured identity fields and treat missing or corrupt metadata as safe misses rather than cleanup triggers. Timing truth should travel with cached audio whenever possible.
+**Applies to:** Cache migrations, timing metadata work, export preparation, and provider-neutral narration diagnostics
+**Status:** Observation
+
+### SRL-027 — Reconcile branch governance against canonical main before fold-in (TTS-SYNC-1, 2026-05-15)
+**Verdict:** The sprint implementation was clean, but branch-local governance files lagged behind the canonical 2026-05-14 roadmap review and would have regressed queue state if copied wholesale.
+**Evidence:** TTS-SYNC-1 completed and pushed on `sprint/tts-sync-1-highlight-controller`, but its branch `ROADMAP.md`, `SPRINT_QUEUE.md`, and `CLAUDE.md` still described older Desktop v2.0 / queue-RED framing while canonical main already had the TTS Architecture Completion conveyor with additional backfilled specs.
+**Recommendation:** During phase closeout for worktree-resident sprints, treat branch governance edits as candidate fold-ins only. Compare against canonical main, preserve newer roadmap/queue state, and apply only net-new sprint facts unless a governance staging file explicitly records fold-in instructions.
+**Applies to:** Worktree-resident sprint closeouts, branch-to-main governance reconciliation, roadmap and queue updates
+**Status:** Observation
+
+### SRL-028 — Diagnostic/export specs need producer and validator redaction gates (TTS-DIAG-1, 2026-05-15)
+**Verdict:** The diagnostics bundle was safe to expose through settings because redaction was treated as a schema contract, not just a UI promise.
+**Evidence:** TTS-DIAG-1 added `tts-diagnostics-v1` bundle production, eval-runner validation, and settings export while recursively stripping/rejecting raw text fields (`rawText`, `originalText`, `normalizedText`) and audio-shaped payloads from caller-supplied metadata.
+**Recommendation:** Any future diagnostic, export, or evidence-artifact sprint that can touch user content should define redaction requirements in the producer, validator, tests, and UI affordance before the export action is considered complete.
+**Applies to:** Diagnostics bundles, eval artifacts, export tooling, evidence runbooks, and settings/dev-only export controls
+**Status:** Observation
+
+### SRL-029 — Known broad-suite flakes become integration blockers when they are required gates (TTS-INTEGRATE-1, 2026-05-15)
+**Verdict:** The integration itself was clean, but the sprint correctly stopped because a required broad-suite gate failed in a known resource-sensitive lane.
+**Evidence:** TTS-INTEGRATE-1 merged TTS-SYNC-1 first and stacked TTS-DIAG-1 second, then passed focused sync verification, focused diagnostics verification, typecheck, and build. Full `npm test` failed in `tests/mossNanoProbe.test.js` with 3 performance-class failures, so the integration branch was left uncommitted/unpushed.
+**Recommendation:** If a known resource-sensitive test lane is required by an integration sprint, the spec should name the unblock path up front: waive by explicit governance decision, stabilize first, or run the stabilization sprint on the integration branch.
+**Applies to:** Integration sprints, broad verification gates, resource-sensitive probes, and test-harness debt
+**Status:** Observation
+
+### SRL-030 — Host-sensitive performance probes should be opt-in when contract coverage can remain deterministic (TEST-HARNESS-1, 2026-05-15)
+**Verdict:** The MOSS Nano probe lane became stable when live Python performance checks were separated from deterministic default-suite contract coverage.
+**Evidence:** TEST-HARNESS-1 kept direct Python MOSS Nano performance probes behind `BLURBY_RUN_MOSS_NANO_PERF_TESTS=1`, while default verification retained mocked/readiness/performance-contract coverage and passed full `npm test`, serialized `npm test -- --maxWorkers=1`, typecheck, build, and diff checks.
+**Recommendation:** Future probe specs should split deterministic contract checks from host-sensitive live performance checks, and document the opt-in environment variable or command that runs the live lane.
+**Applies to:** Performance probes, hardware/runtime-sensitive tests, broad verification gates, and integration unblockers
+**Status:** Observation
+
+### SRL-031 — Engine dormancy should be dual-gated at settings load and IPC entry (ENGINE-DORMANCY-1, 2026-05-16)
+**Verdict:** The dormancy posture is safer when stale persisted settings and direct runtime channels are both handled explicitly.
+**Evidence:** ENGINE-DORMANCY-1 migrated stale Nano, Pocket, and Qwen profile selections to Kokoro on settings load, while `tts-nano-*` and `tts-pocket-*` IPC entry points fail closed with `reason: "engine-dormant"`. This prevents dormant engines from re-entering through either user settings or direct channel calls.
+**Recommendation:** Future engine-disable or engine-dormancy specs should require both gates: persisted-selection normalization and IPC/runtime fail-closed guards. Tests should cover both paths.
+**Applies to:** Engine posture changes, provider retirement/dormancy work, settings migrations, and IPC runtime gating
+**Status:** Observation
+
+### SRL-032 — Stacked integration sprints should preserve merge order and rerun focused plus broad gates (TTS-INTEGRATE-1, 2026-05-16)
+**Verdict:** The integration succeeded because it treated branch order as part of the contract, not incidental git mechanics.
+**Evidence:** TTS-INTEGRATE-1 merged `TTS-SYNC-1` before `TTS-DIAG-1`, then ran focused sync tests, focused diagnostics tests, typecheck, build, full test, and diff-check before the final `main` merge.
+**Recommendation:** Future stacked integration specs should name the required merge order, run focused suites for each source branch, then run the broad gate before governance advances.
+**Applies to:** Multi-branch integration sprints, stacked feature branches, architecture fold-ins, and branch-to-main governance reconciliation
+**Status:** Observation
+
+### SRL-033 — Branch-complete closeouts must not imply main-landed queue advancement (TTS-CACHE-HARDEN-1, 2026-05-16)
+**Verdict:** The implementation was successful, but the handoff summary mixed completion language with a still-unmerged branch state.
+**Evidence:** At the first closeout pass, TTS-CACHE-HARDEN-1 was pushed at `53c7862` on `origin/sprint/tts-cache-harden-1-cache-pipeline-parity`, while canonical `main` still remained at `f1d5b4f`; the supplied PR link was a PR creation URL, not a landed merge. The branch later landed via merge commit `c54dd0f`.
+**Recommendation:** Future closeout summaries should explicitly label status as `branch-complete`, `PR-open`, `merged-to-main`, or `pushed-to-main`, and roadmap advancement should require the final state.
+**Applies to:** Sprint closeouts, branch-to-main governance reconciliation, next-pointer readiness checks
+**Status:** Observation; related to SRL-027 and worth promoting if this recurs.
+
+### SRL-034 — Word-boundary sync contracts should carry both source and resolved indexes with trust metadata (TTS-EVENT-SYNC-1, 2026-05-16)
+**Verdict:** Event-driven highlight sync is robust when boundary callbacks carry mapping provenance rather than only a final index.
+**Evidence:** TTS-EVENT-SYNC-1 landed provider-level boundary capability flags plus callback payloads containing `sourceWordIndex`, `resolvedWordIndex`, `isTrustedWordTiming`, `alignmentCorrected`, and `timingTruth`; this preserved LL-079 ownership boundaries while letting diagnostics and fallback logic reason about normalized→original remaps explicitly.
+**Recommendation:** Future timing/event contracts should always include both raw/source coordinates and resolved/display coordinates, plus trust/correction flags, so scheduler fallback and diagnostics remain auditable across normalization and cache-hit paths.
+**Applies to:** Event-driven narration sync, timing sidecar consumers, normalized-text remap logic, and future provider boundary integrations
+**Status:** Observation
+
+### SRL-035 — Enrichment transforms need conservative guards to preserve legacy normalization behavior (NORMALIZER-ENRICH-1, 2026-05-17)
+**Verdict:** Gap-filling transforms can regress stable paths unless each new rule explicitly excludes known legacy patterns.
+**Evidence:** NORMALIZER-ENRICH-1 required tightening dotted-acronym and terminal-punctuation behavior so existing fixtures remained unchanged (for example preserving `p.m.` time parsing and heading-style strings without forced terminal periods), while still adding nine new transforms and 25 new fixtures.
+**Recommendation:** For future normalizer enrichment sprints, require one positive case plus one guard/no-op case per transform family, and validate transform ordering with explicit tests before broad-suite runs.
+**Applies to:** Normalizer enrichments, transform ordering work, fixture expansion sprints, and alignment-map stability checks
+**Status:** Observation
+
+### SRL-036 — Keep one authoritative sprint queue, not mirrored queue files (SPRINT-QUEUE-PARITY, 2026-05-17)
+**Verdict:** The queue drift risk dropped once the legacy Markdown sprint queue was retired and `docs/governance/sprint-queue.xlsx` became the only operational FIFO queue source.
+**Evidence:** Recent closeouts had to reconcile roadmap text, a Markdown queue, and the workbook independently. The 2026-05-17 parity pass deleted the legacy Markdown queue, updated CLAUDE/ROADMAP/DEVELOPMENT_SYNC guidance, and repaired current TTS Architecture closeout references so future dispatches read the workbook Catalog/Dashboard.
+**Recommendation:** Future governance updates should change `ROADMAP.md` for full specs and `docs/governance/sprint-queue.xlsx` for queue order/status. Do not recreate a Markdown queue mirror; if a human-readable queue view is needed, generate it from the workbook.
+**Applies to:** Sprint closeout, next-pointer generation, roadmap review, phase closeout, and queue backfill
+**Status:** Observation
+
+### SRL-037 — Render-time position indexes should be fail-open with explicit miss telemetry (TTS-RENDER-MAP-1, 2026-05-17)
+**Verdict:** The O(1) lookup win is safest when index misses degrade transparently to live DOM lookup during transient reflow/reload windows.
+**Evidence:** TTS-RENDER-MAP-1 introduced a pre-built `WordPositionIndex` plus rebuild triggers across section load, render-version changes, and resize/layout events; highlight resolution now tries indexed entries first and logs structured miss reasons (`stale-index-entry`, `direct-fallback-hit`, `section-fallback-hit`, `not-found`) before using fallback lookup paths.
+**Recommendation:** Future render-map or precomputed-layout sprints should require three things together: explicit invalidation triggers, miss-reason diagnostics, and a continuity-preserving fallback path instead of hard-failing on stale/missing cache entries.
+**Applies to:** Event-driven highlight sync, DOM pre-index caches, resize/reflow-sensitive UI mapping, and diagnostics-driven performance hardening
+**Status:** Observation
+
+### SRL-038 — Integration tests should call production identity helpers, not duplicate private construction logic (TTS-PIPELINE-1, 2026-05-17)
+**Verdict:** Cross-module pipeline tests are more trustworthy when the identity-building seam is a small production helper shared by runtime code and tests.
+**Evidence:** TTS-PIPELINE-1 extracted `buildKokoroCacheIdentity()` from the Kokoro strategy/background cache paths, then used that helper in the integration test that chains planner, normalizer, cache identity, timing sidecar, word-boundary sync, and word-position lookup.
+**Recommendation:** When a sprint needs to test a private production contract end-to-end, prefer extracting a pure helper that production also consumes over reconstructing the same object shape in test-only code.
+**Applies to:** Cache identity, normalized segment identity, timing sidecar construction, diagnostics bundle construction, and future export pipeline tests
+**Status:** Observation
+
+### SRL-039 — Canonical architecture decision records prevent stale review artifacts from driving sprint routing (TTS-ARCH-DOC-1, 2026-05-17)
+**Verdict:** The TTS architecture became easier to audit once engine posture, invariants, research dispositions, and P1/P2 finding outcomes moved into one standing governance document.
+**Evidence:** TTS-ARCH-DOC-1 created `docs/governance/TTS_ARCHITECTURE_DECISIONS.md`, linked it from `TECHNICAL_REFERENCE.md`, and marked it as the canonical home in `ROADMAP_SPECS.md` so future sessions no longer need to infer current decisions from scattered roadmap specs, review artifacts, and closeouts.
+**Recommendation:** Future architecture completion phases should end with one canonical decision record that distinguishes adopted, rejected, deferred, and reactivation conditions before new optional lanes are dispatched.
+**Applies to:** Architecture finish-line sprints, roadmap reviews, engine posture decisions, future export planning, and audit handoffs
+**Status:** Observation
+
+### SRL-040 — Worktree-isolated deferred sprints should include a rebase-readiness checklist in the spec (KOKORO-EXPORT-1, 2026-05-17)
+**Verdict:** The worktree pattern worked well for building ahead without blocking the active conveyor, but the spec didn't anticipate how many files on main would diverge during the deferral window.
+**Evidence:** KOKORO-EXPORT-1 touches `main/tts-cache.js`, `src/types.ts`, and `preload.js`. All three were edited by 5+ subsequent sprints (TTS-CACHE-HARDEN-1, TTS-EVENT-SYNC-1, NORMALIZER-ENRICH-1, TTS-RENDER-MAP-1, TTS-PIPELINE-1) after the worktree branched. A rebase will require conflict resolution in at minimum those three files.
+**Recommendation:** When a sprint is spec'd as "implement now, merge later," include a `## Rebase Readiness` section listing the files touched and a threshold: if >3 subsequent sprints edit the same files, schedule a dedicated rebase-and-verify mini-sprint rather than attempting a cold rebase at merge time.
+**Applies to:** Any sprint using worktree isolation with a planned deferral window of >2 sprints.
+**Status:** Observation
+
+### SRL-041 — Pre-validated branch pattern needs explicit dispatch guidance (NARR-MEDIA-1, 2026-05-17)
+**Verdict:** Effort calibration was accurate (S-tier, 1 day), but the dispatch didn't anticipate that the implementation was already complete on-branch. CLI spent its time validating rather than building, which was the right outcome but wasn't signaled in the spec.
+**Evidence:** All 8 done-when criteria were already met before CLI started. CLI's 5-task plan was entirely validation and close-out — no implementation tasks. 52 tests already passing.
+**Recommendation:** When a sprint's implementation is known to already exist on a branch (e.g., from a prior session or parallel work), add a `## Pre-existing Implementation` note to the spec stating: "Implementation exists on `branch-name` at `commit`. Dispatch scope is validation-only: spec compliance, test verification, and merge." This sets correct CLI expectations and avoids wasted planning overhead.
+**Applies to:** Any sprint where the code predates the dispatch.
+**Status:** Observation
+
+### SRL-042 — Edit-site lists should include stop/teardown paths, not just happy-path wiring (NARR-PAUSE-1, 2026-05-18)
+**Verdict:** Effort calibration was accurate (M-tier, delivered in spec window), but the edit-site list missed two files that needed changes — `useReaderMode.ts` and `useFlowScrollSync.ts` — because the spec focused on narration start/pause/resume paths and didn't trace stop-reason threading through mode-switch and book-end teardown.
+**Evidence:** The spec listed 3 edit sites (`narration.ts`, `useNarration.ts`, `mediaSessionBridge.ts`). CLI touched 5 files total, adding `useReaderMode.ts` and `useFlowScrollSync.ts` for stop-reason wiring. Both were necessary for `mode-switch` and `book-end` pause reasons to actually fire.
+**Recommendation:** When speccing a new state discriminant (like `pauseReason`), trace not just where the value is produced and consumed but also where the absence of it would leave a code path using the old undiscriminated behavior. Stop/teardown/cleanup paths are the most common miss.
+**Applies to:** Any sprint adding a new state field that replaces implicit behavior with explicit discrimination.
+**Status:** Observation
+
+### SRL-043 — Pipeline backpressure requires both resume-cap AND demand-driven drain (TTS-PARITY-1, 2026-05-18)
+**Verdict:** The spec correctly identified that `pipelineResume()` needed backpressure gating (emit at most `queueDepth - pendingChunks` chunks). But the implementation discovered that capping the initial flush is only half the contract — the remaining buffered chunks must drain on-demand via `acknowledgeChunk()`, not sit in the pause buffer indefinitely. Without the drain hook, paused chunks beyond the initial cap are never delivered.
+**Evidence:** The resume-cap gating alone left buffered chunks stranded. Adding a follow-on drain path in `acknowledgeChunk()` — pull one buffered chunk per acknowledgment — completed the demand-driven pipeline contract.
+**Recommendation:** When speccing backpressure or flow-control changes, trace the full lifecycle: initial flush (cap), ongoing delivery (demand pull), and buffer exhaustion (cleanup). A cap without a drain is a deadlock waiting to happen.
+**Applies to:** Any sprint modifying pipeline buffer/queue/backpressure behavior.
+**Status:** Observation
+
+### SRL-044 — Pure-function decision modules for animation logic (NARR-CURSOR-2, 2026-05-18)
+**Verdict:** Extracting cursor-hold decisions into a shared pure-function module (`silenceAwareCursor.ts`) rather than inlining them in the FoliatePageView glide loop produced cleaner separation of concerns and significantly better testability — 20 focused tests on the decision logic alone, independent of RAF timing or DOM state.
+**Evidence:** The spec predicted 3 edit sites; CLI touched 8 files but the core decision logic was cleanly isolated in one new module. The glide loop calls the decision function and acts on the result, keeping animation mechanics and hold/resume policy separate.
+**Recommendation:** When an animation loop needs branching logic based on external state (silence gaps, pause reasons, playback mode), extract the decision into a pure function that the loop calls. Test the decision exhaustively; test the animation integration lightly.
+**Applies to:** Any sprint adding conditional behavior to RAF-based animation loops.
+**Status:** Observation
+
+### SRL-045 — Evaluation/infrastructure sprints are naturally well-bounded when the harness pre-exists (TTS-EVAL-3, 2026-05-18)
+**Verdict:** The spec's 8 done-when criteria mapped 1:1 to implementation tasks with no scope expansion, no surprise edit sites, and no mid-sprint amendments. When a sprint's job is to run an existing tool, capture its output, and wire a script, the spec can be precise because the moving parts are already built.
+**Evidence:** 91 tests passed on first attempt. No additional files beyond what the spec predicted were needed. Matrix run, soak run, and gate run all produced artifacts cleanly. Contrast with runtime-code sprints (NARR-CURSOR-2, NARR-PAUSE-1) where edit-site discovery is common.
+**Recommendation:** For sprints that exercise existing infrastructure rather than building new runtime code, the spec can be tighter and the effort estimate more reliable. Flag these as "infrastructure execution" in the spec so reviewers calibrate expectations correctly.
+**Applies to:** Any sprint whose primary work is running tooling, capturing baselines, or wiring existing scripts into CI.
+**Status:** Observation
+
+### SRL-046 — Isolation sprints need preflight stabilization gates before extraction (READER-MODE-ISOLATION-1-PHASE-0, 2026-05-21)
+**Verdict:** Adapter isolation is safer when known shared-surface guardrails are fixed before extraction begins.
+**Evidence:** Phase 0 closed word-0 recentering and stale browse-away reset before moving Flow/Narrate ownership into adapters, and locked those seams with 10 regression tests plus code-search gates.
+**Recommendation:** For cross-mode refactors, require a Phase 0 gate that locks exact-anchor, visual-follow, and mode-switch invariants before restructuring.
+**Applies to:** Reader modes, shared-surface refactors, adapter extraction sprints.
+**Status:** Observation
+
+### SRL-047 — Mode lifecycle must reset local visual refs, not only runtime owners (READER-MODE-ISOLATION-1-PHASE-0, 2026-05-21)
+**Verdict:** Runtime ownership contracts are incomplete if local view refs can survive mode switches and block the new owner.
+**Evidence:** `userBrowsingRef` and `lastScrollFollowPosRef` could carry stale Flow/Narrate state into the next mode until a reading-mode reset effect was added.
+**Recommendation:** Adapter `select()` / `start()` contracts should include visual-state reset guarantees for local refs, browse-away state, cursor baselines, and recenter affordances.
+**Applies to:** Flow/Narrate adapters, Foliate surface bridge, mode lifecycle specs.
+**Status:** Observation
+
+### SRL-048 — Baseline-sync closeouts must advance the queue before next-pointer (BASELINE-SYNC-1, 2026-05-22)
+**Verdict:** A baseline-sync sprint is not fully closed just because the intended commits are pushed; the workbook queue must also mark the completed head and expose the next real sprint.
+**Evidence:** `BASELINE-SYNC-1` landed as three pushed commits on `main` with `main...origin/main = 0/0`, but `/next-pointer` still saw `BASELINE-SYNC-1` as Seq 1 because `docs/governance/sprint-queue.xlsx` had not advanced.
+**Recommendation:** Closeout for any queue-management or baseline-sync sprint should update `ROADMAP.md` and `docs/governance/sprint-queue.xlsx` before running `/next-pointer`.
+**Applies to:** Baseline sync, roadmap review, phase closeout, sprint closeout, and next-pointer dispatch readiness.
+**Status:** Observation
+
+### SRL-049 — Shared constants and behavioral gates require full-suite verification (TEST-GREEN-1, 2026-05-22)
+**Verdict:** Targeted tests are insufficient when a sprint changes shared constants or adds a behavioral gate, because stale expectations can survive outside the focused scope.
+**Evidence:** Seven of twelve TEST-GREEN-1 failures traced to constant-change or gate-change drift: `TTS_TRUSTED_CURSOR_LAG_MS`, `TTS_NORMALIZER_VERSION`, and the `followerMode` gate.
+**Recommendation:** Any sprint changing shared constants, cache/version constants, timing constants, or broad behavioral gates should run the full suite before closeout or explicitly record why it cannot.
+**Applies to:** Runtime constants, narration timing, normalizer/cache identity, reader-mode gates, and CI gating.
+**Status:** Observation
+
+### SRL-050 — Foliate recovery actions need renderer-level movement, not only shared reader state (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A persistent anchor is not user-visible unless the active Foliate surface is explicitly navigated to it.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 needed `jumpFoliateToWordAnchor` because Page jump-back could show and clear the button without moving the Foliate viewport.
+**Recommendation:** Any Foliate-visible action like jump-back, mode start, or recenter must call a surface API that can highlight, scroll, and section-recover the target word.
+**Applies to:** Foliate Page/Focus/Flow/Narrate surfaces, jump-back, mode-start anchoring, section recovery.
+**Status:** Observation
+
+### SRL-051 — Render-path getters must be side-effect free (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A function called like a getter becomes dangerous when it logs or records diagnostics on every render.
+**Evidence:** `getEffectiveWords` spammed the console and diagnostics during Focus startup until the effective word source was stabilized.
+**Recommendation:** Split source resolution into pure memoized values for render and explicit one-shot diagnostics for source transitions.
+**Applies to:** React render paths, word-source selection, diagnostics, performance-sensitive reader hooks.
+**Status:** Observation
+
+### SRL-052 — Mode playing state must follow runtime start, not precede it (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** UI "playing" state should not flip before the mode runtime has actually started.
+**Evidence:** Focus could render a blank active overlay when `focusPlaying=true` preceded delayed `startMode("focus", ...)`.
+**Recommendation:** For Focus/Flow/Narrate, resolve anchor and start the runtime before publishing active playback state, or expose a distinct "starting" state.
+**Applies to:** Reader mode start flows, async Foliate readiness, overlay rendering, Play/Space handlers.
+**Status:** Observation
+
+### SRL-053 — Manual screen QA is mandatory for Foliate reader-mode runtime changes (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Automated tests are necessary but not sufficient for reader-mode runtime changes that move the Foliate surface.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 reported 2794 passing tests and clean TypeScript, but the live 18-scenario manual QA gate found 10 failures, including Page jump-back, Focus blank overlay, Flow non-follow, Narrate wrong start, and hard-click retarget failures.
+**Recommendation:** Any sprint touching Foliate surface movement, mode start, jump-back, playback visual follow, or hard-selection anchoring should require screen-interaction manual QA before merge or roadmap advancement.
+**Applies to:** Page/Focus/Flow/Narrate runtime changes, Foliate surface bridge, jump-back, active playback follow, mode handoff.
+**Status:** Observation
+
+### SRL-054 — Specs must distinguish hard-selected anchor from last-read/progress anchor (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A "current word" contract is ambiguous unless it names the difference between hard selection, live playback cursor, durable progress, and browse-away visible position.
+**Evidence:** Manual QA showed hard clicks moved the visible highlight box, but playback resumed from a prior "persistent last-read word" or section start. Narrate's Jump back tooltip also exposed the implementation mismatch by targeting "persistent last-read word" rather than the hard-selected playback anchor.
+**Recommendation:** Future reader-anchor specs should define separate owners and precedence for hard-selected anchor, last-read progress, live playback cursor, and temporary browse-away position, then test Play, Space, Jump back, active retarget, and reopen against that precedence.
+**Applies to:** Reader anchor service, mode start, progress persistence, CFI restore, active retarget, cross-mode handoff.
+**Status:** Observation
+
+### SRL-055 — Shared Foliate surfaces need live UI gates, not only structural/unit tests (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Structural gates can confirm the right helpers exist while the live renderer still fails to move, render, or follow.
+**Evidence:** Step 2 added Foliate jump-back helpers, Flow follow fixes, Focus startup changes, and targeted tests, yet manual QA found Page jump-back hiding without returning, Focus rendering a blank overlay, Flow cursor advancing outside the reading window, and Flow browse-away failing to pause or show Jump back.
+**Recommendation:** Add at least one live UI gate, manual or automated, for each shared Foliate surface behavior that depends on real layout: Page jump-back motion, Focus first-word render, Flow cursor follow, Narrate exact start, and cross-mode hard-click retarget.
+**Applies to:** FoliatePageView, reader mode adapters, FlowScrollEngine integration, Focus overlay, Narrate cursor sync, persistent-anchor repairs.
+**Status:** Observation
+
+### SRL-056 — Hard-selection anchors need cause-aware clearing (READER-PERSISTENT-ANCHOR Step 3, 2026-05-22)
+**Verdict:** A hard-selected anchor must not be cleared by generic progress or visual-ref writes before mode start consumes it.
+**Evidence:** `explicitSelectionAnchorRef` was cleared by `writeRefs` calls with non-hard-selection causes, including jump-back from `syncVisualToPersistentWord`, which caused Narrate and Flow starts to ignore the newly selected word.
+**Recommendation:** Anchor state mutation APIs should use explicit causes and only clear hard-selection anchors on lifecycle events that truly invalidate them, such as book-open or explicit replacement.
+**Applies to:** Reader persistent anchors, mode start, jump-back, active retargeting, resume/progress writes, cross-mode handoff.
+**Status:** Observation
+
+### SRL-057 — Same-section and cross-section Foliate movement are separate acceptance cases (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** A Jump Back or anchor recovery path that works across chapter or section boundaries does not prove same-section movement works.
+**Evidence:** Step 3 Page Jump Back returned correctly when the target anchor was in another section, but dismissed without moving when the anchor was in the same chapter.
+**Recommendation:** Any Foliate anchor navigation helper must test both same-section and cross-section return paths before being accepted.
+**Applies to:** Page Jump Back, reopen restore, section recovery, mode-switch recentering, persistent-anchor navigation.
+**Status:** Observation
+
+### SRL-058 — Each reading mode needs its own active-render QA gate (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** Shared anchor plumbing can pass while a specific mode's playback renderer remains broken.
+**Evidence:** Step 3 fixed Flow playback and Narrate exact start, but Focus still rendered a blank active overlay and did not expose paused Jump Back.
+**Recommendation:** Manual QA and dispatch specs must verify active render output per mode, not infer mode health from shared anchor or surface state.
+**Applies to:** Focus, Flow, Narrate, Page-mode restore, adapter extraction.
+**Status:** Observation
+
+### SRL-059 — CSS-column word-position indexes need live rect validation before same-section movement decisions (READER-PERSISTENT-ANCHOR Step 3.1, 2026-05-22)
+**Verdict:** Cached word-position rects can go stale after Foliate page turns in CSS-column paginated mode.
+**Evidence:** Step 3.1 found that `FoliatePageView`'s word position index stores `getBoundingClientRect()` snapshots; same-section Jump Back could trust stale `visible` state and dismiss without moving.
+**Recommendation:** Same-section Foliate navigation should either force motion for recovery actions or validate target rects live before deciding the word is already visible.
+**Applies to:** Page Jump Back, reopen restore, same-section anchor recovery, mode-switch recentering, Foliate word-position indexes.
+**Status:** Observation
+
+### SRL-060 — Narrate sync gates must verify heard audio, not only visual cursor position (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Narrate can visually start at the right word while the spoken audio lags behind or skips at chunk boundaries.
+**Evidence:** Step 3.1 manual QA showed S12/S13 failing after the cursor started at the hard-clicked anchor but then outran the heard audio; at chunk boundaries the audio skipped ahead to the cursor location.
+**Recommendation:** Future Narrate specs and manual QA gates should explicitly verify cursor lead/lag against heard audio and include chunk-boundary transition checks, not only visual start position.
+**Applies to:** Narrate playback, audio scheduler changes, cursor sync, chunk-boundary handoff, TTS progress sources.
+**Status:** Observation
+
+### SRL-061 — Cross-surface cursor visuals need one declared owner per mode (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Flow cursor regressions can appear when multiple surfaces render cursor affordances for the same active word.
+**Evidence:** Step 3.1 manual QA found S8 failing because both the parent-document `.flow-shrink-cursor` overlay and the iframe `.page-word--flow-cursor` underline rendered at once.
+**Recommendation:** Mode specs should declare the single visual cursor owner for each mode and include an acceptance check that duplicate cursor affordances are suppressed.
+**Applies to:** Flow cursor rendering, Foliate iframe highlights, parent overlay cursors, reader mode adapter isolation.
+**Status:** Observation
+
+### SRL-062 — Narrate timing repairs should be sized as investigation-heavy (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** Narrate cursor fixes can require high-effort root-cause tracing even when the final patch is small.
+**Evidence:** Step 3.2's final Narrate change was a one-line cursor-lag constant update, but the work required tracing audio scheduler progress, word boundaries, output latency, tempo stretch, and chunk-boundary behavior.
+**Recommendation:** Future Narrate timing dispatches should pre-flag investigation effort separately from implementation effort so expectations match the real diagnostic burden.
+**Applies to:** Narrate timing, audio scheduler work, TTS cursor sync, chunk-boundary repairs, manual audio QA.
+**Status:** Observation
+
+### SRL-063 — Fixed cursor-lag constants are provisional when audio output latency is hardware-dependent (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** A fixed trusted cursor lag can be a useful repair lever, but repeated tuning signals the need for a measured or adaptive model.
+**Evidence:** `TTS_TRUSTED_CURSOR_LAG_MS` has moved `120→220→350→450ms` as real Electron/Chromium/WASAPI output latency exceeded timestamp-derived expectations.
+**Recommendation:** Plan a future hardening sprint for adaptive lag calibration or measured output delay rather than continuing to hand-tune a fixed cursor-lag constant.
+**Applies to:** Narrate cursor sync, audio scheduler calibration, hardware-dependent playback latency, TTS UX polish.
+**Status:** Observation
+
+### SRL-064 — Narrate exact-start and continuous sync are separate acceptance gates (READER-PERSISTENT-ANCHOR Step 3.2 QA, 2026-05-22)
+**Verdict:** Narrate can improve chunk-boundary continuity while still failing exact selected-word audio start.
+**Evidence:** Step 3.2 manual QA showed S8 fixed and chunk-boundary skip-ahead improved, but selecting "At" in "At this point" started audio from "Cusco" in the prior sentence.
+**Recommendation:** Future Narrate sync specs should separately test selected-word audio start, cursor/audio lead-lag during playback, and chunk-boundary transition behavior.
+**Applies to:** Narrate playback start, audio scheduler chunk mapping, cursor sync, hard-click retargeting, manual audio QA.
+**Status:** Observation
+
+### SRL-065 — Active retarget paths must have a single resync owner (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Active playback retargeting becomes race-prone when more than one path can stop and restart the audio pipeline for the same click.
+**Evidence:** Step 3.3 found that `onWordClick` could trigger `narration.resyncToCursor` twice during active Narrate: once from `commitSharedWordAnchor` and again from `retargetActiveModeToWord`, causing two rapid pipeline stop/start cycles per click.
+**Recommendation:** For active Focus, Flow, and Narrate retargeting, assign one resync owner per click path and make secondary anchor updates explicitly skip runtime resync.
+**Applies to:** Active word-click retargeting, Narrate resync, audio pipeline restarts, Flow/Focus adapter ownership.
+**Status:** Observation
+
+### SRL-066 — Downstream chunk dispatch must use resolved plan boundaries, not raw targets (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Chunk-planning refinements can invalidate downstream assumptions that raw target sizes equal resolved chunk boundaries.
+**Evidence:** Step 3.3 sentence-boundary snapping extended cold-start chunk 0 beyond the raw `firstSize` target, exposing a parallel ramp overlap because chunk 1 started from raw `firstSize` instead of `openingRampPlan[0].endIdx`.
+**Recommendation:** Any sprint that changes chunk sizing, snapping, ramping, or natural-boundary logic should audit all downstream dispatch math and require consumers to use resolved plan boundaries.
+**Applies to:** TTS chunk planning, Kokoro pipeline ramping, sentence-boundary snapping, parallel chunk dispatch.
+**Status:** Observation
+
+### SRL-067 — Visual and audio pipelines must not share raw word indexes unless they share tokenization (READER-PERSISTENT-ANCHOR Step 3.3 QA, 2026-05-22)
+**Verdict:** A numeric word index is not a stable cross-subsystem contract when Foliate/click resolution and TTS chunking tokenize text differently.
+**Evidence:** Step 3.3 DevTools diagnostics showed `globalWordIndex: 3370` meant `Medicare` to `onWordClick`, but the same `startIdx=3370` meant `Many` to `speakNextChunkKokoro` and `produceChunk`; the TTS chunk also rendered `sixty-five` as `sixty five`, indicating tokenization drift.
+**Recommendation:** Narrate exact-start work should use one canonical word/token index source across click resolution, highlighting, and TTS chunking, or explicitly translate indexes at subsystem boundaries before audio scheduling.
+**Applies to:** Narrate exact-start, TTS chunking, Foliate word indexes, click retargeting, cursor/audio sync, tokenizer normalization.
+**Status:** Observation
+
+### SRL-068 — Prefer canonical content alignment over tokenizer unification across renderer/source boundaries (READER-PERSISTENT-ANCHOR Step 3.4, 2026-05-23)
+**Verdict:** When the renderer and source extractor see the same book through different DOM/XHTML views, making one canonical index source and aligning rendered content to it is safer than trying to force tokenizer parity.
+**Evidence:** Step 3.4 repaired the click/TTS index mismatch by stamping Foliate DOM spans from canonical extractor words in `wrapWordsInSpans`, instead of trying to make renderer `segmentWordSpans` and main-process `epub-word-extractor` tokenize identically across stitching, punctuation-gap, footnote, and block-selection differences.
+**Recommendation:** For reader surfaces that bridge rendered DOM and source extraction, choose one canonical word/index source, align content to it, and make unmatched content warn/recover instead of silently drifting by position.
+**Applies to:** Foliate word wrapping, TTS word indexes, rendered/source text alignment, Narrate exact-start, click retargeting, adapter extraction.
+**Status:** Observation
+
+### SRL-069 — Prefetched audio boundaries must be source-owned before driving heard-audio cursors (READER-PERSISTENT-ANCHOR Step 3.5, 2026-05-24)
+**Verdict:** A flat boundary timeline can advance visual cursor state beyond the currently audible source when chunks are prefetched.
+**Evidence:** NARRATE-CURSOR-SYNC-4 fixed S13 by clamping `tick()` and `getAudioProgress()` to the active source window, so prefetched future boundaries cannot drive Narrate cursor progress before their source starts playing.
+**Recommendation:** Any TTS cursor driven by prefetched chunk boundaries must gate emitted progress by the currently-playing source, not just by `audioCtx.currentTime` minus lag.
+**Applies to:** `audioScheduler`, Narrate cursor sync, chunk prefetch, streaming TTS, source handoff.
+**Status:** Observation
+
+### SRL-070 — Self-referential telemetry cannot gate a sync fix; verify with audio-independent ground truth (READER-PERSISTENT-ANCHOR Step 3.5/3.6 QA, 2026-05-24)
+**Verdict:** The boundary-drift metric (~9ms) measured cursor-vs-schedule, not cursor-vs-heard-audio, so it reported "tight" while the cursor actually led the audio — masking S13 across four repair rounds (3.2–3.5).
+**Evidence:** In The Raven, every chunk logged `WORD-NATIVE` timing with ~9ms boundary drift, yet Evan's ear confirmed the cursor led and narration omitted content at re-entry. Every scheduler-derived number is computed from the same predicted timeline, so none can detect a schedule-vs-audio offset. Step 3.6 added the first non-self-referential instrument (`ctx.currentTime − chunkStartTime`).
+**Recommendation:** PROMOTED TO STANDING RULE — Narrate/sync QA gates require an audio-independent ground truth (Evan's ear, or a non-self-referential instrument such as schedule-vs-wallclock drift); scheduler-derived metrics (boundary drift, scroll-follow, handoff index) are NOT sync evidence. Recorded in `docs/governance/LESSONS_LEARNED.md`.
+**Applies to:** Narrate cursor/audio sync gates, TTS QA, any open-loop-vs-closed-loop verification.
+**Status:** Promoted to standing rule (second occurrence with SRL-060).
+
+### SRL-071 — Cowork pre-dispatch root-cause investigation shrinks investigation-heavy repairs to read-and-run sprints (READER-PERSISTENT-ANCHOR Step 3.6, 2026-05-24)
+**Verdict:** Pinning the exact seam before dispatch turned a Narrate-timing repair (which SRL-062 sized as investigation-heavy) into a small, clean implementation sprint.
+**Evidence:** Step 3.6 dispatched a single core change (`nextGenWordIndexRef`) plus tests with file:line targets and reset conditions; CLI landed it green on the first pass (2,821 tests, tsc clean) at M effort with no investigation tasks.
+**Recommendation:** For investigation-heavy subsystem repairs, have Cowork complete live root-cause tracing and identify the exact seam (refs, file:line, reset conditions) before authoring the dispatch; the CLI sprint then sizes as a normal read-and-run implementation.
+**Applies to:** Narrate/TTS timing repairs, tangled-subsystem bug fixes, the investigate-then-dispatch workflow.
+**Status:** Observation (refines SRL-062).
+
+### SRL-072 — Don't iterate fixes on "ahead-of-heard" references; audible continuity needs a real heard-position signal (READER-PERSISTENT-ANCHOR Step 3.6 QA, 2026-05-24)
+**Verdict:** Six pre-isolation rounds (3.1–3.6) each partially worked then skipped because every reference the code could seed playback from — `cursorWordIndex`, `lastConfirmedAudioWordRef`, and finally `nextGenWordIndexRef` (produced-end) — is AHEAD of what the listener has actually heard. Step 3.6 made generation contiguous yet the audio still dropped a line, proving the content-omission (Bug 2) and the cursor-lead (Bug 1) are one defect that cannot be fixed without a "what was actually spoken" signal.
+**Evidence:** Step 3.6 console showed `produceChunk 0→…→1111` (contiguous generation) and `scheduleChunk drift ≈ −227s` (whole book prefetched); Evan did not hear "This it is and nothing more." — playback continued from the ahead-of-heard frontier. Each prior fix swapped one ahead-of-heard ref for another.
+**Recommendation:** When an audio/playback sync defect recurs across multiple targeted fixes, stop substituting predicted/generation references and first establish the real playback-position signal (closed-loop). Prefer doing the closed-loop rework once — ideally after the owning module is isolated — over repeated open-loop patches that each add scheduler risk. Tie acceptance to an audio-independent ground truth (ear or a non-self-referential instrument), per SRL-070.
+**Applies to:** TTS cursor/audio sync, streaming playback continuation, any open-loop "predict then display/seed" subsystem; pre- vs post-isolation sequencing of high-risk fixes.
+**Status:** Observation (third in the Narrate-sync arc with SRL-060 and SRL-070; promotion candidate — "audio sync fixes require a real heard-position signal, not predicted references").
+
+### SRL-073 — Stateful adapter services need before/after cleanup tests for mode transitions (READER-ISO-1A, 2026-05-24)
+**Verdict:** State services can pass happy-path precedence tests while cleanup paths are dead if the implementation overwrites owner state before comparing old and new ownership.
+**Evidence:** READER-ISO-1A initially had a `setActiveMode` assignment-before-comparison bug that made stale mode-advance cleanup unreachable; parent review caught and fixed it before merge.
+**Recommendation:** Adapter and anchor-service specs that mutate active owner state should include explicit transition tests proving cleanup happens when ownership changes, plus no-op tests proving same-owner selection does not clear valid state.
+**Applies to:** Reader mode adapters, current-word anchor services, active runtime ownership, stale-mode cleanup, future orchestrator extraction.
+**Status:** Observation.
+
+### SRL-074 — Orchestrators should consume building blocks, not closure-owned internals (READER-ISO-1B, 2026-05-25)
+**Verdict:** A clean orchestrator boundary should route public lifecycle actions while closure-heavy implementation functions remain in the owning hook or module until their adapter owns the relevant refs.
+**Evidence:** READER-ISO-1B could not cleanly extract `handleStopTts` because it depends on internal refs such as `narrationCursorRafRef` and `narrateTruthRafRef`; keeping it in `useReaderMode` and exporting it as a building block preserved encapsulation.
+**Recommendation:** Future adapter extraction specs should classify functions as routeable shell actions versus implementation-owned building blocks before moving code. Do not force ref-heavy teardown/truth-sync functions across a boundary just to make the extraction look complete.
+**Applies to:** Reader mode orchestrator, Focus/Flow/Narrate adapter extraction, lifecycle routing, stop/teardown paths, truth-sync ownership.
+**Status:** Observation.
+
+### SRL-075 — Concrete adapters can be proven as pure classes before React wiring (READER-ISO-1C, 2026-05-26)
+**Verdict:** Adapter contracts are easier to validate when the first concrete adapter is implemented and tested as a standalone class before routing live React hooks through it.
+**Evidence:** READER-ISO-1C added `FocusModeAdapter` wrapping `FocusMode` with lifecycle ownership, anchor-gated `onWordAdvance`, clock reporting, and SRL-073 transition/no-op coverage without needing `renderHook` or runtime wiring.
+**Recommendation:** Future adapter migrations should first prove adapter lifecycle, ownership, and contract behavior in pure-class tests, then perform orchestrator/hook wiring as a separate step.
+**Applies to:** Focus, Flow, Narrate adapters; reader-mode lifecycle ownership; passive surface command migration; future hook wiring.
+**Status:** Observation.
+
+### SRL-076 — Adapters can own pure decisions before owning DOM execution lifecycle (READER-ISO-1D, 2026-05-26)
+**Verdict:** Adapter extraction can safely advance by moving pure decision logic first while leaving ref-heavy DOM execution in the existing hook until a later wiring sprint.
+**Evidence:** READER-ISO-1D added `FlowModeAdapter.resolveCompletion()` as pure data logic for section-handoff decisions, plus browse-away state and surface command emission, while keeping `FlowScrollEngine` DOM lifecycle in `useFlowScrollSync` per SRL-074.
+**Recommendation:** Future adapter migrations should separate pure decision ownership from execution ownership: extract and test decision services first, then wire hooks and DOM/ref lifecycles in a later sprint with transition coverage.
+**Applies to:** Flow/Narrate adapter extraction, section handoff, browse-away handling, DOM-coupled runtime migration, reader-mode lifecycle ownership.
+**Status:** Observation.
+
+### SRL-077 — Hook-backed modes can use typed bridges before React wiring (READER-ISO-1E, 2026-05-27)
+**Verdict:** A hook-backed mode can gain a concrete adapter boundary before the full React hook tree is routed through that adapter, as long as the adapter consumes typed bridge callbacks instead of reaching into closure-owned refs.
+**Evidence:** READER-ISO-1E added `NarrateModeAdapter` around the narration hook bridge, owning truth-sync install/clear lifecycle, browse-away state, surface command emission, and `audio-truth` clock reporting while leaving ref-heavy truth-sync RAF callbacks in `useReaderMode` per SRL-074.
+**Recommendation:** Future adapter migrations should introduce typed bridges for hook-owned operations first, prove lifecycle and cleanup behavior with pure adapter tests, and move React/ref wiring only after ownership seams are explicit.
+**Applies to:** Narrate adapter wiring, audio truth-sync ownership, hook-backed mode bridges, reader-mode lifecycle ownership, closed-loop cursor preparation.
+**Status:** Observation.
+
+### SRL-078 — Agent-rename propagation must include workflow docs and project-local skills (GOV-HUMAN-REVIEW-1, 2026-05-27)
+**Verdict:** Standing Rule #14 (agent-rename grep-and-replace across governing docs) is necessary but not sufficient if its scope is read narrowly. Workflow docs (`.claude/WORKFLOW_REFERENCE.md`) and project-local skills (`.claude/skills/*/SKILL.md`) can carry agent-role names that drift from the canonical CLAUDE.md roster without being noticed.
+**Evidence:** The MarcusAurelius stub agent existed in `.claude/agents/` as an uncustomized doc-keeper template while `.claude/agents/herodotus.md` was the actual customized doc-keeper file — two competing names for the same role. CLAUDE.md's canonical roster referenced Herodotus; `WORKFLOW_REFERENCE.md` (3 spots) and the project-local Virtuoso `SKILL.md` (7 spots) referenced MarcusAurelius. GOV-HUMAN-REVIEW-1 resolved this by renaming the doc-keeper agent to MarcusAurelius across all surfaces (deleting `herodotus.md`, creating `marcusaurelius.md` with the customized content, and propagating to CLAUDE.md, agents/readme.md, zeus.md, hercules.md, athena.md, simonides.md, ROADMAP.md, LESSONS_LEARNED.md, WORKFLOW_REFERENCE.md, and SKILL.md). A first-pass resolution that simply removed the MarcusAurelius file would have completed the GOV item but kept the workflow-doc drift intact and the canonical-roster reference broken; the broader grep was what made the resolution correct.
+**Recommendation:** Extend Standing Rule #14 explicitly: any agent rename or removal must grep `.claude/` recursively (not just `agents/`) and check `WORKFLOW_REFERENCE.md` and every installed-in-project skill. When two competing names point at the same role, treat it as a rename, not a removal — the workflow docs are signaling the intended canonical name.
+**Applies to:** Agent additions, renames, removals; workflow doc consistency; skill maintenance; governance hygiene sweeps.
+**Status:** Observation. Promotion candidate if a second occurrence appears.
+
+### SRL-079 — Source-fix verification needs rebuild gate (BUG-181 retroactive, 2026-05-28)
+**Verdict:** Any bug whose disposition is "RESOLVED in source — production build needs rebuild" stays OPEN until `npm run build` + a smoke-test pass against the bug's original reproducer confirms the rebuilt binary embodies the diff. The fix is not closed when the source diff lands; it is closed when the binary the user is actually running embodies the change. Catch-up entry — promoted to Standing Rule #35 in ROADMAP.md on 2026-05-28 at /next-pointer time; this SpecRetro entry exists to keep the canonical lessons log in sync with the active Standing Rules.
+**Evidence:** Five consecutive bugs drifted past close-out with the fix landed in source but the running binary stale: BUG-176 (Flow→Page mode drop), BUG-178 (mode-switch position loss), BUG-179 (Focus blank zone), BUG-180 (chunk active-word color-on-color), and BUG-181 (Production build `tokenizeWithMeta` `r.split is not a function`). Each carried the same "Verification blocked by stale production build" tag in BUG_REPORT.md. The 2026-05-27 live-QA discovery sweep re-found BUG-181 as "F2" and produced a YELLOW gate verdict — entirely based on a stale-build observation that rebuild then eliminated 24 hours later. Without a rebuild-verification gate the discovery loop would have continued; with it, the rebuild step is forced into the close-out before the fix is considered shipped.
+**Recommendation:** Adopt rebuild+smoke as the explicit final acceptance step for source-fix-only sprints. Any sprint with "verification blocked by stale production build" in its close-out remains OPEN. MarcusAurelius's docs-pass step in sprints with renderer changes should include an explicit "rebuild + smoke" task before the sprint is marked Completed.
+**Applies to:** All bug-fix sprints; verification gates; source-vs-binary drift; live-QA discovery passes.
+**Status:** **Promoted to Standing Rule #35** (ROADMAP.md, 2026-05-28).
+
+### SRL-080 — openpyxl writes erase Excel formula machinery (TTS-QUAL-CI-1, 2026-05-28)
+**Verdict:** openpyxl can silently strip Excel formula expressions when writing an `.xlsx` file, converting formula cells to their last-cached static values. Once stripped, formula-driven KPIs become inert — any downstream consumer expecting computed values gets a frozen snapshot of whatever the last cached display value was at strip-time. This happens whether or not `data_only=True` was used on the load — the formula's expression text and the cached value travel separately, and a default openpyxl save can ratchet a formula-bearing sheet toward static even without explicit intent. The damage is asymmetric: once a sheet has been stripped, no openpyxl operation will restore it; restoration requires Excel itself (rebuilding the formulas by hand) plus a guardrail to prevent future strips.
+**Evidence:** `scripts/recalc.py` was authored under the assumption that `sprint-queue.xlsx`'s Dashboard tab (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag) was formula-driven. Hermes's smoke-run discovered the formula-cell scan returned zero results — meaning prior openpyxl operations across 2026-05-22 → 2026-05-28 had silently converted every Dashboard formula to a static value. The recalc script's intended primary purpose (refresh formula-driven KPIs) is therefore moot for the current file; its remaining value is the `calcMode = auto` flip and a clean re-save.
+**Recommendation:** Disposition (Evan, 2026-05-28): **restore formulas in Excel, then quarantine the Dashboard tab from openpyxl.** Concretely: (a) rebuild the Dashboard formulas manually in Excel using the cell-reference layout the original template specified (see C:\Users\estra\Projects\Blurby\docs\governance\sprint-queue.xlsx Dashboard section per the /roadmap-review skill's "Sprint queue spreadsheet structure" doc); (b) extend `scripts/recalc.py` with a guardrail: refuse to operate on any cell whose worksheet name matches `Dashboard`, with `--allow-dashboard` as an explicit opt-out; (c) document the convention in `CLAUDE.md` or a new `docs/governance/SPREADSHEET_CONVENTIONS.md`: openpyxl edits the Catalog tab; Excel computes Dashboard from Catalog. Future hygiene work is captured in `HYG-XLSX-DASHBOARD-RESTORE` (Catalog Seq=6 stub).
+**Applies to:** Any project that uses Excel files for KPI rollup and edits them via openpyxl; spreadsheet automation; governance-tooling design; Blurby's sprint-queue.xlsx specifically.
+**Status:** Observation. Promotion candidate if a second occurrence appears or if a third-party openpyxl-driven xlsx tool hits the same fragility in another Blurby surface.
+
+### SRL-081 — Mid-spec fold-in absorbs small adjacent hygiene cleanly (TTS-QUAL-CI-1, 2026-05-28)
+**Verdict:** When a sprint discovers small adjacent tooling debt during its planning or /next-pointer phase, folding the items into the active spec (as labeled tasks with their own success criteria) is preferable to spinning up dedicated micro-sprints, provided the fold-in stays under ~20% of total sprint LOE and reuses the same dispatch wave. The "spin up a dedicated micro-sprint" alternative pays full queue-management overhead (Catalog row, Seq renumber, separate branch, separate commit, separate close-out) for work that can be a 3-line task table entry instead.
+**Evidence:** TTS-QUAL-CI-1's spec was amended on 2026-05-28 to absorb two adjacent items surfaced by the xlsx Catalog mirror operation: `scripts/recalc.py` (governance tooling, ~37 LOC) and the LOE-XS dropdown extension (Catalog data validation + SINGLE-INSTANCE-LOCK-1 row update). Hermes executed both inside the original sprint scope as Tasks 4–5 in the amended spec, Hippocrates smoke-tested the recalc script as Task 9, and MarcusAurelius rolled all three concerns into one docs pass. Net effect: two tooling items shipped with zero queue-management overhead and no separate sprint dispatch. The original "Effort: S" sizing held — the fold-in didn't blow scope. CLI reports "All tasks matched their annotated effort/model tiers" — no effort mismatch flagged.
+**Recommendation:** When small hygiene items surface during sprint planning, prefer fold-in over spin-off if (a) the work touches an overlapping surface or roster (here: same Lane D + Lane E, same Hermes + MarcusAurelius), (b) it's < ~20% of the host sprint's LOE, and (c) it can reuse the host's dispatch wave. Document the fold-in explicitly in the spec (don't slip it in silently) — the audit trail in TTS-QUAL-CI-1's "Effort note flagged the marginal scope expansion on 2026-05-28 with traceable rationale" sentence is the model.
+**Applies to:** Sprint scoping; governance tooling; small hygiene work; spec amendments; queue-management overhead reduction.
+**Status:** Observation. "What worked" lesson. Promotion candidate if the pattern recurs in a second sprint without scope creep.
+
+### SRL-082 — Electron/CommonJS tests should prefer direct seams over brittle module-cache mocks (EXT-PAIR-1, 2026-05-29)
+**Verdict:** Electron-facing CommonJS modules are hard to isolate reliably with broad `vi.mock("electron", ...)` assumptions once another test has already cached a `require("electron")` path.
+**Evidence:** EXT-PAIR-1's WebSocket auth tests needed reliable access to connection/message handlers and safe behavior when `safeStorage` was unavailable. Rather than leaning on a fragile Electron mock that may not intercept cached CommonJS imports consistently, the sprint added direct test exports for `handleConnection`/`handleMessage` state seams and made production `safeStorage` access defensive with optional chaining.
+**Recommendation:** For Electron CommonJS modules, expose narrow test seams for state-machine logic and guard runtime-dependent Electron APIs defensively. Use global Electron mocks only as a last resort, and do not rely on them as the sole proof for module-cache-sensitive behavior.
+**Applies to:** Electron main-process tests, CommonJS modules, WebSocket server tests, runtime-dependent Electron APIs such as `safeStorage`.
+**Status:** Observation. Promotion candidate if another Electron/CJS test seam hits the same module-cache fragility.
+
+### SRL-083 — Electron lifecycle handlers belong inside the single-instance owner branch (SINGLE-INSTANCE-LOCK-1, 2026-05-29)
+**Verdict:** Once an Electron app adopts `app.requestSingleInstanceLock()`, lifecycle handlers that create, restore, focus, or tear down windows should be registered only by the primary lock owner.
+**Evidence:** SINGLE-INSTANCE-LOCK-1 wrapped `whenReady`, `window-all-closed`, `will-quit`, and `activate` behavior inside the lock-owner branch. The second process exits after failing the lock and never registers duplicate lifecycle handlers.
+**Recommendation:** Future main-process lifecycle additions should go inside the primary-instance `else` branch unless they are intentionally needed before the lock check. Treat pre-lock handlers as exceptional and document the reason inline.
+**Applies to:** Electron main-process lifecycle, single-instance lock, `BrowserWindow` creation/focus, app activation handlers.
+**Status:** Observation.
+
+### SRL-084 — Vite circular-chunk diagnosis requires build-API instrumentation, not grep-based import tracing (THEME-SYNC-1, 2026-05-29)
+**Verdict:** Grep-based import tracing is insufficient for diagnosing Vite/Rollup circular chunk warnings — it misses edges created by Rollup's automatic module placement.
+**Evidence:** THEME-SYNC-1's initial agent-based grep found only 1 of 2 cycle edges in `settings↔tts`. The `tempoStretch` edge was visible in source imports, but the `kokoroStatus`/`qwenStatus` edge was invisible — Rollup assigned those modules to the settings chunk because their only importers were settings-panel hooks, then `useNarration.ts` (TTS chunk) imported them, creating the reverse edge. Three iterative build-test cycles were needed. The programmatic build API (`chunk.imports` + `chunk.modules` from `vite.build()` with `write: false`) revealed all edges in one pass.
+**Recommendation:** For any sprint diagnosing a Vite/Rollup circular chunk warning, start with the programmatic build API to dump chunk membership and inter-chunk imports. Reserve grep for confirming specific edges after the chunk map is known.
+**Applies to:** Vite build config, `manualChunks`, Rollup chunk diagnostics.
+**Status:** Observation.
+
+### SRL-085 — Smoke tests must verify build version before issuing verdicts (THEME-SYNC-1, 2026-05-29)
+**Verdict:** A smoke test verdict is only valid when the binary under test contains the fix being verified.
+**Evidence:** The first THEME-SYNC-1 smoke ran against an old installed Blurby.exe (v1.1.2) instead of the post-fix dev build (v1.75.1). The RED verdict was moot — the circular chunk fix wasn't in the binary being tested. A retest on `npm run dev` (v1.75.1) produced the correct GREEN verdict. The version label check was buried at TS2 instead of being a blocking TS0 gate.
+**Recommendation:** Every smoke checklist should include a TS0 step: verify the displayed version label matches the expected commit/version before any functional assertions. If the version doesn't match, stop and rebuild — don't issue a verdict on the wrong binary.
+**Applies to:** All sprints with manual smoke gates, especially source-fix-only sprints where the running binary may be stale.
+**Status:** Observation. Candidate for promotion to standing rule if a future smoke test repeats the stale-binary pattern.
+
+### SRL-086 — Prose synthesis is not a substitute for grep on quantitative claims (NARRATE-DUAL-SOURCE-ULTRATHINK adversarial review, 2026-05-29)
+**Verdict:** Any quantitative claim about the codebase that an architectural conclusion rests on — call-site counts, dispatch counts, reference counts, branch counts, edit-site enumerations — must be grep-verified against source before publishing. Prose summaries from upstream agents (Explore-agent reports, codex-parent dispatch summaries, prior close-outs) are inputs to be cross-checked, not citations to be propagated.
+**Evidence:** The 2026-05-29 ULTRATHINK on narration dual-source architecture published several quantitative claims later caught as wrong by an adversarial review that ground-truthed file:line references against `useNarration.ts`. The most consequential was the "~14 `speakNextChunk` call sites" claim that was actually 6 — propagated from a codex-parent prose summary without grep. The error didn't change the architectural conclusion but did require a 2nd commit (`cb6e894`) once the adversarial review caught it, plus a 3rd reconciliation pass when SRL-087 (below) compounded the problem by grepping the wrong branch.
+**Recommendation:** Cowork workflows that produce dispatch-ready artifacts (`/roadmap-review`, `/write-spec`, adversarial-review fold-ins, ULTRATHINK syntheses) MUST grep-verify every quantitative claim against source before publishing. Spec citations for counts MUST include the grep date and (when line numbers matter) the commit hash. Treat upstream-agent prose summaries as informant testimony, not as evidence.
+**Applies to:** All Cowork synthesis workflows that produce dispatch-ready artifacts; ULTRATHINK; roadmap-review; spec amendments.
+**Status:** **Promoted to Standing Rule #36** (ROADMAP.md, 2026-05-29 — jointly with SRL-087 under the umbrella *"accumulated context is not verified state; trust must be earned by an explicit verification step at the moment of consequence"*).
+
+### SRL-087 — Verify environment state (branch, cwd, build) before consequential edits (NARRATE-DUAL-SOURCE-ULTRATHINK fold-in, 2026-05-29)
+**Verdict:** Environment state — current git branch, working directory, build version, file freshness — must be verified before any edit or workflow whose correctness depends on it. SRL-086's grep is necessary but not sufficient: the grep itself can target the wrong codebase if branch state is unverified.
+**Evidence:** Within ~1 hour of SRL-086's authoring, the corrective grep that responded to SRL-086 ran against the dissolved branch (`sprint/narrate-closed-loop-cursor`) instead of main, because the roadmap-review pass had been started without checking branch state. Half the corrections were branch-specific (line numbers ~9 lines higher on main due to the dissolved branch's additions), forcing a 3rd commit (`cb6e894`) to reconcile against main's actual values. Cost asymmetry: verify is seconds; recovery was ~25 min of git handoff + amendment commits.
+**Recommendation:** Any Cowork workflow that produces dispatch-ready artifacts MUST begin with explicit state verification — at minimum: `git status`, `git branch --show-current`, and confirmation of build version where the verdict depends on it. Line-number citations MUST include branch + commit hash + grep date (format: *"lines X, Y, Z grep-verified against main @ HASH on DATE"*).
+**Applies to:** All Cowork synthesis workflows; spec amendments; roadmap-review; adversarial-review fold-ins; Aristotle enumeration memos; any artifact whose correctness depends on environment state.
+**Status:** **Promoted to Standing Rule #36** (ROADMAP.md, 2026-05-29 — jointly with SRL-086).
+
+### SRL-088 — Instrumented gate replay is cheap insurance before a multi-sprint refactor (NARRATE-DUAL-SOURCE-DIAG-1, 2026-05-30)
+**Verdict:** When a multi-sprint refactor sequence depends on a single architectural hypothesis, dispatching a flag-gated instrumentation sprint first to disambiguate the hypothesis is dramatically cheaper than committing the sequence and re-doing it if wrong.
+**Evidence:** NARRATE-DUAL-SOURCE-DIAG-1 was an XS-effort instrumentation sprint that added telemetry events to A1/A4/A5 paths under a localStorage flag. Its live-QA gate REFUTED the in-hook dual-source race as the cause of A4 (the central architectural hypothesis from the 2026-05-29 ULTRATHINK) and CONFIRMED the reader-layer never-cleared `resumeAnchor` as the actual root cause. Without DIAG-1, the 4-sprint unification sequence would have committed against the wrong root cause and required substantial respec. The instrumentation sprint cost <1 day; the avoided rework would have been several days.
+**Recommendation:** When a buffer of 3+ sprints depends on a single root-cause hypothesis, the queue head should be a flag-gated instrumentation sprint that can REFUTE or CONFIRM that hypothesis from live evidence before the heavy work commits. The instrumentation should reach every gate criterion the downstream sprints will verify against. Bonus: the instrumentation is reusable as a verification harness for the downstream sprints.
+**Applies to:** Multi-sprint refactors; architectural-hypothesis-driven roadmaps; ULTRATHINK-to-execution handoffs; any sequence where a single bad assumption invalidates several queued sprints.
+**Status:** Observation. Strong promotion candidate (the value of the pattern is already clear from one occurrence). Re-evaluate at the next /roadmap-review.
+
+### SRL-089 — Don't parallel-launch work that depends on an in-flight agent's output (NARRATE-DUAL-SOURCE-DIAG-1, 2026-05-30; recurrence in NARRATE-INTENT-CURSOR-1, 2026-05-31)
+**Verdict:** Worker agents dispatched in parallel onto a shared worktree must declare write-disjoint surfaces. Dependent workers — where worker B's correctness depends on worker A's output — must NEVER be dispatched in parallel onto the same tree; they must be serialized OR each operate in its own git worktree (`git worktree add`). The naive parallel pattern (fan-out for speed without dependency analysis) wastes the entire fan-out's compute on every dependency violation.
+**Evidence:** Two occurrences in two consecutive sprints. (1) DIAG-1: parallel workers dispatched onto the same tree without worktree isolation; worker B depended on worker A's diff; B's output was based on a tree-state that didn't include A's diff; ~90 min compute wasted. (2) NARRATE-INTENT-CURSOR-1 Task 3: same pattern, same tree-isolation gap, ~90 min compute wasted. Both occurrences caught at close-out; both required clean redo from a serialized dispatch.
+**Recommendation:** Zeus (and any orchestrator) must include a dependency-and-tree-isolation check before parallelizing worker dispatches. The two safe patterns: (a) serialize workers when surfaces overlap or outputs feed each other; (b) `git worktree add` per worker when parallelism is required for latency reasons. Cost asymmetry: serialize/isolate is seconds of dispatch overhead; parallel-mis-dispatch is ~90 min wasted compute per occurrence (2 occurrences = 3 hours).
+**Applies to:** All Zeus orchestration; multi-agent dispatch planning; sub-agent fan-out patterns; sprint Task 3-style "implement + verify in parallel" wave designs.
+**Status:** **Promoted to Standing Rule #37** (ROADMAP.md, 2026-05-31 — after 2nd occurrence in NARRATE-INTENT-CURSOR-1; per SRL-012's two-validated-occurrences promotion convention).
+
+### SRL-090 — Verify a structured data file's real schema before any programmatic write (NARRATE-DUAL-SOURCE-DIAG-1 governance close-out, 2026-05-30)
+**Verdict:** Any script that writes to a structured data file (xlsx, json, csv with header conventions) must first verify the file's actual schema (column names, row identity, header layout) and assert target-row identity at write time. Schema assumptions propagated from prior context — even from recently-correct context — can drift in ways that produce silent writes to the wrong cell.
+**Evidence:** DIAG-1's catalog-edit script wrote to a wrong row because the schema assumption (column index for `Sprint Code`) diverged from the real Excel layout after a column was inserted between authoring and execution. The wrong write was caught visually before the file was committed but only because the operator happened to inspect the post-write state; nothing in the script would have flagged it. The Catalog tab's `Sprint Code` column had shifted from index 0 to index 1.
+**Recommendation:** Programmatic writes to structured data files MUST: (a) load the file with header detection and assert against a known-good column-name set; (b) locate target rows by *value* match (e.g., `Sprint Code == "NARRATE-INTENT-CURSOR-1"`) not by index; (c) emit a pre-write "about to write to row N: <Sprint Code value>" log line; (d) optionally re-read after write and assert the round-trip. The Catalog tab in particular has been modified by hand several times in 2026-05 and column indices have drifted.
+**Applies to:** `scripts/recalc.py`; any future Catalog/xlsx tooling; openpyxl-driven governance writes; CSV/JSON tooling that uses positional access; any script that mutates structured user data.
+**Status:** Observation. Promotion candidate if a 2nd occurrence appears in another openpyxl-driven write surface.
+
+### SRL-091 — Reactive write-site cleanup is not equivalent to preventive read-site priority, when stale state can be re-populated faster than the cleanup fires (NARRATE-INTENT-CURSOR-1, 2026-05-31)
+**Verdict:** When a piece of state X gates a downstream read site R that runs on a cold-start / re-entry path, adding reactive cleanup to clear X *after* its use is necessary but not sufficient — the read site R can fire BEFORE any cleanup-triggering event reaches it, in which case R still reads stale X. The decisive fix is a preventive read-site priority chain: R should prefer fresh sources (heard-position, explicit resume target) over the stale gate state, not just rely on the gate being cleared.
+**Evidence:** NARRATE-INTENT-CURSOR-1 added a `shouldConsumeResumeAnchorOnAdvance` predicate + two per-word handlers that fire `resumeAnchor:consumed` and null the anchor on first word-advance strictly past it. The new `resumeAnchor:consumed` event correctly appeared in live-QA traces (first-ever sighting), confirming the consume code path executes. But A4 still failed 0-of-3: the consume fires at `approxWordIdx:67` AFTER the cold-start resume seed has already read `startIdx:66` from the still-stale anchor — the seed read happens BEFORE any audio advance can fire the consume. Additionally, the persistent hard-selection re-populates the anchor after each consume, restoring the trap. The reactive-cleanup architecture is correct as in-flight scaffolding (it breaks the gravity well once narration restarts) but cannot fix cold-start by construction; PAUSE-RESUME-UNIFY-1's seed priority chain (`heardFloor` / `resumeTarget` over the stale anchor at the read site) is the decisive control point.
+**Recommendation:** When designing a state-mutation lifecycle for a value that downstream reads gate on, distinguish two control points up front: (a) the *write-site* lifecycle (set, consume, clear) and (b) the *read-site* priority chain (which source wins on cold-start / re-entry). If the value can be stale at any cold-start read, the read-site priority chain is the *decisive* control point; the write-site lifecycle is *scaffolding* that hardens the in-flight case. Sprint specs that claim to "fix" a cold-start failure with a write-site lifecycle alone should be re-scoped to include the read-site priority chain in the same sprint, or explicitly bisected with a dependent sprint named as the completion (INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 is the bisected pattern that emerged here).
+**Applies to:** State-lifecycle design (anchors, cursors, refs, snapshots); cold-start / re-entry paths; resume / restart code; any sprint that aims to fix a position-preservation failure via a refcount-style or consume-style lifecycle alone.
+**Status:** Observation. Promotion candidate if a 2nd occurrence appears in another state-lifecycle sprint (e.g., a future subscriber-cursor or seed-chain refactor).
+
+### SRL-086 — Prose synthesis is not a substitute for grep on quantitative claims (NARRATE-DUAL-SOURCE-ULTRATHINK adversarial review, 2026-05-29)
+**Verdict:** Any quantitative claim about the codebase that an architectural conclusion rests on — call-site counts, dispatch counts, reference counts, branch counts, edit-site enumerations — must be grep-verified against source before publishing. Prose summaries from upstream agents (Explore-agent reports, codex-parent dispatch summaries, prior close-outs) are inputs to be cross-checked, not citations to be propagated.
+**Evidence:** The 2026-05-29 ULTRATHINK on narration dual-source architecture published five quantitative claims later caught as wrong by an adversarial review that ground-truthed file:line references against `useNarration.ts`:
+1. "`applyRateChange` has 14 reseed paths" → grep-verified count is **6** (lines 1759, 1802, 1821, 1839, 1853, 1869). The "14" was propagated from codex-parent's dispatch-summary phrase "~14 speakNextChunk call sites I noted but didn't fully trace" without independent count.
+2. "`getHeardFloorWordIndex` consumed in exactly one call site (line 1202)" → grep-verified **2 sites** (1202 re-entry seed + 1950 handoff-resume seed). The Explore agent's prose summary said "only used in ONE place"; I keyed off the prose rather than the agent's own enumeration table elsewhere in the same report.
+3. "Sprint 5 enumerates 5 WORD_ADVANCE dispatch sites: lines 463, 972, 1073, 1159, 1313" → grep-verified **6 sites**: 463, 972, 1073, 1158, 1255, 1314. Line 1255 missed entirely; 3 of 5 line numbers off by ±1.
+4. Stage 5 lifecycle ("resume → speakNextChunkKokoro reads from {…}" implying one path) → actual code has **three structurally distinct resume branches** at lines 1910, 1946, 1976; the bare-resume branch (1976) calls `kokoroStrategy.resume()` directly and does NOT route through `speakNextChunkKokoro` at all. The architectural conclusion that PAUSE-RESUME-UNIFY-1's `resumeTargetRef` fix is sufficient assumed all resume paths went through a seed-priority chain. Branch (c) doesn't — so the spec may need adjustment depending on which branch A4 actually fires through.
+5. A4 reproducibility-on-main was implicitly assumed, but A4 was observed on `sprint/narrate-closed-loop-cursor` commit `0f1b2c8` (a branch that explicitly modified resume paths — see comment at `useNarration.ts:1947`). The dispatched 5-sprint sequence is built against clean main, where A4 may or may not reproduce.
+
+The adversarial reviewer caught (1)–(5) by reading code at file:line precision. I had read the Explore agent's prose synthesis. Imprecisions (1)–(3) are mechanical; (4) is structural — it changes which mechanism Sprint 3 needs to fix; (5) is procedural — it changes the urgency framing of the entire sequence.
+**Recommendation:** For any ULTRATHINK or sprint-spec authoring that involves quantitative architectural claims, the workflow is:
+1. Dispatch the prose-synthesis pass (Explore agent or equivalent) for architecture mapping.
+2. Independently grep / Read the source for every quantitative claim that any conclusion in the synthesis or spec depends on. Specifically: any count of "N call sites," "M branches," "exactly one consumer," "every path does X."
+3. Cite the grep / Read line range in the spec; the prose summary is a footnote, not a citation.
+4. When a quantitative claim is wrong, fix the spec inline AND update the source artifact (the ULTRATHINK document or the agent report) with a revision note preserving original-vs-corrected distinction. Don't silently overwrite — history matters for retrospective audit.
+
+**Forward defense:** When invoking /roadmap-review or /write-spec to produce dispatch-ready specs, pre-pend an explicit "grep-verify every numerical claim before publishing" step to the workflow. Aristotle's enumeration memos in the per-sprint waves are the second line of defense, but they fire AFTER dispatch — they catch what the spec missed, not what the spec was silently confident about.
+**Applies to:** ULTRATHINK protocol output; /roadmap-review skill output; /write-spec output; any architectural conclusion that rests on counts; any spec that anchors agent investigation scope on a numerical claim.
+**Status:** **PROMOTED jointly with SRL-087 to Standing Rule #36** (ROADMAP.md, 2026-05-29) after the second-occurrence case (SRL-087) materialized within ~1 hour and validated the promotion-on-first-occurrence argument. Cost asymmetry confirmed in real time: the wrong-branch grep required a third commit (`cb6e894`) to reconcile spec line numbers against main. The two SRLs are siblings under the umbrella formulation; see Standing Rule #36 for the consolidated rule.
+**Related:** SRL-070 (audio-independent gate evidence — same flavor of "don't trust the system to verify itself"); SRL-079 (rebuild gate — same flavor of "the artifact is not the verification"); `docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md` §"Revisions from adversarial review" (full corrections table); ROADMAP.md SK-N1 NARRATE-DUAL-SOURCE-DIAG-1 (now contains grep-verified counts and three-branch resume instrumentation).
+
+### SRL-087 — Verify environment state (branch, cwd, build) before edits that depend on it (roadmap-review wrong-branch incident, 2026-05-29 — second occurrence in <1 hour after SRL-086)
+**Verdict:** Editing governance files, running grep that informs governance, or otherwise producing dispatch-ready artifacts without first verifying current git branch, working directory, and build version produces work that may be correct in content but wrong in placement or grounded in the wrong source state. Sibling rule to SRL-086 (verify quantitative claims by grep). Together they instantiate the umbrella principle: *"Do not act on accumulated context as if it were verified state."*
+**Evidence:** Within one hour of authoring SRL-086, Cowork executed the `/roadmap-review` skill end-to-end against `C:\Users\estra\Projects\Blurby` while the working directory was on `sprint/narrate-closed-loop-cursor` (the very branch the roadmap-review pass was dissolving) — without ever running `git status` or `git branch --show-current` at the start of the workflow. Compound consequences:
+1. All governance edits (ROADMAP.md, SpecRetro.Lessons_Learned.md, sprint-queue.xlsx, plus two new files) sat as uncommitted changes on the dissolved branch. Recovery required a git-handoff packet: stash governance files → `git checkout main` → `git pull --ff-only` → `git stash pop` → stage + commit + push. Stash popped cleanly because main's pre-edit state for those three governance files was identical to dissolved's pre-edit state. Recovery cost: ~5 minutes Evan time.
+2. The grep verification that SRL-086's fold-in performed (in response to the adversarial review) was executed against the dissolved branch's `useNarration.ts`. The dissolved branch added the `getHeardFloorWordIndex` wrapper and its 2 consumers — both of which DO NOT EXIST on main, because the supersede pulled them. The "consumed in 2 sites" correction I confidently published in SRL-086 was true for the dissolved branch but wrong for main (where it's 0 sites). Cascading correction required a second amendment commit on main with updated line numbers for `WORD_ADVANCE` (1246/1305 not 1255/1314), `applyRateChange` branches (1750-1860 not 1759-1869), `pause()` (1868 not 1877), `resume()` branches (1901/1937/1962 not 1910/1946/1976), and an expanded SK-N1 DIAG-1 Task 2 step ("Step 2a: re-introduce the heard-floor oracle on main as a clean addition") because the oracle the instrumentation was supposed to wrap does not exist on the baseline.
+
+The grep was only as reliable as the codebase grep'd. Verifying claims-against-codebase (SRL-086) without first verifying codebase-state (this rule) was insufficient. Both verifications are required.
+
+**Recommendation:** Before any Cowork workflow that edits governance files, edits the codebase, runs grep whose results feed into a governance/spec conclusion, or asks the user to act on environment-dependent state:
+1. **Run `git status`** to confirm the working directory is in a known state. Note any uncommitted changes; decide explicitly whether they're in-scope for the current task.
+2. **Verify the current branch** matches the intended dispatch target via `git branch --show-current`. If the workflow's output is meant to land on `main`, the branch must already be `main` (or there must be an explicit plan to migrate via stash + checkout).
+3. **For build-version-dependent verdicts** (live-QA gates, smoke tests), verify the displayed version per SRL-085 BEFORE the first functional assertion.
+4. **For grep-verified architectural claims** in any spec or artifact, cite the branch + commit hash + grep date in the spec, not just the line number. Example format: `WORD_ADVANCE sites: lines 463, 972, 1073, 1158, 1246, 1305 (grep-verified against main @ 4444276 on 2026-05-29)`. This makes future re-verification mechanical and makes branch-drift visible.
+
+**For the `/roadmap-review` skill specifically:** Phase 0 ("Initiate") should add an explicit "verify git branch is the intended dispatch target" step before Phase A reads any document.
+
+**Forward defense — paired rules:**
+- SRL-085: verify build version before smoke verdict
+- SRL-086: verify quantitative claims by grep before publishing
+- SRL-087: verify environment state (branch, cwd) before consequential edits
+- SRL-079: verify rebuild lands in binary before closing bug
+- All four instantiate the same umbrella: *do not act on accumulated context as if it were verified state.*
+
+**Status:** **PROMOTED jointly with SRL-086 to Standing Rule #36** (ROADMAP.md, 2026-05-29). The two occurrences across two different verification axes within ~1 hour proved decisive. Standing Rule wording: *"Accumulated context is not verified state; trust must be earned by an explicit verification step at the moment of consequence."* See Standing Rule #36 for the consolidated formulation, application rules (mandatory `git status` + `git branch --show-current` at workflow start, build-version verify where verdicts depend on it, branch+commit+date stamps on line-number-dependent spec citations), and the four-rule family (SRL-079, SRL-085, SRL-086, SRL-087) the umbrella consolidates.
+
+**Applies to:** `/roadmap-review`, `/write-spec`, `/next-pointer` (when it cites code locations), `/live-qa` (when it triggers state-dependent edits), Cowork's adversarial-review fold-ins, any spec amendment that propagates line numbers or counts.
+
+**Related:** SRL-070 (gate evidence independence), SRL-079 (rebuild gate), SRL-085 (smoke version gate), SRL-086 (grep-verify quantitative claims), ROADMAP.md SK-N1 DIAG-1 Task 2 (now contains Step 2a oracle re-introduction because of this incident), `docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md` §"Second revision — post-checkout-to-main re-verification" (full main-vs-dissolved diff table).
+
+### SRL-088 — Instrumented gate replay is cheap insurance before a multi-sprint refactor (NARRATE-DUAL-SOURCE-DIAG-1, 2026-05-30)
+**Verdict:** A 1-day instrumented diagnostic (DIAG-1) REFUTED the ULTRATHINK's central A4 thesis (an in-hook dual-source race) and identified the true cause (a never-cleared reader-layer resume anchor) BEFORE 4 implementation sprints committed to the wrong fix. The decisive enabler was instrumenting BOTH candidate layers (in-hook AND reader-layer) so a single live-QA replay could discriminate competing hypotheses — the smoking gun was the ABSENCE of a `resumeAnchor:consumed` event, detectable only by cross-layer instrumentation. A corollary catch: `heardFloor` was null (cold engine) at A4 resume — there was no live in-hook source to "lose a race" to, which is itself the disproof of the race thesis.
+**Why:** Committing 4 sprints to a refuted thesis would have cost ~10-15 days; the diagnostic cost 1 day. The cost asymmetry strongly favors a gate-replay validation sprint whenever an architectural *inference* (not a measurement) underpins a multi-sprint sequence.
+**How to apply:** When an architectural inference underpins a multi-sprint sequence, insert a short instrumented gate-replay validation sprint first, and instrument EVERY competing-hypothesis layer, not just the leading one. Also: when a downstream agent's investigation surfaces a cross-layer root cause outside the declared touch-list, expand instrumentation scope to it — the value of the gate is discrimination, not confirmation.
+**Related:** SRL-070 (audio-independent gate evidence); SRL-086/SRL-087 (verify state before consequential action); `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md` (the verdict).
+**Status:** Promotion candidate (single occurrence) — forward-defense for future ULTRATHINK→multi-sprint pipelines. (Numbered SRL-088 because SRL-080 is already taken by the openpyxl/Excel-formula-machinery lesson; the dispatch requested "SRL-080" but the next free number is SRL-088.)
+
+### SRL-089 — Don't parallel-launch work that depends on an in-flight agent's output (NARRATE-DUAL-SOURCE-DIAG-1 Wave B, 2026-05-30)
+**Verdict:** In Wave B, the implementer agent (Hercules), the verification agent (Hippocrates), and the Wave-B git commit were launched in a single parallel batch. But verification and commit both *depend on* the implementer finishing. The result: Hippocrates ran against the pre-implementation tree and returned a spurious RED ("instrumentation not present"), and the commit failed on a stale/incorrect pathspec. Both had to be re-run sequentially after the implementer actually completed. No work was lost, but ~2 recovery cycles were spent.
+**Why:** Parallelism is only safe across *independent* tasks. A dependent task launched in parallel reads a pre-condition that does not yet hold, producing a confidently-wrong result that then has to be distinguished from a real failure — which is more expensive than just sequencing.
+**How to apply:** Within a wave, separate the dependency graph explicitly: implementer → (barrier) → verifier → (barrier) → commit. Only fan out tasks that share no produced state. Treat "verify before commit" as a hard sequential gate, never a parallel sibling of the thing it verifies. When in doubt about a dependency, sequence it — the latency cost of sequencing is far below the cost of disambiguating a stale-state false result.
+**Applies to:** any multi-agent wave (Virtuoso Phase 4, Zeus dispatches); `superpowers:dispatching-parallel-agents`; any workflow that batches implement + test + commit.
+**Related:** SRL-086/SRL-087 (verify state at the moment of consequence — a parallel verifier verifies the wrong state); Virtuoso "three-call rule" / sequential narration.
+**Status:** Promotion candidate (single occurrence) — forward-defense for multi-agent wave scheduling.
+
+### SRL-090 — Verify a structured data file's real schema before any programmatic write, and assert target-row identity in the write script (NARRATE-DUAL-SOURCE-DIAG-1 closeout, 2026-05-30)
+**Verdict:** The `sprint-queue.xlsx` Catalog reshape was written (openpyxl) against an *assumed* layout (col2=Seq, active rows 5–8) when the real Catalog is 15 columns with col1=Seq and the active queue at rows 46–51. The script overwrote historical completed-sprint rows (TTS-REGISTRY-1, TTS-NORMALIZE-1, TTS-CACHE-TIMING-1, TTS-SYNC-1, TTS-INTEGRATE-1) and never touched the real queue — and the corrupted file was committed and pushed before detection. Recovery: `git checkout <good-rev> -- file`, then a redo whose write script first `assert`ed the sprint code at each target row before mutating. The corrected redo was clean on the first try.
+**Why:** A structured-file write is a consequential edit (SRL-086 family). Trusting a remembered or first-glance schema is "acting on accumulated context as if it were verified state." An xlsx/json/csv has no compiler or test to catch a wrong row/column index — the only guard is reading the real schema first and asserting identity at the write site.
+**How to apply:** Before any programmatic mutation of a structured data file: (1) dump the real header + target region and confirm the column map and row positions; (2) inside the write script, `assert` the identity of each target cell (e.g., `assert ws.cell(r,2).value == 'EXPECTED-CODE'`) *before* writing, so a wrong assumption aborts instead of corrupting; (3) re-read and dump the result to a file and verify *before* committing — never commit a structured-file write on the strength of the write call alone. Also note openpyxl gotcha: `ws.cell(r,c, None)` is a no-op; clear a cell with `ws.cell(r,c).value = None`.
+**Applies to:** all `scripts/recalc.py`-adjacent xlsx edits; any openpyxl/csv/json programmatic write to a governance or data file; `/phase-closeout` and `/roadmap-review` queue edits.
+**Related:** SRL-086 (grep-verify quantitative claims before publishing — this is its structured-file specialization); SRL-080 (openpyxl erases Excel formula machinery); HYG-XLSX-DASHBOARD-RESTORE (openpyxl/Dashboard quarantine).
+**Status:** Promotion candidate (single occurrence) — forward-defense for programmatic structured-file edits.

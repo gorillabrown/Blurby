@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="audit">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/docs/audit/blurby-audit-package.zip!/" />
+      <root url="jar://$PROJECT_DIR$/docs/audit/audit-main-process-sources.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

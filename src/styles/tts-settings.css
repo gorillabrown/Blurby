@@ -1,0 +1,583 @@
+/* ── TTS Settings Styles ────────────────────────────────────────────────────
+   Covers TTSSettings.tsx and its three sub-components:
+     KokoroStatusSection, PauseSettingsSection, PronunciationOverridesEditor
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Shared small-text dim hint ─────────────────────────────────────────── */
+.tts-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ── Reading Goals settings ───────────────────────────────────────────── */
+
+.reading-goals-create,
+.reading-goal-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.reading-goals-create select,
+.reading-goals-create input,
+.reading-goal-row input[type="number"] {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.reading-goals-create input,
+.reading-goal-row input[type="number"] {
+  width: 80px;
+}
+
+.reading-goal-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+}
+
+.reading-goal-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  font-size: 12px;
+}
+
+.reading-goal-unit,
+.reading-goal-progress,
+.reading-goal-streak,
+.reading-goals-empty {
+    font-family: var(--mono);
+    font-size: 11px;
+  color: var(--text-dim);
+}
+
+.reading-goal-delete {
+  font-size: 11px;
+}
+
+/* ── Narration Profile section ──────────────────────────────────────────── */
+
+.tts-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tts-profile-select {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.tts-profile-new-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.tts-profile-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tts-profile-rename-input {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 11px;
+}
+
+.tts-profile-action-btn {
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.tts-profile-action-btn--danger {
+  color: var(--error, #c44);
+}
+
+.tts-profile-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+/* ── Book-level profile assignment ─────────────────────────────────────── */
+
+.tts-book-profile-row {
+  margin-bottom: 8px;
+}
+
+.tts-book-profile-label {
+  font-size: 12px;
+}
+
+.tts-book-profile-select {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 11px;
+}
+
+.tts-book-profile-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+/* ── Voice Engine / mode toggle spacing ─────────────────────────────────── */
+
+.tts-engine-toggle {
+  margin-bottom: 12px;
+}
+
+/* ── Voice picker ───────────────────────────────────────────────────────── */
+
+.tts-voice-picker-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.tts-voice-select {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* ── Speech rate display ────────────────────────────────────────────────── */
+
+.tts-rate-value {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.tts-rate-bucket-toggle {
+  margin-bottom: 4px;
+}
+
+/* ── Test voice button and hint ─────────────────────────────────────────── */
+
+.tts-test-btn {
+  margin-top: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.tts-test-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+
+/* ── Cache hint ─────────────────────────────────────────────────────────── */
+
+.tts-cache-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+/* ── Cache size display ─────────────────────────────────────────────────── */
+
+.tts-cache-size-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tts-cache-size-label {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.tts-cache-clear-btn {
+  font-size: 11px;
+  padding: 3px 10px;
+}
+
+/* ── Narration Data export / import / reset ─────────────────────────────── */
+
+.tts-data-action-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.tts-data-action-btn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.tts-data-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.tts-data-reset-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tts-data-reset-btn {
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--error, #c44);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+/* ── KokoroStatusSection ────────────────────────────────────────────────── */
+
+.tts-kokoro-wrapper {
+  margin-bottom: 12px;
+}
+
+.tts-status-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card, #222);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.tts-status-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.tts-status-detail {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.tts-kokoro-error {
+  font-size: 11px;
+  color: var(--error, #c44);
+  margin-bottom: 8px;
+}
+
+.tts-kokoro-success {
+  font-size: 11px;
+  color: var(--success, #4a8f5b);
+  margin-bottom: 8px;
+}
+
+.tts-kokoro-warning {
+  font-size: 11px;
+  color: var(--warning, #b80);
+  margin-bottom: 8px;
+}
+
+.tts-kokoro-progress-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.tts-kokoro-progress-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+
+/* .tts-kokoro-progress-bar width is set via inline style (dynamic %) */
+.tts-kokoro-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+.tts-kokoro-download-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.tts-kokoro-download-btn:disabled {
+  cursor: default;
+  opacity: 0.65;
+}
+
+.tts-kokoro-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tts-kokoro-meta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+
+.tts-kokoro-asset-list,
+.tts-kokoro-check-list {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.tts-kokoro-asset {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.tts-kokoro-asset--pass span:last-child,
+.tts-kokoro-check--pass .tts-kokoro-check-label {
+  color: var(--success, #4a8f5b);
+}
+
+.tts-kokoro-asset--fail span:last-child,
+.tts-kokoro-check--fail .tts-kokoro-check-label {
+  color: var(--error, #c44);
+}
+
+.tts-kokoro-check {
+  padding: 4px 6px;
+  border-left: 2px solid var(--warning, #b80);
+  background: var(--bg-raised);
+}
+
+.tts-kokoro-check--fail {
+  border-left-color: var(--error, #c44);
+}
+
+.tts-kokoro-check-label {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tts-kokoro-check-detail {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* ── PauseSettingsSection ───────────────────────────────────────────────── */
+
+.tts-pause-value {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.tts-pause-clause-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.tts-pause-dialogue-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.tts-pause-footnote-select {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 11px;
+}
+
+.tts-pause-footnote-hint {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+/* ── PronunciationOverridesEditor ───────────────────────────────────────── */
+
+.tts-pron-intro {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.tts-pron-scope-toggle {
+  margin-bottom: 8px;
+}
+
+.tts-pron-book-note {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  font-style: italic;
+}
+
+/* Override list row */
+.tts-pron-override-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+/* Toggle-enable button — background and color remain inline (dynamic per-row) */
+.tts-pron-toggle-btn {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  padding: 0;
+  background: var(--bg-card, #222);
+  color: var(--text-dim);
+}
+.tts-pron-toggle-btn--active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tts-pron-override-label {
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+.tts-pron-override-label--active {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.tts-pron-move-up-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 10px;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+.tts-pron-move-up-btn:disabled {
+  cursor: default;
+}
+
+.tts-pron-remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 4px;
+}
+
+.tts-pron-empty {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+/* Add-override row */
+.tts-pron-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.tts-pron-text-input {
+  flex: 1;
+  padding: 4px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  font-size: 11px;
+}
+
+/* Add and Preview buttons share the same base shape */
+.tts-pron-action-btn {
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: var(--bg-card, #222);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 11px;
+}
+.tts-pron-action-btn:disabled {
+  cursor: default;
+}
+
+/* Preview row */
+.tts-pron-preview-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tts-pron-preview-result {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  font-style: italic;
+}

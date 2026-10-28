@@ -1,0 +1,48 @@
+{
+  "runCount": 4,
+  "startupLatency": {
+    "p50": 433.5,
+    "p95": 482.85,
+    "min": 395,
+    "max": 486
+  },
+  "warmPreviewLatency": {
+    "p50": 1120,
+    "p95": 1120,
+    "min": 1120,
+    "max": 1120
+  },
+  "warmFirstAudioLatency": {
+    "p50": 433.5,
+    "p95": 482.85,
+    "min": 395,
+    "max": 486
+  },
+  "rateResponseLatency": {
+    "p50": null,
+    "p95": null,
+    "min": null,
+    "max": null
+  },
+  "drift": {
+    "p50": 2,
+    "p95": 2,
+    "max": 2
+  },
+  "failureCounts": {
+    "pauseResumeFailures": 0,
+    "handoffFailures": 0
+  },
+  "startupSpikes": {
+    "thresholdMs": 3000,
+    "count": 0
+  },
+  "startupParity": {
+    "cachedStartLatencyMs": null,
+    "uncachedStartLatencyMs": null,
+    "deltaMs": null,
+    "cachedOpeningChunkWordCounts": [],
+    "uncachedOpeningChunkWordCounts": [],
+    "openingRampMatches": null
+  }
+}
