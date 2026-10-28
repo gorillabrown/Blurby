@@ -1,0 +1,40 @@
+{
+  "fixtureId": "long-sentence",
+  "scenarioId": "long-form-stability",
+  "runId": "run-matrix__long-form-stability__it004",
+  "startLatencyMs": 507,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 507,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 41,
+  "flowEventCount": 14,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 0,
+    "handoff": 0
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": null,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "long-form-stability",
+    "voiceId": "af_bella",
+    "requestedRate": 1.3,
+    "durationClass": "long",
+    "tags": [
+      "long-form",
+      "stability"
+    ]
+  }
+}

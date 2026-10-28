@@ -1,0 +1,178 @@
+import { useContext, type KeyboardEvent } from "react";
+import type { BlurbySettings } from "../../types";
+import { ThemeContext } from "../ThemeProvider";
+
+const ACCENT_PRESETS = [
+  { label: "gold", value: "#c4a882" },
+  { label: "blurby blue", value: "#2F8FD8" },
+  { label: "green", value: "#6b9f6b" },
+  { label: "blurby coral", value: "#FF5B7F" },
+  { label: "purple", value: "#9b82c4" },
+  { label: "teal", value: "#5ba8a0" },
+];
+
+const FONT_PRESETS: { label: string; value: string | null }[] = [
+  { label: "system", value: null },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Merriweather", value: "'Merriweather', Georgia, serif" },
+  { label: "Mono", value: "'SF Mono', 'JetBrains Mono', 'Fira Code', monospace" },
+  { label: "Literata", value: "'Literata', Georgia, serif" },
+  { label: "OpenDyslexic", value: "'OpenDyslexic', sans-serif" },
+];
+
+interface ThemeSettingsProps {
+  settings: BlurbySettings;
+  onSettingsChange: (updates: Partial<BlurbySettings>) => void;
+}
+
+export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps) {
+  const { setTheme, setEinkMode, setAccentColor, setFontFamily } = useContext(ThemeContext);
+  const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "eink", "system"];
+
+  // Wrap onSettingsChange to also update ThemeContext instantly
+  const handleSettingsChange = (updates: Partial<BlurbySettings>) => {
+    onSettingsChange(updates);
+    if (updates.theme !== undefined) setTheme(updates.theme);
+    if (updates.einkMode !== undefined) setEinkMode(updates.einkMode === true);
+    if (updates.accentColor !== undefined) setAccentColor(updates.accentColor as string | null);
+    if (updates.fontFamily !== undefined) setFontFamily(updates.fontFamily as string | null);
+  };
+
+  const handleSwitchKey = (event: KeyboardEvent, onToggle: () => void) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    onToggle();
+  };
+
+  const isPresetAccent = ACCENT_PRESETS.some((p) => p.value === settings.accentColor);
+  const customColor =
+    settings.accentColor && !isPresetAccent ? settings.accentColor : "#888888";
+
+  return (
+    <div>
+      <div className="settings-section-label">E-Ink Display Mode</div>
+      <div className="settings-toggle-row">
+        <span className="settings-toggle-label">E-Ink Display Mode</span>
+        <div
+          className={`settings-toggle${settings.einkMode ? " active" : ""}`}
+          onClick={() => handleSettingsChange({ einkMode: !settings.einkMode })}
+          onKeyDown={(event) => handleSwitchKey(event, () => handleSettingsChange({ einkMode: !settings.einkMode }))}
+          role="switch"
+          tabIndex={0}
+          aria-label="Toggle E-Ink display mode"
+          aria-checked={settings.einkMode === true}
+        >
+          <div className="settings-toggle-thumb" />
+        </div>
+      </div>
+
+      {settings.einkMode && (
+        <>
+          <div className="settings-section-label settings-section-label--mt-lg">E-Ink Display</div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Phrase grouping (2-3 words per tick)</span>
+            <div
+              className={`settings-toggle${settings.einkPhraseGrouping ? " active" : ""}`}
+              onClick={() => handleSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping })}
+              onKeyDown={(event) => handleSwitchKey(event, () => handleSettingsChange({ einkPhraseGrouping: !settings.einkPhraseGrouping }))}
+              role="switch"
+              tabIndex={0}
+              aria-label="Toggle E-Ink phrase grouping"
+              aria-checked={settings.einkPhraseGrouping}
+            >
+              <div className="settings-toggle-thumb" />
+            </div>
+          </div>
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">WPM ceiling</span>
+            <span className="settings-eink-value">{settings.einkWpmCeiling ?? 250} wpm</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={100}
+            max={400}
+            step={10}
+            value={settings.einkWpmCeiling ?? 250}
+            onChange={(e) => handleSettingsChange({ einkWpmCeiling: Number(e.target.value) })}
+            aria-label="E-ink WPM ceiling"
+          />
+
+          <div className="settings-toggle-row">
+            <span className="settings-toggle-label">Screen refresh interval (page turns)</span>
+            <span className="settings-eink-value">{settings.einkRefreshInterval ?? 20}</span>
+          </div>
+          <input
+            type="range"
+            className="settings-slider"
+            min={5}
+            max={50}
+            step={5}
+            value={settings.einkRefreshInterval ?? 20}
+            onChange={(e) => handleSettingsChange({ einkRefreshInterval: Number(e.target.value) })}
+            aria-label="E-ink refresh interval"
+          />
+        </>
+      )}
+
+      <div className="settings-section-label">Theme</div>
+      <div className="settings-mode-toggle">
+        {themes.map((t) => (
+          <button
+            key={t}
+            className={`settings-mode-btn${settings.theme === t ? " active" : ""}`}
+            onClick={() => handleSettingsChange({ theme: t })}
+            aria-pressed={settings.theme === t}
+            aria-label={`${t} theme`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {settings.theme !== "blurby" && (
+        <>
+          <div className="settings-section-label">Accent Color</div>
+          <div className="appearance-row settings-appearance-row--mb">
+            {ACCENT_PRESETS.map((preset) => (
+              <button
+                key={preset.value}
+                className={`accent-swatch${settings.accentColor === preset.value ? " accent-swatch-active" : ""}`}
+                style={{ background: preset.value }}
+                title={preset.label}
+                onClick={() => handleSettingsChange({ accentColor: preset.value })}
+                aria-label={`Accent color: ${preset.label}`}
+              />
+            ))}
+            <label className="accent-custom" title="Custom color">
+              <input
+                type="color"
+                className="accent-color-input"
+                value={customColor}
+                onChange={(e) => handleSettingsChange({ accentColor: e.target.value })}
+                aria-label="Custom accent color"
+              />
+              <span className="accent-custom-label">custom</span>
+            </label>
+          </div>
+
+          <div className="settings-section-label">Font</div>
+          <div className="appearance-row">
+            {FONT_PRESETS.map((preset) => (
+              <button
+                key={preset.label}
+                className={`font-preset${settings.fontFamily === preset.value ? " font-preset-active" : ""}`}
+                style={preset.value ? { fontFamily: preset.value } : undefined}
+                onClick={() => handleSettingsChange({ fontFamily: preset.value })}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

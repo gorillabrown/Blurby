@@ -1,0 +1,131 @@
+{
+  "name": "blurby",
+  "version": "1.75.1",
+  "description": "RSVP Speed Reading App with local folder sync",
+  "author": "Blurby",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "vite build",
+    "dev": "concurrently \"vite --port 5173\" \"wait-on http://localhost:5173 && electron .\"",
+    "package:win": "electron-builder --win",
+    "package:mac": "electron-builder --mac",
+    "package:linux": "electron-builder --linux",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "perf": "vitest run tests/perf-baseline.test.ts",
+    "moss:preflight": "node scripts/moss_preflight.mjs",
+    "moss:nano:resident": "node scripts/moss_nano_probe.mjs --runtime-mode resident",
+    "tts:eval": "node scripts/tts_eval_runner.mjs",
+    "tts:eval:matrix": "node scripts/tts_eval_runner.mjs --matrix",
+    "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",
+    "test:quality": "node scripts/tts_eval_runner.mjs --mode=gate --baseline=docs/testing/tts_eval_baseline_v2.json --gates=docs/testing/tts_quality_gates.v2.json",
+    "tts:eval:soak:short": "node scripts/tts_eval_runner.mjs --soak-profile short",
+    "tts:eval:gates": "node scripts/tts_eval_gate.mjs",
+    "tts:scan:index": "node scripts/tts_engine_scan_index.mjs",
+    "tts:scan:validate": "vitest run tests/ttsEngineScanCorpus.test.ts tests/ttsEngineScanIndex.test.ts",
+    "postinstall": "patch-package && node scripts/patch-onnxruntime.js"
+  },
+  "build": {
+    "appId": "com.blurby.app",
+    "extraResources": [
+      {
+        "from": "resources/",
+        "to": "resources/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "productName": "Blurby",
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "main/**/*",
+      "dist/**/*",
+      "scripts/moss_nano_app_sidecar.py",
+      "scripts/pocket_tts_sidecar.py"
+    ],
+    "asarUnpack": [
+      "scripts/moss_nano_app_sidecar.py",
+      "scripts/pocket_tts_sidecar.py",
+      "node_modules/onnxruntime-node/**",
+      "node_modules/onnxruntime-common/**",
+      "node_modules/kokoro-js/**",
+      "node_modules/phonemizer/**",
+      "node_modules/@huggingface/transformers/**",
+      "node_modules/@napi-rs/**"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": "nsis-web",
+      "icon": "assets/icon.ico",
+      "artifactName": "${productName}-Web-Setup-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "warningsAsErrors": false,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Blurby",
+      "menuCategory": true,
+      "runAfterFinish": true
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png",
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png",
+      "category": "Utility"
+    }
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "electron": "^41.1.0",
+    "electron-builder": "^26.8.1",
+    "patch-package": "^8.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^6.1.0",
+    "vitest": "^4.1.0",
+    "wait-on": "^8.0.3"
+  },
+  "overrides": {
+    "onnxruntime-node": "1.24.3"
+  },
+  "dependencies": {
+    "@azure/msal-node": "^3.8.10",
+    "@mozilla/readability": "^0.6.0",
+    "adm-zip": "^0.5.16",
+    "cheerio": "^1.2.0",
+    "chokidar": "^4.0.3",
+    "docx": "^9.6.1",
+    "electron-updater": "^6.8.3",
+    "exceljs": "^4.4.0",
+    "foliate-js": "^1.0.1",
+    "googleapis": "^171.4.0",
+    "jsdom": "^24.1.0",
+    "kokoro-js": "^1.2.1",
+    "mammoth": "^1.12.0",
+    "opusscript": "^0.1.1",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.18.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

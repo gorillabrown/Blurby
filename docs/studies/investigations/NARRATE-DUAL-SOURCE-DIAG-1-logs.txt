@@ -1,0 +1,99 @@
+NARRATE-DUAL-SOURCE-DIAG-1 — Live-QA Gate Replay Logs
+Branch: sprint/narrate-dual-source-diag-1 (Wave B instrumented build)
+Date: 2026-05-30 (replay run)  |  Original template date: 2026-05-29
+Fixtures: The Raven (A1/A4/A5)
+Flag: localStorage.BLURBY_DUAL_SOURCE_DIAG = '1'  (set + reload, confirmed active)
+Build: npm run electron:dev (Vite source build, Electron v41.1.0, Chromium 146)
+Driver: Cowork (computer-use), perceptual verdicts by Evan's ear.
+Console filter applied: /DUAL-SOURCE-DIAG|TTS-7/
+Mode: Narrate mode (the mode where the resume bug lives). Doc total = 1111 words.
+
+GATE OUTCOME: YELLOW (1 PASS, 2 FAIL — both FAILs have decisive root-cause captures + named follow-up).
+
+================================================================================
+A1 — HARD-CLICK EXACT START (regression check)
+  Action: clicked "December;" mid-text (resolved word 66), then pressed play.
+  Evan verdict: PASS — "audio started on 'December' (the clicked word)".
+  --- console ([DUAL-SOURCE-DIAG] + [TTS-7M]) ---
+  [TTS-7L] onWordClick: resolved globalWordIndex: 66 word: December;
+  [DUAL-SOURCE-DIAG] resumeAnchor:set {"t":"resumeAnchor:set","resumeAnchor":66,"source":"ReaderContainer:onWordClick:click-to-narrate"}
+  [DUAL-SOURCE-DIAG] resumeAnchor:set {"t":"resumeAnchor:set","resumeAnchor":66,"source":"usePersistentReadingAnchor:writeRefs:hard-selection"}
+  (on play — natural forward progression from 66:)
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":77,"lastConfirmedAudioWordRef":78,"nextGenWordIndexRef":172,"nextKokoroExactStartRef":null,"word":"Eagerly","heardFloor":78}
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":78,"lastConfirmedAudioWordRef":79,"nextGenWordIndexRef":277,"nextKokoroExactStartRef":null,"word":"I","heardFloor":81}
+  resumeAnchor:active-skip pinned at 66 throughout; NO resumeAnchor:consumed (not required for A1 PASS — anchor==clicked word here).
+  NOTE: a single hard-click sets the resume anchor + cursor (click-to-narrate) but does NOT auto-start audio; pressing play begins narration at the clicked word.
+
+================================================================================
+A4 — PAUSE -> WAIT 3s -> PLAY  (THREE times — the gate-blocking failure)
+  PASS criterion: 3-of-3 resumptions within +/-2 words of pause position.
+  RESULT: 0-of-3. Every resume restarts at word 66 = "December" (the last hard selection / pinned resumeAnchor). FAIL.
+  Evan verdict (spontaneous, multi-cycle): "It keeps jumping back to December -- the last hard selection."
+
+  SMOKING GUN (per Decision 4a): resumeAnchor:active-skip is pinned at 66 across all states and resumeAnchor:consumed NEVER fires.
+  The resume path is NOT resume:cursor-mismatch / :handoff-pending / :bare — a paused engine goes cold and "play" fires
+  a cold startCursorDriven seeded by the reader-layer anchor (66). speakNextChunkKokoro:seed reads startIdx 66 -> word "December".
+
+  --- A4 cycle 1 ---  pause word: ~270 "there"/"spoken" (line: "And the only word there spoken...")   resume word: ~67 "each"/"separate"/"dying"   verdict: FAIL
+  (pause-point telemetry:)
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":269,"lastConfirmedAudioWordRef":270,"nextGenWordIndexRef":1111,"nextKokoroExactStartRef":null,"word":"there","heardFloor":271}
+  [TTS-7M] onRelocate: resume anchor active at 66 — skipping approx 264
+  [DUAL-SOURCE-DIAG] resumeAnchor:active-skip {"t":"resumeAnchor:active-skip","resumeAnchor":66,"approxWordIdx":264,"mode":"narrate","source":"ReaderContainer:onRelocate"}
+  (on resume — audio jumped back to ~67, heardFloor oracle confirms real audio there, not just cursor:)
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":67,"lastConfirmedAudioWordRef":68,"nextGenWordIndexRef":1111,"word":"each","heardFloor":69}
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":68,"word":"separate","heardFloor":69}
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":69,"lastConfirmedAudioWordRef":70,"word":"dying","heardFloor":71}
+  resumeAnchor:active-skip at 66; NO resumeAnchor:consumed.
+
+  --- A4 cycle 2 ---  pause word: ~168 (forward-played to "and" in "This it is and nothing more")   resume word: 66 "December"   verdict: FAIL
+  (clean resume capture — console cleared immediately before play:)
+  [DUAL-SOURCE-DIAG] resumeAnchor:set {"t":"resumeAnchor:set","resumeAnchor":66,"source":"useReaderMode:mode-change"}
+  [DUAL-SOURCE-DIAG] startCursorDriven:kokoro-warming-seed {"t":"startCursorDriven:kokoro-warming-seed","cursorWordIndex":66,"lastConfirmedAudioWordRef":66,"nextGenWordIndexRef":66,"nextKokoroExactStartRef":null,"startIdx":66}
+  (on-screen toast: "Starting Kokoro...")
+  NO resumeAnchor:consumed.
+
+  --- A4 cycle 3 ---  pause word: ~209 "tapping" (line: "And so faintly you came tapping, tapping...")   resume word: 66 "December"   verdict: FAIL
+  (clean resume capture — console cleared immediately before play:)
+  [DUAL-SOURCE-DIAG] resumeAnchor:set {"t":"resumeAnchor:set","resumeAnchor":66,"source":"useReaderMode:mode-change"}
+  [DUAL-SOURCE-DIAG] startCursorDriven:speaking-seed {"t":"startCursorDriven:speaking-seed","cursorWordIndex":66,"lastConfirmedAudioWordRef":66,"nextGenWordIndexRef":66,"nextKokoroExactStartRef":null,"startIdx":66,"engine":"kokoro"}
+  [DUAL-SOURCE-DIAG] getPlayingSourceMaxWordIndex:query {"t":"getPlayingSourceMaxWordIndex:query","playingSourceMax":66,"heardFloor":null}
+  [DUAL-SOURCE-DIAG] speakNextChunkKokoro:seed {"t":"speakNextChunkKokoro:seed","cursorWordIndex":66,"lastConfirmedAudioWordRef":66,"nextGenWordIndexRef":66,"nextKokoroExactStartRef":null,"startIdx":66,"heardFloor":null,"word":"December;","engine":"kokoro","status":"speaking"}
+  [DUAL-SOURCE-DIAG] speakNextChunkKokoro:exact-start-gate {"t":"speakNextChunkKokoro:exact-start-gate","cursorWordIndex":66,"nextKokoroExactStartRef":null,"startIdx":66,"requireExactFirstBoundary":false}
+  [TTS-7M] onRelocate: resume anchor active at 66 — skipping approx 78
+  [DUAL-SOURCE-DIAG] resumeAnchor:active-skip {"t":"resumeAnchor:active-skip","resumeAnchor":66,"approxWordIdx":78,"mode":"narrate","source":"ReaderContainer:onRelocate"}
+  NO resumeAnchor:consumed.
+
+  DECISION-4a DISAMBIGUATION (resolved): resume seed arrives as 66 FROM THE READER LAYER (resumeAnchor, source
+  useReaderMode:mode-change), the anchor is never consumed, and the in-hook seed (speakNextChunkKokoro:seed)
+  faithfully reads that 66. => A4 root cause is the NEVER-CLEARED reader-layer resume anchor, NOT (primarily) the
+  in-hook cursorWordIndex<->lastConfirmedAudioWordRef dual-source race. Per Decision 4a downstream implication:
+  Sprint 3 (PAUSE-RESUME-UNIFY-1) scope MUST expand to own (or coordinate a new sprint owning) the cross-layer
+  resume-anchor clear lifecycle (ReaderContainer.tsx:1353 is the only clear-to-null; nothing clears on pause/resume/first-advance).
+
+================================================================================
+A5 — RATE CHANGE WHILE PLAYING  (gate-blocking)
+  Action: playing at ~word 562 ("Nothing"); changed speed 1.0x -> 1.4x via narrate-mode preset (≈250 wpm equiv).
+  PASS criterion: position holds (no skip) per Evan's ear.
+  RESULT: FAIL. Evan verdict: "Stopped / went silent" — narration stalled at "Nothing" and did not continue.
+  Watch (seed value vs heardFloor): bucket-change seed = startIdx 1111 (from nextGenWordIndexRef = pre-fetch head /
+  end-of-doc) while heardFloor = 565. The seed IGNORES heardFloor and uses the pre-fetch head -> on this fully
+  pre-generated short doc that points at end-of-doc -> no audio generated -> playingSourceMax null -> silence/stall.
+  (On a longer doc this same divergence would skip FORWARD to the pre-fetch head rather than stall.)
+  --- console ([DUAL-SOURCE-DIAG] + [TTS-7M]) ---
+  [DUAL-SOURCE-DIAG] wordAdvance:kokoro {"cursorWordIndex":561,"lastConfirmedAudioWordRef":562,"nextGenWordIndexRef":1111,"nextKokoroExactStartRef":null,"word":"Nothing","heardFloor":565}
+  [DUAL-SOURCE-DIAG] applyRateChange:kokoro-bucket {"t":"applyRateChange:kokoro-bucket","cursorWordIndex":562,"lastConfirmedAudioWordRef":562,"nextGenWordIndexRef":1111,"nextKokoroExactStartRef":null,"heardFloor":565}
+  [DUAL-SOURCE-DIAG] getPlayingSourceMaxWordIndex:query {"t":"getPlayingSourceMaxWordIndex:query","playingSourceMax":null,"heardFloor":null}
+  [DUAL-SOURCE-DIAG] speakNextChunkKokoro:seed {"t":"speakNextChunkKokoro:seed","cursorWordIndex":562,"lastConfirmedAudioWordRef":562,"nextGenWordIndexRef":1111,"nextKokoroExactStartRef":null,"startIdx":1111,"heardFloor":null,"word":null,"engine":"kokoro","status":"speaking"}
+  [DUAL-SOURCE-DIAG] speakNextChunkKokoro:exact-start-gate {"t":"speakNextChunkKokoro:exact-start-gate","cursorWordIndex":562,"nextKokoroExactStartRef":null,"startIdx":1111,"requireExactFirstBoundary":false}
+  (no further wordAdvance — playback halted; play control returned to idle.)
+
+================================================================================
+NOTES / ANOMALIES (anything Evan heard or saw that the gate items don't cover):
+  - Button re-centers between play (▶ ~x=700) and pause (❚❚ ~x=678) states; matters only for the driver's clicks.
+  - resumeAnchor source labels observed: ReaderContainer:onWordClick:click-to-narrate, usePersistentReadingAnchor:writeRefs:hard-selection,
+    useReaderMode:mode-change, ReaderContainer:onLoad, ReaderContainer:onRelocate. The ONLY clear-to-null site
+    (resumeAnchor:consumed, ReaderContainer.tsx:1353) was NEVER observed firing in any A4 cycle.
+  - A5 seed-vs-heardFloor divergence (startIdx 1111 vs heardFloor 565) is a second, independent defect from A4's
+    reader-anchor pin — the rate-change reseed sources from nextGenWordIndexRef (pre-fetch head) rather than the
+    heard audio position. Recommend a distinct fix from the A4 anchor-clear work.
+  - DIAG flag still ON and speed left at 1.4x at end of run. To disable: localStorage.removeItem('BLURBY_DUAL_SOURCE_DIAG') + reload.

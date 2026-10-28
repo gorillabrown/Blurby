@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0",
+  "baselineVersion": "v2",
+  "createdAt": "2026-05-18T15:46:00-05:00",
+  "source": {
+    "runType": "matrix+soak",
+    "matrixRunId": "baseline-v2",
+    "matrixArtifactsDir": "artifacts/tts-eval/baseline-v2",
+    "soakRunId": "soak-v2-standard",
+    "soakProfile": "standard",
+    "soakArtifactsDir": "artifacts/tts-eval/soak-v2-standard",
+    "commitShortSha": "db6e0b7"
+  },
+  "manifests": {
+    "fixtureManifestPath": "tests/fixtures/narration/manifest.json",
+    "fixtureManifestSha256": "C7BFCA6D0717B952FBB9A445109D25B55199BAB62AB58B2F61041D4467912F27",
+    "matrixManifestPath": "tests/fixtures/narration/matrix.manifest.json",
+    "matrixManifestSha256": "D6648E405DFBFC6DA8C95D88EB8E9B57832C3E395C2FB6E0E05E64499F6A8109"
+  },
+  "gateConfig": {
+    "path": "docs/testing/tts_quality_gates.v2.json",
+    "gateVersion": "v2"
+  },
+  "aggregate": {
+    "runCount": 9,
+    "startupLatency": {
+      "p50": 465,
+      "p95": 507.6,
+      "min": 370,
+      "max": 508
+    },
+    "warmPreviewLatency": {
+      "p50": 1120,
+      "p95": 1156,
+      "min": 1000,
+      "max": 1180
+    },
+    "warmFirstAudioLatency": {
+      "p50": 465,
+      "p95": 507.6,
+      "min": 370,
+      "max": 508
+    },
+    "rateResponseLatency": {
+      "p50": 210,
+      "p95": 210,
+      "min": 210,
+      "max": 210
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    },
+    "startupSpikes": {
+      "thresholdMs": 3000,
+      "count": 0
+    },
+    "startupParity": {
+      "cachedStartLatencyMs": 370,
+      "uncachedStartLatencyMs": 508,
+      "deltaMs": 138,
+      "cachedOpeningChunkWordCounts": [
+        13,
+        26,
+        52,
+        104,
+        148
+      ],
+      "uncachedOpeningChunkWordCounts": [
+        13,
+        26,
+        52,
+        104,
+        148
+      ],
+      "openingRampMatches": true
+    }
+  },
+  "soak": {
+    "runCount": 16,
+    "profile": "standard",
+    "startupLatency": {
+      "p50": 475.5,
+      "p95": 507,
+      "min": 402,
+      "max": 507
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    },
+    "bufferedButUnplayedSecondsP95": null,
+    "backpressureObservation": "No buffered-but-unplayed metric is emitted by the current synthetic harness; no explicit >5s backpressure signal observed in soak summaries."
+  }
+}

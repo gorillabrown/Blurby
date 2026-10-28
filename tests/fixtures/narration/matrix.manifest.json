@@ -1,0 +1,282 @@
+{
+  "schemaVersion": "1.0",
+  "generatedFor": "TTS-EVAL-2",
+  "scenarios": [
+    {
+      "id": "smoke-prose-default",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["smoke", "baseline"]
+    },
+    {
+      "id": "smoke-dialogue-fast",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.1,
+      "durationClass": "short",
+      "tags": ["smoke", "dialogue"]
+    },
+    {
+      "id": "punctuation-heavy-mid",
+      "fixtureId": "punctuation-dense",
+      "voiceId": "af_bella",
+      "requestedRate": 1.2,
+      "durationClass": "medium",
+      "tags": ["punctuation", "drift"]
+    },
+    {
+      "id": "long-form-stability",
+      "fixtureId": "long-sentence",
+      "voiceId": "af_bella",
+      "requestedRate": 1.3,
+      "durationClass": "long",
+      "tags": ["long-form", "stability"]
+    },
+    {
+      "id": "handoff-queue",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.4,
+      "durationClass": "medium",
+      "tags": ["handoff", "transition"]
+    },
+    {
+      "id": "chapter-transition",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.5,
+      "durationClass": "medium",
+      "tags": ["transition", "chapter"]
+    },
+    {
+      "id": "startup-parity-uncached",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["startup-parity", "uncached", "opening-ramp"]
+    },
+    {
+      "id": "startup-parity-cached",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "short",
+      "tags": ["startup-parity", "cached", "opening-ramp"]
+    },
+    {
+      "id": "rate-edit-live-response",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.3,
+      "durationClass": "short",
+      "tags": ["rate-response", "same-bucket", "segmented"]
+    },
+    {
+      "id": "moss-nano-11-page-live-book",
+      "label": "MOSS Nano 11 — Page selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "page",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "page"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-focus-live-book",
+      "label": "MOSS Nano 11 — Focus selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "focus",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "focus"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-flow-live-book",
+      "label": "MOSS Nano 11 — Flow selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "flow",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "flow"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-11-narrate-live-book",
+      "label": "MOSS Nano 11 — Narrate selected Nano live-book gate",
+      "engine": "nano",
+      "readingMode": "narrate",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-11", "nano-product-gate", "live-book", "narrate"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required",
+        "settingsPreviewTruth": true,
+        "sidecarLifecycle": true,
+        "cachePrefetchContinuity": true,
+        "segmentTiming": "segment-following",
+        "wordTimestamps": false,
+        "fallback": "explicit-only",
+        "runtimeReadiness": "documented",
+        "kokoroAvailable": true
+      }
+    },
+    {
+      "id": "moss-nano-12-page-live-evidence",
+      "label": "MOSS Nano 12 — Page selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "page",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "page"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-focus-live-evidence",
+      "label": "MOSS Nano 12 — Focus selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "focus",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "focus"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-flow-live-evidence",
+      "label": "MOSS Nano 12 — Flow selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "flow",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "flow"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-12-narrate-live-evidence",
+      "label": "MOSS Nano 12 — Narrate selected Nano live evidence",
+      "engine": "nano",
+      "readingMode": "narrate",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-12", "nano-live-evidence", "live-book", "narrate"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "streaming-cold-start",
+      "label": "Streaming — cold start latency",
+      "engine": "qwen-streaming",
+      "text": "The morning light filtered through the tall windows of the library, casting long golden rectangles across the wooden floor.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "latency", "cold-start"],
+      "expectedGates": ["streamingFirstAudioMs"]
+    },
+    {
+      "id": "streaming-warm-start",
+      "label": "Streaming — warm start latency",
+      "engine": "qwen-streaming",
+      "text": "She reached for the worn leather journal on the top shelf, its pages yellowed with age but still holding their secrets.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "latency", "warm-start"],
+      "expectedGates": ["streamingFirstAudioMs"]
+    },
+    {
+      "id": "streaming-long-chapter",
+      "label": "Streaming — sustained long chapter playback",
+      "engine": "qwen-streaming",
+      "text": "It was in that quiet hour before dawn, when the world holds its breath between darkness and light, that she finally understood what he had been trying to tell her all along. The words came back to her now with startling clarity, each syllable weighted with a meaning she had missed in her haste. She set down her coffee cup and walked to the window, watching the first pale threads of morning weave themselves into the horizon. There was no going back now — that much was certain. Whatever path she chose from this moment forward would define not just her own future, but the futures of everyone who depended on her judgment.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "sustained", "long-chapter"],
+      "expectedGates": ["streamingWordsPerMinute", "streamingStallCount"]
+    },
+    {
+      "id": "streaming-rapid-cancel",
+      "label": "Streaming — rapid cancel stress test",
+      "engine": "qwen-streaming",
+      "text": "The old clock on the mantelpiece began to chime.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "cancel", "stress"],
+      "cancelAfterMs": 200,
+      "expectedGates": []
+    },
+    {
+      "id": "streaming-stall-recovery",
+      "label": "Streaming — stall detection and recovery",
+      "engine": "qwen-streaming",
+      "text": "Even in the deepest silence, the river continued its patient journey toward the sea.",
+      "speaker": "af_heart",
+      "rate": 1.0,
+      "tags": ["streaming", "stall", "recovery"],
+      "simulateStall": true,
+      "expectedGates": ["streamingStallCount"]
+    }
+  ]
+}

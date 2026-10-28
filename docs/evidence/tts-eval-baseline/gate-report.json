@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "1.0",
+  "gateVersion": "v1",
+  "evaluatedAt": "2026-04-20T20:08:08.452Z",
+  "pass": true,
+  "counts": {
+    "hardRules": 7,
+    "warnRules": 3,
+    "hardFailures": 0,
+    "warnings": 0
+  },
+  "failures": [],
+  "warnings": [],
+  "results": [
+    {
+      "id": "warm-preview-p50-max",
+      "metric": "warmPreviewLatency.p50",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 1200,
+      "actual": 1120,
+      "unit": "ms",
+      "reason": "Warm Test voice previews must remain responsive.",
+      "passed": true
+    },
+    {
+      "id": "warm-preview-p95-max",
+      "metric": "warmPreviewLatency.p95",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 1800,
+      "actual": 1156,
+      "unit": "ms",
+      "reason": "Tail warm Test voice preview latency must remain within the approved Qwen budget.",
+      "passed": true
+    },
+    {
+      "id": "warm-first-audio-p50-max",
+      "metric": "warmFirstAudioLatency.p50",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 1500,
+      "actual": 465,
+      "unit": "ms",
+      "reason": "Median warm first-audio latency must stay within the approved Qwen budget.",
+      "passed": true
+    },
+    {
+      "id": "warm-first-audio-p95-max",
+      "metric": "warmFirstAudioLatency.p95",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 2200,
+      "actual": 507.6,
+      "unit": "ms",
+      "reason": "Tail warm first-audio latency must stay within the approved Qwen budget.",
+      "passed": true
+    },
+    {
+      "id": "drift-p95-max",
+      "metric": "drift.p95",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 2,
+      "actual": 2,
+      "unit": "words",
+      "reason": "Cursor/highlight drift should remain fully aligned in baseline matrix runs.",
+      "passed": true
+    },
+    {
+      "id": "pause-resume-failures-max",
+      "metric": "failureCounts.pauseResumeFailures",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 0,
+      "actual": 0,
+      "unit": "count",
+      "reason": "Pause/resume integrity failures block release.",
+      "passed": true
+    },
+    {
+      "id": "handoff-failures-max",
+      "metric": "failureCounts.handoffFailures",
+      "severity": "hard",
+      "op": "<=",
+      "expected": 0,
+      "actual": 0,
+      "unit": "count",
+      "reason": "Cross-book handoff failures block release.",
+      "passed": true
+    },
+    {
+      "id": "warm-preview-max-warning",
+      "metric": "warmPreviewLatency.max",
+      "severity": "warn",
+      "op": "<=",
+      "expected": 3000,
+      "actual": 1180,
+      "unit": "ms",
+      "reason": "Warm preview spikes above the approved threshold require reviewer acknowledgement.",
+      "passed": true
+    },
+    {
+      "id": "warm-first-audio-max-warning",
+      "metric": "warmFirstAudioLatency.max",
+      "severity": "warn",
+      "op": "<=",
+      "expected": 3000,
+      "actual": 508,
+      "unit": "ms",
+      "reason": "Warm first-audio spikes above the approved threshold require reviewer acknowledgement.",
+      "passed": true
+    },
+    {
+      "id": "drift-max-warning",
+      "metric": "drift.max",
+      "severity": "warn",
+      "op": "<=",
+      "expected": 2,
+      "actual": 2,
+      "unit": "words",
+      "reason": "Any max drift above baseline should be reviewed before release.",
+      "passed": true
+    }
+  ],
+  "aggregate": {
+    "runCount": 9,
+    "startupLatency": {
+      "p50": 465,
+      "p95": 507.6,
+      "min": 370,
+      "max": 508
+    },
+    "warmPreviewLatency": {
+      "p50": 1120,
+      "p95": 1156,
+      "min": 1000,
+      "max": 1180
+    },
+    "warmFirstAudioLatency": {
+      "p50": 465,
+      "p95": 507.6,
+      "min": 370,
+      "max": 508
+    },
+    "rateResponseLatency": {
+      "p50": 210,
+      "p95": 210,
+      "min": 210,
+      "max": 210
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    },
+    "startupSpikes": {
+      "thresholdMs": 3000,
+      "count": 0
+    },
+    "startupParity": {
+      "cachedStartLatencyMs": 370,
+      "uncachedStartLatencyMs": 508,
+      "deltaMs": 138,
+      "cachedOpeningChunkWordCounts": [
+        13,
+        26,
+        52,
+        104,
+        148
+      ],
+      "uncachedOpeningChunkWordCounts": [
+        13,
+        26,
+        52,
+        104,
+        148
+      ],
+      "openingRampMatches": true
+    }
+  }
+}
