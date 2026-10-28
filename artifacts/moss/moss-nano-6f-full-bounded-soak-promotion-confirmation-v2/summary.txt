@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-6f-full-bounded-soak-promotion-confirmation-v2
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6f-full-bounded-soak-promotion-confirmation-v2\output.wav
+Total seconds: 1.7666
+First WAV bytes seconds: 0.243
+Internal first decoded seconds: 0.243
+Audio duration seconds: 3.68
+RTF: 0.4801
+Peak memory: 1739.84 MB
+Process mode: cold
+Runtime reuse actual: false
+Prewarm: none
+Iterations: 1

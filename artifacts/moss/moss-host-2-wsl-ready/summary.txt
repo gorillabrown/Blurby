@@ -1,0 +1,17 @@
+MOSS Runtime Shape Probe
+========================
+Status: ok
+Run ID: moss-host-2-wsl-ready
+Checked at: 2026-04-28T13:57:21.639Z
+Config path: C:\Users\estra\Projects\Blurby\.runtime\moss\config.json
+
+Shapes
+------
+- x64Windows: available
+  Configured x64 Windows MOSS binary is present.
+  Binary: C:\Users\estra\Projects\Blurby\.runtime\moss\llama.cpp\build-vs-x64\bin\Release\llama-moss-tts.exe
+- nativeArm64Clang: blocked (clang-unavailable)
+  spawn clang ENOENT
+- wsl2Linux: available
+  Ubuntu-24.04 shell gate confirmed WSL runtime and host2 aarch64 MOSS binary.
+  Binary: /mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts

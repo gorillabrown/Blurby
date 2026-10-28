@@ -1,0 +1,19 @@
+{
+  "fixtureId": "long-sentence",
+  "runId": "long-sentence-1776382372187",
+  "startLatencyMs": 507,
+  "wordEventCount": 41,
+  "flowEventCount": 14,
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 0,
+    "handoff": 0
+  },
+  "failureClasses": []
+}

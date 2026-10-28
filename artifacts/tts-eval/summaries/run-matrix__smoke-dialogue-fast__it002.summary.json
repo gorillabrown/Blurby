@@ -1,0 +1,40 @@
+{
+  "fixtureId": "dialogue-switches",
+  "scenarioId": "smoke-dialogue-fast",
+  "runId": "run-matrix__smoke-dialogue-fast__it002",
+  "startLatencyMs": 465,
+  "warmPreviewLatencyMs": 1120,
+  "warmFirstAudioLatencyMs": 465,
+  "startupSpikeThresholdMs": 3000,
+  "startupSpikeCount": 0,
+  "maxDrift": 2,
+  "wordEventCount": 35,
+  "flowEventCount": 12,
+  "startupCacheMode": null,
+  "openingChunkWordCounts": [],
+  "pauseResumeIntegrity": {
+    "pauses": 0,
+    "resumes": 0,
+    "balanced": true
+  },
+  "transitionCounts": {
+    "section": 0,
+    "chapter": 0,
+    "book": 0,
+    "handoff": 0
+  },
+  "sectionHandoffLatencyMs": null,
+  "crossBookResumeLatencyMs": null,
+  "rateResponseLatencyMs": null,
+  "failureClasses": [],
+  "scenario": {
+    "id": "smoke-dialogue-fast",
+    "voiceId": "af_bella",
+    "requestedRate": 1.1,
+    "durationClass": "short",
+    "tags": [
+      "smoke",
+      "dialogue"
+    ]
+  }
+}

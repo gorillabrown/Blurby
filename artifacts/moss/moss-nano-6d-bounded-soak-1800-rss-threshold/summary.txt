@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-6d-bounded-soak-1800-rss-threshold
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6d-bounded-soak-1800-rss-threshold\output.wav
+Total seconds: 1.7996
+First WAV bytes seconds: 0.249
+Internal first decoded seconds: 0.249
+Audio duration seconds: 3.68
+RTF: 0.489
+Peak memory: 1725.15 MB
+Process mode: cold
+Runtime reuse actual: false
+Prewarm: none
+Iterations: 1

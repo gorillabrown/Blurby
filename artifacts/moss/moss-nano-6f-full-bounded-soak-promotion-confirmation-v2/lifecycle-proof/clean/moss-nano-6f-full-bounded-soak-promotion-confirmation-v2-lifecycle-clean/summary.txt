@@ -1,0 +1,20 @@
+MOSS Nano Probe
+===============
+Status: blocked
+Failure class: runtime-contract
+Run ID: moss-nano-6f-full-bounded-soak-promotion-confirmation-v2-lifecycle-clean
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6f-full-bounded-soak-promotion-confirmation-v2\lifecycle-proof\clean\moss-nano-6f-full-bounded-soak-promotion-confirmation-v2-lifecycle-clean\output.wav
+Total seconds: unknown
+First WAV bytes seconds: unknown
+Internal first decoded seconds: unsupported
+Audio duration seconds: unknown
+RTF: unknown
+Peak memory: unknown MB
+Process mode: cold
+Runtime reuse actual: False
+Prewarm: none
+Iterations: 1
+Error: Resident success requires at least two warmup/measured runs to prove runtime reuse identity.

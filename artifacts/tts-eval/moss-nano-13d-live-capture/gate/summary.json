@@ -1,0 +1,721 @@
+{
+  "generatedAt": "2026-05-03T20:07:58.584Z",
+  "mode": "matrix",
+  "interrupted": false,
+  "fixtureCount": 4,
+  "summaries": [
+    {
+      "fixtureId": "prose-basic",
+      "scenarioId": "moss-nano-12-page-live-evidence",
+      "runId": "moss-nano-13d-live-capture-gate-matrix__moss-nano-12-page-live-evidence__it001",
+      "startLatencyMs": 486,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 486,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 38,
+      "flowEventCount": 13,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-12-page-live-evidence",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-12",
+          "nano-live-evidence",
+          "live-book",
+          "page"
+        ]
+      }
+    },
+    {
+      "fixtureId": "dialogue-switches",
+      "scenarioId": "moss-nano-12-focus-live-evidence",
+      "runId": "moss-nano-13d-live-capture-gate-matrix__moss-nano-12-focus-live-evidence__it002",
+      "startLatencyMs": 465,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 465,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 35,
+      "flowEventCount": 12,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-12-focus-live-evidence",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-12",
+          "nano-live-evidence",
+          "live-book",
+          "focus"
+        ]
+      }
+    },
+    {
+      "fixtureId": "queued-handoff",
+      "scenarioId": "moss-nano-12-flow-live-evidence",
+      "runId": "moss-nano-13d-live-capture-gate-matrix__moss-nano-12-flow-live-evidence__it003",
+      "startLatencyMs": 402,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 402,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
+        "book": 1,
+        "handoff": 1
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": 474,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-12-flow-live-evidence",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-12",
+          "nano-live-evidence",
+          "live-book",
+          "flow"
+        ]
+      }
+    },
+    {
+      "fixtureId": "chapter-transition",
+      "scenarioId": "moss-nano-12-narrate-live-evidence",
+      "runId": "moss-nano-13d-live-capture-gate-matrix__moss-nano-12-narrate-live-evidence__it004",
+      "startLatencyMs": 395,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 395,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 25,
+      "flowEventCount": 9,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 1,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": [],
+      "scenario": {
+        "id": "moss-nano-12-narrate-live-evidence",
+        "voiceId": "af_bella",
+        "requestedRate": 1,
+        "durationClass": "medium",
+        "tags": [
+          "moss-nano-12",
+          "nano-live-evidence",
+          "live-book",
+          "narrate"
+        ]
+      }
+    }
+  ],
+  "aggregate": {
+    "runCount": 4,
+    "startupLatency": {
+      "p50": 433.5,
+      "p95": 482.85,
+      "min": 395,
+      "max": 486
+    },
+    "warmPreviewLatency": {
+      "p50": 1120,
+      "p95": 1120,
+      "min": 1120,
+      "max": 1120
+    },
+    "warmFirstAudioLatency": {
+      "p50": 433.5,
+      "p95": 482.85,
+      "min": 395,
+      "max": 486
+    },
+    "rateResponseLatency": {
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
+    },
+    "drift": {
+      "p50": 2,
+      "p95": 2,
+      "max": 2
+    },
+    "failureCounts": {
+      "pauseResumeFailures": 0,
+      "handoffFailures": 0
+    },
+    "startupSpikes": {
+      "thresholdMs": 3000,
+      "count": 0
+    },
+    "startupParity": {
+      "cachedStartLatencyMs": null,
+      "uncachedStartLatencyMs": null,
+      "deltaMs": null,
+      "cachedOpeningChunkWordCounts": [],
+      "uncachedOpeningChunkWordCounts": [],
+      "openingRampMatches": null
+    }
+  },
+  "mossNanoLiveEvidenceGate": {
+    "requiredModes": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "requiredModesPresent": {
+      "page": true,
+      "focus": true,
+      "flow": true,
+      "narrate": true
+    },
+    "scenarioCount": 4,
+    "liveEvidence": {
+      "schemaVersion": "moss-nano-live-evidence.v2",
+      "evidenceKind": "real-app-selected-nano",
+      "generatedBy": "scripts/moss_nano_live_capture.mjs",
+      "generatedAt": "2026-05-03T20:07:33.117Z",
+      "appCommit": "6540e7cdbf43558949fcff7f444a7b5d80e2bc96",
+      "evidenceProducerVersion": "moss-nano-13c",
+      "modes": {
+        "page": {
+          "live": true,
+          "nanoSelected": true,
+          "startable": true,
+          "segmentProgressUnderstandable": true,
+          "noUnderlineRace": true,
+          "cachePrefetchContinuity": true,
+          "noStalePlayback": true,
+          "pauseResumeSameMode": true,
+          "modeSwitchAnchorPreserved": true,
+          "explicitFallback": true,
+          "sidecarLifecycleStable": true,
+          "source": "real-app-selected-nano",
+          "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\page.trace.json",
+          "traceEventCount": 42,
+          "recordedAt": "2026-05-03T19:38:32.216Z",
+          "scenarioId": "moss-nano-13c-page-live-evidence",
+          "selectedEngine": "nano",
+          "timingTruth": "segment-following",
+          "wordTimestamps": null,
+          "runtime": {
+            "backend": "moss-nano-onnx",
+            "modelVariant": "moss-tts-nano-onnx",
+            "syntheticAudio": false
+          },
+          "nanoSegmentLatencyMs": {
+            "p50": 21992,
+            "p95": 32324,
+            "min": 10512,
+            "max": 33472
+          },
+          "nanoCache": {
+            "hits": 0,
+            "misses": 4,
+            "hitRate": 0
+          },
+          "nanoPrefetch": {
+            "ready": 1,
+            "stale": 0,
+            "cancelled": 0
+          },
+          "recycleObservations": {
+            "restarts": 0,
+            "cleanShutdowns": 1
+          },
+          "observedEngineSelection": {
+            "kind": "engine-selection",
+            "selectedEngine": "nano",
+            "source": "app-settings",
+            "ts": 1777837134435
+          },
+          "observedFallbackPolicy": {
+            "kind": "fallback-policy",
+            "policy": "explicit-only",
+            "selectedEngine": "nano",
+            "ts": 1777837134436
+          }
+        },
+        "focus": {
+          "live": true,
+          "nanoSelected": true,
+          "startable": true,
+          "segmentProgressUnderstandable": true,
+          "noUnderlineRace": true,
+          "cachePrefetchContinuity": true,
+          "noStalePlayback": true,
+          "pauseResumeSameMode": true,
+          "modeSwitchAnchorPreserved": true,
+          "explicitFallback": true,
+          "sidecarLifecycleStable": true,
+          "source": "real-app-selected-nano",
+          "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\focus.trace.json",
+          "traceEventCount": 44,
+          "recordedAt": "2026-05-03T19:40:16.044Z",
+          "scenarioId": "moss-nano-13c-focus-live-evidence",
+          "selectedEngine": "nano",
+          "timingTruth": "segment-following",
+          "wordTimestamps": null,
+          "runtime": {
+            "backend": "moss-nano-onnx",
+            "modelVariant": "moss-tts-nano-onnx",
+            "syntheticAudio": false
+          },
+          "nanoSegmentLatencyMs": {
+            "p50": 7467.5,
+            "p95": 8606.45,
+            "min": 6202,
+            "max": 8733
+          },
+          "nanoCache": {
+            "hits": 0,
+            "misses": 4,
+            "hitRate": 0
+          },
+          "nanoPrefetch": {
+            "ready": 1,
+            "stale": 0,
+            "cancelled": 0
+          },
+          "recycleObservations": {
+            "restarts": 0,
+            "cleanShutdowns": 1
+          },
+          "observedEngineSelection": {
+            "kind": "engine-selection",
+            "selectedEngine": "nano",
+            "source": "app-settings",
+            "ts": 1777837230982
+          },
+          "observedFallbackPolicy": {
+            "kind": "fallback-policy",
+            "policy": "explicit-only",
+            "selectedEngine": "nano",
+            "ts": 1777837230982
+          }
+        },
+        "flow": {
+          "live": true,
+          "nanoSelected": true,
+          "startable": true,
+          "segmentProgressUnderstandable": true,
+          "noUnderlineRace": true,
+          "cachePrefetchContinuity": true,
+          "noStalePlayback": true,
+          "pauseResumeSameMode": true,
+          "modeSwitchAnchorPreserved": true,
+          "explicitFallback": true,
+          "sidecarLifecycleStable": true,
+          "source": "real-app-selected-nano",
+          "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\flow.trace.json",
+          "traceEventCount": 43,
+          "recordedAt": "2026-05-03T19:40:52.170Z",
+          "scenarioId": "moss-nano-13c-flow-live-evidence",
+          "selectedEngine": "nano",
+          "timingTruth": "segment-following",
+          "wordTimestamps": null,
+          "runtime": {
+            "backend": "moss-nano-onnx",
+            "modelVariant": "moss-tts-nano-onnx",
+            "syntheticAudio": false
+          },
+          "nanoSegmentLatencyMs": {
+            "p50": 7954.5,
+            "p95": 8732.55,
+            "min": 7090,
+            "max": 8819
+          },
+          "nanoCache": {
+            "hits": 0,
+            "misses": 4,
+            "hitRate": 0
+          },
+          "nanoPrefetch": {
+            "ready": 1,
+            "stale": 0,
+            "cancelled": 0
+          },
+          "recycleObservations": {
+            "restarts": 0,
+            "cleanShutdowns": 1
+          },
+          "observedEngineSelection": {
+            "kind": "engine-selection",
+            "selectedEngine": "nano",
+            "source": "app-settings",
+            "ts": 1777837266600
+          },
+          "observedFallbackPolicy": {
+            "kind": "fallback-policy",
+            "policy": "explicit-only",
+            "selectedEngine": "nano",
+            "ts": 1777837266601
+          }
+        },
+        "narrate": {
+          "live": true,
+          "nanoSelected": true,
+          "startable": true,
+          "segmentProgressUnderstandable": true,
+          "noUnderlineRace": true,
+          "cachePrefetchContinuity": true,
+          "noStalePlayback": true,
+          "pauseResumeSameMode": true,
+          "modeSwitchAnchorPreserved": true,
+          "explicitFallback": true,
+          "sidecarLifecycleStable": true,
+          "source": "real-app-selected-nano",
+          "runArtifactPath": "C:\\Users\\estra\\Projects\\Blurby\\artifacts\\tts-eval\\moss-nano-13d-live-capture\\traces\\narrate.trace.json",
+          "traceEventCount": 39,
+          "recordedAt": "2026-05-03T19:41:28.051Z",
+          "scenarioId": "moss-nano-13c-narrate-live-evidence",
+          "selectedEngine": "nano",
+          "timingTruth": "segment-following",
+          "wordTimestamps": null,
+          "runtime": {
+            "backend": "moss-nano-onnx",
+            "modelVariant": "moss-tts-nano-onnx",
+            "syntheticAudio": false
+          },
+          "nanoSegmentLatencyMs": {
+            "p50": 10727,
+            "p95": 13145.3,
+            "min": 8040,
+            "max": 13414
+          },
+          "nanoCache": {
+            "hits": 0,
+            "misses": 4,
+            "hitRate": 0
+          },
+          "nanoPrefetch": {
+            "ready": 1,
+            "stale": 0,
+            "cancelled": 0
+          },
+          "recycleObservations": {
+            "restarts": 0,
+            "cleanShutdowns": 1
+          },
+          "observedEngineSelection": {
+            "kind": "engine-selection",
+            "selectedEngine": "nano",
+            "source": "app-settings",
+            "ts": 1777837304220
+          },
+          "observedFallbackPolicy": {
+            "kind": "fallback-policy",
+            "policy": "explicit-only",
+            "selectedEngine": "nano",
+            "ts": 1777837304220
+          }
+        }
+      }
+    },
+    "reasons": [],
+    "decision": "NANO_RECOMMENDED_OPT_IN"
+  },
+  "gateReport": {
+    "schemaVersion": "1.0",
+    "gateVersion": "v1",
+    "evaluatedAt": "2026-05-03T20:07:58.586Z",
+    "pass": true,
+    "counts": {
+      "hardRules": 7,
+      "warnRules": 3,
+      "hardFailures": 0,
+      "warnings": 0
+    },
+    "failures": [],
+    "warnings": [],
+    "results": [
+      {
+        "id": "warm-preview-p50-max",
+        "metric": "warmPreviewLatency.p50",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 1200,
+        "actual": 1120,
+        "unit": "ms",
+        "reason": "Warm Test voice previews must remain responsive.",
+        "passed": true
+      },
+      {
+        "id": "warm-preview-p95-max",
+        "metric": "warmPreviewLatency.p95",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 1800,
+        "actual": 1120,
+        "unit": "ms",
+        "reason": "Tail warm Test voice preview latency must remain within the approved narration-lane budget.",
+        "passed": true
+      },
+      {
+        "id": "warm-first-audio-p50-max",
+        "metric": "warmFirstAudioLatency.p50",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 1500,
+        "actual": 433.5,
+        "unit": "ms",
+        "reason": "Median warm first-audio latency must stay within the approved narration-lane budget.",
+        "passed": true
+      },
+      {
+        "id": "warm-first-audio-p95-max",
+        "metric": "warmFirstAudioLatency.p95",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 2200,
+        "actual": 482.85,
+        "unit": "ms",
+        "reason": "Tail warm first-audio latency must stay within the approved narration-lane budget.",
+        "passed": true
+      },
+      {
+        "id": "drift-p95-max",
+        "metric": "drift.p95",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 2,
+        "actual": 2,
+        "unit": "words",
+        "reason": "Cursor/highlight drift should remain fully aligned in baseline matrix runs.",
+        "passed": true
+      },
+      {
+        "id": "pause-resume-failures-max",
+        "metric": "failureCounts.pauseResumeFailures",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 0,
+        "actual": 0,
+        "unit": "count",
+        "reason": "Pause/resume integrity failures block release.",
+        "passed": true
+      },
+      {
+        "id": "handoff-failures-max",
+        "metric": "failureCounts.handoffFailures",
+        "severity": "hard",
+        "op": "<=",
+        "expected": 0,
+        "actual": 0,
+        "unit": "count",
+        "reason": "Cross-book handoff failures block release.",
+        "passed": true
+      },
+      {
+        "id": "warm-preview-max-warning",
+        "metric": "warmPreviewLatency.max",
+        "severity": "warn",
+        "op": "<=",
+        "expected": 3000,
+        "actual": 1120,
+        "unit": "ms",
+        "reason": "Warm preview spikes above the approved threshold require reviewer acknowledgement.",
+        "passed": true
+      },
+      {
+        "id": "warm-first-audio-max-warning",
+        "metric": "warmFirstAudioLatency.max",
+        "severity": "warn",
+        "op": "<=",
+        "expected": 3000,
+        "actual": 486,
+        "unit": "ms",
+        "reason": "Warm first-audio spikes above the approved threshold require reviewer acknowledgement.",
+        "passed": true
+      },
+      {
+        "id": "drift-max-warning",
+        "metric": "drift.max",
+        "severity": "warn",
+        "op": "<=",
+        "expected": 2,
+        "actual": 2,
+        "unit": "words",
+        "reason": "Any max drift above baseline should be reviewed before release.",
+        "passed": true
+      }
+    ],
+    "aggregate": {
+      "runCount": 4,
+      "startupLatency": {
+        "p50": 433.5,
+        "p95": 482.85,
+        "min": 395,
+        "max": 486
+      },
+      "warmPreviewLatency": {
+        "p50": 1120,
+        "p95": 1120,
+        "min": 1120,
+        "max": 1120
+      },
+      "warmFirstAudioLatency": {
+        "p50": 433.5,
+        "p95": 482.85,
+        "min": 395,
+        "max": 486
+      },
+      "rateResponseLatency": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "drift": {
+        "p50": 2,
+        "p95": 2,
+        "max": 2
+      },
+      "failureCounts": {
+        "pauseResumeFailures": 0,
+        "handoffFailures": 0
+      },
+      "startupSpikes": {
+        "thresholdMs": 3000,
+        "count": 0
+      },
+      "startupParity": {
+        "cachedStartLatencyMs": null,
+        "uncachedStartLatencyMs": null,
+        "deltaMs": null,
+        "cachedOpeningChunkWordCounts": [],
+        "uncachedOpeningChunkWordCounts": [],
+        "openingRampMatches": null
+      }
+    }
+  }
+}

@@ -1,0 +1,1254 @@
+# MOSS Decision Log
+
+**Sprint:** MOSS-1 through MOSS-NANO-13e
+**Initial status:** `INVESTIGATE`
+**Current status:** `NANO_RECOMMENDED_OPT_IN`
+**Last updated:** 2026-05-04
+
+**Adjacent TTS posture after POCKET-TTS-1:** Pocket TTS is available as a separate opt-in third engine. This does not alter the MOSS-Nano decision state: Nano remains `NANO_RECOMMENDED_OPT_IN`, Kokoro remains default/available, Qwen remains disabled, no comparative Pocket-vs-Nano gate was run, and Kokoro retirement remains separately deferred.
+
+## Status Values
+
+| Status | Meaning |
+|---|---|
+| `INVESTIGATE` | Gather setup, runtime, and feasibility evidence. No product claim yet. |
+| `ITERATE` | Continue the flagship lane after a classified failure or incomplete gate. |
+| `ITERATE_RUNTIME_SHAPE` | Continue flagship only by resolving runtime-shape uncertainty and missing baseline evidence; app-side MOSS-3 work remains blocked. |
+| `PROMOTE_TO_APP_PROTOTYPE` | Flagship MOSS has enough evidence to enter app integration/prototype work. |
+| `DEMOTE_TO_NANO` | Flagship MOSS failed after the documented demotion criteria were satisfied; Nano may enter as fallback runtime. |
+| `PAUSE_FLAGSHIP_MOSS` | Stop flagship MOSS product-path work because paired baseline evidence does not justify more runtime effort. |
+| `PAUSE_FLAGSHIP_MOSS_RUNTIME_UNSTABLE` | Stop flagship MOSS product-path work because corrected speed rescue evidence remains too slow and repeats failed-cell instability. |
+| `KEEP_PAUSED_ROOT_CAUSE_CONFIRMED` | Keep flagship MOSS product-path work paused because root-cause evidence explains the current configured runtime as batch-only, non-assertive for prior quant/thread labels, too slow in raw generation plus ONNX decode, and intermittently unstable in `llama.cpp`. |
+| `CONTINUE_RUNTIME_RESCUE` | Continue bounded flagship runtime rescue because truthful evidence shows a plausible viable path still exists. |
+| `CONTINUE_FLAGSHIP_HOST_RESCUE` | Continue flagship host/runtime rescue because native ARM64 or WSL2/Linux bring-up produced a plausible non-x64 path that needs more timing evidence. |
+| `PROMOTE_TO_MOSS_3_CANDIDATE` | Reopen MOSS-3 sidecar/app-integration only after truthful runtime evidence shows a plausible live or precache candidate. |
+| `KEEP_PAUSED_RUNTIME_CONFIRMED` | Keep flagship MOSS product-path work paused after truthful runtime rescue confirms the best available local path remains too slow or unstable, with exact runtime-shape blockers recorded. |
+| `KEEP_PAUSED_HOST_CONFIRMED` | Keep flagship MOSS product-path work paused after host/runtime evidence confirms that the best available native ARM64 or WSL2/Linux MOSS shape is either unavailable or still non-viable. |
+| `ITERATE_NANO_RUNTIME` | Continue bounded Nano runtime iteration because Nano ONNX CPU can generate local audio, but timing evidence is not yet good enough for app prototype or promotion. |
+| `ITERATE_NANO_RESIDENT_RUNTIME` | Continue resident Nano runtime tuning/soak/perf only because true reuse and internal first-decoded timing are proven, but promotion thresholds and memory-soak confidence are not met. |
+| `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE` | Promote Nano only to the next runtime soak/package gate because segment-first product-path evidence passed; this is not app prototype promotion and does not unlock app integration. |
+| `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` | Promote Nano from runtime evidence into the gated app-prototype path only after soak, lifecycle, package, provisioning, and adjacent-segment evidence all pass; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
+| `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE` | Promote Nano from runtime evidence into the gated app-prototype path only when bounded lifecycle evidence includes measured recycle/reset, restart/prewarm cost, stale-output safety, memory/tail gates, and truthful shutdown/restart lifecycle coverage; this unlocks MOSS-NANO-7 but does not retire Kokoro. |
+| `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE` | Promote Nano from app-boundary sidecar/IPC prototype into the next bounded narration-strategy prototype path. This does not make Nano user-facing, selectable, normal playback, default, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE` | Promote Nano from bounded test-only narration strategy into the next continuity/cache/prefetch prototype path. This does not make Nano public `TtsEngine`, settings UI, normal playback productization, default, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE` | Promote Nano from bounded continuity/cache/prefetch prototype into explicit experimental UI candidate work. This does not make Nano default, broadly user-facing, public without opt-in UX, or a Kokoro replacement. |
+| `PROMOTE_NANO_TO_PRODUCTIZATION_GATE` | Promote Nano from settings-only experimental opt-in into the next productization/default-decision gate. This does not make Nano default, remove sidecar readiness gating, silently fall back to another engine, or retire Kokoro. |
+| `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE` | Promote Nano from synthetic app-sidecar proof to real local ONNX app-audio prototype. This proves Test Voice and selected Nano narration can use real Nano audio through app IPC when ready, but does not make Nano default, recommended opt-in, word-timed, or a Kokoro replacement. |
+| `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE` | MOSS-NANO-13c status: the schema/producer/gate can evaluate provenance-backed selected-Nano observations and reject simulated/incomplete evidence, but no clean real four-mode capture has promoted Nano. Nano remains experimental and non-default. |
+| `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION` | MOSS-NANO-13d status: real app-selected Nano evidence exists for Page, Focus, Flow, and Narrate; the final live gate passed cleanly as `NANO_RECOMMENDED_OPT_IN`; 13e must record the productization/opt-in recommendation decision. This does not change the default engine, retire Kokoro, or reactivate Qwen. |
+| `NANO_RECOMMENDED_OPT_IN` | MOSS-NANO-13e product decision: MOSS-Nano is recommended opt-in for Desktop v2.0 from the existing 13d real app-selected four-mode evidence and clean gate. Kokoro remains the default and available operational floor, Qwen remains disabled, and Kokoro retirement remains a separately deferred lane. |
+| `PAUSE_NANO_RUNTIME_RELIABILITY` | Pause Nano runtime reliability work when bounded recycle/reset evidence cannot make memory, tail latency, or lifecycle gates plausible enough for more runtime iteration. |
+| `KEEP_KOKORO_ONLY` | Historical Nano runtime-rescue decision from MOSS-NANO-2. It is not exposed as a Nano-6 readiness decision; Nano-6 readiness uses only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`. |
+| `REJECT` | MOSS is unsuitable for this lane because of quality, licensing, runtime, or maintainability blockers. |
+
+## Current MOSS-1 Evidence
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Upstream source facts | Verified 2026-04-26 | MOSS flagship, GGUF, ONNX tokenizer, CPU-only config, first-class `llama.cpp` branch, and Nano fallback facts recorded in `MOSS_FLAGSHIP_FEASIBILITY.md`. |
+| Runtime setup contract | Drafted | Config paths, config shape, required assets, Windows ARM64 notes, and no-silent-fallback rule recorded in `MOSS_RUNTIME_SETUP.md`. |
+| Preflight command | Present | `npm run moss:preflight` is the documented validation command. |
+| Probe command | Present | `npm run moss:probe` is documented in `MOSS_RUNTIME_SETUP.md` and writes classified probe artifacts. |
+| Native Windows Node probe: short smoke | Blocked | `npm run moss:probe -- --run-id moss1-native-short --passage short-smoke --out artifacts/moss/probe --json` exited `1` with `ok: false`, status `blocked`, and failure class `config-missing`. Evidence: `artifacts/moss/probe/moss1-native-short/summary.json`, `artifacts/moss/probe/moss1-native-short/summary.txt`. |
+| Native Windows Node probe: punctuation-heavy | Blocked | `npm run moss:probe -- --run-id moss1-native-punctuation --passage punctuation-heavy-mid --out artifacts/moss/probe --json` exited `1` with `ok: false`, status `blocked`, and failure class `config-missing`. Evidence: `artifacts/moss/probe/moss1-native-punctuation/summary.json`, `artifacts/moss/probe/moss1-native-punctuation/summary.txt`. |
+| Config-missing behavior | Verified classified blocker | Probe ran on native Windows Node host (`win32 arm64`) and produced classified failure artifacts under `<out>/<run-id>/summary.*` when `.runtime/moss/config.json` was missing. |
+| Windows x64-emulated flagship smoke | Passed | `npm run moss:probe -- --run-id moss1-smoke-win-direct-decode --passage short-smoke --json` exited `0` with `ok: true`, firstAudioMs `70202`, generationMs `70989`, audioDurationMs `4080`, and RTF `17.3993`. Evidence: `artifacts/moss/moss1-smoke-win-direct-decode/summary.json`, `artifacts/moss/moss1-smoke-win-direct-decode/summary.txt`, `artifacts/moss/moss1-smoke-win-direct-decode/short-smoke.wav`. |
+| Flagship runtime evidence | First audio reached | MOSS flagship Q4 first-class GGUF produced a WAV through `llama.cpp` raw-code generation plus direct Python ONNX decode. This proves local synthesis can run; it does not prove live-book viability. |
+| Native ARM64 vs WSL2 vs x64-emulation comparison | Partial | x64-emulated Windows binary works. Native ARM64 MSVC/Ninja build hit upstream ggml's MSVC ARM unsupported path and still needs a clang-based attempt before classification. WSL2/Linux x64 is not yet attempted. |
+| Quant/thread tuning evidence | Pending | Required before demotion if backend runs. |
+| Real book passage evidence | Pending | Required before promotion or demotion. |
+
+## MOSS-1 Decision
+
+Decision: `ITERATE`.
+
+Reason: MOSS-1 now has first-audio evidence from a runnable flagship path, but the first run is far too limited to promote into app integration. Continue the flagship-first lane with warm-run measurements, quant/thread tuning, punctuation-heavy and real-book passages, and a native ARM64/WSL2 shape check before judging live-book viability.
+
+Non-decisions:
+
+- Do not `PROMOTE_TO_APP_PROTOTYPE`: one slow smoke WAV is not enough app-integration evidence.
+- Do not `DEMOTE_TO_NANO`: the program-level demotion gate is not satisfied. A valid flagship runtime shape has now run, and no quant/thread profile, warm-run profile, or real book passage evidence exists.
+- Do not treat native ARM64 or WSL2/Linux x64 as failed. Native ARM64 still needs a clang-based attempt; WSL2/Linux x64 is not yet attempted.
+
+## Initial MOSS-2 Evidence
+
+Run id: `moss2-initial-escalated`.
+
+Artifact paths:
+
+- Run summary: `artifacts/moss/moss2-initial-escalated/summary.json`.
+- Case artifacts: `artifacts/moss/moss2-initial-escalated/cases/*/summary.json`, `artifacts/moss/moss2-initial-escalated/cases/*/summary.txt`, and successful `*.wav` outputs.
+- Runtime crash evidence: `artifacts/moss/moss2-initial-escalated/cases/moss2-initial-escalated-warm-Q4_K_M-t12-punctuation-heavy-mid-r1/summary.json`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Generated audio | Partial | `7/8` cases generated audio; the warm `Q4_K_M`, 12-thread, `punctuation-heavy-mid` case failed before audio output. |
+| Runtime stability | Crashed once | One runtime crash recorded: `llama-moss-tts raw-code generation failed with rc=3221225477`. |
+| Real-time factor | Too slow for live-book proof | Successful cases ranged from RTF `14.721` to `21.8858`. |
+| First-audio latency | Too slow for live-book proof | Successful cases ranged from about `62.5s` to `93.8s` first audio. |
+| Kokoro/listening comparison | Missing live data | Harness recorded Kokoro status `missing-live-data`; listening comparison is placeholder-only. |
+
+## MOSS-2 Decision
+
+Decision: `ITERATE`.
+
+Harness category: `needs-more-evidence`.
+
+Reason: MOSS-2 adds useful initial quant/thread and warm/cold evidence, including longer punctuation-heavy coverage, but it does not yet prove live-book viability. The successful cases are far slower than live playback needs, one runtime shape crashed, and there is no paired live Kokoro or listening-quality comparison.
+
+Non-decisions:
+
+- Do not `PROMOTE_TO_APP_PROTOTYPE`: MOSS-2 has no paired Kokoro/listening evidence and no viable first-audio or RTF profile yet.
+- Do not `DEMOTE_TO_NANO`: the documented demotion gate is not satisfied because paired Kokoro/listening and runtime-shape follow-up evidence is still missing.
+- Do not start MOSS-3 until paired Kokoro/listening evidence and the runtime-shape follow-up are complete.
+
+## MOSS-2B Evidence
+
+Run ids:
+
+- Paired required gate: `moss2b-paired-comparison`.
+- Optional missing-Kokoro artifact: `moss2b-paired-missing-kokoro`.
+- Runtime shape probe: `moss2b-runtime-shapes`.
+
+Artifact paths:
+
+- Required paired summary: `artifacts/moss/moss2b-paired-comparison/summary.json`.
+- Optional paired summary: `artifacts/moss/moss2b-paired-missing-kokoro/summary.json`.
+- Failed-case repeat summary: `artifacts/moss/moss2b-failed-repeat/summary.json`.
+- Listening review scaffold: `artifacts/moss/moss2b-paired-missing-kokoro/listening-review.md`.
+- Runtime shape summary: `artifacts/moss/moss2b-runtime-shapes/summary.json`.
+- Runtime shape comparison doc: `docs/testing/MOSS_RUNTIME_SHAPE_COMPARISON.md`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Paired Kokoro gate | Blocked | `--require-kokoro` exits nonzero with `failureClass: kokoro-comparison-missing`, `comparisonStatus: missing-live-data`, and promotion blockers `kokoro-live-data-missing` plus `listening-review-missing`. |
+| Optional paired artifact | Recorded, still non-promoting | Optional paired mode writes comparison/listening artifacts with `comparisonStatus: missing-live-data`; the imported MOSS summary still has `status: failed` because the known punctuation case failed. |
+| Failed-case classification | More precise | The warm `Q4_K_M`, 12-thread, `punctuation-heavy-mid` crash is now classified as `windows-process-crash-access-violation-candidate` from `rc=3221225477`. |
+| Failed-case repeat | Failed 3/3 with a different precise blocker | Re-running the warm `Q4_K_M`, 12-thread, `punctuation-heavy-mid` case three times produced no WAV artifacts. Each repeat is classified as `runtime-contract`, with generation times `71553`, `73578`, and `92768` ms. |
+| Runtime shape: x64 Windows | Available | Configured binary exists at `.runtime/moss/llama.cpp/build-vs-x64/bin/Release/llama-moss-tts.exe`. This is the only proven runnable shape so far. |
+| Runtime shape: native ARM64 clang | Blocked | Probe recorded `blocked`, blocker `clang-unavailable`, detail `spawn EPERM` in this execution context. This is not a native ARM64 failure. |
+| Runtime shape: WSL2/Linux | Blocked | Probe recorded `blocked`, blocker `wsl2-unavailable`, detail `spawn EPERM` in this execution context. This is not a WSL2 runtime failure. |
+| MOSS-3 readiness | Blocked | No paired Kokoro baseline, no completed human listening review, one classified Windows process crash candidate, and successful MOSS cases remain far too slow for live playback. |
+
+## MOSS-2B Decision
+
+Decision: `ITERATE_RUNTIME_SHAPE`.
+
+Reason: MOSS-2B tightened the harness and classification, but it did not produce the evidence needed to promote sidecar/IPC work. The only available runtime shape remains x64 Windows, the paired Kokoro/listening gate is still missing live data, the original warm punctuation failure is a Windows process crash/access-violation candidate, and three repeat attempts failed as `runtime-contract` because no WAV artifact was produced. Continue the flagship lane only by testing runtime shape alternatives and obtaining a real Kokoro/listening baseline. Do not start MOSS-3.
+
+Non-decisions:
+
+- Do not `PROMOTE_TO_APP_PROTOTYPE`: paired Kokoro evidence and listening review are still missing, and MOSS-3 is explicitly blocked.
+- Do not `DEMOTE_TO_NANO`: the evidence still does not distinguish x64-emulated runtime shape from flagship model viability.
+- Do not `PAUSE_FLAGSHIP`: the quality comparison has not happened yet; pausing before listening evidence would be premature.
+- Do not treat native ARM64 clang or WSL2/Linux as failed: both are blocked/unavailable in the current execution context, not proven bad runtime shapes.
+
+## MOSS-2C Evidence
+
+Run ids:
+
+- Kokoro live baseline: `moss2c-kokoro-baseline`.
+- Paired listening artifact: `moss2c-paired-listening`.
+
+Artifact paths:
+
+- Kokoro summary: `artifacts/moss/moss2c-kokoro-baseline/summary.json`.
+- Kokoro audio: `artifacts/moss/moss2c-kokoro-baseline/short-smoke.wav`, `artifacts/moss/moss2c-kokoro-baseline/punctuation-heavy-mid.wav`.
+- Paired summary: `artifacts/moss/moss2c-paired-listening/summary.json`.
+- Paired listening worksheet: `artifacts/moss/moss2c-paired-listening/listening-review.md`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Real Kokoro baseline | Generated | Kokoro produced audio for the same `short-smoke` and `punctuation-heavy-mid` passages used by the available MOSS evidence. |
+| Kokoro timing | Viable baseline | Kokoro recorded first-audio/generation `1385` ms with RTF `0.3337` for `short-smoke`, and `5616` ms with RTF `0.7414` for `punctuation-heavy-mid`. |
+| Paired MOSS/Kokoro artifact | Generated | Pairing succeeded with `comparisonStatus: paired`; the harness still blocks promotion with `listening-review-missing`. |
+| MOSS timing and stability | Still non-viable | Imported MOSS evidence remains `7/8` audio generated, one failed warm punctuation case, first-audio about `62.5s` to `93.8s`, and RTF `14.721` to `21.8858`. |
+| Human listening review | Not completed | No subjective listener notes were fabricated. The quality-first gate has no evidence that MOSS clearly beats Kokoro. |
+
+## MOSS-2C Decision
+
+Decision: `PAUSE_FLAGSHIP_MOSS`.
+
+Reason: MOSS-2C generated the missing real Kokoro baseline and paired it against the available MOSS artifacts. The objective evidence strongly favors Kokoro for live-book feasibility, while MOSS remains slow, fragile, and unproven on subjective quality. Because the human listening review has not shown that MOSS clearly beats Kokoro, further runtime-shape work is not justified now.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, and app integration work remain blocked.
+- Do not continue native ARM64, WSL2, or other runtime-shape work unless a later human listening review shows MOSS clearly beats Kokoro.
+- Do not record `DEMOTE_TO_NANO`: this decision pauses flagship MOSS; it does not promote Nano as the next runtime.
+- Keep Kokoro as the operational floor.
+
+## MOSS-SPEED-1 Task #8/#10b Supersession
+
+Task #8c and task #10b remain historical runtime rescue evidence, but their segment comparison numbers are superseded by corrected MOSS-SPEED-1 task #10f artifacts because correct end-to-end `passageText` propagation is fixed. Do not use task #8 or task #10b artifacts for current full-vs-first-sentence conclusions.
+
+## MOSS-SPEED-1 Task #10g Failed-Cell Confirmation Evidence
+
+Run ids:
+
+- Corrected single x64 timing check: `moss-speed-1-task-10f-single-x64`.
+- Corrected x64 timing matrix: `moss-speed-1-task-10f-x64-matrix`.
+- Failed-cell first-sentence rerun: `moss-speed-1-task-10f-rerun-first-sentence`.
+- Full 12-thread rerun: `moss-speed-1-task-10f-rerun-full-12-thread`.
+- Runtime-shape escalated artifacts from task #8: `moss-speed-1-task-8-runtime-shapes-escalated`, `moss-speed-1-task-8-escalated`.
+
+Artifact paths:
+
+- Corrected single x64 summary: `artifacts/moss/moss-speed-1-task-10f-single-x64/summary.json`, `artifacts/moss/moss-speed-1-task-10f-single-x64/summary.txt`.
+- Corrected x64 matrix summary: `artifacts/moss/moss-speed-1-task-10f-x64-matrix/summary.json`, `artifacts/moss/moss-speed-1-task-10f-x64-matrix/summary.txt`.
+- Failed-cell first-sentence rerun summary: `artifacts/moss/moss-speed-1-task-10f-rerun-first-sentence/summary.json`, `artifacts/moss/moss-speed-1-task-10f-rerun-first-sentence/summary.txt`.
+- Full 12-thread rerun summary: `artifacts/moss/moss-speed-1-task-10f-rerun-full-12-thread/summary.json`, `artifacts/moss/moss-speed-1-task-10f-rerun-full-12-thread/summary.txt`.
+- Escalated runtime shape summary: `artifacts/moss/moss-speed-1-task-8-runtime-shapes-escalated/summary.json`, `artifacts/moss/moss-speed-1-task-8-runtime-shapes-escalated/summary.txt`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Corrected propagation | Fixed | Correct end-to-end `passageText` propagation is fixed. Earlier task #8 and task #10b segment comparisons are superseded by task #10f. |
+| Corrected x64 single proof | Non-viable | `Q4_K_M`, 8-thread, `short-smoke/first-sentence` recorded firstAudioMs `43857` and RTF `10.8613`; speed gate stayed `KEEP_PAUSED`. |
+| Corrected x64 matrix timing | Non-viable | Matrix produced `24` cells, `16` timings, and `8` failures. Best observed RTF was `8.5593`; worst observed successful RTF was `11.1208`. Successful cells still took first audio from `43973` to `56456` ms. |
+| Corrected x64 matrix stability | Unstable | Eight cells failed: two with `rc=3221225477` and six with `rc=3221226356`. |
+| Failed-cell first-sentence rerun | Runtime instability reproduced | Punctuation-heavy first-sentence rerun covered `6` cells with `1` timing and `5` failures. `rc=3221226356` reproduced across the failed cells; the lone success was RTF `43.7886`. |
+| Full 12-thread rerun | Too slow despite passing | Full punctuation-heavy 12-thread rerun passed `2/2`, but successful RTF remained `13.7587` to `14.0669`. |
+| Native ARM64 clang | Blocked | Escalated task #8 runtime-shape evidence records `blocked`, blocker `clang-unavailable`, detail `spawn clang ENOENT`. This is not a failed native ARM64 timing run. |
+| WSL2/Linux | Blocked/unconfirmed | Escalated task #8 runtime-shape evidence records `blocked`, blocker `wsl2-unavailable`; `wsl.exe --status` ran, but WSL2 availability was not confirmed. |
+| MOSS-3 readiness | Blocked | Failed-cell confirmation plus non-viable timing produced no reason to reopen sidecar, IPC, or app integration work. |
+| Nano demotion | Not recorded | There is still no Nano timing evidence, so `DEMOTE_TO_NANO` remains unsupported. |
+
+## MOSS-SPEED-1 Task #10g Decision
+
+Decision among `CONTINUE` / `PAUSE` / `NANO`: `PAUSE`.
+
+Decision status: `PAUSE_FLAGSHIP_MOSS_RUNTIME_UNSTABLE`.
+
+Reason: The corrected task #10f artifacts preserve the pause conclusion after fixing end-to-end `passageText` propagation and add failed-cell confirmation evidence. The only runnable x64 shape remains too slow across successful cells, the first-sentence failed-cell rerun reproduced `rc=3221226356` in `5/6` cells, the lone first-sentence success was RTF `43.7886`, the full 12-thread rerun passed but stayed at RTF `13.7587` to `14.0669`, native ARM64 clang is blocked by missing clang, and WSL2 remains unconfirmed/blocked. MOSS-3 remains blocked.
+
+Follow-up RCA caveat: the task #10f matrix proves the current configured x64 batch path is slow and unstable, but it must not be treated as final proof about all quant/thread alternatives. Follow-up inspection found that the configured generation command hardcodes the first-class Q4 GGUF and does not pass thread count to `llama-moss-tts`, while the matrix labels still vary quant/thread. `MOSS-RCA-1` is therefore the next approved diagnostic sprint: fix or clearly classify matrix-label truth, separate batch latency from raw-code generation and ONNX decode, classify native return codes, and explain the punctuation-heavy instability before any MOSS app-integration work resumes.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, and app integration work remain blocked.
+- Do not continue product-path runtime-shape rescue work without root-cause evidence that changes the runtime availability or quality tradeoff. `MOSS-RCA-1` is allowed because it is diagnostic and explicitly does not reopen MOSS-3.
+- Do not record `DEMOTE_TO_NANO`: no Nano timing evidence exists.
+- Do not reopen MOSS-3: failed-cell confirmation and corrected speed evidence do not justify app-integration work.
+- Keep Kokoro as the operational floor.
+
+## MOSS-RCA-1 Evidence
+
+Run ids:
+
+- Short configured-path truth audit: `moss-rca-1-short-truth-audit`.
+- Punctuation first-sentence repeats: `moss-rca-1-punctuation-first-repeat`, `moss-rca-1-punctuation-first-repeat-2`, `moss-rca-1-punctuation-first-repeat-3`.
+
+Artifact paths:
+
+- `artifacts/moss/moss-rca-1-short-truth-audit/summary.json`, `stage-timings.json`, and per-run child `summary.json`.
+- `artifacts/moss/moss-rca-1-punctuation-first-repeat-2/summary.json` and child probe summary under `runs/*/summary.json`.
+- `artifacts/moss/moss-rca-1-punctuation-first-repeat-3/summary.json`, `stage-timings.json`, and per-run child `summary.json`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Matrix-label truth | Corrected | The RCA harness now records `runtimeInputTruth`. Current `.runtime/moss/config.json` does not consume `{quant}`, `{threads}`, or `{maxNewTokens}` in the configured command, so those labels are marked non-assertive instead of treated as proven runtime inputs. Historical MOSS-SPEED-1 quant/thread comparisons remain valid only as configured-path repeats, not as true quant/thread sweeps. |
+| Configured-path short timing | Non-viable | `moss-rca-1-short-truth-audit` produced non-empty stage timing with firstAudioMs `107184`, generationMs `107949`, audioDurationMs `4080`, and RTF `26.4581`. Stage split: raw-code generation `53656` ms and ONNX decode `53093` ms. |
+| Batch first-audio semantics | Confirmed | First audio is only available after raw-code generation and ONNX decode complete; this configured path is batch-only, not streaming-first-audio. |
+| Punctuation first-sentence repeat | Intermittent instability plus non-viable successes | `moss-rca-1-punctuation-first-repeat-2` failed in the child probe as `llama-cpp` with native return code `0xC0000374` (`heap-corruption-candidate`) extracted from wrapper stderr. Adjacent repeats passed but were still non-viable: RTF `60.8977` and `57.8307` for 880 ms of audio. |
+| Native return-code truth | Corrected | Probe summaries now preserve return code, hex code, return-code name, wrapper return code when applicable, command metadata, and bounded stdout/stderr tails. |
+| Max-token sweep | Blocked by current config truth | The harness can vary `--max-new-tokens`, but the current configured command hardcodes `--max-new-tokens 128` and does not consume `{maxNewTokens}`. RCA therefore records max-token labels as non-assertive until the local runtime config is changed to consume that placeholder. |
+| MOSS-3 readiness | Blocked | Root cause confirms no basis to start sidecar, IPC, renderer, timing-truth integration, or app work. |
+| Nano demotion | Not recorded | RCA collected no Nano timing evidence, so `DEMOTE_TO_NANO` remains unsupported. |
+
+## MOSS-RCA-1 Decision
+
+Decision: `KEEP_PAUSED_ROOT_CAUSE_CONFIRMED`.
+
+Reason: MOSS-RCA-1 explains the current failure shape without reopening product-path work. The configured x64 Windows path is batch-only, not a streaming first-audio path; raw-code generation and ONNX decode are both large latency contributors; the current local command hardcodes the first-class Q4 GGUF and does not consume quant/thread/max-token placeholders, so earlier matrix labels cannot be treated as true quant/thread/max-token sweeps; and punctuation-heavy first-sentence repeats show intermittent `llama.cpp` heap-corruption candidate behavior alongside successful runs that are still far too slow for live use. MOSS-3 remains blocked.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, renderer integration, and app-visible MOSS work remain blocked.
+- Do not change Kokoro production behavior: Kokoro remains the operational floor.
+- Do not record `DEMOTE_TO_NANO`: no Nano evidence was collected.
+- Do not treat current quant/thread/max-token labels as assertive until a local runtime command consumes the corresponding placeholders and the artifact records that truth.
+
+## MOSS-RUNTIME-1 Evidence
+
+Run ids:
+
+- Runtime-shape attempt: `moss-runtime-1-shapes-attempt-escalated`.
+- Truthful short rescue: `moss-runtime-1-truthful-single-q4-tokens128b`.
+- Truthful punctuation minimized rescue: `moss-runtime-1-truthful-punctuation-first-q4-tokens128c`.
+
+Artifact paths:
+
+- `artifacts/moss/moss-runtime-1-shapes-attempt-escalated/summary.json`.
+- `artifacts/moss/moss-runtime-1-truthful-single-q4-tokens128b/summary.json`, `stage-timings.json`, and `first-audio-architecture.json`.
+- `artifacts/moss/moss-runtime-1-truthful-punctuation-first-q4-tokens128c/summary.json` and `stage-timings.json`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Runtime-input truth | Corrected | The speed-forensics runner can use an in-memory first-class assertive command overlay without editing `.runtime/moss/config.json`. It propagates `{modelGguf}` and `{maxNewTokens}` to the wrapper/native executable, but marks `threads` non-assertive/unsupported because this local `llama-moss-tts` target rejects `--threads`. |
+| Quant truth | Partially assertive | First-class `Q4_K_M` exists and is assertive. The local first-class directory does not contain first-class Q5/Q6 GGUF files, so those quants are blocked as `quant-missing` rather than represented as tested. |
+| Runtime shape | Blocked beyond x64 | Escalated shape evidence records x64 Windows available, native ARM64 clang blocked by `spawn clang ENOENT`, and WSL2/Linux blocked because `wsl.exe --status` ran but did not confirm WSL2 availability. |
+| Short truthful timing | Non-viable | `Q4_K_M`, x64 Windows, `maxNewTokens=128`, short smoke succeeded with firstAudioMs `81438`, generationMs `82110`, audioDurationMs `4080`, and RTF `20.125`. Stage split: generation-ref `1208` ms, raw-code generation `53354` ms, ONNX decode `27291` ms. |
+| First-audio architecture | Batch-bound | `first-audio-architecture.json` classifies the current first-audio path as `batch-raw-code-plus-onnx-decode`; no partial raw-code or partial audio stream was observed through the configured first-class wrapper. |
+| Punctuation minimized instability | Reproduced | `punctuation-heavy-mid/first-sentence` (`Wait...`) with truthful Q4/max-token labels failed as `llama-cpp` with native `0xC0000374` (`heap-corruption-candidate`). Partial timing preserved generation-ref `761` ms and raw-code generation `25973` ms before crash; no ONNX decode or WAV stage occurred. |
+| Max-token rescue | Failed to rescue | `maxNewTokens=16` and `maxNewTokens=128` both showed native instability in truthful x64 runs; the successful `128` short case remained far outside live viability. |
+| MOSS-3 readiness | Blocked | No truthful runtime evidence supports reopening sidecar, IPC, renderer, timing-truth integration, or app-visible MOSS work. |
+| Nano demotion | Not recorded | MOSS-RUNTIME-1 collected no Nano timing evidence, so `DEMOTE_TO_NANO` remains unsupported. |
+
+## MOSS-RUNTIME-1 Decision
+
+Decision: `KEEP_PAUSED_RUNTIME_CONFIRMED`.
+
+Reason: MOSS-RUNTIME-1 made the flagship runtime evidence fairer and still did not produce a viable local flagship path. The only available local runtime shape remains x64 Windows; native ARM64 clang is blocked by missing clang and WSL2 is unconfirmed. Truthful first-class Q4/max-token propagation works, but thread count is unsupported by this native target and Q5/Q6 first-class quants are unavailable locally. The best truthful short run still took `81438` ms to first audio with RTF `20.125`, and the measured first-audio architecture is batch-bound on raw-code generation plus ONNX decode. The minimized punctuation input `Wait...` reproduced native heap-corruption candidate `0xC0000374`. MOSS-3 remains blocked.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, renderer integration, and app-visible MOSS work remain blocked.
+- Do not change Kokoro production behavior: Kokoro remains the operational floor.
+- Do not record `DEMOTE_TO_NANO`: no Nano timing evidence was collected.
+- Do not call Q5/Q6 or thread sweeps tested under the current first-class path; those labels are blocked or non-assertive unless a future runtime adds real support.
+
+## MOSS-HOST-1 Evidence
+
+Run ids:
+
+- Runtime-shape attempt after WSL parser fix: `moss-host-1-shapes-attempt-after-wsl-fix`.
+- LLVM install attempt: `moss-host-1-llvm-install-attempt`.
+- WSL usability check: `moss-host-1-wsl-usability`.
+
+Artifact paths:
+
+- `artifacts/moss/moss-host-1-shapes-attempt-after-wsl-fix/summary.json`.
+- `artifacts/moss/moss-host-1-llvm-install-attempt/summary.json`.
+- `artifacts/moss/moss-host-1-wsl-usability/summary.json`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Runtime-shape probe truth | Corrected | `scripts/moss_runtime_shape_probe.mjs` now normalizes NUL-padded `wsl.exe --status` output before matching, so Windows WSL status output is not misread as unavailable. |
+| Native ARM64 clang locate/install | Blocked | `clang`, `clang-cl`, and `ninja` were not found on PATH or in common Visual Studio/LLVM locations. `choco install llvm -y --no-progress` was attempted but failed because the current shell could not obtain Chocolatey package-lock access under `C:\ProgramData\chocolatey\lib` or create `C:\ProgramData\chocolatey\lib-bad`. |
+| Native ARM64 build | Blocked before configure | The guarded `arm64-windows-llvm-release` configure/build would run through CMake, but `clang` remains unavailable, so no native ARM64 `llama-moss-tts.exe` was produced. |
+| WSL2 presence | Present | Escalated `wsl.exe --status` reports Default Version `2`, and the fixed shape probe records WSL2 as `available`. |
+| WSL2 Linux runtime usability | Blocked | Installed distros are Docker Desktop internals only. `docker-desktop-data` cannot execute `/bin/sh`; `docker-desktop` can run `uname` and reports `aarch64`, but Blurby repo/runtime paths are not mounted and `git`, `cmake`, `gcc`, `g++`, `make`, `ninja`, and `python3` are missing. |
+| Non-x64 truthful Q4/Wait rerun | Not runnable | No native ARM64 or usable WSL2/Linux MOSS runtime exists on this host state, so rerunning short Q4 and minimized `Wait...` under a non-x64 shape is blocked rather than failed. |
+| MOSS-3 readiness | Blocked | MOSS-HOST-1 produced no non-x64 timing or stability evidence that could reopen sidecar, IPC, renderer, timing-truth integration, or app-visible MOSS work. |
+| Nano demotion | Not recorded | MOSS-HOST-1 collected no Nano timing evidence, so `DEMOTE_TO_NANO` remains unsupported. |
+
+## MOSS-HOST-1 Decision
+
+Decision: `KEEP_PAUSED_HOST_CONFIRMED`.
+
+Reason: MOSS-HOST-1 tried the remaining host-shape escape hatch and did not produce a runnable non-x64 flagship path. Native ARM64 clang remains blocked because LLVM/clang is not installed and the attempted Chocolatey install failed on host permissions. WSL2 is present after fixing NUL-padded status parsing, but the only installed WSL2 distributions are Docker Desktop internals and are not usable for MOSS runtime build/run: the default data distro has no usable shell, and the runnable Docker distro lacks repo mounts and build/runtime tools. Because no native ARM64 or WSL2/Linux MOSS runtime could run, the truthful Q4 short and minimized `Wait...` evidence could not be rerun outside x64 Windows. MOSS-3 remains blocked.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, renderer integration, and app-visible MOSS work remain blocked.
+- Do not change Kokoro production behavior: Kokoro remains the operational floor.
+- Do not record `DEMOTE_TO_NANO`: no Nano evidence was collected.
+- Do not call native ARM64 or WSL2/Linux performance failed; they are host/tooling blocked in this environment.
+
+## MOSS-HOST-2 Evidence
+
+Run ids:
+
+- Shape gate: `moss-host-2-wsl-ready`.
+- Short WSL Q4 tokens128: `moss-host-2-wsl-short-q4-tokens128`.
+- Punctuation WSL Q4 tokens128: `moss-host-2-wsl-punctuation-q4-tokens128`.
+
+Artifact paths:
+
+- `artifacts/moss/moss-host-2-wsl-ready/summary.json`.
+- `artifacts/moss/moss-host-2-wsl-short-q4-tokens128/summary.json`.
+- `artifacts/moss/moss-host-2-wsl-punctuation-q4-tokens128/summary.json`.
+
+Fresh WSL ARM64 binary:
+
+- `/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts`.
+
+Build flags:
+
+- `GGML_NATIVE=OFF`
+- `GGML_CPU_ARM_ARCH=armv8.6-a+dotprod+i8mm+nosve`
+- `CMAKE_BUILD_TYPE=Release`
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Shape gate | Available | `artifacts/moss/moss-host-2-wsl-ready/summary.json` records `shapes.wsl2Linux.status=available`, `machine=aarch64`, an Ubuntu-24.04 shell gate, and the fresh host2 binary path `/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts`. |
+| Fresh binary provenance | Confirmed | MOSS-HOST-2 used the fresh WSL ARM64 host2 binary, not stale evidence from earlier x64 or blocked host-shape attempts. |
+| Short WSL Q4 tokens128 | Runnable but non-viable | `artifacts/moss/moss-host-2-wsl-short-q4-tokens128/summary.json` records raw `57.84s`, decode `63.38s`, total `121.22s`, RTF `42.0902777777778`, and WAV `180524` bytes. |
+| Punctuation WSL Q4 tokens128 | Runnable but non-viable | `artifacts/moss/moss-host-2-wsl-punctuation-q4-tokens128/summary.json` records raw `52.93s`, decode `73.26s`, total `126.19s`, RTF `16.2615979381443`, and WAV `372524` bytes. |
+| MOSS-3 readiness | Blocked | Fresh WSL ARM64 evidence proves the shape can run, but the measured runtime is still far outside live app-integration viability. Do not reopen sidecar, IPC, renderer, timing-truth integration, or app-visible MOSS work. |
+| Nano demotion | Not recorded | MOSS-HOST-2 collected no Nano timing evidence and does not record `DEMOTE_TO_NANO`. |
+
+## MOSS-HOST-2 Decision
+
+Decision: `KEEP_PAUSED_HOST_CONFIRMED`.
+
+Reason: MOSS-HOST-2 closed the stale-evidence gap by using a fresh WSL ARM64 host2 binary at `/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts`, built with `GGML_NATIVE=OFF`, `GGML_CPU_ARM_ARCH=armv8.6-a+dotprod+i8mm+nosve`, and `CMAKE_BUILD_TYPE=Release`. The Ubuntu-24.04 WSL shape gate is available on `aarch64`, but the runnable Q4 tokens128 probes remain non-viable: short took total `121.22s` at RTF `42.0902777777778`, and punctuation took total `126.19s` at RTF `16.2615979381443`. MOSS-3 remains paused.
+
+Non-decisions:
+
+- Do not start MOSS-3: sidecar, IPC, renderer integration, timing-truth integration, and app-visible MOSS work remain blocked.
+- Do not change Kokoro production behavior: Kokoro remains the operational floor.
+- Do not record `DEMOTE_TO_NANO`: no Nano timing evidence was collected.
+
+## MOSS-NANO-1 Evidence
+
+Run ids:
+
+- Provisioning evidence: `moss-nano-1-provisioning`.
+- Runtime-contract blocker evidence before fix: `moss-nano-1-provisioning-blocked`.
+- Live short probe after fix: `moss-nano-1-short`.
+- Live punctuation probe after fix: `moss-nano-1-punctuation`.
+
+Artifact paths:
+
+- Provisioning logs: `artifacts/moss/moss-nano-1-provisioning/`.
+- Initial blocker artifacts: `artifacts/moss/moss-nano-1-provisioning-blocked/` and provisioning logs under `artifacts/moss/moss-nano-1-provisioning/`. The canonical `moss-nano-1-short` summary now holds successful post-fix evidence.
+- Short live summary/audio: `artifacts/moss/moss-nano-1-short/summary.json`, `artifacts/moss/moss-nano-1-short/output.wav`.
+- Punctuation live summary/audio: `artifacts/moss/moss-nano-1-punctuation/summary.json`, `artifacts/moss/moss-nano-1-punctuation/output.wav`.
+
+Local runtime assets:
+
+- Source: `.runtime/moss/MOSS-TTS-Nano`.
+- ONNX assets: `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-TTS-Nano-100M-ONNX` and `.runtime/moss/weights/MOSS-TTS-Nano-ONNX/MOSS-Audio-Tokenizer-Nano-ONNX`.
+- Python venv: `.runtime/moss/.venv-nano`, Python `3.13`.
+- Installed packages: `numpy`, `soundfile`, `onnxruntime`, `sentencepiece`, `torch==2.7.0`, `torchaudio==2.7.0`.
+
+| Evidence item | Status | Notes |
+|---|---|---|
+| Probe scripts | Added | `scripts/moss_nano_probe.mjs` and `scripts/moss_nano_probe.py` run direct upstream Nano ONNX inference and collect summary/audio artifacts. |
+| Probe tests | Passed | `tests/mossNanoProbe.test.js` focused test passed `8/8` after sandbox `EPERM` required an escalated rerun. |
+| Runtime contract | Fixed | Upstream `infer_onnx.py` requires `--output-audio-path` and `--cpu-threads`, not `--output`/`--threads`; prompt audio uses `--prompt-audio-path`. Direct `infer_onnx.py` is preferred over `moss-tts-nano` CLI for this probe. |
+| Short Nano ONNX CPU probe | Runnable but not realtime | `status: ok`; `output.wav` size `706604`; firstAudioSec `15.5075`; totalSec `16.1921`; audioDurationSec `3.68`; RTF `4.4`; peakMemoryMb `null`. |
+| Punctuation Nano ONNX CPU probe | Runnable but not realtime | `status: ok`; `output.wav` size `2257964`; firstAudioSec `18.7613`; totalSec `19.4349`; audioDurationSec `11.76`; RTF `1.6526`; peakMemoryMb `null`. |
+| Kokoro comparison | Still favors Kokoro for live default | Prior Kokoro baseline remains much faster: `1385` ms / RTF `0.3337` for short smoke and `5616` ms / RTF `0.7414` for punctuation-heavy. Nano is operationally far better than flagship but still misses live first-audio and realtime promotion thresholds. |
+| Flagship comparison | Nano is the better MOSS runtime candidate | Previous flagship evidence remains non-viable despite fresh WSL ARM64 proof: MOSS-HOST-2 short total `121.22s` / RTF `42.0902777777778`, punctuation total `126.19s` / RTF `16.2615979381443`. Nano ONNX CPU generates local audio faster and more reliably than flagship, but not fast enough for app integration. |
+| MOSS app integration | Still blocked | No sidecar, renderer, selectable engine, IPC, timing-truth, cache, or productization work is approved from this evidence. |
+
+## MOSS-NANO-1 Decision
+
+Decision: `ITERATE_NANO_RUNTIME`.
+
+Reason: Nano ONNX CPU generated local audio for both short and punctuation-heavy passages and is operationally far better than flagship on this host, but the observed first-audio times (`15.5075s`, `18.7613s`) and RTF (`4.4`, `1.6526`) miss live realtime and promotion thresholds. Keep Kokoro as the app default and only integrated engine for now. Nano remains worth runtime iteration, not rejection and not app promotion.
+
+Next actions:
+
+- Optimize Python cold start and imports in the Nano probe path.
+- Measure streaming first-audio truth separately from full-file completion.
+- Explore CPU thread and model/runtime options that could improve first audio and RTF.
+- Define packaging/provisioning shape only after timing improves enough to justify app prototype work.
+
+Non-decisions:
+
+- Do not record `PROMOTE_NANO_TO_APP_PROTOTYPE`: Nano is not ready for app integration.
+- Do not reject Nano: it generates local audio and is materially better than flagship operationally.
+- Do not start MOSS-3 or any Nano app-side sidecar, IPC, renderer, timing-truth, cache, or productization work.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not record `DEMOTE_TO_NANO`: the current decision is bounded Nano runtime iteration, not a product-lane demotion/promotion.
+
+## MOSS-NANO-2 Evidence
+
+Run ids:
+
+- Superseded wrong-interpreter runs: `moss-nano-2-cold-short`, `moss-nano-2-warm-short`, `moss-nano-2-cold-punctuation`, `moss-nano-2-warm-punctuation`.
+- Superseded venv-but-empty-alias runs: `moss-nano-2-cold-short-venv`, `moss-nano-2-warm-short-venv`, `moss-nano-2-cold-punctuation-venv`, `moss-nano-2-warm-punctuation-venv`.
+- Superseded non-v2 real-text runs: `moss-nano-2-cold-short-realtext`, `moss-nano-2-warm-short-realtext`, `moss-nano-2-cold-punctuation-realtext`, `moss-nano-2-warm-punctuation-realtext`.
+- Superseded non-v2 segmentation runs: `moss-nano-2-segment-first-sentence-short`, `moss-nano-2-segment-natural-punctuation`, `moss-nano-2-segment-token-window-punctuation`, `moss-nano-2-segment-char-window-punctuation`.
+- Canonical v2 real-text runs: `moss-nano-2-cold-short-realtext-v2`, `moss-nano-2-warm-short-realtext-v2`, `moss-nano-2-cold-punctuation-realtext-v2`, `moss-nano-2-warm-punctuation-realtext-v2`.
+- Canonical v2 segmentation runs: `moss-nano-2-segment-token-window-punctuation-v2`, `moss-nano-2-segment-char-window-punctuation-v2`.
+- ORT option runs: `moss-nano-2-ort-cpu-default-short`, `moss-nano-2-ort-cpu-threads2-short`, `moss-nano-2-ort-azure-cpu-short`.
+- Prewarm/cache runs: `moss-nano-2-prewarm-none-short`, `moss-nano-2-prewarm-ort-sessions-short`, `moss-nano-2-prewarm-synthetic-short`.
+
+MOSS-NANO-2 scope: runtime optimization and evidence only. It did not add app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or Kokoro behavior changes.
+
+Harness changes:
+
+- Added stage/profile fields, cold/warm modes, segmentation/window modes, ORT option request metadata, prewarm metadata, and Python interpreter selection with this precedence: explicit `--python`, then `PYTHON` environment variable, then repo-local `.runtime/moss/.venv-nano`, then system `python`.
+- Added passage aliases `short` -> `short-smoke` and `punctuation` -> `punctuation-heavy-mid`.
+- Added a fail-closed empty passage guard so shorthand resolution mistakes cannot produce wordCount `0` "success" evidence.
+- Focused tests passed `23/23` after a known sandbox Vite/esbuild `spawn EPERM` and escalated rerun.
+
+Superseded artifacts:
+
+- `moss-nano-2-cold-short`, `warm-short`, `cold-punctuation`, and `warm-punctuation` are superseded and non-canonical because they were blocked by the wrong system Python before the corrected interpreter precedence was documented and enforced.
+- `moss-nano-2-*-venv` artifacts are superseded and non-canonical because they used the venv but shorthand passage aliases still resolved empty, producing wordCount `0`; the alias and empty-passage guard fixes supersede them.
+- Non-v2 real-text and segmentation artifacts are superseded by the v2 reruns after the first-audio/output path contract fix.
+
+Canonical v2 real-text metrics:
+
+| Run | Passage | Words | First observed | Total | Audio | RTF | WAV bytes | Runtime reuse |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| `moss-nano-2-cold-short-realtext-v2` | `short-smoke` | 9 | `13.9036s` | `14.4591s` | `3.68s` | `3.9291` | `706604` | n/a |
+| `moss-nano-2-warm-short-realtext-v2` | `short-smoke` | 9 | `15.2025s` | `15.8170s` | `3.68s` | `4.2981` | `706604` | `runtimeReuseActual: false` |
+| `moss-nano-2-cold-punctuation-realtext-v2` | `punctuation-heavy-mid` | 14 | `20.0393s` | `20.6641s` | `11.76s` | `1.7572` | `2257964` | n/a |
+| `moss-nano-2-warm-punctuation-realtext-v2` | `punctuation-heavy-mid` | 14 | `18.6516s` | `19.2688s` | `11.76s` | `1.6385` | `2257964` | `runtimeReuseActual: false` |
+
+Timing-truth caveat: v2 `firstAudioObservedSec` is based on reset file observation with `fileResetBeforeRun: true`, so it is no longer the old reused-output artifact, but it is still not internal first decoded audio. Internal first decoded audio remains unavailable without runtime instrumentation.
+
+Segmented v2 output-path contract:
+
+| Run | Total | RTF | Output contract |
+|---|---:|---:|---|
+| `moss-nano-2-segment-token-window-punctuation-v2` | `52.8842s` | `2.7204` | `outputWavPath: null`, `outputPath: null`, `segmentOutputWavPaths` present |
+| `moss-nano-2-segment-char-window-punctuation-v2` | `51.2033s` | `3.2002` | `outputWavPath: null`, `outputPath: null`, `segmentOutputWavPaths` present |
+
+Optimization evidence:
+
+| Attempt | Result |
+|---|---|
+| Segmentation/windowing | Did not help. Non-v2 segmented artifacts are superseded by v2. Canonical v2 token-window punctuation was total `52.8842s` / RTF `2.7204`; canonical v2 char-window punctuation was total `51.2033s` / RTF `3.2002`. Both record `outputWavPath` / `outputPath` as `null` and preserve per-segment paths in `segmentOutputWavPaths`. |
+| ORT options | Did not help/apply. CPU default short `16.846s` / RTF `4.5777`; CPU threads2 `17.4572s` / RTF `4.7438`; Azure+CPU `20.3399s` / RTF `5.5271`. Options were recorded as requested metadata but did not apply through the subprocess boundary. |
+| Prewarm/cache | Did not help/apply. No-prewarm `16.8044s` / RTF `4.5664`; ORT prewarm `18.6696s` / RTF `5.0733`; synthetic `18.4332s` / RTF `5.0090`; `runtimeReuseActual` stayed `false`. |
+
+Comparison:
+
+- Kokoro remains far ahead: short `1385ms` / RTF `0.3337`; punctuation `5616ms` / RTF `0.7414`.
+- Nano remains better than flagship WSL: flagship short `121.22s` / RTF `42.09`; flagship punctuation `126.19s` / RTF `16.26`.
+- Nano is still not viable for a live app prototype on this evidence.
+
+## MOSS-NANO-2 Decision
+
+Decision: `KEEP_KOKORO_ONLY`.
+
+Reason: MOSS-NANO-2 corrected the Nano probe evidence path and tested the plausible bounded rescue levers, but the canonical real-text timings still miss live-app viability by a wide margin, and the attempted optimizations did not produce true runtime reuse, applied ORT/session options, or trustworthy internal first-decoded timing. Kokoro remains far faster on the same short and punctuation passages. Keep Kokoro as the only integrated engine.
+
+Decision framing: `KEEP_KOKORO_ONLY` means no Nano app prototype now. It is not a permanent Nano model rejection. Future Nano work should reopen only with in-process runtime instrumentation, true session reuse, trustworthy internal first-decoded timing, and applied ORT/session options.
+
+## MOSS-NANO-3 Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Reason: MOSS-NANO-3 proved the meaningful part of the reopen hypothesis: Nano can run through a resident in-process runtime with true runtime reuse and internal first decoded audio timing. However, the canonical short resident run still recorded RTF `1.7005`, missing the promotion threshold `<=1.5`, and memory growth across resident runs needs soak/tuning before any app-prototype decision. Iterate resident runtime tuning/soak/perf only rather than promote.
+
+Runtime path:
+
+- Resident runtime: `scripts/moss_nano_resident_probe.py`.
+- Wrapper: `scripts/moss_nano_probe.mjs --runtime-mode resident`.
+- Package script: `npm run moss:nano:resident`.
+
+Verification:
+
+- Focused tests: `npm test -- tests/mossNanoProbe.test.js` => `28/28` pass after known sandbox `EPERM` escalated rerun.
+- Full tests: `npm test` => `150` files, `2268` tests pass.
+- Build: `npm run build` passes with the existing circular chunk warning.
+
+Canonical refreshed artifacts:
+
+| Artifact | Evidence |
+|---|---|
+| `artifacts/moss/moss-nano-3-short-resident/summary.json` | `internalFirstDecodedAudioMs` `513`, RTF `1.7005`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `36.59`. |
+| `artifacts/moss/moss-nano-3-punctuation-resident/summary.json` | `internalFirstDecodedAudioMs` `541`, RTF `1.2042`, `runtimeReuseActual: true`, `memoryGrowthAcrossRunsMb` `62.92`. |
+| `artifacts/moss/moss-nano-3-ort-session-resident/summary.json` | Requested/applied ORT split recorded; CPU provider, `intraOp` `2`, and `interOp` `1` applied; `usePerSessionThreads` truthfully unsupported; `internalFirstDecodedAudioMs` `516`; RTF `1.0962`; `runtimeReuseActual: true`. |
+| `artifacts/moss/moss-nano-3-stale-output-guard/summary.json` | Clean fresh-output evidence: `outputFileExistedBeforeRun: false`, `reusedExistingOutputFile: false`, memory evidence present. |
+
+Comparison: MOSS-NANO-2 v2 had observed first audio `13.9036s` / `15.2025s` short and `20.0393s` / `18.6516s` punctuation with `runtimeReuseActual: false`. Kokoro baseline remains `1385ms` / RTF `0.3337` short and `5616ms` / RTF `0.7414` punctuation.
+
+Non-decision: MOSS-NANO-3 does not reopen MOSS-3 through MOSS-7. Sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, and Kokoro retirement remain forbidden until a separate promotion decision is recorded.
+
+Non-decisions:
+
+- Do not start MOSS-3 through MOSS-7 unless a new explicit promotion decision is recorded.
+- Do not add Nano sidecar IPC, renderer integration, selectable engine behavior, timing-truth UI integration, cache/prewarm/continuity integration, or productization work from this evidence.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not treat superseded wrong-interpreter or empty-passage artifacts as current timing evidence.
+- Do not reject Nano permanently; require better runtime instrumentation and actual reuse before reconsidering.
+
+## MOSS-NANO-4 Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Scope: MOSS-NANO-4 was runtime optimization plus promotion retest only. It did not add app integration, sidecar IPC, renderer integration, selectable engine behavior, MOSS-3 reopening, or Kokoro behavior changes.
+
+Evidence:
+
+| Evidence item | Result |
+|---|---|
+| Best short resident ORT run | `moss-nano-4-short-resident-ort-intra2` recorded true reuse; ORT applied CPU `intraOp 2`, `interOp 1`, sequential execution, and graph optimization all; first decoded `659ms`; final RTF `1.3734`; p50/p95 `1.3734`/`1.4329`; memory growth about `42.57MB`. |
+| Baseline short | RTF `1.7116`, first decoded `565ms`. |
+| Best punctuation | First decoded `944ms`, final RTF `1.6540`. |
+| Best bookwarm | Long-form built-in substitute; `3/3` fresh internal first decoded warm runs; stale output reuse `0`; first decoded `727ms`; RTF `1.1252`. |
+| Decode-full caveat | Disqualified/caveated for promotion framing: first decoded `6099ms`, memory growth about `103.16MB`. |
+| Precompute truth | Precompute was requested but `precomputeInputsActual=false`; no false reuse/precompute claim is valid. |
+| False-promotion hardening | Promotion-class summaries now require numeric thresholds/metrics and block requested-vs-actual contradictions. |
+| Focused verification | Focused tests passed `42/42`; full verification is reserved for Hippocrates. |
+
+Reason: The best short resident ORT run improved throughput and proves applied ORT settings with true reuse, but punctuation RTF remains above the promotion target and decode-full/bookwarm caveats prevent a safe app-prototype promotion. Continue resident runtime tuning/soak/perf only.
+
+Non-decisions:
+
+- Do not start MOSS-3 through MOSS-7 unless a new explicit promotion decision is recorded.
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, timing-truth UI integration, cache/prewarm/continuity integration, or productization work from this evidence.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not claim precompute reuse when `precomputeInputsActual=false`.
+
+## MOSS-NANO-5B Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decisions: not `PROMOTE_NANO_TO_SOAK_CANDIDATE`, not `KEEP_KOKORO_ONLY`, and not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`.
+
+Scope: MOSS-NANO-5B was runtime-only precompute + adjacent continuity closure. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache integration, continuity integration in the app, Kokoro behavior changes, or `.runtime/**` commits.
+
+Focused verification:
+
+- `python -m py_compile scripts\moss_nano_resident_probe.py` passed.
+- `npm test -- tests/mossNanoProbe.test.js` passed `75/75` after the known sandbox `EPERM` escalated rerun.
+
+Canonical refreshed artifacts:
+
+| Evidence item | Result |
+|---|---|
+| Short resident ORT | `moss-nano-5b-short-resident-ort-intra2`: ok; first audio `0.340s`; RTF `0.6440`; p50/p95 `0.6440`/`0.6610`; memory delta `5.81MB`; stale `false`. |
+| Decode full | `moss-nano-5b-short-resident-decode-full`: runtime ok but gate failed; first audio `2.963s` > `2.5s`; RTF `0.7142`; p50/p95 `0.6969`/`0.7142`; memory delta `5.60MB`; stale `false`. |
+| Precompute request rows | `moss-nano-5b-short-resident-precompute-requestrows`: runtime ok but precompute blocked; first audio `0.418s`; RTF `0.7183`; p50/p95 `0.7882`/`0.8012`; memory delta `6.15MB`; `requested=true`, `actual=false`, `partial=true`; blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`; `preparedBeforeRun=false`; `consumedByMeasuredRun=false`; `requestRowCount=0`. |
+| Adjacent segments stable | `moss-nano-5b-adjacent-segments-resident-stable`: ok; first audio `0.428s`; RTF `0.6003`; p50/p95 `0.5996`/`0.6003`; memory delta `8.14MB`; stale `false`; `5/5` fresh; fair trend ratio `0.0081` <= `0.15`; `crossSegmentStateActual=false`; blocker `NO_CROSS_SEGMENT_MODEL_STATE_HOOK`. |
+
+False-evidence hardening:
+
+- Preserve top-level `crossSegmentStateActual`.
+- Explicit decode-full re-threshold evidence is supported.
+- The fair adjacent trend metric is separate from true cross-segment/prosody state.
+- Precompute row-consumption evidence is required for promotion.
+
+Reason: Do not record `PROMOTE_NANO_TO_SOAK_CANDIDATE` because decode-full misses the first-audio gate and precompute request rows are still not consumed. Adjacent fair trend improved and clears the runtime stability metric, but it does not prove true cross-segment model state.
+
+Non-decisions:
+
+- This 5B closeout did not dispatch MOSS-NANO-6; 5C later superseded the soak-gate blocker with a segment-first runtime-only gate.
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or productization work from this evidence.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not commit `.runtime/**`.
+
+## MOSS-NANO-5C Decision
+
+Decision: `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`.
+
+Explicit framing: this is a runtime-only soak-candidate gate, not app prototype promotion. It does not add or approve app integration, renderer integration, sidecar IPC, selectable engine/cache changes, Kokoro behavior changes, MOSS-3 reopening, or `.runtime/**` committed edits.
+
+Final artifact:
+
+- `artifacts/moss/moss-nano-5c-segment-first-soak-gate-final2/summary.json`
+
+Canonical final2 evidence:
+
+| Evidence item | Result |
+|---|---|
+| Status | `ok`. |
+| Promote | `true`. |
+| Decision | `PROMOTE_NANO_TO_SOAK_CANDIDATE_WITH_SEGMENT_FIRST_GATE`. |
+| First decoded metric | `0.449s <= 0.5s`. |
+| Segment-first short RTF | `0.6513 <= 1.5`. |
+| Adjacent fair RTF trend | `0.0105 <= 0.15`. |
+| Fresh segments | `5 >= 5`. |
+| Stale output reuse | `0`. |
+| Session restarts | `0`. |
+| Precompute classification | `non-product-required`, status `not-required`. |
+| Decode-full classification | `diagnostic-only-non-product-path`. |
+
+Supporting diagnostics:
+
+- `moss-nano-5c-short-resident-decode-full-diagnostic`: decode-full diagnostic path measured, but decode-full remains diagnostic-only/non-product for 5C and is not product latency proof.
+- `moss-nano-5c-short-resident-precompute-requestrows-rca`: precompute was requested but actual remained false with blocker `NO_PRECOMPUTE_REQUEST_ROWS_HOOK`. RCA: the current high-level path lacks prepared-row consumption, but the lower ONNX path has build/request rows and generate frames, so future runtime work may implement it.
+
+Reason: The segment-first product-path gate passed all final2 numeric thresholds with fresh outputs and no session restarts. Precompute is non-product-required for this gate, so no precompute success is claimed. Decode-full is diagnostic-only/non-product, so it is not a product blocker or product latency proof for 5C.
+
+Next actions:
+
+- `MOSS-NANO-6` may dispatch as resident soak + packaging readiness because 5C earned a runtime-only soak-candidate gate.
+- App integration remains gated until a later explicit `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE` or stricter decision is recorded.
+
+Non-decisions:
+
+- Do not add Nano app integration, sidecar IPC, renderer integration, selectable engine behavior, cache/continuity integration, timing-truth UI integration, or productization work from this evidence.
+- Do not reopen MOSS-3.
+- Do not change Kokoro behavior: Kokoro remains the app default and only integrated engine.
+- Do not commit `.runtime/**`.
+- Do not claim precompute success.
+- Do not use decode-full as product latency proof for 5C.
+
+## MOSS-NANO-6B Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Nano was not promoted to app prototype, no app integration was unlocked, and Kokoro remains the default and only integrated engine.
+
+Scope: MOSS-NANO-6B was resident soak memory/lifecycle closure only. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Canonical long artifact:
+
+| Evidence item | Result |
+|---|---|
+| Long resident soak + adjacent 100 | `artifacts/moss/moss-nano-6b-soak-1800-adjacent-100-escalated/summary.json`: requested `1800s`; measured `1800.0012s`; `100/100` adjacent fresh; stale output reuse `0`; session restarts `0`; crash count `0`; readiness `not-promoting`. |
+| Memory slope | Wall-clock RSS sample slope was `12.8416MB/min`, failing the `1.5MB/min` promotion gate. |
+| Adjacent first decoded | Adjacent p95 internal first decoded audio was `1088ms`, passing the `1500ms` gate. |
+| Adjacent RTF | Adjacent p95 final RTF was `2.3007`, failing both final RTF `1.5` and punctuation RTF `1.45` gates. |
+| Lifecycle shutdown | Clean, forced, zombie, restart, and in-flight shutdown classes remain `not-observed`/`not-implemented`; synthetic lifecycle evidence remains fail-closed and cannot promote. |
+
+Hardening:
+
+- Soak duration now uses real wall-clock evidence rather than requested-only metadata.
+- Memory slope is based on wall-clock RSS samples.
+- Adjacent coverage uses deterministic 100+ book-like adjacent segments.
+- Synthetic lifecycle evidence fails closed.
+- Nano-specific package readiness is not inherited from the development or flagship `.runtime` config.
+- Nano-6 readiness records machine-readable failed gates/reasons.
+- Preflight source evidence and package evidence fields are separated.
+
+Verification:
+
+- Focused tests: `133/133` passed.
+- Final full `npm test`: `2354/2354` passed.
+- `npm run build` passed with the existing circular chunk warning.
+
+Reason: MOSS-NANO-6B fixed the earlier duration and adjacent-completion evidence gaps, but it still did not meet the app-prototype promotion bar. The long resident process stayed up for the requested wall-clock soak and completed `100/100` fresh adjacent segments, but memory slope failed badly, adjacent final RTF failed, Nano package/app readiness is not unlocked, and lifecycle shutdown classes remain unimplemented. Continue resident Nano runtime iteration only.
+
+Next actions:
+
+- Do not dispatch `MOSS-NANO-7`; app-prototype promotion did not happen.
+- Next Nano work must remain runtime iteration/hardening only.
+- No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
+
+## MOSS-NANO-6C Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`. Nano was not promoted to app prototype, no app integration was unlocked, and Kokoro remains the default and only integrated engine.
+
+Scope: MOSS-NANO-6C was a runtime-only memory, tail-latency, and lifecycle hardening sprint. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Targeted artifacts:
+
+| Evidence item | Result |
+|---|---|
+| Adjacent 20 | `artifacts/moss/moss-nano-6c-adjacent-20-escalated/summary.json`: `20/20` fresh; readiness memory slope `9.7639MB/min`; inference slope `10.6414MB/min`; hold slope `0`; p95 first decoded `1240ms`; p95 RTF `3.0416`; lifecycle not implemented. |
+| ORT no-arena 20 | `artifacts/moss/moss-nano-6c-ort-no-arena-20-escalated/summary.json`: `20/20` fresh; readiness memory slope `8.563MB/min`; inference slope `8.8964MB/min`; hold slope `0`; p95 first decoded `1768ms`; p95 RTF `3.3251`; lifecycle not implemented. |
+
+Hardening:
+
+- Memory endpoint slope is diagnostic-only.
+- Readiness memory gate uses the authoritative max of readiness, post-warmup, and inference phase slopes.
+- Phase fields are required.
+- Tail-latency failures include machine-readable slow segment evidence.
+- Lifecycle validation accepts `lifecycleEvidence.lifecycleClasses` and requires all six measured classes.
+- Nano-6 decision set is only `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE`, `ITERATE_NANO_RESIDENT_RUNTIME`, or `PAUSE_NANO_RUNTIME_RELIABILITY`; `KEEP_KOKORO_ONLY` is not exposed as a Nano-6 readiness decision.
+
+Verification:
+
+- Focused final tests: `143/143` passed.
+- Final full `npm test`: `2364/2364` passed.
+- `npm run build` passed with the existing circular chunk warning.
+
+Reason: Targeted evidence already failed readiness on memory slope, RTF/tail latency, and lifecycle implementation. The full 30-minute soak was skipped/deferred because the targeted gates already proved the state non-promotable; do not spend 30 minutes proving a non-promotable state. Continue resident Nano runtime iteration only.
+
+Next actions:
+
+- Do not dispatch `MOSS-NANO-7`; app-prototype promotion did not happen.
+- Next Nano work must remain runtime iteration/hardening only.
+- No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
+
+## MOSS-NANO-6D Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`. Nano was not promoted to app prototype, no app integration was unlocked, and Kokoro remains the default and only integrated engine.
+
+Scope: MOSS-NANO-6D was a runtime-only bounded lifecycle/process recycling sprint. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Canonical artifacts:
+
+| Evidence item | Result |
+|---|---|
+| Bounded 30-minute soak | `artifacts/moss/moss-nano-6d-bounded-soak-1800-rss-threshold/summary.json`: requested `1800s`; measured `1800.0033s`; `100/100` adjacent fresh; stale output reuse `0`; same-identity `runtimeReuseActual: false`; bounded recycle evidence `boundedRuntimeReuseActual: true`; `99` RSS-threshold recycles; bounded lifecycle actual for measured in-process reset; `processRestartActual: false`; readiness memory slope `0.3555MB/min`; post-warmup slope `0`; p95 first decoded `264ms`; p95 final RTF `0.4631`; readiness failed on `shutdownEvidence`. |
+| Targeted RSS threshold | `artifacts/moss/moss-nano-6d-rss-threshold-b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `19`; readiness slope `0`; inference slope `1.4665MB/min`; p95 first decoded `262ms`; p95 RTF `0.4703`. |
+| Targeted segment-limit recycle | `artifacts/moss/moss-nano-6d-recycle-5b/summary.json`: `20/20` fresh; stale output reuse `0`; recycle count `3`; segments per runtime `[5,5,5,5]`; p95 first decoded `281ms`; p95 RTF `0.5026`. |
+| Baseline targeted control | `artifacts/moss/moss-nano-6d-baseline-10b/summary.json`: `10/10` fresh; stale output reuse `0`; restarts `0`; p95 first decoded `268ms`; p95 RTF `0.4772`; readiness slope `4.9803MB/min`; diagnostic RSS endpoint slope `108.9894MB/min`. |
+
+Hardening:
+
+- Bounded lifecycle evidence distinguishes measured in-process runtime reset from same-identity resident reuse and child-process restart.
+- Recycle evidence records count, reasons, segments per runtime, restart/prewarm cost, post-recycle memory slope, and post-recycle p95 tail metrics.
+- Stale-output reuse remains fail-closed across recycle/reset.
+- Warm spare and true process restart are reported as unsupported/not observed instead of implied.
+- Short adjacent sources expand deterministically to satisfy requested book-like segment counts.
+
+Verification:
+
+- Focused final tests: `153/153` passed.
+- Final full `npm test`: `2374/2374` passed.
+- `npm run build` passed with the existing circular chunk warning.
+
+Reason: Bounded in-process runtime recycle makes the cumulative resident pressure hypothesis plausible: the bounded 30-minute soak passed the memory-slope and p95 RTF gates with `100/100` fresh adjacent segments and zero stale reuse. However, this is still not a full lifecycle implementation. Child-process restart was not observed, warm spare is unsupported, and clean shutdown, forced kill, zombie process, restart-clean, restart-failed, and in-flight rejection lifecycle classes remain `not-observed`/`not-implemented`. Continue resident runtime lifecycle/process-boundary iteration only.
+
+Next actions:
+
+- Do not dispatch `MOSS-NANO-7`; app-prototype promotion did not happen.
+- Next Nano work must implement/measure true process-boundary shutdown/restart lifecycle before any app-prototype reconsideration.
+- No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
+
+## MOSS-NANO-6E Decision
+
+Decision: `ITERATE_NANO_RESIDENT_RUNTIME`.
+
+Explicit non-decision: not `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`. MOSS-NANO-6E implemented and measured truthful child-process lifecycle proof, but the confirmation run was intentionally short and did not re-run the 30-minute/100-segment promotion gate.
+
+Scope: runtime lifecycle proof only. No app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior change, MOSS-3 reopening, or Kokoro retirement work was added.
+
+Evidence:
+
+| Evidence item | Result |
+|---|---|
+| Lifecycle proof | `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`: `shutdownObserved: true`, `restartObserved: true`, `processRestartActual: true`, child PIDs changed `24484 -> 3408`, forced-kill child exited with no zombie, restart-failed exited nonzero, in-flight shutdown was rejected, and stale output reuse remained `0`. |
+| Bounded short confirmation | Same artifact completed `2/2` fresh adjacent segments with bounded recycle, p95 post-recycle RTF `1.4647`, stale output reuse `0`, and lifecycle evidence classified as `measured-lifecycle-check`. |
+| Promotion gap | Same artifact is `not-promoting` because it was not the 1800-second soak and not 100 adjacent book-like segments; failed readiness keys were only `residentSoak` and `bookLikeAdjacentRun`. |
+
+Hardening:
+
+- `scripts/moss_nano_probe.mjs --shutdown-restart-evidence` now runs a Node-side child-process lifecycle harness around the resident Python probe.
+- The harness measures clean shutdown, forced kill, no-zombie, restart-clean, restart-failed, and in-flight rejection as OS child-process facts.
+- Bounded lifecycle promotion now requires `processRestartActual: true`, child-process lifecycle evidence, stale-output clean evidence across shutdown/restart/in-flight, and no hidden runtime reuse classification.
+- In-process bounded recycle remains distinguishable from true child-process shutdown/restart.
+
+Verification:
+
+- Focused final tests: `132/132` passed for `npm test -- tests/mossNanoProbe.test.js`.
+- Real lifecycle proof: `npm run moss:nano:resident -- --run-id moss-nano-6e-lifecycle-proof-v2 --passage short-smoke --json --bounded-lifecycle --recycle-after-segments 1 --measure-restart-cost --shutdown-restart-evidence --adjacent-segment-count 2 --adjacent-segment-source book-like --resident-decode-mode stream` exited `0`.
+
+Reason: MOSS-NANO-6E closes the remaining truthful shutdown/restart lifecycle blocker from 6D, but it does not by itself replace the full 6D-scale promotion artifact. The decision remains runtime iteration until a full 1800-second/100-segment bounded run includes this measured child-process lifecycle proof and still clears memory, tail-latency, stale-output, crash, package, and readiness gates.
+
+Next actions:
+
+- Do not dispatch `MOSS-NANO-7` from 6E alone; app-prototype promotion still did not happen.
+- A future runtime-only confirmation may rerun the full 30-minute/100-segment bounded gate with `--shutdown-restart-evidence`.
+- No app integration, renderer/IPC/selectable-engine work, cache/continuity app integration, Kokoro behavior change, MOSS-3 reopen, or Kokoro retirement work is unlocked.
+
+## MOSS-NANO-6F Decision
+
+Decision: `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`.
+
+Scope: MOSS-NANO-6F is a runtime promotion confirmation and governance closeout only. It did not add app integration, renderer integration, sidecar IPC, selectable engine behavior, cache/continuity integration, timing-truth UI integration, Kokoro behavior changes, MOSS-3 reopening, or Kokoro retirement work.
+
+Canonical artifact:
+
+| Evidence item | Result |
+|---|---|
+| Promotion confirmation | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/promotion-confirmation.json`: final recommended decision `PROMOTE_NANO_TO_APP_PROTOTYPE_CANDIDATE_WITH_BOUNDED_LIFECYCLE`; source summary `status: ok`, failure class `null`; measured resident soak `1800.0015s`; `100/100` book-like adjacent segments fresh; empty segments `0`; stale output reuse `0`; bounded lifecycle actual/truthful with `99` RSS-threshold in-process runtime resets at `1750MB`; readiness memory slope `0.3261MB/min <= 1.5`; p95 final RTF `0.4826 <= 1.5`; p95 first decoded audio `280ms <= 1500`; crash count `0`; unclassified restarts `0`. |
+| Lifecycle proof by reference | `artifacts/moss/moss-nano-6e-lifecycle-proof-v2/summary.json`: shutdown/restart child-process lifecycle evidence is present and passing, including clean shutdown, forced kill, zombie-process check, clean restart, restart-failed, and in-flight shutdown rejection. |
+| Raw summary caveat | `artifacts/moss/moss-nano-6f-full-bounded-soak-promotion-confirmation-v2/summary.json` still has the older persisted `promotionDecision` / `not-promoting` state. Consumers must use `promotion-confirmation.json` as canonical for the 6F decision. |
+
+Reason: The full bounded promotion confirmation attaches the 6E child-process lifecycle proof to a fresh 1800-second/100-segment bounded soak. The `99` session/runtime identity changes are classified bounded lifecycle recycles, not hidden crashes or unclassified restarts, and stale output reuse remains `0`. No app integration drift occurred; scripts, tests, and app source were unchanged by this confirmation.
+
+Next actions:
+
+- `MOSS-NANO-7` may dispatch as the next conditional app-onboarding prototype sprint.
+- Kokoro remains the operational floor and default engine until a later explicit productization/default decision.
+- No Kokoro retirement work is unlocked by 6F.
+
+## MOSS-NANO-7 Decision
+
+Decision: `PROMOTE_NANO_TO_STRATEGY_PROTOTYPE`.
+
+Scope: MOSS-NANO-7 is an app-boundary sidecar/IPC prototype only. It did not add renderer engine selection, normal playback wiring, user-facing Nano behavior, Kokoro behavior changes, or Kokoro retirement work. `TtsEngine` remains `web | kokoro | qwen`, Kokoro remains the default/operational floor, and Nano is not user-facing.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Sidecar manager | Added `main/moss-nano-engine.js` with an injectable sidecar adapter, structured readiness/failure semantics, bounded lifecycle config snapshots, stale-output/request ownership guards, startup-before-request behavior, and cancel adapter rejection settlement. |
+| Protocol placeholder | Added `main/moss-nano-sidecar.js` as the protocol placeholder/adapter. |
+| IPC boundary | Registered experimental `tts-nano-status`, `tts-nano-synthesize`, `tts-nano-cancel`, `tts-nano-shutdown`, and `tts-nano-restart` handlers in `main/ipc/tts.js`. |
+| Preload/API boundary | Exposed experimental preload methods `nanoStatus`, `nanoSynthesize`, `nanoCancel`, `nanoShutdown`, and `nanoRestart` in `preload.js`; added Nano status/result/failure/Electron API types in `src/types.ts`. |
+| Tests | Added `tests/mossNanoEngine.test.js` and `tests/mossNanoIpc.test.js`. |
+| Lifecycle semantics | Cancel, shutdown, and restart settle in-flight requests; stale outputs and wrong request owners are guarded; shutdown/restart/cancel failures fail closed. |
+
+Verification:
+
+- Focused Nano sidecar/IPC tests: `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js` passed `2` files / `14` tests after sandbox `EPERM` escalated rerun.
+- Full `npm test` passed `152` files / `2392` tests.
+- `npm run build` passed; Vite emitted the existing circular chunk warning for `settings -> tts -> settings` and exited `0`.
+- Solon approved spec compliance; Plato final quality check was `READY`.
+
+Reason: The main-process/preload IPC contract now has enough bounded app-boundary truth to proceed to the next strategy-prototype slice. Promotion is deliberately narrow: Nano is still not selectable, not wired into normal playback, not renderer-visible as an engine choice, and not a Kokoro replacement.
+
+Next actions:
+
+- `MOSS-NANO-8` may dispatch as the next bounded narration-strategy/segment-timing prototype.
+- Keep Nano hidden from user-facing engine selection until a later explicit settings/UX sprint approves it.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
+## MOSS-NANO-8 Decision
+
+Decision: `PROMOTE_NANO_TO_CONTINUITY_PROTOTYPE`.
+
+Scope: MOSS-NANO-8 is an experimental renderer narration strategy prototype only. It did not add public engine selection, settings UI, default-engine behavior, Kokoro behavior changes, or Kokoro retirement work. `TtsEngine` remains `web | kokoro | qwen`, Kokoro remains the default/operational floor, and Nano remains hidden behind test-only `useNarration({ experimentalNano: true })` plumbing.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Nano strategy | Added `src/hooks/narration/mossNanoStrategy.ts` as the experimental Nano `TtsStrategy` boundary. |
+| Optional IPC calls | Strategy uses optional `window.electronAPI.nanoStatus`, `nanoSynthesize`, and `nanoCancel`; missing/unready Nano reports structured failure instead of silent fallback. |
+| Segment timing truth | Scheduled PCM segment audio through the existing scheduler, called `markPipelineDone()`, set `timingTruth: "segment-following"`, and kept `wordTimestamps: null`. |
+| Hook selection | Added test-only `useNarration({ experimentalNano: true })`; no public `TtsEngine` expansion or settings UI. |
+| Failure/cancel/status propagation | Preserved structured `nanoError`, supported cancel/stop, missing-audio failure, speed/rate changes, pause/resume routing, and section-end cleanup. |
+| Ownership guards | Guarded late synth results and stale `onWordAdvance`/`onEnd`/`onError` callbacks after stop, handoff, rate restart, engine switch, new chunk, or unmount. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano strategy/useNarration tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx` passed `2` files / `20` tests. |
+| Full suite | `npm test` passed `154` files / `2412` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+| Review | Solon approved spec compliance; Plato final quality review approved after callback ownership repairs. |
+
+Next actions:
+
+- `MOSS-NANO-9` may dispatch as the next bounded cache/prefetch/continuity prototype.
+- Keep Nano hidden from public engine selection and settings UI until a later explicit settings/UX sprint approves it.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
+## MOSS-NANO-10 Decision
+
+Decision: `PROMOTE_NANO_TO_PRODUCTIZATION_GATE`.
+
+Scope: MOSS-NANO-10 is a settings-only experimental opt-in. It adds a visible Nano settings option, but selection-for-use and preview readiness remain blocked unless the sidecar API exists and `nanoStatus` reports ready. It does not change the default engine, retire Kokoro, silently fall back while Nano is selected, or fabricate word timestamps.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Settings option | `src/components/settings/TTSSettings.tsx` exposes `Nano AI (Experimental)` with local runtime and bounded lifecycle warning copy. |
+| Readiness truth | `src/components/settings/useMossNanoSettingsStatus.ts` separates visible experimental option state from ready-for-use state; blocked Nano remains disabled for use and preview. |
+| Preview truth | `src/components/settings/ttsPreview.ts` calls `nanoStatus` and `nanoSynthesize` only when Nano is ready; blocked Nano does not fall back to another engine. |
+| Narration activation | `src/hooks/useNarration.ts` routes Nano only when experimental Nano is enabled and the selected engine is `nano`; `src/components/ReaderContainer.tsx` enables that path only for Nano settings selection. |
+| Timing truth | Existing Nano segment-following semantics remain intact; no fake `wordTimestamps` were introduced. |
+| Default/Kokoro drift | Default settings remain unchanged and Kokoro behavior is untouched. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano/settings tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsPreviewTruth.test.ts tests/ttsSettingsMossNano.test.tsx` passed `4` files / `35` tests. |
+| Adjacent settings/profile/default tests | `npm test -- --run tests/ttsSettingsQwenPrototype.test.tsx tests/ttsSettingsKokoroTruth.test.tsx tests/qwenDefaultSettings.test.ts tests/narrationPortability.test.ts tests/narrationProfiles.test.ts tests/useNarrationMossNano.test.tsx tests/ttsSettingsMossNano.test.tsx` passed `7` files / `60` tests. |
+| Full suite | `npm test` passed `155` files / `2427` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+
+Next actions:
+
+- MOSS-NANO-11 has now closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`.
+- Keep Nano experimental and sidecar-readiness-gated until later live product evidence says otherwise.
+- Keep Kokoro available; no Kokoro retirement work is unlocked by MOSS-NANO-10.
+
+## MOSS-NANO-13B Decision
+
+Decision: `PROMOTE_NANO_TO_REAL_APP_AUDIO_PROTOTYPE`.
+
+Scope: MOSS-NANO-13B replaces the synthetic app-sidecar preview tone with real local MOSS-TTS-Nano ONNX audio through Electron `tts-nano-*` IPC. It does not re-enable Qwen, make Nano default, retire Kokoro, fake word timestamps, silently fall back to Kokoro on Nano failure, or start flagship MOSS work.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Real app bridge | `scripts/moss_nano_app_sidecar.py` validates Python/source/model/tokenizer/imports, constructs the local `OnnxTtsRuntime`, and reports `ready` only after the real runtime is usable. |
+| Synthetic guard | Synthetic tone output exists only behind explicit mock mode. `main/moss-nano-sidecar.js` rejects synthetic or unclassified results in real mode with `synthetic-audio-forbidden`. |
+| Default paths | `main/moss-nano-engine.js` defaults to `.runtime/moss/.venv-nano`, `.runtime/moss/MOSS-TTS-Nano`, and the documented Nano ONNX model/tokenizer directories. |
+| Runtime metadata | Ready/synthesize results include backend/model/runtime metadata and `syntheticAudio: false` for real output. |
+| Timing truth | `src/hooks/narration/mossNanoStrategy.ts` keeps `timingTruth: "segment-following"` and `wordTimestamps: null`, even if a sidecar result includes timestamp-like fields. |
+| UI truth | Nano Test Voice remains readiness-gated through `nanoStatus` and `nanoSynthesize`; blocked Nano surfaces a structured preview failure rather than falling back to another engine. |
+
+Real smoke:
+
+| Check | Result |
+|---|---|
+| Status | Direct Node app-sidecar smoke reached `ready` with `backend: "moss-nano-onnx"`, `modelVariant: "moss-tts-nano-onnx"`, `syntheticAudio: false`, and `sessionCreateMs` about `8439`. |
+| Synthesize | `"MOSS Nano real audio smoke test."` returned `ok: true`, `sampleRate: 48000`, `durationMs: 3360`, `audioLength: 161280`, an `outputPath` under `.tmp/moss-nano-app-sidecar`, and `syntheticAudio: false`. |
+| Blocked path | Missing runtime paths report `status: "blocked"` with a structured missing source/model/asset reason instead of claiming ready. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| RED test slice | Initial Nano engine/strategy RED tests failed on dropped runtime metadata, synthetic output acceptance, and missing-path readiness overclaim. |
+| Focused Nano suite | `npm test -- --run tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js tests/ttsSettingsMossNano.test.tsx tests/mossNanoStrategy.test.ts` passed `4` files / `43` tests. |
+| Python compile | `python -m py_compile scripts\moss_nano_app_sidecar.py` passed. |
+| Full suite | `npm test` passed `163` files / `2489` tests. |
+| Build | `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |
+| Audit | `npm audit --audit-level=high` passed with moderate-only `uuid` advisories. |
+| Diff check | `git diff --check` passed. |
+| Solon/Plato | Spec and quality review found no Qwen reactivation, no Kokoro behavior change, no fake word timestamps, no silent fallback, strict stdout JSON protocol, structured stderr diagnostics, Windows process-tree cleanup, and one residual prototype risk: large PCM payloads over IPC must remain bounded until live evidence hardening. |
+
+Decision rationale:
+
+- The integrated app sidecar can now run the same real Nano ONNX runtime family that the diagnostic resident path proved, and it returns real WAV/PCM metadata through app IPC.
+- Readiness is truthfully blocked until the local runtime is present and importable.
+- This is not a productization or default-engine decision; live four-mode provenance still belongs to MOSS-NANO-13c/13e.
+
+Next actions:
+
+- Use MOSS-NANO-13c to build the provenance-backed live evidence schema and producer on top of the real app-audio path.
+- Keep Nano non-default and segment-following; keep Kokoro available.
+
+## MOSS-NANO-13c Decision
+
+Decision: `PROVENANCE_GATE_READY_NO_LIVE_CAPTURE`.
+
+Scope: MOSS-NANO-13c hardens the live-evidence decision path for Nano recommended-opt-in readiness. It does not change the default engine, re-enable Qwen, retire Kokoro, silently fall back to another engine, or make Nano word-timed. It also does not claim a product promotion without a clean real four-mode capture artifact.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Schema | `scripts/tts_eval_runner.mjs` requires `schemaVersion: "moss-nano-live-evidence.v2"`, `evidenceKind: "real-app-selected-nano"`, `generatedBy`, `generatedAt`, `appCommit`, and `evidenceProducerVersion: "moss-nano-13c"`. |
+| Producer path | `buildMossNanoLiveEvidenceArtifact()` builds a v2 artifact from explicit Page/Focus/Flow/Narrate trace artifacts. CLI support is `--nano-live-evidence-out <json>` plus repeated `--nano-live-trace mode=<trace.json>`. |
+| Provenance gate | `evaluateMossNanoLiveEvidenceGate()` validates linked trace artifact existence, event-count agreement, per-mode provenance fields, selected Nano in the trace itself, segment-following timing, `wordTimestamps: null`, quantitative Nano latency/cache/prefetch/recycle observations, and `runtime.syntheticAudio: false`. |
+| Anti-simulation guard | Legacy all-true boolean evidence, simulated evidence, missing modes, mismatched trace counts, non-Nano-selected traces, and synthetic audio traces cap the decision at `NANO_EXPERIMENTAL_ONLY` instead of promoting. |
+| Timing truth | Nano evidence remains segment-following only; no fake word timestamps are accepted or generated. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| RED gate/producer tests | Initial focused run failed on unsupported explicit live-trace producer flags and legacy behavior. |
+| Focused evidence/Nano suite | `npm test -- --run tests/ttsEvalMatrixRunner.test.ts tests/ttsEvalTrace.test.ts tests/ttsEvalLifecycle.test.ts tests/mossNanoStrategy.test.ts tests/mossNanoEngine.test.js tests/mossNanoIpc.test.js` passed `6` files / `94` tests. |
+| Full suite | `npm test` passed `163` files / `2495` tests. |
+| Build | `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |
+| Audit | `npm audit --audit-level=high` passed with moderate-only `uuid` advisories. |
+| Diff check | `git diff --check` passed. |
+| Solon/Plato | Review confirmed the gate cannot promote simulated, incomplete, non-Nano-selected, or synthetic evidence; no Qwen reactivation, Kokoro behavior change, default drift, silent fallback, or broad artifact staging was introduced. |
+
+Decision rationale:
+
+- 13c closes the provenance gap left by MOSS-NANO-12: a hand-authored boolean file is no longer enough to record `NANO_RECOMMENDED_OPT_IN`.
+- The gate can promote only when complete linked four-mode evidence proves real selected-Nano app observations.
+- No live four-mode capture run was executed in 13c; 13d has since supplied that evidence for the 13e decision.
+
+Next actions:
+
+- MOSS-NANO-13d has since supplied real app-selected Nano four-mode live capture on top of the now-trustworthy gate.
+- Use MOSS-NANO-13e for the final productization / opt-in recommendation decision.
+
+## MOSS-NANO-13d Decision
+
+Decision: `LIVE_CAPTURE_READY_FOR_PRODUCT_DECISION`.
+
+Scope: MOSS-NANO-13d produced real app-selected Nano evidence for all four reader modes. It began as a Live Four-Mode Capture Producer / Manual Observation Pass, but the automated Electron live-capture driver became the primary capture path after manual fallback was paused. This sprint records evidence readiness for the product decision; it does not change the default engine, retire Kokoro, reactivate Qwen, or make Nano word-timed.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Live evidence artifact | `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`. |
+| Schema/provenance | `schemaVersion: "moss-nano-live-evidence.v2"`; `evidenceKind/source: "real-app-selected-nano"`. |
+| Runtime truth | Real selected Nano; `runtime.syntheticAudio: false`; `timingTruth: "segment-following"`; `wordTimestamps: null`. |
+| Trace counts | Page 42 events; Focus 44 events; Flow 43 events; Narrate 39 events. |
+| Review tightening | Observed provenance requires trace-level `engine-selection selectedEngine:nano` and observed `fallback-policy policy:explicit-only`; top-level assertions cannot substitute. |
+| Final gate command | `node scripts/tts_eval_runner.mjs --matrix --tag moss-nano-12 --run-id moss-nano-13d-live-capture-gate --out artifacts/tts-eval/moss-nano-13d-live-capture/gate --nano-live-evidence artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json --gates`. |
+| Final gate result | PASS; hard failures 0/7; warnings 0/3; decision `NANO_RECOMMENDED_OPT_IN`; reasons none. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused suite | Passed 7 files / 113 tests. |
+| Full suite | `npm test` passed 165 files / 2518 tests. |
+| Build | `npm run build` passed with circular chunk warning `settings -> tts -> settings`. |
+| Audit | `npm audit --audit-level=high` passed with 3 moderate `uuid` findings. |
+| Diff check | `git diff --check` passed. |
+| Process cleanup | No Electron process left running. |
+
+Decision rationale:
+
+- All four real traces pass the provenance-backed live evidence gate.
+- The clean gate result supports `NANO_RECOMMENDED_OPT_IN` as evidence for the next productization decision.
+- The decision remains evidence readiness only until 13e records the productization/opt-in recommendation posture.
+
+Next actions:
+
+- MOSS-NANO-13e has recorded the productization decision / opt-in recommendation posture.
+- Keep Nano non-default; keep Kokoro available/default; keep Qwen disabled; keep Kokoro retirement separately deferred.
+
+## MOSS-NANO-13e Decision
+
+Decision: `NANO_RECOMMENDED_OPT_IN`.
+
+Scope: MOSS-NANO-13e closes the MOSS-Nano product decision using the existing MOSS-NANO-13d canonical live-evidence artifact and gate output. It records Nano as the recommended opt-in local engine for Desktop v2.0. It does not make Nano default, rerun live capture, start Pocket TTS, reactivate Qwen, open Kokoro retirement, change fallback semantics, or alter runtime behavior.
+
+Product posture:
+
+| Engine | Desktop v2.0 posture |
+|---|---|
+| Kokoro | Default and available operational floor. No retirement lane is opened by this decision. |
+| MOSS-Nano | Recommended opt-in local engine, readiness-gated by the local sidecar/runtime. Segment-following progress remains truthful with `wordTimestamps: null`. |
+| Qwen | Disabled. No reactivation is introduced. |
+
+Evidence:
+
+| Evidence item | Result |
+|---|---|
+| Productization memo | `docs/testing/moss-nano-13e-productization-memo.md`. |
+| Live evidence artifact | `artifacts/tts-eval/moss-nano-13d-live-capture/moss-nano-13d-live-evidence.json`. |
+| Final gate output | `artifacts/tts-eval/moss-nano-13d-live-capture/gate/`. |
+| Schema/provenance | `schemaVersion: "moss-nano-live-evidence.v2"`; `evidenceKind/source: "real-app-selected-nano"`. |
+| Trace counts | Page 42 events; Focus 44 events; Flow 43 events; Narrate 39 events. |
+| Runtime truth | Real selected Nano; `runtime.syntheticAudio: false`; `timingTruth: "segment-following"`; `wordTimestamps: null`. |
+| Fallback policy | Observed trace-level `fallback-policy policy:explicit-only`; no silent fallback to another engine while Nano is selected. |
+| Final gate result | PASS; hard failures 0/7; warnings 0/3; decision `NANO_RECOMMENDED_OPT_IN`; reasons none. |
+
+Decision rationale:
+
+- 13d already supplied the real app-selected four-mode evidence required by the provenance-backed gate; 13e does not rerun or expand capture.
+- The clean gate supports a bounded product recommendation, not a default-engine change.
+- Nano's release language must remain "recommended opt-in" and must preserve local sidecar readiness, segment-following progress truth, and explicit-only fallback policy.
+
+Next actions:
+
+- POCKET-TTS-1 has since proceeded as a separate third-engine integration; Pocket TTS is available opt-in and does not alter this Nano decision.
+- Keep Kokoro default and available, Qwen disabled, and KOKORO-RETIRE independently deferred.
+
+## MOSS-NANO-12 Decision
+
+Decision: `NANO_EXPERIMENTAL_ONLY`.
+
+Scope: MOSS-NANO-12 is a live four-mode evidence gate for possible recommended opt-in status. It does not change the default engine, open Kokoro retirement, or treat simulated runner output as live evidence. The approved hard line remains: if users cannot tell that Nano progress is segment-following rather than word-following, Nano stays experimental.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Live evidence evaluator | `scripts/tts_eval_runner.mjs` exports `evaluateMossNanoLiveEvidenceGate()` and classifies `NANO_RECOMMENDED_OPT_IN`, `NANO_EXPERIMENTAL_ONLY`, or `PAUSE_NANO_PRODUCTIZATION`. |
+| Evidence input | `--nano-live-evidence <json>` lets a future live observation artifact feed the gate without code edits. |
+| Four-mode matrix shape | `tests/fixtures/narration/matrix.manifest.json` adds explicit `moss-nano-12` selected-Nano scenarios for Page, Focus, Flow, and Narrate. |
+| Promotion blocker | Simulated matrix output alone cannot promote. Missing live evidence for any mode caps the decision at `NANO_EXPERIMENTAL_ONLY`; unclear segment-following progress, stale playback, unsafe fallback, underline race, or lifecycle instability pauses productization. |
+| Gate artifact | `artifacts/tts-eval/moss-nano-12-live-four-mode-evidence/summary.json` recorded four Nano-12 scenario-shape runs and `mossNanoLiveEvidenceGate.decision: NANO_EXPERIMENTAL_ONLY`. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused live-evidence gate tests | `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `26` tests. |
+| Live-evidence shape artifact command | `npm run tts:eval:matrix -- --run-id moss-nano-12-live-four-mode-evidence --tag moss-nano-12 --out artifacts\tts-eval\moss-nano-12-live-four-mode-evidence` completed `4` runs and wrote the experimental-only decision. |
+
+Decision rationale:
+
+- The four-mode selected-Nano evidence slots exist, but no live observation artifact was supplied.
+- Per the approved gate, simulated output cannot promote Nano to recommended opt-in.
+- Nano remains experimental; no default change and no Kokoro retirement lane is opened.
+
+Next actions:
+
+- Capture real app-selected live evidence for all four modes in a future run and pass it via `--nano-live-evidence`.
+- Keep Nano experimental until the user-facing segment-following progress model is proven understandable.
+
+## MOSS-NANO-11 Decision
+
+Decision: `NANO_EXPERIMENTAL_ONLY` and `KEEP_KOKORO_DEFAULT`.
+
+Scope: MOSS-NANO-11 is an evidence-first product gate. It does not change the default engine, recommend Nano as a production opt-in, open Kokoro retirement, or treat lower-level runtime evidence as product readiness. Nano remains experimental and selected-use must stay sidecar-readiness-gated.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Product-gate evaluator | `scripts/tts_eval_runner.mjs` exports `evaluateMossNanoProductGate()` and caps the gate at `NANO_EXPERIMENTAL_ONLY` when any required selected-Nano mode or evidence item is missing. |
+| Four-mode matrix shape | `tests/fixtures/narration/matrix.manifest.json` adds explicit `moss-nano-11` selected-Nano scenarios for Page, Focus, Flow, and Narrate. |
+| No matrix drift | Untagged matrix runs exclude experimental Nano product-gate scenarios; `--tag moss-nano-11` is required to exercise them. |
+| Gate artifact | `artifacts/tts-eval/moss-nano-11-product-gate-shape/summary.json` recorded four Nano-11 scenario-shape runs and `mossNanoProductGate.maxDecision: NANO_EXPERIMENTAL_ONLY`. |
+| Promotion blocker | The artifact intentionally carries no live product evidence for settings preview truth, selected-sidecar lifecycle, cache/prefetch continuity, segment-following progress, explicit fallback, package/runtime readiness, or Kokoro availability. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused product-gate tests | `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `20` tests. |
+| Product-gate artifact command | `npm run tts:eval:matrix -- --run-id moss-nano-11-product-gate-shape --tag moss-nano-11 --out artifacts\tts-eval\moss-nano-11-product-gate-shape` completed `4` runs and wrote the experimental-only decision cap. |
+
+Decision rationale:
+
+- The matrix can now exercise all four required selected-Nano modes by explicit tag, but this sprint did not supply live product evidence for the full gate.
+- Per the approved guardrail, missing live evidence means the decision cannot exceed `NANO_EXPERIMENTAL_ONLY`.
+- Kokoro remains available and no Kokoro retirement lane is opened.
+
+Next actions:
+
+- Keep Nano experimental and readiness-gated.
+- A later sprint may rerun the gate with live app evidence and package/runtime readiness.
+- Do not change defaults or retirement posture from MOSS-NANO-11 alone.
+
+## MOSS-NANO-9 Decision
+
+Decision: `PROMOTE_NANO_TO_EXPERIMENTAL_UI_CANDIDATE`.
+
+Scope: MOSS-NANO-9 is an experimental continuity prototype only. It did not add public engine selection, settings UI, default-engine behavior, public `TtsEngine` expansion, Kokoro behavior changes, or Kokoro retirement work. Nano remains hidden behind test-only `useNarration({ experimentalNano: true })` plumbing until a later explicit UX sprint.
+
+Implementation evidence:
+
+| Evidence item | Result |
+|---|---|
+| Bounded cache | `src/hooks/narration/mossNanoStrategy.ts` owns a bounded Nano segment cache with cache stats and oldest-entry eviction. |
+| Cache ownership | Cached/prefetched audio is admitted only when generation, continuity scope, voice, rate, start index, and text hash still match; stale prefetches are rejected and counted. |
+| Prefetch | Strategy supports next-segment and next-section prefetch; hook starts prefetch from the current continuity scope without scheduler changes. |
+| Continuity orchestration | `src/hooks/useNarration.ts` routes Nano pause/resume, preserves segment anchors, emits playback trace evidence, and clears Nano cache on handoff/cross-book word replacement. |
+| Timing truth | Nano trace and playback metadata remain `timingTruth: "segment-following"` with `wordTimestamps: null`; no fake word timestamps were introduced. |
+| Eval trace | `src/types/eval.ts`, `src/utils/ttsEvalTrace.ts`, and `scripts/tts_eval_runner.mjs` summarize Nano segment latency, cache hits/misses, hit rate, prefetch ready/stale/cancelled counts. |
+| Kokoro/default drift | Public `TtsEngine`, settings UI, default engine behavior, and Kokoro narration behavior were not changed. |
+
+Verification:
+
+| Check | Result |
+|---|---|
+| Focused Nano continuity/eval tests | `npm test -- --run tests/mossNanoStrategy.test.ts tests/useNarrationMossNano.test.tsx tests/ttsEvalTrace.test.ts tests/ttsEvalMatrixRunner.test.ts` passed `4` files / `57` tests. |
+| Full suite | `npm test` passed `154` files / `2423` tests. |
+| Build | `npm run build` passed; Vite emitted the existing `settings -> tts -> settings` circular chunk warning. |
+| Review | Local Solon/Plato review found the guardrails satisfied: no public UI toggle, no public `TtsEngine` change, no Kokoro behavior change, no fake word timestamps, and no scheduler changes. |
+
+Next actions:
+
+- `MOSS-NANO-10` may dispatch as explicit experimental UI candidate work.
+- Keep Nano hidden from public engine selection until that sprint deliberately adds an opt-in surface.
+- Keep Kokoro as the operational floor/default; no Kokoro retirement work is unlocked.
+
+## Nano Onboarding Roadmap Gate
+
+Roadmap status: `MOSS-NANO-5B` through `MOSS-NANO-11` are specified as the Nano onboarding lane. `MOSS-NANO-11` closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`, so Nano remains experimental and no default or retirement lane is unlocked.
+
+Allowed next work:
+
+- A future live product evidence sprint may rerun the MOSS-NANO-11 gate with real app-selected Nano evidence. It must preserve bounded lifecycle truth, stale-output safety, crash/restart classification, app-side reversibility, and truthful segment timing.
+
+Still forbidden after 7 promotion:
+
+- Kokoro behavior changes or Kokoro retirement work.
+- Making Nano the default engine.
+- Treating Nano visibility as readiness: blocked Nano may be visible, but must not appear ready/selectable-for-use unless `nanoStatus` is ready.
+- Treating NANO-7, NANO-8, NANO-9, or NANO-10 as default playback productization.
+- Treating bounded lifecycle recycles as crashes, or treating unclassified restarts as acceptable.
+- Ignoring the 6F canonical artifact in favor of the raw summary's older persisted `not-promoting` state.
+
+## Decision Notes
+
+- Flagship MOSS-TTS was the first target and remains paused for app-integration/product-path work.
+- MOSS-TTS-Nano is no longer awaiting MOSS-NANO-11 closeout; MOSS-NANO-11 closed as `NANO_EXPERIMENTAL_ONLY` / `KEEP_KOKORO_DEFAULT`. It remains experimental, sidecar-readiness-gated, non-default, and must not retire Kokoro without a later explicit decision.
+- The Windows-safe first-class wrapper intentionally avoids the upstream inner `std::system(...)` ONNX decoder call. It asks `llama-moss-tts` for raw codes, then invokes the Python decoder directly with an argument array.
+- Kokoro retirement remains paused. Kokoro stays the operational floor and only integrated engine until a successor proves live-book playback, timing truth, and user-visible reliability.
+- Legacy flagship MOSS-3 through MOSS-7 stay paused/superseded unless a new explicit flagship promotion decision is recorded. Nano app onboarding is capped at experimental-only after the completed NANO-7 through NANO-11 prototypes until new live evidence is approved.
+- No silent fallback is allowed when MOSS is selected. Unsupported MOSS state must remain visible and actionable.
+
+## Evidence Links
+
+- Runtime setup: `docs/testing/MOSS_RUNTIME_SETUP.md`
+- Feasibility policy: `docs/testing/MOSS_FLAGSHIP_FEASIBILITY.md`
+- Preflight script: `scripts/moss_preflight.mjs`
+- Probe script: `scripts/moss_flagship_probe.mjs`
+- Benchmark script: `scripts/moss_kokoro_benchmark.mjs`
+- Kokoro baseline script: `scripts/kokoro_pair_baseline.mjs`
+- Runtime shape probe: `scripts/moss_runtime_shape_probe.mjs`
+- Speed forensics script: `scripts/moss_speed_forensics.mjs`
+- Windows first-class wrapper: `scripts/moss_firstclass_windows_e2e.py`
+- Nano probe scripts: `scripts/moss_nano_probe.mjs`, `scripts/moss_nano_probe.py`
+- Provisioning tests: `tests/mossProvisioning.test.js`
+- Probe tests: `tests/mossFlagshipProbe.test.js`
+- Nano probe tests: `tests/mossNanoProbe.test.js`
+- Benchmark tests: `tests/mossBenchmark.test.js`
+- Kokoro baseline tests: `tests/kokoroPairBaseline.test.js`
+- Runtime shape tests: `tests/mossRuntimeShapeProbe.test.js`

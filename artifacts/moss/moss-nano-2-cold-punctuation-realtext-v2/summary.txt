@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-2-cold-punctuation-realtext-v2
+Passage: punctuation-heavy-mid
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-2-cold-punctuation-realtext-v2\output.wav
+Total seconds: 20.6641
+First WAV bytes seconds: 20.0393
+Internal first decoded seconds: unsupported
+Audio duration seconds: 11.76
+RTF: 1.7572
+Peak memory: unknown MB
+Process mode: cold
+Runtime reuse actual: false
+Prewarm: none
+Iterations: 2

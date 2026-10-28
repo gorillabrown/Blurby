@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "passage": "punctuation-heavy-mid",
+  "quant": "Q4_K_M",
+  "maxNewTokens": 128,
+  "wav": "/mnt/c/Users/estra/Projects/Blurby/artifacts/moss/moss-host-2-wsl-punctuation-q4-tokens128/output.wav",
+  "durationSec": 7.76,
+  "rawElapsedSec": 52.93,
+  "rawMaxRssKb": 9709132,
+  "decodeElapsedSec": 73.26,
+  "decodeMaxRssKb": 7255292,
+  "totalMeasuredSec": 126.19,
+  "rtfMeasured": 16.26159793814433,
+  "binaryPath": "/mnt/c/Users/estra/Projects/Blurby/.runtime/moss/llama.cpp/build-wsl-arm64-host2/bin/llama-moss-tts",
+  "buildFlags": {
+    "GGML_NATIVE": "OFF",
+    "GGML_CPU_ARM_ARCH": "armv8.6-a+dotprod+i8mm+nosve",
+    "CMAKE_BUILD_TYPE": "Release"
+  },
+  "evidence": {
+    "binaryFreshness": "fresh-wsl-arm64-host2",
+    "staleEvidence": false,
+    "timingSource": "tmp/raw_time.txt and tmp/decode_time.txt",
+    "note": "Normalized from authoritative tmp timing files using fresh WSL ARM64 host2 binary; not stale evidence."
+  }
+}

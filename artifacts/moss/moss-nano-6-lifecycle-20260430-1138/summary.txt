@@ -1,0 +1,19 @@
+MOSS Nano Probe
+===============
+Status: ok
+Failure class: none
+Run ID: moss-nano-6-lifecycle-20260430-1138
+Passage: short-smoke
+Backend: moss-nano-onnx
+Device: cpu
+Output WAV: C:\Users\estra\Projects\Blurby\artifacts\moss\moss-nano-6-lifecycle-20260430-1138\output_002.wav
+Total seconds: 2.7929
+First WAV bytes seconds: 0.244
+Internal first decoded seconds: 0.244
+Audio duration seconds: 4.64
+RTF: 0.6019
+Peak memory: 1772.94 MB
+Process mode: cold
+Runtime reuse actual: true
+Prewarm: none
+Iterations: 2
