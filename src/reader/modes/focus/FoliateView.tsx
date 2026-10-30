@@ -24,7 +24,6 @@ import {
   resolveTrustedRenderedWordIndexToGlobal,
 } from "./helpers/foliateWordOffsets";
 import {
-  FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_LINES_OFF,
   FOLIATE_RENDERER_HEIGHT_MARGIN_PX,
   FOLIATE_MARGIN_PX,
@@ -40,6 +39,8 @@ import {
   normalizeBandAnchor,
   normalizeBandLines,
   readZoneLineStepPx,
+  computeLeadingInsetPx,
+  computeTrailingInsetPx,
   writeZoneLineStepPx,
 } from "./helpers/foliateLayout";
 import { resolveFoliateWordHighlightClass } from "./helpers/foliateWordHighlight";
@@ -467,25 +468,15 @@ export default function FocusFoliateView({
     return containerRef.current?.clientHeight ?? 0;
   }, [resolveFoliateScrollContainer]);
 
-  const getFlowLeadingInsetPx = useCallback((): number => {
-    const viewportHeight = getFlowViewportHeightPx();
-    if (viewportHeight <= 0) return 0;
-    return Math.max(0, Math.round(viewportHeight * FLOW_ZONE_INITIAL_TOP));
-  }, [getFlowViewportHeightPx]);
-
-  const getFlowTrailingInsetPx = useCallback((): number => {
-    const viewportHeight = getFlowViewportHeightPx();
-    if (viewportHeight <= 0) return 0;
-    return Math.max(0, Math.round(viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP)));
-  }, [getFlowViewportHeightPx]);
-
   const setFlowInsetsForRenderedDocs = useCallback((leadingInsetPx: number, trailingInsetPx: number) => {
     const view = viewRef.current;
     const leadingValue = `${Math.max(0, Math.round(leadingInsetPx))}px`;
     const trailingValue = `${Math.max(0, Math.round(trailingInsetPx))}px`;
     for (const { doc } of view?.renderer?.getContents?.() ?? []) {
       try {
-        doc?.documentElement?.style.setProperty("--blurby-flow-leading-inset", leadingValue);
+        // R7 (owner Q2): a zero-word section (the cover) starts at the top of the view, with no leading space.
+        const hasWords = doc?.querySelector?.("[data-word-index]") != null;
+        doc?.documentElement?.style.setProperty("--blurby-flow-leading-inset", hasWords ? leadingValue : "0px");
         doc?.documentElement?.style.setProperty("--blurby-flow-trailing-inset", trailingValue);
       } catch {
         // Detached Foliate iframe documents can disappear during section changes.
@@ -498,6 +489,27 @@ export default function FocusFoliateView({
   const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), lines: normalizeBandLines(settings.flowZoneLines) };
   const bandLayoutRef = useRef(bandLayout);
   bandLayoutRef.current = bandLayout;
+
+  /**
+   * R7 (owner, 2026-10-30): a section with words starts below a leading space equal to the band anchor's y, and ends
+   * above a trailing space of the view below it, so any cursor line can reach the anchor and the band never moves.
+   * Declared below bandLayoutRef so nothing reads the ref before it exists (LL-087).
+   */
+  const getFlowLeadingInsetPx = useCallback((): number => {
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const { anchor, lines } = bandLayoutRef.current;
+    const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
+    return Math.max(0, Math.round(computeLeadingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
+  }, [getFlowViewportHeightPx]);
+
+  const getFlowTrailingInsetPx = useCallback((): number => {
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const { anchor, lines } = bandLayoutRef.current;
+    const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
+    return Math.max(0, Math.round(computeTrailingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
+  }, [getFlowViewportHeightPx]);
   /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
   const appliedBandLayoutRef = useRef<{ anchor: number; lines: number } | null>(null);
 
@@ -524,7 +536,7 @@ export default function FocusFoliateView({
       return true;
     }
     const around = span ? collectLineBoxesAround(span, Math.ceil((lines - 1) / 2)) : null;
-    const band = around ? computeBandEdges(around.lines, around.cursor, lines) : null;
+    const band = around ? computeBandEdges(around.lines, around.cursor, lines, readZoneLineStepPx(host)) : null;
     if (!band) {
       hideBand();
       return false;
@@ -809,6 +821,7 @@ export default function FocusFoliateView({
             }
           }
 
+          applyZoneRef.current?.(); // R7: once the words are stamped, a zero-word section drops its leading space
           lastLoadedSectionIndexRef.current = index;
           scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
@@ -1238,6 +1251,7 @@ export default function FocusFoliateView({
         if (stampsWithBook) bookStampedDocsRef.current.add(doc);
       }
       if (!cancelled) {
+        applyZoneRef.current?.(); // R7: a re-wrapped section regains its leading space
         scheduleWordPositionIndexRebuild("section-restamp", 0);
       }
     };
@@ -1289,10 +1303,7 @@ export default function FocusFoliateView({
     const applyZoneProperties = () => {
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
-      setFlowInsetsForRenderedDocs(
-        viewportHeight * FLOW_ZONE_INITIAL_TOP,
-        viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP),
-      );
+      setFlowInsetsForRenderedDocs(getFlowLeadingInsetPx(), getFlowTrailingInsetPx());
       // BAND-ALIGN-2: the band sits around the cursor line (R1–R3); with no cursor painted there is no band (R6).
       // An anchor or Lines change re-places it at once (scrolling the cursor line to the new anchor) without moving
       // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
@@ -1325,6 +1336,8 @@ export default function FocusFoliateView({
     };
   }, [
     getFlowViewportHeightPx,
+    getFlowLeadingInsetPx,
+    getFlowTrailingInsetPx,
     settings.flowZoneLines,
     settings.flowZonePosition,
     setFlowInsetsForRenderedDocs,

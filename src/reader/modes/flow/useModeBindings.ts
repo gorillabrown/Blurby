@@ -116,7 +116,8 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
     runtime.syncScrollEngineChunks();
   }, [runtime, renderVersion, snapshot.playing]);
 
-  // useFlowScrollSync effect 5: rebuild the line map after a font-size change.
+  // useFlowScrollSync effect 5: rebuild the line map after a font-size change, or an anchor or Lines change (R7: the
+  // leading space follows the band's anchor and line count, so every line's y moves).
   useEffect(() => {
     if (!runtime.isScrollEngineRunning()) return;
     let cancelled = false;
@@ -127,7 +128,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [runtime, settings.focusTextSize]);
+  }, [runtime, settings.focusTextSize, settings.settings.flowZonePosition, settings.settings.flowZoneLines]);
 
   // useFlowScrollSync effect 5b: rebuild after this view stamps a new rendered-word surface.
   const lastHandledRenderVersionRef = useRef(renderVersion);

@@ -476,7 +476,7 @@ export class FlowScrollEngine {
     const reach = Math.ceil((Math.max(bandLines, 1) - 1) / 2) + 1;
     const from = Math.max(0, lineIdx - reach);
     const window = this.lines.slice(from, lineIdx + reach + 1).map((entry) => ({ top: entry.y, bottom: entry.bottom }));
-    const band = computeBandEdges(window, lineIdx - from, bandLines);
+    const band = computeBandEdges(window, lineIdx - from, bandLines, readZoneLineStepPx(this.container)); // R7: the band keeps its size at a section's ends
     const clientTop = this.container.getBoundingClientRect().top;
     this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
     this.onZoneTopChange?.(

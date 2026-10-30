@@ -94,6 +94,22 @@ export function bandAnchorY(anchor: number, viewportHeightPx: number, bandHeight
   return anchor === FLOW_BAND_ANCHOR_TOP ? bandHeightPx / 2 : anchor * viewportHeightPx;
 }
 
+/** R7: the leading space above a section's first line: the anchor's y, so the first line can reach the anchor. */
+export function computeLeadingInsetPx({ anchor, viewportHeightPx, lineStepPx, lines }: {
+  anchor: number; viewportHeightPx: number; lineStepPx: number; lines: number;
+}): number {
+  if (viewportHeightPx <= 0) return 0;
+  return Math.max(0, bandAnchorY(anchor, viewportHeightPx, lineStepPx * Math.max(lines, 1)));
+}
+
+/** R7 (owner Q1): the trailing space below a section's last line, mirroring the top: the view below the anchor. */
+export function computeTrailingInsetPx({ anchor, viewportHeightPx, lineStepPx, lines }: {
+  anchor: number; viewportHeightPx: number; lineStepPx: number; lines: number;
+}): number {
+  if (viewportHeightPx <= 0) return 0;
+  return Math.max(0, viewportHeightPx - bandAnchorY(anchor, viewportHeightPx, lineStepPx * Math.max(lines, 1)));
+}
+
 /** R3 step 1: the scrollTop that puts the cursor line's centre at the anchor, clamped to the container's range. */
 export function computeAnchorScrollTop({ scrollTop, lineTopPx, lineBottomPx, containerTopPx, viewportHeightPx, anchor, bandHeightPx, maxScrollTop }: {
   scrollTop: number;
@@ -117,16 +133,26 @@ export function computeAnchorScrollTop({ scrollTop, lineTopPx, lineBottomPx, con
 }
 
 /**
- * R1 + R2: the band around line `cursor`, covering n lines with the cursor line in the middle (fewer at a section's
- * start or end: only lines that exist). Each edge is the midpoint of the gap to the next line out, or the line's own
- * box edge at the first or last line. null for Off (n = 0) or a cursor outside the lines.
+ * R1 + R2: the band around line `cursor`, covering n lines with the cursor line in the middle. Each edge is the
+ * midpoint of the gap to the next line out. R7: at a section's first or last line, with the line step `stepPx`, the
+ * edge is extended past the line by the step for each missing line, so the band keeps its size over the section's
+ * blank space; with stepPx 0 it is the line's own box edge. `first` and `last` are real line indices. null for Off
+ * (n = 0) or a cursor outside the lines.
  */
-export function computeBandEdges(lines: readonly BandLineBox[], cursor: number, n: number): { top: number; bottom: number; first: number; last: number } | null {
+export function computeBandEdges(lines: readonly BandLineBox[], cursor: number, n: number, stepPx = 0): { top: number; bottom: number; first: number; last: number } | null {
   if (n <= 0 || cursor < 0 || cursor >= lines.length) return null;
-  const first = Math.max(0, cursor - Math.floor((n - 1) / 2));
-  const last = Math.min(lines.length - 1, cursor + Math.ceil((n - 1) / 2));
-  const top = first > 0 ? (lines[first - 1].bottom + lines[first].top) / 2 : lines[first].top;
-  const bottom = last < lines.length - 1 ? (lines[last].bottom + lines[last + 1].top) / 2 : lines[last].bottom;
+  const want = cursor - Math.floor((n - 1) / 2);
+  const wantLast = cursor + Math.ceil((n - 1) / 2);
+  const end = lines.length - 1;
+  const first = Math.max(0, want);
+  const last = Math.min(end, wantLast);
+  const half = (box: BandLineBox) => Math.max(0, stepPx - (box.bottom - box.top)) / 2;
+  const top = first > 0
+    ? (lines[first - 1].bottom + lines[first].top) / 2
+    : stepPx > 0 ? lines[0].top - half(lines[0]) - (first - want) * stepPx : lines[0].top;
+  const bottom = last < end
+    ? (lines[last].bottom + lines[last + 1].top) / 2
+    : stepPx > 0 ? lines[end].bottom + half(lines[end]) + (wantLast - last) * stepPx : lines[end].bottom;
   return { top, bottom, first, last };
 }
 
