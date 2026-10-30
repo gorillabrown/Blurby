@@ -1,5 +1,5 @@
 "use strict";
-// main/ipc/narrate.js — the rebuilt Narrate's narrow IPC surface (NARRATE-REBUILD-1 P3). Three channels, all
+// main/ipc/narrate.js — the rebuilt Narrate's narrow IPC surface (NARRATE-REBUILD-1 P3). Four channels, all
 // to the producer in main/narrate/producer.js; the preload exposure is P4's. Results carry the exact table and
 // the PCM (structured clone keeps the Float32Array); errors come back as { error } and are F4 in the renderer.
 
@@ -7,6 +7,7 @@ const { ipcMain } = require("electron");
 
 function register() {
   const producer = require("../narrate/producer");
+  const { NARRATE_CANCELLED_ERROR } = require("../narrate/constants");
 
   ipcMain.handle("narrate-generate", async (_, text, voice, speed, options) => {
     const recvEpoch = performance.timeOrigin + performance.now(); // D6 analysis: when main received the request
@@ -17,7 +18,8 @@ function register() {
       const ipc = { recvEpoch, replyEpoch: performance.timeOrigin + performance.now() };
       return { table: r.table, pcm: r.pcm, sampleRate: r.sampleRate, genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign, ipc: { ...ipc, stages: r.stages } };
     } catch (err) {
-      console.error("[narrate] generate failed:", err?.message || String(err));
+      // A pause cancelling a queued job is not a failure (NARRATE-PAUSE-CANCEL-1).
+      if (err?.message !== NARRATE_CANCELLED_ERROR) console.error("[narrate] generate failed:", err?.message || String(err));
       return { error: err?.message || String(err) };
     }
   });
@@ -25,6 +27,10 @@ function register() {
   ipcMain.handle("narrate-preload", async () => {
     try { return { ok: true, status: await producer.ensureReady() }; } catch (err) { return { ok: false, error: err?.message || String(err) }; }
   });
+
+  // A pause cancels this engine's queued, not-yet-started jobs. Any non-string or empty prefix becomes "\u0000", which
+  // no group starts with, so it cancels nothing. Returns the count removed.
+  ipcMain.handle("narrate-cancel-queued", (_, groupPrefix) => producer.cancelQueued(typeof groupPrefix === "string" && groupPrefix.length > 0 ? groupPrefix : "\u0000"));
 
   ipcMain.handle("narrate-status", () => producer.getStatus());
 }

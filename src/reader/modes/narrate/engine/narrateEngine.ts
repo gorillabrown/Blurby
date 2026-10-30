@@ -22,6 +22,7 @@ import type {
   TtsEvalNarrateScheduleEvent,
   TtsEvalNarrateStopEvent,
 } from "../../../../types/eval";
+import { NARRATE_CANCELLED_ERROR } from "../../../../constants";
 
 export type EngineRequestCause = TtsEvalNarrateRequestCause;
 
@@ -67,6 +68,8 @@ export interface ProducerPort {
   generate(request: { readonly text: string; readonly voice: string; readonly speed: number; readonly priority?: "request" | "prefetch"; readonly group?: string }): Promise<ProducerResult>;
   /** Load and warm the voice ahead of the first request (the mode calls it on entry); never required. */
   preload?(): Promise<void>;
+  /** Cancel the queued, not yet started jobs whose group starts with groupPrefix (a pause); they reject with NARRATE_CANCELLED_ERROR. */
+  cancelQueued?(groupPrefix: string): void;
 }
 
 export type EngineState = "idle" | "playing" | "paused" | "stopped";
@@ -213,6 +216,7 @@ export class NarrateEngine {
     this.speedChangeAt = null;
     this.pendingRequest = null;
     this.lastTickPerf = null;
+    this.producer.cancelQueued?.(`${this.id}:`); // every group this engine sends (NARRATE-PAUSE-CANCEL-1)
     this.setState("paused");
   }
 
@@ -404,6 +408,14 @@ export class NarrateEngine {
   private onError(entry: ChunkPlanEntry, error: unknown, epoch: number): void {
     if (epoch !== this.epoch) return;
     this.inFlight -= 1;
+    if (error instanceof Error && error.message.includes(NARRATE_CANCELLED_ERROR)) {
+      // A pause cancelled this queued chunk: rewind to its first word, so a resume generates it again (not F4).
+      this.nextWord = entry.startWord;
+      this.chunkSeq = Math.max(0, this.chunkSeq - 1);
+      this.diag("narrate:cancelled", `${entry.startWord}-${entry.endWord}`);
+      this.fill();
+      return;
+    }
     this.fail({ kind: "F4", reason: "producer-error", atWord: entry.startWord, detail: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
   }
 

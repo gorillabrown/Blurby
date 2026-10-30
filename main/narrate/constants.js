@@ -29,4 +29,6 @@ module.exports = {
   NARRATE_IDLE_UNLOAD_MS: 10 * 60 * 1000,
   /** How long a stopping worker may take to finish its generation in progress before it is terminated. */
   NARRATE_STOP_TIMEOUT_MS: 30000,
+  /** A job queued in main, not yet posted to a worker, cancelled by a pause; twin of src/constants.ts NARRATE_CANCELLED_ERROR. */
+  NARRATE_CANCELLED_ERROR: "narrate generation cancelled",
 };

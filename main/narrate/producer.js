@@ -188,8 +188,24 @@ async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0, pr
   });
 }
 
+/**
+ * Cancel every queued, not yet posted job whose group starts with groupPrefix (a pause, NARRATE-PAUSE-CANCEL-1);
+ * each rejects with NARRATE_CANCELLED_ERROR. Posted jobs (pending) and workers are never touched: a generation already
+ * running cannot be aborted. Returns the number removed; 0 unless groupPrefix is a non-empty string.
+ */
+function cancelQueued(groupPrefix) {
+  if (typeof groupPrefix !== "string" || groupPrefix.length === 0) return 0;
+  let n = 0;
+  for (let i = queue.length - 1; i >= 0; i--) {
+    const job = queue[i];
+    if (typeof job.group === "string" && job.group.startsWith(groupPrefix)) { queue.splice(i, 1); job.reject(new Error(C.NARRATE_CANCELLED_ERROR)); n += 1; }
+  }
+  plog("cancel", groupPrefix, n);
+  return n;
+}
+
 function getStatus() { return { ...status, ready, pending: pending.size + queue.length, workersReady: workers.filter((w) => w.ready).length }; }
 /** Resolves once every worker has exited (before the process may exit: see stopWorker). */
 function shutdown() { return dispose("shutdown", true); }
 
-module.exports = { ensureReady, generate, getStatus, shutdown, getModelsRoot };
+module.exports = { ensureReady, generate, cancelQueued, getStatus, shutdown, getModelsRoot };

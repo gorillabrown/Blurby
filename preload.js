@@ -168,6 +168,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   narrateGenerate: (text, voice, speed, options) => ipcRenderer.invoke("narrate-generate", text, voice, speed, options),
   narratePreload: () => ipcRenderer.invoke("narrate-preload"),
   narrateStatus: () => ipcRenderer.invoke("narrate-status"),
+  // Accepts only a string group prefix; main cancels that group's not-yet-started jobs and nothing else (NARRATE-PAUSE-CANCEL-1).
+  narrateCancelQueued: (groupPrefix) => ipcRenderer.invoke("narrate-cancel-queued", typeof groupPrefix === "string" ? groupPrefix : ""),
 
   // Events from main
   onSyncProgress: (callback) => {

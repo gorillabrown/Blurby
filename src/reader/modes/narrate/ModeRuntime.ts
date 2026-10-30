@@ -116,6 +116,10 @@ function preloadProducer(): ProducerPort {
       const api = (globalThis as { electronAPI?: { narratePreload?: () => Promise<unknown> } }).electronAPI;
       await api?.narratePreload?.();
     },
+    cancelQueued(groupPrefix: string): void {
+      const api = (globalThis as { electronAPI?: { narrateCancelQueued?: (groupPrefix: string) => Promise<number> } }).electronAPI;
+      void api?.narrateCancelQueued?.(groupPrefix)?.catch((err: unknown) => console.warn("[narrate] cancel queued failed:", err instanceof Error ? err.message : String(err)));
+    },
   };
 }
 function NarrateIpcSampleRate(_r: NarrateIpcResult): number { return NARRATE_SAMPLE_RATE; }
