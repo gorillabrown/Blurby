@@ -1,0 +1,35 @@
+{
+  "id": "20261030T220759Z-external-set-status-NARRATE-GAP-PAUSE-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-GAP-PAUSE-1",
+  "created": "2026-10-30T22:07:59Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: e3498f60, package from 5f09224a, fix 5d51d111 (narrateEngine.ts only). A real gap pause after the fix skipped 0 words, resume 86 ms (base: 18 words skipped, 2.3 s silence). Resumes 82-92 ms; suite 2473/1/0; x64/arm64 asar identical. BUG-237 resolved in source. Merge order: the sentence-resume and sentence-initials branches first; this stack resolves the narrateEngine.ts and ModeRuntime.ts conflicts, re-runs tests/narrate, and takes a fresh rule 53 check."
+    },
+    "expectedRevision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+    "idempotencyKey": "set-status:NARRATE-GAP-PAUSE-1:[('notes', 'Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: e3498f60, package from 5f09224a, fix 5d51d111 (narrateEngine.ts only). A real gap pause after the fix skipped 0 words, resume 86 ms (base: 18 words skipped, 2.3 s silence). Resumes 82-92 ms; suite 2473/1/0; x64/arm64 asar identical. BUG-237 resolved in source. Merge order: the sentence-resume and sentence-initials branches first; this stack resolves the narrateEngine.ts and ModeRuntime.ts conflicts, re-runs tests/narrate, and takes a fresh rule 53 check.'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-GAP-PAUSE-1",
+      "idempotencyKey": "set-status:NARRATE-GAP-PAUSE-1:[('notes', 'Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: e3498f60, package from 5f09224a, fix 5d51d111 (narrateEngine.ts only). A real gap pause after the fix skipped 0 words, resume 86 ms (base: 18 words skipped, 2.3 s silence). Resumes 82-92 ms; suite 2473/1/0; x64/arm64 asar identical. BUG-237 resolved in source. Merge order: the sentence-resume and sentence-initials branches first; this stack resolves the narrateEngine.ts and ModeRuntime.ts conflicts, re-runs tests/narrate, and takes a fresh rule 53 check.'), ('status', 'In Flight')]",
+      "actualRevision": "0d62459760152ff6ec783ec153eee468c6bf19dd82b61aa6394b2ec01668dff8",
+      "recoveryId": "20261030T220759Z-external-set-status-NARRATE-GAP-PAUSE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T22:08:33Z",
+  "outcome": "succeeded"
+}

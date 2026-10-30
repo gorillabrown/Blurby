@@ -11,7 +11,7 @@
 ### BUG-237 — A Narrate pause in the gap before a scheduled chunk skips that chunk's words and resumes after ~2.3 s of silence
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), during NARRATE-PAUSE-CANCEL-1's base D6 (`5de476ce`, x64, quiet host). Deterministic in two runs.
 **Severity:** HIGH. It is audible: words are lost, then there is silence.
-**Status:** OPEN; fix item NARRATE-GAP-PAUSE-1 (TTS / Narration Engine), stacked on `eb/narrate-pause-cancel-1`. Lane: TTS / Narration Engine.
+**Status:** RESOLVED IN SOURCE 2026-10-30 by NARRATE-GAP-PAUSE-1 (`eb/narrate-gap-pause-1` @ `e3498f60`, package-verified x64 by Blurby.Brain1; a real gap pause after the fix skipped 0 words and resumed in 86 ms). Merges with the quit-linger stack; the entry moves to Complete then. Lane: TTS / Narration Engine.
 **Observation:** *Meditations*, word ~8730, 2.00x, D6 run warm-2.00-3. The pause landed 34 ms before chunk 8730 was due to start. On resume:
 - playback restarted at the NEXT chunk (word 8748), so the 18 words 8730–8747 were never heard (heard: 8726–8729, then 8748);
 - speech started after about 2.3 s of silence. The new chunk was scheduled at startAt 6.0963, the stopped chunk's endAt.
@@ -37,7 +37,7 @@
 ### BUG-235 — REGRESSION: Flow playback stops at a section's end and never enters the next section
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
 **Severity:** HIGH. A regression in the held stack; it BLOCKS BAND-ALIGN-2's merge.
-**Status:** RESOLVED in source (BAND-ALIGN-2 R7a); closes with BAND-ALIGN-2's merge and the owner's smoke. The bisect (RodneySr job 6) named BAND-ALIGN-2's "Flow runs on one clock" commit: a word past the last rendered line could not be highlighted, so it took the page-turn path and never reached the line pacer's section hand-off. R7a hands off there and holds the word timer on that word until the section loads. Lane: Reader Engine.
+**Status:** RESOLVED IN SOURCE 2026-10-30 by BAND-ALIGN-2 R7a (`eb/band-align-2` @ `3977540e`, package-verified x64 by Blurby.Brain1). The bisect named `860ad3ca`. It merges with the BAND-ALIGN-2 stack; the entry moves to Complete when that stack merges. Lane: Reader Engine.
 **Observation:** in Flow, at NOTES#185 the band switches off, the cursor disappears, and playback never enters section 2.
 - Present on M `70e739ea` (band-align-2 `85e32777` + main) and on R7 `a5273704`.
 - Absent on release `36ac7466`, which crosses into section 2 at sample 15 (AURELIUS#189) and keeps playing.
