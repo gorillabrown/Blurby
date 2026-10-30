@@ -1,0 +1,34 @@
+{
+  "id": "20261030T182953Z-external-set-status-LIBRARY-CONTENT-DEDUP-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-CONTENT-DEDUP-1",
+  "created": "2026-10-30T18:29:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P3. Sources F11. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner design ruling 2026-10-30 (via Blurby.Brain1): detect duplicates by content hash; duplicate marker plus a choose-which-to-keep action; the chosen-away copy is removed from the library only, unless the owner confirms a dialog naming the full path, in which case its file goes to the Recycle Bin (shell.trashItem, never unlink). Main validates the path through the IPC-PATH-TRUST rules (doc id only from the renderer; never bundled or cache paths) and re-hashes both copies before trashing. Still a Stub."
+    },
+    "expectedRevision": "c4efd43b01123f67071385f63c3e1ccddfc443a9492e3fef165a886a52ed2537",
+    "idempotencyKey": "set-status:LIBRARY-CONTENT-DEDUP-1:[('notes', 'Owner smoke intake 2026-10-26. Proposed priority P3. Sources F11. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner design ruling 2026-10-30 (via Blurby.Brain1): detect duplicates by content hash; duplicate marker plus a choose-which-to-keep action; the chosen-away copy is removed from the library only, unless the owner confirms a dialog naming the full path, in which case its file goes to the Recycle Bin (shell.trashItem, never unlink). Main validates the path through the IPC-PATH-TRUST rules (doc id only from the renderer; never bundled or cache paths) and re-hashes both copies before trashing. Still a Stub.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-CONTENT-DEDUP-1",
+      "idempotencyKey": "set-status:LIBRARY-CONTENT-DEDUP-1:[('notes', 'Owner smoke intake 2026-10-26. Proposed priority P3. Sources F11. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner design ruling 2026-10-30 (via Blurby.Brain1): detect duplicates by content hash; duplicate marker plus a choose-which-to-keep action; the chosen-away copy is removed from the library only, unless the owner confirms a dialog naming the full path, in which case its file goes to the Recycle Bin (shell.trashItem, never unlink). Main validates the path through the IPC-PATH-TRUST rules (doc id only from the renderer; never bundled or cache paths) and re-hashes both copies before trashing. Still a Stub.')]",
+      "actualRevision": "a85e178b99cd736c01c9d05e3736333b1ee39d7d258de20fe72a6e415ef599f5",
+      "recoveryId": "20261030T182953Z-external-set-status-LIBRARY-CONTENT-DEDUP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:30:12Z",
+  "outcome": "succeeded"
+}
