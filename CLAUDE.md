@@ -33,7 +33,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 3. **Review results** — After Claude Code agents run, verify every change against spec. Identify drift, gaps, regressions.
 4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct MarcusAurelius to do it).
 5. **Interpret test results** — Analyze test output, decide next steps for failures.
-6. **Triage findings** — Review AGENT_FINDINGS.md, group issues, set priorities.
+6. **Triage findings** — Review `docs/governance/Findings.md` (registered findings role), group issues, set priorities.
 
 #### Planning Contract
 
@@ -57,7 +57,7 @@ This repo uses a strict two-layer planning system:
 
 #### Product lanes (roadmap and Notion)
 
-The Notion Lane field uses the six product domains declared in registry policy.roadmap.lanes: UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
+The Notion Lane field uses the seven product domains declared in registry `policy.roadmap.workstreams` (Findings F-006): UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance; Blurby Business. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
 
 #### Reading-mode isolation (Narrate rebuilt 2026-10-15)
 
@@ -103,7 +103,7 @@ If any of these are missing, the sprint is NOT parallel-dispatch-ready.
 Before writing ANY code, you MUST read these files in this order. No exceptions. No shortcuts.
 
 1. **`CLAUDE.md`** (this file) — You're already reading it. Note the Standing Rules below.
-2. **`.claude/agents/zeus.md`** — The orchestrator protocol. Defines the mandatory sprint execution sequence (READ → PLAN → IMPLEMENT → TEST → VERIFY → DOCUMENT → GIT → REPORT). Follow this sequence exactly. Zeus never writes code — all implementation is delegated to doer agents.
+2. **The Virtuoso plugin's Zeus protocol** — the `virtuoso` skill and `skills/virtuoso/references/zeus.md` — followed as written, plus Blurby's facts in `Virtuoso/overlays/` (list them with the rule-11a-guarded `virtuoso_registry --root . overlays`). There is no local copy; never create one.
 3. **`docs/governance/LESSONS_LEARNED.md`** — Scan for entries tagged with the areas you're about to touch. These are hard-won guardrails. Violating them causes regressions.
 4. **`ROADMAP.md`** — Find the sprint/hotfix section for your current task. Read the full spec including WHERE, Tasks, and SUCCESS CRITERIA.
 5. **Source files listed in the dispatch's WHERE section** — Read them in the listed order before making changes.
@@ -112,51 +112,15 @@ If your dispatch references a LESSONS_LEARNED entry by number (e.g., "LL-051"), 
 
 #### Agent Definition Files
 
-Agent `.md` files in `.claude/agents/` define the scope, output contract, and strict rules for each agent role. Each file has YAML frontmatter that Claude Code uses for auto-discovery, model assignment, and tool permissions.
+Agents are the plugin's (`virtuoso:` roster), selected by its Zeus protocol.
 
-**Orchestrator:**
-
-| File | Agent | Model | Purpose |
-|------|-------|-------|---------|
-| `zeus.md` | Zeus | opus | Sprint orchestrator — decomposes tasks, dispatches doer agents, spawns specialists. **Never writes code.** |
-
-**Doer agents** (implementation — Zeus selects cheapest tier that can handle each task):
-
-| File | Agent | Model | Purpose |
-|------|-------|-------|---------|
-| `hermes.md` | Hermes | haiku | Mechanical execution — prescribed diffs, config edits, version bumps, git ops |
-| `hercules.md` | Hercules | sonnet | Single-domain implementation — bounded judgment within one module |
-| `athena.md` | Athena | opus | Cross-system implementation — architectural judgment, multi-module changes |
-
-**Specialist agents** (verification & support — take priority over doers when task matches):
-
-| File | Agent | Model | Purpose |
-|------|-------|-------|---------|
-| `hippocrates.md` | Hippocrates | haiku | Test execution — run suites, categorize failures, report pass/fail |
-| `solon.md` | Solon | sonnet | Spec compliance — verify implementation matches every SUCCESS CRITERIA item |
-| `plato.md` | Plato | sonnet | Code quality — architecture compliance, known-trap detection |
-| `marcusaurelius.md` | MarcusAurelius | sonnet | Documentation — update all governing docs after every sprint |
-| `aristotle.md` | Aristotle | opus | Root-cause diagnosis — read-only trace, produces fix specs |
-| `simonides.md` | Simonides | sonnet | Memory guide — shared memory system, findings queue, cross-agent continuity |
+Blurby overlays: `Virtuoso/overlays/skills/virtuoso/SKILL.md`, `Virtuoso/overlays/agents/Hippocrates.md`, `Virtuoso/overlays/agents/Plato.md`, `Virtuoso/overlays/agents/MarcusAurelius.md`.
 
 #### How Dispatches Work
 
 Sprint dispatches go to `Zeus` (the orchestrator). Zeus reads the dispatch, loads the sprint spec from ROADMAP.md, and delegates all work.
 
-**Zeus never writes code.** It decomposes tasks, routes each one to the cheapest appropriate doer agent (Hermes → Hercules → Athena, escalating only as needed), then spawns specialist agents for verification and documentation.
-
-**Task routing decision tree** (from zeus.md):
-1. Does a specialist match? (e.g., tests → Hippocrates, diagnosis → Aristotle) → assign specialist
-2. Is the change fully prescribed (exact diff known)? → Hermes (haiku)
-3. Does the task stay within one module? → Hercules (sonnet)
-4. Does it cross module boundaries? → Athena (opus)
-5. Fallback → Hercules (can self-escalate)
-
-The dispatch's Task table tells Zeus:
-
-- **Which doer tier** to use for each implementation task
-- **Which specialists to spawn** for verification steps
-- **What order** — sequential by default, parallel when explicitly marked
+Zeus routes and orders work as the plugin's `skills/virtuoso/references/zeus.md` states.
 
 #### Agent Scope Labels (Reference)
 
@@ -168,28 +132,11 @@ The dispatch's Task table tells Zeus:
 | `renderer-scope` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
 | `format-scope` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/file-parsers.js`, `main/epub-word-extractor.js` |
 
-**Specialist agents** (spawned by Zeus for verification and support):
-
-| Agent | Scope | Files |
-|-------|-------|-------|
-| `Hippocrates` | Test execution and build verification | `tests/`, `package.json` scripts |
-| `Solon` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
-| `Plato` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
-| `MarcusAurelius` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
-| `Aristotle` | Root-cause analysis when investigation is needed | Read-only diagnosis + fix spec |
-| `Simonides` | Cross-agent memory, findings queue, continuity | `.claude/agents/memory.yaml` (created on first save) |
-
-**Orchestration:**
-
-| Agent | Scope | Files |
-|-------|-------|-------|
-| `Zeus` | Sprint orchestrator — task decomposition, agent dispatch, progress tracking | All (read), delegates all writes |
-
 #### Post-Completion Checklist
 
 Before committing, verify ALL of these:
 
-- [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
+- [ ] Every SUCCESS CRITERIA item from the dispatch is met (the plugin's spec-compliance review)
 - [ ] `npm test` passes (2,452+ tests, 0 failures; count as of 2026-10-23, release gate (1) run 4) and `npm run typecheck` exits 0
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
@@ -201,16 +148,7 @@ Before committing, verify ALL of these:
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
-After EVERY sprint completion — hotfixes included, no exceptions — run the MarcusAurelius pass:
-
-1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
-2. **Notion work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
-3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
-4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
-5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
-6. **TECHNICAL_REFERENCE.md** — Update if architecture changed.
-
-**MarcusAurelius efficiency rule:** Zeus SHOULD pre-compose exact old_string/new_string edit diffs for doc updates and include them in the MarcusAurelius dispatch. This lets MarcusAurelius apply edits directly without re-reading each file to discover what changed. When provided, pre-composed diffs cut MarcusAurelius tool calls by ~50%. When not feasible (e.g., complex multi-section updates), MarcusAurelius falls back to standard read-then-edit.
+Documentation runs as *Document Lifecycle* states, with Blurby's documentation facts in `Virtuoso/overlays/agents/MarcusAurelius.md`.
 
 ### Standing Rules
 
@@ -228,11 +166,11 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the M
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
 - **Notion register text.** Anything the tooling reads from the Notion register comes from a SQL (plain-text) read, never rows mode or page fetch. When writing text to it, wrap every dotted name in backticks and backslash-escape markdown characters, or Notion links or drops them (`x-notion.textRules`).
-- **Dispatch sizing: 40 tool-use ceiling per wave.** A single Zeus dispatch must stay under ~40 tool uses. **Sprints with 5+ implementation tasks MUST be pre-split into waves at dispatch time** (don't wait for a runtime ceiling hit). Standard wave split: Wave A = implement + test, Wave B = verify + docs + git. Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
+- **Dispatch sizing.** Waves are sized and split by the Virtuoso plugin's criteria (`skills/effort-levels/SKILL.md`, *This Is Additive*): tool budget ≤40, wall time ≤60 minutes, and a split when effort levels are significantly mixed. Each wave is a separate dispatch.
 - **Parallel-safe execution beats queue speed theater.** Do not dispatch two sprints in parallel if both touch the shared-core freeze set. Run them sequentially or split one sprint so only non-core scaffolding runs in parallel.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.
 - **Verification gate is mandatory.** After completing any code-change task, verify: tests pass, behavior matches spec, no regressions, edge cases covered, documentation current. A task is NOT complete until verification evidence exists.
-- **Spec-compliance review before quality review.** For multi-task sprints, each task gets a spec-compliance check (does it match the dispatch spec?) before a quality check (is it well-built?). `Solon` performs this step. Full-tier sprints then spawn `Plato`. Quick-tier sprints use Zeus self-review. **For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible in the execution sequence.** Both are read-only — sequential execution wastes time with zero benefit. (Promoted from SRL-012 after two validated occurrences: READER-4M-2 missed parallelization, QWEN-STREAM-2 executed parallel and saved ~65s.)
+- **Spec-compliance review before quality review.** Every dispatch gets the plugin's spec-compliance review and then its quality review, by the agents and in the order `skills/virtuoso/references/zeus.md` names. No dispatch tier omits either review (SRL-012 amended 2026-10-30).
 
 ### Pike's 5 Rules of Programming (Engineering Axioms)
 
@@ -271,7 +209,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 ### Other References
 
 - **Project Constitution**: `docs/planning/Blurby_Project_Constitution.md`
-- **Agent Definitions**: `.claude/agents/` (Zeus, Hermes, Hercules, Athena, Aristotle, Hippocrates, Solon, Plato, MarcusAurelius, Simonides)
+- **Agent Definitions**: the Virtuoso plugin's agents (`virtuoso:` roster) and its Zeus protocol (`skills/virtuoso/references/zeus.md`), plus Blurby's facts in `Virtuoso/overlays/`. The former local briefs are archived in `docs/planning/.Archive/agent-protocols-2026-10-30/`.
 - **Roadmap Archive**: `docs/planning/.Archive/ROADMAP_legacy.md` (completed sprint full specs — reference only)
 - **Development Sync SOP**: `docs/governance/DEVELOPMENT_SYNC.md` (local-first git workflow)
 

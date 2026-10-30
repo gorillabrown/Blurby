@@ -19,7 +19,7 @@ FOLIATE-DISPLAY-LIFETIME-1 is **PACKAGE-VERIFIED (x64, RodneySr) 2026-10-30, bui
 
 ## Work lanes
 
-The owner requested product lanes on 2026-09-23. Each Notion record has one primary Lane; shared delivery dependencies remain in the spec and prerequisites. Registry policy.roadmap.lanes declares these six categories.
+The owner requested product lanes on 2026-09-23. Each Notion record has one primary Lane; shared delivery dependencies remain in the spec and prerequisites. Registry `policy.roadmap.workstreams` declares these seven workstreams (the Notion Lane column).
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
@@ -142,11 +142,11 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 4. **PR-12:** Context for cross-cutting concerns (settings, toasts, theme); props for direct parent-child data.
 5. **PR-17:** Never drive imperative DOM animations from React useEffect — use a plain class.
 6. **PR-26:** Settings that control a runtime engine must have explicit sync bridges.
-7. **SRL-012:** For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible.
+7. **SRL-012 (amended 2026-10-30):** reviews follow the Virtuoso plugin's order — spec compliance passes before the quality review.
 8. **Queue depth >=3:** If queue drops below 3 after completion, stop and backfill before next dispatch.
     - *Status (2026-10-12):* after NARRATE-REMOVE-1 the dispatch-ready depth is 0 full specs plus one epic (excluded); this rule and CLAUDE.md Rule 5a stop the next dispatch until `/roadmap-review` backfills.
-9. **Spec-compliance before quality:** Each task gets Solon check (does it match spec?) before Plato check (is it well-built?).
-10. **Dispatch sizing:** 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves.
+9. **Spec-compliance before quality:** each task's spec-compliance review passes before its quality review, as the plugin's Zeus protocol orders them.
+10. **Retired 2026-10-30 (AGENT-PROTOCOL-CONSOLIDATION-1):** dispatch sizing is the Virtuoso plugin's (`skills/effort-levels/SKILL.md`, *This Is Additive*: tool budget ≤40, wall time ≤60 minutes, mixed-effort split). Former text: "Dispatch sizing: 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves."
 11. **SRL-046:** Cross-mode/shared-surface refactors must start with a preflight stabilization gate that locks exact-anchor, visual-follow, and mode-switch invariants.
 12. **SRL-047:** Mode adapter specs must include lifecycle reset requirements for local visual refs, browse-away state, cursor baselines, and recenter affordances.
 13. **Broad-suite-before-CI:** Do not dispatch CI gate wiring while default broad-suite failures are being waived as unrelated debt; first classify or fix them.
@@ -939,7 +939,8 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-30.md) (moved by roadmap review 2026-10-30 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `e29117b2`; search for `#### NATIVE-PATH-ATTESTATION-1`). Its WIP candidate `9264c9b3` (also `refs/archive/rodney-unpushed/eb-native-path-attestation-1`), the Rodney worktree's 7 uncommitted harness edits and all receipts are kept untouched.
 - **Parked (R-2026-10-30-1, Blurby.Brain1 under the owner's 2026-10-30 mandate):** no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. On RodneySr the owner's data is absent, so native runs there use inspector-proved scratch userData (LL-165), APPDATA/LOCALAPPDATA redirected, a profile-tree snapshot/diff/restore-only-on-difference, and no other Blurby running — bounded to owned fixtures and public-domain books; reading the owner's library needs the owner's explicit OK. Seq 67.5 → 140.
 
-#### AGENT-PROTOCOL-CONSOLIDATION-1 — Use standard Virtuoso agents with Blurby overlays *(Seq67.75; Queued; **Full Spec — dispatch-ready 2026-10-30**; Platform & Maintenance)* <a id="agent-protocol-consolidation-1"></a>
+#### AGENT-PROTOCOL-CONSOLIDATION-1 — Use standard Virtuoso agents with Blurby overlays ✅ COMPLETED *(2026-10-30; Platform & Maintenance)* <a id="agent-protocol-consolidation-1"></a>
+- **Completed 2026-10-30:** dispatch merge `4a1b7aa5`, then close-out Step 0 applied the staging memo to main. Close-out: [docs/governance/close-outs/CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md](docs/governance/close-outs/CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md).
 - **Full specification (2026-10-30):** [docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md](docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md). It is built on the owner's 2026-10-30 rule "follow the plugin skills to the letter":
   - Overlays add Blurby facts only.
   - Athena, Simonides and Solon are retired.
