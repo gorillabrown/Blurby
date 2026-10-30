@@ -211,7 +211,7 @@ export class NarrateEngine {
     if (this.state !== "playing") return;
     const now = this.output.playbackPosition(); // the heard sample: nothing heard is repeated, nothing unheard is dropped
     const pos = this.position(now);
-    this.pausedAt = pos ? { index: pos.index, sample: pos.sample } : this.nextScheduledPause();
+    this.pausedAt = pos ? { index: pos.index, sample: pos.sample } : this.nextScheduledPause(now);
     for (const c of this.chunks) this.stopSource(c, now, "pause");
     this.speedChangeAt = null;
     this.pendingRequest = null;
@@ -395,7 +395,9 @@ export class NarrateEngine {
     const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, requestedT, resultT, genMs: result.genMs ?? null, worker: result.worker ?? null, busyAtAssign: result.busyAtAssign ?? null, ipc: result.ipc ?? null, offset: 0, startAt: 0, endAt: 0, source: null };
     this.chunks.push(chunk);
     if (this.state === "playing") {
-      const prev = this.chunks.at(-2);
+      // BUG-237: a chunk the pause stopped (source null) never times the next one; the first chunk after a resume starts at now + lead.
+      const last = this.chunks.at(-2);
+      const prev = last && last.source !== null ? last : undefined;
       const now = this.output.now();
       let startAt = prev ? prev.endAt : now + this.lead;
       if (this.speedChangeAt !== null) { startAt = Math.max(this.speedChangeAt, startAt); this.speedChangeAt = null; }
@@ -490,15 +492,14 @@ export class NarrateEngine {
     return null;
   }
 
-  /** Paused in a gap: resume from the first chunk not yet started, at its trim. */
   /** The first chunk that arrived while paused and was never scheduled (endAt is set only by scheduling). */
   private firstUnscheduled(): { readonly index: number; readonly sample: number } | null {
     const i = this.chunks.findIndex((c) => c.endAt === 0);
     return i >= 0 ? { index: i, sample: this.chunks[i].trim } : null;
   }
 
-  private nextScheduledPause(): { readonly index: number; readonly sample: number } | null {
-    const now = this.output.now();
+  /** Paused in a gap: resume from the first chunk not yet started, at its trim, on the heard clock (BUG-237). */
+  private nextScheduledPause(now: number): { readonly index: number; readonly sample: number } | null {
     const i = this.chunks.findIndex((c) => c.startAt >= now || c.source === null);
     return i >= 0 ? { index: i, sample: this.chunks[i].trim } : null;
   }
