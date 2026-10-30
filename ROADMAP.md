@@ -712,6 +712,16 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - Also required: T2-2 `--gaps` over D6 warm-resume traces, D6 resume on x64, and rule 53.
 - **Full specification:** [docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md](docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md). It holds the WHERE, Done-when, implementation detail, task list (8 rows, Waves A/B) and lessons applied. The builder, the merge and the close-out read it there.
 
+<a id="play-first-text-1"></a>
+
+#### PLAY-FIRST-TEXT-1 — Play on a page with no words starts reading at the first text *(Seq 86.75; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-236)*
+
+- **What:** pressing Play with the reading position in a section that has no words (a cover, an image plate, a blank separator) goes to the next section that has words and starts reading at its first word, in Flow, Focus and Narrate, each in its own runtime. With no later text, Play does nothing.
+- **Owner rulings (2026-10-30):** "Start at first text"; skip on Play only, while navigation lands where asked; a paused Focus or Narrate session resumes at the paused word; on a cover, the first text replaces a later held word.
+- **Brain1 rulings:** Q2 (a), the `pendingFirstText` flag: a Play pressed before the section map arrives starts exactly once when it does, with no timers. Q5 no cap; Q6 automatic starts skip too; Q7 a timeout leaves the mode not playing and logs a diagnostic; Q8 the port-level save proof is enough.
+- **Base:** stacked on `eb/band-align-2` after R7a and R8. Prerequisites BAND-ALIGN-2 and NARRATE-PAUSE-CANCEL-1. Host RodneySr (job 9), about 4 h.
+- **Full specification:** [docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md](docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md).
+
 #### OVERLAY-THEME-SWEEP-1 — Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### OVERLAY-THEME-SWEEP-1`). The builder, the merge and the close-out read it there.
