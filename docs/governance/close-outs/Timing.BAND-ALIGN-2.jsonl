@@ -35,3 +35,13 @@
 {"event": "end", "row": 19, "evidence": "run 1 crosses at 13 AURELIUS#189, 0 no-cursor samples, rise 45, band on 18/18, playing throughout; run 2 crosses at 13 MARCUS#188, 0 no-cursor; release crosses at 15 with 2 no-cursor; bad run never crosses with 18", "result": "done", "at": "2026-10-30T21:39:30Z"}
 {"event": "start", "row": 20, "model": "claude-opus-5-5", "host": "claude-code", "note": "x64 and arm64 packages, pair check, 25 s launch, memo, time log, push", "at": "2026-10-30T21:34:30Z"}
 {"event": "end", "row": 20, "evidence": "asar e4a5405d identical x64/arm64; pair check 0; dist 0 of 21 differ; 25 s x64 launch clean; memo recorded; pushed to eb/band-align-2; not merged", "result": "done", "at": "2026-10-30T21:41:21Z"}
+{"event": "start", "row": 21, "model": "claude-opus-5-5", "host": "claude-code", "note": "R8 red tests", "at": "2026-10-30T21:42:00Z"}
+{"event": "end", "row": 21, "evidence": "5d06e888; red exit 1, named rows by assertion, controls pass", "result": "done", "at": "2026-10-30T21:52:46Z"}
+{"event": "start", "row": 22, "model": "claude-opus-5-5", "host": "claude-code", "note": "R8 fix and C2b pins", "at": "2026-10-30T21:53:00Z"}
+{"event": "end", "row": 22, "evidence": "2801fdc2, d644255d; npm test 194 files 2598/1/0; typecheck 0; build 0", "result": "done", "at": "2026-10-30T22:10:03Z"}
+{"event": "start", "row": 23, "model": "claude-opus-5-5", "host": "claude-code", "note": "live L1-L8 and L8 capture runs", "at": "2026-10-30T22:10:30Z"}
+{"event": "end", "row": 23, "evidence": "L1-L7 pass; L8 27/30 x3, stale at #203/#219/#252; band arg dropped in the useModeBindings wrapper", "result": "done", "at": "2026-10-30T22:38:00Z"}
+{"event": "start", "row": 24, "model": "claude-opus-5-5", "host": "claude-code", "note": "amendment red and fix", "at": "2026-10-30T22:40:00Z"}
+{"event": "end", "row": 24, "evidence": "3a24629e red fails by assertion; 2e019ee4 fix; npm test 195 files 2599/1/0; typecheck 0; build 0", "result": "done", "at": "2026-10-30T22:44:00Z"}
+{"event": "start", "row": 25, "model": "claude-opus-5-5", "host": "claude-code", "note": "packages, rule 53, L8 x3, memo, push", "at": "2026-10-30T22:44:30Z"}
+{"event": "end", "row": 25, "evidence": "asar a45cdee5 x64=arm64; dist 0 of 21 differ; 25 s launch clean; L8fix 30/30 x3, 0 px, 18/18 reports via placeBandAtCursor; memo; pushed", "result": "done", "at": "2026-10-30T22:55:00Z"}

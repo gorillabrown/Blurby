@@ -299,3 +299,64 @@ R7's probe, copied unchanged (`r7-probe.mjs` SHA-256 `bbbffbb7…`), on R7's rou
 ### Gate (2) owner row (for Blurby.Roadmap to add)
 
 > On *Meditations* in Flow, play from the start of the text through the end of the first section: the reading carries on into the next section (AURELIUS…) without stopping, the cursor never disappears, and the band stays on.
+
+## R8 (2026-10-30) — paragraph band and the Band switch (owner ruling)
+
+**State:** built on `eb/band-align-2-r8-work`, then fast-forwarded to `eb/band-align-2`. Not merged; that waits for Blurby.Roadmap's go.
+
+### Rulings (Brain, 2026-10-30)
+
+- **B1:** the anchor geometry keeps `FLOW_ZONE_LINES_DEFAULT` as its line count. `flowZoneLines` is deprecated. Settings migration v13→v14 replaces it with `flowBandEnabled` (on unless false).
+- **Rule 50, ruling (a), C2b `d644255d`:** EINK-CONTROLS-1's schema-13 pins in `tests/settingsMigrationV13.test.js` and `tests/settingsNarrateNormalization.test.js` follow the v14 bump, under R8's name.
+- **L3 and L8 were accepted as probes.** L3's `coversBlock=false` was a probe artifact: a line straddling the host edge. L8's 28/30 led to the amendment below.
+- **Amendment (tier 1, inside the fence):** the pacer's band box must reach the view at every hop.
+
+### Red
+
+- **C1 `5d06e888`:** exit 1. Every named row fails by assertion. The controls z1, k1 and t4c pass.
+- **Amendment red `3a24629e`:** `tests/readerModes/bandAlign2Forward.test.tsx` f1 fails on `d644255d` by assertion (placeBandAtCursor called 0 times).
+
+### The change
+
+- **C2 `2801fdc2`:** each mode's helpers gain `computeParagraphBandEdges` and `collectParagraphAround`. Both views place the band over the cursor's paragraph. Flow's view API gains `placeBandAtCursor`. The bottom bar gets one Band switch (`aria-label="Band"`, `aria-pressed`). Settings move to schema 14.
+- **Amendment fix `2e019ee4`:**
+  - `FlowModeRuntime.startScrollEngine`'s callback type is widened to `(topFrac, band?: FlowBandEdges)`.
+  - `useModeBindings` now forwards `band`.
+  - Focus has no pacer callback (its band is placed from the highlight), so it had no such drop.
+
+### Root cause of the L8 stale band
+
+- FlowScrollEngine reported `onZoneTopChange(topFrac, band)`, but the `useModeBindings` wrapper `(topFrac) => …` dropped `band`. Every stable-window report therefore took the no-band fallback and painted 5 × line height (135 px) over the paragraph band.
+- The highlight only repainted the paragraph band on its next write, so the 1 s samples caught it at some line advances (#203, #219, #252, in all 3 capture runs) and missed it at others (#281 was repainted 0.21 s later).
+- The capture (CDP logpoints plus a host `style.setProperty` hook) named the writer.
+- Lesson candidate: a widened callback must be widened at every hop. A type that only lists the old arity makes TypeScript accept a wrapper that silently drops the new argument.
+
+### Gates (tip `2e019ee4`)
+
+- `npm test`: 195 files, 2,599 passed, 1 skipped, 0 failed.
+- `npm run typecheck`: 0.
+- `npm run build`: 0.
+- Collected addition: `bandAlign2Forward.test.tsx`. On `d644255d` it was 194 files, 2,598 passed.
+
+### Live L1–L8 (x64 package, scratch profiles)
+
+- **L1–L7 (on `d644255d`):** pass, with edges 0/0 throughout. L5 (Band off) has no band or mask. L6 relaunches and L7 (v13 seeds lines 0/7) migrate.
+- **L8 before the amendment:** 28/30 and 27/30. Stale samples at the line advances, as described above.
+- **L8 after the amendment (`2e019ee4`), runs L8fix-5/6/7:** 30/30 cursor in band and 30/30 edges in every run, max edge error 0 px. All 18 report writes per run went through `placeBandAtCursor`, and there was no fallback write.
+
+### Package verification (standing rule 53, Temporary placement), `2e019ee4`
+
+- `--dir` x64 and arm64 both exit 0. `app.asar` is `A45CDEE56D4A9E19E1F838943FA79CB1A43D55509E9B1C04E884F66F7372195A` on both, so they are equal.
+- `BLURBY_USER_DATA_DIR` is present.
+- The asar's `dist\` equals the worktree build: 21 files, 0 differences (list hash `442c8132…cf9e`).
+- 25 s x64 launch on a scratch profile: error.log none written, 0 flagged stdio lines, no crash dump, exit 0.
+- The live `library.json` and `settings.json` were unchanged across all launches.
+- The arm64 launch happens at merge time, on Rodney.
+
+### Gate (2) owner row (for Blurby.Roadmap to add)
+
+> In Flow and Focus, play a few paragraphs with the Band switch on: the band covers exactly the paragraph being read and moves with it, with no flicker to a short band at line changes. Turn Band off: no band and no dimming. Turn it back on: the band returns.
+
+### Hand-off (s7)
+
+GAP-PAUSE and R8 are independent of each other. Job 9 (PLAY-FIRST-TEXT-1) is next on this host.
