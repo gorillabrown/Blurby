@@ -172,3 +172,62 @@ In Focus and Flow: the band's edges sit between lines; the cursor line is the ba
   - The extracted `main.js`, `preload.js` and `main/` match `git archive df80e5dc` byte for byte, and `dist/` matches the build's.
   - `main` has since moved to `a87153be` with docs and governance commits only. Nothing under `build.files` changed, so the package is equivalent; `merge-tree` is clean.
   - Superseded outputs deleted on Brain's word: `eb-out-89862a91`, `bba582e5`, `cfc44269` and `eabd0c07`. `eb-out-df80e5dc` stays until the merge lands.
+
+## R7 (2026-10-30) — add space, band fixed. Superseded by the owner's paragraph-band ruling, 2026-10-30; the leading-space work carries forward
+
+- **Status:** R7 is superseded by the owner's paragraph-band ruling of 2026-10-30, relayed by Blurby.Brain1: the band covers the paragraph that holds the selected word; a page with no word has no band; the 3/5/7 line count and its control go away. Blurby.Roadmap is writing R8. The band extent was not changed here. Branch `eb/band-align-2-r7-work`, pushed with `HEAD:refs/heads/eb/band-align-2-r7-work`. Not merged.
+- **Owner's answers (Q1–Q5) and Brain's rulings (T1, T2):** as in `docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7.md`. Q1: the band is fixed at both ends. Q2: zero-word sections get no leading space. Q3: ≤ 6 px on the title row. Q4: Flow and Focus only. Q5: belongs to FOCUS-WORD-ONLY-1. T1: the pair check covers `dist/`, `main/`, `main.js`, `preload.js` and `package.json`, and both asar SHA-256 values are recorded. T2: `origin/main` is merged into the base first.
+- **M = `70e739ea`:** `origin/main` `80dbe938` merged into `85e32777`. Only `docs/governance/BUG_REPORT.md` conflicted. It was resolved as main's file whole, with BUG-188's Status line replaced by the branch's line. Main's replaced line reads "**Status:** OPEN — measured by READER-VISUAL-DIAG-1 (2026-10-23, …)". The re-applied line reads "**Status:** band height and band placement RESOLVED in source (BAND-ALIGN-1, BAND-ALIGN-2). …". The branch's hunks for BUG-217 (main had also changed it), BUG-211 and BUG-210 were dropped in favour of main's text. Records: `C:\Projects\fdl1-job\r7-replaced-main-line.txt`, `r7-reapplied-line.txt` and `r7-dropped-hunks.txt`.
+- **Red first (rule 43), C1 = `3aeca116`:** `tests/readerModes/bandAlign2R7.test.tsx`, plus the in-scope edits to the pinned r2/r3 in `tests/readerModes/bandAlign2.test.tsx` (BandHelpers gains `stepPx?`). On M: 26 failures, all by assertion, across a1–a4, b1, b2, w1–w5, r2 and r3 in both modes. The controls c1 and c2 pass (4 passed).
+- **Change, C2 = `a5273704`:**
+  - Each mode's own `helpers/foliateLayout.ts` gains `computeLeadingInsetPx` and `computeTrailingInsetPx` (the anchor's offset and its mirror). The two copies are still byte-identical, and neither imports the other.
+  - `computeBandEdges` gains `stepPx` and extends the band by the line step at a section's ends.
+  - Both `FoliateView.tsx` files: the inset getters read the zone line step. The leading inset is written only to documents with stamped words, and `0px` to the rest (Q2). `applyZoneProperties` writes the insets, and `applyZoneRef` runs after stamping and after section load.
+  - Flow's `helpers/FlowScrollEngine.ts` `reportBand` passes the zone step.
+  - `flow/useModeBindings.ts` effect 5 adds `settings.settings.flowZonePosition` and `settings.settings.flowZoneLines` to its deps. This is the W3 correction, using `settings.settings.*` after TS2339; Brain accepted it.
+  - (b2) was amended under Brain's ruling A. It gates on step 20, the heading centred on the anchor and the heading inside the band, and records the exact edge deltas −6.5 and +9.
+- **Gates on `a5273704`:** the Done-when 2 set passed 399/399. `npm test` exit 0: 191 files, 2,574 passed / 1 skipped / 0 failed. `npm run typecheck` 0, `npm run build` 0. The Done-when 5 import grep is clean.
+- **Probe:** `C:\Projects\Blurby-artifacts\band-align-2-r7\tools\r7-probe.mjs`. It adapts `cover-probe.mjs` (`bbdbf949`, `band-align-2-r6/`) and runs through the job-2 `run.mjs` launcher, which records the LL-165 scratch-profile proof and the live hashes. The changes from the original:
+  - `Session`/`enter` are replaced by direct CDP steps.
+  - The reads add the cursor section's line boxes, a uniform/boundary classification (equal gaps within 1 px over the band window plus one line either side), anchorY, the leading and trailing insets, `bodyTop` and the band-off class.
+  - New rows: L1, L1T (the title row against a mid-section reference), L2 (with `L2START=text`), L3 and L5.
+- **Live, packaged x64 build of `a5273704`.** Every run used a fresh scratch profile and passed its proof, and the live `library.json`/`settings.json` hashes were unchanged.
+  - **Deviation:** section 1's first stamped word is "The"#0 (Gutenberg front matter), not "MEDITATIONS". The title row is "MEDITATIONS"#135/#136. Section 1 has no evenly spaced window anywhere, with gaps of 20.8–199.4 px.
+  - **L1 — held, then superseded.** The title row exceeds 6 px at every anchor and Lines value. The cursor line's centre sits on the anchor within 0.4 px, and the cursor is inside the band in every sample. Each edge is exactly halfway into the gap past the n-th real line, so R1 works as written and the front matter's spacing stretches it. Δ is a band edge relative to the cursor line's centre, title row minus a uniform reference in INTRODUCTION (27 px pitch):
+
+    | Mode | Anchor / Lines | Title band (px) | Reference band (px) | Δtop | Δbottom |
+    |---|---|---|---|---|---|
+    | Focus | Top / 5 | 0–278.3 | 0–134.9 | +13.8 | +157.2 |
+    | Focus | Top third / 5 | 34.2–434.3 | 130.9–265.9 | −107.9 | +157.2 |
+    | Focus | Center / 5 | 139.2–539.3 | 229.9–364.9 | −107.9 | +157.2 |
+    | Focus | Top third / 3 | 82.0–310.7 | 157.9–238.9 | −87.1 | +60.6 |
+    | Focus | Top third / 7 | 0–560.6 | 103.9–292.9 | −115.1 | +256.5 |
+    | Flow | Top / 5 | 0–276.7 | 0–133.3 | +13.8 | +157.2 |
+    | Flow | Top third / 5 | 32.6–432.7 | 129.3–264.3 | −107.9 | +157.2 |
+    | Flow | Center / 5 | 137.6–537.7 | 228.3–363.3 | −107.9 | +157.2 |
+    | Flow | Top third / 3 | 80.4–309.1 | 156.3–237.3 | −87.1 | +60.6 |
+    | Flow | Top third / 7 | 0–559.0 | 102.3–291.3 | −113.5 | +256.5 |
+
+    Brain ruled (c), an owner question. The owner answered with the paragraph band (above). L1e and the 120 % rows were not run.
+  - **L3, cover — PASS** in Focus and Flow. `--flow-zone-*` is empty, the band-off class is present, mask `none`, 0 stamped words, and the cover's leading inset is `0px` (the base M has `95px`). The cover frame sits at 24 px, which equals the renderer's own `margin="24px"`, at scroll 0. The base is the same.
+  - **L4, Page — PASS.** In Page, section 1's leading and trailing insets are `0px`.
+  - **L2, Flow playing — not measurable as specified; pre-existing.** Play from the cover never leaves the cover in 60 s, on M and on the candidate alike. Started on section 1 (`L2START=text`, after R6's arrival):
+    - The cursor plays #136 → NOTES#185. Then, at the end of section 1, the band switches off, the cursor disappears, and play never enters section 2. Samples 13–30 have no cursor, on M and on the candidate alike.
+    - With a cursor: the candidate's centre is about −10 px from the anchor (M about −4), within half a step (10.8). The cursor is outside the band in 2 of 12 samples on the candidate (MARCUS#140, NOTES#185) and in 1 of 12 on M (NOTES#185).
+    - When Play starts, both builds put the cursor at 24 px (−169 px from the anchor) for one sample.
+  - **L5 — not measurable:** after the section-end stall there is no cursor while playing, on both builds. The candidate's leading inset changes 198 → 298 px on Top third → Center.
+  - **Recorded for Blurby.Roadmap via Brain:** in Focus, "Next chapter" does not leave section 1 (3 clicks, no move). A synthetic click on a word scrolled out of view past BOOKS moves the view to section 2 with no cursor and the band switched off. The candidate logs 540–730 ResizeObserver-loop lines per run because it does not carry `51759276`.
+
+### Package verification (standing rule 53, Temporary placement), `a5273704`
+
+- **(a) Packages:** `C:\Projects\Blurby-artifacts\band-align-2-r7\out-x64\win-unpacked` and `out-arm64\win-arm64-unpacked`, built from `a5273704` (which descends from M) with `--dir`. Log: `C:\Projects\fdl1-job\r7-pkg.log`.
+  - `app.asar` SHA-256: x64 `01d932638cbf3f149fe108880e18ca3c1a57db83d06bc4d6d2057bd82ca7f399`, arm64 `01d932638cbf3f149fe108880e18ca3c1a57db83d06bc4d6d2057bd82ca7f399` (identical).
+  - Pair check over `dist/`, `main/`, `main.js`, `preload.js` and `package.json`: **0**. Extracted to `asar-x64` and `asar-arm64`.
+- **(b)** `BLURBY_USER_DATA_DIR` appears at `main.js:27` and `:29`. **25 s x64 launch** on a fresh scratch profile (`live/rule53-x64-25s`): proof passed, alive at 25 s, no error log written, no flagged stdio lines, no crash dump.
+- **(c)** `asar list` shows `\dist\index.html`. Against the base M package (`out-base-x64`, asar `62bdbfef…`): `main/`, `main.js`, `preload.js` and `package.json` are identical, and 6 renderer chunks differ (App, epub, index, settings, tts, view).
+- **(d)** The live rows above ran on the x64 package.
+- **arm64 launch:** at merge time (R-2026-10-30-2).
+
+### Gate (2) owner row
+
+Withdrawn with R7: the paragraph-band ruling replaces the band-at-fixed-height wording. R8 will carry its own row.
