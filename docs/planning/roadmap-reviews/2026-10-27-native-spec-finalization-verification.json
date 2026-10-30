@@ -1,0 +1,1071 @@
+{
+  "item": "NATIVE-PATH-ATTESTATION-1",
+  "planningBaseline": "865c39a2d27ea6883f23b3c300aeafaa8e3606bb",
+  "authorSha256": "95f24cb019f33c5851a07e88d3532dc5263582ca0673ae55bbda7d764a28dd37",
+  "technicalDecisionSha256": "235491ce4948ddd52ae428cb610f1320c1b11e2dbbe3be69936893caafaecdd6",
+  "roadmapSha256": "96acc62b106c0e51cd780a71f851975242e79b4774174e2abec12883965a6b78",
+  "roadmapLines": 1994,
+  "otherSpecifications": "Unchanged except one GROUP prerequisite display annotation; raw prefix/suffix comparison passed",
+  "u9": {
+    "kind": "specification",
+    "passed": true,
+    "cited": [
+      "LL-143",
+      "LL-152",
+      "LL-157",
+      "LL-159",
+      "LL-160",
+      "LL-165",
+      "LL-169",
+      "LL-168",
+      "LL-170",
+      "LL-002",
+      "LL-063",
+      "LL-006",
+      "LL-097",
+      "LL-098",
+      "LL-066",
+      "LL-068",
+      "LL-090",
+      "LL-091",
+      "LL-092",
+      "LL-096",
+      "LL-107",
+      "LL-113",
+      "LL-137",
+      "LL-142",
+      "LL-155",
+      "LL-171"
+    ],
+    "findings": [
+      {
+        "code": "lessons-not-cited",
+        "severity": "info",
+        "message": "92 live lesson(s) not cited — confirm none applies: LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures), LL-018 (reader, flow mode, performance), LL-019 (renderer, pagination)…"
+      }
+    ],
+    "document": "ROADMAP.md",
+    "lessons": "docs/governance/LESSONS_LEARNED.md",
+    "prefix": "LL",
+    "notes": []
+  },
+  "u10": {
+    "ready": true,
+    "rows": [
+      {
+        "id": 1,
+        "title": "Literal observer/source/case/command contract",
+        "class": "frontier",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "cross-cutting",
+        "effort": "high",
+        "kind": "producer-identity",
+        "timebox": 90,
+        "onTimebox": "preserve checkpoint and stop",
+        "predicted": 90,
+        "basis": "timeboxed"
+      },
+      {
+        "id": 2,
+        "title": "Thirteen-file bundle and pure controls",
+        "class": "frontier",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "cross-cutting",
+        "effort": "high",
+        "kind": "positive-control",
+        "timebox": 120,
+        "onTimebox": "preserve checkpoint before process",
+        "predicted": 120,
+        "basis": "timeboxed"
+      },
+      {
+        "id": 3,
+        "title": "Independent static review and branch publication",
+        "class": "repeat",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "bounded",
+        "effort": "high",
+        "kind": "review",
+        "estimate": 3,
+        "writtenPredicted": 3,
+        "writtenBasis": "8-run kind median",
+        "predicted": 3,
+        "basis": "median of 8 runs"
+      },
+      {
+        "id": 4,
+        "title": "Full runtime preparation and review",
+        "class": "repeat",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "bounded",
+        "effort": "medium",
+        "kind": "setup",
+        "estimate": 1,
+        "writtenPredicted": 1,
+        "writtenBasis": "9-run kind median",
+        "predicted": 1,
+        "basis": "median of 9 runs"
+      },
+      {
+        "id": 5,
+        "title": "Two-population qualification and disposition",
+        "class": "repeat",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "cross-cutting",
+        "effort": "high",
+        "kind": "positive-control",
+        "estimate": 4,
+        "writtenPredicted": 4,
+        "writtenBasis": "20-run kind median",
+        "predicted": 4,
+        "basis": "median of 20 runs"
+      },
+      {
+        "id": 6,
+        "title": "Native observation and disposition",
+        "class": "repeat",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "bounded",
+        "effort": "high",
+        "kind": "live-check",
+        "estimate": 10,
+        "writtenPredicted": 10,
+        "writtenBasis": "4-run kind median",
+        "predicted": 10,
+        "basis": "median of 4 runs"
+      },
+      {
+        "id": 7,
+        "title": "Package-unchanged evidence and readiness handoff",
+        "class": "repeat",
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "tier": "bounded",
+        "effort": "medium",
+        "kind": "packaging-verify",
+        "estimate": 12,
+        "writtenPredicted": 12,
+        "writtenBasis": "4-run kind median",
+        "predicted": 12,
+        "basis": "median of 4 runs"
+      }
+    ],
+    "total": "chain 30m · sum 30m + 2 timeboxed ≤3h30m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  },
+  "liveLessonDispositions": [
+    {
+      "id": "LL-002",
+      "title": "PR #1 Is Massive — 102 Commits, 80 Files",
+      "appliesTo": "process, git hygiene",
+      "disposition": "applied",
+      "reason": "Narrow scoped branch publication under current Git policy"
+    },
+    {
+      "id": "LL-003",
+      "title": "main.js Is 93KB and Growing",
+      "appliesTo": "architecture, maintainability",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-004",
+      "title": "GitHub Repo is Private — No CI/CD",
+      "appliesTo": "infrastructure, quality",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-006",
+      "title": "Atomic JSON Writes Prevent Data Corruption",
+      "appliesTo": "data integrity, file I/O",
+      "disposition": "applied",
+      "reason": "Atomic owned manifest/report publication; append-only durable budget journal"
+    },
+    {
+      "id": "LL-007",
+      "title": "Content Security Policy in Electron",
+      "appliesTo": "security, Electron",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-008",
+      "title": "React Context vs Prop Drilling — When to Switch",
+      "appliesTo": "React architecture, renderer",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-014",
+      "title": "React Effects Cannot Drive Imperative DOM Animation",
+      "appliesTo": "rendering, animation, flow cursor",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-015",
+      "title": "Forced Reflow for CSS Transition Sequencing",
+      "appliesTo": "animation, CSS",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-016",
+      "title": "React State Batching Breaks Pause/Resume Flows",
+      "appliesTo": "renderer, React state, effects",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-017",
+      "title": "Closures in Imperative Controllers Capture Stale React State",
+      "appliesTo": "renderer, imperative code, closures",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-018",
+      "title": "Flow Mode Must Stay Paginated, Not Infinite-Scroll",
+      "appliesTo": "reader, flow mode, performance",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-019",
+      "title": "Pagination Estimation — Count the First Line",
+      "appliesTo": "renderer, pagination",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-020",
+      "title": "Paragraph Margin Is Not Equal to lineHeight",
+      "appliesTo": "renderer, pagination, CSS",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-021",
+      "title": "TTS Chunk Size Dramatically Affects Speech Quality",
+      "appliesTo": "TTS, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-022",
+      "title": "TTS and Flow Cursor Are Independent Systems That Conflict",
+      "appliesTo": "reader, TTS, flow cursor",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-023",
+      "title": "TTS Settings Were Disconnected From Narration Engine",
+      "appliesTo": "settings, TTS, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-024",
+      "title": "`-webkit-app-region: drag` on Body Inherits Into Grid Gaps",
+      "appliesTo": "CSS, Electron, window management",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-025",
+      "title": "DOM Elements Created by Imperative Code Get Orphaned by React",
+      "appliesTo": "renderer, imperative code, React reconciliation",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-026",
+      "title": "Never Put `-webkit-app-region: drag` on `body`",
+      "appliesTo": "CSS, Electron, window management",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-027",
+      "title": "Foliate EPUB DOM Is Not Your DOM — Use Overlays",
+      "appliesTo": "EPUB rendering, foliate-js, React integration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-028",
+      "title": "Word Tokenization Must Be Unified Across All Paths",
+      "appliesTo": "Text processing, EPUB word extraction, click handling",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-029",
+      "title": "Stale Ranges Are Silent Killers — Guard Every Access",
+      "appliesTo": "DOM, EPUB, Range API",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-030",
+      "title": "Engagement Gating Prevents Ghost Progress",
+      "appliesTo": "State management, progress tracking, EPUB",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-031",
+      "title": "Generation ID Pattern for Stale Async Results",
+      "appliesTo": "TTS, async IPC, state management",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-032",
+      "title": "Foliate Shadow DOM Blocks querySelectorAll",
+      "appliesTo": "DOM, foliate-js, Electron, shadow DOM",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-033",
+      "title": "adjustRate Before startCursorDriven, Never After",
+      "appliesTo": "TTS, Kokoro, async IPC, state management",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-034",
+      "title": "TTS Chunks Must Be One Sentence for Natural Pauses",
+      "appliesTo": "TTS, Kokoro, audio UX",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-063",
+      "title": "Never Develop in a Cloud-Synced Folder",
+      "appliesTo": "workflow, infrastructure, git, disaster recovery",
+      "disposition": "applied",
+      "reason": "Local owned worktree and explicit branch-only publication"
+    },
+    {
+      "id": "LL-065",
+      "title": "MOBI Files Contain Usable HTML — Don't Strip It",
+      "appliesTo": "format conversion, EPUB pipeline",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-066",
+      "title": "Silent `.catch(() => {})` Is a Systemic Anti-Pattern",
+      "appliesTo": "error handling, data integrity",
+      "disposition": "applied",
+      "reason": "Typed bounded failure receipts, no silent catch success"
+    },
+    {
+      "id": "LL-067",
+      "title": "Infinite Scroll Is Fundamentally Incompatible with Pagination",
+      "appliesTo": "architecture, reader, flow mode",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-068",
+      "title": "Agent File Reconstruction Causes Silent Truncation",
+      "appliesTo": "process, agent safety, file integrity",
+      "disposition": "applied",
+      "reason": "Full-file preservation, diff/stat and staged-blob verification"
+    },
+    {
+      "id": "LL-069",
+      "title": "Normalize `load-doc-content` Results at the Renderer Boundary",
+      "appliesTo": "renderer, IPC contracts, reader startup",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-070",
+      "title": "Single Ownership for Section Navigation During Narration",
+      "appliesTo": "renderer, foliate bridge, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-071",
+      "title": "EPUB Modes Must Use Global Word Source, Not DOM Viewport",
+      "appliesTo": "renderer, foliate bridge, narration, EPUB modes",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-072",
+      "title": "All User Selection Paths Must Preserve Exact Word Identity",
+      "appliesTo": "renderer, foliate bridge, selection mapping",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-073",
+      "title": "Resume Anchor Must Be Persistent, Not Time-Limited",
+      "appliesTo": "renderer, reader state, narration, progress tracking",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-074",
+      "title": "UI Controls Must Materially Affect the Engine Path They Claim to Control",
+      "appliesTo": "TTS settings, Kokoro narration, UI truthfulness",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-075",
+      "title": "A Silky Narration Cursor Requires Canonical Audio Progress, Not More Visual Easing",
+      "appliesTo": "renderer, narration, audio scheduling, cursor UX",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-076",
+      "title": "Rolling Planner Must Own All Chunk-Boundary Decisions",
+      "appliesTo": "TTS, narration, generationPipeline, narrationPlanner",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-077",
+      "title": "RAF Glide Loop Must Read From a Single Canonical Progress Source",
+      "appliesTo": "renderer, narration, audioScheduler, FoliatePageView, cursor UX",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-078",
+      "title": "A Visually Calm Narration Cursor Beats a Theoretically Precise One",
+      "appliesTo": "renderer, cursor UX, FoliatePageView, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-079",
+      "title": "Separate the Canonical Cursor Ref from Reducer State to Break Visual Contamination",
+      "appliesTo": "renderer, narration, useNarration, cursor ownership",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-080",
+      "title": "Global Keyboard Guard Must Check Input Target, Not Modal State",
+      "appliesTo": "renderer, keyboard, useKeyboardShortcuts, accessibility",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-081",
+      "title": "Full-Book Words and DOM-Slice Words Are Two Different Data Sources — Never Mix Indices",
+      "appliesTo": "renderer, narration, focus mode, FoliatePageView, ReaderContainer, data integrity",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-082",
+      "title": "Fallback Values Must Be Capped to Prevent Proportional Blowup",
+      "appliesTo": "renderer, narration, CSS, visual safety",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-083",
+      "title": "Soft Selection Uses Refs + Direct Shadow DOM Mutation, Not State",
+      "appliesTo": "renderer, page mode, word selection, FoliatePageView",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-084",
+      "title": "Electron fetch() Is Rejected by WAF-Protected Sites — Always Provide fetchWithBrowser Fallback",
+      "appliesTo": "main process, URL extraction, url-extractor.js, misc.js",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-085",
+      "title": "Derive Layout Values Per-Tick — Never Store Width in Animation Ref Structs",
+      "appliesTo": "renderer, FoliatePageView.tsx, narration overlay, animation loops",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-086",
+      "title": "In Foliate, Always Measure Geometry from `foundDoc` — Not `contents[0]`",
+      "appliesTo": "renderer, FoliatePageView.tsx, Foliate multi-document architecture",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-087",
+      "title": "Module-Scope Constants Must Be Declared Before Use — TDZ Is Silent in Test Environments",
+      "appliesTo": "renderer, constants.ts, test setup, TypeScript module scope",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-088",
+      "title": "Parallel Doer Agents Can Produce Duplicate Exports — Verify Unique Identifiers Before Dispatch",
+      "appliesTo": "renderer, constants.ts, multi-agent sprints, parallel task execution",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-089",
+      "title": "patch-package Fork Maintenance Pattern for Node Dependencies",
+      "appliesTo": "TTS, dependencies, fork maintenance",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-090",
+      "title": "Verify Bug Reports Against Current Codebase Before Filing",
+      "appliesTo": "bug triage, investigation gate, sprint planning",
+      "disposition": "applied",
+      "reason": "Exact current held ASAR source pins and actual declarations"
+    },
+    {
+      "id": "LL-091",
+      "title": "Pre-Split Sprints With 5+ Implementation Tasks Into Waves",
+      "appliesTo": "dispatch sizing, agent orchestration, tool budget",
+      "disposition": "applied",
+      "reason": "Named bounded execution/review/setup/qualification waves"
+    },
+    {
+      "id": "LL-128",
+      "title": "Sprint Specs Must Verify Target File Existence Before \"Create\" Tasks",
+      "appliesTo": "sprint planning, spec quality, investigation gate",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-093",
+      "title": "Effect Extraction Reduces useEffect Count but Not Total Line Count",
+      "appliesTo": "refactoring, sprint planning, success criteria",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-092",
+      "title": "Performance Remediation Patterns for Electron + React",
+      "appliesTo": "performance, startup, renderer, data layer, build",
+      "disposition": "applied",
+      "reason": "Bounded per-snapshot memo cleared before S1"
+    },
+    {
+      "id": "LL-094",
+      "title": "Component Decomposition Removes ~30–40% of Lines, Not 60%",
+      "appliesTo": "refactoring, sprint planning, success criteria",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-095",
+      "title": "Centralize URL Scheme Validation and Force Refresh on 401",
+      "appliesTo": "main process, security, auth, cloud sync, URL handling",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-096",
+      "title": "Evaluation Tracing Must Be Explicitly Opt-In and Sink-Driven",
+      "appliesTo": "renderer, narration, flow sync, tooling, observability",
+      "disposition": "applied",
+      "reason": "Opt-in external observation, no production hooks"
+    },
+    {
+      "id": "LL-097",
+      "title": "Evaluation Artifact Names Must Be Deterministic for Cross-Branch Diffs",
+      "appliesTo": "tooling, evaluation harness, release workflow",
+      "disposition": "applied",
+      "reason": "Deterministic named immutable receipts and interruption retention"
+    },
+    {
+      "id": "LL-098",
+      "title": "Quality Gates Must Fail Fast but Still Persist Review Artifacts",
+      "appliesTo": "tooling, release quality, evaluation governance",
+      "disposition": "applied",
+      "reason": "Persist failure evidence before nonzero exit"
+    },
+    {
+      "id": "LL-099",
+      "title": "Kokoro Readiness Must Come from an Authoritative Status Snapshot",
+      "appliesTo": "TTS, Kokoro, renderer truth, worker lifecycle",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-100",
+      "title": "Fallback Ownership Cleanup Must Key Off React-Visible Extraction State",
+      "appliesTo": "TTS, foliate fallback, React lifecycle, callback ownership",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-101",
+      "title": "Exact-Speed UX Can Sit Above Fixed Kokoro Generation Buckets",
+      "appliesTo": "TTS, Kokoro, audio scheduling, release verification",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-102",
+      "title": "Contiguous Styled Fragments Must Collapse to One Logical Word",
+      "appliesTo": "EPUB extraction, renderer, selection mapping, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-103",
+      "title": "Startup Cache Warmup Must Share the Live Opening-Ramp Contract",
+      "appliesTo": "TTS, cache warmup, startup latency, evaluation",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-104",
+      "title": "Flow-Surface Mode Guards Must Treat `narrate` and `flow` as the Same Foliate Load Surface",
+      "appliesTo": "reader modes, Foliate load lifecycle, compatibility boundaries",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-105",
+      "title": "Universal Mode Shortcuts Must Bypass Surface-Gated Keyboard Blocks",
+      "appliesTo": "reader modes, keyboard shortcuts, narrate",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-106",
+      "title": "Binary-Framed IPC Protocols Require a Three-Way Contract Between Main, Preload, and Types",
+      "appliesTo": "Platform/Main Process, IPC, preload bridge, TypeScript types",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-107",
+      "title": "Stdin Command Protocol Must Use Consistent Key Name Across Language Boundary",
+      "appliesTo": "Platform/Main Process, Python sidecar, IPC",
+      "disposition": "applied",
+      "reason": "Closed cross-language keys and real ACK controls inside existing budgets"
+    },
+    {
+      "id": "LL-108",
+      "title": "Canonical Reader Anchors Must Be Mode-Aware, Preserve Zero, and Keep Spoken Truth Separate From Visual Drift",
+      "appliesTo": "reader modes, progress persistence, Foliate shared surface, narration truth",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-109",
+      "title": "Streaming Strategy Must Guard async IIFE Against stop() Race",
+      "appliesTo": "TTS strategy, streaming, async IPC",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-110",
+      "title": "Stream-Finished Flush Wire Is Mandatory for Streaming TTS Strategies",
+      "appliesTo": "TTS strategy, streaming, IPC, narration pipeline",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-111",
+      "title": "Eval Runner Manifest Must Gate Streaming Scenarios from Non-Streaming Paths",
+      "appliesTo": "TTS eval runner, scenario manifest, streaming",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-113",
+      "title": "Test Discovery Must Ignore Scratch External Source Trees",
+      "appliesTo": "Tests, repository hygiene, external audits",
+      "disposition": "applied",
+      "reason": "External artifact fixtures excluded from project discovery"
+    },
+    {
+      "id": "LL-114",
+      "title": "Spoken Normalization Must Not Become Display Truth",
+      "appliesTo": "TTS, segment normalization, cache identity, highlight mapping",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-115",
+      "title": "Cache Identity Must Be Data, Not a Path",
+      "appliesTo": "TTS, disk cache, timing metadata, storage migration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-116",
+      "title": "Audit Packaging Must Include Complete Canonical Files",
+      "appliesTo": "governance, audit process, documentation",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-117",
+      "title": "Directory Reorgs Need a Forbidden-Scope Reference Decision Up Front",
+      "appliesTo": "governance, repository hygiene, verification",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-118",
+      "title": "Audit Packages Must Trace Imports Bottom-Up, Not Just Features Top-Down",
+      "appliesTo": "governance, audit process, TTS pipeline",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-119",
+      "title": "Non-Memoized Hook Return Objects Create Unstable Function Identities That Cause Render Loops",
+      "appliesTo": "React hooks, performance, narration",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-120",
+      "title": "Shared Foliate Surfaces Need Explicit Visual Ownership per Mode",
+      "appliesTo": "reader modes, shared surface, visual sync",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-121",
+      "title": "Compatibility Mode Aliases Are Hazardous in Runtime Hooks",
+      "appliesTo": "reader modes, hook contracts, regressions",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-122",
+      "title": "\"No Mid-Sentence Breaks\" Must Be Enforced in Chunk Planner, Not UI Settings",
+      "appliesTo": "prosody, chunk planning, narration pipeline",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-123",
+      "title": "Prosody Normalization Rules Must Respect Semantic Domains",
+      "appliesTo": "TTS normalization, text semantics, cache identity",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-124",
+      "title": "Audio/Visual Sync Calibration Must Use End-to-End Output Reality, Not API Partials",
+      "appliesTo": "narration timing, scheduler, audio output latency",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-125",
+      "title": "Narrate Must Stay Audio-Owned Even When Flow Shares Its Surface",
+      "appliesTo": "reader modes, narration ownership, Foliate surface",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-126",
+      "title": "Narrate Synthesis Continuity Must Use Produced-Content Truth, Not the Cursor Twin",
+      "appliesTo": "narration, audio scheduler, cursor sync",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-127",
+      "title": "No Instrumented Cursor Signal Sits On the Heard Word — `heardFloor` Is a Mislabeled Twin of `schedulerActiveWord`",
+      "appliesTo": "narration, cursor sync, diagnostics",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-129",
+      "title": "Bulk transforms of hand-written docs must census label variants before dispatch",
+      "appliesTo": "Any specification that parses or rewrites hand-written markdown governance documents (lessons, roadmap, close-outs).",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-131",
+      "title": "A dead-code census must match references, not identifiers",
+      "appliesTo": "Any deletion or rename specification whose failure handling stops on a reference census.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-132",
+      "title": "Child-process test fakes must emit exit asynchronously after kill()",
+      "appliesTo": "Tests of child-process adapters and engines (MOSS/Pocket sidecars and engines, TTS-ENGINE-SHARED-1, Kokoro worker wrappers).",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-133",
+      "title": "Epic completion steps that edit charter.md must be carved out of the kickoff's prohibition",
+      "appliesTo": "Every epic packet (charter, launch kickoff and completion protocol).",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-134",
+      "title": "Session budgets for unattended epics are overestimated",
+      "appliesTo": "Epic sizing, deadlines and session budgets in charters and roadmap reviews.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-137",
+      "title": "Read governance JSON and JSONL as explicit UTF-8 on Windows",
+      "appliesTo": "Scripts and checks that read the terminal ledger, manifests, register snapshots or close-outs on Windows.",
+      "disposition": "applied",
+      "reason": "Explicit UTF-8 manifests and verification reads"
+    },
+    {
+      "id": "LL-139",
+      "title": "Mode-separation specs must be cut from an import-graph census, not a file inventory",
+      "appliesTo": "Spec authoring for refactors that split or move runtime code, especially the reader modes.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-140",
+      "title": "Hear the baseline before automating parity for it",
+      "appliesTo": "Epics and refactors that preserve user-facing behaviour; owner gates; narration and other perceptual features.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-142",
+      "title": "A timing label is a declaration, not evidence; prove a producer by executing it against the installed artifact",
+      "appliesTo": "TTS engines and adapters, dependency patches, provenance labels, NARRATE-REBUILD-1 Phase 0 and its charter, audit package preparation.",
+      "disposition": "applied",
+      "reason": "Actual producer/path observations; static pins are not runtime authentication"
+    },
+    {
+      "id": "LL-143",
+      "title": "Dry-run every acceptance gate against the prescribed edit and the base; name the shell; pass only on an exact exit code",
+      "appliesTo": "Spec authoring, Done-when gates and reconciliation recipes, including the NARRATE-REBUILD-1 charter and its Phase 0 commands.",
+      "disposition": "applied",
+      "reason": "Exact shell exits and causal opposing controls"
+    },
+    {
+      "id": "LL-144",
+      "title": "Take a resume base from the first commit's trailer; never recompute it against the publication target",
+      "appliesTo": "Resume and reconciliation recipes for multi-commit items, and every NARRATE-REBUILD-1 phase that commits and publishes.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-145",
+      "title": "A coordinated audit closes only through a fresh, package-only review of the exact revisions; keep approved rulings verbatim",
+      "appliesTo": "3rd-party-audit cycles (D2–D5), remediation plans, and owner-decision records.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-150",
+      "title": "A Delete-list file can carry rules for retained features: census every deleted stylesheet's selectors",
+      "appliesTo": "Deletion and removal specs (NARRATE-REMOVE-1 and its siblings, CLEANUP-MODE-BARREL-1), any CSS consolidation, and spec-compliance review checklists.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-152",
+      "title": "When a live owner gate is blocked by environment slowness, A/B the same actions on the base build before attributing it",
+      "appliesTo": "Spec authoring for any item with a live smoke row, and the owner-gate steps in `/next-pointer` dispatch prompts.",
+      "disposition": "applied",
+      "reason": "Timeout is not automatically a product defect"
+    },
+    {
+      "id": "LL-154",
+      "title": "The Notion connector cannot build cross-relation formulas or formula view filters, and its view-mode query misreads formula-filtered views",
+      "appliesTo": "Specifications and verification steps that create or check Notion formulas, rollups or views through the connector (work-register views, phase layers, dashboards).",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-155",
+      "title": "Verify a Notion text rewrite against the SQL plain text; rows mode is not a faithful echo of the markdown written",
+      "appliesTo": "Specifications and runs that write text into the Notion work register through the connector (register repairs, ceremony writes of Spec Reference, Evidence and Notes), and their verification steps.",
+      "disposition": "applied",
+      "reason": "Parent plain-text full SQL readback"
+    },
+    {
+      "id": "LL-157",
+      "title": "Electron does not wait for an async quit listener",
+      "appliesTo": "Specifications and fixes that touch `will-quit`, `before-quit` or `window-all-closed`, or claim data is persisted at exit.",
+      "disposition": "applied",
+      "reason": "Forced cleanup does not qualify product quit or persistence"
+    },
+    {
+      "id": "LL-159",
+      "title": "A flush at exit must drain timer-armed writes, not only writes already in flight",
+      "appliesTo": "Quit and shutdown paths; sync and merge code that persists through debounced saves; any specification that claims data is on disk at exit (with LL-157); the LARGE-FOLDER-SYNC-1 batched-save work, which adds new deferred library writes that the quit list must cover.",
+      "disposition": "applied",
+      "reason": "No claim of full application flush from socket/handle cleanup"
+    },
+    {
+      "id": "LL-160",
+      "title": "Word segmentation depends on the runtime's ICU, so tooling that numbers words runs under the app's runtime",
+      "appliesTo": "Narrate, Focus and Flow tooling; saved-position tests; any harness that chooses a start word by index; Electron upgrades (re-measure the canonical book's word count, which DEPS-AUDIT-1's 41.10.7 kept at 80,493); WORD-INDEX-UNIFY-1.",
+      "disposition": "applied",
+      "reason": "Pin actual runtime/ICU; do not infer word-numbering qualification"
+    },
+    {
+      "id": "LL-161",
+      "title": "A correctness row about a word is checked by the word's text, not its index",
+      "appliesTo": "Narrate and reading-mode acceptance rows; resume and handoff checks; any trace checker keyed by word index.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-162",
+      "title": "Sweep the whole corpus offline before trusting sampled sessions, and validate every unit class the mapper accepts",
+      "appliesTo": "Narrate reconciliation and chunking; word extraction and segmentation; import parsers; any gate whose live runs start from a fixed position.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-163",
+      "title": "A registry alias that is renamed upstream becomes a hard refusal; map the canonical key to the populated column",
+      "appliesTo": "`Virtuoso/workspace-layout.json` field and status mappings; plugin upgrades; snapshot imports after a mapping change.",
+      "disposition": "excluded",
+      "reason": "Outside this observer fence: no corresponding reader/TTS/UI/parser/auth/persistent-product/build/CI/audit/refactor behavior is edited; no additional process or scope is admitted."
+    },
+    {
+      "id": "LL-165",
+      "title": "A driver must prove which profile the app opened before its first action",
+      "appliesTo": "UI sweeps, bisects and live checks on old or packaged builds; any CDP or computer-use driver; release smoke harnesses.",
+      "disposition": "applied",
+      "reason": "Actual initialized paths/PID before input, old attempts exhausted"
+    },
+    {
+      "id": "LL-168",
+      "title": "An NSIS install replaces an older Blurby's uninstall registration, so an install test exports both keys first",
+      "appliesTo": "install, uninstall and upgrade checks of a packaged build (standing rule 53 (d) for packaging items); release smoke runs; the release runbook's verify step.",
+      "disposition": "excluded",
+      "reason": "Install/uninstall is forbidden; no registry export/install process"
+    },
+    {
+      "id": "LL-169",
+      "title": "Operation currentness and retained-resource lifetime need separate guards",
+      "appliesTo": "Async reader/dependency lifecycles, same-resource intent changes, native-load continuation, callbacks and teardown.",
+      "disposition": "applied",
+      "reason": "Collection deadlines separate from mandatory retained-handle cleanup"
+    },
+    {
+      "id": "LL-170",
+      "title": "An unchanged canonical word array does not prove DOM source correspondence",
+      "appliesTo": "Reader block grouping, canonical word stamping, source alignment, provisional/hydrated selection and persistence, mode-local fallback word sources.",
+      "disposition": "excluded",
+      "reason": "Reader grouping/canonical alignment is separate; no grouping source edit"
+    },
+    {
+      "id": "LL-171",
+      "title": "Preserve sequence values and numeric types across every provider boundary",
+      "appliesTo": "Work-register sequence normalization, provider adapters, planned external mutations, snapshot import, canonical ordering and helper activation.",
+      "disposition": "applied",
+      "reason": "Qualified helper guards and exact fractional sequence preservation"
+    }
+  ],
+  "runtimeQualification": "NOT RUN",
+  "implementation": "NOT STARTED",
+  "terminalLedgerSha256": "f80cbaa4980cecf023d9f2d37bd153b75bd73c60d86ba132e5f3a8875929ce1c",
+  "operationalToolsExist": false,
+  "operationalRuntimeRootExists": false,
+  "externalMutation": {
+    "confirmed": true,
+    "recoveryId": "20261028T003337Z-external-set-status-NATIVE-PATH-ATTESTATION-1",
+    "actualRevision": "6a5113430ca34ec55bf84679e6ab7b5141109c6cd3c1b33d2eced397b64c94d2",
+    "readbackAt": "2026-10-28T00:35:15Z",
+    "rows": 196,
+    "changedFields": [
+      "NATIVE Notes",
+      "NATIVE Evidence",
+      "NATIVE Spec State"
+    ],
+    "status": "Queued",
+    "sequence": 67.5,
+    "specState": "Full Spec",
+    "other195RowsUnchanged": true,
+    "outstandingRecoveries": [],
+    "rawSqlDiff": [
+      {
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "field": "Notes",
+        "before": "Owner approved Phase C2026-10-27 and explicitly directed qualified registry-helper repair followed by registration at67.5. Authored NOT READY observer contract; exact executable/control/request-bound/runtime/native qualification gates remain. Registration activates no setup, fixture, measurement, native process or consumer implementation. Original exhausted two-run collector budget and existing release holds remain unchanged.",
+        "after": "Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted."
+      },
+      {
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "field": "Evidence",
+        "before": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md",
+        "after": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md; docs/planning/roadmap-reviews/2026-10-27-native-final-technical-contract.md; docs/planning/roadmap-reviews/2026-10-27-native-final-spec-review.md; docs/planning/roadmap-reviews/2026-10-27-native-spec-finalization.md"
+      },
+      {
+        "item": "NATIVE-PATH-ATTESTATION-1",
+        "field": "Spec State",
+        "before": "Stub",
+        "after": "Full Spec"
+      }
+    ],
+    "prewriteRawRowsSha256": "b9926ed38ea5423fafa62e9ea263da4834d8dc2b96a31c27f8a36287a1f70f44",
+    "afterRawRowsSha256": "d86b8b8c8e7cadfd95ef5d85ce6b300a801feddf7888f18030db3c7161ce556d",
+    "queuedFullSpecCount": 10
+  },
+  "finalIndependentReviewSha256": "763080fd7596bb939a80368221fd4e17c3e8e49c4144d6847e7801f0a538424c",
+  "board": {
+    "generatedAt": "2026-10-28T00:36:39Z",
+    "preflight": "current",
+    "rowId": "NATIVE-PATH-ATTESTATION-1",
+    "sequence": 67.5,
+    "status": "queued",
+    "written_status": "full-spec"
+  },
+  "gitLockPreservation": {
+    "authority": "Blurby.Brain conditional preservation ruling 2026-10-27",
+    "source": "C:\\Projects\\Blurby\\.git\\index.lock",
+    "destination": "C:\\Projects\\Blurby-artifacts\\native-spec-finalization-20261027\\registry\\stale-index-lock\\496e17a3-539d-407a-aac6-5f09fe1774b2\\index.lock",
+    "firstAtUtc": "2026-10-28T00:42:30.9198325Z",
+    "secondAtUtc": "2026-10-28T00:42:36.2190137Z",
+    "first": {
+      "path": "C:\\Projects\\Blurby\\.git\\index.lock",
+      "bytes": 0,
+      "createdUtc": "2026-10-27T23:42:50.1974982Z",
+      "mtimeUtc": "2026-10-27T23:53:14.9739107Z",
+      "attributes": "Archive",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "indexSha256": "3AC8F0E1075A72CB9665689F2B77B60ECA3603CEFF5786AF25E72C62E648C427",
+      "head": "865c39a2d27ea6883f23b3c300aeafaa8e3606bb",
+      "branch": "main",
+      "staged": []
+    },
+    "second": {
+      "path": "C:\\Projects\\Blurby\\.git\\index.lock",
+      "bytes": 0,
+      "createdUtc": "2026-10-27T23:42:50.1974982Z",
+      "mtimeUtc": "2026-10-27T23:53:14.9739107Z",
+      "attributes": "Archive",
+      "sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+      "indexSha256": "3AC8F0E1075A72CB9665689F2B77B60ECA3603CEFF5786AF25E72C62E648C427",
+      "head": "865c39a2d27ea6883f23b3c300aeafaa8e3606bb",
+      "branch": "main",
+      "staged": []
+    },
+    "firstOwners": [],
+    "secondOwners": [],
+    "outcome": "ONE preservation relocation verified; index/HEAD/staged set unchanged; no deletion or process termination",
+    "auditAfterSha256": "13d09df7e92f0a92635897df6b3703304cc0feaac981c6efb4f58fa047bb309f"
+  }
+}

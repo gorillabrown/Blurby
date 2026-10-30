@@ -1,0 +1,25 @@
+{
+  "id": "20261026T190439Z-external-set-status-FOLDER-NOTICE-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-NOTICE-1",
+  "created": "2026-10-26T19:04:39Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only. Smoke 2026-10-26: single failed/successful retries work; F16 / FOLDER-RETRY-FEEDBACK-1 adds missing visible checking/failure feedback. R13 / LIBRARY-UI-TEXT-SIZE-1 increases readability. Functional PASS is not UX acceptance."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "smoke20261026-FOLDER-NOTICE-1"
+  },
+  "resolved": "2026-10-26T19:05:51Z",
+  "outcome": "abandoned",
+  "reason": "Superseded before execution by a plan pinned to the fresh provider snapshot revision."
+}

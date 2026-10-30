@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204123Z-external-set-status-TOC-JUMP-SAVE-1",
+  "operation": "external-set-status",
+  "item_id": "TOC-JUMP-SAVE-1",
+  "created": "2026-10-26T20:41:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/toc-jump-save-1 at db03f2f5d7c22419e76405ead34e1c414102f25d; ancestor of planning baseline=False; ROADMAP heading: TOC-JUMP-SAVE-1 — A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from PAGE-SAVE-RESTAMP-2's live check (Blurby.Brain ruling: pre-existing, stub). Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/toc-jump-save-1 from main), built during the Stage 8 freeze and merged after it lifts.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/toc-jump-save-1 at db03f2f5d7c22419e76405ead34e1c414102f25d; ancestor of planning baseline=False; ROADMAP heading: TOC-JUMP-SAVE-1 — A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "dc3516455bb83a863d940648b3e31be61aca7be443e61ea2653fb0a171547597",
+    "idempotencyKey": "parallelgov20261026-TOC-JUMP-SAVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "TOC-JUMP-SAVE-1",
+      "idempotencyKey": "parallelgov20261026-TOC-JUMP-SAVE-1",
+      "actualRevision": "0be15a151943572ee36451809ecc9333bf75b141ef0666d149e2e5a54680b2e6",
+      "recoveryId": "20261026T204123Z-external-set-status-TOC-JUMP-SAVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:54Z",
+  "outcome": "succeeded"
+}

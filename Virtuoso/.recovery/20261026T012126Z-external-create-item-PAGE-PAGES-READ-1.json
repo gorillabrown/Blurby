@@ -1,0 +1,52 @@
+{
+  "id": "20261026T012126Z-external-create-item-PAGE-PAGES-READ-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-PAGES-READ-1",
+  "created": "2026-10-26T01:21:26Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Page turns count toward the pages-read goal",
+      "status": "Queued",
+      "sequence": 113,
+      "written_status": "Full Spec",
+      "effort": "S",
+      "prerequisites": [
+        "KEEP-FURTHEST-FIX-1"
+      ],
+      "group": "Reader Polish",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#page-pages-read-1",
+      "branch": "eb/page-pages-read-1",
+      "description": "Page-mode forward turns add their words to the reading goal's pages count, with carry between turns; the furthest mark owns the count.",
+      "notes": "origin: roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C. Full Spec (U9 pass). Shared-core touch: ReaderContainer.tsx, own integration window after the Stage 8 merge train. Not a release gate.",
+      "id": "PAGE-PAGES-READ-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T01:09:26Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-PAGES-READ-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-PAGES-READ-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-PAGES-READ-1",
+      "actualRevision": "",
+      "recoveryId": "20261026T012126Z-external-create-item-PAGE-PAGES-READ-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-817f-bee8-f0612d51cb27",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T01:22:16Z",
+  "outcome": "succeeded"
+}

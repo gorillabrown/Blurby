@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190410Z-external-create-item-PAGE-ENTRY-KEYS-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-ENTRY-KEYS-1",
+  "created": "2026-10-26T19:04:10Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Page navigation keys work when the book first opens",
+      "status": "Queued",
+      "sequence": 119,
+      "written_status": "Stub",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#page-entry-keys-1",
+      "description": "Initial PageDown did nothing until mouse Next was used; Left/Right and PageDown then worked. Readiness/focus cause is unverified and differs from paragraph-key BUG-220.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F3. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Reproduce initial keyboard use without mouse navigation; PageDown and arrows advance when ready, with no dropped or double page turns and correct saved progress.",
+      "id": "PAGE-ENTRY-KEYS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-PAGE-ENTRY-KEYS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-ENTRY-KEYS-1",
+      "idempotencyKey": "smoke20261026-PAGE-ENTRY-KEYS-1",
+      "actualRevision": "6adbbc7efe0dfb2f31cd72cab5868e2f2741931fae5eab6a54ae571093153c3d",
+      "recoveryId": "20261026T190410Z-external-create-item-PAGE-ENTRY-KEYS-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81f2-8aed-eeebd17e1826",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:32Z",
+  "outcome": "succeeded"
+}

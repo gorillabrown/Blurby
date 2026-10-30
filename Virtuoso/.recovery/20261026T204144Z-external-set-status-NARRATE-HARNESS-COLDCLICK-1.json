@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204144Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-HARNESS-COLDCLICK-1",
+  "created": "2026-10-26T20:41:44Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "built/held source atc90d9e08; reference smoke incomplete/stopped and measurement acceptance outstanding. Evidence: branch eb/narrate-harness-coldclick-1 at c90d9e08acfc356ca76941df063a0941ab488a94; ancestor of planning baseline=False; ROADMAP heading: NARRATE-HARNESS-COLDCLICK-1 — Cold click is measured on mainstream hardware *(built and held `c90d9e08` on `eb/narrate-harness-coldclick-1`; its reference smoke ran short and was stopped and reported (see the branch's staging memo); Seq 94, In Flight, merge held for the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "f39466d2f177aebb9bbf4a0b3b662a62db10efccc30403a89d8207ead6711710",
+    "idempotencyKey": "parallelgov20261026-NARRATE-HARNESS-COLDCLICK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+      "idempotencyKey": "parallelgov20261026-NARRATE-HARNESS-COLDCLICK-1",
+      "actualRevision": "147e5d6878f0a738782b5a825b30258340c0ef63f0e44e1a2029a4458dd039d8",
+      "recoveryId": "20261026T204144Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:14Z",
+  "outcome": "succeeded"
+}

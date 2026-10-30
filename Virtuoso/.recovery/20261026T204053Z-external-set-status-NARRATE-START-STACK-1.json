@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204053Z-external-set-status-NARRATE-START-STACK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-START-STACK-1",
+  "created": "2026-10-26T20:40:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/narrate-start-stack-1 at 0acf256869a3977bffba7f673299dc87ea739b98; ancestor of planning baseline=True; ROADMAP heading: NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/narrate-start-stack-1 at 0acf256869a3977bffba7f673299dc87ea739b98; ancestor of planning baseline=True; ROADMAP heading: NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "d01394532b222dad8532a502eace354d98ff60ac1d094d145956ef497f0faf4e",
+    "idempotencyKey": "parallelgov20261026-NARRATE-START-STACK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-START-STACK-1",
+      "idempotencyKey": "parallelgov20261026-NARRATE-START-STACK-1",
+      "actualRevision": "7b2c892fc042e74aaface728ff230080efd50e4c7e122f8499eb299c20e31a31",
+      "recoveryId": "20261026T204053Z-external-set-status-NARRATE-START-STACK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:28Z",
+  "outcome": "succeeded"
+}

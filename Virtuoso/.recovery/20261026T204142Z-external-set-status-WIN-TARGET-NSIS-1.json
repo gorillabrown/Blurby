@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204142Z-external-set-status-WIN-TARGET-NSIS-1",
+  "operation": "external-set-status",
+  "item_id": "WIN-TARGET-NSIS-1",
+  "created": "2026-10-26T20:41:42Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/win-target-nsis-1 at d96435a182f2f54de19d5d30b9e5caf4ebf493af; ancestor of planning baseline=False; ROADMAP heading: WIN-TARGET-NSIS-1 — `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "9b2e972ae8ea9bb05e426ae33822b904dde8cf35bdcb899e6823f8cf73cad05b",
+    "idempotencyKey": "parallelgov20261026-WIN-TARGET-NSIS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WIN-TARGET-NSIS-1",
+      "idempotencyKey": "parallelgov20261026-WIN-TARGET-NSIS-1",
+      "actualRevision": "2301e5a567196cd570df7a825d15a5207e97ba0d859fc3cc5f9b65b50c84a17d",
+      "recoveryId": "20261026T204142Z-external-set-status-WIN-TARGET-NSIS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:12Z",
+  "outcome": "succeeded"
+}

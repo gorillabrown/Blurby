@@ -1,0 +1,7 @@
+# Brain bounded identity RPC refinement — 2026-10-27
+
+PLANNING ONLY. Two exact pure identity bodies and one exact Electron API body require static review and explicit admission. No general callFunctionOn permission.
+
+Small explicit B3 refinement before freezing the successor: do not implement duplicate-child identity rejection as thousands of RPCs. At the allowed128-slot cap there are8128 child pairs per array; that is a static request-count issue, not a measured runtime claim. Add this SECOND narrowly fixed pure identity body to the proposed whitelist, only for an already-bounded children tuple:
+function(){"use strict";for(let i=0;i<arguments.length;i++){for(let j=0;j<i;j++){if(arguments[i]===arguments[j])return false;}}return true;}
+Supply at most128 actual child object handles as arguments, a selected verified Module receiver (body never reads it), returnByValue:true/awaitPromise:false/generatePreview:false; accept only an actual boolean true. It reads no remote properties, calls no app/builtin method and serializes no objects. False/exception/shape failure rejects. Retain the one-argument strict reference comparator for declared S0/S1 identity pairs. Freeze/review these TWO exact pure bodies plus the ONE exact Electron API read-pair body; no arbitrary callFunctionOn or dynamically generated code. This is an explicit proposed contract amendment, still no execution admission.

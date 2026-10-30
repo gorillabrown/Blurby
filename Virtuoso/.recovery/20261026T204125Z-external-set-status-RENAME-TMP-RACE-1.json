@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204125Z-external-set-status-RENAME-TMP-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "RENAME-TMP-RACE-1",
+  "created": "2026-10-26T20:41:25Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/rename-tmp-race-1 at b37d199b03409d34e48fc7da160fb88686a15313; ancestor of planning baseline=False; ROADMAP heading: RENAME-TMP-RACE-1 — The sync-state and token saves use the serialized JSON writer *(built `b37d199b` on `eb/rename-tmp-race-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "afb201777bea3edadf8b2c54825bffaf4511a9b4ec3fca75eec42ae721e15616",
+    "idempotencyKey": "parallelgov20261026-RENAME-TMP-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RENAME-TMP-RACE-1",
+      "idempotencyKey": "parallelgov20261026-RENAME-TMP-RACE-1",
+      "actualRevision": "b8e290a4758c1fa1d414e6c0ebcb49603ee8a8410f57af022ed57ed8d5ec5cee",
+      "recoveryId": "20261026T204125Z-external-set-status-RENAME-TMP-RACE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:56Z",
+  "outcome": "succeeded"
+}

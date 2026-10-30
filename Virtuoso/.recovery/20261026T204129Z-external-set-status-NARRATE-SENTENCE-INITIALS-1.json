@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204129Z-external-set-status-NARRATE-SENTENCE-INITIALS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-SENTENCE-INITIALS-1",
+  "created": "2026-10-26T20:41:29Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-sentence-initials-1 at c93f7c09186187b98ac6af83a7abce782e555517; ancestor of planning baseline=False; ROADMAP heading: NARRATE-SENTENCE-INITIALS-1 — A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from NARRATE-SENTENCE-RESUME-1's live check. Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/narrate-sentence-initials-1 at c93f7c09186187b98ac6af83a7abce782e555517; ancestor of planning baseline=False; ROADMAP heading: NARRATE-SENTENCE-INITIALS-1 — A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "695fa1af50da20be42482757f26bfb412d4bd07a1cd6bea61fb1c5a00f6bd79c",
+    "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-INITIALS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-SENTENCE-INITIALS-1",
+      "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-INITIALS-1",
+      "actualRevision": "6af2915e530d98b32d41b9fec6f8c88037624cd636eb48c2368ba15b895e8ec3",
+      "recoveryId": "20261026T204129Z-external-set-status-NARRATE-SENTENCE-INITIALS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:00Z",
+  "outcome": "succeeded"
+}

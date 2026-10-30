@@ -1,0 +1,35 @@
+{
+  "id": "20261026T014638Z-external-set-status-WIN-TARGET-NSIS-1",
+  "operation": "external-set-status",
+  "item_id": "WIN-TARGET-NSIS-1",
+  "created": "2026-10-26T01:46:38Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release. Package verified in full under rule 53 by Blurby.Brain 2026-10-25, tip d96435a1: (a)-(c) arm64; (d) x64 quiet machine (installer asar = --dir = installed, sha256 B8FE8246...; silent install and uninstall clean; live hashes unchanged). LL-168 filed. Built and held.",
+      "evidence": "Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:WIN-TARGET-NSIS-1:[('evidence', 'Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release. Package verified in full under rule 53 by Blurby.Brain 2026-10-25, tip d96435a1: (a)-(c) arm64; (d) x64 quiet machine (installer asar = --dir = installed, sha256 B8FE8246...; silent install and uninstall clean; live hashes unchanged). LL-168 filed. Built and held.\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WIN-TARGET-NSIS-1",
+      "idempotencyKey": "set-status:WIN-TARGET-NSIS-1:[('evidence', 'Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release. Package verified in full under rule 53 by Blurby.Brain 2026-10-25, tip d96435a1: (a)-(c) arm64; (d) x64 quiet machine (installer asar = --dir = installed, sha256 B8FE8246...; silent install and uninstall clean; live hashes unchanged). LL-168 filed. Built and held.\")]",
+      "actualRevision": "",
+      "recoveryId": "20261026T014638Z-external-set-status-WIN-TARGET-NSIS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T01:47:12Z",
+  "outcome": "succeeded"
+}

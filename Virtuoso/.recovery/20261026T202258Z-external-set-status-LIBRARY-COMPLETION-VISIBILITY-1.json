@@ -1,0 +1,35 @@
+{
+  "id": "20261026T202258Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-COMPLETION-VISIBILITY-1",
+  "created": "2026-10-26T20:22:58Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.",
+      "deliverable": "Full specification in ROADMAP.md; implementation integration/ownership window cleared by owner 2026-10-26. Visibility first, APP-TABS-1 integration later. Package verification, designated confirmation, code-merge and release gates remain. See the admission decision."
+    },
+    "expectedRevision": "c0ef2feb24e2dae860965599397f90903e353c1ce1f4eb03cf57397154f46694",
+    "idempotencyKey": "visibilityadmission20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "idempotencyKey": "visibilityadmission20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+      "actualRevision": "8a4e2e10415dc86991caa22a7130c49cde4096a1361c0e6a5f54c9a37d9a31f3",
+      "recoveryId": "20261026T202258Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:23:39Z",
+  "outcome": "succeeded"
+}

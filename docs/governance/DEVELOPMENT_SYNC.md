@@ -23,6 +23,10 @@ C:\Projects\Blurby                    C:\Projects\Blurby
 
 ---
 
+## Policy and ceremony exceptions (2026-10-26)
+
+Read-only ceremonies inspect status/upstream with zero writes; they do not pull, stage, commit or push merely to start. Resolve policy.git before any mutation. If the worktree is dirty, preserve unrelated paths and use a dedicated branch/worktree; do not stash, reset or clean as a convenience. Stage exact approved paths only. During the Stage8 freeze, implementation may build-and-hold in its admitted source window; code merges require the designated package confirmation and merge go. Documentation-only work follows its own explicit approval: this governance sweep is commit-only, with no merge/push. Branch deletion/pruning is separate maintenance.
+
 ## The Two Rules
 
 ### Rule 1: Push after every sprint
@@ -45,13 +49,7 @@ Before starting any work on either machine, pull first:
 git pull origin main
 ```
 
-If there are local changes that conflict, stash first:
-
-```
-git stash
-git pull origin main
-git stash pop
-```
+If local changes conflict, stop integration and preserve them. Inspect with git status and git diff; use an isolated checkout for the admitted work. No automatic stash/reset/clean is authorized.
 
 This is a **mandatory step in session bootstrap** (Step 0, before reading CLAUDE.md).
 
@@ -144,7 +142,7 @@ Step 3: Verify push succeeded (check GitHub or git log --oneline origin/main)
 
 ```
 On Machine A:
-  git add -A && git commit -m "wip: switching machines"
+  # Stage only the exact approved paths, then commit on the work branch
   git push origin main
 
 On Machine B:
@@ -161,9 +159,9 @@ The MarcusAurelius pass already handles most of this. The addition is the **mand
 ```
 1. ✅ Tests pass (npm test)
 2. ✅ Branch merged to main (--no-ff)
-3. ✅ Branch deleted
+3. ✅ Branch retained; deletion/pruning is separate maintenance
 4. ✅ ROADMAP.md updated
-5. ✅ `docs/governance/sprint-queue.xlsx` Catalog/Dashboard updated
+5. ✅ Live Notion work register updated by its authorized ceremony and read back; XLSX is historical evidence
 6. ✅ CLAUDE.md updated
 7. ✅ LESSONS_LEARNED.md updated (if applicable)
 8. ✅ git push origin main        ← NEW: MANDATORY
@@ -194,14 +192,7 @@ git pull origin main
 
 ### Merge conflict on pull
 
-```
-git stash
-git pull origin main
-git stash pop
-# Resolve conflicts manually
-git add -A && git commit -m "merge: resolve conflict after pull"
-git push origin main
-```
+Stop and preserve the conflict/worktree. Record exact paths and route integration to the repository operator. Do not automatically stash, reset, clean or stage every path. Resolve only the approved scope, verify the cached set and follow the current merge/release permission.
 
 ### Git repository is corrupted
 

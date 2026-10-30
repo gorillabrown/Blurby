@@ -1,0 +1,53 @@
+{
+  "id": "20261026T195129Z-external-create-item-NARRATE-PAUSED-CLICK-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-PAUSED-CLICK-1",
+  "created": "2026-10-26T19:51:29Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-PAUSED-CLICK-1",
+      "title": "Narrate resumes from the word explicitly selected while paused",
+      "status": "Queued",
+      "sequence": 117,
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "TTS / Narration Engine",
+      "group": "Narration UX",
+      "branch": "eb/narrate-paused-click-1",
+      "spec_link": "ROADMAP.md#narrate-paused-click-1",
+      "prerequisites": [
+        "NARRATE-SENTENCE-RESUME-1"
+      ],
+      "description": "After a paused explicit word click, Play, Space and direct resume start at that exact word, including word0; preserve ordinary sentence-resume behavior. This fixes only F9; the parent NARRATE-SELECTION-START-1 retains F7/F8 band/viewport diagnosis.",
+      "notes": "Roadmap-review 2026-10-26, approved PhaseC split of SMOKE-F9 from NARRATE-SELECTION-START-1. Proposed priorityP1. Full Spec; no code dispatch or release exception. Evidence: docs/planning/roadmap-reviews/2026-10-26-narrate-selection-evidence.json.",
+      "deliverable": "After a paused explicit selection, actual engine request and first heard/timed word match the click, including word0. Ordinary sentence-resume policy is unchanged; F7/F8 remain separate. Full tests/fence/gates are in ROADMAP.md."
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:51:28Z",
+    "idempotencyKey": "review20261026-create-NARRATE-PAUSED-CLICK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-PAUSED-CLICK-1",
+      "idempotencyKey": "review20261026-create-NARRATE-PAUSED-CLICK-1",
+      "actualRevision": "d086cf80a71f2bff97b9f723da89ee6a89185b18e11e814622c022c5eb8b0e58",
+      "recoveryId": "20261026T195129Z-external-create-item-NARRATE-PAUSED-CLICK-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8199-9ade-e42f6ec5efd1",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T20:03:25Z",
+  "outcome": "succeeded"
+}

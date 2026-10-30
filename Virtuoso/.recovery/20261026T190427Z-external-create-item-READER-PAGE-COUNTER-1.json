@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190427Z-external-create-item-READER-PAGE-COUNTER-1",
+  "operation": "external-create-item",
+  "item_id": "READER-PAGE-COUNTER-1",
+  "created": "2026-10-26T19:04:27Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Display the reading page near the remaining time",
+      "status": "Queued",
+      "sequence": 134,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#reader-page-counter-1",
+      "description": "Add a page display near reading time. This is distinct from PAGE-PAGES-READ-1's goal counter.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P3. Sources R1. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Specify pagination semantics for reflowable books, PDFs and each mode; display the current page and an honest total where computable, with coherent resize/font-change behavior.",
+      "id": "READER-PAGE-COUNTER-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-READER-PAGE-COUNTER-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "READER-PAGE-COUNTER-1",
+      "idempotencyKey": "smoke20261026-READER-PAGE-COUNTER-1",
+      "actualRevision": "b23ecadc076160e7433d5f1c8e2bf6387e6a08cc34b80f3d4f77562fb6573038",
+      "recoveryId": "20261026T190427Z-external-create-item-READER-PAGE-COUNTER-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81b1-9b53-f0baa8dd5434",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:50Z",
+  "outcome": "succeeded"
+}

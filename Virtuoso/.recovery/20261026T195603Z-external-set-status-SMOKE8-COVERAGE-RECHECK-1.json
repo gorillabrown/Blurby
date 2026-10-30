@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195603Z-external-set-status-SMOKE8-COVERAGE-RECHECK-1",
+  "operation": "external-set-status",
+  "item_id": "SMOKE8-COVERAGE-RECHECK-1",
+  "created": "2026-10-26T19:56:03Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 139
+    },
+    "expectedRevision": "155ad20a9da10777fdfc924de7c2fdace07dec8d5cf84fe450c6806d05de2921",
+    "idempotencyKey": "review20261026-integer-seq-SMOKE8-COVERAGE-RECHECK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "SMOKE8-COVERAGE-RECHECK-1",
+      "idempotencyKey": "review20261026-integer-seq-SMOKE8-COVERAGE-RECHECK-1",
+      "actualRevision": "1488670cb7ad771a1484ae09337a5e2fe619f866e1f3f417154a6d4b3077cbb6",
+      "recoveryId": "20261026T195603Z-external-set-status-SMOKE8-COVERAGE-RECHECK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:24Z",
+  "outcome": "succeeded"
+}

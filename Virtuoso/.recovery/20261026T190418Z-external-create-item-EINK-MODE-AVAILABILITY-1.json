@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190418Z-external-create-item-EINK-MODE-AVAILABILITY-1",
+  "operation": "external-create-item",
+  "item_id": "EINK-MODE-AVAILABILITY-1",
+  "created": "2026-10-26T19:04:18Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Focus is unavailable while E-ink is enabled",
+      "status": "Queued",
+      "sequence": 126,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#eink-mode-availability-1",
+      "description": "Hide Focus in E-ink, including entry via shortcuts and remembered-mode restore. Enabling E-ink while Focus is active needs a specified fallback.",
+      "prerequisites": [
+        "EINK-CONTROLS-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R6. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "No route enters Focus while E-ink is enabled; decide and document the active-Focus transition before implementation. Regular displays retain Focus.",
+      "id": "EINK-MODE-AVAILABILITY-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-EINK-MODE-AVAILABILITY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "EINK-MODE-AVAILABILITY-1",
+      "idempotencyKey": "smoke20261026-EINK-MODE-AVAILABILITY-1",
+      "actualRevision": "e768b007b720f3727d89931c85254b6c91004fccf4774020674cf56bef4fccd4",
+      "recoveryId": "20261026T190418Z-external-create-item-EINK-MODE-AVAILABILITY-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8153-b060-edb66ede2b57",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:40Z",
+  "outcome": "succeeded"
+}

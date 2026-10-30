@@ -1,0 +1,43 @@
+{
+  "id": "20261026T195049Z-external-set-status-PAGE-ENTRY-KEYS-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-ENTRY-KEYS-1",
+  "created": "2026-10-26T19:50:49Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Page receives section navigation keys before word wrapping completes",
+      "written_status": "full-spec",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "group": "Reader Polish",
+      "branch": "eb/page-entry-keys-1",
+      "spec_link": "ROADMAP.md#page-entry-keys-1",
+      "prerequisites": [],
+      "description": "Install Page-owned native section key forwarding before asynchronous wrapping yields, with one listener per document and teardown cleanup. This repairs the proven forwarding gap; input before a paginator exists remains unchanged.",
+      "deliverable": "Full specification in ROADMAP.md; U1–U10 checked. Execution remains held by release, prerequisite/ownership and exact-package/owner verification gates."
+    },
+    "expectedRevision": "6adbbc7efe0dfb2f31cd72cab5868e2f2741931fae5eab6a54ae571093153c3d",
+    "idempotencyKey": "review20261026-spec-PAGE-ENTRY-KEYS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-ENTRY-KEYS-1",
+      "idempotencyKey": "review20261026-spec-PAGE-ENTRY-KEYS-1",
+      "actualRevision": "280f3e0f1803619a09ba39a9b8c5f4fa2f3772521ce7471e019b8f49e3e586ea",
+      "recoveryId": "20261026T195049Z-external-set-status-PAGE-ENTRY-KEYS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:05Z",
+  "outcome": "succeeded"
+}

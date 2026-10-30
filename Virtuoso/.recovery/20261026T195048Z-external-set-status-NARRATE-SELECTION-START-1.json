@@ -1,0 +1,58 @@
+{
+  "id": "20261026T195048Z-external-set-status-NARRATE-SELECTION-START-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-SELECTION-START-1",
+  "created": "2026-10-26T19:50:48Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Diagnose Narrate's paused band and start viewport",
+      "sequence": 123.5,
+      "description": "Residual F7/F8: paused horizontal band offset and Play viewport jump. Proven paused-click F9 is separated into NARRATE-PAUSED-CLICK-1 at Seq117. Owner approved regular-display policy: preserve viewport when selected word is visible, align paused highlight, follow only on leaving the reading area or explicit Jump back. Measure actual asynchronous scroll writers before a visual fix."
+    },
+    "expectedRevision": "3035e04cb7a322d1941bff1c89df55c48817b602a4ed2470fd1e0446e34c3eb1",
+    "idempotencyKey": "review20261026-spec-NARRATE-SELECTION-START-1",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "partial",
+      "operation": "set-status",
+      "itemId": "NARRATE-SELECTION-START-1",
+      "idempotencyKey": "review20261026-spec-NARRATE-SELECTION-START-1",
+      "actualRevision": "da0c9cb9f56c3bd5b7e436b772faf01498a13eca03d23b25bfd960d2ce62384e",
+      "recoveryId": "20261026T195048Z-external-set-status-NARRATE-SELECTION-START-1",
+      "detail": {
+        "reason": "Fractional Seq landed in Notion but canonical provider truncates it; replace with whole-number slot before final confirmation."
+      },
+      "partial": {
+        "written": [
+          "title",
+          "description"
+        ],
+        "unwritten": [
+          "sequence"
+        ]
+      }
+    },
+    "partial": {
+      "written": [
+        "title",
+        "description"
+      ],
+      "unwritten": [
+        "sequence"
+      ]
+    },
+    "supersededBy": "20261026T195548Z-external-set-status-NARRATE-SELECTION-START-1"
+  },
+  "resolved": "2026-10-26T19:55:48Z",
+  "outcome": "superseded",
+  "reason": "superseded by 20261026T195548Z-external-set-status-NARRATE-SELECTION-START-1"
+}

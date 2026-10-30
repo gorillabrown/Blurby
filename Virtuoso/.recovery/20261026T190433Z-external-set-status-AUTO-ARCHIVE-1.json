@@ -1,0 +1,27 @@
+{
+  "id": "20261026T190433Z-external-set-status-AUTO-ARCHIVE-1",
+  "operation": "external-set-status",
+  "item_id": "AUTO-ARCHIVE-1",
+  "created": "2026-10-26T19:04:33Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Confirm completion before archiving a read",
+      "written_status": "stub",
+      "description": "Owner amendment 2026-10-26: at assumed completion ask whether the reader finished, with an Archive option. Confirmed archived reads appear in Archive; unconfirmed reads remain discoverable. Supersedes silent end-of-book exit auto-archive; old Full Spec must be amended. SMOKE-R12 / LIBRARY-COMPLETION-VISIBILITY-1."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "smoke20261026-AUTO-ARCHIVE-1"
+  },
+  "resolved": "2026-10-26T19:05:37Z",
+  "outcome": "abandoned",
+  "reason": "Superseded before execution by a plan pinned to the fresh provider snapshot revision."
+}

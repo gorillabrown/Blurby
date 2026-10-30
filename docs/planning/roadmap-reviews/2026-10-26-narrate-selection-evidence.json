@@ -1,0 +1,19 @@
+{
+  "sourceCommit": "d8e44864708d40e2a472f3e6436d936e9ee96bfa",
+  "instrument": "production Narrate runtime with existing fake producer and audio clock; not desktop or heard-audio evidence",
+  "failure": {
+    "clickedWord": 20,
+    "requestedWord": 8,
+    "nextTimedWord": 9
+  },
+  "control": {
+    "clickedWord": 20,
+    "requestedWord": 20,
+    "nextTimedWord": 21
+  },
+  "warning": "Immediate resumed snapshot alone can falsely show20 before the old engine emits its next cursor. Assert requests and clock advancement.",
+  "artifactHashes": {
+    "narrate-paused-selection-probe-result.json": "c37f33cbc02e8a19ddf612bca47a7cecda07261b307c63869c51ca3f538fab52",
+    "narrate-paused-selection-control-result.json": "7ba5510486febc73a227a28b69b3fe3955e5d1e0c9c24c6fbf993db50026ce36"
+  }
+}

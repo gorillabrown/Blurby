@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190422Z-external-create-item-FOLDER-RETRY-FEEDBACK-1",
+  "operation": "external-create-item",
+  "item_id": "FOLDER-RETRY-FEEDBACK-1",
+  "created": "2026-10-26T19:04:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Retry visibly reports checking and an unavailable folder",
+      "status": "Queued",
+      "sequence": 130,
+      "written_status": "Stub",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#folder-retry-feedback-1",
+      "description": "The single Retry works and logs one null root result, but its unchanged UI leaves the reader unsure anything happened. FOLDER-NOTICE-2 is dissolved and is not reopened.",
+      "prerequisites": [
+        "FOLDER-NOTICE-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources F16. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Show an accessible checking state and a clear unavailable result after failure; successful retry clears the banner. Preserve single-click/single-request behavior and no repeated toast loop.",
+      "id": "FOLDER-RETRY-FEEDBACK-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-FOLDER-RETRY-FEEDBACK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLDER-RETRY-FEEDBACK-1",
+      "idempotencyKey": "smoke20261026-FOLDER-RETRY-FEEDBACK-1",
+      "actualRevision": "a09b431111bc4b584ae58c27b039df4328f5737647b1b1a9f689f530d1628fad",
+      "recoveryId": "20261026T190422Z-external-create-item-FOLDER-RETRY-FEEDBACK-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8148-91ed-fe7717babb01",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:45Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195055Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SWITCH-CONTENT-1",
+  "created": "2026-10-26T19:50:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner approved 2026-10-26: a selected folder shows explicit loading rather than presenting old-folder cards as its contents; preserve cached/persisted data. Separately instrument scan, cancellation, extraction and batching before performance changes; the observed~93s gap is not entirely attributed to the tested30s old-run wait."
+    },
+    "expectedRevision": "7d3e6eec880690735afaeeef3461370c0f88cb0d862cc9e7403efeaadd7cf833",
+    "idempotencyKey": "review20261026-spec-FOLDER-SWITCH-CONTENT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SWITCH-CONTENT-1",
+      "idempotencyKey": "review20261026-spec-FOLDER-SWITCH-CONTENT-1",
+      "actualRevision": "e4c14cb4c3eca19fdff9271455b8eafd40db189ac7f8e5685ea623c8e3f0d28d",
+      "recoveryId": "20261026T195055Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:10Z",
+  "outcome": "succeeded"
+}

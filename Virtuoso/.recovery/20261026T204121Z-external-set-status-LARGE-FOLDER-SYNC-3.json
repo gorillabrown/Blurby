@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204121Z-external-set-status-LARGE-FOLDER-SYNC-3",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-26T20:41:21Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/large-folder-sync-3 at 043ef79aba28c664ec154f3b0b3eeb7deff21239; ancestor of planning baseline=False; ROADMAP heading: LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2 *(built `043ef79a` on `eb/large-folder-sync-3`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "66bc96ae2504c2167dff4e5a87184687bcad6a8a75d2658c90c40d40732af7b2",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-3",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-3",
+      "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-3",
+      "actualRevision": "2e594cd30676620241f8a4247e6bf6d9c8d27bdc0475c06f56795e2178da8f44",
+      "recoveryId": "20261026T204121Z-external-set-status-LARGE-FOLDER-SYNC-3",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:53Z",
+  "outcome": "succeeded"
+}

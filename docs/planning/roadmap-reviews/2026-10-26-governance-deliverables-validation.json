@@ -1,0 +1,19 @@
+{
+  "sourceThread": "01a178b2-c694-70b0-90df-0edae537aed0",
+  "sourceThreadReadLive": true,
+  "sourceOutcome": "discovery and approval complete; implementation stopped on drift; no cleanup writes",
+  "item": "GOV-SWEEP-FOLLOWTHROUGH-1",
+  "sequence": 0,
+  "status": "Queued",
+  "specState": "Stub",
+  "approvedActionsMapped": 16,
+  "firstOrderDeliverables": 4,
+  "deferredFindingCategories": 6,
+  "liveRegisterItems": 193,
+  "snapshotTakenAt": "2026-10-26T20:28:20Z",
+  "existingStatusAndSequenceChanges": false,
+  "visibilityWindowPreserved": true,
+  "applicationSourceChanged": false,
+  "sweepImplementationPerformed": false,
+  "mutationConfirmed": true
+}

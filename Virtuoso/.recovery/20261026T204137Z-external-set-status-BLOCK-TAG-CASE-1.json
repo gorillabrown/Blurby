@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204137Z-external-set-status-BLOCK-TAG-CASE-1",
+  "operation": "external-set-status",
+  "item_id": "BLOCK-TAG-CASE-1",
+  "created": "2026-10-26T20:41:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/block-tag-case-1 at 61cbbf7e1d55430288446e721aebca7ae536ae21; ancestor of planning baseline=False; ROADMAP heading: BLOCK-TAG-CASE-1 — The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. branch eb/block-tag-case-1 at 61cbbf7e1d55430288446e721aebca7ae536ae21; ancestor of planning baseline=False; ROADMAP heading: BLOCK-TAG-CASE-1 — The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "4cb1adcfea3df77a34383c2e8f4c30b9fd84fe7ccf6fc2d2832fca426c31b759",
+    "idempotencyKey": "parallelgov20261026-BLOCK-TAG-CASE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLOCK-TAG-CASE-1",
+      "idempotencyKey": "parallelgov20261026-BLOCK-TAG-CASE-1",
+      "actualRevision": "0c490bb48abfd0f3b1486e2045623739bacca1cfcb006481af257b6372c01d45",
+      "recoveryId": "20261026T204137Z-external-set-status-BLOCK-TAG-CASE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:08Z",
+  "outcome": "succeeded"
+}

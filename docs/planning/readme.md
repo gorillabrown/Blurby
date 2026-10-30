@@ -17,6 +17,8 @@ release checklists, and the planning archive.
 ## Subdirectories
 | Directory | Purpose |
 |-----------|---------|
+| `epics/` | Long-horizon charters, admission/resume state and execution packets |
+| `holding/` | Ad hoc storyboards/plans awaiting roadmap absorption; state is recorded by the authorized ceremony |
 | `plans/` | Dated implementation plans (+ `.Archive/`) |
 | `specs/` | Dated design specs (+ `.Archive/`) |
 | `roadmap-reviews/` | Roadmap-review ceremony artifacts (+ `checkins/`) |

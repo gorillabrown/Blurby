@@ -1,0 +1,36 @@
+{
+  "id": "20261026T203313Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SWITCH-CONTENT-1",
+  "created": "2026-10-26T20:33:13Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix."
+    },
+    "expectedRevision": "e4c14cb4c3eca19fdff9271455b8eafd40db189ac7f8e5685ea623c8e3f0d28d",
+    "idempotencyKey": "parallelrun20261026-start-FOLDER-SWITCH-CONTENT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SWITCH-CONTENT-1",
+      "idempotencyKey": "parallelrun20261026-start-FOLDER-SWITCH-CONTENT-1",
+      "actualRevision": "f6e64499318b43e5c05e47a2f14d096e4016565109492c049b24996bef4d603e",
+      "recoveryId": "20261026T203313Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:33:47Z",
+  "outcome": "succeeded"
+}

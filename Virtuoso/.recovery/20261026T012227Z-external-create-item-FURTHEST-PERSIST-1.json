@@ -1,0 +1,51 @@
+{
+  "id": "20261026T012227Z-external-create-item-FURTHEST-PERSIST-1",
+  "operation": "external-create-item",
+  "item_id": "FURTHEST-PERSIST-1",
+  "created": "2026-10-26T01:22:27Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "The furthest page a reader reached is remembered across sessions",
+      "status": "Queued",
+      "sequence": 114,
+      "written_status": "Stub",
+      "effort": "M",
+      "prerequisites": [
+        "PAGE-PAGES-READ-1"
+      ],
+      "group": "Reader Polish",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#furthest-persist-1",
+      "description": "Save furthestPosition and furthestCfi (only when higher) through the progress IPC, so the backtrack prompt survives a quit.",
+      "notes": "origin: roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C. Stub; owner question (tier 2): offer the furthest page ever reached, or of this session only. Touches src/types.ts (shared core). Not a release gate.",
+      "id": "FURTHEST-PERSIST-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T01:09:26Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FURTHEST-PERSIST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FURTHEST-PERSIST-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FURTHEST-PERSIST-1",
+      "actualRevision": "",
+      "recoveryId": "20261026T012227Z-external-create-item-FURTHEST-PERSIST-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81a4-967d-fbc4f01e7d63",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T01:22:48Z",
+  "outcome": "succeeded"
+}

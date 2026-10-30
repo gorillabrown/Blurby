@@ -1,0 +1,34 @@
+{
+  "id": "20261026T190823Z-external-set-status-FOCUS-WORD-ONLY-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-WORD-ONLY-1",
+  "created": "2026-10-26T19:08:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "Remove only Focus's band and band-only controls, if any; keep its word cursor and unrelated Focus settings. Flow and Narrate retain their own band requirements. Reconcile the held alignment stack before specification."
+    },
+    "expectedRevision": "8d82cb23cee47577aefe3d95f12b194f46646a67c276c3458dbcd108fcac2c9c",
+    "idempotencyKey": "smoke20261026-refinement-FOCUS-WORD-ONLY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOCUS-WORD-ONLY-1",
+      "idempotencyKey": "smoke20261026-refinement-FOCUS-WORD-ONLY-1",
+      "actualRevision": "1aac3255cfaed650af045c88bbc7064af3aa7f60aa67b9ba1e2c90bd23963e6c",
+      "recoveryId": "20261026T190823Z-external-set-status-FOCUS-WORD-ONLY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T19:10:03Z",
+  "outcome": "succeeded"
+}
