@@ -206,7 +206,7 @@ describe("BAND-ALIGN-2 Flow: one clock", () => {
 type BandHelpers = {
   computeBandScrollTop?: (o: { scrollTop: number; lineTopPx: number; containerTopPx: number; viewportHeightPx: number; zoneTopFrac: number; maxScrollTop?: number }) => number;
   isLineInBand?: (lineTopPx: number, lineBottomPx: number, bandTopPx: number, bandBottomPx: number) => boolean;
-  computeBandEdges?: (lines: readonly BandBox[], cursor: number, n: number) => { top: number; bottom: number; first: number; last: number } | null;
+  computeBandEdges?: (lines: readonly BandBox[], cursor: number, n: number, stepPx?: number) => { top: number; bottom: number; first: number; last: number } | null;
   computeAnchorScrollTop?: (o: { scrollTop: number; lineTopPx: number; lineBottomPx: number; containerTopPx: number; viewportHeightPx: number; anchor: number; bandHeightPx: number; maxScrollTop: number }) => number;
   normalizeBandAnchor?: (v: unknown) => number;
   normalizeBandLines?: (v: unknown) => number;
@@ -236,27 +236,30 @@ for (const [mode, h] of [["focus", focusLayout], ["flow", flowLayout]] as Array<
       expect(band.bottom).toBeCloseTo((208 + 22 + 235) / 2, 6); // 232.5, not 230
     });
 
-    it(`(r2) ${mode} the cursor line is the band's middle line; at a section's first line the band takes the lines that exist`, () => {
+    it(`(r2) ${mode} the cursor line is the band's middle line; at a section's first and last lines the band keeps its size (R7)`, () => {
       const edges = need(mode, h, "computeBandEdges");
       for (const [n, pos] of [[3, 2], [5, 3], [7, 4]] as const) {
         const band = edges(SEVEN, 3, n)!;
         expect(band.last - band.first + 1).toBe(n);
         expect(3 - band.first + 1, `n=${n}`).toBe(pos);
       }
-      const first = edges(SEVEN, 0, 5)!;
+      const first = edges(SEVEN, 0, 5, 27)!;
       expect({ first: first.first, last: first.last }).toEqual({ first: 0, last: 2 });
-      expect(first.top).toBe(73); // the line's box edge: no blank above
+      expect(first.top).toBeCloseTo(73 - 2.5 - 2 * 27, 6); // R7: two lines of space above, by the line step
+      const last = edges(SEVEN, 6, 5, 27)!;
+      expect({ first: last.first, last: last.last }).toEqual({ first: 4, last: 6 });
+      expect(last.bottom).toBeCloseTo(235 + 22 + 2.5 + 2 * 27, 6); // R7: two lines of space below
     });
 
-    it(`(r3) ${mode} at a section's first line the scroll clamps at 0 and the band follows the cursor line, not the 210 px anchor`, () => {
+    it(`(r3) ${mode} R7: with the leading space a section's first line scrolls to the anchor; the band does not follow it up`, () => {
       const scrollFor = need(mode, h, "computeAnchorScrollTop");
       const edges = need(mode, h, "computeBandEdges");
-      const lines: BandBox[] = [0, 27, 54, 81].map((top) => ({ top, bottom: top + 22 }));
-      expect(scrollFor({ scrollTop: 0, lineTopPx: 0, lineBottomPx: 22, containerTopPx: 0, viewportHeightPx: 630, anchor: 1 / 3, bandHeightPx: 135, maxScrollTop: 4000 })).toBe(0);
-      const band = edges(lines, 0, 5)!;
-      expect(band.top).toBeLessThanOrEqual(0);
-      expect(band.bottom).toBeGreaterThanOrEqual(22);
-      expect((band.top + band.bottom) / 2).toBeLessThan(210 - 27);
+      const lines: BandBox[] = [212.5, 239.5, 266.5, 293.5].map((top) => ({ top, bottom: top + 22 }));
+      expect(scrollFor({ scrollTop: 0, lineTopPx: 212.5, lineBottomPx: 234.5, containerTopPx: 0, viewportHeightPx: 630, anchor: 1 / 3, bandHeightPx: 135, maxScrollTop: 4000 })).toBeCloseTo(13.5, 6);
+      const band = edges(lines.map((l) => ({ top: l.top - 13.5, bottom: l.bottom - 13.5 })), 0, 5, 27)!;
+      expect(Math.abs((band.top + band.bottom) / 2 - 210)).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(band.top - 142.5)).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(band.bottom - 277.5)).toBeLessThanOrEqual(0.5);
     });
 
     it(`(r4) ${mode} normalizeBandAnchor, and each anchor's cursor-line centre`, () => {
