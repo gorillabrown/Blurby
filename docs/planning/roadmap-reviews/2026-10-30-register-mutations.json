@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30; change 26 (NARRATE-PAUSE-CANCEL-1 package-verified, In Flight) approved 2026-10-30; change 27 (BAND-ALIGN-2 R7a package-verified note) approved 2026-10-30; change 28 (NARRATE-GAP-PAUSE-1 package-verified, In Flight) approved 2026-10-30; change 29 (BAND-ALIGN-2 R8 package-verified note) approved 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30; change 26 (NARRATE-PAUSE-CANCEL-1 package-verified, In Flight) approved 2026-10-30; change 27 (BAND-ALIGN-2 R7a package-verified note) approved 2026-10-30; change 28 (NARRATE-GAP-PAUSE-1 package-verified, In Flight) approved 2026-10-30; change 29 (BAND-ALIGN-2 R8 package-verified note) approved 2026-10-30; change 30 (PLAY-FIRST-TEXT-1 package-verified, In Flight) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,7 +14,7 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T22:52:48Z",
+  "final": "2026-10-30T23:12:24Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
   "batch3Refresh": "2026-10-30T19:57:00Z",
   "batch4Refresh": "2026-10-30T20:01:30Z",
@@ -25,7 +25,8 @@
   "batch9Refresh": "2026-10-30T21:26:30Z",
   "batch10Refresh": "2026-10-30T21:42:30Z",
   "batch11Refresh": "2026-10-30T22:07:30Z",
-  "batch12Refresh": "2026-10-30T22:51:31Z"
+  "batch12Refresh": "2026-10-30T22:51:31Z",
+  "batch13Refresh": "2026-10-30T23:11:27Z"
  },
  "driftLines": [],
  "counts": {
@@ -34,8 +35,8 @@
   "created": 5,
   "statusAfter": {
    "Completed": 72,
-   "Queued": 44,
-   "In Flight": 71,
+   "Queued": 43,
+   "In Flight": 72,
    "Dissolved": 9,
    "Superseded": 6
   },
@@ -151,6 +152,14 @@
    "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-r8-verified)"
+  },
+  "batch13": {
+   "refreshDiffAgainst225248Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-pft-verified)"
   }
  },
  "changes": [
@@ -1005,6 +1014,34 @@
    "actualRevision": "be25b0cc78ad076db4c85de05dc910b7ce9676989525d8016e65dcb727823241",
    "readbackNote": "Status In Flight, Seq 83, Spec State and Prerequisites unchanged",
    "batch": 12
+  },
+  {
+   "change": 30,
+   "item": "PLAY-FIRST-TEXT-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T231147Z-external-set-status-PLAY-FIRST-TEXT-1",
+   "providerId": "4097c96c-c31e-81a1-94f5-d6c923491f78",
+   "url": "https://app.notion.com/4097c96cc31e81a194f5d6c923491f78",
+   "fieldsWritten": [
+    "Status",
+    "Notes"
+   ],
+   "before": {
+    "Status": "Queued",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime."
+   },
+   "readback": {
+    "Status": "In Flight",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: ebea7311, package from c57a7b4f, stacked on eb/band-align-2 at e8e6de06. Play on the cover starts at section 1's first word in Flow, Focus and Narrate within 60-340 ms; base Flow and Focus fail. Suite 2641/1/0; x64/arm64 asar identical. BUG-236 resolved in source. Arm64 launch at merge.",
+    "Seq": 86.75,
+    "Spec State": "Full Spec",
+    "Prerequisites": "BAND-ALIGN-2; NARRATE-PAUSE-CANCEL-1"
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "a6467c209a45e3b248b1a242ab9db3603f5f2b804e4695b7b2b552bbe58fb8d3",
+   "readbackNote": "Seq, Spec State and Prerequisites kept (read back unchanged); built and held",
+   "batch": 13
   }
  ]
 }

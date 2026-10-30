@@ -762,7 +762,12 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="play-first-text-1"></a>
 
-#### PLAY-FIRST-TEXT-1 — Play on a page with no words starts reading at the first text *(Seq 86.75; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-236)*
+#### PLAY-FIRST-TEXT-1 — Play on a page with no words starts reading at the first text *(Seq 86.75; **In Flight — built and held, package-verified (x64, RodneySr) 2026-10-30**; Full Spec; authored 2026-10-30; fixes BUG-236)*
+
+- **Package-verified 2026-10-30 (Blurby.Brain1), built and held:** `eb/play-first-text-1` @ `ebea7311`, package from `c57a7b4f`, stacked on `eb/band-align-2` @ `e8e6de06`.
+  - Flow, Focus and Narrate each start at "The" #0 of section 1 within 60–340 ms of Play on the cover, and read on. On the base, Flow and Focus FAIL (no cursor); Narrate was already correct.
+  - Suite 2,641/1/0. x64/arm64 asar identical (`06DF1209…`). Arm64 launch at merge.
+  - The owner check (o-pft) reads "The Project Gutenberg eBook of Meditations…". BUG-236 resolved in source.
 
 - **What:** pressing Play with the reading position in a section that has no words (a cover, an image plate, a blank separator) goes to the next section that has words and starts reading at its first word, in Flow, Focus and Narrate, each in its own runtime. With no later text, Play does nothing.
 - **Owner rulings (2026-10-30):** "Start at first text"; skip on Play only, while navigation lands where asked; a paused Focus or Narrate session resumes at the paused word; on a cover, the first text replaces a later held word.
