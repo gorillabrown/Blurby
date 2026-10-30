@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-30T20:47:30Z",
+  "takenAt": "2026-10-30T20:54:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -385,14 +385,14 @@
       "workstream": "Blurby Business",
       "deliverable": "",
       "group": "",
-      "spec_link": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+      "spec_link": "docs/planning/epics/2026-10-30-blurby-business/charter.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "",
-      "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.",
-      "revision": "331ad24c969a3e5d41392a119348d7ccf7d1f1a815d4bdfc308329cd9ad73ea0",
+      "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.\n\nChartered 2026-10-30 by the Blurby Business session: packet docs/planning/epics/2026-10-30-blurby-business/, run branch eb/blurby-business-1 on RodneySr, never merged by the run itself.",
+      "revision": "fdd8bdd0df90a4013d603238edf01c49e36d78ec4ab98384d31c7e1c72ac06d1",
       "extra": {
         "id": "4097c96c-c31e-816d-95ef-d6fa5243812b",
         "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
