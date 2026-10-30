@@ -5,7 +5,7 @@
 //
 //   node scripts/narrate-quit-linger/quit-linger.mjs --exe release\win-arm64-unpacked\Blurby.exe --out <dir>
 //        [--runs-paused 5] [--runs-playing 3] [--deltas 0.5,1.0,2.0] [--relaunch-runs 3] [--only L,R,C] [--break]
-//        [--port 9480] [--models <NARRATE_MODELS_ROOT>]
+//        [--port 9480] [--models <NARRATE_MODELS_ROOT>] [--runs-staged 3]
 //   node scripts/narrate-quit-linger/quit-linger.mjs --gaps <p5-latency-e2e --out dir>   (post-resume gaps, Done-when 2/7)
 //
 // Every launch gets a fresh scratch profile under --out (--user-data-dir plus BLURBY_USER_DATA_DIR) and
@@ -22,6 +22,11 @@
 //     argv, --inspect included) and the scratch blurby-data is touched after the relaunch.
 // (C) c1: a launch 15 s after a full exit shows a window the detector must see; c2: a second launch while the app is
 //     open and idle leaves exactly one Blurby window and one main process.
+// (S) staged pause (--only S, re-dispatch 2026-10-30): the (L) paused route, but the pause is pressed only when a
+//     generation is running in a worker and a prefetch is queued in main. A speed step (ArrowUp/ArrowDown) abandons a
+//     running prefetch (stale epoch), the new request takes the other worker, and the next prefetch then waits behind
+//     the reserved worker. Running = producer posts minus results in the log; queued = getStatus().pending minus
+//     running, read over the main inspector. Records the state at the pause and the producer posts after it.
 // --break (LL-151): the detector reports a window that is not there for the first (R) run; its verification must fail
 //     and the run must exit 1.
 // Exit: 0 when the run completes and the controls hold; 1 when a control or a window verification fails; 4 on a
@@ -33,13 +38,14 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 const argv = process.argv.slice(2);
-const args = { runsPaused: 5, runsPlaying: 3, deltas: [0.5, 1.0, 2.0], relaunchRuns: 3, port: 9480, only: ["L", "R", "C"], models: process.env.NARRATE_MODELS_ROOT || "C:/Projects/Blurby-artifacts/narrate-quit-linger-1/models" };
+const args = { runsStaged: 3, runsPaused: 5, runsPlaying: 3, deltas: [0.5, 1.0, 2.0], relaunchRuns: 3, port: 9480, only: ["L", "R", "C"], models: process.env.NARRATE_MODELS_ROOT || "C:/Projects/Blurby-artifacts/narrate-quit-linger-1/models" };
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i], v = () => argv[++i];
   if (a === "--exe") args.exe = path.resolve(v());
   else if (a === "--out") args.out = path.resolve(v());
   else if (a === "--runs-paused") args.runsPaused = Number(v());
   else if (a === "--runs-playing") args.runsPlaying = Number(v());
+  else if (a === "--runs-staged") args.runsStaged = Number(v());
   else if (a === "--deltas") args.deltas = v().split(",").map(Number);
   else if (a === "--relaunch-runs") args.relaunchRuns = Number(v());
   else if (a === "--only") args.only = v().split(",");
@@ -104,7 +110,7 @@ if (!args.exe || !args.out) { console.error("--exe and --out are required"); pro
 fs.mkdirSync(path.join(args.out, "profiles"), { recursive: true });
 fs.mkdirSync(path.join(args.out, "logs"), { recursive: true });
 
-const rec = { exe: args.exe, args: { ...args, exe: undefined, out: undefined }, started: new Date().toISOString(), liveBefore: hashLive(), L: [], R: [], C: {}, controls: [] };
+const rec = { exe: args.exe, args: { ...args, exe: undefined, out: undefined }, started: new Date().toISOString(), liveBefore: hashLive(), L: [], S: [], R: [], C: {}, controls: [] };
 const recFile = path.join(args.out, "quit-linger.json");
 const save = () => fs.writeFileSync(recFile, JSON.stringify(rec, null, 2));
 const control = (name, ok, detail) => { rec.controls.push({ name, ok, detail }); log(`control ${name}: ${ok ? "PASS" : "FAIL"}`, detail ? JSON.stringify(detail).slice(0, 300) : ""); save(); };
@@ -251,6 +257,43 @@ async function waitLibrary(page) {
 const postsAfter = (app, t) => app.lines.filter((l) => /\[narrate-producer\] (\d+) post /.test(l) && Number(l.match(/\[narrate-producer\] (\d+) post /)[1]) > t);
 const results = (app) => app.lines.filter((l) => /\[narrate-producer\] \d+ result /.test(l));
 
+const posts = (app) => app.lines.filter((l) => /\[narrate-producer\] \d+ post /.test(l));
+const PRODUCER_STATUS = "process.mainModule.require('./main/narrate/producer').getStatus()";
+/** Running in a worker (log posts minus results) and queued in main (status pending minus running). */
+async function producerState(app) {
+  const running = posts(app).length - results(app).length;
+  const st = await app.main.eval(PRODUCER_STATUS, 3000).catch(() => null);
+  return { running, pending: st ? st.pending : null, queued: st ? st.pending - running : null, lastPost: posts(app).at(-1) ?? null };
+}
+async function pressKey(page, code, vk) {
+  for (const type of ["rawKeyDown", "keyUp"]) await page.send("Input.dispatchKeyEvent", { type, code, key: code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk });
+}
+/** (S): from playing, step the speed while a prefetch is running until one is running and one is queued; then Pause. */
+async function stagePause(app, t) {
+  const page = app.page; t.attempts = [];
+  for (let attempt = 1; attempt <= 12; attempt++) {
+    // Wait for a prefetch to be running (posted, no result yet).
+    let end = Date.now() + 15000, st = await producerState(app);
+    while (Date.now() < end && !(st.running >= 1 && / prefetch /.test(st.lastPost || ""))) { await sleep(50); st = await producerState(app); }
+    const up = attempt % 2 === 1;
+    await pressKey(page, up ? "ArrowUp" : "ArrowDown", up ? 38 : 40);
+    const a = { attempt, key: up ? "ArrowUp" : "ArrowDown", at: Date.now(), before: st };
+    end = Date.now() + 8000;
+    while (Date.now() < end) {
+      st = await producerState(app);
+      if (st.running >= 1 && st.queued >= 1) {
+        t.pausePress = Date.now();
+        await clickSel(page, ".rbb-play-btn");
+        a.atPause = st; t.attempts.push(a); t.staged = st;
+        return;
+      }
+      await sleep(40);
+    }
+    a.timedOut = st; t.attempts.push(a);
+  }
+  throw new Error("could not stage a running generation with a queued prefetch in 12 attempts");
+}
+
 /** Open Meditations, enter Narrate, Play; 15 s after the first voiced chunk returns. "paused": Pause, then 1.5 s. */
 async function narrateRoute(app, mode) {
   const page = app.page; const t = {};
@@ -271,10 +314,10 @@ async function narrateRoute(app, mode) {
   if (!results(app).length) throw new Error("no producer result within 120 s of Play");
   t.firstResult = Date.now();
   if ((await playLabel(page)) !== "Pause") throw new Error(`not playing after the first result (button: ${await playLabel(page)})`);
-  await sleep(15000);
-  if (mode === "paused") {
-    t.pausePress = Date.now();
-    await clickSel(page, ".rbb-play-btn");
+  await sleep(mode === "staged" ? 3000 : 15000);
+  if (mode === "paused" || mode === "staged") {
+    if (mode === "staged") await stagePause(app, t);
+    else { t.pausePress = Date.now(); await clickSel(page, ".rbb-play-btn"); }
     await sleep(300);
     t.labelAfterPause = await playLabel(page);
     if (t.labelAfterPause !== "Play") throw new Error(`pause did not take (button: ${t.labelAfterPause})`);
@@ -331,13 +374,13 @@ async function runL(mode, n) {
     const t = await narrateRoute(app, mode);
     const quitAt = quit(app);
     const ex = await waitExit(app);
-    const ref = mode === "paused" ? t.pausePress : quitAt;
+    const ref = mode === "playing" ? quitAt : t.pausePress;
     const posts = postsAfter(app, ref);
-    row = { ...row, ...t, quitAt, exitAt: app.exitAt, lingerS: +((app.exitAt - quitAt) / 1000).toFixed(2), exitCode: ex.code, timedOut: ex.timedOut, postsAfterPause: mode === "paused" ? posts.length : null, postLines: posts, results: results(app).length };
+    row = { ...row, ...t, quitAt, exitAt: app.exitAt, lingerS: +((app.exitAt - quitAt) / 1000).toFixed(2), exitCode: ex.code, timedOut: ex.timedOut, postsAfterPause: mode === "playing" ? null : posts.length, postLines: posts, results: results(app).length };
   } catch (err) {
     row.error = err.message; try { app.proc.kill(); } catch { /* gone */ } await Promise.race([app.exited, sleep(5000)]);
   }
-  rec.L.push(row); save();
+  (mode === "staged" ? rec.S : rec.L).push(row); save();
   log(`[${label}] linger ${row.lingerS}s exit ${row.exitCode} postsAfterPause ${row.postsAfterPause}${row.error ? " ERROR " + row.error : ""}`);
   if (isCrash(row.exitCode) || row.timedOut) log(`[${label}] QUIT-CRASH CLASS or terminate: stop (Failure handling)`);
   return row;
@@ -436,6 +479,7 @@ if (isMain) {
   if (pre.windows.length || (detector.lastMains || []).length) { console.error(`refusing: a Blurby on ${args.exe} is already running`, JSON.stringify(pre)); detector.stop(); process.exit(2); }
   log("live hashes", JSON.stringify(rec.liveBefore));
   if (args.only.includes("C")) await runC();
+  if (args.only.includes("S")) for (let i = 1; i <= args.runsStaged; i++) await runL("staged", i);
   if (args.only.includes("L")) {
     for (let i = 1; i <= args.runsPaused; i++) await runL("paused", i);
     for (let i = 1; i <= args.runsPlaying; i++) await runL("playing", i);
