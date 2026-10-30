@@ -129,3 +129,42 @@ describe("narrate producer pool (D6)", () => {
     expect(workers.every((w) => w.exited && !w.terminated)).toBe(true); // asked to stop, never killed under a live run
   });
 });
+
+describe("pause cancels queued work (NARRATE-PAUSE-CANCEL-1)", () => {
+  it("(p1) cancelQueued removes only the queued jobs of the prefix", async () => {
+    await producer.ensureReady();
+    await settle();
+    const posted = producer.generate("posted prefetch, e 1", { priority: "prefetch", group: "e:1" }).catch((e) => e); // worker 0
+    await settle();
+    const queuedE = producer.generate("queued prefetch, e 1", { priority: "prefetch", group: "e:1" }).catch((e) => e); // held
+    const queuedX = producer.generate("queued prefetch, x 1", { priority: "prefetch", group: "x:1" }).catch((e) => e);
+    await settle();
+    expect(typeof producer.cancelQueued).toBe("function");
+    const n = producer.cancelQueued?.("e:");
+    expect(n).toBe(1);
+    const err = await queuedE;
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toMatch(/narrate generation cancelled/);
+    expect(workers[0].generates).toHaveLength(1); // the posted job is untouched
+    workers[0].answer();
+    await settle();
+    expect(workers.flatMap((w) => w.generates.map((m) => m.text))).toContain("queued prefetch, x 1");
+    workers.find((w) => w.generates.length)?.answer();
+    await Promise.all([posted, queuedX]);
+  });
+
+  it("(p2) a request of a new group still supersedes a queued prefetch", async () => {
+    await producer.ensureReady();
+    await settle();
+    const stale = producer.generate("stale prefetch, e 1", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    await settle();
+    const queuedOld = producer.generate("older prefetch, e 1", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    await settle();
+    const req = producer.generate("clicked word, e 2", { priority: "request", group: "e:2" }).catch((e) => e);
+    await settle();
+    expect((await queuedOld).message).toMatch(/superseded/);
+    workers[1].answer();
+    workers[0].answer();
+    await Promise.all([stale, req]);
+  });
+});
