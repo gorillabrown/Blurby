@@ -29,6 +29,7 @@ The owner requested product lanes on 2026-09-23. Each Notion record has one prim
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | BROWSER-EXT-FINALIZE-1 remains Stage9 after APP-TABS-1. Pairing/token/security changes already built or merged keep their recorded release and verification holds; the source register decides status. |
 | Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Visibility116 has the owner-approved exclusive LibraryView/test window, before APP-TABS source integration. Folder120 and profile121 diagnosis proceeds separately. Completion confirmation, duplicate presentation and content intake keep their own specification and ownership gates. |
 | Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | GOV-SWEEP-FOLLOWTHROUGH-1 is the first governance deliverable; current cleanup preserves all held states. Stage8 gate(1) passed on36ac7466, owner smoke gate(2) is RED/partial; branch/package evidence does not grant completion or release. |
+| Blurby Business | The walled-off PDF viewer and editor window, its document tabs, PDF default handler, OCR and the confirmed send-to-Library bridge | BLURBY-BUSINESS-1 (Path: epic, Seq 100.5); lane confirmed by the owner 2026-10-30, policy entry through AGENT-PROTOCOL-CONSOLIDATION-1 |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
 
@@ -1528,6 +1529,34 @@ These headings expose existing table/bullet items to the board parser; they do n
 
 #### APP-TABS-1 — Four tabs: Library, Newsroom, Podcasts, Marketplace *(live Seq100; In Flight; Full Spec)*
 - **Source:** docs/planning/specs/2026-10-23-5/APP-TABS-1.md; live register remains status authority.
+
+<a id="blurby-business-1"></a>
+#### BLURBY-BUSINESS-1 — Blurby Business: a walled-off PDF viewer and editor *(Seq 100.5; Queued; Path: epic; lane Blurby Business; absorbed 2026-10-30 from held plan `2026-10-30-blurby-business-tier1`)*
+
+- **What:** a separate Blurby Business window that becomes Blurby's standard PDF viewer and editor, and the default PDF app. It covers the competitor matrix's Viewing, Annotation, Editing, Page organisation, Forms, Optimisation, Signatures, Metadata and Printing rows, plus merge, extract and split (about 121 features), in eight phases:
+  - P1 Viewer, with the default-PDF handler, tabs, navigation with native text select and copy, locked PDFs, OCR, and "Send to Blurby to read";
+  - P2 Annotation, form fill and save with backup;
+  - P3 Page organisation and merge;
+  - P4 Editing and metadata;
+  - P5 Signatures;
+  - P6 Form authoring;
+  - P7 Printing;
+  - P8 Optimisation.
+- **Why:** the owner asked to bring KillerPDF's functionality into Blurby, walled off from the reading modes (storyboard aligned 2026-10-30, re-scoped to epic the same day). Blurby today converts every PDF to EPUB on import and rejects scanned PDFs.
+- **Path:** epic — eight dependent phases spanning many sessions. `/epic BLURBY-BUSINESS-1` charters it, and `/next-dispatch` routes it there when it reaches the head.
+- **Source:**
+  - held entry `docs/planning/holding/2026-10-30-blurby-business-tier1.md` (alignment record, frames, "Epic re-scope" phase table and verdict);
+  - Phase 1 seed specs (HB-6..HB-11) in `docs/planning/holding/2026-10-30-blurby-business-tier1/phase1-specs.md`;
+  - matrix `docs/studies/2026-10-30-pdf-competitor-matrix.md`.
+- **Origin:** held plan `2026-10-30-blurby-business-tier1` (HB-6..HB-11, epic re-scope).
+- **Gates:**
+  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes, and APP-TABS-1 is a P1 prerequisite.
+  - Merge: after the Stage 8 release, and after the seven held branches named under Readiness in `phase1-specs.md`.
+  - Engine: permissive licences only (pdf.js, pdf-lib, `@signpdf`, bundled qpdf).
+  - No shared-core touches (a separate `.d.ts` avoids `src/types.ts`).
+  - Host: RodneySr, for now.
+- **Lane:** "Blurby Business", the seventh product lane, confirmed by the owner on 2026-10-30. It enters registry policy through AGENT-PROTOCOL-CONSOLIDATION-1's `roadmap.lanes` → `workstreams` rename.
+- **Follow-ups:** a separate future storyboard for main-app document tabs (it reopens APP-TABS-1's "reader stays full-screen" decision) and for the main app as the EPUB default.
 
 #### RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom *(live Seq101; Queued; Stub)*
 - **Source:** ROADMAP.md#rss-aggregator-1; live register remains status authority.

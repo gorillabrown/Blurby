@@ -13,6 +13,7 @@
 | 2026-10-30 | storyboarded | storyboard | aligned; item set; 5 items (BUSINESS-SHELL/NAV/LOCKED/OCR/SEND, provisional) |
 | 2026-10-30 | storyboarded | storyboard | reopened for entry points: PDF default handler (HB-11); re-aligned; 6 items HB-6..HB-11 |
 | 2026-10-30 | storyboarded | storyboard | re-scoped to epic-scale: PDF viewer and editor, 8 phases, 121 features; aligned; Phase 1 specs (HB-6..HB-11) moved to 2026-10-30-blurby-business-tier1/phase1-specs.md as charter seed |
+| 2026-10-30 | absorbed | roadmap-review | as BLURBY-BUSINESS-1 (queued, Path: epic, Seq 100.5; lane Blurby Business pending its Notion option) |
 
 ## Storyboard
 
