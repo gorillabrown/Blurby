@@ -1,0 +1,35 @@
+{
+  "id": "20261030T212651Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-PAUSE-CANCEL-1",
+  "created": "2026-10-30T21:26:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1).\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: fix 53adf994, census c4b79abb, packages from cf093ab7. After (S) 3/3 pass (press-to-cancel 13-24 ms, 0 posts after); T2-2 0 gaps; after D6 resumes 80-96 ms; x64/arm64 asar identical. Arm64 launch at merge. Built and held, stacked on NARRATE-QUIT-LINGER-1."
+    },
+    "expectedRevision": "7bd29cbc88c9cb2ce77313c7e74950530f7fc7c98dd4717bdb414235db870a92",
+    "idempotencyKey": "set-status:NARRATE-PAUSE-CANCEL-1:[('notes', \"Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\\n\\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1).\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: fix 53adf994, census c4b79abb, packages from cf093ab7. After (S) 3/3 pass (press-to-cancel 13-24 ms, 0 posts after); T2-2 0 gaps; after D6 resumes 80-96 ms; x64/arm64 asar identical. Arm64 launch at merge. Built and held, stacked on NARRATE-QUIT-LINGER-1.\"), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-PAUSE-CANCEL-1",
+      "idempotencyKey": "set-status:NARRATE-PAUSE-CANCEL-1:[('notes', \"Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\\n\\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1).\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: fix 53adf994, census c4b79abb, packages from cf093ab7. After (S) 3/3 pass (press-to-cancel 13-24 ms, 0 posts after); T2-2 0 gaps; after D6 resumes 80-96 ms; x64/arm64 asar identical. Arm64 launch at merge. Built and held, stacked on NARRATE-QUIT-LINGER-1.\"), ('status', 'In Flight')]",
+      "actualRevision": "8dade63dd326d92fa1294fe5992be994f95f4b01a68c3c8ea9fe6f66246f7b97",
+      "recoveryId": "20261030T212651Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T21:27:09Z",
+  "outcome": "succeeded"
+}

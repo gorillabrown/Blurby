@@ -37,7 +37,7 @@
 ### BUG-235 — REGRESSION: Flow playback stops at a section's end and never enters the next section
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
 **Severity:** HIGH. A regression in the held stack; it BLOCKS BAND-ALIGN-2's merge.
-**Status:** OPEN. A bisect is queued on RodneySr as job 6 (after job 5, before R8). Lane: Reader Engine.
+**Status:** RESOLVED IN SOURCE 2026-10-30 by BAND-ALIGN-2 R7a (`eb/band-align-2` @ `3977540e`, package-verified x64 by Blurby.Brain1). The bisect named `860ad3ca`. It merges with the BAND-ALIGN-2 stack; the entry moves to Complete when that stack merges. Lane: Reader Engine.
 **Observation:** in Flow, at NOTES#185 the band switches off, the cursor disappears, and playback never enters section 2.
 - Present on M `70e739ea` (band-align-2 `85e32777` + main) and on R7 `a5273704`.
 - Absent on release `36ac7466`, which crosses into section 2 at sample 15 (AURELIUS#189) and keeps playing.
