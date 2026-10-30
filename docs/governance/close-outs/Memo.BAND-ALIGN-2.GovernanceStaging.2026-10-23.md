@@ -231,3 +231,71 @@ In Focus and Flow: the band's edges sit between lines; the cursor line is the ba
 ### Gate (2) owner row
 
 Withdrawn with R7: the paragraph-band ruling replaces the band-at-fixed-height wording. R8 will carry its own row.
+
+## R7a (2026-10-30, BUG-235)
+
+**Spec:** `docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md`. Host: RodneySr (job 7). Branch `eb/band-align-2-r7a-work`, to be pushed to the held `eb/band-align-2` as a fast-forward. Not merged.
+
+### Bisect and diagnosis
+
+- **Bisect (RodneySr job 6, `C:\Projects\Blurby-artifacts\bug-235-bisect\`):** `860ad3ca` ("Flow runs on one clock") is the first bad commit. Its last cursor is NOTES#185, it never crosses, and 20 samples have no cursor. `b8ded60c` and `f96552bd` are good: both cross at L2 15 (AURELIUS#189). `368dcc15` adds only a test.
+- **Diagnosis (Blurby.Brain1):** under `wordClock`, the section hand-off fires only in `FlowScrollEngine.syncToWord`, and `onEngineWordAdvance` reached `syncToWord` only after a successful highlight. A word past the last rendered line cannot be highlighted, so it took the pause-and-`surface.next()` path, and the hand-off was unreachable.
+
+### Base M7a
+
+`4f464b7a`: a `--no-ff` merge of `origin/main` `db43bd3c` into `f3f254f3`. **Conflicting files: none.** `HEAD^1` is `f3f254f3`; `origin/main` is an ancestor. `package.json` and `package-lock.json` are unchanged, and no code differs from `f3f254f3`.
+
+### Red (C1 `81281523`, standing rule 43)
+
+`npx vitest run tests/readerModes/flowSectionHandoff.test.tsx` exits 1: 4 failed, 3 passed. Log: `C:\Projects\Blurby-artifacts\band-align-2-r7a\r7a-red.log`.
+
+| Row | On the tip | Failure |
+|---|---|---|
+| (h1) | failed | the pacer's hand-off, and no page turn for a past-end word: expected `{ goToSection: [], next: 1 }` to deeply equal `{ goToSection: [ [ 1 ] ], next: 0 }` |
+| (h2) | failed | `handoffHold`: expected undefined to be null |
+| (h3) control | passed | — |
+| (h4a) control | passed | — |
+| (h4b) control | passed | — |
+| (h5) | failed | the hold begins with the hand-off: expected [] to deeply equal [ [ 1 ] ] |
+| (h6) | failed | the sequence stops at 99, 100 (miss), with no found 100 and no 101–104 |
+
+(h1)'s failure is the diagnosis confirmed: on the tip, word 100 is not found, `surface.next` is called once, and `goToSection(1)` never is.
+
+**F-red, one test-only round:** the first run (`r7a-red-try.log`) recorded 95 twice in (h6), because `start()` highlights its start word with `allowMotion: true` and that is not a word advance. The sequence now records only word-advance and resume highlights. (h1)'s hand-off and page-turn checks were joined into one assertion so the red output shows both counts.
+
+### The change (C2 `20b3d5f8`, Done-when 2–3)
+
+- E1–E5 as specified, in `FlowScrollEngine.isPastRenderedEnd`, `FlowModeState.handoffHold`, `onEngineWordAdvance`, `onWordsReextracted`, `pausePlayback` and `stop`. BUG-235's status reads RESOLVED in source (BAND-ALIGN-2 R7a).
+- `flowSectionHandoff.test.tsx`: 7/7.
+- `tests/readerModes`, `flow-scroll-engine`, `flowZoneAuto`, `readerModeIsolation` and `readerModeOwnership`: 27 files, 306 tests, exit 0. No existing file was edited.
+- `npm test`: **192 files passed; 2,581 passed, 1 skipped, 0 failed.** `npm run typecheck` 0; `npm run build` 0.
+- Fence: `git diff --name-only 4f464b7a HEAD -- src/utils src/components src/types.ts src/constants.ts main src/reader/modes/focus src/reader/modes/page src/reader/modes/narrate` prints nothing.
+
+### Live L2 on the x64 package (Done-when 5)
+
+R7's probe, copied unchanged (`r7-probe.mjs` SHA-256 `bbbffbb7…`), on R7's route: `L2START=text` (Flow from MEDITATIONS#136), Top third, 5 lines, 100 %, one sample a second for 30 s. Each run used a fresh scratch profile with the proof passed; live `library.json` `5917eefc…` and `settings.json` `ec99be2b…` were unchanged.
+
+| Run | Crossing (L2a) | Samples with no cursor (L2c) | Index rise, samples 16–30 | Monotone from crossing | Band on with the cursor in it | `playing` | Last cursor |
+|---|---|---|---|---|---|---|---|
+| **R7a run 1** `r7a-L2text-Flow` | **13, AURELIUS#189 (section 2)** | **0** | 45 | yes | 18 of 18 | true throughout | Annius#242 |
+| R7a run 2 `r7a-L2text-Flow-2` | 13, MARCUS#188 (section 2's first word; #193 at 14) | 0 | 43 | yes | 18 of 18 | true throughout | kings.#239 |
+| Release `rel36-L2-text` | 15, AURELIUS#189 | 2 (13, 14) | 43 | yes | — | true | of#237 |
+| Bad `cand-L2text-L5-Flow` | never | 18 (13–30) | — | — | — | true | none |
+
+- L2a, L2b and L2c pass. The crossing comes two samples earlier than the release's, because the release lost two samples at the boundary.
+- Run 1's `error.log` held 2,400 ResizeObserver-loop lines at 60 per second. They began at 21:37:08, eight seconds before Play (21:37:16), during the probe's setup. There was also one startup `paginator` "Cannot destructure property 'style'" line at 21:36:50. Neither reproduced: run 2 logged 3 ResizeObserver lines, as the release and bad runs did. This is recorded, not failed.
+
+### Package verification (standing rule 53, Temporary placement), `20b3d5f8`
+
+- **(a) Packages:** `C:\Projects\Blurby-artifacts\band-align-2-r7a\out-x64\win-unpacked` and `out-arm64\win-arm64-unpacked`, `--dir` from `20b3d5f8` (descends from M7a; C3 is documents only).
+  - `app.asar` SHA-256: x64 `e4a5405d8499bdaa2246630c1c7c65c3c37bf97d52e8c9b04d07034e31ec1e9c`, arm64 `e4a5405d8499bdaa2246630c1c7c65c3c37bf97d52e8c9b04d07034e31ec1e9c` (identical).
+  - Pair check: **0**. Extracted to `asar-x64` and `asar-arm64`.
+- **(b)** `BLURBY_USER_DATA_DIR`: `True`. **25 s x64 launch** (`rule53-x64-25s`): proof passed, alive at 25 s, no `error.log` written, no flagged stdio line, no crash dump, live hashes unchanged. Known noise: BUG-217's `Backup failed … ENOENT` only; no `EADDRINUSE`.
+- **(c)** Package unchanged for `main/`: `git diff --name-only 4f464b7a HEAD -- main main.js preload.js package.json` is empty. The extracted x64 `dist\` equals the worktree's `dist\` by SHA-256 (0 of 21 files differ).
+- **(d)** The live rows ran on this x64 package.
+- **arm64 launch:** at merge time (R-2026-10-30-2). The item reads "package-verified (x64, RodneySr); arm64 launch at merge".
+- **(e)** Package path, commit and logs go to Blurby.Brain1. Blurby.Roadmap gives no merge go before Brain confirms.
+
+### Gate (2) owner row (for Blurby.Roadmap to add)
+
+> On *Meditations* in Flow, play from the start of the text through the end of the first section: the reading carries on into the next section (AURELIUS…) without stopping, the cursor never disappears, and the band stays on.
