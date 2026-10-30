@@ -1570,8 +1570,9 @@ These headings expose existing table/bullet items to the board parser; they do n
   - Phase 1 seed specs (HB-6..HB-11) in `docs/planning/holding/2026-10-30-blurby-business-tier1/phase1-specs.md`;
   - matrix `docs/studies/2026-10-30-pdf-competitor-matrix.md`.
 - **Origin:** held plan `2026-10-30-blurby-business-tier1` (HB-6..HB-11, epic re-scope).
+- **Prerequisites:** none in the register (cleared 2026-10-30). The gates below are carried in the epic charter as its Constraints and launch-preflight start gate.
 - **Gates:**
-  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes, and APP-TABS-1 is a P1 prerequisite.
+  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes. APP-TABS-1 is a merge-order dependency (shared `preload.js` and `CommandPalette.tsx`).
   - Merge: after the Stage 8 release, and after the seven held branches named under Readiness in `phase1-specs.md`.
   - Engine: permissive licences only (pdf.js, pdf-lib, `@signpdf`, bundled qpdf).
   - No shared-core touches (a separate `.d.ts` avoids `src/types.ts`).
