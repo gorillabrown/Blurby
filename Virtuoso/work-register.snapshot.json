@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-28T02:24:28Z",
+  "takenAt": "2026-10-28T19:04:46Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -21,6 +21,45 @@
     "written_status"
   ],
   "items": [
+    {
+      "id": "AGENT-PROTOCOL-CONSOLIDATION-1",
+      "title": "Use standard Virtuoso agents with Blurby overlays",
+      "sequence": 67.75,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NATIVE-PATH-ATTESTATION-1"
+      ],
+      "effort": "M",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "Standard Virtuoso agent loading with registered Blurby overlays and duplicated local protocols retired",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#agent-protocol-consolidation-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "After the current Native dispatch closes out, consolidate local agent protocols into Virtuoso standard roles plus additive Blurby-specific overlays. Inventory callers, migrate project requirements and startup instructions, keep only necessary thin host adapters, retire duplicated protocols and verify a fresh session loads intended plugin/overlays without fallback.",
+      "notes": "Owner directive 2026-10-28. First governance follow-up after NATIVE-PATH-ATTESTATION-1. Current pinned Zeus file and six uncommitted tool edits remain untouched. Stub only: detailed migration specification, local-protocol dependency release and verified quiet-machine destination/access are required before execution. Preserve all current technical/design authority, review, isolation, custody and release gates.",
+      "revision": "395852ae6a89d7a99dc35abc4c91eec65772dd2ffd332ed8840650e4d1888985",
+      "extra": {
+        "id": "4077c96c-c31e-81b4-9673-db39d6735765",
+        "url": "https://app.notion.com/4077c96cc31e81b49673db39d6735765",
+        "createdTime": "2026-10-28 19:04:17Z",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
+    },
     {
       "id": "ANDROID-APP-1",
       "title": "Establish the Android app",
