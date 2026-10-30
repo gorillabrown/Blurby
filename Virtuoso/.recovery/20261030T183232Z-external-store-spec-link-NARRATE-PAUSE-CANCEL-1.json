@@ -1,0 +1,35 @@
+{
+  "id": "20261030T183232Z-external-store-spec-link-NARRATE-PAUSE-CANCEL-1",
+  "operation": "external-store-spec-link",
+  "item_id": "NARRATE-PAUSE-CANCEL-1",
+  "created": "2026-10-30T18:32:32Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md"
+    },
+    "expectedRevision": "6f50fc8e93f829eea93397a884a03689f99b1e96551e6e0325edba90a810a8e7",
+    "idempotencyKey": "store-spec-link:NARRATE-PAUSE-CANCEL-1:[('spec_link', 'docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "NARRATE-PAUSE-CANCEL-1",
+      "idempotencyKey": "store-spec-link:NARRATE-PAUSE-CANCEL-1:[('spec_link', 'docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md'), ('written_status', 'Full Spec')]",
+      "actualRevision": "ea48feed6506c2cee382a1e69a75ad9d7401e91aa9b1007b0323c0a3bd220171",
+      "recoveryId": "20261030T183232Z-external-store-spec-link-NARRATE-PAUSE-CANCEL-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:32:56Z",
+  "outcome": "succeeded"
+}

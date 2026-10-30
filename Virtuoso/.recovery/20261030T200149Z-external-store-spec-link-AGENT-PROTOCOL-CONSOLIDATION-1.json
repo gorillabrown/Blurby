@@ -1,0 +1,35 @@
+{
+  "id": "20261030T200149Z-external-store-spec-link-AGENT-PROTOCOL-CONSOLIDATION-1",
+  "operation": "external-store-spec-link",
+  "item_id": "AGENT-PROTOCOL-CONSOLIDATION-1",
+  "created": "2026-10-30T20:01:49Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md"
+    },
+    "expectedRevision": "eaeebb6d8614ddafe757bed8a40aa50678dc8e4d6d99a1a3bf93bff7c1de866b",
+    "idempotencyKey": "store-spec-link:AGENT-PROTOCOL-CONSOLIDATION-1:[('spec_link', 'docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "AGENT-PROTOCOL-CONSOLIDATION-1",
+      "idempotencyKey": "store-spec-link:AGENT-PROTOCOL-CONSOLIDATION-1:[('spec_link', 'docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md'), ('written_status', 'Full Spec')]",
+      "actualRevision": "8c683694c660ac43b2f52cdfe71fb91094a32044b47a1b940d3b4310fb37e58e",
+      "recoveryId": "20261030T200149Z-external-store-spec-link-AGENT-PROTOCOL-CONSOLIDATION-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T20:02:11Z",
+  "outcome": "succeeded"
+}

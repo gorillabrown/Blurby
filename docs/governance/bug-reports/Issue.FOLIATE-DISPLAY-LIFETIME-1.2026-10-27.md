@@ -1,6 +1,6 @@
 # FOLIATE-DISPLAY-LIFETIME-1 — observation capability hold (2026-10-27)
 
-Status: OPEN / BLOCKED. Source built and held; native qualification NOT RUN.
+Status: RESOLVED 2026-10-30 by R-2026-10-30-1's native A/B on RodneySr (see Resolution below). Original status: OPEN / BLOCKED. Source built and held; native qualification NOT RUN.
 Source: owner-confirmed non-completion recording under dispatch-closeout.
 Related report: ../close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md
 
@@ -20,3 +20,15 @@ Owner confirmed 2026-10-27: record built and held, mark Blocked, persist report 
 
 ## Remaining work
 A successor observation mechanism needs a separately reviewed static design and explicit new qualification budget/custody. All original native routes, actual initialized data/queue path proof, normal-profile integrity checks and final Brain exact-package/integration gates remain. No release, main source merge, installation or terminal completion is authorized. This is an open implementation dependency, not an unresolved request to waive acceptance.
+
+## Resolution — 2026-10-30
+
+Ruling R-2026-10-30-1 (Blurby.Brain1, under the owner's 2026-10-30 mandate) replaced the native-observation collector with a native A/B on RodneySr. Isolation: inspector-proved scratch userData (LL-165), APPDATA/LOCALAPPDATA redirected, profile-tree snapshot.
+
+- The candidate passes: package commit `2d5772d3` (`2df0f920` + origin/main `e29117b2`), tip `ea02d903`.
+- Control `10332e5a` shows 1 style-null line; the candidate shows 0 across 9 runs and writes no `error.log`.
+- Route checks are identical on both builds.
+- The package is verified under rule 53 on x64 (the asar pair is identical); the arm64 launch happens at merge.
+- Live profile unchanged: 4,088 files and 4 updater files, with nothing restored.
+
+Memo: `docs/studies/investigations/FOLIATE-DISPLAY-LIFETIME-1.native.2026-10-30.md` on `eb/foliate-display-lifetime-1`. The earlier receipts above stay as historical evidence. BUG-222 is fixed in the candidate; `BUG_REPORT.md` records it as resolved when the stack merges.

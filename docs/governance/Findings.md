@@ -119,3 +119,49 @@ Append-only findings; each disposition change is appended under its identifier. 
 **Source:** Parent roadmap actor confirmed64 durable mutation plans after full live readback; snapshot 2026-10-26T20:43:19Z. Original Notes prefixes and all factual identities/dates/states were preserved; Notion inline Markdown presentation was normalized explicitly.
 
 **Disposition:** open — all64 metadata descriptions applied without Status/Seq changes; the seven named build/package evidence gaps remain owned follow-ups rather than presumed completed delivery.
+
+### F-001 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — the seven build/package evidence gaps stay owned by each item's own standing rule 53 verification, now run on RodneySr (temporary placement, 2026-10-30), and are never presumed delivered. Recorded in docs/planning/roadmap-reviews/2026-10-30-assessment.md.
+
+### F-002 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted, deferred — no semantic deduplication of lessons without a reviewed pass; revisit at the next review that has close-outs to read.
+
+### F-003 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — both legacy close-out copies stay preserved; no canonical template replacement is guessed.
+
+### F-004 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — the live register Seq is authoritative; physical roadmap card order is presentation only.
+
+### F-005 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — uncovered classifications and local infrastructure remain preservation items, never deleted automatically.
+
+### F-006 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** fixed by a planned item — the reviewed policy.roadmap.lanes to workstreams rename is folded into AGENT-PROTOCOL-CONSOLIDATION-1's scope (owner-approved at the 2026-10-30 Phase B checkpoint).
+
+### F-007 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — the documentation-only sweep never claimed runtime verification.
+
+### F-008 — disposition (roadmap-review, 2026-10-30)
+
+**Disposition:** accepted — matches CLAUDE.md rule 10: no workspace or footprint deletion without an explicit request.
+
+### F-009 — Narrate D6 exceeds its budgets on the x64 mainstream class (roadmap-review, 2026-10-30)
+
+**Source:** Blurby.Brain1, 2026-10-30, from NARRATE-QUIT-LINGER-1 (b)'s D6 run on RodneySr (x64, i7-1185G7; foreign CPU 13.7–23.5 %, trials counted). Data: RodneySr C:\Projects\Blurby-artifacts\narrate-quit-linger-1\d6-after-x64\.
+
+**Severity:** medium
+
+**Where:** Narrate D6 latency budgets (Decision #22, NARRATE-REBUILD-1 charter; docs/planning/epics/2026-10-12-narrate-rebuild/)
+
+**Finding:** D6 exits 1 on two figures: 1.0x click 2,051 ms and speed change 2,406 ms. Warm resume passes (94/93 ms). Not caused by quit-linger (b), which touches only main/quit-sequence.js. The budgets were set on the owner's ARM64 machine; whether they hold for the x64 mainstream class is unmeasured.
+
+**Accountable role / next action:** planner with Blurby.Brain1 (technical authority) — decide whether the mainstream-class budgets need their own figures or whether this is a defect; NARRATE-CPU-PROFILE-1 (Seq 95) is the existing measurement item to carry it.
+
+**Disposition:** open

@@ -1,0 +1,34 @@
+{
+  "id": "20261030T182809Z-external-set-status-NARRATE-QUIT-LINGER-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-QUIT-LINGER-1",
+  "created": "2026-10-30T18:28:09Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).\n\n(b) package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: tip 5de476ce, package 9e428caf (includes origin/main e29117b2); 9/9 relaunches during the linger show one window vs 0/8 base; suite 2456/1/0. Arm64 launch at merge (R-2026-10-30-2). Built and held; merge go pending the post-release train. (a) pause cancel split to NARRATE-PAUSE-CANCEL-1 (reproduced 3/3 on RodneySr)."
+    },
+    "expectedRevision": "ea192b2bf3cf185627cdccd6127308634c4289d3e4dba62b122a9a421726c387",
+    "idempotencyKey": "set-status:NARRATE-QUIT-LINGER-1:[('notes', 'Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).\\n\\n(b) package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: tip 5de476ce, package 9e428caf (includes origin/main e29117b2); 9/9 relaunches during the linger show one window vs 0/8 base; suite 2456/1/0. Arm64 launch at merge (R-2026-10-30-2). Built and held; merge go pending the post-release train. (a) pause cancel split to NARRATE-PAUSE-CANCEL-1 (reproduced 3/3 on RodneySr).')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-QUIT-LINGER-1",
+      "idempotencyKey": "set-status:NARRATE-QUIT-LINGER-1:[('notes', 'Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).\\n\\n(b) package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: tip 5de476ce, package 9e428caf (includes origin/main e29117b2); 9/9 relaunches during the linger show one window vs 0/8 base; suite 2456/1/0. Arm64 launch at merge (R-2026-10-30-2). Built and held; merge go pending the post-release train. (a) pause cancel split to NARRATE-PAUSE-CANCEL-1 (reproduced 3/3 on RodneySr).')]",
+      "actualRevision": "5c6326437c1893fb61d24b19bfac5a948393b3ec6b6cb0d4e08b90bdcd0a959b",
+      "recoveryId": "20261030T182809Z-external-set-status-NARRATE-QUIT-LINGER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:28:25Z",
+  "outcome": "succeeded"
+}
