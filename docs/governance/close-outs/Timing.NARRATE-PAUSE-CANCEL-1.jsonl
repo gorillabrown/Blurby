@@ -1,0 +1,12 @@
+{"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "note": "worktree from 5de476ce, base package, base (S)", "at": "2026-10-30T20:15:00Z"}
+{"event": "end", "row": 1, "evidence": "base x64 --dir 5de476ce; check-s-base FAIL 3/3 (posts +768/+449/+550 ms)", "result": "done", "at": "2026-10-30T20:28:39Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "note": "red tests (e1-e4, k1, i1-i3, p1-p2)", "at": "2026-10-30T20:20:00Z"}
+{"event": "end", "row": 2, "evidence": "30216818; red exits 1, controls e3 e4 i3 p2 pass; e3 one-fix 3 s", "result": "done", "at": "2026-10-30T20:27:35Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "note": "fix and targeted suites", "at": "2026-10-30T20:27:40Z"}
+{"event": "end", "row": 3, "evidence": "53adf994; targeted suites green", "result": "done", "at": "2026-10-30T20:55:07Z"}
+{"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "note": "base D6 and gaps; after package, (S), D6, gaps", "at": "2026-10-30T20:30:00Z"}
+{"event": "end", "row": 4, "evidence": "base D6 PASS (excepted warm-2.00-3 2354 ms, BUG-237); after (S) PASS 0/3; after D6 exit 0 worst 96 ms; compare exit 1, ruling (a); T2-2 0 gaps", "result": "done", "at": "2026-10-30T21:23:47Z"}
+{"event": "start", "row": 5, "model": "claude-opus-5-5", "host": "claude-code", "note": "origin/main merge, gates, census ruling, rule 53", "at": "2026-10-30T20:45:00Z"}
+{"event": "end", "row": 5, "evidence": "cf093ab7 merge; c4b79abb census; npm test 183/2466/1 skipped/0 failed; typecheck 0; build 0; asar pair F961A79C identical, 0; 25 s x64 launch clean", "result": "done", "at": "2026-10-30T21:26:20Z"}
+{"event": "start", "row": 6, "model": "claude-opus-5-5", "host": "claude-code", "note": "investigation memo, BUG-207, governance memo, time log, push", "at": "2026-10-30T21:30:00Z"}
+{"event": "end", "row": 6, "evidence": "memos, BUG-207 line, time log committed; origin/main merged; pushed to eb/narrate-pause-cancel-1", "result": "done", "at": "2026-10-30T21:29:12Z"}
