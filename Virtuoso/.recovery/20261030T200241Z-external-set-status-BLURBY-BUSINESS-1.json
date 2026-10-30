@@ -1,0 +1,34 @@
+{
+  "id": "20261030T200241Z-external-set-status-BLURBY-BUSINESS-1",
+  "operation": "external-set-status",
+  "item_id": "BLURBY-BUSINESS-1",
+  "created": "2026-10-30T20:02:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "workstream": "Blurby Business"
+    },
+    "expectedRevision": "c17c5c9de7494b9213517cda98c1118ee81bcfff6fff83c26f9e267a767eae79",
+    "idempotencyKey": "set-status:BLURBY-BUSINESS-1:[('workstream', 'Blurby Business')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLURBY-BUSINESS-1",
+      "idempotencyKey": "set-status:BLURBY-BUSINESS-1:[('workstream', 'Blurby Business')]",
+      "actualRevision": "824e0c1dd0e87887570a6c5b0787374b06b113b101d23946b1960412ebcdf10d",
+      "recoveryId": "20261030T200241Z-external-set-status-BLURBY-BUSINESS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T20:02:59Z",
+  "outcome": "succeeded"
+}
