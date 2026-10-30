@@ -36,7 +36,7 @@ for (const d of [profile, appdata, localappdata]) { if (fs.existsSync(d)) { rec.
 const dataDir = path.join(profile, "blurby-data");
 const errLog = path.join(dataDir, "error.log");
 
-if (seed === "owned91") {
+if (seed === "owned91" || seed === "owned91-initial") {
   // The fixture's three filepath fields name the investigator's profile; rewrite only those to this profile's copy.
   fs.mkdirSync(dataDir, { recursive: true });
   const epub = path.join(dataDir, "owned91.epub");
@@ -44,6 +44,14 @@ if (seed === "owned91") {
   fs.copyFileSync(path.join(fixture, "settings.json"), path.join(dataDir, "settings.json"));
   const lib = JSON.parse(fs.readFileSync(path.join(fixture, "library.json"), "utf8"));
   rec.seedRewrites = lib.docs.map((d) => { const from = d.filepath; d.filepath = epub; return { id: d.id, from, to: epub }; });
+  if (seed === "owned91-initial") {
+    // The visibility item's INITIAL state (Blurby.Brain 2026-10-30): the fixture holds the later exit state, so restore
+    // owned-complete to 91/91 unarchived; owned-archive and owned-control are left as supplied.
+    const c = lib.docs.find((d) => d.id === "owned-complete");
+    rec.seedInitial = { from: { position: c.position, archived: c.archived, archivedAt: c.archivedAt ?? null } };
+    c.position = 91; c.archived = false; delete c.archivedAt;
+    rec.seedInitial.to = { position: 91, archived: false, archivedAt: null };
+  }
   fs.writeFileSync(path.join(dataDir, "library.json"), JSON.stringify(lib, null, 2));
   rec.seedHashes = { before: Object.fromEntries(["library.json", "settings.json", "owned91.epub"].map((f) => [f, sha(path.join(fixture, f))])), seeded: Object.fromEntries(["library.json", "settings.json", "owned91.epub"].map((f) => [f, sha(path.join(dataDir, f))])) };
 }
