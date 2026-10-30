@@ -8,6 +8,21 @@
 
 ## Incomplete
 
+### BUG-234 — Clicking a word scrolled out of view past BOOKS jumps Focus to section 2 with no cursor and the band off
+**Reported:** 2026-10-30, RodneySr (Blurby.Brain1) during BAND-ALIGN-2 R7 live checks on candidate `a5273704` (Focus, *Meditations*).
+**Severity:** LOW, pending reproduction on `main`.
+**Status:** OPEN; not yet scheduled. Lane: Reader Engine.
+**Observation:** a click on a word that had scrolled out of view past the BOOKS heading moved the view to section 2. No cursor was painted, and the band switched off.
+**Next:** reproduce on `main` and on the R7 base before attributing it to R7. If it reproduces on `main`, specify it as a Focus-runtime fix. Related: CHAPTER-STEP-CFI-1 (the Focus landing word), BUG-233.
+
+### BUG-233 — In Focus, the bottom bar's Next chapter does not leave section 1
+**Reported:** 2026-10-30, RodneySr (Blurby.Brain1) during BAND-ALIGN-2 R7 live checks on candidate `a5273704` (Focus, *Meditations*).
+**Severity:** MEDIUM.
+**Status:** OPEN; not yet scheduled. Lane: Reader Engine.
+**Observation:** three clicks on the bottom bar's Next chapter in Focus left the view in section 1; nothing moved.
+**Coverage check (Blurby.Roadmap, 2026-10-30):** not covered. CHAPTER-STEP-CFI-1 (`docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md`; it absorbed FOCUS-TOC-JUMP-WORD-1) covers which word and cfi a chapter step saves after it lands, not a step that never moves. It edits the same Focus navigation path, so a fix should be scheduled with it or after it.
+**Next:** reproduce on `main` and on the R7 base. If it reproduces on `main`, trace Focus's next-chapter handler and specify the fix alongside CHAPTER-STEP-CFI-1.
+
 ### BUG-232 — Normal-profile sync queue changed during isolated smoke; writer unresolved
 **Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
 **Severity:** INVESTIGATION; proposed intake priority P1, not a new release-gate ruling.
@@ -80,7 +95,7 @@
 **Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
 **Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
 
-**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. The next free number is BUG-233.
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. The next free number is BUG-235.
 
 ### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
 **Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
