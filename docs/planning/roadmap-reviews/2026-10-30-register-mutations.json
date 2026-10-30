@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,9 +14,10 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T19:59:00Z",
+  "final": "2026-10-30T20:03:00Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
-  "batch3Refresh": "2026-10-30T19:57:00Z"
+  "batch3Refresh": "2026-10-30T19:57:00Z",
+  "batch4Refresh": "2026-10-30T20:01:30Z"
  },
  "driftLines": [],
  "counts": {
@@ -70,6 +71,14 @@
    "confirmedRevisionsMatchFinalRead": true,
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-absorb-blurby-business)"
+  },
+  "batch4": {
+   "refreshDiffAgainst195900Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-spec-agent-protocol)"
   }
  },
  "changes": [
@@ -534,6 +543,134 @@
    "actualRevision": "c17c5c9de7494b9213517cda98c1118ee81bcfff6fff83c26f9e267a767eae79",
    "readbackNote": null,
    "batch": 3
+  },
+  {
+   "change": 19,
+   "item": "AGENT-PROTOCOL-CONSOLIDATION-1",
+   "operation": "store-spec-link",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T200149Z-external-store-spec-link-AGENT-PROTOCOL-CONSOLIDATION-1",
+   "providerId": "4077c96c-c31e-81b4-9673-db39d6735765",
+   "url": "https://app.notion.com/4077c96cc31e81b49673db39d6735765",
+   "fieldsWritten": [
+    "Spec State",
+    "Spec Reference"
+   ],
+   "before": {
+    "Spec State": "Stub",
+    "Spec Reference": "ROADMAP.md#agent-protocol-consolidation-1"
+   },
+   "readback": {
+    "Spec State": "Full Spec",
+    "Spec Reference": "docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md"
+   },
+   "actualRevision": "8c683694c660ac43b2f52cdfe71fb91094a32044b47a1b940d3b4310fb37e58e",
+   "readbackNote": "spec passed U9 and U10 (exit 0) per coordinator",
+   "batch": 4
+  },
+  {
+   "change": "20a",
+   "item": null,
+   "operation": "schema: add select option (connector notion-update-data-source; not a helper handshake: the helper has no schema operation)",
+   "outcome": "succeeded",
+   "recoveryId": null,
+   "providerId": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
+   "property": "Lane",
+   "statement": "ALTER COLUMN \"Lane\" SET SELECT('UX polish':pink, 'TTS / Narration Engine':purple, 'Reader Engine':blue, 'Chrome Extension':yellow, 'Library & Content':brown, 'Platform & Maintenance':gray, 'Blurby Business':orange) COMMENT 'Primary product lane (registry policy.roadmap.lanes)'",
+   "optionsBefore": [
+    [
+     "UX polish",
+     "pink"
+    ],
+    [
+     "TTS / Narration Engine",
+     "purple"
+    ],
+    [
+     "Reader Engine",
+     "blue"
+    ],
+    [
+     "Chrome Extension",
+     "yellow"
+    ],
+    [
+     "Library & Content",
+     "brown"
+    ],
+    [
+     "Platform & Maintenance",
+     "gray"
+    ]
+   ],
+   "optionsAfter": [
+    [
+     "UX polish",
+     "pink"
+    ],
+    [
+     "TTS / Narration Engine",
+     "purple"
+    ],
+    [
+     "Reader Engine",
+     "blue"
+    ],
+    [
+     "Chrome Extension",
+     "yellow"
+    ],
+    [
+     "Library & Content",
+     "brown"
+    ],
+    [
+     "Platform & Maintenance",
+     "gray"
+    ],
+    [
+     "Blurby Business",
+     "orange"
+    ]
+   ],
+   "diff": {
+    "added": [
+     [
+      "Blurby Business",
+      "orange"
+     ]
+    ],
+    "removed": [],
+    "recoloured": [],
+    "renamed": [],
+    "existingOptionIdsUnchanged": true,
+    "propertyDescriptionUnchanged": true,
+    "otherPropertiesUnchanged": true
+   },
+   "authority": "owner approval in chat 2026-10-30 (\"Yes, add the option\") with Blurby.Brain1 technical ruling",
+   "followUp": "policy.roadmap.lanes still lists the six original lanes; not changed by this batch",
+   "batch": 4
+  },
+  {
+   "change": "20b",
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T200241Z-external-set-status-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Lane"
+   ],
+   "before": {
+    "Lane": null
+   },
+   "readback": {
+    "Lane": "Blurby Business"
+   },
+   "actualRevision": "824e0c1dd0e87887570a6c5b0787374b06b113b101d23946b1960412ebcdf10d",
+   "readbackNote": "completes change 18, whose Lane was refused before the option existed",
+   "batch": 4
   }
  ]
 }
