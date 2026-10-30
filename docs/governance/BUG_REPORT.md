@@ -247,7 +247,7 @@ Ruled out by measurement: the restamp guard's cfi-only save, the renderer's full
 | Producer done, instrumented | 1.86–8.01 |
 
 No run hit the 30 s terminate, and every exit code was 0. Gate status and fix direction are for Blurby.Brain (the report's BUG-207 section).
-**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
+**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN for the slow quit. The relaunch lost during the quit linger is RESOLVED in source (NARRATE-QUIT-LINGER-1, (b)): on x64, 9 of 9 counted relaunches 0.5–2.0 s after quit now show one Blurby window (base: 0 of 8; `docs/studies/investigations/NARRATE-QUIT-LINGER-1.after.2026-10-30.md`). Pause-cancel (a) is split to its own item (Blurby.Brain, 2026-10-30): 3 of 3 staged base runs posted a queued prefetch after the pause. The teardown linger after Node's exit is a finding for ELECTRON-42-UPGRADE-1's lane. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
 
 ### BUG-200 — The quick-settings "Sort by" does not change the library order
 **Reported:** 2026-10-14 (code trace while specifying SETTINGS-KEY-TRUST-1, on `eb/ipc-path-trust-1` @ `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
