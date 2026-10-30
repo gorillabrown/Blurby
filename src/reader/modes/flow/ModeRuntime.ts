@@ -77,7 +77,7 @@ import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
 import { findBookParagraphStart, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 import { createChunkReadingVisualState } from "./helpers/chunkReadingVisualState";
-import { FlowScrollEngine, type FlowProgress } from "./helpers/FlowScrollEngine";
+import { FlowScrollEngine, type FlowBandEdges, type FlowProgress } from "./helpers/FlowScrollEngine";
 import type { FoliateWord } from "./helpers/foliateHelpers";
 
 /**
@@ -1167,7 +1167,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   };
 
   /** useFlowScrollSync effect 1, startWhenReady: start the line pacer against this mode's view. */
-  startScrollEngine = (container: HTMLElement, cursor: HTMLDivElement, onZoneTopChange: (topFrac: number) => void): void => {
+  startScrollEngine = (container: HTMLElement, cursor: HTMLDivElement, onZoneTopChange: (topFrac: number, band?: FlowBandEdges) => void): void => {
     if (!this.alive || !this.state.playing) return;
     const engine = this.scrollEngine ?? (this.scrollEngine = this.createScrollEngine());
     const totalWords = this.document.bookWords?.totalWords || this.document.wordCount || this.engineWords.length;

@@ -96,7 +96,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
         }
         return;
       }
-      runtime.startScrollEngine(container, cursor, (topFrac) => onZoneTopChangeRef.current(topFrac));
+      runtime.startScrollEngine(container, cursor, (topFrac, band) => onZoneTopChangeRef.current(topFrac, band));
     };
     void startWhenReady();
     return () => {
