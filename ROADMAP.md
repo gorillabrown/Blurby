@@ -645,7 +645,13 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - Shared core: `src/types.ts` (keeps a deprecated `flowZoneLines?`) and `ReaderContainer.tsx`, both inside this item's integration window. Narrate is untouched.
   - Queues on RodneySr after the BUG-235 fix.
   - Full amendment: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md).
-- **MERGE BLOCKED by BUG-235 (2026-10-30):** Flow playback stops at a section's end on the held stack but not on release `36ac7466`. The cause is between `36ac7466` and `85e32777`: prime suspect `860ad3ca`, then R6 `eabd0c07`. A bisect is RodneySr job 6, before R8. BAND-ALIGN-2 merges only after the fix.
+- **BUG-235 merge block LIFTED (2026-10-30):** R7a is package-verified (x64, RodneySr; Blurby.Brain1).
+  - `eb/band-align-2` @ `3977540e`, package from `20b3d5f8`, fast-forwarded from `a5273704`.
+  - Red h1 failed as `{goToSection: [], next: 1}`, which confirms the diagnosis. After the fix: 7/7 new; npm test 2,581/1/0.
+  - Live L2 crosses into section 2 at sample 13 in both runs, with no sample missing a cursor; the release crosses at 15, with 2 missing.
+  - x64/arm64 asar identical (`e4a5405d…`). Arm64 launch at merge.
+  - R8 is unblocked on `3977540e`. RodneySr order: NARRATE-GAP-PAUSE-1 → R8 → PLAY-FIRST-TEXT-1.
+  - Earlier record: MERGE BLOCKED by BUG-235 (2026-10-30):** Flow playback stops at a section's end on the held stack but not on release `36ac7466`. The cause is between `36ac7466` and `85e32777`: prime suspect `860ad3ca`, then R6 `eabd0c07`. A bisect is RodneySr job 6, before R8. BAND-ALIGN-2 merges only after the fix.
 - **R7 — add space, band fixed (owner design ruling 2026-10-30; dispatch-ready, RodneySr job 4):** the band never moves. Each band mode in Flow and Focus gets a leading space equal to the band anchor's offset, and a matching trailing space, so the cursor and band reach a section's first and last lines, headings included (a few px of shift is acceptable). Zero-word sections get no leading space, and R6 (no band on a zero-word page) is kept. Narrate's band is [NARRATE-BAND-SPACE-1](#narrate-band-space-1). R7 lands before FOCUS-WORD-ONLY-1 and merges after BAND-ALIGN-1. Build base: origin/main merged into tip `85e32777` first (T2). Full amendment: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7.md).
 - Accepted outside the fence: `src/reader/modes/flow/useModeBindings.ts` (writes the engine's band edges), `docs/.../census/boundary-policy.json` (declares the new constants) and `tests/readerModes/zoneLineStep.test.ts` b1d (pinned test; it now checks the band height and the anchor).
 - Accepted: e-ink steps early when the next line would fall below the view (it landed at line 18, not 20), so the cursor stays on screen. Added to the owner's smoke list.
@@ -1966,6 +1972,7 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 - SSML as internal format explicitly **rejected** per research consensus — structured text + normalizer trace is cleaner than SSML payload. (2026-05-17)
 
 ### Non-Blocking Follow-Ups (from 2026-07-02 roadmap-review)
+- **Flow hand-off hold has no timeout (LOW; from BAND-ALIGN-2 R7a, Blurby.Brain1 2026-10-30).** If the next section never loads, R7a's `handoffHold` leaves Flow "playing" with the word timer paused indefinitely. Add a 3 s timeout matching PLAY-FIRST-TEXT-1's Q7 pattern: not playing, a diagnostic, and the next Play retries. Not blocking.
 - **Declare `narrateCancelQueued` in `src/types.ts` (LOW; Blurby.Brain1 2026-10-30).** NARRATE-PAUSE-CANCEL-1 reaches the new preload method through ModeRuntime's local cast, as `narrateGenerate` is reached today, because `src/types.ts` is in the shared-core freeze set. Declare it in `ElectronAPI` once the freeze lifts, in an integration window.
 - **Relaunch drops a file argument (LOW; from NARRATE-QUIT-LINGER-1 (b), Blurby.Brain1 2026-10-30).** `app.relaunch()` in `main/quit-sequence.js` is called with no arguments, so a second-instance request that carried a file argument (opening a book) loses it on the relaunch. Not blocking; specify after the post-release train.
 - **Ads on Free (owner, 2026-10-23; from BLURBY-SERVER-1).** Deferred off the desktop: AdSense does not allow ads in software applications, and AdMob has no desktop SDK. Revisit with the phone apps (AdMob, in the library and between books only, never on the reading page or in Narrate) or a future web reader.
