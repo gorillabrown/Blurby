@@ -132,8 +132,9 @@ Other Blurby.Brain1 decisions during the dispatch: the Work lanes row is Blurby.
 ## Roadmap & Queue Movement
 
 - **Retired:** AGENT-PROTOCOL-CONSOLIDATION-1 — Queued at Seq 67.75 → Completed 2026-10-30, Seq cleared, Evidence this report.
-- **Elevated:** NARRATE-PAUSE-CANCEL-1 (Seq 86.5, Full Spec) — first queued item. No renumbering. Its prerequisite NARRATE-QUIT-LINGER-1 is In Flight, so `/next-dispatch` will hold it until that closes.
-- **Buffer:** 11 queued Full Spec items remain (≥ 3).
+- **Elevated:** NARRATE-PAUSE-CANCEL-1 (Seq 86.5, Full Spec) — first queued item. No renumbering. Its prerequisite NARRATE-QUIT-LINGER-1 is In Flight, so the helper's `next` (snapshot 2026-10-30T21:08:57Z) names NARRATE-CPU-PROFILE-1 (Seq 95, Full Spec, prerequisite NARRATE-REBUILD-1 completed) as the first eligible item until it closes.
+- **Register write:** plan `20261030T210832Z-external-record-completion-AGENT-PROTOCOL-CONSOLIDATION-1` at revision `8c683694…e58e`; one connector call set Status Completed, Completed 2026-10-30, Evidence this report, and cleared Seq; the SQL read-back matched every field; confirmed `--succeeded`. `recovery` reports nothing outstanding. The snapshot was refreshed from the read-back; only this item changed.
+- **Buffer:** 44 queued items, 11 of them Full Spec (≥ 3).
 
 ## Next Work
 
