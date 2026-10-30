@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,20 +14,24 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T20:03:00Z",
+  "final": "2026-10-30T21:24:00Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
   "batch3Refresh": "2026-10-30T19:57:00Z",
-  "batch4Refresh": "2026-10-30T20:01:30Z"
+  "batch4Refresh": "2026-10-30T20:01:30Z",
+  "batch5Refresh": "2026-10-30T20:46:00Z",
+  "batch6Refresh": "2026-10-30T20:53:00Z",
+  "batch7Refresh": "2026-10-30T21:14:30Z",
+  "batch8Refresh": "2026-10-30T21:22:00Z"
  },
  "driftLines": [],
  "counts": {
   "before": 197,
-  "after": 200,
-  "created": 3,
+  "after": 202,
+  "created": 5,
   "statusAfter": {
-   "Queued": 45,
+   "Completed": 72,
+   "Queued": 46,
    "In Flight": 69,
-   "Completed": 71,
    "Dissolved": 9,
    "Superseded": 6
   },
@@ -79,6 +83,38 @@
    "confirmedRevisionsMatchFinalRead": true,
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-spec-agent-protocol)"
+  },
+  "batch5": {
+   "refreshDiffAgainst200300Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-prereqs from origin/main 4a1b7aa5)"
+  },
+  "batch6": {
+   "refreshDiffAgainst204730Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-charter-link from origin/main c96343c4)"
+  },
+  "batch7": {
+   "refreshDiffAgainst205400Z": "AGENT-PROTOCOL-CONSOLIDATION-1 closed by another session (Status Completed, Seq cleared, Completed date and Evidence set; already in the 2026-10-30T21:10:01Z snapshot on main). Not a change of this batch; its change-19 revision is superseded by that close-out.",
+   "onlyIntendedRowAdded": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (superseded by the close-out above)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-play-first-text)"
+  },
+  "batch8": {
+   "refreshDiffAgainst211630Z": "none (register unchanged between batches)",
+   "onlyIntendedChanges": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-gap-pause)"
   }
  },
  "changes": [
@@ -671,6 +707,168 @@
    "actualRevision": "824e0c1dd0e87887570a6c5b0787374b06b113b101d23946b1960412ebcdf10d",
    "readbackNote": "completes change 18, whose Lane was refused before the option existed",
    "batch": 4
+  },
+  {
+   "change": 21,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T204636Z-external-set-status-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Prerequisites",
+    "Notes"
+   ],
+   "before": {
+    "Prerequisites": "APP-TABS-1; LIBRARY-COMPLETION-VISIBILITY-1",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now."
+   },
+   "readback": {
+    "Prerequisites": null,
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "331ad24c969a3e5d41392a119348d7ccf7d1f1a815d4bdfc308329cd9ad73ea0",
+   "readbackNote": "Prerequisites written as null (empty), as for change 5",
+   "batch": 5
+  },
+  {
+   "change": 22,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "store-spec-link",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T205327Z-external-store-spec-link-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Spec Reference",
+    "Notes"
+   ],
+   "before": {
+    "Spec Reference": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate."
+   },
+   "readback": {
+    "Spec Reference": "docs/planning/epics/2026-10-30-blurby-business/charter.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.\n\nChartered 2026-10-30 by the Blurby Business session: packet docs/planning/epics/2026-10-30-blurby-business/, run branch eb/blurby-business-1 on RodneySr, never merged by the run itself."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "fdd8bdd0df90a4013d603238edf01c49e36d78ec4ab98384d31c7e1c72ac06d1",
+   "readbackNote": "Spec State left Stub and Status Queued (epics are chartered, not Full Spec); packet on main at c96343c4",
+   "batch": 6
+  },
+  {
+   "change": 23,
+   "item": "PLAY-FIRST-TEXT-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T211548Z-external-create-item-PLAY-FIRST-TEXT-1",
+   "providerId": "4097c96c-c31e-81a1-94f5-d6c923491f78",
+   "url": "https://app.notion.com/4097c96cc31e81a194f5d6c923491f78",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Lane",
+    "Effort",
+    "Branch",
+    "Prerequisites",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "before": null,
+   "readback": {
+    "Name": "Play on a page with no words starts reading at the first text",
+    "Status": "Queued",
+    "Seq": 86.75,
+    "Spec State": "Full Spec",
+    "Lane": "Reader Engine",
+    "Effort": "M",
+    "Branch": "eb/play-first-text-1",
+    "Prerequisites": "BAND-ALIGN-2; NARRATE-PAUSE-CANCEL-1",
+    "Spec Reference": "docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.",
+    "Sprint Code": "PLAY-FIRST-TEXT-1",
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "NARRATE-PAUSE-CANCEL-1 (86.5)",
+    "PLAY-FIRST-TEXT-1 (86.75)",
+    "LIBRARY-WRITE-RACE-2 (87)"
+   ],
+   "actualRevision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
+   "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself; no follow-up store-spec-link needed",
+   "batch": 7
+  },
+  {
+   "change": 24,
+   "item": "NARRATE-GAP-PAUSE-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212257Z-external-create-item-NARRATE-GAP-PAUSE-1",
+   "providerId": "4097c96c-c31e-815e-be67-ebce2a82b23c",
+   "url": "https://app.notion.com/4097c96cc31e815ebe67ebce2a82b23c",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Lane",
+    "Effort",
+    "Branch",
+    "Prerequisites",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "before": null,
+   "readback": {
+    "Name": "A pause in the gap before a chunk resumes on that chunk's first word, without a silence",
+    "Status": "Queued",
+    "Seq": 86.6,
+    "Spec State": "Full Spec",
+    "Lane": "TTS / Narration Engine",
+    "Effort": "S",
+    "Branch": "eb/narrate-gap-pause-1",
+    "Prerequisites": "NARRATE-PAUSE-CANCEL-1",
+    "Spec Reference": "docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.",
+    "Sprint Code": "NARRATE-GAP-PAUSE-1",
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "NARRATE-PAUSE-CANCEL-1 (86.5)",
+    "NARRATE-GAP-PAUSE-1 (86.6)",
+    "PLAY-FIRST-TEXT-1 (86.75)"
+   ],
+   "actualRevision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+   "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself",
+   "batch": 8
+  },
+  {
+   "change": 25,
+   "item": "NARRATE-PAUSE-CANCEL-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212328Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+   "providerId": "4097c96c-c31e-8131-8dbc-c9439c893bd2",
+   "url": "https://app.notion.com/4097c96cc31e81318dbcc9439c893bd2",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5."
+   },
+   "readback": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1)."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "7bd29cbc88c9cb2ce77313c7e74950530f7fc7c98dd4717bdb414235db870a92",
+   "readbackNote": null,
+   "batch": 8
   }
  ]
 }

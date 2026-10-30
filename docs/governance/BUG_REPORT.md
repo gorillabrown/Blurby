@@ -8,10 +8,28 @@
 
 ## Incomplete
 
+### BUG-237 — A Narrate pause in the gap before a scheduled chunk skips that chunk's words and resumes after ~2.3 s of silence
+**Reported:** 2026-10-30, RodneySr (Blurby.Brain1), during NARRATE-PAUSE-CANCEL-1's base D6 (`5de476ce`, x64, quiet host). Deterministic in two runs.
+**Severity:** HIGH. It is audible: words are lost, then there is silence.
+**Status:** OPEN; fix item NARRATE-GAP-PAUSE-1 (TTS / Narration Engine), stacked on `eb/narrate-pause-cancel-1`. Lane: TTS / Narration Engine.
+**Observation:** *Meditations*, word ~8730, 2.00x, D6 run warm-2.00-3. The pause landed 34 ms before chunk 8730 was due to start. On resume:
+- playback restarted at the NEXT chunk (word 8748), so the 18 words 8730–8747 were never heard (heard: 8726–8729, then 8748);
+- speech started after about 2.3 s of silence. The new chunk was scheduled at startAt 6.0963, the stopped chunk's endAt.
+**Cause (read at `5de476ce`, `src/reader/modes/narrate/engine/narrateEngine.ts`):**
+- (a) `pause()` (:211) resolves a gap pause through `position(playbackPosition)`, which is null in the gap, and then `nextScheduledPause()` (:488). That compares `c.startAt` to `output.now()`, a different clock, returns null, so `pausedAt` is null.
+- (b) `resume()` (:225), with `at = null`, abandons the in-flight prefetch and requests from `this.nextWord` (8748), skipping the scheduled-but-unheard chunk 8730.
+- (c) `onResult` (:396) sets `startAt = prev ? prev.endAt …` with `prev` being the pause-stopped chunk. The clamp at :398 fixes only a startAt in the past, never a stale future slot.
+**Evidence:** RodneySr `C:\Projects\Blurby-artifacts\narrate-pause-cancel-1\d6-base\traces\warm-2-00-3.trace.json`, and `d6-base-run1\`.
+**Next:** NARRATE-GAP-PAUSE-1:
+- a gap pause anchors `pausedAt` at the first chunk not yet heard, using one clock for both the position and the scheduled-chunk test;
+- a chunk stopped by the pause never serves as `prev` for timing, so the first chunk after a resume schedules at now + lead;
+- red tests reproduce the trace;
+- D6 on RodneySr puts warm-2.00-3's resume in the 80–100 ms class.
+
 ### BUG-236 — Play in Flow on an image-only cover does nothing
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
 **Severity:** MEDIUM. A release defect, not a regression.
-**Status:** OPEN; goes into the usual intake. Lane: Reader Engine.
+**Status:** OPEN; fix item PLAY-FIRST-TEXT-1 (owner ruling 2026-10-30: "Start at first text"). Lane: Reader Engine.
 **Observation:** pressing Play in Flow on the image-only cover leaves playing=true in section 0, with 0 words and no cursor, for 60 s. It happens on release `36ac7466` and on the held BAND-ALIGN stack alike.
 **Evidence:** RodneySr `C:\Projects\Blurby-artifacts\band-align-2-r7\live\rel36-L2-cover`.
 **Next:** specify the intended behaviour, for example advancing to the first section with words, or disabling Play on a zero-word section. That is an owner design choice; then schedule a Flow-runtime fix.
@@ -114,7 +132,7 @@
 **Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
 **Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
 
-**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. BUG-235 and BUG-236 were filed 2026-10-30 from RodneySr's Flow checks. The next free number is BUG-237.
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. BUG-235 and BUG-236 were filed 2026-10-30 from RodneySr's Flow checks. BUG-237 was filed 2026-10-30 from NARRATE-PAUSE-CANCEL-1's base D6 on RodneySr. The next free number is BUG-238.
 
 ### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
 **Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)

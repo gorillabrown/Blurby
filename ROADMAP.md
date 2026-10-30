@@ -19,7 +19,7 @@ FOLIATE-DISPLAY-LIFETIME-1 is **PACKAGE-VERIFIED (x64, RodneySr) 2026-10-30, bui
 
 ## Work lanes
 
-The owner requested product lanes on 2026-09-23. Each Notion record has one primary Lane; shared delivery dependencies remain in the spec and prerequisites. Registry policy.roadmap.lanes declares these six categories.
+The owner requested product lanes on 2026-09-23. Each Notion record has one primary Lane; shared delivery dependencies remain in the spec and prerequisites. Registry `policy.roadmap.workstreams` declares these seven workstreams (the Notion Lane column).
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
@@ -142,11 +142,11 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 4. **PR-12:** Context for cross-cutting concerns (settings, toasts, theme); props for direct parent-child data.
 5. **PR-17:** Never drive imperative DOM animations from React useEffect — use a plain class.
 6. **PR-26:** Settings that control a runtime engine must have explicit sync bridges.
-7. **SRL-012:** For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible.
+7. **SRL-012 (amended 2026-10-30):** reviews follow the Virtuoso plugin's order — spec compliance passes before the quality review.
 8. **Queue depth >=3:** If queue drops below 3 after completion, stop and backfill before next dispatch.
     - *Status (2026-10-12):* after NARRATE-REMOVE-1 the dispatch-ready depth is 0 full specs plus one epic (excluded); this rule and CLAUDE.md Rule 5a stop the next dispatch until `/roadmap-review` backfills.
-9. **Spec-compliance before quality:** Each task gets Solon check (does it match spec?) before Plato check (is it well-built?).
-10. **Dispatch sizing:** 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves.
+9. **Spec-compliance before quality:** each task's spec-compliance review passes before its quality review, as the plugin's Zeus protocol orders them.
+10. **Retired 2026-10-30 (AGENT-PROTOCOL-CONSOLIDATION-1):** dispatch sizing is the Virtuoso plugin's (`skills/effort-levels/SKILL.md`, *This Is Additive*: tool budget ≤40, wall time ≤60 minutes, mixed-effort split). Former text: "Dispatch sizing: 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves."
 11. **SRL-046:** Cross-mode/shared-surface refactors must start with a preflight stabilization gate that locks exact-anchor, visual-follow, and mode-switch invariants.
 12. **SRL-047:** Mode adapter specs must include lifecycle reset requirements for local visual refs, browse-away state, cursor baselines, and recenter affordances.
 13. **Broad-suite-before-CI:** Do not dispatch CI gate wiring while default broad-suite failures are being waived as unrelated debt; first classify or fix them.
@@ -630,12 +630,18 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 <a id="band-align-2-spec"></a>
 
 #### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**
+- **R7a — Flow hands off to the next section under one clock (fixes BUG-235; dispatch-ready; RodneySr job 7):**
+  - Cause (bisected): first bad commit `860ad3ca`. Under wordClock, the next-section hand-off fires only inside `syncToWord`, which is never called for a word past the rendered end.
+  - Fix: call it for that word, and hold the word timer (`handoffHold`, distinct from a user pause) until the next section is stamped.
+  - Red tests h1–h6, plus a packaged check on RodneySr that it crosses into section 2 by sample 15 like the release.
+  - Base `eb/band-align-2-r7-work` @ `f3f254f3`; fast-forwards `eb/band-align-2`. Merges before R8, and lifts BUG-235's merge block once Brain confirms the package.
+  - Spec: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md).
 - **R8 — paragraph band (owner design ruling 2026-10-30; dispatch-ready; supersedes R7's band-extent rows):**
   - The band covers exactly the paragraph block that contains the selected word, whatever its size. A heading is its own block. With no selected word on the page there is no band.
   - The 3/5/7 line count and its control are removed. A single **Band** on/off switch replaces "Lines 3 5 7 Off" (owner: "Keep an Off switch"). Turning it off also removes the dimming.
   - `flowZoneLines` → `flowBandEnabled` via a v13 → v14 migration; a band that was off stays off.
   - Anchors and R7's leading and trailing spaces stay, with geometry fixed at `FLOW_ZONE_LINES_DEFAULT` (5).
-  - Base: `eb/band-align-2-r7-work` @ `f3f254f3` (R7 candidate `a5273704` plus its memo).
+  - Base: `eb/band-align-2` at R7a's tip (re-based 2026-10-30). It launches only after Brain confirms R7a's package (RodneySr job 8).
   - Shared core: `src/types.ts` (keeps a deprecated `flowZoneLines?`) and `ReaderContainer.tsx`, both inside this item's integration window. Narrate is untouched.
   - Queues on RodneySr after the BUG-235 fix.
   - Full amendment: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md).
@@ -696,6 +702,8 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 #### NARRATE-PAUSE-CANCEL-1 — Pausing Narrate cancels queued Kokoro jobs *(Seq 86.5; Queued; Full Spec — dispatch-ready; authored 2026-10-30 by roadmap review 2026-10-30)*
 
+- **Mid-dispatch amendment (2026-10-30, Blurby.Brain1):** the D6 slow-resume gate is now "no regression": warm-2.00-3 after ≤ base + 150 ms, one-sided, and every other resume under 2,000 ms. It supersedes the D6 stop, because base D6 exposed BUG-237, which NARRATE-GAP-PAUSE-1 fixes. The amendment text is at the end of the spec file.
+
 - **What:** the pause cancels Narrate's queued, not-yet-started Kokoro jobs in main through one narrow IPC, `narrate-cancel-queued`, which takes a group prefix (quit-linger's original half (a)).
 - **Why:** on RodneySr, in 3 of 3 staged base runs the queued prefetch posted after the pause (+9, +871, +600 ms).
 - **Prerequisites:** NARRATE-QUIT-LINGER-1. Stacked on `eb/narrate-quit-linger-1` @ `5de476ce`; both touch `main/narrate/producer.js`, and this one merges after it.
@@ -705,6 +713,31 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - A queued job posted within 50 ms of the press, before the cancel line, is recorded as "race window", not a failure.
   - Also required: T2-2 `--gaps` over D6 warm-resume traces, D6 resume on x64, and rule 53.
 - **Full specification:** [docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md](docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md). It holds the WHERE, Done-when, implementation detail, task list (8 rows, Waves A/B) and lessons applied. The builder, the merge and the close-out read it there.
+
+<a id="narrate-gap-pause-1"></a>
+
+#### NARRATE-GAP-PAUSE-1 — A pause in the gap before a chunk resumes on that chunk's first word, without a silence *(Seq 86.6; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-237, HIGH)*
+
+- **What:** a Narrate pause that lands in the gap just before a scheduled chunk anchors on the first unheard chunk, measured on one clock, so the resume speaks that chunk's first word with normal latency. A chunk stopped by the pause no longer sets the next chunk's start time.
+- **Why:** BUG-237. On RodneySr, a pause 34 ms before chunk 8730 made the resume skip 18 words and wait about 2.3 s. Cause: `pause()` reads the scheduling head instead of the heard position. The unit fake hid it (LL-173).
+- **Gates (Blurby.Brain1):**
+  - Red tests g1–g3 on a fake with a lagging heard position.
+  - `check-skip` must flag the base trace.
+  - warm-2.00-3 resume ≤ 150 ms after the fix.
+  - No regression: ≤ base + 150 ms.
+  - Rule 53 pair on RodneySr.
+- **Base:** stacked on `eb/narrate-pause-cancel-1`'s final tip; merges after it. Prerequisite NARRATE-PAUSE-CANCEL-1. Host RodneySr, about 3–4 h.
+- **Full specification:** [docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md](docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md).
+
+<a id="play-first-text-1"></a>
+
+#### PLAY-FIRST-TEXT-1 — Play on a page with no words starts reading at the first text *(Seq 86.75; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-236)*
+
+- **What:** pressing Play with the reading position in a section that has no words (a cover, an image plate, a blank separator) goes to the next section that has words and starts reading at its first word, in Flow, Focus and Narrate, each in its own runtime. With no later text, Play does nothing.
+- **Owner rulings (2026-10-30):** "Start at first text"; skip on Play only, while navigation lands where asked; a paused Focus or Narrate session resumes at the paused word; on a cover, the first text replaces a later held word.
+- **Brain1 rulings:** Q2 (a), the `pendingFirstText` flag: a Play pressed before the section map arrives starts exactly once when it does, with no timers. Q5 no cap; Q6 automatic starts skip too; Q7 a timeout leaves the mode not playing and logs a diagnostic; Q8 the port-level save proof is enough.
+- **Base:** stacked on `eb/band-align-2` after R7a and R8. Prerequisites BAND-ALIGN-2 and NARRATE-PAUSE-CANCEL-1. Host RodneySr (job 9), about 4 h.
+- **Full specification:** [docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md](docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md).
 
 #### OVERLAY-THEME-SWEEP-1 — Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
 
@@ -933,7 +966,8 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-30.md) (moved by roadmap review 2026-10-30 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `e29117b2`; search for `#### NATIVE-PATH-ATTESTATION-1`). Its WIP candidate `9264c9b3` (also `refs/archive/rodney-unpushed/eb-native-path-attestation-1`), the Rodney worktree's 7 uncommitted harness edits and all receipts are kept untouched.
 - **Parked (R-2026-10-30-1, Blurby.Brain1 under the owner's 2026-10-30 mandate):** no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. On RodneySr the owner's data is absent, so native runs there use inspector-proved scratch userData (LL-165), APPDATA/LOCALAPPDATA redirected, a profile-tree snapshot/diff/restore-only-on-difference, and no other Blurby running — bounded to owned fixtures and public-domain books; reading the owner's library needs the owner's explicit OK. Seq 67.5 → 140.
 
-#### AGENT-PROTOCOL-CONSOLIDATION-1 — Use standard Virtuoso agents with Blurby overlays *(Seq67.75; Queued; **Full Spec — dispatch-ready 2026-10-30**; Platform & Maintenance)* <a id="agent-protocol-consolidation-1"></a>
+#### AGENT-PROTOCOL-CONSOLIDATION-1 — Use standard Virtuoso agents with Blurby overlays ✅ COMPLETED *(2026-10-30; Platform & Maintenance)* <a id="agent-protocol-consolidation-1"></a>
+- **Completed 2026-10-30:** dispatch merge `4a1b7aa5`, then close-out Step 0 applied the staging memo to main. Close-out: [docs/governance/close-outs/CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md](docs/governance/close-outs/CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md).
 - **Full specification (2026-10-30):** [docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md](docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md). It is built on the owner's 2026-10-30 rule "follow the plugin skills to the letter":
   - Overlays add Blurby facts only.
   - Athena, Simonides and Solon are retired.
@@ -1554,6 +1588,11 @@ These headings expose existing table/bullet items to the board parser; they do n
 <a id="blurby-business-1"></a>
 #### BLURBY-BUSINESS-1 — Blurby Business: a walled-off PDF viewer and editor *(Seq 100.5; Queued; Path: epic; lane Blurby Business; absorbed 2026-10-30 from held plan `2026-10-30-blurby-business-tier1`)*
 
+- **Chartered 2026-10-30:**
+  - Packet `docs/planning/epics/2026-10-30-blurby-business/` (charter, plan, state, journal, launch; main `c96343c4`); register Spec Reference → `charter.md`.
+  - 21 DoD rows (D1–D21), 9 phases (P1–P8 plus P9 completion), about 40 sessions.
+  - Run branch `eb/blurby-business-1` on RodneySr (worktree `C:\Projects\bb-business`). The run never merges itself; every merge waits for Blurby.Roadmap's go after Brain's package confirmation.
+  - **Not launched.** The owner directed on 2026-10-30 that it be roadmapped before launch, and it is not yet sent to Brain. Launch waits for the start gate (LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes) and for an owner decision on who hosts and launches it on RodneySr (launch.md Q2).
 - **What:** a separate Blurby Business window that becomes Blurby's standard PDF viewer and editor, and the default PDF app. It covers the competitor matrix's Viewing, Annotation, Editing, Page organisation, Forms, Optimisation, Signatures, Metadata and Printing rows, plus merge, extract and split (about 121 features), in eight phases:
   - P1 Viewer, with the default-PDF handler, tabs, navigation with native text select and copy, locked PDFs, OCR, and "Send to Blurby to read";
   - P2 Annotation, form fill and save with backup;
@@ -1570,8 +1609,9 @@ These headings expose existing table/bullet items to the board parser; they do n
   - Phase 1 seed specs (HB-6..HB-11) in `docs/planning/holding/2026-10-30-blurby-business-tier1/phase1-specs.md`;
   - matrix `docs/studies/2026-10-30-pdf-competitor-matrix.md`.
 - **Origin:** held plan `2026-10-30-blurby-business-tier1` (HB-6..HB-11, epic re-scope).
+- **Prerequisites:** none in the register (cleared 2026-10-30). The gates below are carried in the epic charter as its Constraints and launch-preflight start gate.
 - **Gates:**
-  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes, and APP-TABS-1 is a P1 prerequisite.
+  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes. APP-TABS-1 is a merge-order dependency (shared `preload.js` and `CommandPalette.tsx`).
   - Merge: after the Stage 8 release, and after the seven held branches named under Readiness in `phase1-specs.md`.
   - Engine: permissive licences only (pdf.js, pdf-lib, `@signpdf`, bundled qpdf).
   - No shared-core touches (a separate `.d.ts` avoids `src/types.ts`).
