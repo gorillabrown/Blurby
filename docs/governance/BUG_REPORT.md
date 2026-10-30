@@ -13,7 +13,7 @@
 **Severity:** MEDIUM. A release defect, not a regression.
 **Status:** OPEN; goes into the usual intake. Lane: Reader Engine.
 **Observation:** pressing Play in Flow on the image-only cover leaves playing=true in section 0, with 0 words and no cursor, for 60 s. It happens on release `36ac7466` and on the held BAND-ALIGN stack alike.
-**Evidence:** RodneySr `C:\Projects\Blurby-artifactsand-align-2-r7\liveel36-L2-cover`.
+**Evidence:** RodneySr `C:\Projects\Blurby-artifacts\band-align-2-r7\live\rel36-L2-cover`.
 **Next:** specify the intended behaviour, for example advancing to the first section with words, or disabling Play on a zero-word section. That is an owner design choice; then schedule a Flow-runtime fix.
 
 ### BUG-235 — REGRESSION: Flow playback stops at a section's end and never enters the next section
@@ -24,7 +24,7 @@
 - Present on M `70e739ea` (band-align-2 `85e32777` + main) and on R7 `a5273704`.
 - Absent on release `36ac7466`, which crosses into section 2 at sample 15 (AURELIUS#189) and keeps playing.
 - `git diff 36ac7466 origin/main` over `src/`, `main/`, `main.js`, `preload.js`, `package*.json` and `patches` is empty, so the cause lies in the held stack between `36ac7466` and `85e32777`: BAND-ALIGN-1, FOCUS-KEYS-FIX-1 / FLOW-KEYS-FIX-1, FLOW-PARA-KEYS-1 or BAND-ALIGN-2. Prime suspect `860ad3ca` ("Flow runs on one clock"); second suspect R6 `eabd0c07`.
-**Evidence:** RodneySr `C:\Projects\Blurby-artifactsand-align-2-r7\live\` (`base-L2*`, `cand-L2text-L5-Flow`, `rel36-L2-text`).
+**Evidence:** RodneySr `C:\Projects\Blurby-artifacts\band-align-2-r7\live\` (`base-L2*`, `cand-L2text-L5-Flow`, `rel36-L2-text`).
 **Next:** the bisect names the first bad commit; Blurby.Roadmap then writes the fix spec. BAND-ALIGN-2 (with R7/R8) does not merge until this is fixed.
 
 ### BUG-234 — Clicking a word scrolled out of view past BOOKS jumps Focus to section 2 with no cursor and the band off
