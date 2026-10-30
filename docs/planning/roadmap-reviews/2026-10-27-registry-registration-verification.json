@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-27",
+  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+  "takenAt": "2026-10-27T23:36:49.628Z",
+  "helperCommit": "fcfa92959b757828f29bdac6a54aa99015b2b525",
+  "manifestSha256": "86a0fb68619372d6e73cdc4dc1ad5e7fc4c55c62fc75e2a836c0084e895c8d47",
+  "counts": {
+    "before": 194,
+    "after": 196,
+    "created": 2
+  },
+  "created": [
+    {
+      "id": "NATIVE-PATH-ATTESTATION-1",
+      "providerId": "4067c96c-c31e-8179-bdd5-cc7b17e90e7f",
+      "url": "https://app.notion.com/4067c96cc31e8179bdd5cc7b17e90e7f",
+      "sequence": 67.5,
+      "status": "Queued",
+      "written": "Stub",
+      "recovery": "20261027T233203Z-external-create-item-NATIVE-PATH-ATTESTATION-1"
+    },
+    {
+      "id": "BLOCK-TEXT-ORDER-1",
+      "providerId": "4067c96c-c31e-81a6-8f0a-e776b050f662",
+      "url": "https://app.notion.com/4067c96cc31e81a68f0ae776b050f662",
+      "sequence": 87.5,
+      "status": "Queued",
+      "written": "Stub",
+      "recovery": "20261027T233333Z-external-create-item-BLOCK-TEXT-ORDER-1"
+    }
+  ],
+  "existingChanges": [
+    {
+      "code": "FOLIATE-DISPLAY-LIFETIME-1",
+      "field": "Prerequisites",
+      "before": "FOLIATE-OBSERVER-LEAK-1",
+      "after": "FOLIATE-OBSERVER-LEAK-1; NATIVE-PATH-ATTESTATION-1"
+    },
+    {
+      "code": "WORD-INDEX-UNIFY-1",
+      "field": "Prerequisites",
+      "before": "NARRATE-REBUILD-1; FLOW-PARA-PAUSE-INDEX-1; BLOCK-TAG-CASE-1",
+      "after": "NARRATE-REBUILD-1; FLOW-PARA-PAUSE-INDEX-1; BLOCK-TAG-CASE-1; BLOCK-TEXT-ORDER-1; NATIVE-PATH-ATTESTATION-1"
+    }
+  ],
+  "all194ExistingSequencesAndStatusesUnchanged": true,
+  "onlyTwoIntendedExistingPrerequisiteFieldsChanged": true,
+  "all4RecoveriesConfirmed": true,
+  "recoveryOutstanding": [],
+  "oldAbandonedRecoveryUnchanged": true,
+  "invalidRootGuard": {
+    "exitCode": 1,
+    "launcherReached": false
+  },
+  "sourceQualification": {
+    "focusedPassed": 99,
+    "baseCausalAssertionFailures": 73,
+    "baseControlsPassed": 26,
+    "fullRelevantPassed": 399,
+    "detectorSha256": "888a0481fb97b941b12051f9ade1c17fef95e746f27d3fdade00592664c71c0d",
+    "fullRelevantLogSha256": "e9153eed9914a3eb496dd2ed0e0979ce45f798c038eec84e77e9231aa3086f59",
+    "sourceIndependentReviewSha256": "9a17ed9fc19171f20e07e1f4e27649984192e6dc9eb0dd58f4f0473e73c6e27c",
+    "helperPublishedManifestSha256": "95d68e38d6325658887fb913af9eae48ccec4c7f90d0d08c3d2bf74ac3dd1d75"
+  },
+  "noAppOrObserverOrNativeExecution": true,
+  "noTerminalWrite": true,
+  "defaultInstalledPluginUnchanged": true,
+  "qualifiedCheckoutRetained": true,
+  "canonicalCacheChanges": {
+    "revisionHashesRecomputed": 88,
+    "prerequisitesUpdated": 2,
+    "otherExistingFieldsChanged": 0,
+    "note": "Revision changes follow corrected raw numeric cells, not provider renumbering"
+  }
+}

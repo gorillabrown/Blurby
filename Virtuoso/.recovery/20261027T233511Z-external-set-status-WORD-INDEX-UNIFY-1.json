@@ -1,0 +1,34 @@
+{
+  "id": "20261027T233511Z-external-set-status-WORD-INDEX-UNIFY-1",
+  "operation": "external-set-status",
+  "item_id": "WORD-INDEX-UNIFY-1",
+  "created": "2026-10-27T23:35:11Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "NARRATE-REBUILD-1; FLOW-PARA-PAUSE-INDEX-1; BLOCK-TAG-CASE-1; BLOCK-TEXT-ORDER-1; NATIVE-PATH-ATTESTATION-1"
+    },
+    "expectedRevision": "4f745f5f49dd3ec383b87f9c8516e679fb91d02064f376ae69f459de9f11d669",
+    "idempotencyKey": "registry-helper-fix-20261027-link-word-v2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WORD-INDEX-UNIFY-1",
+      "idempotencyKey": "registry-helper-fix-20261027-link-word-v2",
+      "actualRevision": "6b01f4f4fa3d79b093d390c74a0884b47a7670abc65440fbbb621f81b0ab04c1",
+      "recoveryId": "20261027T233511Z-external-set-status-WORD-INDEX-UNIFY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-27T23:36:54Z",
+  "outcome": "succeeded"
+}

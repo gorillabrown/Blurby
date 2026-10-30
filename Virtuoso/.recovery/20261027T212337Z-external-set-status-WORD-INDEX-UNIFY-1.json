@@ -1,0 +1,35 @@
+{
+  "id": "20261027T212337Z-external-set-status-WORD-INDEX-UNIFY-1",
+  "operation": "external-set-status",
+  "item_id": "WORD-INDEX-UNIFY-1",
+  "created": "2026-10-27T21:23:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "NARRATE-REBUILD-1; FLOW-PARA-PAUSE-INDEX-1; BLOCK-TAG-CASE-1",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate. Hold cleared 2026-10-25: Blurby.Brain ruling (b), two copies (CommonJS main/word-segments.js, TS source of truth) with a parity test; spec corrected by roadmap review 2026-10-25. Dispatch-ready (U9 pass).\n\nNext-dispatch gate 2026-10-27, Brain technical ruling: NOT READY. Canonical prerequisites corrected to preserve completed NARRATE-REBUILD-1 and include FLOW-PARA-PAUSE-INDEX-1 plus BLOCK-TAG-CASE-1, both currently In Flight. Exact held stack f61ae02ddf16a023314369685d4dbfcab1ac9a36 remains available for future separately admitted source-only work; it does not make prerequisites terminal. Candidate split-policy counts/anchors/fingerprint and policy-red test contract require planning finalization/LL-143 dry-run before Ready; old80352/offsets are pre-split predictions. Source-of-truth src/utils/segmentWords.ts is explicitly in proposed edit fence, first then CommonJS copy. Native actual scratch path observation is not qualified and no new probe budget is admitted. No source entry, main merge, release, status transition or queue resequence. Issue docs/governance/bug-reports/Issue.WORD-INDEX-UNIFY-1.2026-10-27.md; head-only ROADMAP gate and U9/total corrections persisted. Seq88 and Queued status retained."
+    },
+    "expectedRevision": "f428101d78a239311d451bb2593394966d3372c1649dc3320067740254d34248",
+    "idempotencyKey": "word-index-next-prerequisites-20261027",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WORD-INDEX-UNIFY-1",
+      "idempotencyKey": "word-index-next-prerequisites-20261027",
+      "actualRevision": "4f745f5f49dd3ec383b87f9c8516e679fb91d02064f376ae69f459de9f11d669",
+      "recoveryId": "20261027T212337Z-external-set-status-WORD-INDEX-UNIFY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-27T21:25:25Z",
+  "outcome": "succeeded"
+}
