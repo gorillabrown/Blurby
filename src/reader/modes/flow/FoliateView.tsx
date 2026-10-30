@@ -256,6 +256,8 @@ export interface FlowFoliateViewAPI {
   highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: FlowFoliateHighlightOptions) => boolean;
   resolveWordState: (wordIndex: number) => FlowWordState;
   getSectionForWordIndex: (wordIndex: number) => number | null;
+  /** PLAY-FIRST-TEXT-1: the section on screen (the last loaded), as Narrate's view reports it; null before the first load. */
+  getDisplayedSectionIndex: () => number | null;
   findFirstVisibleWordIndex: () => number;
   isUserBrowsing: () => boolean;
   goToSection: (sectionIndex: number) => Promise<void>;
@@ -1228,6 +1230,7 @@ export default function FlowFoliateView({
             applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false),
           resolveWordState,
           getSectionForWordIndex,
+          getDisplayedSectionIndex: () => lastLoadedSectionIndexRef.current,
           findFirstVisibleWordIndex: () => {
             const indexedFirstVisible = wordPositionIndexRef.current.findFirstVisibleWordIndex();
             if (indexedFirstVisible >= 0) return indexedFirstVisible;

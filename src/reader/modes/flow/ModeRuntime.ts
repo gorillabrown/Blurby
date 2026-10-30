@@ -554,6 +554,12 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   private readonly rafs = new Set<number>();
   private alive = true;
   private destroyed = false;
+  /** PLAY-FIRST-TEXT-1: the start in flight while the view moves from a section with no words to the first text after it. */
+  private firstTextToken: symbol | null = null;
+  /** PLAY-FIRST-TEXT-1: true only while start() re-enters after that move, so the re-entry never skips again. */
+  private firstTextReentry = false;
+  /** PLAY-FIRST-TEXT-1 (Brain1 Q2): a Play made on a section with no words before the section map exists. */
+  private pendingFirstText: { sectionIndex: number; request: ReaderModeStartRequestV1 } | null = null;
   /**
    * S1 G6: B0 kept one foliate surface across a mode switch, so the word selected before a paused switch
    * kept its page-word--flow-cursor class in the destination. This session's view is new and starts
@@ -651,6 +657,11 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (!next.bookWords) this.chunkCache = null;
     this.warmReadingChunks();
     this.state.notify();
+    const pending = this.pendingFirstText;
+    if (pending && next.bookWords) {
+      this.pendingFirstText = null; // exactly once
+      if (this.surface.getDisplayedSectionIndex() === pending.sectionIndex) this.start(pending.request);
+    }
   };
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -676,6 +687,8 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** Legacy useReaderMode.startFlow with targetMode "flow" and no resumeNarration. */
   start(request: ReaderModeStartRequestV1): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
+    if (this.startAtFirstText(request)) return;
     this.arrivalCursorPending = false;
     const s = this.state;
     // stopAllModes (Flow's own part): stop the engine, clear playing/browse.
@@ -697,6 +710,14 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     }
     const effectiveWords = [...this.effectiveWords()];
     if (this.document.useFoliate && effectiveWords.length === 0 && this.surface.isReady()) {
+      const shownEmpty = this.surface.getDisplayedSectionIndex();
+      if (!this.document.bookWords && shownEmpty != null) {
+        // Brain1 Q2 (a): wait for the section map; adoptDocument re-runs this Play once. No next(), no timer.
+        this.pendingFirstText = { sectionIndex: shownEmpty, request };
+        this.ports.diagnostics.record("play-first-text", `section ${shownEmpty} has no words and no section map yet: waiting for it`);
+        s.notify();
+        return;
+      }
       this.surface.next();
       this.setTimer(() => {
         this.surface.extractWords();
@@ -735,6 +756,8 @@ export class FlowModeRuntime implements ReaderModeRuntime {
 
   pause(): void {
     if (!this.alive) return;
+    this.firstTextToken = null;
+    this.pendingFirstText = null;
     this.state.pendingStartOnLoad = false;
     this.pausePlayback();
     this.state.notify();
@@ -764,6 +787,8 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.unsubscribeDocument?.(); // a local unsubscribe, not a port call
     this.unsubscribeDocument = null;
     this.clearTimers();
+    this.firstTextToken = null;
+    this.pendingFirstText = null;
     this.state.pendingStartOnLoad = false;
     this.state.pendingResume = null;
     this.state.handoffHold = null;
@@ -784,6 +809,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
 
   jumpToWord(wordIndex: number, _cause: ReaderModeJumpCause): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     if (this.engine) {
       this.engine.jumpTo(wordIndex); // advances through onEngineWordAdvance
       return;
@@ -849,6 +875,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths) + retargetActiveModeToWord. */
   hardSelect(input: ReaderHardSelectInput): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     const s = this.state;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
@@ -902,6 +929,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** Legacy handleJumpBackToPersistentWord (flow style hint). */
   jumpBack(): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     const anchor = this.state.canonicalWordIndex;
     this.anchor.syncVisualToPersistentWord({ navigate: true });
     if (this.document.useFoliate) void this.surface.jumpToWordAnchor(anchor);
@@ -919,6 +947,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
 
   handleCommand(command: ReaderModeCommand): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     switch (command.kind) {
       case "flow-line":
         // Legacy handleFlowPrevLine / handleFlowNextLine; the word timer follows the line pacer's new word.
@@ -1422,6 +1451,51 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   private setBrowsedAway(value: boolean): void {
     this.state.isBrowsedAway = value;
     if (value && this.state.playing) this.pausePlayback();
+  }
+
+  /**
+   * PLAY-FIRST-TEXT-1 (owner ruling 2026-10-30 "Start at first text"; Brain1 rulings 1–2). Play with the view on a
+   * section that has no words (no entry in the book's section map) moves to the first later section with words and
+   * starts on its first word. Returns true when it took the start over (moving, or inert because no later section has
+   * words); false when the start goes on as before (a section with words, no section map yet, or no view).
+   */
+  private startAtFirstText(request: ReaderModeStartRequestV1): boolean {
+    if (this.firstTextReentry || !this.document.useFoliate) return false;
+    const bookWords = this.document.bookWords;
+    const shown = this.surface.getDisplayedSectionIndex();
+    if (!bookWords || shown == null) return false; // Brain1 Q2: no map yet; the empty-words path sets pendingFirstText
+    if (bookWords.sections.some((section) => section.sectionIndex === shown)) return false;
+    const target = bookWords.sections.find((section) => section.sectionIndex > shown);
+    if (!target) {
+      this.ports.diagnostics.record("play-first-text", `section ${shown} has no words and no later section has words: Play does nothing`);
+      return true; // ruling 1: the existing no-text state stands (no engagement, no navigation, no clock)
+    }
+    const s = this.state;
+    const token = Symbol("play-first-text");
+    this.firstTextToken = token;
+    s.explicitSelectionAnchor = target.startWordIdx; // the re-entry's consumeModeStartAnchor starts here
+    s.resumeAnchor = target.startWordIdx; // no relocate save of an earlier word while the view moves
+    this.publishHighlight(target.startWordIdx);
+    s.currentSection = target.sectionIndex; // syncSection sees no change and does not navigate as well
+    this.ports.diagnostics.record("play-first-text", `section ${shown} has no words: to section ${target.sectionIndex}, word ${target.startWordIdx}`);
+    Promise.resolve(this.surface.goToSection(target.sectionIndex))
+      .then(() => this.surface.waitForSectionReady(target.sectionIndex))
+      .then((ready) => {
+        if (!this.alive || this.firstTextToken !== token) return; // paused, stopped or superseded during the move
+        this.firstTextToken = null;
+        if (ready !== target.sectionIndex) {
+          this.ports.diagnostics.record("play-first-text", `section ${target.sectionIndex} not ready: not started`);
+          s.notify();
+          return;
+        }
+        this.firstTextReentry = true;
+        try { this.start(request); } finally { this.firstTextReentry = false; }
+      })
+      .catch((error: unknown) => {
+        if (this.alive) this.ports.diagnostics.record("play-first-text", `move failed: ${String(error)}`); // LL-066
+      });
+    s.notify();
+    return true;
   }
 
   /** Legacy consumeModeStartAnchor. */

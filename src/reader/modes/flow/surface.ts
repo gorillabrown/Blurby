@@ -28,6 +28,8 @@ export interface FlowSurface {
   goToSection(sectionIndex: number): Promise<void>;
   waitForSectionReady(sectionIndex?: number | null): Promise<number | null>;
   findFirstVisibleWordIndex(): number;
+  /** PLAY-FIRST-TEXT-1: the section on screen; null with no view, or a view without the getter. */
+  getDisplayedSectionIndex(): number | null;
   isUserBrowsing(): boolean;
   clearUserBrowsing(): void;
   clearSoftHighlight(): void;
@@ -54,6 +56,7 @@ export function createFlowSurface(viewApiRef: MutableRefObject<FlowFoliateViewAP
     goToSection: (sectionIndex) => Promise.resolve(api()?.goToSection(sectionIndex)),
     waitForSectionReady: (sectionIndex) => Promise.resolve(api()?.waitForSectionReady(sectionIndex) ?? null),
     findFirstVisibleWordIndex: () => api()?.findFirstVisibleWordIndex() ?? -1,
+    getDisplayedSectionIndex: () => api()?.getDisplayedSectionIndex?.() ?? null,
     isUserBrowsing: () => api()?.isUserBrowsing() ?? false,
     clearUserBrowsing: () => api()?.clearUserBrowsing(),
     clearSoftHighlight: () => api()?.clearSoftHighlight(),
