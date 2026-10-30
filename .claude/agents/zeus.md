@@ -246,6 +246,14 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
       Input: Changed files + sprint spec + discoveries
       Await: All docs updated
 
+6b. PACKAGE VERIFICATION (mandatory — standing rule 53, LL-167)
+   a. Build `npx electron-builder --win --dir --arm64` (an explicit arch flag; --arm64 on the owner's ARM64 machine) from the final commit with origin/main merged in, in this worktree only
+   b. Grep built main.js for BLURBY_USER_DATA_DIR; launch release\win-unpacked\Blurby.exe natively (arm64 here, so the arm64 native modules in app.asar.unpacked load) on a fresh scratch profile for 25 s: alive, no error/unhandled-rejection/crash line in stdout, stderr or error.log, no crash dump
+   c. `npx asar list`: every changed main/ file present; renderer bundle in app.asar matches dist/
+   d. Re-run the automatable Done-when checks against the packaged exe
+   e. Write a "Package verification" section in the close-out; send Blurby.Brain the package path, commit and logs. No merge until Brain confirms and Blurby.Roadmap gives the go
+   f. Nothing under package.json build.files changed: record "package unchanged" with `git diff --name-only` against the last verified commit
+
 7. GIT phase
    a. DISPATCH: "Hermes (haiku/Messenger)" → stage, commit, merge to `main`, push
       Default policy: if the sprint passed verification/review/docs, merge automatically unless the sprint spec explicitly says not to

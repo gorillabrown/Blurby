@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190408Z-external-create-item-NARRATE-SELECTION-START-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-SELECTION-START-1",
+  "created": "2026-10-26T19:04:08Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Narrate starts at the selected word and aligns its paused display",
+      "status": "Queued",
+      "sequence": 117,
+      "written_status": "Stub",
+      "workstream": "TTS / Narration Engine",
+      "spec_link": "ROADMAP.md#narrate-selection-start-1",
+      "description": "Paused word clicks are ignored on Play; the paused horizontal band is offset, and Play scrolls the underlined word to the top. Diagnose the three paths independently before fixing.",
+      "prerequisites": [
+        "NARRATE-SENTENCE-RESUME-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F7, F8, F9. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "A paused clicked word determines the next start per explicit-selection rules; paused band/cursor agree; playback viewport policy is deliberate. Preserve exact heard-word timing and distinguish scrolling from changing the logical word.",
+      "id": "NARRATE-SELECTION-START-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-NARRATE-SELECTION-START-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-SELECTION-START-1",
+      "idempotencyKey": "smoke20261026-NARRATE-SELECTION-START-1",
+      "actualRevision": "3035e04cb7a322d1941bff1c89df55c48817b602a4ed2470fd1e0446e34c3eb1",
+      "recoveryId": "20261026T190408Z-external-create-item-NARRATE-SELECTION-START-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81fd-a566-d92dc9b59161",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:30Z",
+  "outcome": "succeeded"
+}

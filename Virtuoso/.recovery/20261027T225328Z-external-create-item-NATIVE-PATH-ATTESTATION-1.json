@@ -1,0 +1,38 @@
+{
+  "id": "20261027T225328Z-external-create-item-NATIVE-PATH-ATTESTATION-1",
+  "operation": "external-create-item",
+  "item_id": "NATIVE-PATH-ATTESTATION-1",
+  "created": "2026-10-27T22:53:28Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NATIVE-PATH-ATTESTATION-1",
+      "title": "Prove native scratch data and queue paths before input",
+      "sequence": 67,
+      "status": "Queued",
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "effort": "L",
+      "prerequisites": [],
+      "branch": "eb/native-path-attestation-1",
+      "spec_link": "ROADMAP.md#native-path-attestation-1",
+      "notes": "Owner approved Phase C roadmap review 2026-10-27. Separate observation capability prerequisite; operational tools and evidence only. Exact specifications/independent artifact and per-wave admissions remain required; no setup or process activated. Existing two-run collector budget remains exhausted; no consumer completion or release waiver.",
+      "deliverable": "Reviewed actual native scratch data and queue path observer with bounded controlled qualification and one separately admitted no-input canary"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-27T22:53:13Z",
+    "idempotencyKey": "roadmap-review-20261027-native-path-create"
+  },
+  "resolved": "2026-10-27T22:53:49Z",
+  "outcome": "abandoned",
+  "reason": "No connector write: helper silently truncated owner-approved sequence67.5 to67; technical precision remedy pending"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "20261028T003337Z-external-set-status-NATIVE-PATH-ATTESTATION-1",
+  "operation": "external-set-status",
+  "item_id": "NATIVE-PATH-ATTESTATION-1",
+  "created": "2026-10-28T00:33:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "notes": "Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted.",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-27-independent-phase-d-review.md; docs/planning/roadmap-reviews/2026-10-27-native-fixture-clarification.md; docs/planning/roadmap-reviews/2026-10-27-native-final-technical-contract.md; docs/planning/roadmap-reviews/2026-10-27-native-final-spec-review.md; docs/planning/roadmap-reviews/2026-10-27-native-spec-finalization.md"
+    },
+    "expectedRevision": "2060e3a73020a5d8d585a744c5a12df59986c58b82488b3df9e15d06bbda98e3",
+    "idempotencyKey": "native-spec-finalization-20261027-v4",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NATIVE-PATH-ATTESTATION-1",
+      "idempotencyKey": "native-spec-finalization-20261027-v4",
+      "actualRevision": "6a5113430ca34ec55bf84679e6ab7b5141109c6cd3c1b33d2eced397b64c94d2",
+      "recoveryId": "20261028T003337Z-external-set-status-NATIVE-PATH-ATTESTATION-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-28T00:35:35Z",
+  "outcome": "succeeded"
+}

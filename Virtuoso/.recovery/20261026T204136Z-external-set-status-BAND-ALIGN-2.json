@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204136Z-external-set-status-BAND-ALIGN-2",
+  "operation": "external-set-status",
+  "item_id": "BAND-ALIGN-2",
+  "created": "2026-10-26T20:41:36Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "3ea57d6369e02d3ca5f435cef80e261ec792719a5171d81b00a29c4525bffd17",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BAND-ALIGN-2",
+      "idempotencyKey": "parallelgov20261026-BAND-ALIGN-2",
+      "actualRevision": "c1d3068b2f82300a96e5d27877e242f1aea90ef9a1db45c82864a5b272efe2bc",
+      "recoveryId": "20261026T204136Z-external-set-status-BAND-ALIGN-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:06Z",
+  "outcome": "succeeded"
+}

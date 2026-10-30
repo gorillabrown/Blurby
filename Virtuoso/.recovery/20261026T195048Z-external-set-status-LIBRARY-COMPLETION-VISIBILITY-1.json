@@ -1,0 +1,43 @@
+{
+  "id": "20261026T195048Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-COMPLETION-VISIBILITY-1",
+  "created": "2026-10-26T19:50:48Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Completed reads remain visible in the correct library tab",
+      "written_status": "full-spec",
+      "effort": "S",
+      "workstream": "Library & Content",
+      "group": "Platform Health",
+      "branch": "eb/library-completion-visibility-1",
+      "spec_link": "ROADMAP.md#library-completion-visibility-1",
+      "prerequisites": [],
+      "description": "Keep every record admitted by the existing tab/type/search filters visible exactly once in list and grid, including position at or beyond wordCount. Preserve the existing Reading Now / Not Started groups; do not silently archive, reset progress or change completion detection.",
+      "deliverable": "Full specification in ROADMAP.md; U1–U10 checked. Execution remains held by release, prerequisite/ownership and exact-package/owner verification gates."
+    },
+    "expectedRevision": "8016c1d7a957c8c23a1cb57af60d5bd80df0fb6ac7015e85dc223c630be81e78",
+    "idempotencyKey": "review20261026-spec-LIBRARY-COMPLETION-VISIBILITY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "idempotencyKey": "review20261026-spec-LIBRARY-COMPLETION-VISIBILITY-1",
+      "actualRevision": "c0ef2feb24e2dae860965599397f90903e353c1ce1f4eb03cf57397154f46694",
+      "recoveryId": "20261026T195048Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:04Z",
+  "outcome": "succeeded"
+}

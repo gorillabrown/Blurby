@@ -1,0 +1,55 @@
+{
+  "id": "20261027T233333Z-external-create-item-BLOCK-TEXT-ORDER-1",
+  "operation": "external-create-item",
+  "item_id": "BLOCK-TEXT-ORDER-1",
+  "created": "2026-10-27T23:33:33Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "BLOCK-TEXT-ORDER-1",
+      "title": "Keep block text in DOM order in every reading mode",
+      "status": "Queued",
+      "written_status": "Stub",
+      "workstream": "Reader Engine",
+      "effort": "L",
+      "prerequisites": [
+        "NARRATE-REBUILD-1",
+        "FLOW-PARA-PAUSE-INDEX-1",
+        "BLOCK-TAG-CASE-1",
+        "NATIVE-PATH-ATTESTATION-1"
+      ],
+      "branch": "eb/block-text-order-1",
+      "spec_link": "ROADMAP.md#block-text-order-1",
+      "notes": "Owner approved Phase C2026-10-27 and explicitly directed qualified registry-helper repair followed by registration at87.5. Authored Stub/NOT READY: accepted-text equivalence, non-lossy canonical alignment, hydration authority and semantic paragraph contracts remain G-A through G-D holds. Narrow four-helper-only preservation premise is insufficient; exact minimal source-fence correction requires review. Preserve legacy main tokenizer/word/cue output; WORD joining/migration remains separate. No source/process/native admission.",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-27-group-source-trace.md; docs/governance/bug-reports/Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md",
+      "deliverable": "Preserve ordered accepted block runs and exact canonical source correspondence in independent reading modes without activating WORD numbering",
+      "sequence": 87.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-27T23:33:13Z",
+    "idempotencyKey": "registry-helper-fix-20261027-group-create-v2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BLOCK-TEXT-ORDER-1",
+      "idempotencyKey": "registry-helper-fix-20261027-group-create-v2",
+      "actualRevision": "2e4f576f1aa9ca42b576e7946dcb0b32903a67af30ebc6357146b81bb155387d",
+      "recoveryId": "20261027T233333Z-external-create-item-BLOCK-TEXT-ORDER-1",
+      "detail": {},
+      "providerItemId": "4067c96c-c31e-81a6-8f0a-e776b050f662",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-27T23:34:32Z",
+  "outcome": "succeeded"
+}

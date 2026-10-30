@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204106Z-external-set-status-IPC-PATH-TRUST-1",
+  "operation": "external-set-status",
+  "item_id": "IPC-PATH-TRUST-1",
+  "created": "2026-10-26T20:41:06Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/ipc-path-trust-1 at 1f59181f5a1e63db087dca352ed4ffe60735ab1b; ancestor of planning baseline=True; ROADMAP heading: IPC-PATH-TRUST-1 — Main decides which files and folders the renderer can reach *(merged `9b68ce38` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "8f146c94abdaa2f5001565035b9cd7b7d7eb88e9e9e215100208616763ffabaa",
+    "idempotencyKey": "parallelgov20261026-IPC-PATH-TRUST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "IPC-PATH-TRUST-1",
+      "idempotencyKey": "parallelgov20261026-IPC-PATH-TRUST-1",
+      "actualRevision": "444d016eec62cb6006efdf32aa182c5601043e34c9391de3c41285d6eb9bf1d2",
+      "recoveryId": "20261026T204106Z-external-set-status-IPC-PATH-TRUST-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:40Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190429Z-external-create-item-TRAY-ICON-SIZE-1",
+  "operation": "external-create-item",
+  "item_id": "TRAY-ICON-SIZE-1",
+  "created": "2026-10-26T19:04:29Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Make the Windows tray icon legible at normal scaling",
+      "status": "Queued",
+      "sequence": 136,
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#tray-icon-size-1",
+      "description": "Existing BUG-203: tiny Windows tray icon recurs in this smoke. PACKAGING-FIX-1 shipped assets but did not fix the visual sizing.",
+      "prerequisites": [
+        "PACKAGING-FIX-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P3. Sources F1. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Inspect actual icon padding and Windows raster size/DPI handling, then verify legible tray rendering at normal and scaled displays with menu behavior intact.",
+      "id": "TRAY-ICON-SIZE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-TRAY-ICON-SIZE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "TRAY-ICON-SIZE-1",
+      "idempotencyKey": "smoke20261026-TRAY-ICON-SIZE-1",
+      "actualRevision": "a5f5b3c076671a6b1e1502cf8bb37768c7312befced346a920c5fa65195b7685",
+      "recoveryId": "20261026T190429Z-external-create-item-TRAY-ICON-SIZE-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8122-841f-f5b7a9c0ddcb",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:52Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204140Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+  "operation": "external-set-status",
+  "item_id": "OVERLAY-THEME-SWEEP-1",
+  "created": "2026-10-26T20:41:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/overlay-theme-sweep-1 at ec73f3529343fb44c913261868a148db5beb9d28; ancestor of planning baseline=False; ROADMAP heading: OVERLAY-THEME-SWEEP-1 — Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "99ca15e081d899e063aaebedf597e79fc6c407030988671209d1df26560a5934",
+    "idempotencyKey": "parallelgov20261026-OVERLAY-THEME-SWEEP-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "OVERLAY-THEME-SWEEP-1",
+      "idempotencyKey": "parallelgov20261026-OVERLAY-THEME-SWEEP-1",
+      "actualRevision": "7b98f57eabf6d0685ea4aa37984a2cd6502c40cd79628bec40bd1c4c33be5d34",
+      "recoveryId": "20261026T204140Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:10Z",
+  "outcome": "succeeded"
+}

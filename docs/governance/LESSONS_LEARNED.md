@@ -3060,3 +3060,58 @@ Related: LL-151, standing rule 43, LL-142.
 
 ### LL-146 — status (2026-10-23, 2026-10-23)
 **Status:** Promoted -> ROADMAP standing rule 52
+
+### LL-167 — A dispatch is not done until its packaged build is verified (owner directive, 2026-10-23)
+**Verdict:** Dispatches were closing on dev-mode tests, a suite and a build exit code, with live checks run on packages only when a spec asked. The owner directed Blurby.Brain on 2026-10-23: "You need to verify packages at conclusions of all dispatches." A green suite does not prove the shipped `app.asar` carries the change, that the packaged app launches clean, or that a Done-when holds outside dev mode; worktree junctions have already produced incomplete asars in this project.
+**Evidence:** Blurby.Brain's message to Blurby.Roadmap, 2026-10-23 (owner directive relayed; the owner confirmed codifying it the same day in Blurby.Roadmap).
+**Recommendation:** Every dispatch ends with package verification before its merge go: a `--dir` build from the final commit with `origin/main` merged in, in its own worktree; a `BLURBY_USER_DATA_DIR` grep of the built `main.js`; a 25 s scratch-profile launch with no error, unhandled-rejection or crash line and no crash dump; `npx asar list` showing every changed `main/` file and the renderer bundle matching `dist/`; the automatable Done-when re-run on the packaged exe; a "Package verification" section in the close-out; and Blurby.Brain's confirmation. A dispatch that changes nothing under `build.files` records "package unchanged" with its diff.
+**Applies to:** every dispatch's close-out and merge go, In Flight items included; release gates.
+**Status:** Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23)
+Related: LL-165, standing rules 47 and 48.
+
+### LL-158 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 54
+
+### LL-151 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 55
+
+### LL-166 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 55
+
+### LL-168 — An NSIS install replaces an older Blurby's uninstall registration, so an install test exports both keys first
+**Verdict:** The NSIS installer registers under the app's `appId` (`com.blurby.app`, key `Uninstall\3d1a7f75-29ad-505c-9015-d9a83f11b281`). An install replaces the uninstall registration of any older Blurby with the same `appId`, and the new build's uninstall then deletes it. Moving the old install folder aside does not protect it. On the quiet machine, WIN-TARGET-NSIS-1's install check replaced the old 1.1.2 registration. Its keys had not been exported, so they were rebuilt from the template (`reg-1.1.2-reconstructed.reg`). The files are byte-verified as restored.
+**Evidence:** Blurby.Brain's WIN-TARGET-NSIS-1 (d) run on the x64 quiet machine, 2026-10-25 (`C:\Projects\Blurby-artifacts\win-target-nsis-1\quiet-x64\`), relayed by Blurby.Roadmap.
+**Recommendation:** Before any install test on a machine that already has Blurby, export both `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\<guid>` and `HKCU\Software\<guid>` (`reg export`), and record the files' hashes. Restore them after the uninstall and verify the restore. Never rely on moving the install folder.
+**Applies to:** install, uninstall and upgrade checks of a packaged build (standing rule 53 (d) for packaging items); release smoke runs; the release runbook's verify step.
+**Status:** Observation (2026-10-25)
+Related: LL-167 (standing rule 53), WIN-TARGET-NSIS-1, RELEASE-RUNBOOK-1.
+
+
+
+### LL-169 — Operation currentness and retained-resource lifetime need separate guards (FOLIATE-DISPLAY-LIFETIME-1, 2026-10-27)
+**Verdict:** A newer display or anchor intent can retire publication, scrolling and focus while the same retained View still legitimately owns pending load, font and resize callbacks. A single generation predicate for both lifetimes cancels valid work or permits stale side effects.
+**Evidence:** Source e1c1c11ceac16e8cba808714172420942e8801fa and its identical installed-production detector: candidate 51 passes; base 35 behavior assertion failures and 16 active controls, with four extra old-production rejections classified separately. Native acceptance remains NOT RUN; collector qualification is not a Foliate defect finding.
+**Recommendation:** Model operation currentness and retained-resource liveness separately; check captured identity before each effect and after reentry/await. Cancel pending loads once without changing fulfilled outcomes, and dispose only the captured obsolete resource.
+**Applies to:** Async reader/dependency lifecycles, same-resource intent changes, native-load continuation, callbacks and teardown.
+**Status:** Observation
+Related: LL-029, LL-031, LL-109; CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md.
+
+### LL-165 — status (FOLIATE-DISPLAY-LIFETIME-1, 2026-10-27)
+**Status:** Held as a safety gate: no Blurby input or native route was attempted because actual initialized scratch data/queue paths were not proved. Two controlled collector attempts failed before cache/cell traversal; synthetic parser passes did not substitute for actual path proof. Native acceptance remains NOT RUN.
+**Evidence:** CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; controlled Run1 receipt 999bf5062e7743bf9978c62ab99cc38562c3e436e2e7c6ce40f4cc29072c4e76 and Run2 receipt e2815173d54fc205c9b051c8eba89631121db8a9b9766488810277e48fabbf26; final Brain and independent CAPABILITY HOLD.
+
+### LL-170 — An unchanged canonical word array does not prove DOM source correspondence (roadmap-review, 2026-10-27)
+**Verdict:** Pinned source analysis at f61ae02d found that main and renderer accept different referenced-footnote target text, canonical wrapping can skip missing words or match repeated text at the wrong occurrence, and pre-canonical mode paths can supply selection, persistence or Narrate playback. Keeping main's word array unchanged therefore does not certify that a grouping-only edit preserves saved word identity. These are source-derived counterexamples, not executed reproducers or owner-book incidence measurements.
+**Evidence:** docs/planning/roadmap-reviews/2026-10-27-group-source-trace.md, sections3–7, authored by Blurby.Brain; Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md. No source/test/fixture/measurement/native execution occurred in this analysis.
+**Recommendation:** Before declaring a renderer regrouping index-preserving, trace accepted-text suppression, non-lossy source-occurrence alignment, canonical availability/hydration authority, semantic paragraph metadata and every actual save/start consumer. Equal text/counts, consumed-count totals and an in-range index are insufficient. Freeze the exact minimal consumer fence and causal/opposing tests; keep source and prospective measurements held when that contract is incomplete.
+**Applies to:** Reader block grouping, canonical word stamping, source alignment, provisional/hydrated selection and persistence, mode-local fallback word sources.
+**Status:** Observation — specification hold; no runtime failure or correction acceptance is claimed.
+Related: LL-028, LL-071, LL-072, LL-081, LL-139, LL-160; standing rules29 and36.
+
+### LL-171 — Preserve sequence values and numeric types across every provider boundary (registry-helper repair, 2026-10-27)
+**Verdict:** int(float(...)) truncated approved67.5/87.5 placements and rounded large integral values; generic row truthiness erased raw0, scalar flattening hid typed bools, and numeric Seq serialization could become text. Direct parser tests alone missed actual import/update/persist/recovery routes.
+**Evidence:** qualified private helper commitfcfa92959b757828f29bdac6a54aa99015b2b525; identical detector base73 assertion failures/26 opposing passes, candidate99 passes, relevant full399 passes with unchanged source hashes; docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md and registry-registration-verification.json. Live196-row readback confirms exact half positions and unchanged original194 positions/statuses.
+**Recommendation:** normalize finite numeric sequence before any mutation key/recovery side effect, preserve exact integers and supported decimal float roundtrips, distinguish explicit clear from invalid, and retain mapped raw sequence scalar types through import. Test actual production create/update/alias/import/store/read/order/recovery paths, with causal controls for fractions, zero, bool, precision and nonfinite values. Compare raw live provider values against plans before confirmation; a snapshot mirror cannot prove provider ordering.
+**Applies to:** Work-register sequence normalization, provider adapters, planned external mutations, snapshot import, canonical ordering and helper activation.
+**Status:** Observation — bounded helper repair and registration verified; no application/native qualification or official plugin release claim.
+Related: LL-130, LL-137, LL-155, LL-163; Issue.REGISTER-SEQUENCE-PRECISION-1.2026-10-27.md.

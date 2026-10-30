@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195549Z-external-set-status-EINK-DEVICE-SETTINGS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-DEVICE-SETTINGS-1",
+  "created": "2026-10-26T19:55:49Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 125
+    },
+    "expectedRevision": "e0a1bc23d2b9abcc413e74bff14d693ded6fb5a851173870b20faa26a213ffb9",
+    "idempotencyKey": "review20261026-integer-seq-EINK-DEVICE-SETTINGS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-DEVICE-SETTINGS-1",
+      "idempotencyKey": "review20261026-integer-seq-EINK-DEVICE-SETTINGS-1",
+      "actualRevision": "741a42b6d7ce4dd1cd21040f49996f5d8d913502a800e5e3213e31e8498b78b2",
+      "recoveryId": "20261026T195549Z-external-set-status-EINK-DEVICE-SETTINGS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:12Z",
+  "outcome": "succeeded"
+}

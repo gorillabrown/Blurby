@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195056Z-external-set-status-AUTO-ARCHIVE-1",
+  "operation": "external-set-status",
+  "item_id": "AUTO-ARCHIVE-1",
+  "created": "2026-10-26T19:50:56Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner approved 2026-10-26: on an assumed finish, offer Keep in Library or Archive; default/dismiss keeps the read visible, Archive requires affirmation and is findable in Archive. Preserve compatible explicit Mark complete/Undo behavior. Supersedes silent exit-at-end auto-archive; remains Stub until completion/history/prompt tests are re-specified."
+    },
+    "expectedRevision": "9d77080f433871f0be6d23f92129269ceb3c2b56977d89da6d4f17512b17b758",
+    "idempotencyKey": "review20261026-spec-AUTO-ARCHIVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "AUTO-ARCHIVE-1",
+      "idempotencyKey": "review20261026-spec-AUTO-ARCHIVE-1",
+      "actualRevision": "983452cfd4ca1d3a33905ad8ebb1fa2b2edbd5d57dc5162321a7730dd25436bd",
+      "recoveryId": "20261026T195056Z-external-set-status-AUTO-ARCHIVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:10Z",
+  "outcome": "succeeded"
+}

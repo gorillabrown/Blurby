@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204054Z-external-set-status-BOOK-TYPE-SCALE-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TYPE-SCALE-1",
+  "created": "2026-10-26T20:40:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/book-type-scale-1 at 7194a9095999fc8746fb83c99e879ea2a2c0fa19; ancestor of planning baseline=True; ROADMAP heading: BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(merged; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/book-type-scale-1 at 7194a9095999fc8746fb83c99e879ea2a2c0fa19; ancestor of planning baseline=True; ROADMAP heading: BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(merged; In Flight, close-out held by the Stage 8 release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "11c1ced0c173d1d006b68d9a42dbafc81ea91c5ba0e5edbb9f2371e7d7925a88",
+    "idempotencyKey": "parallelgov20261026-BOOK-TYPE-SCALE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TYPE-SCALE-1",
+      "idempotencyKey": "parallelgov20261026-BOOK-TYPE-SCALE-1",
+      "actualRevision": "e97397f3d5a300d4b130c82515d2e31a9149e906c51e2590ebdacc221dcb7019",
+      "recoveryId": "20261026T204054Z-external-set-status-BOOK-TYPE-SCALE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:29Z",
+  "outcome": "succeeded"
+}

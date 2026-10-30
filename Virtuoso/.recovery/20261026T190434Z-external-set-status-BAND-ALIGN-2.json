@@ -1,0 +1,25 @@
+{
+  "id": "20261026T190434Z-external-set-status-BAND-ALIGN-2",
+  "operation": "external-set-status",
+  "item_id": "BAND-ALIGN-2",
+  "created": "2026-10-26T19:04:34Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner amendment 2026-10-23: the band edges sit on line boxes, the cursor line is the band middle, the band follows the reading location when the scroll clamps, and the reader picks the anchor (Top, Top third, Center). Flow runs on one clock. Smoke 2026-10-26: Flow offset recurs (F5); R4 requests Focus word cursor only. FOCUS-WORD-ONLY-1 follows held work and reconciles that changed Focus design. No widening of held fence or claim this release includes its fix."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "smoke20261026-BAND-ALIGN-2"
+  },
+  "resolved": "2026-10-26T19:05:39Z",
+  "outcome": "abandoned",
+  "reason": "Superseded before execution by a plan pinned to the fresh provider snapshot revision."
+}

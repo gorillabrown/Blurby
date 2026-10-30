@@ -1,0 +1,51 @@
+{
+  "id": "20261026T202745Z-external-create-item-GOV-SWEEP-FOLLOWTHROUGH-1",
+  "operation": "external-create-item",
+  "item_id": "GOV-SWEEP-FOLLOWTHROUGH-1",
+  "created": "2026-10-26T20:27:45Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "GOV-SWEEP-FOLLOWTHROUGH-1",
+      "title": "Finish the approved governance sweep against the current roadmap",
+      "status": "Queued",
+      "sequence": 0,
+      "written_status": "Stub",
+      "effort": "M",
+      "workstream": "Platform & Maintenance",
+      "group": "Platform Health",
+      "branch": "eb/governance-sweep-2026-10-26",
+      "spec_link": "ROADMAP.md#gov-sweep-followthrough-1",
+      "description": "First-order governance delivery: refresh and complete the owner-approved 16-action sweep without overwriting the RED smoke review or visibility admission. Deliver documentation/registry consistency, evidence-backed held-work descriptions, individually owned deferred findings, and a verified preservation/closure package.",
+      "notes": "Owner direction2026-10-26: include the referenced governance sweep as first-order upcoming deliverables. Live source thread01a178b2-c694-70b0-90df-0edae537aed0 was read: discovery/plan/approval complete; implementation stopped on drift and changed no files. Seq0 prioritizes governance; visibility remains the first app fix with its source window intact. This is a new follow-through item; historical GOVERNANCE-SWEEP remains Completed. Original sweep approval is commit-only, excludes its merge/push. Scope and16-action matrix: docs/planning/roadmap-reviews/2026-10-26-governance-deliverables.md.",
+      "deliverable": "A: approved16-action cleanup with current source/registry parity; B: register-authorized held-state/Notes/Deliverable reconciliation; C: six categories of deferred findings individually owned; D: backup/protected-hash, links/parity/board checks and sweep report with exact-path commit. Stub until refreshed baseline is reconciled; no implementation/close-out is claimed.",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T20:27:44Z",
+    "idempotencyKey": "sweepfollowthrough20261026-create",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1",
+      "idempotencyKey": "sweepfollowthrough20261026-create",
+      "actualRevision": "a167cae5cf0e80df3c2f9f932ede0092469a5a1012a6a52fb368b6f447da01e0",
+      "recoveryId": "20261026T202745Z-external-create-item-GOV-SWEEP-FOLLOWTHROUGH-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8158-baf8-ec3a4a4b90d0",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T20:28:21Z",
+  "outcome": "succeeded"
+}

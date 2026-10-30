@@ -1,0 +1,41 @@
+{
+  "ownerRequest": "parallel independentagents, monitorcompletion, approvefinaldeliverables",
+  "reviewer": "Blurby.Roadmap parent",
+  "technicalAuthority": "Blurby.Brain thread01a179e8-7a40-75c0-93f4-d3045ad99027 by directownergrant",
+  "designAuthority": "owner",
+  "governance": {
+    "commit": "60d11b4285447f6b1d9496a7564c0be911848906",
+    "decision": "APPROVED exact16action/12path documentation deliverable, commit-only boundary retained",
+    "independentReview": "independent-review.md"
+  },
+  "investigations": {
+    "decision": "APPROVED as bounded diagnoses",
+    "reports": [
+      "docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md",
+      "docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md"
+    ],
+    "remainingUnknowns": [
+      "original93.2second phasebudget",
+      "original normalqueue writerPID/profileattribution"
+    ]
+  },
+  "visibility": {
+    "source": "0dd4d94026f2574f735031b2b1569aee09d17120",
+    "decision": "APPROVED source/test quality as BUILD-AND-HOLD",
+    "packageDecision": "WITHHOLD: separatefourmode check1BUG222 style-null error",
+    "mergeOrReleaseGo": false,
+    "admittedCombinedSource": "aa5f1485 (main -> visibility -> observer, no main merge)",
+    "combinedSource": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
+    "combinedCleanChecks": [
+      "full329236ms observerroute",
+      "4liveobservers/4targets census",
+      "owned91word completionroute26008ms"
+    ],
+    "originalBlocker": "existing BUG187 ResizeObserver errorflood reproducedonbaseandcandidate",
+    "originalTechnicalNextWork": "Brain separately authorized isolated combined verification branch eb/visibility-observer-verification-20261026; full original observer route and clean standing53 checks required",
+    "currentBlocker": "BUG-222 active iframe loading/body-null style error; exact-stack and captured-instance readiness controls produced; no corrective source admission yet",
+    "currentTechnicalNextWork": "Submit narrow loading/body-readiness repair proposal and controls to Brain; no generic helper guard, suppression or hidden waiver"
+  },
+  "terminalStatusChanges": false,
+  "publicationAuthorization": "Brain approved exactdocs-onlyparentpublication after currentreceipts captured; no mainapplicationmerge/release"
+}

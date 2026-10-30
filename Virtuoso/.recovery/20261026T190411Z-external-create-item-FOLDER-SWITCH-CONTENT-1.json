@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190411Z-external-create-item-FOLDER-SWITCH-CONTENT-1",
+  "operation": "external-create-item",
+  "item_id": "FOLDER-SWITCH-CONTENT-1",
+  "created": "2026-10-26T19:04:11Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Folder switching shows the correct books promptly",
+      "status": "Queued",
+      "sequence": 120,
+      "written_status": "Stub",
+      "workstream": "Library & Content",
+      "spec_link": "ROADMAP.md#folder-switch-content-1",
+      "description": "The header follows selection, but old-folder cards remain during a long cancellation/scan gap. Readings records began arriving after about 93 seconds; this is eventual loading, not permanent failure.",
+      "prerequisites": [
+        "LARGE-FOLDER-SYNC-2"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Measure loading and cancellation separately on small and large collections; prevent stale cards being presented as the new folder's books, keep the UI responsive, and preserve existing records/progress. No local import cap or subfolder picker is authorized.",
+      "id": "FOLDER-SWITCH-CONTENT-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-FOLDER-SWITCH-CONTENT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLDER-SWITCH-CONTENT-1",
+      "idempotencyKey": "smoke20261026-FOLDER-SWITCH-CONTENT-1",
+      "actualRevision": "7d3e6eec880690735afaeeef3461370c0f88cb0d862cc9e7403efeaadd7cf833",
+      "recoveryId": "20261026T190411Z-external-create-item-FOLDER-SWITCH-CONTENT-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8149-85e7-f67c1d8f69a0",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:33Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204104Z-external-set-status-DEPS-AUDIT-1",
+  "operation": "external-set-status",
+  "item_id": "DEPS-AUDIT-1",
+  "created": "2026-10-26T20:41:04Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/deps-audit-1 at 2dfc9a9a67548331a499193643d707e4ed3e7094; ancestor of planning baseline=True; ROADMAP heading: DEPS-AUDIT-1 — Fix or account for every production dependency advisory *(merged `5d12e19a` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "eeb52536a996f5eeace94897f435fb3d6ac011abfdee2298bf40dbf1f4e8ff90",
+    "idempotencyKey": "parallelgov20261026-DEPS-AUDIT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "DEPS-AUDIT-1",
+      "idempotencyKey": "parallelgov20261026-DEPS-AUDIT-1",
+      "actualRevision": "90acb136f2e00d732e8d83de47ac732ef5cc9cccabc4551f3a624a8562a88f88",
+      "recoveryId": "20261026T204104Z-external-set-status-DEPS-AUDIT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:38Z",
+  "outcome": "succeeded"
+}

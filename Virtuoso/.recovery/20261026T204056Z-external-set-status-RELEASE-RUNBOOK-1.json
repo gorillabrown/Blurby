@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204056Z-external-set-status-RELEASE-RUNBOOK-1",
+  "operation": "external-set-status",
+  "item_id": "RELEASE-RUNBOOK-1",
+  "created": "2026-10-26T20:40:56Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/release-runbook-1 at c02e930eeebeabc0e8a1890f88511d48b3a72974; ancestor of planning baseline=True; ROADMAP heading: RELEASE-RUNBOOK-1 — Write the release runbook: build, sign, upload and verify the installers by hand *(merged `3872c6e8` 2026-10-23, release gate (12; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "af4cc2826a47661e1cedb73cb8cd981d8769696456569bb1af1c800784508e2c",
+    "idempotencyKey": "parallelgov20261026-RELEASE-RUNBOOK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RELEASE-RUNBOOK-1",
+      "idempotencyKey": "parallelgov20261026-RELEASE-RUNBOOK-1",
+      "actualRevision": "a3d5d64cfe7a77d8237322392238f67db0493d6c0d4d3dfbcd99b9380d9d351e",
+      "recoveryId": "20261026T204056Z-external-set-status-RELEASE-RUNBOOK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:30Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,33 @@
+{
+  "provider": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+  "snapshotTakenAt": "2026-10-26T20:03:03Z",
+  "liveItems": 192,
+  "statusCounts": {
+    "Completed": 71,
+    "Dissolved": 9,
+    "Superseded": 6,
+    "In Flight": 64,
+    "Queued": 42
+  },
+  "existingStatusesUnchanged": true,
+  "newChild": "NARRATE-PAUSED-CLICK-1",
+  "smokeSourcesCovered": 30,
+  "uniqueSequences": true,
+  "roadmapLines": 2000,
+  "newFullSpecifications": [
+    "LIBRARY-COMPLETION-VISIBILITY-1",
+    "NARRATE-PAUSED-CLICK-1",
+    "PAGE-ENTRY-KEYS-1",
+    "FOCUS-WORD-ONLY-1",
+    "POSITION-PROMPT-COPY-1"
+  ],
+  "mechanicalU9U10": "passed",
+  "ownRecoveryResolved": 64,
+  "ownRecoveryOutstanding": 0,
+  "applicationCodeChanged": false,
+  "applicationTestsRun": false,
+  "board": "regenerated: roadmap-board.html",
+  "gitignoreChanged": false,
+  "holdingBayOpen": 0,
+  "boardCommentsOpen": 0
+}

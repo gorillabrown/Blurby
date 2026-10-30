@@ -1,0 +1,35 @@
+{
+  "id": "20261026T013345Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-HARNESS-COLDCLICK-1",
+  "created": "2026-10-26T01:33:45Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts (quiet x64 run on package 0ca285e5: 80/80 lost-race, spans never ready before first voice); Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner question 1 (A/B/C, spec recommends B) pending.",
+      "evidence": "Quiet machine: C:/Projects/Blurby-artifacts/narrate-harness-coldclick-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('evidence', 'Quiet machine: C:/Projects/Blurby-artifacts/narrate-harness-coldclick-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts (quiet x64 run on package 0ca285e5: 80/80 lost-race, spans never ready before first voice); Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner question 1 (A/B/C, spec recommends B) pending.\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+      "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('evidence', 'Quiet machine: C:/Projects/Blurby-artifacts/narrate-harness-coldclick-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts (quiet x64 run on package 0ca285e5: 80/80 lost-race, spans never ready before first voice); Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner question 1 (A/B/C, spec recommends B) pending.\")]",
+      "actualRevision": "",
+      "recoveryId": "20261026T013345Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T01:34:11Z",
+  "outcome": "succeeded"
+}

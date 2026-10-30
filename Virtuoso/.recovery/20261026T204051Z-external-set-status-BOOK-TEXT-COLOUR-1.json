@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204051Z-external-set-status-BOOK-TEXT-COLOUR-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TEXT-COLOUR-1",
+  "created": "2026-10-26T20:40:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/book-text-colour-1 at 0ccba7308589454a270a75f5406a465fb16f23c1; ancestor of planning baseline=True; ROADMAP heading: BOOK-TEXT-COLOUR-1 — Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/book-text-colour-1 at 0ccba7308589454a270a75f5406a465fb16f23c1; ancestor of planning baseline=True; ROADMAP heading: BOOK-TEXT-COLOUR-1 — Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "0b7c5e37b711cb6ac4118f3b6f687a6077c936b63fe024f7d573c58d70d15c79",
+    "idempotencyKey": "parallelgov20261026-BOOK-TEXT-COLOUR-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TEXT-COLOUR-1",
+      "idempotencyKey": "parallelgov20261026-BOOK-TEXT-COLOUR-1",
+      "actualRevision": "e9b1bf7604e984a692eab2a51040310300c19fcc7d0dba549bb2c534a456f763",
+      "recoveryId": "20261026T204051Z-external-set-status-BOOK-TEXT-COLOUR-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:26Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "20261026T205954Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SWITCH-CONTENT-1",
+  "created": "2026-10-26T20:59:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.",
+      "deliverable": "Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md."
+    },
+    "expectedRevision": "f6e64499318b43e5c05e47a2f14d096e4016565109492c049b24996bef4d603e",
+    "idempotencyKey": "parallelprogress20261026-FOLDER-SWITCH-CONTENT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SWITCH-CONTENT-1",
+      "idempotencyKey": "parallelprogress20261026-FOLDER-SWITCH-CONTENT-1",
+      "actualRevision": "7bd4f98ef11e29fc1d4a3e3e1d06791d24a0b62ed71c716c6d662268f6a3476e",
+      "recoveryId": "20261026T205954Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T21:00:21Z",
+  "outcome": "succeeded"
+}

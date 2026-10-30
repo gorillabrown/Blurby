@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195054Z-external-set-status-BOOK-TYPE-SCALE-2",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TYPE-SCALE-2",
+  "created": "2026-10-26T19:50:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner approved 2026-10-26: normalize decorative inline sizes/dropcaps to the reader scale, retaining emphasis, links and semantic superscript/subscript. The owner EPUB contains fixed span.small/dropcap sizes and current helpers intentionally preserve inline sizes; amend that prior design and its explicit test assertion. No justification-default change is authorized."
+    },
+    "expectedRevision": "1ed38fc9fc4fa194fbacf62d9c9e2518c774ba5c86d743f921c68adc628ef4bc",
+    "idempotencyKey": "review20261026-spec-BOOK-TYPE-SCALE-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TYPE-SCALE-2",
+      "idempotencyKey": "review20261026-spec-BOOK-TYPE-SCALE-2",
+      "actualRevision": "419a79b0150269e645dc9f9e5ddedba7e7e9cdbe040f75cc4048c4b9568f9385",
+      "recoveryId": "20261026T195054Z-external-set-status-BOOK-TYPE-SCALE-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:09Z",
+  "outcome": "succeeded"
+}

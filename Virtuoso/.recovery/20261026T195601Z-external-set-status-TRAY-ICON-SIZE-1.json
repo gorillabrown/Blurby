@@ -1,0 +1,34 @@
+{
+  "id": "20261026T195601Z-external-set-status-TRAY-ICON-SIZE-1",
+  "operation": "external-set-status",
+  "item_id": "TRAY-ICON-SIZE-1",
+  "created": "2026-10-26T19:56:01Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 137
+    },
+    "expectedRevision": "a5f5b3c076671a6b1e1502cf8bb37768c7312befced346a920c5fa65195b7685",
+    "idempotencyKey": "review20261026-integer-seq-TRAY-ICON-SIZE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "TRAY-ICON-SIZE-1",
+      "idempotencyKey": "review20261026-integer-seq-TRAY-ICON-SIZE-1",
+      "actualRevision": "dec36ec26533ad12c7e3e36d6039e2a9d9c80fc8e0c1a0fbd60c1cfd9c64af16",
+      "recoveryId": "20261026T195601Z-external-set-status-TRAY-ICON-SIZE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:22Z",
+  "outcome": "succeeded"
+}

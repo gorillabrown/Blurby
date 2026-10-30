@@ -1,0 +1,2794 @@
+{
+  "scope": "Focused WORD measurement and native observation review; full register identity/status census, no unrelated respecification",
+  "provider": "Notion connector",
+  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+  "takenAt": "2026-10-27T21:29:06.451Z",
+  "mainBeforeReview": "f41a242c05cc60a171c500fb33bed89543f8bb7f",
+  "roadmapLines": 1990,
+  "roadmapSha256": "de6a49eca06b81f1f6ec48e44514bcd824b5f48b9fc861f4a64278b69aaf0c53",
+  "terminalLedgerSha256": "f80cbaa4980cecf023d9f2d37bd153b75bd73c60d86ba132e5f3a8875929ce1c",
+  "ledgerRecords": 86,
+  "ledgerDistinctItems": 86,
+  "rows": [
+    {
+      "id": "ANDROID-APP-1",
+      "title": "Establish the Android app",
+      "providerStatus": "Queued",
+      "sequence": 106,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1661,
+          "text": "#### ANDROID-APP-1 \u2014 Establish the Android app *(live Seq106; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "APP-TABS-1",
+      "title": "Four tabs: Library, Newsroom, Podcasts, Marketplace",
+      "providerStatus": "In Flight",
+      "sequence": 100,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 29,
+          "text": "| Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | BROWSER-EXT-FINALIZE-1 remains Stage9 after APP-TABS-1. Pairing/token/security changes already built or merged keep their recorded release and verification holds; the source register decides status. |"
+        },
+        {
+          "line": 1646,
+          "text": "#### APP-TABS-1 \u2014 Four tabs: Library, Newsroom, Podcasts, Marketplace *(live Seq100; In Flight; Full Spec)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "AUTO-ARCHIVE-1",
+      "title": "Confirm completion before archiving a read",
+      "providerStatus": "Queued",
+      "sequence": 111,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1511,
+          "text": "#### AUTO-ARCHIVE-1 \u2014 Confirm completion before archiving *(Seq111; Queued / Stub; owner amendment approved 2026-10-26)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BAND-ALIGN-1",
+      "title": "The Focus/Flow reading band is sized from the real line step",
+      "providerStatus": "In Flight",
+      "sequence": 66,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 561,
+          "text": "#### BAND-ALIGN-1 \u2014 The Focus/Flow reading band is sized from the real line step (Part A) *(built `105a07c1` on `eb/band-align-1`; In Flight, merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 628,
+          "text": "#### BAND-ALIGN-2 \u2014 The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base \u2192 tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask;"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BAND-ALIGN-2",
+      "title": "In Focus, the text scrolls the cursor's line into the fixed band",
+      "providerStatus": "In Flight",
+      "sequence": 83,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 628,
+          "text": "#### BAND-ALIGN-2 \u2014 The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base \u2192 tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask;"
+        },
+        {
+          "line": 1379,
+          "text": "#### CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on bot"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BASELINE-SYNC-1",
+      "title": "Commit Phase 0 + Governance Sweep Baseline",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 73,
+          "text": "| BASELINE-SYNC-1 | 2026-05-22 | Committed Phase 0 reader stabilization, governance sweep, and roadmap queue recovery in three pushed commits | [Close-out](docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "BLOCK-TAG-CASE-1",
+      "title": "The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks)",
+      "providerStatus": "In Flight",
+      "sequence": 85,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 657,
+          "text": "#### BLOCK-TAG-CASE-1 \u2014 The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*"
+        },
+        {
+          "line": 704,
+          "text": "#### FLOW-PARA-PAUSE-INDEX-1 \u2014 Flow and Focus paragraph pauses land at real paragraph ends *(position 108 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BLURBY-SERVER-1",
+      "title": "One library on every device (blrby.app server)",
+      "providerStatus": "Queued",
+      "sequence": 104,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 798,
+          "text": "#### LIBRARY-WRITE-RACE-3 \u2014 A library edit stamps only what the reader changed, a missing book fails the save, and a save answers only its own form *(Seq 89 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/library-write-race-2` @ `c46e9332`, from that item's memo (W2, N1, N2) and Blurby.Brain's ruling relayed by Blurby.Roadmap 2026-10-25; must merge before BLURBY-SERVER-1's sync is on for anyone; not a Stage 8 release gate)*"
+        },
+        {
+          "line": 1571,
+          "text": "#### BLURBY-SERVER-1 \u2014 One library on every device (blrby.app server) *(position 104 (97 until review 2026-10-23-4, then 100 until the owner moved Stage 9's tabs, feeds and extension ahead of it, 2026-10-23) \u2014 Path: epic; absorbed by roadmap review 2026-10-23-3 from held storyboard `2026-10-23-blurby-server`; after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BOOK-TEXT-COLOUR-1",
+      "title": "Book text takes the theme's text colour",
+      "providerStatus": "In Flight",
+      "sequence": 2,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 604,
+          "text": "#### BOOK-TEXT-COLOUR-1 \u2014 Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BOOK-TYPE-SCALE-1",
+      "title": "Books use one type scale for headers, sub-headers and body text",
+      "providerStatus": "In Flight",
+      "sequence": 5,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1423,
+          "text": "#### BOOK-TYPE-SCALE-1 \u2014 Books use one type scale for headers, sub-headers and body text *(merged; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BOOK-TYPE-SCALE-2",
+      "title": "Diagnose residual uneven book typography on the release build",
+      "providerStatus": "Queued",
+      "sequence": 122,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1830,
+          "text": "#### BOOK-TYPE-SCALE-2 \u2014 Diagnose residual uneven book typography on the release build *(Seq122; Queued / Stub; Reader Engine; proposed P2) <a id=\"book-type-scale-2\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "BROWSER-EXT-FINALIZE-1",
+      "title": "Finalize the Chrome and Firefox extensions",
+      "providerStatus": "Queued",
+      "sequence": 103,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 29,
+          "text": "| Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | BROWSER-EXT-FINALIZE-1 remains Stage9 after APP-TABS-1. Pairing/token/security changes already built or merged keep their recorded release and verification holds; the source register decides status. |"
+        },
+        {
+          "line": 1655,
+          "text": "#### BROWSER-EXT-FINALIZE-1 \u2014 Finalize the Chrome and Firefox extensions *(live Seq103; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "CAR-AUDIO-1",
+      "title": "Android Auto and Apple CarPlay compatibility",
+      "providerStatus": "Queued",
+      "sequence": 109,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1667,
+          "text": "#### CAR-AUDIO-1 \u2014 Android Auto and Apple CarPlay compatibility *(live Seq109; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "CHAPTER-STEP-CFI-1",
+      "title": "Focus and Flow chapter steps save the entry's word with its own section's cfi",
+      "providerStatus": "In Flight",
+      "sequence": 97,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1379,
+          "text": "#### CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on bot"
+        },
+        {
+          "line": 1543,
+          "text": "#### JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Fo"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "CI-AUDIT-ALLOWLIST-1",
+      "title": "CI fails on a new high advisory, not on the reviewed ones",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 107,
+          "text": "| CI-AUDIT-ALLOWLIST-1 | 2026-10-22 | CI's audit step fails only on a new or out-of-date high/critical advisory (9 reviewed entries allowlisted); follow-redirects 1.16.1; main CI green again (merge `47ae6e1f`) | [Close-out](docs/governance/close-outs/CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "CLEANUP-LEGACY-PARSERS-1",
+      "title": "Remove the unused legacy parser module",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 93,
+          "text": "| CLEANUP-LEGACY-PARSERS-1 | 2026-10-10 | Deleted unused `main/legacy-parsers.js` (0 consumers); CLAUDE.md and TECHNICAL_REFERENCE lines corrected (merge `b95dbb55`) | [Close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "CLEANUP-MODE-BARREL-1",
+      "title": "Remove the unused mode barrel and the legacy mode engines",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 113,
+          "text": "| CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | [Close-out](docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "CLOUD-CONNECTORS-1",
+      "title": "Connections to the mainstream cloud services",
+      "providerStatus": "Queued",
+      "sequence": 105,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1658,
+          "text": "#### CLOUD-CONNECTORS-1 \u2014 Connections to the mainstream cloud services *(live Seq105; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "CLOUD-RETRY-SHARED-1",
+      "title": "Share cloud retry handling with provider token refresh",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 91,
+          "text": "| CLOUD-RETRY-SHARED-1 | 2026-10-10 | One `withRetry` in `main/cloud-retry.js` with thin Google/OneDrive wrappers; 10 new tests; behavior unchanged (merge `dd3db29c`, EPIC-MAIN-PROCESS-CLEANUP) | [Close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "DEPS-AUDIT-1",
+      "title": "Fix or account for every production dependency advisory",
+      "providerStatus": "In Flight",
+      "sequence": 17,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 361,
+          "text": "#### DEPS-AUDIT-1 \u2014 Fix or account for every production dependency advisory *(merged `5d12e19a` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "DEV-PERF-MEASURE-1",
+      "title": "Measure dev-mode slowness against a production build",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "DROPDOWN-DISMISS-1",
+      "title": "Dropdowns close on outside click and preserve the selection",
+      "providerStatus": "Queued",
+      "sequence": 133,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1891,
+          "text": "#### DROPDOWN-DISMISS-1 \u2014 Dropdowns close on outside click and preserve the selection *(Seq133; Queued / Stub; UX polish; proposed P2) <a id=\"dropdown-dismiss-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-APPEARANCE-2",
+      "title": "E-ink uses white-dominant grayscale and contrast-only appearance controls",
+      "providerStatus": "Queued",
+      "sequence": 126,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1877,
+          "text": "#### EINK-APPEARANCE-2 \u2014 E-ink uses white-dominant grayscale and contrast-only appearance controls *(Seq126; Queued / Stub; UX polish; proposed P2) <a id=\"eink-appearance-2\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-CONTROLS-1",
+      "title": "One E-ink control, not two",
+      "providerStatus": "In Flight",
+      "sequence": 96,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1394,
+          "text": "#### EINK-CONTROLS-1 \u2014 One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-DEVICE-SETTINGS-1",
+      "title": "Remember E-ink preferences separately on each device",
+      "providerStatus": "Queued",
+      "sequence": 125,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1875,
+          "text": "#### EINK-DEVICE-SETTINGS-1 \u2014 Remember E-ink preferences separately on each device *(Seq125; Queued / Stub; Platform & Maintenance; proposed P2) <a id=\"eink-device-settings-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-FLOW-VIEWPORT-1",
+      "title": "Flow advances a screen at a time on E-ink",
+      "providerStatus": "Queued",
+      "sequence": 128,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1881,
+          "text": "#### EINK-FLOW-VIEWPORT-1 \u2014 Flow advances a screen at a time on E-ink *(Seq128; Queued / Stub; Reader Engine; proposed P2) <a id=\"eink-flow-viewport-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-HOVER-FIX-1",
+      "title": "Stop the e-ink hover rule wiping overlay backgrounds",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 98,
+          "text": "| EINK-HOVER-FIX-1 | 2026-10-12 | E-ink hover suppression limited to interactive leaves, so overlays stay opaque; BUG-184 resolved in source, open until the owner's smoke (merge `61bad595`) | [Close-out](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "EINK-MODE-AVAILABILITY-1",
+      "title": "Focus is unavailable while E-ink is enabled",
+      "providerStatus": "Queued",
+      "sequence": 127,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1879,
+          "text": "#### EINK-MODE-AVAILABILITY-1 \u2014 Focus is unavailable while E-ink is enabled *(Seq127; Queued / Stub; UX polish; proposed P2) <a id=\"eink-mode-availability-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-NARRATE-VIEWPORT-1",
+      "title": "Narrate advances a screen at a time on E-ink",
+      "providerStatus": "Queued",
+      "sequence": 129,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1883,
+          "text": "#### EINK-NARRATE-VIEWPORT-1 \u2014 Narrate advances a screen at a time on E-ink *(Seq129; Queued / Stub; TTS / Narration Engine; proposed P2) <a id=\"eink-narrate-viewport-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EINK-VIEW-REFRESH-1",
+      "title": "Refresh E-ink on view changes instead of elapsed time",
+      "providerStatus": "Queued",
+      "sequence": 130,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1885,
+          "text": "#### EINK-VIEW-REFRESH-1 \u2014 Refresh E-ink on view changes instead of elapsed time *(Seq130; Queued / Stub; UX polish; proposed P2) <a id=\"eink-view-refresh-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "ELECTRON-42-UPGRADE-1",
+      "title": "Upgrade Electron to 42 so a normal quit does not crash on x64",
+      "providerStatus": "In Flight",
+      "sequence": 8,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 438,
+          "text": "#### ELECTRON-42-UPGRADE-1 \u2014 Upgrade Electron to 42 so a normal quit does not crash on x64 *(merged `331fb81b` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "ENGINE-DORMANCY-1",
+      "title": "Disable MOSS-Nano & Pocket TTS",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 55,
+          "text": "| ENGINE-DORMANCY-1 | 2026-05-16 | Disabled dormant sidecar engines at settings/IPC | [Close-out](docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "ERROR-LOG-CAP-1",
+      "title": "error.log is size-capped and rotated",
+      "providerStatus": "In Flight",
+      "sequence": 75,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1415,
+          "text": "#### ERROR-LOG-CAP-1 \u2014 error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "EXT-PAIR-1",
+      "title": "Chrome Extension Pairing Auth Timeout Repair",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 83,
+          "text": "| EXT-PAIR-1 | 2026-05-29 | Chrome extension pairing auth timeout repair \u2014 `WS_PAIRING_TIMEOUT_MS` (5 min) replaces 5s initial auth window, structured WS logging, 8 new tests, BUG-183 closed | [Close-out](docs/governance/close-outs/CloseOut.EXT-PAIR-1.2026-05-29.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "FLOW-KEYS-FIX-1",
+      "title": "Flow's line, word, sentence and paragraph keys move both pacers",
+      "providerStatus": "In Flight",
+      "sequence": 77,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 622,
+          "text": "#### FLOW-KEYS-FIX-1 \u2014 Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, \u2192 and \u2190 move the speed 300 \u2192 325 \u2192 300, Ctrl+\u2193 continues, PgDn still pauses and turns the page, against Ctrl+\u2192 stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*"
+        },
+        {
+          "line": 651,
+          "text": "#### FLOW-PARA-KEYS-1 \u2014 Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 and keeps playing (572 to 579), Ctrl+\u2192 and Ctrl+\u2190 keep playing, plain \u2190/\u2192 change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 \u2192 this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e"
+        },
+        {
+          "line": 684,
+          "text": "#### READER-ARROW-GUARD-1 \u2014 Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+\u2190/\u2192 (see Prerequisites); no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FLOW-PARA-KEYS-1",
+      "title": "Flow paragraph keys step over whole-book paragraph starts on an EPUB",
+      "providerStatus": "In Flight",
+      "sequence": 84,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 628,
+          "text": "#### BAND-ALIGN-2 \u2014 The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base \u2192 tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask;"
+        },
+        {
+          "line": 651,
+          "text": "#### FLOW-PARA-KEYS-1 \u2014 Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 and keeps playing (572 to 579), Ctrl+\u2192 and Ctrl+\u2190 keep playing, plain \u2190/\u2192 change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 \u2192 this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e"
+        },
+        {
+          "line": 657,
+          "text": "#### BLOCK-TAG-CASE-1 \u2014 The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FLOW-PARA-PAUSE-INDEX-1",
+      "title": "Flow and Focus paragraph pauses land at real paragraph ends",
+      "providerStatus": "In Flight",
+      "sequence": 108,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 704,
+          "text": "#### FLOW-PARA-PAUSE-INDEX-1 \u2014 Flow and Focus paragraph pauses land at real paragraph ends *(position 108 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FLOW-TOC-JUMP-WORD-1",
+      "title": "After a contents jump, Flow highlights the chapter first word",
+      "providerStatus": "Queued",
+      "sequence": 110,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1670,
+          "text": "#### FLOW-TOC-JUMP-WORD-1 \u2014 After a contents jump, Flow highlights the chapter first word *(live Seq110; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FLOW-ZONE-AUTO",
+      "title": "Descending auto-advancing reading zone",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 70,
+          "text": "| FLOW-ZONE-AUTO | 2026-05-19 | Descending auto-advancing reading zone + render-loop fix | \u2014 |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "FOCUS-KEYS-FIX-1",
+      "title": "Focus's word, sentence and paragraph keys move the reading word",
+      "providerStatus": "In Flight",
+      "sequence": 76,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 616,
+          "text": "#### FOCUS-KEYS-FIX-1 \u2014 Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **rebuilt 2026-10-23 at `3bfb016e`, all gates and the live check pass**; merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 622,
+          "text": "#### FLOW-KEYS-FIX-1 \u2014 Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, \u2192 and \u2190 move the speed 300 \u2192 325 \u2192 300, Ctrl+\u2193 continues, PgDn still pauses and turns the page, against Ctrl+\u2192 stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*"
+        },
+        {
+          "line": 651,
+          "text": "#### FLOW-PARA-KEYS-1 \u2014 Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 and keeps playing (572 to 579), Ctrl+\u2192 and Ctrl+\u2190 keep playing, plain \u2190/\u2192 change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 \u2192 this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e"
+        },
+        {
+          "line": 657,
+          "text": "#### BLOCK-TAG-CASE-1 \u2014 The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOCUS-PAUSED-HANDOFF-1",
+      "title": "Focus shows the correct word immediately on entry",
+      "providerStatus": "Queued",
+      "sequence": 118,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1784,
+          "text": "#### FOCUS-PAUSED-HANDOFF-1 \u2014 Focus shows the correct word immediately on entry *(Seq118; Queued / Stub; Reader Engine; proposed P1) <a id=\"focus-paused-handoff-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOCUS-TOC-JUMP-WORD-1",
+      "title": "After a contents jump, Focus makes the chapter's first word the reading word",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 1379,
+          "text": "#### CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on bot"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "FOCUS-WORD-ONLY-1",
+      "title": "Focus retains its word cursor without a horizontal dimming band",
+      "providerStatus": "Queued",
+      "sequence": 123,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1832,
+          "text": "#### FOCUS-WORD-ONLY-1 \u2014 Focus retains its word cursor without a horizontal dimming band *(Queued; Full Spec; planning rank 4; Seq123; Reader Engine)* <a id=\"focus-word-only-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLDER-NOTICE-1",
+      "title": "Show when the source folder cannot be reached, with a one-press Retry",
+      "providerStatus": "In Flight",
+      "sequence": 29,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 451,
+          "text": "#### FOLDER-NOTICE-1 \u2014 Show when the source folder cannot be reached, with a one-press Retry *(merged `6ef5363a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLDER-NOTICE-2",
+      "title": "Follow-ups from FOLDER-NOTICE-1",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "FOLDER-RETRY-FEEDBACK-1",
+      "title": "Retry visibly reports checking and an unavailable folder",
+      "providerStatus": "Queued",
+      "sequence": 131,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1887,
+          "text": "#### FOLDER-RETRY-FEEDBACK-1 \u2014 Retry visibly reports checking and an unavailable folder *(Seq131; Queued / Stub; UX polish; proposed P2) <a id=\"folder-retry-feedback-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLDER-SCAN-PERF-1",
+      "title": "Stop a large source folder stalling every launch",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 115,
+          "text": "| FOLDER-SCAN-PERF-1 | 2026-10-14 | Native recursive `fs.watch` replaces chokidar; the folder scan drops per-file `realpath` and yields every 500 entries; startup folder work waits for the window. *Meditations* on Drive opens in ~2 s (was 140\u2013150 s); BUG-193 resolved. Live sync on very large folders (Done-when 9(d)) waived by the owner and moved to [large-folder live-sync follow-up](https://app.notion.com/3f97c96cc31e814fbf38e0d61a0b90f1) (merge `534b43d2`) | [Close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "FOLDER-SWITCH-CONTENT-1",
+      "title": "Folder switching shows the correct books promptly",
+      "providerStatus": "In Flight",
+      "sequence": 120,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1826,
+          "text": "#### FOLDER-SWITCH-CONTENT-1 \u2014 Folder switching shows the correct books promptly *(Seq120; In Flight / Stub; Library & Content; proposed P1) <a id=\"folder-switch-content-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLDER-SWITCH-HEADER-1",
+      "title": "The header follows the folder switch at once",
+      "providerStatus": "In Flight",
+      "sequence": 3,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 598,
+          "text": "#### FOLDER-SWITCH-HEADER-1 \u2014 The header follows the folder switch at once *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLDER-UNREACHABLE-GUARD-1",
+      "title": "Keep folder books when the source folder cannot be reached",
+      "providerStatus": "In Flight",
+      "sequence": 22,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 396,
+          "text": "#### FOLDER-UNREACHABLE-GUARD-1 \u2014 Keep folder books when the source folder cannot be reached *(merged `89a5a95c` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLIATE-DISPLAY-LIFETIME-1",
+      "title": "Fence Foliate loading and retired display continuations",
+      "providerStatus": "Blocked",
+      "sequence": 68,
+      "classification": "definitely live",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FOLIATE-OBSERVER-LEAK-1",
+      "title": "Leaked foliate View observers stop flooding error.log",
+      "providerStatus": "In Flight",
+      "sequence": 67,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 570,
+          "text": "#### FOLIATE-OBSERVER-LEAK-1 \u2014 Leaked foliate View observers stop flooding error.log *(built `51759276` on `eb/foliate-observer-leak-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "FURTHEST-PERSIST-1",
+      "title": "The furthest page a reader reached is remembered across sessions",
+      "providerStatus": "Queued",
+      "sequence": 114,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        },
+        {
+          "line": 1676,
+          "text": "#### FURTHEST-PERSIST-1 \u2014 The furthest page a reader reached is remembered across sessions *(live Seq114; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "GET-STATE-SECRET-1",
+      "title": "No secret reaches the renderer through state or settings reads",
+      "providerStatus": "In Flight",
+      "sequence": 23,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 403,
+          "text": "#### GET-STATE-SECRET-1 \u2014 No secret reaches the renderer through state or settings reads *(merged `f4a2822d` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "GOV-HUMAN-REVIEW-1",
+      "title": "Deferred Governance Review Items",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 81,
+          "text": "| GOV-HUMAN-REVIEW-1 | 2026-05-27 | Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled | [Close-out](docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "GOV-NOTION-LINKS-1",
+      "title": "Notion register link repair",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 101,
+          "text": "| GOV-NOTION-LINKS-1 | 2026-10-13 | 94 auto-generated links repaired in 91 register text values; the Notion register text rule recorded (merge `003c08e4`; ad hoc, held plan `2026-10-13-notion-link-repair` HB-3, absorbed 2026-10-13) | [Close-out](docs/governance/close-outs/CloseOut.HB-3.2026-10-13.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "GOV-NOTION-MAPPING-1",
+      "title": "Restore the Notion mapping and sync the podcast addition",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 103,
+          "text": "| GOV-NOTION-MAPPING-1 | 2026-10-22 | Register mapping repaired for Virtuoso 1.15 (workstream maps to Lane; `lane` alias dropped) and the owner's podcast direction synced into [the podcast-source direction](https://app.notion.com/3fa7c96cc31e81ec947ae2d365205441) (merge `eba49f2b`; from held plan `2026-10-15-notion-mapping-podcast-sync` HB-4) | [Close-out](docs/governance/close-outs/CloseOut.GOV-NOTION-MAPPING-1.2026-10-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "GOV-NOTION-VIEWS-1",
+      "title": "Notion roadmap views and phase layer",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 100,
+          "text": "| GOV-NOTION-VIEWS-1 | 2026-10-13 | Six named views on Blurby.Roadmap and a phase layer (11 phase pages, completion rollup, Phase link drift check) (merge `48cf6a3e`; ad hoc, held plan `2026-10-13-notion-phase-views` HB-2, absorbed 2026-10-13) | [Close-out](docs/governance/close-outs/CloseOut.HB-2.2026-10-13.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "GOV-SWEEP-FOLLOWTHROUGH-1",
+      "title": "Finish the approved governance sweep against the current roadmap",
+      "providerStatus": "In Flight",
+      "sequence": 0,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 31,
+          "text": "| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | GOV-SWEEP-FOLLOWTHROUGH-1 is the first governance deliverable; current cleanup preserves all held states. Stage8 gate(1) passed on36ac7466, owner smoke gate(2) is RED/partial; branch/package evidence does not grant completion or release. |"
+        },
+        {
+          "line": 1699,
+          "text": "#### GOV-SWEEP-FOLLOWTHROUGH-1 \u2014 Finish the approved governance sweep *(In Flight; Stub; first governance deliverable; Seq0; Platform & Maintenance)* <a id=\"gov-sweep-followthrough-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "GOVERNANCE-SWEEP",
+      "title": "Governance document and queue hygiene",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 72,
+          "text": "| GOVERNANCE-SWEEP | 2026-05-22 | Doc hygiene sweep: moved 1 memo, archived 7 dispatch files, created 6 hub readmes, repaired queue/agent references | \u2014 |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "HYG-XLSX-DASHBOARD-RESTORE",
+      "title": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "IOS-APP-1",
+      "title": "Establish the iOS app",
+      "providerStatus": "Queued",
+      "sequence": 107,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1664,
+          "text": "#### IOS-APP-1 \u2014 Establish the iOS app *(live Seq107; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "IPC-PATH-TRUST-1",
+      "title": "Main decides which files and folders the renderer can reach",
+      "providerStatus": "In Flight",
+      "sequence": 19,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 375,
+          "text": "#### IPC-PATH-TRUST-1 \u2014 Main decides which files and folders the renderer can reach *(merged `9b68ce38` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "JSONSTORE-TIMEOUT-1",
+      "title": "Give the jsonStore concurrency test real headroom",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 106,
+          "text": "| JSONSTORE-TIMEOUT-1 | 2026-10-22 | jsonStore test (a) gets a 30 s timeout; (d) and (e) count only their own renames; the file leaves Stage 8's closed list (merge `8e834ea3`) | [Close-out](docs/governance/close-outs/CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "JUMP-LANDING-SAVE-1",
+      "title": "Other jumps in Page mode save the page they land on",
+      "providerStatus": "In Flight",
+      "sequence": 81,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1379,
+          "text": "#### CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on bot"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        },
+        {
+          "line": 1543,
+          "text": "#### JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Fo"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "KEEP-FURTHEST-FIX-1",
+      "title": "Keep at furthest in Page mode keeps the furthest page the reader reached",
+      "providerStatus": "In Flight",
+      "sequence": 6,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 610,
+          "text": "#### KEEP-FURTHEST-FIX-1 \u2014 \"Keep at furthest\" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*"
+        },
+        {
+          "line": 1430,
+          "text": "#### PAGE-PAGES-READ-1 \u2014 Page turns count toward the pages-read goal *(Seq 113 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `main` @ `97568b09`, from PAGE-SAVE-RESTAMP-3's Wave C re-scope (KEEP-FURTHEST-FIX-1 did the rest); post-release, in its own `ReaderContainer.tsx` integration window; not a release gate)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "KF2-WAIVER-RETIRE-1",
+      "title": "Retire the KF-2 rename waiver",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 105,
+          "text": "| KF2-WAIVER-RETIRE-1 | 2026-10-22 | KF-2 waiver retired on 16 recorded runs; Stage 8's closed list written down by error type (merge `3f4798b2`) | [Close-out](docs/governance/close-outs/CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "KOKORO-DEEPEN-1",
+      "title": "Kokoro Readiness & Preflight",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 47,
+          "text": "| KOKORO-DEEPEN-1 | 2026-05-11 | Kokoro readiness and preflight checks | \u2014 |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "KOKORO-DEEPEN-2",
+      "title": "Natural Chunk Highlight",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 48,
+          "text": "| KOKORO-DEEPEN-2 | 2026-05-11 | Natural chunk highlighting for Kokoro TTS | \u2014 |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "KOKORO-DEEPEN-3",
+      "title": "Voice Mixing Feasibility",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 49,
+          "text": "| KOKORO-DEEPEN-3 | 2026-05-11 | Voice mixing feasibility study | \u2014 |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "KOKORO-EXPORT-1",
+      "title": "Long-Form Audio Export",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "LARGE-FOLDER-SYNC-1",
+      "title": "Live folder sync that scales to very large folders (technical half)",
+      "providerStatus": "In Flight",
+      "sequence": 14,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 340,
+          "text": "#### LARGE-FOLDER-SYNC-1 \u2014 Live folder sync that scales to very large folders (technical half) *(merged `0eb46e33` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        },
+        {
+          "line": 410,
+          "text": "#### LARGE-FOLDER-SYNC-2 \u2014 Follow-ups from LARGE-FOLDER-SYNC-1 *(merged `1f573bc2` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LARGE-FOLDER-SYNC-2",
+      "title": "Follow-ups from LARGE-FOLDER-SYNC-1",
+      "providerStatus": "In Flight",
+      "sequence": 24,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 410,
+          "text": "#### LARGE-FOLDER-SYNC-2 \u2014 Follow-ups from LARGE-FOLDER-SYNC-1 *(merged `1f573bc2` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        },
+        {
+          "line": 553,
+          "text": "#### LARGE-FOLDER-SYNC-3 \u2014 Follow-ups from LARGE-FOLDER-SYNC-2 *(built `043ef79a` on `eb/large-folder-sync-3`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LARGE-FOLDER-SYNC-3",
+      "title": "Follow-ups from LARGE-FOLDER-SYNC-2",
+      "providerStatus": "In Flight",
+      "sequence": 44,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 553,
+          "text": "#### LARGE-FOLDER-SYNC-3 \u2014 Follow-ups from LARGE-FOLDER-SYNC-2 *(built `043ef79a` on `eb/large-folder-sync-3`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "title": "MediaSession Controls",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "title": "Completed reads remain visible in the correct library tab",
+      "providerStatus": "In Flight",
+      "sequence": 116,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1704,
+          "text": "#### LIBRARY-COMPLETION-VISIBILITY-1 \u2014 Completed reads remain visible in the correct library tab *(In Flight; Full Spec; planning rank 1; Seq116; Library & Content)* <a id=\"library-completion-visibility-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-CONTENT-DEDUP-1",
+      "title": "Make identical books at different source paths understandable",
+      "providerStatus": "Queued",
+      "sequence": 138,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1939,
+          "text": "#### LIBRARY-CONTENT-DEDUP-1 \u2014 Make identical books at different source paths understandable *(Seq138; Queued / Stub; Library & Content; proposed P3) <a id=\"library-content-dedup-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-FOOTER-REMOVE-1",
+      "title": "Remove the unused settings controls from the library footer",
+      "providerStatus": "Queued",
+      "sequence": 136,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1935,
+          "text": "#### LIBRARY-FOOTER-REMOVE-1 \u2014 Remove the unused settings controls from the library footer *(Seq136; Queued / Stub; UX polish; proposed P3) <a id=\"library-footer-remove-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-READ-ALLOW-1",
+      "title": "Let a library book open from its own file wherever it lives",
+      "providerStatus": "In Flight",
+      "sequence": 15,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 347,
+          "text": "#### LIBRARY-READ-ALLOW-1 \u2014 Let a library book open from its own file wherever it lives *(merged `037472c9` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-SETTINGS-FIX-1",
+      "title": "Fix command-palette settings routing and live New-dot clearing",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 99,
+          "text": "| LIBRARY-SETTINGS-FIX-1 | 2026-10-12 | Every Ctrl+K settings entry opens a titled page (Reading Goals added); the library \"New\" dot clears live through `seenBatcher` (merge `8c41095e`) | [Close-out](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "LIBRARY-UI-TEXT-SIZE-1",
+      "title": "Make library interface text comfortably readable",
+      "providerStatus": "Queued",
+      "sequence": 132,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1889,
+          "text": "#### LIBRARY-UI-TEXT-SIZE-1 \u2014 Make library interface text comfortably readable *(Seq132; Queued / Stub; UX polish; proposed P2) <a id=\"library-ui-text-size-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-WRITE-RACE-1",
+      "title": "Main-side library writers update the live record, never a copy",
+      "providerStatus": "In Flight",
+      "sequence": 36,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 505,
+          "text": "#### LIBRARY-WRITE-RACE-1 \u2014 Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 711,
+          "text": "#### LIBRARY-WRITE-RACE-2 \u2014 Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-WRITE-RACE-2",
+      "title": "Library writes: the renderer-side and policy follow-ups",
+      "providerStatus": "In Flight",
+      "sequence": 87,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 711,
+          "text": "#### LIBRARY-WRITE-RACE-2 \u2014 Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "LIBRARY-WRITE-RACE-3",
+      "title": "A library edit stamps only what the reader changed; a missing book fails the save; a save answers only its own form",
+      "providerStatus": "Queued",
+      "sequence": 89,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 798,
+          "text": "#### LIBRARY-WRITE-RACE-3 \u2014 A library edit stamps only what the reader changed, a missing book fails the save, and a save answers only its own form *(Seq 89 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/library-write-race-2` @ `c46e9332`, from that item's memo (W2, N1, N2) and Blurby.Brain's ruling relayed by Blurby.Roadmap 2026-10-25; must merge before BLURBY-SERVER-1's sync is on for anyone; not a Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARR-CURSOR-2",
+      "title": "Silence-Aware Cursor Hold",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 68,
+          "text": "| NARR-CURSOR-2 | 2026-05-18 | Silence-aware cursor hold \u2014 gaps and pause-reason freeze | [Close-out](docs/governance/close-outs/CloseOut.NARR-CURSOR-2.2026-05-18.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARR-MEDIA-1",
+      "title": "MediaSession Integration",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 64,
+          "text": "| NARR-MEDIA-1 | 2026-05-17 | MediaSession integration \u2014 OS media controls for narration | [Close-out](docs/governance/close-outs/CloseOut.NARR-MEDIA-1.2026-05-17.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARR-PAUSE-1",
+      "title": "Named-Pause State Machine",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 65,
+          "text": "| NARR-PAUSE-1 | 2026-05-18 | Named-pause state machine \u2014 7 pause reasons with auto-resume | [Close-out](docs/governance/close-outs/CloseOut.NARR-PAUSE-1.2026-05-18.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARR-PAUSE-STATE-1",
+      "title": "Named Pause State Machine",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARR-SPOKEN-1",
+      "title": "Spoken/Display Word Separation",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 67,
+          "text": "| NARR-SPOKEN-1 | 2026-05-18 | Spoken/display word separation \u2014 punctuation-only token filtering | [Close-out](docs/governance/close-outs/CloseOut.NARR-SPOKEN-1.2026-05-18.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-A5-RATE-RESEED-1",
+      "title": "Rate-Change Reseed from Heard Position",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 90,
+          "text": "| NARRATE-A5-RATE-RESEED-1 | 2026-05-31 | Rate-change reseeds from heard position (`getHeardFloorWordIndex()`), not the pre-fetch head \u2014 position preserved 3-of-3 live-QA. Residual 1.4x-bucket audio overlap handed to APPLYRATECHANGE-COLLAPSE-1. (No formal close-out; see live-QA gate report.) | `NARRATE-A5-RATE-RESEED-liveqa-gate-report.md` |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "title": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-ARROW-PAUSE-1",
+      "title": "In Narrate, an arrow with a modifier key pauses and the cursor holds its word",
+      "providerStatus": "Queued",
+      "sequence": 99,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 718,
+          "text": "#### NARRATE-ARROW-PAUSE-1 \u2014 In Narrate, an arrow pressed with a modifier key pauses, and the cursor holds its word *(Seq 99 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/reader-arrow-guard-1` @ `51202c1c`; owner ruling 2026-10-25 (tier 3), relayed by Blurby.Brain and Blurby.Roadmap; stacked on READER-ARROW-GUARD-1; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-CLOSED-LOOP-CURSOR",
+      "title": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-CPU-PROFILE-1",
+      "title": "Narrate saturates a 4-core CPU during warm requests",
+      "providerStatus": "Queued",
+      "sequence": 95,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1191,
+          "text": "#### NARRATE-CPU-PROFILE-1 \u2014 Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "title": "Narrate Cursor Tracking Diagnostic",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 89,
+          "text": "| NARRATE-CURSOR-TRACKING-DIAG-1 | 2026-05-31 | Live-QA cursor-tracking trace (Meditations): scheduler-signal hypothesis REFUTED (`schedulerActiveWord` \u2261 `heardFloor`, both lead the ear; `wordIndex` closest but leads & drifts). Authority verdict: lag-compensated visible cursor (~350ms WASAPI). Verdict folded into HEARD-CURSOR-1 + SUBSCRIBER-CURSOR-1. | [Historical verdict](docs/studies/investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "title": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 86,
+          "text": "| NARRATE-DUAL-SOURCE-DIAG-1 | 2026-05-30 | Instrumented gate replay validated A4 root cause: REFUTED in-hook dual-source race, CONFIRMED never-cleared reader-layer resumeAnchor; A5 = wrong rate-change seed source. Reshaped Stage-2 sequence. | [Historical verdict](docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-EXIT-CRASH-1",
+      "title": "A native crash on Narrate producer teardown under Electron",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-HARNESS-COLDCLICK-1",
+      "title": "Measure cold click on mainstream hardware",
+      "providerStatus": "In Flight",
+      "sequence": 94,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1166,
+          "text": "#### NARRATE-HARNESS-COLDCLICK-1 \u2014 Cold click is measured on mainstream hardware *(built and held `c90d9e08` on `eb/narrate-harness-coldclick-1`; its reference smoke ran short and was stopped and reported (see the branch's staging memo); Seq 94, In Flight, merge held for the Stage 8 freeze; not a release gate)*"
+        },
+        {
+          "line": 1191,
+          "text": "#### NARRATE-CPU-PROFILE-1 \u2014 Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-HEARD-CURSOR-1",
+      "title": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-INTENT-CURSOR-1",
+      "title": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 87,
+          "text": "| NARRATE-INTENT-CURSOR-1 | 2026-05-31 | PARTIAL: resume-anchor consume lifecycle (`shouldConsumeResumeAnchorOnAdvance`, CONSUME on first word-advance past anchor in both truth-sync + onWordAdvance paths, CLEAR-before-SET in onWordClick). A1 PASS regression held; A4 FAIL 0-of-3 \u2014 consume is reactive (fires after seed), not preventive. Necessary infrastructure for PAUSE-RESUME-UNIFY-1. 19 new tests. Promoted SRL-089 to Standing Rule #37 after 2nd parallel-dispatch-without-isolation occurrence. | [Close-out](docs/governance/close-outs/CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-KEY-REPEAT-1",
+      "title": "Narrate's key forwarder keeps a held key's repeat flag",
+      "providerStatus": "In Flight",
+      "sequence": 58,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 481,
+          "text": "#### NARRATE-KEY-REPEAT-1 \u2014 Narrate's key forwarder keeps a held key's repeat flag *(built `8b5e9789` on `eb/narrate-key-repeat-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "title": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 88,
+          "text": "| NARRATE-PAUSE-RESUME-UNIFY-1 | 2026-05-31 | Source fix merged plus follow-up anchor-correctness hotfix: `resumeTargetRef` captured at pause, cold-start resume seed prioritized live/resume anchor truth, bottom-bar play/pause uses one Narrate lifecycle, and live narration advancement publishes the persistent anchor. Live A4 retest still recommended before declaring the user-facing gate closed. | [Close-out](docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-PAUSED-CLICK-1",
+      "title": "Narrate resumes from the word explicitly selected while paused",
+      "providerStatus": "Queued",
+      "sequence": 117,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1744,
+          "text": "#### NARRATE-PAUSED-CLICK-1 \u2014 Narrate resumes from the word explicitly selected while paused *(Queued; Full Spec; planning rank 2; Seq117; TTS / Narration Engine)* <a id=\"narrate-paused-click-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-QUIT-LINGER-1",
+      "title": "Quit does not wait on a Kokoro job, and a quick relaunch is not lost",
+      "providerStatus": "In Flight",
+      "sequence": 86,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 664,
+          "text": "#### NARRATE-QUIT-LINGER-1 \u2014 Pause stops new Kokoro work, and a relaunch during the quit linger reopens Blurby *(position 86 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-REBUILD-1",
+      "title": "Rebuild Narrate with the cursor attached to the playing word",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 102,
+          "text": "| NARRATE-REBUILD-1 | 2026-10-15 | Narrate rebuilt on Kokoro as a fourth independent mode; the cursor is the word at the playing sample from an exact word table (P0\u2013P6b; merge `f27c7def`) | [Close-out](docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-RECONCILE-RESIDUAL-1",
+      "title": "A capitalised two-word name that espeak voices differently alone",
+      "providerStatus": "In Flight",
+      "sequence": 93,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1158,
+          "text": "#### NARRATE-RECONCILE-RESIDUAL-1 \u2014 A two-word name that espeak reads differently on its own is identified by reading the two words together *(built and held `5000a60d` on `eb/narrate-reconcile-residual-1`, package verified; Seq 93, In Flight, merge held for the Stage 8 freeze; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-REMOVE-1",
+      "title": "Remove Narrate, keeping Kokoro dormant",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-SELECTION-START-1",
+      "title": "Diagnose Narrate's paused band and start viewport",
+      "providerStatus": "Queued",
+      "sequence": 124,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1872,
+          "text": "#### NARRATE-SELECTION-START-1 \u2014 Diagnose Narrate's paused band and start viewport *(Seq124; Queued / Stub; TTS / Narration Engine; P1 residual F7/F8)* <a id=\"narrate-selection-start-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-SENTENCE-INITIALS-1",
+      "title": "A single-letter initial does not end a sentence",
+      "providerStatus": "In Flight",
+      "sequence": 71,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1407,
+          "text": "#### NARRATE-SENTENCE-INITIALS-1 \u2014 A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-SENTENCE-RESUME-1",
+      "title": "Narrate starts at the beginning of the current sentence",
+      "providerStatus": "In Flight",
+      "sequence": 40,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 545,
+          "text": "#### NARRATE-SENTENCE-RESUME-1 \u2014 Narrate starts at the beginning of the current sentence *(built `35716c5f` on `eb/narrate-sentence-resume-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-START-STACK-1",
+      "title": "Log the full stack when Narrate fails to start",
+      "providerStatus": "In Flight",
+      "sequence": 4,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1401,
+          "text": "#### NARRATE-START-STACK-1 \u2014 Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "providerStatus": "Superseded",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "NARRATE-TOKEN-CAP-1",
+      "title": "Digit-dense passages are planned under the 400-id token cap",
+      "providerStatus": "In Flight",
+      "sequence": 41,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 529,
+          "text": "#### NARRATE-TOKEN-CAP-1 \u2014 Digit-dense passages are planned under the 400-id token cap *(built `814ddc78` on `eb/narrate-token-cap-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-TRACE-LABELS-1",
+      "title": "Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate",
+      "providerStatus": "In Flight",
+      "sequence": 56,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 537,
+          "text": "#### NARRATE-TRACE-LABELS-1 \u2014 Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate *(built `08da0030` on `eb/narrate-trace-labels-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NARRATE-YEARS-1",
+      "title": "Narrate reads 1000\u20131099 as years too, and keeps comma numbers as counts",
+      "providerStatus": "In Flight",
+      "sequence": 39,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 578,
+          "text": "#### NARRATE-YEARS-1 \u2014 Narrate reads 1000\u20131099 as years too, and keeps comma numbers as counts *(built `7b36b836` on `eb/narrate-years-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "NORMALIZER-ENRICH-1",
+      "title": "Normalizer Gap Fill",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 59,
+          "text": "| NORMALIZER-ENRICH-1 | 2026-05-17 | Normalizer gap fill from abogen research | [Close-out](docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "OVERLAY-THEME-SWEEP-1",
+      "title": "Other overlays: Escape and undefined theme tokens",
+      "providerStatus": "In Flight",
+      "sequence": 90,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 677,
+          "text": "#### OVERLAY-THEME-SWEEP-1 \u2014 Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PACKAGING-FIX-1",
+      "title": "Ship the icons, quiet the updater in unpacked builds, relink stale sample books",
+      "providerStatus": "In Flight",
+      "sequence": 11,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 326,
+          "text": "#### PACKAGING-FIX-1 \u2014 Ship the app's icons, quiet the updater in unpacked builds, and relink stale sample books *(merged `e476aed1` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-ENTRY-KEYS-1",
+      "title": "Page receives section navigation keys before word wrapping completes",
+      "providerStatus": "Queued",
+      "sequence": 119,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1786,
+          "text": "#### PAGE-ENTRY-KEYS-1 \u2014 Page receives section navigation keys before word wrapping completes *(Queued; Full Spec; planning rank 3; Seq119; Reader Engine)* <a id=\"page-entry-keys-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-HELD-TURN-FAIL-1",
+      "title": "A held page turn the word count cannot place is reported, not dropped",
+      "providerStatus": "In Flight",
+      "sequence": 61,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 513,
+          "text": "#### PAGE-HELD-TURN-FAIL-1 \u2014 A held page turn the word count cannot place is reported, not dropped *(built `7ca5a4b7` on `eb/page-held-turn-fail-1`; In Flight, merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        },
+        {
+          "line": 1543,
+          "text": "#### JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Fo"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-PAGES-READ-1",
+      "title": "Page turns count toward the pages-read goal",
+      "providerStatus": "Queued",
+      "sequence": 113,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1430,
+          "text": "#### PAGE-PAGES-READ-1 \u2014 Page turns count toward the pages-read goal *(Seq 113 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `main` @ `97568b09`, from PAGE-SAVE-RESTAMP-3's Wave C re-scope (KEEP-FURTHEST-FIX-1 did the rest); post-release, in its own `ReaderContainer.tsx` integration window; not a release gate)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-PARA-KEYS-1",
+      "title": "Page paragraph keys move the highlight to a real paragraph start",
+      "providerStatus": "Queued",
+      "sequence": 115,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1679,
+          "text": "#### PAGE-PARA-KEYS-1 \u2014 Page paragraph keys move the highlight to a real paragraph start *(live Seq115; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-POSITION-SAVE-1",
+      "title": "Page turns in Page mode save the first word of the page",
+      "providerStatus": "In Flight",
+      "sequence": 16,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 354,
+          "text": "#### PAGE-POSITION-SAVE-1 \u2014 Page turns in Page mode save the first word of the page *(merged `309f2390` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        },
+        {
+          "line": 444,
+          "text": "#### PAGE-POSITION-SAVE-2 \u2014 Follow-ups from PAGE-POSITION-SAVE-1 *(merged `82b05269` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-POSITION-SAVE-2",
+      "title": "Follow-ups from PAGE-POSITION-SAVE-1",
+      "providerStatus": "In Flight",
+      "sequence": 27,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 444,
+          "text": "#### PAGE-POSITION-SAVE-2 \u2014 Follow-ups from PAGE-POSITION-SAVE-1 *(merged `82b05269` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-REOPEN-CFI-1",
+      "title": "Reopen from the cfi last saved, and save only the cfi on screen",
+      "providerStatus": "In Flight",
+      "sequence": 1,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 592,
+          "text": "#### PAGE-REOPEN-CFI-1 \u2014 Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-SAVE-RESTAMP-2",
+      "title": "A failed word count or a jump never loses or overwrites the reader's page",
+      "providerStatus": "In Flight",
+      "sequence": 26,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 424,
+          "text": "#### PAGE-SAVE-RESTAMP-2 \u2014 A failed word count or a jump never loses or overwrites the reader's page *(merged `55a39a35` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-SAVE-RESTAMP-3",
+      "title": "Rare page-save edge cases after the restamp guard",
+      "providerStatus": "In Flight",
+      "sequence": 80,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1430,
+          "text": "#### PAGE-PAGES-READ-1 \u2014 Page turns count toward the pages-read goal *(Seq 113 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `main` @ `97568b09`, from PAGE-SAVE-RESTAMP-3's Wave C re-scope (KEEP-FURTHEST-FIX-1 did the rest); post-release, in its own `ReaderContainer.tsx` integration window; not a release gate)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        },
+        {
+          "line": 1543,
+          "text": "#### JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Fo"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PAGE-SAVE-RESTAMP-GUARD-1",
+      "title": "A page turn never saves a position before the book's word numbers apply",
+      "providerStatus": "In Flight",
+      "sequence": 25,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 417,
+          "text": "#### PAGE-SAVE-RESTAMP-GUARD-1 \u2014 A page turn never saves a position before the book's word numbers apply *(merged `813ff38a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PDF-IMPORT-DIAG-1",
+      "title": "PDFs convert again: the EPUB converter uses pdf-parse 2's API",
+      "providerStatus": "In Flight",
+      "sequence": 9,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 431,
+          "text": "#### PDF-IMPORT-DIAG-1 \u2014 PDFs convert again: the EPUB converter uses pdf-parse 2's API *(merged `7c518a30` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PODCAST-SOURCE-1",
+      "title": "Podcast source service integration",
+      "providerStatus": "Queued",
+      "sequence": 102,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1652,
+          "text": "#### PODCAST-SOURCE-1 \u2014 Podcast source service integration *(live Seq102; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "POSITION-PROMPT-COPY-1",
+      "title": "Keep Previous Position precedes Move Position in the save prompt",
+      "providerStatus": "Queued",
+      "sequence": 134,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1893,
+          "text": "#### POSITION-PROMPT-COPY-1 \u2014 Keep Previous Position precedes Move Position in the save prompt *(Queued; Full Spec; planning rank 5; Seq134; UX polish)* <a id=\"position-prompt-copy-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "PROFILE-QUEUE-ISOLATION-1",
+      "title": "Explain the normal-profile sync-queue change during isolated QA",
+      "providerStatus": "In Flight",
+      "sequence": 121,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1828,
+          "text": "#### PROFILE-QUEUE-ISOLATION-1 \u2014 Explain the normal-profile sync-queue change during isolated QA *(Seq121; In Flight / Stub; Platform & Maintenance; proposed P1) <a id=\"profile-queue-isolation-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "QUEUE-SYNC-1",
+      "title": "One reading queue and one listening queue, synced across every surface",
+      "providerStatus": "Queued",
+      "sequence": 112,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1673,
+          "text": "#### QUEUE-SYNC-1 \u2014 One reading queue and one listening queue, synced across every surface *(live Seq112; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "QUIT-FLUSH-1",
+      "title": "Finish every save before the app quits",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 116,
+          "text": "| QUIT-FLUSH-1 | 2026-10-14 | The quit saves run in the cancelled first `will-quit` under a 3 s cap, each guarded; the Narrate producer shutdown is awaited uncapped; review fixes W1 (the quit cloud sync's library merge is flushed), W2 (no step starts after the cap) and N1. BUG-192 resolved; owner smoke (a)\u2013(e) pass on the production build (merge `d21009b3`) | [Close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-ARROW-GUARD-1",
+      "title": "Narrate and Page ignore modified arrows in their page-turn listeners",
+      "providerStatus": "In Flight",
+      "sequence": 91,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 684,
+          "text": "#### READER-ARROW-GUARD-1 \u2014 Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+\u2190/\u2192 (see Prerequisites); no shared-core touch)*"
+        },
+        {
+          "line": 718,
+          "text": "#### NARRATE-ARROW-PAUSE-1 \u2014 In Narrate, an arrow pressed with a modifier key pauses, and the cursor holds its word *(Seq 99 \u2014 Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/reader-arrow-guard-1` @ `51202c1c`; owner ruling 2026-10-25 (tier 3), relayed by Blurby.Brain and Blurby.Roadmap; stacked on READER-ARROW-GUARD-1; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "READER-ISO-1A",
+      "title": "Adapter Contracts + Current Word Anchor Service",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 76,
+          "text": "| READER-ISO-1A | 2026-05-24 | Added typed reader-mode adapter contracts and current-word anchor service with 73 tests and no runtime behavior change | [Close-out](docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-ISO-1B",
+      "title": "Orchestrator Shell + Mode Selection Semantics",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 77,
+          "text": "| READER-ISO-1B | 2026-05-25 | Extracted mode routing into `useReaderModeOrchestrator` while preserving current reader behavior | [Close-out](docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-ISO-1C",
+      "title": "Focus Adapter + Passive Surface Contract Start",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 78,
+          "text": "| READER-ISO-1C | 2026-05-26 | FocusModeAdapter + passive surface command types with 27 adapter tests | [Close-out](docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-ISO-1D",
+      "title": "Flow Adapter + Section Handoff Restart Ownership",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 79,
+          "text": "| READER-ISO-1D | 2026-05-26 | FlowModeAdapter + section-handoff resolution + browse-away with 40 adapter tests | [Close-out](docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-ISO-1E",
+      "title": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 80,
+          "text": "| READER-ISO-1E | 2026-05-27 | NarrateModeAdapter + audio truth-sync ownership with 45 adapter tests | [Close-out](docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-MODE-ISOLATION-1-PHASE-0",
+      "title": "Reader mode isolation \u2014 Phase 0 stabilization",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 71,
+          "text": "| READER-MODE-ISOLATION-1-PHASE-0 | 2026-05-21 | Preflight stabilization for Foliate Flow/Narrate word-0 recentering and browse-away reset (historical display label: READER-MODE-ISOLATION-1 Phase 0) | [Close-out](docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-MODE-SEPARATION-2",
+      "title": "Separate Page, Focus, Flow, and Narrate runtimes",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 96,
+          "text": "| READER-MODE-SEPARATION-2 | 2026-10-11 | Page, Focus, Flow and Narrate separated into independent runtimes behind a thin router, plus the speed dialog; D1\u2013D9 pass (D1/D7/D8 amended by #32, D6 under KF-3 #33) (merge `d96d2f3f`) | [Close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-PAGE-COUNTER-1",
+      "title": "Display the reading page near the remaining time",
+      "providerStatus": "Queued",
+      "sequence": 135,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1933,
+          "text": "#### READER-PAGE-COUNTER-1 \u2014 Display the reading page near the remaining time *(Seq135; Queued / Stub; UX polish; proposed P3) <a id=\"reader-page-counter-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "title": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 75,
+          "text": "| READER-PERSISTENT-ANCHOR-STEP3-REPAIR | 2026-05-24 | Repaired persistent-anchor UX (S1/S4/S8/S12 exact-start/S18); S5 partial, S9 deferred; S13 Narrate sync proven a unified post-isolation closed-loop problem; merged at `25b6a26` | `CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md` |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "READER-VISUAL-DIAG-1",
+      "title": "Diagnose the Focus/Flow reading band and the ResizeObserver flood",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 108,
+          "text": "| READER-VISUAL-DIAG-1 | 2026-10-23 | BUG-188 band sized from a 24 px fallback and untied to the cursor; BUG-187 flood is two leaked foliate View observers (causal by intervention); two fix specs drafted (merge `22d4f7b3`) | [Close-out](docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "RELEASE-RUNBOOK-1",
+      "title": "Write the release runbook: build, sign, upload and verify the installers by hand",
+      "providerStatus": "In Flight",
+      "sequence": 7,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 458,
+          "text": "#### RELEASE-RUNBOOK-1 \u2014 Write the release runbook: build, sign, upload and verify the installers by hand *(merged `3872c6e8` 2026-10-23, release gate (12; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "RENAME-RETRY-1",
+      "title": "Every atomic rename in the main process retries a transient Windows lock",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 104,
+          "text": "| RENAME-RETRY-1 | 2026-10-22 | Seven main-process temp-then-rename writes route through `renameWithRetry`; a transient Windows lock no longer fails a save (merge `40c01ceb`) | [Close-out](docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "RENAME-TMP-RACE-1",
+      "title": "The sync-state and token saves use the serialized JSON writer",
+      "providerStatus": "In Flight",
+      "sequence": 60,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 489,
+          "text": "#### RENAME-TMP-RACE-1 \u2014 The sync-state and token saves use the serialized JSON writer *(built `b37d199b` on `eb/rename-tmp-race-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "RESTAMP-RERUN-RACE-1",
+      "title": "Two re-stamp runs in a row on one section document",
+      "providerStatus": "In Flight",
+      "sequence": 98,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1386,
+          "text": "#### RESTAMP-RERUN-RACE-1 \u2014 Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "RSS-AGGREGATOR-1",
+      "title": "RSS feed aggregator for Newsroom",
+      "providerStatus": "Queued",
+      "sequence": 101,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1649,
+          "text": "#### RSS-AGGREGATOR-1 \u2014 RSS feed aggregator for Newsroom *(live Seq101; Queued; Stub)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "SAVE-LIBRARY-MERGE-1",
+      "title": "A library save merges instead of replacing",
+      "providerStatus": "In Flight",
+      "sequence": 20,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 382,
+          "text": "#### SAVE-LIBRARY-MERGE-1 \u2014 A library save merges instead of replacing *(merged `682676b1` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "SAVE-LIBRARY-TRUST-1",
+      "title": "The renderer cannot change where a library book's file is",
+      "providerStatus": "In Flight",
+      "sequence": 18,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 368,
+          "text": "#### SAVE-LIBRARY-TRUST-1 \u2014 The renderer cannot change where a library book's file is *(merged `fd1d266d` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "SETTINGS-KEY-TRUST-1",
+      "title": "The renderer and cloud sync can only set real user settings",
+      "providerStatus": "In Flight",
+      "sequence": 21,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 389,
+          "text": "#### SETTINGS-KEY-TRUST-1 \u2014 The renderer and cloud sync can only set real user settings *(merged `051d004c` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "SETTINGS-WRITE-DURABLE-1",
+      "title": "Make settings writes durable and race-free",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 114,
+          "text": "| SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | [Close-out](docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "SINGLE-INSTANCE-LOCK-1",
+      "title": "Electron Main-Process Single-Instance Gate",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 84,
+          "text": "| SINGLE-INSTANCE-LOCK-1 | 2026-05-29 | Electron single-instance lock \u2014 `app.requestSingleInstanceLock()` + `second-instance` focus handler prevents duplicate windows | [Close-out](docs/governance/close-outs/CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "SK-HYG-2",
+      "title": "Directory reorganization (historical reconciliation)",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 63,
+          "text": "| SK-HYG-2 | 2026-05-16 | Directory reorganization (Lane E governance) | [Close-out](docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "SMOKE8-COVERAGE-RECHECK-1",
+      "title": "Close the remaining smoke coverage gaps on one candidate build",
+      "providerStatus": "Queued",
+      "sequence": 139,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1941,
+          "text": "#### SMOKE8-COVERAGE-RECHECK-1 \u2014 Close the remaining smoke coverage gaps on one candidate build *(Seq139; Queued / Stub; Platform & Maintenance; proposed P1) <a id=\"smoke8-coverage-recheck-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "SMOKE8-DIAG-1",
+      "title": "Diagnose the two smoke failures: Page reopen position and the stale folder header",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 111,
+          "text": "| SMOKE8-DIAG-1 | 2026-10-23 | BUG-201, BUG-202 and BUG-208 reproduced with causes and fix specs (all merged into the release line); BUG-207 slow quit is the in-flight Kokoro wait; BUG-206 not reproduced (control failed) (merges `0625f9df`, `67678dbb`) | [Close-out](docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TERMINAL-BACKFILL-1",
+      "title": "Record the 51 historical terminal items in the ledger",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 94,
+          "text": "| TERMINAL-BACKFILL-1 | 2026-10-10 | Appended 51 historical terminal records (TR-004..TR-054) from the reviewed manifest; ledger 3 \u2192 54, existing records unchanged (merge `6e898edf`) | [Close-out](docs/governance/close-outs/CloseOut.TERMINAL-BACKFILL-1.2026-10-10.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TEST-BUDGET-WORDINDEX-1",
+      "title": "Give the word-index build-time test headroom under load",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 112,
+          "text": "| TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 \u2192 1,000 ms; BUG-186 resolved (merge `76956729`) | [Close-out](docs/governance/close-outs/CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TEST-GREEN-1",
+      "title": "Broad Suite Failure Triage",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 74,
+          "text": "| TEST-GREEN-1 | 2026-05-22 | Classified and resolved 12 broad-suite failures: 10 fixed, 1 quarantined, obsolete tests removed, and environmental flakes documented | [Close-out](docs/governance/close-outs/CloseOut.TEST-GREEN-1.2026-05-22.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TEST-HARNESS-1",
+      "title": "Test Harness Stability",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TEST-TIMEOUT-HEADROOM-1",
+      "title": "Give the three slow tests explicit time limits",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 97,
+          "text": "| TEST-TIMEOUT-HEADROOM-1 | 2026-10-12 | 30 s per-test timeouts for the three load-sensitive tests (KF-3 retired) and the `seenBatcher` mock typed (mid-dispatch amendment); full suite 3,410 passed / 133 skipped twice on the owner's machine; typecheck exit 0 (merge `072a65f3`) | [Close-out](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "THEME-SYNC-1",
+      "title": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 85,
+          "text": "| THEME-SYNC-1 | 2026-05-29 | Vite circular chunk fix \u2014 5 shared TTS modules moved to TTS chunk, eliminated `settings -> tts -> settings` cycle; BUG-182 confirmed fixed by live smoke on v1.75.1 dev build | [Close-out](docs/governance/close-outs/CloseOut.THEME-SYNC-1.2026-05-29.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TOC-JUMP-SAVE-1",
+      "title": "A contents-list jump in Page mode saves the page it lands on",
+      "providerStatus": "In Flight",
+      "sequence": 57,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 465,
+          "text": "#### TOC-JUMP-SAVE-1 \u2014 A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 1533,
+          "text": "#### PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub"
+        },
+        {
+          "line": 1543,
+          "text": "#### JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Fo"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "TRAY-ICON-SIZE-1",
+      "title": "Make the Windows tray icon legible at normal scaling",
+      "providerStatus": "Queued",
+      "sequence": 137,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1937,
+          "text": "#### TRAY-ICON-SIZE-1 \u2014 Make the Windows tray icon legible at normal scaling *(Seq137; Queued / Stub; Platform & Maintenance; proposed P3) <a id=\"tray-icon-size-1\"></a>"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "TTS-ARCH-DOC-1",
+      "title": "Architecture Decisions Doc",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 62,
+          "text": "| TTS-ARCH-DOC-1 | 2026-05-17 | Architecture decision records for TTS | [Close-out](docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-CACHE-HARDEN-1",
+      "title": "Cache/Pipeline Hardening",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 57,
+          "text": "| TTS-CACHE-HARDEN-1 | 2026-05-16 | Cache-hit timing parity, type harmonization, IPC validation | [Close-out](docs/governance/close-outs/CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-CACHE-TIMING-1",
+      "title": "Cache Identity & Timing Sidecars",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 52,
+          "text": "| TTS-CACHE-TIMING-1 | 2026-05-13 | Schema-versioned v2 cache identities and atomic timing sidecars | [Close-out](docs/governance/close-outs/CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-CANARY-1",
+      "title": "Engine Readiness Probes",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-DIAG-1",
+      "title": "Narration Diagnostics Bundle",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 54,
+          "text": "| TTS-DIAG-1 | 2026-05-15 | Provider-neutral diagnostics bundle | [Close-out](docs/governance/close-outs/CloseOut.TTS-DIAG-1.2026-05-15.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-ENGINE-SHARED-1",
+      "title": "Share MOSS and Pocket engine lifecycle and request handling",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 95,
+          "text": "| TTS-ENGINE-SHARED-1 | 2026-10-10 | One shared MOSS/Pocket engine (`main/python-sidecar-engine.js`); both engine files are thin provider configurations with unchanged exports; a missing MOSS config key now reads `null` (approved). Suite 3,113 passed / 133 skipped (merge `8cedd0cc`) | [Close-out](docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-EVAL-3",
+      "title": "Quality Evaluation + CI Gate",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 69,
+          "text": "| TTS-EVAL-3 | 2026-05-18 | Quality evaluation + CI gate \u2014 Kokoro v2 baseline + `npm run test:quality` | [Close-out](docs/governance/close-outs/CloseOut.TTS-EVAL-3.2026-05-18.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-EVENT-SYNC-1",
+      "title": "Event-Driven Word Sync",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 58,
+          "text": "| TTS-EVENT-SYNC-1 | 2026-05-16 | Event-driven word sync from research | [Close-out](docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-INTEGRATE-1",
+      "title": "Integrate Sync & Diagnostics",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 56,
+          "text": "| TTS-INTEGRATE-1 | 2026-05-16 | Merged sync and diagnostics branches to main | [Close-out](docs/governance/close-outs/CloseOut.TTS-INTEGRATE-1.2026-05-16.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-NORMALIZE-1",
+      "title": "Segment Normalizer",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 51,
+          "text": "| TTS-NORMALIZE-1 | 2026-05-13 | English-first spoken-text normalization | `docs/planning/.Archive/ROADMAP_2026-05-14.md` |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-PARITY-1",
+      "title": "Cache/Progress/Resume Parity Hardening",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 66,
+          "text": "| TTS-PARITY-1 | 2026-05-18 | Cache/progress/resume parity hardening \u2014 3 OutsideAudit.9 defects | [Close-out](docs/governance/close-outs/CloseOut.TTS-PARITY-1.2026-05-18.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-PIPELINE-1",
+      "title": "Pipeline Integration Tests",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 61,
+          "text": "| TTS-PIPELINE-1 | 2026-05-17 | End-to-end pipeline integration tests | [Close-out](docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-QUAL-CI-1",
+      "title": "CI Regression Gate Wiring",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 82,
+          "text": "| TTS-QUAL-CI-1 | 2026-05-28 | CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS | [Close-out](docs/governance/close-outs/CloseOut.TTS-QUAL-CI-1.2026-05-28.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-REGISTRY-1",
+      "title": "Provider Capability Registry",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 50,
+          "text": "| TTS-REGISTRY-1 | 2026-05-12 | Provider capability truth in ttsProviderRegistry | `docs/planning/.Archive/ROADMAP_2026-05-14.md` |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-REGISTRY-DISPATCH-1",
+      "title": "Registry-Driven Dispatch",
+      "providerStatus": "Dissolved",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-RENDER-MAP-1",
+      "title": "Word Position Index",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 60,
+          "text": "| TTS-RENDER-MAP-1 | 2026-05-17 | Sioyek-inspired word position index | [Close-out](docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-SIDECAR-SHARED-1",
+      "title": "Share MOSS and Pocket sidecar process and request handling",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 92,
+          "text": "| TTS-SIDECAR-SHARED-1 | 2026-10-10 | Characterization suite (20 cases) on the old code, then one shared `main/python-sidecar-adapter.js`; MOSS/Pocket sidecar files ~400 \u2192 ~30 lines each (merge `7a462bf7`) | [Close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "TTS-SYNC-1",
+      "title": "Highlight Sync Controller",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 53,
+          "text": "| TTS-SYNC-1 | 2026-05-15 | Centralized narration highlight sync policy | [Close-out](docs/governance/close-outs/CloseOut.TTS-SYNC-1.2026-05-15.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "UI-SWEEP-1",
+      "title": "Press every control on every screen and report what breaks",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 109,
+          "text": "| UI-SWEEP-1 | 2026-10-23 | 369 controls on 57 surfaces pressed on the release-fix build `97527896`; the only errors are BUG-187's flood (the positive control); 104 NO-EFFECT candidates and W1\u2013W3 went to triage (merge `420efa85`) | [Close-out](docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "UI-SWEEP-TRIAGE-1",
+      "title": "Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates",
+      "providerStatus": "Completed",
+      "sequence": null,
+      "classification": "existing terminal history - no new retirement proposed",
+      "roadmapOccurrences": [
+        {
+          "line": 110,
+          "text": "| UI-SWEEP-TRIAGE-1 | 2026-10-23 | 107 candidates classified: 42 WORKS, 40 BY-DESIGN, 25 DEFECT (none release-blocking); BUG-210\u2013BUG-216 filed; [the Focus keyboard repair](https://app.notion.com/4027c96cc31e81b89a51c34fdfc8f1fe) and [the Flow keyboard repair](https://app.notion.com/4027c96cc31e81289354f1d579c39477) specified; LL-165, LL-166 (merge `de453e64`) | [Close-out](docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md) |"
+        }
+      ],
+      "terminalLedgerHasItem": true
+    },
+    {
+      "id": "UX-POLISH-1",
+      "title": "Space-bar resumes last-used reading mode",
+      "providerStatus": "In Flight",
+      "sequence": 12,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 243,
+          "text": "#### UX-POLISH-1 \u2014 Space resumes the last-used reading mode *(merged `e942e3fd` 2026-10-13; In Flight, close-out held by the Stage 8 release gate)*"
+        },
+        {
+          "line": 333,
+          "text": "#### UX-POLISH-2 \u2014 Keyboard and help-surface follow-ups after UX-POLISH-1 *(merged `77929621` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "UX-POLISH-2",
+      "title": "Keyboard and help-surface follow-ups after UX-POLISH-1",
+      "providerStatus": "In Flight",
+      "sequence": 13,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 333,
+          "text": "#### UX-POLISH-2 \u2014 Keyboard and help-surface follow-ups after UX-POLISH-1 *(merged `77929621` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "WIN-TARGET-NSIS-1",
+      "title": "Build full NSIS installers per architecture by default",
+      "providerStatus": "In Flight",
+      "sequence": 92,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 691,
+          "text": "#### WIN-TARGET-NSIS-1 \u2014 `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "WORD-INDEX-UNIFY-1",
+      "title": "One word numbering in every runtime",
+      "providerStatus": "Queued",
+      "sequence": 88,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 900,
+          "text": "#### WORD-INDEX-UNIFY-1 \u2014 One word numbering in every runtime *(position 43, Seq 88 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from Blurby.Brain's tier-1 ruling of 2026-10-15; cut from `eb/flow-para-pause-index-1` @ `f61ae02d`; build-and-hold under the Stage 8 freeze; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "WS-PAIR-LOG-1",
+      "title": "Say why a pairing is not saved when OS encryption is unavailable",
+      "providerStatus": "In Flight",
+      "sequence": 62,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 521,
+          "text": "#### WS-PAIR-LOG-1 \u2014 Say why a pairing is not saved when OS encryption is unavailable *(built `4944def6` on `eb/ws-pair-log-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "WS-TOKEN-REGEN-1",
+      "title": "Regenerating the pairing code stores one encrypted token",
+      "providerStatus": "In Flight",
+      "sequence": 42,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 473,
+          "text": "#### WS-TOKEN-REGEN-1 \u2014 Regenerating the pairing code stores one encrypted token *(built `48c311f6` on `eb/ws-token-regen-1`; In Flight, merge held for the Stage 8 freeze)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "ZIP-ASYNC-READ-1",
+      "title": "Read EPUB archives asynchronously",
+      "providerStatus": "In Flight",
+      "sequence": 82,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 1552,
+          "text": "#### ZIP-ASYNC-READ-1 \u2014 Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 \u2014 Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    },
+    {
+      "id": "ZIP-READ-FOLLOWUPS-1",
+      "title": "Every EPUB archive is opened through one size-checked door",
+      "providerStatus": "In Flight",
+      "sequence": 35,
+      "classification": "definitely live",
+      "roadmapOccurrences": [
+        {
+          "line": 497,
+          "text": "#### ZIP-READ-FOLLOWUPS-1 \u2014 Every EPUB archive is opened through one size-checked door *(built `29b3e7e5` on `eb/zip-read-followups-1`; In Flight, merge held for the Stage 8 freeze)*"
+        },
+        {
+          "line": 1552,
+          "text": "#### ZIP-ASYNC-READ-1 \u2014 Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 \u2014 Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*"
+        }
+      ],
+      "terminalLedgerHasItem": false
+    }
+  ]
+}

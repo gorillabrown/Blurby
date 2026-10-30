@@ -1,0 +1,34 @@
+{
+  "id": "20261026T014637Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-HARNESS-COLDCLICK-1",
+  "created": "2026-10-26T01:46:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts; Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner answer to question 1, 2026-10-25: (B), mainstream cold click = first click while playing in a fresh process once the words are on screen, vs 8,000 ms (clickLatencyMs); quiet x64 passes both rates (1.00x worst 1,609 ms; 2.00x worst 1,746 ms). Charter D6 and second-machine.md:22 amended. Close on this evidence when the branch merges (post-release train)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts; Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner answer to question 1, 2026-10-25: (B), mainstream cold click = first click while playing in a fresh process once the words are on screen, vs 8,000 ms (clickLatencyMs); quiet x64 passes both rates (1.00x worst 1,609 ms; 2.00x worst 1,746 ms). Charter D6 and second-machine.md:22 amended. Close on this evidence when the branch merges (post-release train).\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+      "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate. Built and held c90d9e08. Blurby.Brain ruling 2026-10-25: outcome R4 on 240/240 trials across two hosts; Decision #22 closes as R4; Done-when 5 and 6 stopped (R4 measured), Done-when 10 (rule 53) confirmed for 0ca285e5. Owner answer to question 1, 2026-10-25: (B), mainstream cold click = first click while playing in a fresh process once the words are on screen, vs 8,000 ms (clickLatencyMs); quiet x64 passes both rates (1.00x worst 1,609 ms; 2.00x worst 1,746 ms). Charter D6 and second-machine.md:22 amended. Close on this evidence when the branch merges (post-release train).\")]",
+      "actualRevision": "",
+      "recoveryId": "20261026T014637Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T01:47:11Z",
+  "outcome": "succeeded"
+}

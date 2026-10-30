@@ -1,0 +1,34 @@
+{
+  "id": "20261026T190543Z-external-set-status-EINK-CONTROLS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-26T19:05:43Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner 2026-10-23: drop the E-ink theme; the E-ink switch carries both the colours and the behaviour. Saved E-ink theme migrates to Light with the switch on (settings schema 14). Smoke 2026-10-26 follow-ups: device-local preferences/off only on unconfigured devices; white grayscale/contrast-only appearance; no Focus in E-ink; independent screenwise Flow/Narrate following; view-change refresh. Separate EINK-* stubs hold new scope; built work stays held."
+    },
+    "expectedRevision": "cd8a26f099d85979444b0c0be301faf3170fd1b65d569df319da26d5161b70f7",
+    "idempotencyKey": "smoke20261026-revision-EINK-CONTROLS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "smoke20261026-revision-EINK-CONTROLS-1",
+      "actualRevision": "accd215bc84848f5e13f6238c40c214e43dbf5b765638f645de245f91ee4cfc7",
+      "recoveryId": "20261026T190543Z-external-set-status-EINK-CONTROLS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T19:07:58Z",
+  "outcome": "succeeded"
+}

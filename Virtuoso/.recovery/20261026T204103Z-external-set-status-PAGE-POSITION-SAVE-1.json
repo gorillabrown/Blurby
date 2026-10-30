@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204103Z-external-set-status-PAGE-POSITION-SAVE-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-POSITION-SAVE-1",
+  "created": "2026-10-26T20:41:03Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-position-save-1 at 0d33bdd8cc5cc4c6e9adfb51f4a31c7e5bb36d20; ancestor of planning baseline=True; ROADMAP heading: PAGE-POSITION-SAVE-1 — Page turns in Page mode save the first word of the page *(merged `309f2390` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "878acd0cae1ec648e587fc0068c39f79dfc7bd0910a178f6d99da79b81305387",
+    "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-POSITION-SAVE-1",
+      "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-1",
+      "actualRevision": "d1c3b2719410da0e8e3e4473b200641acef9d103bb6b00c5d734eb78b2735923",
+      "recoveryId": "20261026T204103Z-external-set-status-PAGE-POSITION-SAVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:37Z",
+  "outcome": "succeeded"
+}

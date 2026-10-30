@@ -2,21 +2,120 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-26 (owner smoke intake)
 
 ---
 
 ## Incomplete
 
-### BUG-217 — On an EPUB, Flow's paragraph keys jump thousands of words, to the book's last word or to 0
-**Reported:** 2026-10-23 (FLOW-PARA-KEYS-1's live check on `eb/flow-keys-fix-1` @ `60b86aff`, `C:\Projects\Blurby-artifacts\keys-fix\flow-60b86aff-para.*`)
-**Severity:** MEDIUM (listed reader keys land in the wrong place). Pre-existing; not a release gate.
-**Status:** RESOLVED in source (FLOW-PARA-KEYS-1, branch `eb/flow-para-keys-1`, held for after the Stage 8 release; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1). Lane: Reader Engine.
-**Description:** on *Meditations* from INTRODUCTION (word 187), Flow's Shift+→ went 187 → 5290 → 80492 (the book's last word) paused, and 424 → 5290 → 80492 playing; Shift+↑ could land on 0.
-**Cause:**
-- `src/reader/modes/flow/ModeRuntime.ts`, the `paragraph` case: with full-book words, `effectiveWords()` is book-wide, but the breaks came from `surface.getParagraphBreaks()`, indices into the loaded slice.
-- The block lookup is case-sensitive: an EPUB section is XHTML, so `BLOCK_TAGS.has(el.tagName)` finds no lowercase block (the same cause as BUG-210's amendment; the shared `getBlockParent` is BLOCK-TAG-CASE-1).
-**Fix (FLOW-PARA-KEYS-1, Blurby.Brain ruling A, as Focus):** `paragraphTarget` uses `findBookParagraphStart` over the rendered block starts of book-stamped sections plus the book's section starts; Flow's own `helpers/foliateParagraphStarts.ts` collector matches blocks by `localName.toUpperCase()`. Tests: `tests/readerModes/flowParagraphStarts.test.ts`. Live on `5fb00ab5`: 187 → 188 → 572 → 610 and back, each the DOM's next or previous block start.
+### BUG-232 — Normal-profile sync queue changed during isolated smoke; writer unresolved
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** INVESTIGATION; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; PROFILE-QUEUE-ISOLATION-1, Queued / Stub. Lane: Platform & Maintenance.
+**Evidence / scope:** F17; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json changed. Which process wrote it and whether isolation was breached are unresolved.
+**Next:** Attribute the writer using bounded evidence, classify intended versus unintended writes, and fix a proven isolation defect if found. Preserve the queue and user data; do not call this data loss or attribute it to the scratch app without proof.
+
+### BUG-231 — Failed Retry has no clear visible acknowledgement or result
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; FOLDER-RETRY-FEEDBACK-1, Queued / Stub. Lane: UX polish.
+**Evidence / scope:** F16; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The single Retry works and logs one null root result, but its unchanged UI leaves the reader unsure anything happened. FOLDER-NOTICE-2 is dissolved and is not reopened.
+**Next:** Show an accessible checking state and a clear unavailable result after failure; successful retry clears the banner. Preserve single-click/single-request behavior and no repeated toast loop.
+
+### BUG-230 — Completed unarchived reads vanish from visible library groups
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; LIBRARY-COMPLETION-VISIBILITY-1, Queued / Stub. Lane: Library & Content.
+**Evidence / scope:** F14; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** A 91-word text was saved at 91/91, kept on disk and in the register, yet excluded from every library display group. Diagnose first-open completion separately from the proven visibility hole.
+**Next:** A completed, unarchived read remains findable in All until an explicit archive decision. Confirmed archived reads appear in Archive. Declining or dismissing confirmation never hides the read; no reset, forced completion or silent archive workaround.
+
+### BUG-229 — Folder dropdown stays open after an outside click
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; DROPDOWN-DISMISS-1, Queued / Stub. Lane: UX polish.
+**Evidence / scope:** F12; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The Folder dropdown remains open after outside clicks. The owner requests consistent dismissal across all dropdowns; only Folder is observed failing.
+**Next:** Inventory dropdowns, dismiss on outside click without selecting/changing a value, and preserve normal inside clicks and selection. Verify each supported menu rather than assume all are currently broken.
+
+### BUG-228 — Folder content lags behind its header and large libraries stall
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; FOLDER-SWITCH-CONTENT-1, Queued / Stub. Lane: Library & Content.
+**Evidence / scope:** F10, F13; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The header follows selection, but old-folder cards remain during a long cancellation/scan gap. Readings records began arriving after about 93 seconds; this is eventual loading, not permanent failure.
+**Next:** Measure loading and cancellation separately on small and large collections; prevent stale cards being presented as the new folder's books, keep the UI responsive, and preserve existing records/progress. No local import cap or subfolder picker is authorized.
+
+### BUG-227 — Narrate ignores a paused clicked word and its paused display is offset
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; NARRATE-SELECTION-START-1, Queued / Stub. Lane: TTS / Narration Engine.
+**Evidence / scope:** F7, F8, F9; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Paused word clicks are ignored on Play; the paused horizontal band is offset, and Play scrolls the underlined word to the top. Diagnose the three paths independently before fixing.
+**Next:** A paused clicked word determines the next start per explicit-selection rules; paused band/cursor agree; playback viewport policy is deliberate. Preserve exact heard-word timing and distinguish scrolling from changing the logical word.
+
+### BUG-226 — Paused Page-to-Focus entry initially highlights the wrong word
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; FOCUS-PAUSED-HANDOFF-1, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F4; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Switching from Page to paused Focus initially shows the wrong word; Play corrects it. No evidence yet distinguishes stale display from stale position.
+**Next:** The handoff word is correct before playback, remains correct after pause, and persists through reopen. Fix within Focus ownership; no sibling-mode imports or shared mutable mode state.
+
+### BUG-225 — Initial PageDown does not work until mouse navigation
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; PAGE-ENTRY-KEYS-1, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F3; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Initial PageDown did nothing until mouse Next was used; Left/Right and PageDown then worked. Readiness/focus cause is unverified and differs from paragraph-key BUG-220.
+**Next:** Reproduce initial keyboard use without mouse navigation; PageDown and arrows advance when ready, with no dropped or double page turns and correct saved progress.
+
+### BUG-224 — Uneven book typography remains after the release type-scale fix
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; BOOK-TYPE-SCALE-2, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F2; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
+**Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
+
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. The next free number is BUG-233.
+
+### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
+**Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
+**Severity:** MEDIUM. It must be fixed before BLURBY-SERVER-1's sync is on for anyone. Not a Stage 8 release gate.
+**Status:** OPEN; scheduled as LIBRARY-WRITE-RACE-3. Lane: Library & Content.
+**Location:** the per-field edit stamps that LIBRARY-WRITE-RACE-2 part 3 adds (branch `eb/library-write-race-2` @ `c46e9332`), and the renderer's whole-record library saves.
+**Description:** a cloud merge can change a field, such as `tags`, in main. If a renderer that has not yet received the broadcast then saves its older copy, main sees a real change against its own value. It stamps the stale value `editedAt = now`, and that value beats the cloud copy at the next sync. Before LIBRARY-WRITE-RACE-2 the stale value already overwrote main, but carried no stamp. **Fix:** the renderer sends only the fields it edited, with the values it loaded, and main stamps only those fields (LIBRARY-WRITE-RACE-3).
+
+### BUG-222 — Foliate's paginator throws "Cannot destructure property 'style' of 'r' as it is null" during a fast reader open and close
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW. It is error-log noise on a fast open and close, and the base has it too. Not a release gate.
+**Status:** OPEN; unscheduled. Lane: Reader Engine.
+**Location:** foliate-js's paginator, reached while a book view is torn down before its first layout.
+**Description:** opening and closing a book quickly logs `Cannot destructure property 'style' of 'r' as it is null` from the paginator. No position or library data is affected. **Next step:** reproduce on a scratch profile with a driver that opens and closes within the first layout, then decide whether the teardown should wait for the first layout or swallow the error in that window.
+
+### BUG-221 — `g` shows no go-to badge: GoToIndicator mounts after `blurby:goto-pending` has fired
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW. The go-to chord still works; only its badge is missing.
+**Status:** OPEN; unscheduled. Lane: UX polish.
+**Location:** `GoToIndicator` (grep `blurby:goto-pending` in `src/`) and the keyboard handler that dispatches the event.
+**Description:** pressing `g` dispatches `blurby:goto-pending` before `GoToIndicator` has mounted and subscribed, so the badge never shows. **Fix approach:** mount the indicator with the reader or library shell, so it is listening before the first key, or have it read a pending flag on mount. A red test dispatches the event before mounting, then mounts.
+
+### BUG-220 — In Page, Shift+→ moves the highlight from word 187 to −1, and Shift+← moves it to 0
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW–MEDIUM. Page's paragraph keys put the highlight on an invalid word (−1) or the book's first word.
+**Status:** OPEN; stubbed as PAGE-PARA-KEYS-1. Lane: Reader Engine.
+**Location:** Page's paragraph-step command (Shift+←/→ through `useReaderKeys`). The probable cause is the paragraph command's slice index.
+**Description:** measured on a packaged build: in Page, with the highlight on word 187, Shift+→ set it to −1, and Shift+← set it to 0. Focus and Flow have their own paragraph-key fixes (FOCUS-KEYS-FIX-1, FLOW-PARA-KEYS-1, BLOCK-TAG-CASE-1). **Next step:** trace Page's paragraph command on the held key-fix stack, then specify (PAGE-PARA-KEYS-1).
+
+### BUG-217 — First launch on a fresh profile logs a library backup failure
+**Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
+**Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.
+**Status:** OPEN; unscheduled. Known noise in standing rule 53 (b) until fixed. Lane: Platform & Maintenance.
+**Location:** the library backup step in `main/` (grep `Backup failed for`).
+**Description:** on a fresh profile the first launch prints `Backup failed for <profile>\blurby-data\library.json: ENOENT … copyfile` to stderr: the backup treats a library that does not exist yet as a failure. **Fix:** skip the backup when `library.json` does not exist, with a red test on a missing file.
 
 ### BUG-216 — The note popover is never shown: Shift+N in Page dispatches an event nobody listens to
 **Reported:** 2026-10-23 (UI-SWEEP-1 W3, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
@@ -53,48 +152,19 @@
 **Location:** `src/components/LibraryContainer.tsx:289-298`, `:397` (the keyboard hook focuses into a list built from its own `activeFilter`); `src/components/LibraryView.tsx:58` keeps a separate tab state. The full path from G then A was not traced.
 **Description:** Restore from archive (Shift+E) changed no flag in 2 runs from the archived tab and 2 runs from G then A. Evidence: triage report, row 89.
 
-### BUG-211 — Flow's line, word, sentence and paragraph keys don't move the reading word
-**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103, two runs each on the `97527896` x64 `--dir` build; Ctrl+←/→ measured by FLOW-KEYS-FIX-1's red test)
-**Severity:** MEDIUM (keyboard navigation in Flow is dead). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
-**Status:** RESOLVED in source except paused line keys (FLOW-KEYS-FIX-1, branch `eb/flow-keys-fix-1`, held for after the Stage 8 release). Lane: Reader Engine.
-**Description:**
-- **Playing, ↑/↓:** the cursor never jumps a line.
-- **Ctrl+↑/↓, Shift+↑/↓, Shift+←/→ and Ctrl+←/→:** nothing moves, paused or playing.
-- **At v1.28.0** (f0, `v128-flow-1..3.json`): paused ↓ changed speed; Ctrl+↓ jumped to word 0; Shift+↑/↓, Ctrl+↑ and playing ↑ did nothing.
-**Cause:**
-- **Two pacers:** Flow moves its position with two pacers, the word timer (`FlowMode`) and the line pacer (`FlowScrollEngine`). `src/reader/modes/flow/ModeRuntime.ts:921` moved only the line pacer, so the word timer's next tick pulled the published word back (red test: 10, then 8).
-- **Paused:** the line pacer stops on pause, so there is no line to jump to.
-- **Dropped commands:** `seek-words`, `sentence` and `paragraph` reached `default: return` (`:929-930`), dropped by the READER-MODE-SEPARATION-2 cutover (`3dd4b504`).
-- **Playing ←/→ keys stop playback (live finding, 2026-10-23; diagnosed by Blurby.Brain):** Flow's book view has its own window keydown listener (`src/reader/modes/flow/FoliateView.tsx`, from `9fa253b0`). It marked browse-away, which pauses, and turned a page on ArrowLeft/Right and PageUp/Down whatever the modifiers. So after the key's own move, every ←/→ key paused (live on `60b86aff`: Ctrl+→ 191 → 192, then stopped).
-**Fix (FLOW-KEYS-FIX-1):**
-- **Line keys, playing:** the word timer jumps to the line pacer's new word.
-- **Word, sentence and paragraph keys:**
-  - playing, they move both pacers, as a playing click does;
-  - paused or before a play, they set the explicit start anchor that Flow's cold restart consumes.
-- **Browse-away keys (amendment, owner ruling 2026-10-23):** the book view's listener reacts only to PageUp and PageDown with no modifier, through `isFlowBrowseKey` (`src/reader/modes/flow/helpers/flowBrowseKey.ts`). Plain ←/→ change speed only; PgUp/PgDn still pause and turn a page to look ahead.
-- **Tests:** `tests/readerModes/flowKeys.test.tsx`, `tests/readerModes/flowBrowseKey.test.ts`.
-**Not fixed here:** ↑/↓ while paused. There is no line map while paused, so this needs new design: IDEAS.md A5, FLOW-PAUSED-LINE-1.
+### BUG-211 — Flow's line, sentence and paragraph keys move nothing
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103; filed at its close-out)
+**Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
+**Status:** OPEN; fix specified as FLOW-KEYS-FIX-1 (`ROADMAP.md#flow-keys-fix-1`, position 77, after the Stage 8 release and after FOCUS-KEYS-FIX-1). Lane: Reader Engine.
+**Location:** `src/reader/modes/flow/ModeRuntime.ts:916-931` (only `flow-line` is routed, and only while running, `:921`; `sentence` and `paragraph` are dropped although `helpers/FlowScrollEngine.ts:373` has `jumpToParagraph`).
+**Description:** ArrowDown/Up, Ctrl+Up/Down and Shift+Up/Down do nothing (2 runs each); while playing, ArrowUp and ArrowDown never jump a line. Evidence: triage report, "DEFECTs", Flow group.
 
-### BUG-210 — Focus's word, sentence and paragraph keys don't move the reading word
-**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95, two runs each on the `97527896` x64 `--dir` build; `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`)
-**Severity:** MEDIUM (keyboard navigation in Focus is dead; the mouse and play still work). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
-**Status:** RESOLVED in source (FOCUS-KEYS-FIX-1, branch `eb/focus-keys-fix-1`, held for after the Stage 8 release). Lane: Reader Engine.
-**Description:**
-- In Focus, Ctrl+←/→ and ←/→ (`seek-words`), Ctrl+↑/↓ (`sentence`) and Shift+←/→ (`paragraph`) move nothing, paused or playing. Playing, the RSVP word never steps back.
-- At v1.28.0 (f0, `v128-focus-1..5.json`) they misbehaved differently. Ctrl+↓ jumped to word 0 and Shift+→ set word −1, because v1.28.0's handlers computed over the tokenized text, which an EPUB lacks. Ctrl+→ and Ctrl+↑ moved nothing.
-**Cause:**
-- `src/reader/modes/focus/ModeRuntime.ts:749-754`: `seek-words` changed only `displayWordIndex`. Nothing reads it while paused, and the engine's next word overwrites it while playing.
-- `:761-762`: `sentence` and `paragraph` reached `default: return`. The READER-MODE-SEPARATION-2 cutover (`3dd4b504`) dropped them.
-**Fix (FOCUS-KEYS-FIX-1):**
-- A move jumps the engine (`FocusMode.jumpTo`) once it exists. Before the first play, the move sets the explicit start anchor.
-- Sentence targets use `findSentenceBoundary`, and paragraph targets use the new `findParagraphStart`, both in `src/utils/text.ts`.
-- Tests: `tests/readerModes/focusKeys.test.tsx`.
-**Amendment (2026-10-23, owner):**
-- **Live failure on `48203707`:** Shift+→ jumped from section start to section start (187 → 5480 → 9431), and Shift+← from 187 landed on 0.
-- **Cause:** an EPUB section is `application/xhtml+xml`, so `tagName` is lowercase. The uppercase `BLOCK_TAGS` check in `getBlockParent` (`focus/helpers/foliateHelpers.ts`) never matched, and each section became one block.
-- **Fix (`568acc60`):** `foliateParagraphStarts.ts` walks the block elements with `isParagraphBlock` (`BLOCK_TAGS.has(el.localName.toUpperCase())`). `getBlockParent` is unchanged; BLOCK-TAG-CASE-1 owns it.
-- **Tests:** `tests/readerModes/focusParagraphStarts.test.ts`, with an XHTML section test and a `text/html` control.
-- **Live check on `568acc60`:** passed (the x64 `--dir` package, scratch profile; `C:\Projects\Blurby-artifacts\keys-fix\focus-568acc60-para.*`). Shift+→ moves 187 → 188 → 572 → 610, Shift+← moves 610 → 572 → 188 → 187, and while playing Shift+→ moves 195 → 572. All 7 presses match the probe's DOM block list, and the live profile was unchanged.
+### BUG-210 — Focus's word, sentence and paragraph keys move nothing
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95; filed at its close-out)
+**Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
+**Status:** OPEN; fix specified as FOCUS-KEYS-FIX-1 (`ROADMAP.md#focus-keys-fix-1`, position 76, after the Stage 8 release). Lane: Reader Engine.
+**Location:** `src/reader/modes/focus/ModeRuntime.ts:746-764`: the seek moves `displayWordIndex` only (`:749-753`), which the engine's next word overwrites, and `handleCommand` has no `sentence` or `paragraph` case.
+**Description:** Ctrl+Right/Left, Ctrl+Up/Down and Shift+Left/Right do nothing, paused or playing (2 runs each). Evidence: triage report, "DEFECTs", Focus groups.
 
 ### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
 **Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)
@@ -251,7 +321,7 @@ No run hit the 30 s terminate, and every exit code was 0. Gate status and fix di
 **Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
 **Status:** RESOLVED (QUIT-FLUSH-1, merge `d21009b3`, 2026-10-14). The quit saves run in the cancelled first `will-quit` under `QUIT_FLUSH_TIMEOUT_MS` (3 s), each guarded, and the Narrate producer shutdown is awaited uncapped. Review fixes: the quit cloud sync's library merge is flushed (W1), no step starts after the cap (W2), and the flush cannot stay stuck (N1). Owner smoke on the production build (Done-when 9): the accent changed just before Alt+F4 was kept, no Blurby process remained after about 2 s, and no new `*.tmp` was left ((a)–(e) pass; (f) not testable as written, because Page-mode page turns do not commit a reading position).
 **Location:** was `main.js` `app.on("will-quit", async (event) => …)` (`:691` on `main` @ `15e9c2f1`); now `main/quit-sequence.js` (`createWillQuitHandler`, `runQuitSteps`) and the step list in `main.js`'s `will-quit` block (`main.js:682` on `d21009b3`).
-**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%lurbylurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
+**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%\blurby\blurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
 **Root cause:** Electron does not wait for an async `will-quit` listener. The handler cancels only the first quit (`event.preventDefault()`) to stop the Narrate producer, then calls `app.quit()`; on the second pass every `await` — `flushTtsEvalTraceCaptures()`, `saveLibraryNow()`, SETTINGS-WRITE-DURABLE-1's `saveSettingsFn()`, and the final cloud sync — runs after Electron has already decided to exit, so the process ends mid-write. The library flush had the same flaw before SETTINGS-WRITE-DURABLE-1; that item's quit flush inherits it.
 **Evidence:** owner smoke 2026-10-13 (planner session): file listing and diff of `settings.json` against `settings.json.tmp` (only `accentColor` differs); 0-byte `sync-queue.json.tmp`; 92,712-byte `library.json.tmp` after the second quit; no `ENOENT` in either terminal.
 **Fix path:** do the flushes inside the cancelled first pass: `event.preventDefault()`, then await the producer shutdown, the eval-trace flush, `saveLibraryNow()`, `saveSettingsFn()` and the sync-queue writer (each guarded so one failure does not block the rest, with an overall timeout), then `app.quit()`; the second pass only closes the watcher and the WebSocket server. Whether the final cloud sync belongs in the awaited pass (it can be slow) is a design decision for the spec. Needs a positive control that fails today: a main-process test (or the F7 harness) that quits during a pending write and finds the file unwritten.
@@ -1602,3 +1672,5 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Location:** `src/components/ReaderBottomBar.tsx`
 **Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
 **Solution:** Remov
+
+**2026-10-26 review clarification (BUG-227 remains OPEN):** F9 paused-click playback has a separate investigated specification, NARRATE-PAUSED-CLICK-1 (Seq117). F7/F8 paused-band and viewport behavior stays under NARRATE-SELECTION-START-1 (Seq124), investigation-gated. No implementation or packaged acceptance occurred.
