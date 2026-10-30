@@ -8,6 +8,25 @@
 
 ## Incomplete
 
+### BUG-236 — Play in Flow on an image-only cover does nothing
+**Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
+**Severity:** MEDIUM. A release defect, not a regression.
+**Status:** OPEN; goes into the usual intake. Lane: Reader Engine.
+**Observation:** pressing Play in Flow on the image-only cover leaves playing=true in section 0, with 0 words and no cursor, for 60 s. It happens on release `36ac7466` and on the held BAND-ALIGN stack alike.
+**Evidence:** RodneySr `C:\Projects\Blurby-artifactsand-align-2-r7\liveel36-L2-cover`.
+**Next:** specify the intended behaviour, for example advancing to the first section with words, or disabling Play on a zero-word section. That is an owner design choice; then schedule a Flow-runtime fix.
+
+### BUG-235 — REGRESSION: Flow playback stops at a section's end and never enters the next section
+**Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
+**Severity:** HIGH. A regression in the held stack; it BLOCKS BAND-ALIGN-2's merge.
+**Status:** OPEN. A bisect is queued on RodneySr as job 6 (after job 5, before R8). Lane: Reader Engine.
+**Observation:** in Flow, at NOTES#185 the band switches off, the cursor disappears, and playback never enters section 2.
+- Present on M `70e739ea` (band-align-2 `85e32777` + main) and on R7 `a5273704`.
+- Absent on release `36ac7466`, which crosses into section 2 at sample 15 (AURELIUS#189) and keeps playing.
+- `git diff 36ac7466 origin/main` over `src/`, `main/`, `main.js`, `preload.js`, `package*.json` and `patches` is empty, so the cause lies in the held stack between `36ac7466` and `85e32777`: BAND-ALIGN-1, FOCUS-KEYS-FIX-1 / FLOW-KEYS-FIX-1, FLOW-PARA-KEYS-1 or BAND-ALIGN-2. Prime suspect `860ad3ca` ("Flow runs on one clock"); second suspect R6 `eabd0c07`.
+**Evidence:** RodneySr `C:\Projects\Blurby-artifactsand-align-2-r7\live\` (`base-L2*`, `cand-L2text-L5-Flow`, `rel36-L2-text`).
+**Next:** the bisect names the first bad commit; Blurby.Roadmap then writes the fix spec. BAND-ALIGN-2 (with R7/R8) does not merge until this is fixed.
+
 ### BUG-234 — Clicking a word scrolled out of view past BOOKS jumps Focus to section 2 with no cursor and the band off
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1) during BAND-ALIGN-2 R7 live checks on candidate `a5273704` (Focus, *Meditations*).
 **Severity:** LOW, pending reproduction on `main`.
@@ -95,7 +114,7 @@
 **Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
 **Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
 
-**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. The next free number is BUG-235.
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. BUG-235 and BUG-236 were filed 2026-10-30 from RodneySr's Flow checks. The next free number is BUG-237.
 
 ### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
 **Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
