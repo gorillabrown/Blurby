@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30; change 26 (NARRATE-PAUSE-CANCEL-1 package-verified, In Flight) approved 2026-10-30; change 27 (BAND-ALIGN-2 R7a package-verified note) approved 2026-10-30; change 28 (NARRATE-GAP-PAUSE-1 package-verified, In Flight) approved 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30; change 26 (NARRATE-PAUSE-CANCEL-1 package-verified, In Flight) approved 2026-10-30; change 27 (BAND-ALIGN-2 R7a package-verified note) approved 2026-10-30; change 28 (NARRATE-GAP-PAUSE-1 package-verified, In Flight) approved 2026-10-30; change 29 (BAND-ALIGN-2 R8 package-verified note) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,7 +14,7 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T22:08:45Z",
+  "final": "2026-10-30T22:52:48Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
   "batch3Refresh": "2026-10-30T19:57:00Z",
   "batch4Refresh": "2026-10-30T20:01:30Z",
@@ -24,7 +24,8 @@
   "batch8Refresh": "2026-10-30T21:22:00Z",
   "batch9Refresh": "2026-10-30T21:26:30Z",
   "batch10Refresh": "2026-10-30T21:42:30Z",
-  "batch11Refresh": "2026-10-30T22:07:30Z"
+  "batch11Refresh": "2026-10-30T22:07:30Z",
+  "batch12Refresh": "2026-10-30T22:51:31Z"
  },
  "driftLines": [],
  "counts": {
@@ -142,6 +143,14 @@
    "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-gap-pause-verified)"
+  },
+  "batch12": {
+   "refreshDiffAgainst220845Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-r8-verified)"
   }
  },
  "changes": [
@@ -974,6 +983,28 @@
    "actualRevision": "0d62459760152ff6ec783ec153eee468c6bf19dd82b61aa6394b2ec01668dff8",
    "readbackNote": "Seq, Spec State and Prerequisites kept (read back unchanged); built and held",
    "batch": 11
+  },
+  {
+   "change": 29,
+   "item": "BAND-ALIGN-2",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T225209Z-external-set-status-BAND-ALIGN-2",
+   "providerId": "4027c96c-c31e-817d-ba0a-f8028d8f6b4e",
+   "url": "https://app.notion.com/4027c96cc31e817dba0af8028d8f6b4e",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(Built and held 2026-10-23 at 508be445 on eb/band-align-2, base f96552bd = FLOW-PARA-KEYS-1 100b41dd + BAND-ALIGN-1 105a07c1 + main 7c4a7a88. Red first (368dcc15); npm test 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile --dir builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. Fixed in scope: a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's scrollTop writes never moved the text; the pacer now scrolls through renderer.containerPosition. Roadmap rulings (tier 1):. Status and Seq remain unchanged.\n\nOwner design ruling 2026-10-30 ('Add space, band fixed') amends the spec as R7: the band never moves; each band mode adds a leading space equal to the anchor offset so the cursor and band reach a section's first line and headings; R6 (no band on a zero-word page) kept. R7 lands before FOCUS-WORD-ONLY-1. RodneySr job 4 once specified.\n\nR7a (BUG-235 fix) package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: eb/band-align-2 at 3977540e, package from 20b3d5f8; live L2 crosses into section 2 at sample 13 with no sample missing a cursor; x64/arm64 asar identical. The BUG-235 merge block is lifted. R8 unblocked on 3977540e. Arm64 launch at merge."
+   },
+   "readback": {
+    "Notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(Built and held 2026-10-23 at 508be445 on eb/band-align-2, base f96552bd = FLOW-PARA-KEYS-1 100b41dd + BAND-ALIGN-1 105a07c1 + main 7c4a7a88. Red first (368dcc15); npm test 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile --dir builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. Fixed in scope: a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's scrollTop writes never moved the text; the pacer now scrolls through renderer.containerPosition. Roadmap rulings (tier 1):. Status and Seq remain unchanged.\n\nOwner design ruling 2026-10-30 ('Add space, band fixed') amends the spec as R7: the band never moves; each band mode adds a leading space equal to the anchor offset so the cursor and band reach a section's first line and headings; R6 (no band on a zero-word page) kept. R7 lands before FOCUS-WORD-ONLY-1. RodneySr job 4 once specified.\n\nR7a (BUG-235 fix) package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: eb/band-align-2 at 3977540e, package from 20b3d5f8; live L2 crosses into section 2 at sample 13 with no sample missing a cursor; x64/arm64 asar identical. The BUG-235 merge block is lifted. R8 unblocked on 3977540e. Arm64 launch at merge.\n\nR8 paragraph band package-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: eb/band-align-2 at e8e6de06. The title band is one line at 91 px (R7: 278-560); the Off switch persists; migrations hold; Flow playback 30/30 x3; suite 2599/1/0; x64/arm64 asar identical. LL-174 recorded. Arm64 launch at merge."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "be25b0cc78ad076db4c85de05dc910b7ce9676989525d8016e65dcb727823241",
+   "readbackNote": "Status In Flight, Seq 83, Spec State and Prerequisites unchanged",
+   "batch": 12
   }
  ]
 }

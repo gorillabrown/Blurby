@@ -636,6 +636,12 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - Red tests h1–h6, plus a packaged check on RodneySr that it crosses into section 2 by sample 15 like the release.
   - Base `eb/band-align-2-r7-work` @ `f3f254f3`; fast-forwards `eb/band-align-2`. Merges before R8, and lifts BUG-235's merge block once Brain confirms the package.
   - Spec: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md).
+- **R8 PACKAGE-VERIFIED (x64, RodneySr) 2026-10-30 (Blurby.Brain1):** `eb/band-align-2` @ `e8e6de06`, fast-forwarded through R7a.
+  - L1: the title band is one line, 91 px (R7: 278–560 px). L2: each front-matter block gets its own band. L3: a long paragraph is clipped, with the cursor within 0.32 px of the anchor. L4: one-sentence paragraphs get an exact band. L5: the cover has no band.
+  - L6: the Off switch persists across a relaunch. L7: migration maps `flowZoneLines` 0 → off and 7 → on.
+  - L8: Flow playback 30/30 ×3, edge error 0 px. It first failed 27/30: the band argument was dropped at two forwarding hops, fixed in fence with a red test (LL-174).
+  - Suite 2,599/1/0; x64/arm64 asar identical (`A45CDEE5…`). Arm64 launch at merge.
+  - PLAY-FIRST-TEXT-1 (job 9) builds on `e8e6de06`.
 - **R8 — paragraph band (owner design ruling 2026-10-30; dispatch-ready; supersedes R7's band-extent rows):**
   - The band covers exactly the paragraph block that contains the selected word, whatever its size. A heading is its own block. With no selected word on the page there is no band.
   - The 3/5/7 line count and its control are removed. A single **Band** on/off switch replaces "Lines 3 5 7 Off" (owner: "Keep an Off switch"). Turning it off also removes the dimming.

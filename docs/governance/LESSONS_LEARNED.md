@@ -3137,3 +3137,11 @@ Related: LL-171; standing rule 41.
 **Applies to:** Narrate's engine and output fakes; any scheduler and player split (TTS, audio export, timed highlighting).
 **Status:** Observation
 Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
+
+### LL-174 — A widened callback must be widened at every hop (BAND-ALIGN-2 R8, 2026-10-30)
+**Verdict:** When a callback or engine entry point gains an argument, every forwarding layer between producer and consumer must pass it on. A single typed wrapper that keeps the old signature silently drops it, and the consumer falls back to its default.
+**Evidence:** BAND-ALIGN-2 R8 live row L8 first failed 27/30, deterministically. The paragraph band argument was dropped at two hops: `ModeRuntime.startScrollEngine`'s parameter type, and the wrapper in `useModeBindings`. Every line advance therefore painted the legacy 5-line fallback band. Unit tests that called the engine directly passed. Fixed in R8's fence with a red test and a two-line forwarding fix (Blurby.Brain1, 2026-10-30).
+**Recommendation:** When a spec widens a callback, list every hop from producer to consumer as an edit site. Add one test that drives the outermost entry point and asserts on the value the innermost consumer receives, not only on the inner unit.
+**Applies to:** reader runtimes' engine and binding layers; IPC and preload forwarding; any adapter chain.
+**Status:** Observation
+Related: LL-139, LL-143.
