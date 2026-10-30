@@ -7,7 +7,8 @@ Staging, Rules 1–3). `/dispatch-closeout` processes it as Wave 2 Step 0 (Rule 
 exactly once on `main` is a reconciliation prompt (Rule 4 *Discrepancy handling*), never a silent overwrite.
 
 - Specification: `docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md` (origin/main `1e8bc0cb`).
-- Branch: `eb/agent-protocol-consolidation-1`. Base: `origin/main` `1e8bc0cb`.
+- Branch: `eb/agent-protocol-consolidation-1`. Base: merge-base `1e8bc0cb`; `origin/main` tip `492db7f5` at review
+  (three bug-report merges: ROADMAP.md +1 line, BUG_REPORT.md; no fold-in target text changed). D3 re-run against the tip.
 - Format: every **Old** and **New** block is the exact text between its `~~~~text` line and its closing `~~~~` line,
   without the fences. **Old** blocks were cut from `origin/main` by anchor, never retyped (LL-068).
 - Order: targets in the order below; fold-ins within a target in their numbered order. There are no Mid-Dispatch
@@ -191,6 +192,8 @@ File bytes: the New block followed by one LF, UTF-8, no BOM.
 
 Writer: the repository operator by hand for (a), (b), (c), (e); `roadmap-review` through `policy-set` for (d) and (f)
 (Blurby.Brain1 condition 2). Every helper call runs through the CLAUDE.md rule 11a guarded wrapper `$W`.
+Ledger: `policy-set` at (d)/(f) appends its `roadmap.workstreams` line to `docs/governance/Change.Ledger.jsonl`
+(writer `roadmap-review`, changeLedger allowedWriters).
 
 ### Fold-in W1 — Manifest steps (a)–(g)
 Section: `roles.overlays`, top-level `x-commands`, `policy.roadmap`
@@ -782,3 +785,18 @@ CH-001 uncommitted and list it here; `/dispatch-closeout` decides it.
   names the full plugin path `skills/virtuoso/references/zeus.md` (same pointer; memo fix per the failure table).
 
 ## Review verdicts
+
+Plugin order (`skills/virtuoso/references/zeus.md`): spec compliance (MarcusAurelius), then quality (Plato), each a
+fresh agent that neither wrote nor ran this item.
+
+- Spec compliance: APPROVED
+  - Reviewer: fresh `virtuoso:MarcusAurelius` agent, read-only, on `0294c198`, 2026-10-30.
+  - Re-ran D1–D5: D1 `.claude/agents` empty, 11 `git diff --exit-code` = 0, 11 R100; D2 no output, `.claude` lists
+    exactly the two memo-move files; D3 `folds=26 moves=2 overlays=4 CLAUDE.md=30369B AGENTS.md=30476B failures=0`,
+    exit 0; D4 `1.16.2` exit 0, both cache loops no output exit 0; D5 `3BDBE188…335B`, `?? .agents/`, `?? .codex/`.
+    D8 no output; D9 exactly 11 R100 + A memo.
+  - Findings (all Low): empty verdict section (fixed: this entry); header base moved to `492db7f5` (fixed: header);
+    E5 Old also removes the "Zeus never writes code" paragraph, which names retired agents (consistent with Z9 and C5b;
+    no change); W1 did not name the ledger line (fixed: W1 writer note).
+  - D3 positive control (R-C5a) was run by the dispatch: the checker exits 1 on a memo whose E5 New names
+    `.claude/agents/zeus.md`.
