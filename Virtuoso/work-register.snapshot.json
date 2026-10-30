@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-30T20:03:00Z",
+  "takenAt": "2026-10-30T20:47:30Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -380,10 +380,7 @@
       "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
-      "prerequisites": [
-        "APP-TABS-1",
-        "LIBRARY-COMPLETION-VISIBILITY-1"
-      ],
+      "prerequisites": [],
       "effort": "XL",
       "workstream": "Blurby Business",
       "deliverable": "",
@@ -394,8 +391,8 @@
       "completed": "",
       "evidence": "",
       "description": "",
-      "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.",
-      "revision": "824e0c1dd0e87887570a6c5b0787374b06b113b101d23946b1960412ebcdf10d",
+      "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.",
+      "revision": "331ad24c969a3e5d41392a119348d7ccf7d1f1a815d4bdfc308329cd9ad73ea0",
       "extra": {
         "id": "4097c96c-c31e-816d-95ef-d6fa5243812b",
         "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
