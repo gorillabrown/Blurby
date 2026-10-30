@@ -1,0 +1,7 @@
+{
+  "base": {
+    "errors5s": 300,
+    "perSecond": 60
+  },
+  "steps": []
+}

@@ -1,0 +1,81 @@
+{
+  "inFlow20s": {
+    "roErrors": 1181,
+    "observerCallbacks": {
+      "new It (file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/paginator-sOM65Gn3.js:1:8376)": {
+        "calls": 3,
+        "sizes": {
+          "div. 0x0": 1,
+          "div. 1002x630": 1,
+          "div. 987x630": 1
+        }
+      },
+      "new ee (file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/paginator-sOM65Gn3.js:1:3734)": {
+        "calls": 1,
+        "sizes": {
+          "body.x-ebookmaker 720x9819": 1
+        }
+      },
+      "file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/App-zEyVC33j.js:111:30135": {
+        "calls": 1,
+        "sizes": {
+          "div.rm-flow-view 1002x630": 1
+        }
+      },
+      "file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/App-zEyVC33j.js:111:30417": {
+        "calls": 1,
+        "sizes": {
+          "div.rm-flow-view 1002x630": 1
+        }
+      }
+    },
+    "attr": {
+      "margin": {
+        "writes": 3,
+        "changed": 3,
+        "values": {
+          "24px": 3
+        }
+      },
+      "max-block-size": {
+        "writes": 3,
+        "changed": 3,
+        "values": {
+          "609px": 1,
+          "610px": 2
+        }
+      },
+      "max-column-count": {
+        "writes": 3,
+        "changed": 3,
+        "values": {
+          "1": 3
+        }
+      }
+    },
+    "props": {
+      "--flow-zone-top": {
+        "writes": 4,
+        "changed": 2,
+        "values": {
+          "15%": 4
+        }
+      },
+      "--flow-zone-bottom": {
+        "writes": 4,
+        "changed": 2,
+        "values": {
+          "34.04761904761905%": 4
+        }
+      }
+    }
+  },
+  "geometry": {
+    "legend": "viewClientW|viewScrollH|viewScrollTop|foliateViewH|max-block-size|paginatorDivs",
+    "frames": 182,
+    "changes": 0,
+    "states": {
+      "1002|630|0|629.8|610px|rm-flow-root:1002x630;rm-flow-view:1002x630;FOLIATE-VIEW:0x0|": 182
+    }
+  }
+}

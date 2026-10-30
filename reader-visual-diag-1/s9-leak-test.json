@@ -1,0 +1,23 @@
+{
+  "before": {
+    "errors15s": 899,
+    "perSecond": 59.9
+  },
+  "disconnected": [
+    "paginator-sOM65Gn3.js:1:8376)",
+    "paginator-sOM65Gn3.js:1:8376)"
+  ],
+  "after": {
+    "errors15s": 898,
+    "perSecond": 59.9
+  },
+  "stillLive": [
+    "paginator-sOM65Gn3.js:1:3734) -> ",
+    "paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker",
+    "paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker",
+    "App-zEyVC33j.js:111:30135 -> div.rm-flow-view",
+    "App-zEyVC33j.js:111:30417 -> div.rm-flow-view",
+    "paginator-sOM65Gn3.js:1:8376) -> div.",
+    "paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker"
+  ]
+}
