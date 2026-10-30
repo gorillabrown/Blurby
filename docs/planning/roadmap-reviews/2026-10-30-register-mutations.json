@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,16 +14,17 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T19:52:30Z",
-  "batch2Refresh": "2026-10-30T19:49:00Z"
+  "final": "2026-10-30T19:59:00Z",
+  "batch2Refresh": "2026-10-30T19:49:00Z",
+  "batch3Refresh": "2026-10-30T19:57:00Z"
  },
  "driftLines": [],
  "counts": {
   "before": 197,
-  "after": 199,
-  "created": 2,
+  "after": 200,
+  "created": 3,
   "statusAfter": {
-   "Queued": 44,
+   "Queued": 45,
    "In Flight": 69,
    "Completed": 71,
    "Dissolved": 9,
@@ -61,6 +62,14 @@
    "confirmedRevisionsMatchFinalRead": true,
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (batch-2 recovery records written there)"
+  },
+  "batch3": {
+   "refreshDiffAgainst195230Z": "none (register unchanged between batches)",
+   "onlyIntendedRowAdded": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-absorb-blurby-business)"
   }
  },
  "changes": [
@@ -474,6 +483,57 @@
    "actualRevision": "db95a2077720e604c95175e05a4d89aba241521c1a8930530cf21d5a814cc616",
    "readbackNote": null,
    "batch": 2
+  },
+  {
+   "change": 18,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T195823Z-external-create-item-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Prerequisites",
+    "Effort",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "fieldsNotWritten": {
+    "Lane": "Blurby Business refused by the Notion connector (HTTP 400: Lane is a select whose options are the six declared lanes; a new option needs a data-source update). Left empty per coordinator instruction."
+   },
+   "abandonedPlan": {
+    "recoveryId": "20261030T195739Z-external-create-item-BLURBY-BUSINESS-1",
+    "outcome": "abandoned",
+    "reason": "create with Lane refused (HTTP 400); nothing created, absence re-checked by SQL"
+   },
+   "before": null,
+   "readback": {
+    "Name": "Blurby Business: a walled-off PDF viewer and editor",
+    "Status": "Queued",
+    "Seq": 100.5,
+    "Spec State": "Stub",
+    "Prerequisites": "APP-TABS-1; LIBRARY-COMPLETION-VISIBILITY-1",
+    "Effort": "XL",
+    "Spec Reference": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.",
+    "Sprint Code": "BLURBY-BUSINESS-1",
+    "Lane": null,
+    "Branch": null,
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "APP-TABS-1 (100)",
+    "BLURBY-BUSINESS-1 (100.5)",
+    "RSS-AGGREGATOR-1 (101)"
+   ],
+   "actualRevision": "c17c5c9de7494b9213517cda98c1118ee81bcfff6fff83c26f9e267a767eae79",
+   "readbackNote": null,
+   "batch": 3
   }
  ]
 }
