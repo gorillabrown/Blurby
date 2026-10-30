@@ -6,10 +6,10 @@
 // Effect 3 (WPM) is runtime.applySettings; effect 2 (cross-book auto-resume) runs while Page is active,
 // so it is the router's resumeFlowAfterBookOpen; effect 6 (Flow+narration follower) is not copied (LL-125).
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
-import { FLOW_ZONE_LINES_DEFAULT, FLOW_ZONE_LINES_OFF, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
+import { FLOW_ZONE_LINES_DEFAULT, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
 import type { FlowFoliateViewProps } from "./FoliateView";
 import type { FlowBandEdges } from "./helpers/FlowScrollEngine";
-import { normalizeBandLines, readZoneLineStepPx } from "./helpers/foliateLayout";
+import { readZoneLineStepPx } from "./helpers/foliateLayout";
 import type { FlowModeRuntime } from "./ModeRuntime";
 
 /** useFlowScrollSync startWhenReady: the surface refs can attach a tick after play flips. */
@@ -29,38 +29,33 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
   const renderVersion = runtime.getRenderVersion();
   const scrollContainerRef = useRef<HTMLElement | null>(null);
   const flowCursorRef = useRef<HTMLDivElement | null>(null);
-  const flowZoneLines = settings.settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+  const bandOn = settings.settings.flowBandEnabled !== false; // BAND-ALIGN-2 R8: the Band switch
 
   // FLOW-ZONE-AUTO: the engine reports the descending zone's top fraction per line advance. Write it
   // straight to the masked element's CSS vars (line-advance rate is too fast for React state).
-  // BAND-ALIGN-2: in the stable window the engine reports the band's edges (client px) around the cursor line, or
-  // none for Lines Off (no band, no dimming).
+  // BAND-ALIGN-2 R8: in the stable window the engine reports the cursor line's box; the view then places the band over
+  // the cursor's paragraph (none without a painted cursor, R6). With the Band switch off: no band, no dimming.
   const onZoneTopChange = useCallback((topFrac: number, band?: FlowBandEdges) => {
     const host = runtime.viewApiRef.current?.getFlowZoneHost() ?? null;
     if (!host) return;
-    if (normalizeBandLines(flowZoneLines) === FLOW_ZONE_LINES_OFF) {
+    if (!bandOn) {
       host.style.removeProperty("--flow-zone-top");
       host.style.removeProperty("--flow-zone-bottom");
       return;
     }
     if (band) {
-      const rect = host.getBoundingClientRect();
-      if (rect.height <= 0) return;
-      const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - rect.top) / rect.height) * 100))}%`;
-      host.style.setProperty("--flow-zone-top", pct(band.top));
-      host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
-      host.classList.remove("rm-flow-view--band-off"); // R6: a band on the cursor line ends a no-cursor state
+      runtime.viewApiRef.current?.placeBandAtCursor();
       return;
     }
     const ch = host.clientHeight;
     if (ch <= 0) return;
     const lineHeight = readZoneLineStepPx(host); // BAND-ALIGN-1
-    const zoneHeightFrac = (lineHeight * flowZoneLines) / ch;
+    const zoneHeightFrac = (lineHeight * FLOW_ZONE_LINES_DEFAULT) / ch;
     const botFrac = Math.min(topFrac + zoneHeightFrac, 0.95);
     host.style.setProperty("--flow-zone-top", `${topFrac * 100}%`);
     host.style.setProperty("--flow-zone-bottom", `${botFrac * 100}%`);
     host.classList.remove("rm-flow-view--band-off");
-  }, [runtime, flowZoneLines]);
+  }, [runtime, bandOn]);
   const onZoneTopChangeRef = useRef(onZoneTopChange);
   onZoneTopChangeRef.current = onZoneTopChange;
 
@@ -116,8 +111,8 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
     runtime.syncScrollEngineChunks();
   }, [runtime, renderVersion, snapshot.playing]);
 
-  // useFlowScrollSync effect 5: rebuild the line map after a font-size change, or an anchor or Lines change (R7: the
-  // leading space follows the band's anchor and line count, so every line's y moves).
+  // useFlowScrollSync effect 5: rebuild the line map after a font-size change, an anchor change (R7: the leading space
+  // follows the band's anchor, so every line's y moves) or the Band switch (R8: the band is placed again).
   useEffect(() => {
     if (!runtime.isScrollEngineRunning()) return;
     let cancelled = false;
@@ -128,7 +123,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [runtime, settings.focusTextSize, settings.settings.flowZonePosition, settings.settings.flowZoneLines]);
+  }, [runtime, settings.focusTextSize, settings.settings.flowZonePosition, settings.settings.flowBandEnabled]);
 
   // useFlowScrollSync effect 5b: rebuild after this view stamps a new rendered-word surface.
   const lastHandledRenderVersionRef = useRef(renderVersion);

@@ -266,7 +266,7 @@ export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
 export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;
 /** Duration of opacity flash at line completion for visual rhythm (ms) */
 export const FLOW_LINE_COMPLETE_FLASH_MS = 100;
-/** Default number of lines visible in the flow reading zone */
+/** Anchor geometry's line count (BAND-ALIGN-2 R8, B1): a geometry constant, not a user setting. Top puts the cursor line half this many line steps down; R7's spaces are sized from it. */
 export const FLOW_ZONE_LINES_DEFAULT = 5;
 /** Minimum lines for flow reading zone */
 export const FLOW_ZONE_LINES_MIN = 3;
@@ -337,7 +337,7 @@ export const DEFAULT_SETTINGS = {
   syncOnMeteredConnection: false,
   flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
   flowZonePosition: FLOW_READING_ZONE_POSITION,
-  flowZoneLines: FLOW_ZONE_LINES_DEFAULT,
+  flowBandEnabled: true,
   lastReadingMode: "flow" as const,
   isNarrating: false,
   ttsEnabled: false,

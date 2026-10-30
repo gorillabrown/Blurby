@@ -812,8 +812,8 @@ export default function ReaderContainer({
           speed={toolbar?.speed ?? null}
           onSetSpeed={handleSetSpeed}
           foliateFraction={useFoliate ? foliateFraction : undefined}
-          flowZoneLines={settings.flowZoneLines}
-          onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
+          flowBandEnabled={settings.flowBandEnabled !== false}
+          onSetFlowBandEnabled={(on) => updateSettings({ flowBandEnabled: on })}
           flowZonePosition={settings.flowZonePosition}
           onSetFlowZonePosition={(v) => updateSettings({ flowZonePosition: v })}
         />

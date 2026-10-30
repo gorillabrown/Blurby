@@ -9,9 +9,7 @@
 
 import {
   computeAnchorScrollTop,
-  computeBandEdges,
   normalizeBandAnchor,
-  normalizeBandLines,
   readZoneLineStepPx,
 } from "./foliateLayout";
 import {
@@ -132,7 +130,6 @@ export class FlowScrollEngine {
   private completeSent = false;
   // The stored settings, normalized where the band is placed (the engine's constants mock carries no band constants).
   private bandAnchorSetting: unknown = undefined;
-  private bandLinesSetting: unknown = undefined;
   private einkPageStart = 0;
   private totalWords = 0;
   private bookPct = 0;
@@ -438,10 +435,9 @@ export class FlowScrollEngine {
     return this.running && this.wordClock && this.lines.length > 0 && wordIndex > this.lines[this.lines.length - 1].lastWord;
   }
 
-  /** BAND-ALIGN-2 R4/R5: the band's anchor and line count (settings.flowZonePosition, flowZoneLines); re-places the band at once. */
-  setBandLayout(anchor: unknown, lines: unknown): void {
+  /** BAND-ALIGN-2 R4: the band's anchor (settings.flowZonePosition); re-places the band at once. */
+  setBandLayout(anchor: unknown): void {
     this.bandAnchorSetting = anchor;
-    this.bandLinesSetting = lines;
     if (this.running && this.lines.length > 0 && !this.manualScrollPaused) this.advanceZone(this.lineIdx);
   }
 
@@ -470,18 +466,17 @@ export class FlowScrollEngine {
     return at;
   }
 
-  /** BAND-ALIGN-2 R1/R2: report the band around a line, in the top window's client px, at the current scroll. */
+  /**
+   * BAND-ALIGN-2 R8: report the cursor line's own box, in the top window's client px, at the current scroll. The
+   * report signals the view to place the paragraph band (placeBandAtCursor); the pacer sizes no band.
+   */
   private reportBand(lineIdx: number): void {
     if (!this.container) return;
     const ch = this.getViewportHeight();
     if (ch <= 0) return;
-    const bandLines = normalizeBandLines(this.bandLinesSetting);
     const scrollTop = this.getScrollTop();
-    // The band's lines plus one either side (for the gap midpoints), as glyph boxes in content space.
-    const reach = Math.ceil((Math.max(bandLines, 1) - 1) / 2) + 1;
-    const from = Math.max(0, lineIdx - reach);
-    const window = this.lines.slice(from, lineIdx + reach + 1).map((entry) => ({ top: entry.y, bottom: entry.bottom }));
-    const band = computeBandEdges(window, lineIdx - from, bandLines, readZoneLineStepPx(this.container)); // R7: the band keeps its size at a section's ends
+    const line = this.lines[lineIdx];
+    const band = line ? { top: line.y, bottom: line.bottom } : null;
     const clientTop = this.container.getBoundingClientRect().top;
     this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
     this.onZoneTopChange?.(
@@ -898,7 +893,6 @@ export class FlowScrollEngine {
     // wherever it ended up. An e-ink page puts its first line at the view's top instead. Narration follower mode keeps
     // legacy behavior unchanged.
     if (this.stableWindowScroll && !this.followerMode) {
-      const bandLines = normalizeBandLines(this.bandLinesSetting);
       const maxScrollTop = Math.max(0, this.getScrollHeight() - ch);
       const targetScrollTop = this.isEink && this.wordClock
         ? Math.min(maxScrollTop, Math.max(0, line.y))
@@ -909,7 +903,7 @@ export class FlowScrollEngine {
           containerTopPx: 0,
           viewportHeightPx: ch,
           anchor: normalizeBandAnchor(this.bandAnchorSetting),
-          bandHeightPx: readZoneLineStepPx(this.container) * Math.max(bandLines, 1),
+          bandHeightPx: readZoneLineStepPx(this.container) * FLOW_ZONE_LINES_DEFAULT, // R8 B1: the anchor geometry
           maxScrollTop,
         });
       if (Math.abs(this.getScrollTop() - targetScrollTop) > 0.5) {

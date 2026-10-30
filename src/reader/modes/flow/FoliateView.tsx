@@ -29,7 +29,6 @@ import {
 import {
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_LINES_DEFAULT,
-  FLOW_ZONE_LINES_OFF,
   FOLIATE_RENDERER_HEIGHT_MARGIN_PX,
   FOLIATE_MARGIN_PX,
   FOLIATE_MAX_INLINE_SIZE_PX,
@@ -38,11 +37,11 @@ import {
 import { injectStyles } from "./helpers/foliateStyles";
 import {
   collectLineBoxesAround,
+  collectParagraphAround,
   computeAnchorScrollTop,
-  computeBandEdges,
+  computeParagraphBandEdges,
   getFoliateMaxColumnCount,
   normalizeBandAnchor,
-  normalizeBandLines,
   readZoneLineStepPx,
   computeLeadingInsetPx,
   computeTrailingInsetPx,
@@ -267,6 +266,8 @@ export interface FlowFoliateViewAPI {
   getScrollContainer: () => HTMLElement | null;
   /** FLOW-ZONE-AUTO: the masked outer element that carries the --flow-zone-* vars. */
   getFlowZoneHost: () => HTMLElement | null;
+  /** BAND-ALIGN-2 R8: place the paragraph band over the painted cursor (the pacer's band report); false with none (R6). */
+  placeBandAtCursor: () => boolean;
 }
 
 export interface FlowFoliateViewProps {
@@ -523,11 +524,10 @@ export default function FlowFoliateView({
     if (viewportHeight <= 0) return 0;
     const container = containerRef.current;
     const lineHeight = container ? readZoneLineStepPx(container) : 24;
-    const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+    const zoneLines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     return Math.max(0, Math.round((viewportHeight * FLOW_ZONE_INITIAL_TOP) + ((lineHeight * zoneLines) / 2)));
   }, [
     getFlowViewportHeightPx,
-    settings.flowZoneLines,
   ]);
 
   const setFlowInsetsForRenderedDocs = useCallback((leadingInsetPx: number, trailingInsetPx: number) => {
@@ -546,9 +546,9 @@ export default function FlowFoliateView({
     }
   }, []);
 
-  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) and line
-  // count (R5) come from settings.flowZonePosition and settings.flowZoneLines.
-  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), lines: normalizeBandLines(settings.flowZoneLines) };
+  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) comes from
+  // settings.flowZonePosition; R8 (owner, 2026-10-30): the Band switch (settings.flowBandEnabled, on unless false).
+  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), on: settings.flowBandEnabled !== false };
   const bandLayoutRef = useRef(bandLayout);
   bandLayoutRef.current = bandLayout;
 
@@ -560,7 +560,8 @@ export default function FlowFoliateView({
   const getFlowLeadingInsetPx = useCallback((): number => {
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const { anchor, lines } = bandLayoutRef.current;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
     return Math.max(0, Math.round(computeLeadingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
   }, [getFlowViewportHeightPx]);
@@ -568,12 +569,13 @@ export default function FlowFoliateView({
   const getFlowTrailingInsetPx = useCallback((): number => {
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const { anchor, lines } = bandLayoutRef.current;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
     return Math.max(0, Math.round(computeTrailingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
   }, [getFlowViewportHeightPx]);
   /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
-  const appliedBandLayoutRef = useRef<{ anchor: number; lines: number } | null>(null);
+  const appliedBandLayoutRef = useRef<{ anchor: number; on: boolean } | null>(null);
 
   /**
    * R6 (owner, 2026-10-23): with no cursor line on screen (an image-only section such as the cover, or a cursor word
@@ -587,18 +589,19 @@ export default function FlowFoliateView({
     host.classList.add("rm-flow-view--band-off");
   }, []);
 
-  /** R1/R2: put the band on the zone host around a word span's line, from the rendered line boxes (no scroll). */
+  /** R8: put the band on the zone host over a word span's paragraph, from the rendered line boxes (no scroll). */
   const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
     const host = containerRef.current;
     if (!host) return false;
-    const { lines } = bandLayoutRef.current;
-    if (lines === FLOW_ZONE_LINES_OFF) {
+    if (!bandLayoutRef.current.on) {
       host.style.removeProperty("--flow-zone-top");
       host.style.removeProperty("--flow-zone-bottom");
       return true;
     }
-    const around = span ? collectLineBoxesAround(span, Math.ceil((lines - 1) / 2)) : null;
-    const band = around ? computeBandEdges(around.lines, around.cursor, lines, readZoneLineStepPx(host)) : null;
+    const para = span ? collectParagraphAround(span) : null;
+    const band = para
+      ? computeParagraphBandEdges({ blockLines: para.blockLines, prevBottom: para.prevBottom, nextTop: para.nextTop, stepPx: readZoneLineStepPx(host) })
+      : null;
     if (!band) {
       hideBand();
       return false;
@@ -648,7 +651,7 @@ export default function FlowFoliateView({
     const around = collectLineBoxesAround(span, 0);
     if (scroll && around) {
       const line = around.lines[around.cursor];
-      const { anchor, lines } = bandLayoutRef.current;
+      const { anchor } = bandLayoutRef.current;
       const host = containerRef.current;
       const scrollTop = scroll.get();
       const target = computeAnchorScrollTop({
@@ -658,7 +661,7 @@ export default function FlowFoliateView({
         containerTopPx: scroll.topPx,
         viewportHeightPx: scroll.viewportHeightPx,
         anchor,
-        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * Math.max(lines, 1),
+        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * FLOW_ZONE_LINES_DEFAULT, // R8 B1
         maxScrollTop: scroll.contentHeightPx - scroll.viewportHeightPx,
       });
       if (Math.abs(scrollTop - target) > 0.5) scroll.set(target);
@@ -1273,6 +1276,7 @@ export default function FlowFoliateView({
           },
           getScrollContainer: () => resolveFoliateScrollContainer(),
           getFlowZoneHost: () => containerRef.current,
+          placeBandAtCursor: () => placeBandAroundSpan(findCursorSpan()),
         };
         // FLOW-3A: expose the scroll container for FlowScrollEngine (legacy flowMode toggle effect).
         scrollContainerRef.current = resolveFoliateScrollContainer();
@@ -1420,7 +1424,7 @@ export default function FlowFoliateView({
       // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
       const layout = bandLayoutRef.current;
       const layoutChanged = appliedBandLayoutRef.current !== null
-        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.lines !== layout.lines);
+        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.on !== layout.on);
       appliedBandLayoutRef.current = layout;
       if (userBrowsingRef.current) return;
       const cursorSpan = findCursorSpan();
@@ -1449,7 +1453,7 @@ export default function FlowFoliateView({
     getFlowViewportHeightPx,
     getFlowLeadingInsetPx,
     getFlowTrailingInsetPx,
-    settings.flowZoneLines,
+    settings.flowBandEnabled,
     settings.flowZonePosition,
     setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,
@@ -1514,7 +1518,7 @@ export default function FlowFoliateView({
   }, [markUserBrowsingAway]);
 
   return (
-    <div className={`rm-flow-view${bandLayout.lines === FLOW_ZONE_LINES_OFF ? " rm-flow-view--band-off" : ""}`} ref={containerRef}>
+    <div className={`rm-flow-view${bandLayout.on ? "" : " rm-flow-view--band-off"}`} ref={containerRef}>
       {/* Jump back to persistent last-read word — shown when user has browsed away */}
       {showJumpBackToAnchor && (
         <button

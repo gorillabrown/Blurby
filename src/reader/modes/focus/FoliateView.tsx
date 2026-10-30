@@ -24,7 +24,7 @@ import {
   resolveTrustedRenderedWordIndexToGlobal,
 } from "./helpers/foliateWordOffsets";
 import {
-  FLOW_ZONE_LINES_OFF,
+  FLOW_ZONE_LINES_DEFAULT,
   FOLIATE_RENDERER_HEIGHT_MARGIN_PX,
   FOLIATE_MARGIN_PX,
   FOLIATE_MAX_INLINE_SIZE_PX,
@@ -33,11 +33,11 @@ import {
 import { injectStyles } from "./helpers/foliateStyles";
 import {
   collectLineBoxesAround,
+  collectParagraphAround,
   computeAnchorScrollTop,
-  computeBandEdges,
+  computeParagraphBandEdges,
   getFoliateMaxColumnCount,
   normalizeBandAnchor,
-  normalizeBandLines,
   readZoneLineStepPx,
   computeLeadingInsetPx,
   computeTrailingInsetPx,
@@ -484,9 +484,9 @@ export default function FocusFoliateView({
     }
   }, []);
 
-  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) and line
-  // count (R5) come from settings.flowZonePosition and settings.flowZoneLines.
-  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), lines: normalizeBandLines(settings.flowZoneLines) };
+  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) comes from
+  // settings.flowZonePosition; R8 (owner, 2026-10-30): the Band switch (settings.flowBandEnabled, on unless false).
+  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), on: settings.flowBandEnabled !== false };
   const bandLayoutRef = useRef(bandLayout);
   bandLayoutRef.current = bandLayout;
 
@@ -498,7 +498,8 @@ export default function FocusFoliateView({
   const getFlowLeadingInsetPx = useCallback((): number => {
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const { anchor, lines } = bandLayoutRef.current;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
     return Math.max(0, Math.round(computeLeadingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
   }, [getFlowViewportHeightPx]);
@@ -506,12 +507,13 @@ export default function FocusFoliateView({
   const getFlowTrailingInsetPx = useCallback((): number => {
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
-    const { anchor, lines } = bandLayoutRef.current;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
     return Math.max(0, Math.round(computeTrailingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
   }, [getFlowViewportHeightPx]);
   /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
-  const appliedBandLayoutRef = useRef<{ anchor: number; lines: number } | null>(null);
+  const appliedBandLayoutRef = useRef<{ anchor: number; on: boolean } | null>(null);
 
   /**
    * R6 (owner, 2026-10-23): with no cursor line on screen (an image-only section such as the cover, or a cursor word
@@ -525,18 +527,19 @@ export default function FocusFoliateView({
     host.classList.add("rm-focus-view--band-off");
   }, []);
 
-  /** R1/R2: put the band on the zone host around a word span's line, from the rendered line boxes (no scroll). */
+  /** R8: put the band on the zone host over a word span's paragraph, from the rendered line boxes (no scroll). */
   const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
     const host = containerRef.current;
     if (!host) return false;
-    const { lines } = bandLayoutRef.current;
-    if (lines === FLOW_ZONE_LINES_OFF) {
+    if (!bandLayoutRef.current.on) {
       host.style.removeProperty("--flow-zone-top");
       host.style.removeProperty("--flow-zone-bottom");
       return true;
     }
-    const around = span ? collectLineBoxesAround(span, Math.ceil((lines - 1) / 2)) : null;
-    const band = around ? computeBandEdges(around.lines, around.cursor, lines, readZoneLineStepPx(host)) : null;
+    const para = span ? collectParagraphAround(span) : null;
+    const band = para
+      ? computeParagraphBandEdges({ blockLines: para.blockLines, prevBottom: para.prevBottom, nextTop: para.nextTop, stepPx: readZoneLineStepPx(host) })
+      : null;
     if (!band) {
       hideBand();
       return false;
@@ -586,7 +589,7 @@ export default function FocusFoliateView({
     const around = collectLineBoxesAround(span, 0);
     if (scroll && around) {
       const line = around.lines[around.cursor];
-      const { anchor, lines } = bandLayoutRef.current;
+      const { anchor } = bandLayoutRef.current;
       const host = containerRef.current;
       const scrollTop = scroll.get();
       const target = computeAnchorScrollTop({
@@ -596,7 +599,7 @@ export default function FocusFoliateView({
         containerTopPx: scroll.topPx,
         viewportHeightPx: scroll.viewportHeightPx,
         anchor,
-        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * Math.max(lines, 1),
+        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * FLOW_ZONE_LINES_DEFAULT, // R8 B1
         maxScrollTop: scroll.contentHeightPx - scroll.viewportHeightPx,
       });
       if (Math.abs(scrollTop - target) > 0.5) scroll.set(target);
@@ -1309,7 +1312,7 @@ export default function FocusFoliateView({
       // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
       const layout = bandLayoutRef.current;
       const layoutChanged = appliedBandLayoutRef.current !== null
-        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.lines !== layout.lines);
+        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.on !== layout.on);
       appliedBandLayoutRef.current = layout;
       if (userBrowsingRef.current) return;
       const cursorSpan = findCursorSpan();
@@ -1338,7 +1341,7 @@ export default function FocusFoliateView({
     getFlowViewportHeightPx,
     getFlowLeadingInsetPx,
     getFlowTrailingInsetPx,
-    settings.flowZoneLines,
+    settings.flowBandEnabled,
     settings.flowZonePosition,
     setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,
@@ -1381,7 +1384,7 @@ export default function FocusFoliateView({
   }, [markUserBrowsingAway]);
 
   return (
-    <div className={`rm-focus-view${bandLayout.lines === FLOW_ZONE_LINES_OFF ? " rm-focus-view--band-off" : ""}`} ref={containerRef}>
+    <div className={`rm-focus-view${bandLayout.on ? "" : " rm-focus-view--band-off"}`} ref={containerRef}>
       {/* Jump back to persistent last-read word — shown when user has browsed away */}
       {showJumpBackToAnchor && (
         <button

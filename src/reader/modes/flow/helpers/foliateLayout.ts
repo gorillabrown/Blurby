@@ -3,10 +3,9 @@ import {
   FLOW_BAND_ANCHOR_TOP,
   FLOW_BAND_ANCHOR_TOP_THIRD,
   FLOW_ZONE_LINES_DEFAULT,
-  FLOW_ZONE_LINES_OFF,
-  FLOW_ZONE_LINES_OPTIONS,
   FOLIATE_TWO_COLUMN_BREAKPOINT_PX,
 } from "../../../../constants";
+import { isParagraphBlock } from "./foliateParagraphStarts";
 
 /**
  * Foliate's scrolled flow surface is shared by Flow and Narrate. That surface
@@ -59,12 +58,6 @@ export function writeZoneLineStepPx(el: HTMLElement, doc: Document | null | unde
 export interface BandLineBox {
   top: number;
   bottom: number;
-}
-
-/** R5: the band's line count, 3, 5 or 7, or 0 for Off; any other stored value (a legacy 4, 6 or 8) reads as 5. */
-export function normalizeBandLines(value: unknown): number {
-  if (value === FLOW_ZONE_LINES_OFF) return FLOW_ZONE_LINES_OFF;
-  return (FLOW_ZONE_LINES_OPTIONS as readonly unknown[]).includes(value) ? (value as number) : FLOW_ZONE_LINES_DEFAULT;
 }
 
 /** R4: the band's anchor, Top (0), Top third (1/3) or Center (0.5); a legacy zone position (0.15, 0.25, …) reads as Top third. */
@@ -132,28 +125,75 @@ export function computeAnchorScrollTop({ scrollTop, lineTopPx, lineBottomPx, con
   });
 }
 
+/** R8: the band over the cursor's paragraph: its line boxes, edges midway to the neighbouring blocks (else half a leading). */
+export function computeParagraphBandEdges({ blockLines, prevBottom, nextTop, stepPx }: {
+  blockLines: readonly BandLineBox[]; prevBottom: number | null; nextTop: number | null; stepPx: number;
+}): { top: number; bottom: number } | null {
+  if (blockLines.length === 0) return null;
+  const first = blockLines[0], last = blockLines[blockLines.length - 1];
+  const halfLead = (b: BandLineBox) => Math.max(0, stepPx - (b.bottom - b.top)) / 2;
+  return {
+    top: prevBottom !== null ? (prevBottom + first.top) / 2 : first.top - halfLead(first),
+    bottom: nextTop !== null ? (last.bottom + nextTop) / 2 : last.bottom + halfLead(last),
+  };
+}
+
 /**
- * R1 + R2: the band around line `cursor`, covering n lines with the cursor line in the middle. Each edge is the
- * midpoint of the gap to the next line out. R7: at a section's first or last line, with the line step `stepPx`, the
- * edge is extended past the line by the step for each missing line, so the band keeps its size over the section's
- * blank space; with stepPx 0 it is the line's own box edge. `first` and `last` are real line indices. null for Off
- * (n = 0) or a cursor outside the lines.
+ * R8: the cursor's paragraph, in the top window's client px (its iframe's offset added): the line boxes of the word
+ * spans whose nearest block (isParagraphBlock, else the section's body) is the span's own, the bottom of the previous
+ * word-bearing block's last line and the top of the next block's first line (null at the section's first or last
+ * block). Lines are grouped as collectLineBoxesAround does. null when the span has no box.
  */
-export function computeBandEdges(lines: readonly BandLineBox[], cursor: number, n: number, stepPx = 0): { top: number; bottom: number; first: number; last: number } | null {
-  if (n <= 0 || cursor < 0 || cursor >= lines.length) return null;
-  const want = cursor - Math.floor((n - 1) / 2);
-  const wantLast = cursor + Math.ceil((n - 1) / 2);
-  const end = lines.length - 1;
-  const first = Math.max(0, want);
-  const last = Math.min(end, wantLast);
-  const half = (box: BandLineBox) => Math.max(0, stepPx - (box.bottom - box.top)) / 2;
-  const top = first > 0
-    ? (lines[first - 1].bottom + lines[first].top) / 2
-    : stepPx > 0 ? lines[0].top - half(lines[0]) - (first - want) * stepPx : lines[0].top;
-  const bottom = last < end
-    ? (lines[last].bottom + lines[last + 1].top) / 2
-    : stepPx > 0 ? lines[end].bottom + half(lines[end]) + (wantLast - last) * stepPx : lines[end].bottom;
-  return { top, bottom, first, last };
+export function collectParagraphAround(span: Element): { blockLines: BandLineBox[]; prevBottom: number | null; nextTop: number | null; block: Element } | null {
+  const doc = span.ownerDocument;
+  if (!doc) return null;
+  const frame = doc.defaultView?.frameElement as HTMLElement | null | undefined;
+  const offset = frame ? frame.getBoundingClientRect().top : 0;
+  const boxOf = (el: Element) => {
+    const r = el.getBoundingClientRect();
+    return r.height > 0 ? { top: r.top + offset, bottom: r.bottom + offset, height: r.height } : null;
+  };
+  if (!boxOf(span)) return null;
+  const blockOf = (el: Element): Element => {
+    for (let p = el.parentElement; p; p = p.parentElement) if (isParagraphBlock(p)) return p;
+    return doc.body;
+  };
+  const block = blockOf(span);
+  const spans = Array.from(doc.querySelectorAll("[data-word-index]"));
+  const blocks = spans.map(blockOf);
+  const i0 = blocks.indexOf(block);
+  const i1 = blocks.lastIndexOf(block);
+  if (i0 < 0) return null;
+  const blockLines: BandLineBox[] = [];
+  for (let k = i0; k <= i1; k++) {
+    if (blocks[k] !== block) continue;
+    const box = boxOf(spans[k]);
+    if (!box) continue;
+    const line = blockLines[blockLines.length - 1];
+    if (line && Math.abs(box.top - line.top) <= box.height * 0.5) {
+      line.top = Math.min(line.top, box.top);
+      line.bottom = Math.max(line.bottom, box.bottom);
+    } else {
+      blockLines.push({ top: box.top, bottom: box.bottom });
+    }
+  }
+  // The neighbouring block's adjacent line: from the nearest boxed span outside the block, the spans on its line.
+  const adjacent = (from: number, step: 1 | -1): BandLineBox | null => {
+    let line: BandLineBox | null = null;
+    for (let k = from; k >= 0 && k < spans.length; k += step) {
+      if (blocks[k] === block) continue;
+      const box = boxOf(spans[k]);
+      if (!box) continue;
+      if (!line) { line = { top: box.top, bottom: box.bottom }; continue; }
+      if (Math.abs(box.top - line.top) > box.height * 0.5) break;
+      line.top = Math.min(line.top, box.top);
+      line.bottom = Math.max(line.bottom, box.bottom);
+    }
+    return line;
+  };
+  const prev = adjacent(i0 - 1, -1);
+  const next = adjacent(i1 + 1, 1);
+  return { blockLines, prevBottom: prev ? prev.bottom : null, nextTop: next ? next.top : null, block };
 }
 
 /**

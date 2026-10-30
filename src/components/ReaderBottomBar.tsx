@@ -5,9 +5,6 @@ import {
   FLOW_BAND_ANCHOR_CENTER,
   FLOW_BAND_ANCHOR_TOP,
   FLOW_BAND_ANCHOR_TOP_THIRD,
-  FLOW_ZONE_LINES_DEFAULT,
-  FLOW_ZONE_LINES_OFF,
-  FLOW_ZONE_LINES_OPTIONS,
 } from "../constants";
 import type { BlurbyDoc, ReaderMode } from "../types";
 import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
@@ -50,9 +47,9 @@ interface ReaderBottomBarProps {
   onSetSpeed?: (speed: ReaderModeSpeed) => void;
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
-  /** BAND-ALIGN-2 R5: the band's lines, 3, 5 or 7, or 0 for Off (settings.flowZoneLines). */
-  flowZoneLines?: number;
-  onSetFlowZoneLines?: (lines: number) => void;
+  /** BAND-ALIGN-2 R8: the Band switch, on unless false (settings.flowBandEnabled). */
+  flowBandEnabled?: boolean;
+  onSetFlowBandEnabled?: (on: boolean) => void;
   /** BAND-ALIGN-2 R4: the band's anchor, 0 Top, 1/3 Top third or 0.5 Center (settings.flowZonePosition). */
   flowZonePosition?: number;
   onSetFlowZonePosition?: (anchor: number) => void;
@@ -69,12 +66,6 @@ const BAND_ANCHOR_OPTIONS = [
   { label: "Top third", value: FLOW_BAND_ANCHOR_TOP_THIRD },
   { label: "Center", value: FLOW_BAND_ANCHOR_CENTER },
 ] as const;
-
-/** BAND-ALIGN-2 R5: how many lines the band covers, or Off. */
-const BAND_LINES_OPTIONS = [
-  ...FLOW_ZONE_LINES_OPTIONS.map((value) => ({ label: String(value), value: value as number })),
-  { label: "Off", value: FLOW_ZONE_LINES_OFF },
-];
 
 const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu",
@@ -108,18 +99,16 @@ export default function ReaderBottomBar({
   speed = null,
   onSetSpeed,
   foliateFraction,
-  flowZoneLines,
-  onSetFlowZoneLines,
+  flowBandEnabled,
+  onSetFlowBandEnabled,
   flowZonePosition,
   onSetFlowZonePosition,
   flowProgress,
   currentChapterName,
 }: ReaderBottomBarProps) {
   const surfaceMode = readingMode;
-  // BAND-ALIGN-2: a legacy stored value shows as the setting it reads as (Lines 5, anchor Top third).
-  const bandLines = flowZoneLines === FLOW_ZONE_LINES_OFF || (FLOW_ZONE_LINES_OPTIONS as readonly unknown[]).includes(flowZoneLines)
-    ? flowZoneLines
-    : FLOW_ZONE_LINES_DEFAULT;
+  // BAND-ALIGN-2: a legacy stored anchor shows as the setting it reads as (Top third); R8: the band is on unless false.
+  const bandOn = flowBandEnabled !== false;
   const bandAnchor = flowZonePosition === FLOW_BAND_ANCHOR_TOP || flowZonePosition === FLOW_BAND_ANCHOR_CENTER
     ? flowZonePosition
     : FLOW_BAND_ANCHOR_TOP_THIRD;
@@ -376,7 +365,7 @@ export default function ReaderBottomBar({
           </button>
         </div>
 
-        {/* Reading band controls (BAND-ALIGN-2 R4/R5) — Focus and Flow both have the band; progress — Flow only */}
+        {/* Reading band controls (BAND-ALIGN-2 R4, R8) — Focus and Flow both have the band; progress — Flow only */}
         {(surfaceMode === "focus" || surfaceMode === "flow") && (
           <div className="rbb-flow-zone-controls">
             <div className="rbb-flow-zone-group" role="group" aria-label="Band position">
@@ -392,19 +381,16 @@ export default function ReaderBottomBar({
                 </button>
               ))}
             </div>
-            <div className="rbb-flow-zone-group" role="group" aria-label="Band lines">
-              <span className="rbb-flow-zone-label">Lines</span>
-              {BAND_LINES_OPTIONS.map(({ label, value }) => (
-                <button
-                  key={label}
-                  type="button"
-                  className={`rbb-flow-zone-btn${bandLines === value ? " rbb-flow-zone-btn--active" : ""}`}
-                  aria-pressed={bandLines === value}
-                  onClick={() => onSetFlowZoneLines?.(value)}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="rbb-flow-zone-group" role="group" aria-label="Band">
+              <button
+                type="button"
+                className={`rbb-flow-zone-btn${bandOn ? " rbb-flow-zone-btn--active" : ""}`}
+                aria-label="Band"
+                aria-pressed={bandOn}
+                onClick={() => onSetFlowBandEnabled?.(!bandOn)}
+              >
+                Band
+              </button>
             </div>
           </div>
         )}
