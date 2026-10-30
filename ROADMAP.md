@@ -630,12 +630,18 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 <a id="band-align-2-spec"></a>
 
 #### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**
+- **R7a — Flow hands off to the next section under one clock (fixes BUG-235; dispatch-ready; RodneySr job 7):**
+  - Cause (bisected): first bad commit `860ad3ca`. Under wordClock, the next-section hand-off fires only inside `syncToWord`, which is never called for a word past the rendered end.
+  - Fix: call it for that word, and hold the word timer (`handoffHold`, distinct from a user pause) until the next section is stamped.
+  - Red tests h1–h6, plus a packaged check on RodneySr that it crosses into section 2 by sample 15 like the release.
+  - Base `eb/band-align-2-r7-work` @ `f3f254f3`; fast-forwards `eb/band-align-2`. Merges before R8, and lifts BUG-235's merge block once Brain confirms the package.
+  - Spec: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md).
 - **R8 — paragraph band (owner design ruling 2026-10-30; dispatch-ready; supersedes R7's band-extent rows):**
   - The band covers exactly the paragraph block that contains the selected word, whatever its size. A heading is its own block. With no selected word on the page there is no band.
   - The 3/5/7 line count and its control are removed. A single **Band** on/off switch replaces "Lines 3 5 7 Off" (owner: "Keep an Off switch"). Turning it off also removes the dimming.
   - `flowZoneLines` → `flowBandEnabled` via a v13 → v14 migration; a band that was off stays off.
   - Anchors and R7's leading and trailing spaces stay, with geometry fixed at `FLOW_ZONE_LINES_DEFAULT` (5).
-  - Base: `eb/band-align-2-r7-work` @ `f3f254f3` (R7 candidate `a5273704` plus its memo).
+  - Base: `eb/band-align-2` at R7a's tip (re-based 2026-10-30). It launches only after Brain confirms R7a's package (RodneySr job 8).
   - Shared core: `src/types.ts` (keeps a deprecated `flowZoneLines?`) and `ReaderContainer.tsx`, both inside this item's integration window. Narrate is untouched.
   - Queues on RodneySr after the BUG-235 fix.
   - Full amendment: [docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md](docs/planning/specs/2026-10-30/BAND-ALIGN-2-R8.md).

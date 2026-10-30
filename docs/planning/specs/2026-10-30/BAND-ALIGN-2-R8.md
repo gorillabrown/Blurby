@@ -36,9 +36,14 @@
 - R7's leading and trailing spaces, its zero-word rule and its scroll rows: (a2), (a4), (b1), (w1), (w2), (w4), (w5), (c1) and (c2).
 - Flow's one-clock change.
 
-**Based on:** `origin/eb/band-align-2-r7-work` @ `f3f254f30da9c844e4416a988bb9325a160b109f`, fetched 2026-10-30. R8 preserves that tip as its base and never rewrites it, so R7's memo stays in history.
-- `f3f254f3` is R7's memo and time log on top of the R7 candidate `a5273704`, and the code is identical: `git diff --quiet a5273704 f3f254f3 -- src tests main` exits 0. The diff lists only the BAND-ALIGN-2 memo and time log.
-- `origin/eb/band-align-2` is at `a5273704`, so `f3f254f3` descends from it.
+**Based on:** `origin/eb/band-align-2` @ `<R7a tip>`: R7a's pushed tip (BUG-235 fix, `docs/planning/specs/2026-10-30/BAND-ALIGN-2-R7a.md`, RodneySr job 7). R8 preserves it as its base and never rewrites it, so R7's and R7a's memos stay in history.
+- R7a's tip descends from `f3f254f3` through R7a's merge base M7a and its commits C1–C3. Before launch, record its sha here and in the memo.
+- `f3f254f3` is R7's memo and time log on top of the R7 candidate `a5273704`, with identical code: `git diff --quiet a5273704 f3f254f3 -- src tests main` exits 0.
+- **R7a's history** sits between `f3f254f3` and R8's base:
+  - M7a merges `origin/main`;
+  - C1 is the red `flowSectionHandoff.test.tsx`;
+  - C2 is the fix (`ModeRuntime.ts`, `ModeState.ts` `handoffHold`, `FlowScrollEngine.ts` `isPastRenderedEnd`, BUG-235's line);
+  - C3 is the memo and time log rows 16–20.
 - **R7's history:**
   - `70e739ea` is R7's merge base M: the merge of `origin/main` `80dbe938` into `85e32777`.
   - `3aeca116` is R7's red commit.
@@ -46,8 +51,11 @@
   - `f3f254f3` is R7's memo, which marks R7 superseded by the paragraph band, keeps the leading-space work, and withdraws R7's gate (2) row.
   - Its time log ends at row 15, and its package was verified (x64/arm64 asar identical `01d93263`, pair check 0).
 - **RodneySr's R7 inputs** are at `refs/archive/rodneysr-inputs/band-align-2-r7` @ `bbdbf949`: R6's `cover-probe.mjs`, BAND-ALIGN-1's `band-live.mjs`, and R6's probe records.
-- `origin/main` is now `492db7f5`. `git diff --name-only 80dbe938 origin/main` lists only governance documents, and `git merge-tree --write-tree origin/main origin/eb/band-align-2-r7-work` merges cleanly.
+- `origin/main` is now `9a3800e8`. `git diff --name-only 80dbe938 origin/main` lists only governance documents, and `git merge-tree --write-tree origin/main origin/eb/band-align-2-r7-work` reports no conflicting file.
 - Every line number below was read at `a5273704`, whose code `f3f254f3` shares, with `git show`. Re-grep at dispatch (standing rule 36).
+  - R7a edits two of R8's files: `src/reader/modes/flow/helpers/FlowScrollEngine.ts` and `src/reader/modes/flow/ModeRuntime.ts`. Every citation into them below is marked **"re-grep at the R7a tip"**, with the symbol and the expected offset.
+  - In `FlowScrollEngine.ts`, R7a inserts 5 lines after `syncToWord`'s closing brace (`:434`), so lines from `:435` shift by +5.
+  - In `ModeRuntime.ts`, R7a adds 1 line at `stop` (`:768`), 11 lines in `onWordsReextracted` after `:1088`, a net +10 in `onEngineWordAdvance` (`:1264-1272`) and 1 line in `pausePlayback` (`:1392`). So lines `:769-1088` shift by +1, and lines `:1089-1263` by +12.
 
 **Sequencing.** R8 lands on the held BAND-ALIGN-2 branch, on top of R7, before FOCUS-WORD-ONLY-1 (Seq 123):
 - FOCUS-WORD-ONLY-1 still removes Focus's band, and with it Focus's R7 spaces (owner Q5: none). It also removes the switch from Focus's bottom bar, keeping it in Flow.
@@ -82,11 +90,13 @@
   - The line count comes from `settings.flowZoneLines` through `normalizeBandLines` (`helpers/foliateLayout.ts:65-68`), set by the bottom bar's Lines group (`ReaderBottomBar.tsx:73-77`, `:395-409`).
 - **Prerequisites:**
   - R7 is built on the branch (`a5273704`).
+  - **R7a (BUG-235) is built, pushed and package-verified on `eb/band-align-2`.** R8 does not launch before Blurby.Brain1 confirms R7a's package.
   - `origin/main` is merged into the R8 base first (Brain T2: the rule 53 package is the bytes that will merge). That merge is clean at authoring.
 - **Done when** (run every command in `pwsh` from the worktree root on RodneySr, unless it names another host):
-  0. **Base M8.** The worktree's first commit is M8, the `--no-ff` merge of `refs/remotes/origin/main` into `f3f254f3` (Branch, step 4).
-     - `git rev-parse HEAD^1` prints `f3f254f30da9c844e4416a988bb9325a160b109f`.
+  0. **Base M8.** The worktree's first commit is M8, the `--no-ff` merge of `refs/remotes/origin/main` into `<R7a tip>` (Branch, step 4).
+     - `git rev-parse HEAD^1` prints `<R7a tip>`.
      - `git merge-base --is-ancestor refs/remotes/origin/main HEAD` exits 0.
+     - If `origin/main` has not moved since R7a's M7a, the merge has nothing to bring in. Then M8 is skipped, recorded in the memo as "M8 = R7a tip (main unchanged)", and `<M8>` below means the R7a tip.
   1. **Red first (standing rule 43).** Commit C1 holds only:
      - the new `tests/readerModes/bandAlign2R8.test.tsx` and `tests/settingsBandMigration.test.ts`;
      - the pinned-test edits listed under Tests.
@@ -94,7 +104,7 @@
      `npx vitest run tests/readerModes/bandAlign2R8.test.tsx tests/settingsBandMigration.test.ts` exits **1** on C1. Rows (p1)–(p7), (w6), (w8), (w9), (u1) and (s1)–(s6) fail **by assertion**, and the controls (z1), (k1) and (t4c) pass. Record the failing rows in the memo.
   2. **The change.**
      - On the fix commit, `npx vitest run tests/readerModes/bandAlign2R8.test.tsx tests/settingsBandMigration.test.ts` exits 0.
-     - These also exit 0: `npx vitest run tests/readerModes tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowZoneAuto.test.ts tests/foliateChunkHighlight.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/settingsKeyTrustKeys.test.ts tests/settingsKeyTrust.test.js`.
+     - These also exit 0: `npx vitest run tests/readerModes tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowZoneAuto.test.ts tests/foliateChunkHighlight.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/settingsKeyTrustKeys.test.ts tests/settingsKeyTrust.test.js`. The `tests/readerModes` directory includes R7a's `tests/readerModes/flowSectionHandoff.test.tsx` (h1)–(h6), which must pass **unedited**.
      - Only the pinned rows named under Tests are edited.
   3. `npm test` exits 0 (record the counts). `npm run typecheck` and `npm run build` exit 0 (standing rules 47 and 48).
   4. **Fence (standing rule 41).** `git diff --name-status <M8> HEAD` lists exactly the paths below, plus the BAND-ALIGN-2 memo and time log:
@@ -202,7 +212,7 @@
 
 ##### Implementation detail
 
-- **Edit sites** (line numbers at `a5273704`). Each mode edits only its own copy.
+- **Edit sites** (line numbers at `a5273704`. Citations into `FlowScrollEngine.ts` and `ModeRuntime.ts` carry their R7a-tip re-grep offsets; every other file is untouched by R7a). Each mode edits only its own copy.
   - **H1, both `src/reader/modes/focus/helpers/foliateLayout.ts` and `src/reader/modes/flow/helpers/foliateLayout.ts`:**
     - **Import** `isParagraphBlock` from `./foliateParagraphStarts`.
     - **Add the pure** `computeParagraphBandEdges`:
@@ -236,7 +246,7 @@
   - **The anchor geometry without a Lines setting** (Brain1 ruling B1: `FLOW_ZONE_LINES_DEFAULT` is a geometry constant, not a user setting): every place that passed the band's line count to the anchor or space helpers now passes `FLOW_ZONE_LINES_DEFAULT` (5). This keeps R4/R7 positions identical for the default setting: Top puts the cursor line's centre 2.5 steps down.
     - Focus: `getFlowLeadingInsetPx` and `getFlowTrailingInsetPx` (`focus/FoliateView.tsx:498-512`), and `alignSpanToBand`'s `bandHeightPx` (`:599`).
     - Flow: `:560-574` and `:661`, plus `getFlowFollowOffsetPx`'s `zoneLines` (`flow/FoliateView.tsx:521-533`).
-    - Flow's pacer: `FlowScrollEngine.ts:896` and `:907`.
+    - Flow's pacer, in `advanceZone`: `FlowScrollEngine.ts:896` (`const bandLines = normalizeBandLines(…)`) and `:907` (`bandHeightPx: … * Math.max(bandLines, 1)`). **Re-grep at the R7a tip:** expected `:901` and `:912` (+5).
   - **F1, `src/reader/modes/focus/FoliateView.tsx`:**
     - `bandLayout` (`:489`) becomes `{ anchor: normalizeBandAnchor(settings.flowZonePosition), on: settings.flowBandEnabled !== false }`.
     - `placeBandAroundSpan` (`:529-551`):
@@ -248,8 +258,10 @@
     - the view API type (`:269`) and object (`:1275`) gain `placeBandAtCursor: () => boolean`, implemented as `() => placeBandAroundSpan(findCursorSpan())`;
     - the imports drop `FLOW_ZONE_LINES_OFF` (`:32`).
   - **W2, `src/reader/modes/flow/helpers/FlowScrollEngine.ts`:**
-    - `setBandLayout(anchor: unknown)` (`:437-441`) loses the `lines` parameter, and `bandLinesSetting` (`:135`) is deleted.
-    - `reportBand` (`:469-486`) no longer sizes a band. It reports the cursor line's own box in client px as `band`: `{ top: line.y − scrollTop + clientTop, bottom: line.bottom − scrollTop + clientTop }`. The report signals the view to place the paragraph band.
+    - `setBandLayout(anchor: unknown)` (`:437-441`; **re-grep at the R7a tip**, symbol `setBandLayout`, expected `:442-446`, +5) loses the `lines` parameter.
+    - `bandLinesSetting` (`:135`, above R7a's insertion, so unchanged) is deleted.
+    - **R7a's `isPastRenderedEnd`** (after `syncToWord`) and the `syncToWord` hand-off (`:405-434`) are kept unchanged.
+    - `reportBand` (`:469-486`; **re-grep at the R7a tip**, symbol `private reportBand`, expected `:474-491`, +5, with its `normalizeBandLines` at `:478` and its `computeBandEdges` call at `:484`) no longer sizes a band. It reports the cursor line's own box in client px as `band`: `{ top: line.y − scrollTop + clientTop, bottom: line.bottom − scrollTop + clientTop }`. The report signals the view to place the paragraph band.
     - The imports drop `computeBandEdges` and `normalizeBandLines` (`:12`, `:14`).
   - **W3, `src/reader/modes/flow/useModeBindings.ts`:**
     - `flowZoneLines` (`:32`) is replaced by `const bandOn = settings.settings.flowBandEnabled !== false`.
@@ -260,10 +272,11 @@
     - Dependencies: `[runtime, bandOn]`.
     - Effect 5 (`:131`) depends on `settings.settings.flowZonePosition` and `settings.settings.flowBandEnabled`.
     - The imports (`:9`) drop `FLOW_ZONE_LINES_OFF`.
-  - **W4, `src/reader/modes/flow/ModeRuntime.ts`:**
-    - `:824-825` becomes `this.scrollEngine?.setBandLayout(this.settingsSnapshot.settings.flowZonePosition)`.
-    - `:1167` becomes `engine.setBandLayout(settings.flowZonePosition)`.
-    - `:1175` passes `FLOW_ZONE_LINES_DEFAULT`.
+  - **W4, `src/reader/modes/flow/ModeRuntime.ts`** (every line re-grep at the R7a tip):
+    - `:824-825` (in `setSettings`, `this.scrollEngine?.setBandLayout(flowZonePosition, flowZoneLines)`; expected `:825-826`, +1) becomes `this.scrollEngine?.setBandLayout(this.settingsSnapshot.settings.flowZonePosition)`.
+    - `:1167` (in `startScrollEngine`, `engine.setBandLayout(settings.flowZonePosition, settings.flowZoneLines)`; expected `:1179`, +12) becomes `engine.setBandLayout(settings.flowZonePosition)`.
+    - `:1175` (the `engine.start(…)` argument `settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT`; expected `:1187`, +12) passes `FLOW_ZONE_LINES_DEFAULT`.
+    - R7a's `handoffHold` code (`onEngineWordAdvance`, `onWordsReextracted`, `pausePlayback`, `stop`) is not touched.
   - **U1, `src/components/ReaderBottomBar.tsx`** (not in the shared-core set):
     - Remove `BAND_LINES_OPTIONS` (`:73-77`), `bandLines` (`:119-122`), the `flowZoneLines`/`onSetFlowZoneLines` props (`:53-55`, `:111-112`) and the "Band lines" group (`:395-409`).
     - Imports `:8-10` drop the three `FLOW_ZONE_LINES_*` names.
@@ -395,35 +408,36 @@
     - **`tests/settingsKeyTrust.test.js:122`:** `flowZoneLines: 7` becomes `flowBandEnabled: false` in `UI_WRITES`.
   - **Unchanged and must pass unedited:** `tests/readerModes/bandAlign2Cover.test.tsx` (c6–c8; its settings literal's extra `flowZoneLines` is ignored), `flow-scroll-engine.test.js`, `flowZoneAuto.test.ts`, `foliateChunkHighlight.test.ts`, `flowKeys.test.tsx`, `focusKeys.test.tsx`, and bandAlign2.test.tsx's (f1)–(f4), (p1), (c1), (m1), (m2), (p2), (r4) and (r5). (f1)'s clamped-band check holds, because the pacer now reports the cursor line's own box.
 - **Constants:** none added. `FLOW_ZONE_LINES_DEFAULT` is now a geometry constant (the anchor geometry's line count, B1), not a user setting; its comment at `src/constants.ts:269` (`/** Default number of lines visible in the flow reading zone */`) becomes `/** Anchor geometry's line count (BAND-ALIGN-2 R8, B1): a geometry constant, not a user setting. Top puts the cursor line half this many line steps down; R7's spaces are sized from it. */`. `DEFAULT_SETTINGS` swaps the key (K1).
-- **Branch:** built on `eb/band-align-2-r7-work`'s tip `f3f254f3` and pushed to the held `eb/band-align-2`, as Wave 4. `eb/band-align-2-r7-work` itself is left as is. **Execution host: RodneySr** ("for now (GoG bandwidth, 2026-10-30)", rule 53's Temporary placement).
+- **Branch:** built on `origin/eb/band-align-2` @ `<R7a tip>` and pushed back to it, as Wave 4. `eb/band-align-2-r7-work` and `eb/band-align-2-r7a-work` are left as they are. **Execution host: RodneySr** ("for now (GoG bandwidth, 2026-10-30)", rule 53's Temporary placement).
   1. **Before launch:**
      - RodneySr is reachable;
      - `C:\Projects\bq-main`'s detached `HEAD` is `36ac7466` and `stash@{0}` is unchanged;
-     - RodneySr's R7 worktree is preserved as is (never reset or removed; rule 10).
+     - RodneySr's R7 and R7a worktrees are preserved as they are (never reset or removed; rule 10);
+     - Blurby.Brain1 has confirmed R7a's package.
 
      If any of these fails, stop and ask Blurby.Brain1 for placement.
   2. `git -C C:\Projects\bq-main fetch origin`, then:
-     - `git -C C:\Projects\bq-main rev-parse refs/remotes/origin/eb/band-align-2-r7-work` must print `f3f254f30da9c844e4416a988bb9325a160b109f`;
-     - `git -C C:\Projects\bq-main merge-base --is-ancestor refs/remotes/origin/eb/band-align-2 refs/remotes/origin/eb/band-align-2-r7-work` must exit 0, since `eb/band-align-2` is at `a5273704` (F-tip).
-  3. `git -C C:\Projects\bq-main worktree add --detach C:\Projects\bq-band-align-2-r8 refs/remotes/origin/eb/band-align-2-r7-work`, then `git switch -c eb/band-align-2-r8-work`, then `npm ci`.
-  4. **M8:** `git merge --no-ff refs/remotes/origin/main`. It is clean at authoring; any conflict is F-merge. Run `npm ci` again only if `package.json` or `package-lock.json` changed.
+     - `git -C C:\Projects\bq-main rev-parse refs/remotes/origin/eb/band-align-2` must print `<R7a tip>`, the sha recorded under "Based on";
+     - `git -C C:\Projects\bq-main merge-base --is-ancestor f3f254f30da9c844e4416a988bb9325a160b109f refs/remotes/origin/eb/band-align-2` must exit 0 (F-tip).
+  3. `git -C C:\Projects\bq-main worktree add --detach C:\Projects\bq-band-align-2-r8 refs/remotes/origin/eb/band-align-2`, then `git switch -c eb/band-align-2-r8-work`, then `npm ci`.
+  4. **M8:** `git merge --no-ff refs/remotes/origin/main`, skipped if `origin/main` is already an ancestor (Done-when 0). Any conflict is F-merge. Run `npm ci` again only if `package.json` or `package-lock.json` changed.
   5. Make `C:\Projects\Blurby-artifacts\band-align-2-r8\tools\`, and copy R7's probe and `bbdbf949`'s `cover-probe.mjs` into it. Write `r8-probe.mjs` with Done-when 6's reads.
-  6. **Push:** `git push origin HEAD:refs/heads/eb/band-align-2`. This is a fast-forward from `a5273704` through `f3f254f3`. Never `--force`. Use the lowercase refspec.
+  6. **Push:** `git push origin HEAD:refs/heads/eb/band-align-2`. This is a fast-forward from `<R7a tip>`. Never `--force`. Use the lowercase refspec.
 - **Staging plan** (explicit paths, never `-A`):
   - **M8:** the merge as is.
   - **C1, red:** `git add tests/readerModes/bandAlign2R8.test.tsx tests/settingsBandMigration.test.ts tests/readerModes/bandAlign2.test.tsx tests/readerModes/bandAlign2R7.test.tsx tests/readerModes/zoneLineStep.test.ts tests/flowReadingZone.test.ts tests/settingsKeyTrustKeys.test.ts tests/settingsKeyTrust.test.js`.
   - **C2, fix:** `git add main/migrations.js src/types.ts src/components/ReaderContainer.tsx src/components/ReaderBottomBar.tsx src/constants.ts src/test-harness/electron-api-stub.ts src/reader/modes/focus/helpers/foliateLayout.ts src/reader/modes/focus/FoliateView.tsx src/reader/modes/flow/helpers/foliateLayout.ts src/reader/modes/flow/FoliateView.tsx src/reader/modes/flow/helpers/FlowScrollEngine.ts src/reader/modes/flow/useModeBindings.ts src/reader/modes/flow/ModeRuntime.ts`.
   - **C3, record:** `git add docs/governance/close-outs/Memo.BAND-ALIGN-2.GovernanceStaging.2026-10-23.md docs/governance/close-outs/Timing.BAND-ALIGN-2.jsonl`.
-    - R7's section is already in the memo (`f3f254f3`) and is left as is.
+    - R7's section (`f3f254f3`) and R7a's section (R7a's C3) are already in the memo and are left as they are.
     - The memo gains an "R8 (2026-10-30)" section with the owner's and Brain1's rulings (including B1–B3), M8's sha, the red output, the pinned rows, live L1–L8, Package verification (both asar hashes, the pair-check output), the gate (2) row, and the (s7) text handed to EINK-CONTROLS-1's merge.
-    - The time log gains rows 16–20.
+    - The time log gains rows 21–25. R7a holds rows 16–20.
   - Before each commit, `git diff --cached --name-only` shows only that commit's paths.
   - Before C3, `git diff --stat <M8> HEAD` shows no unexpected shrink.
   - Nothing is written to `ROADMAP.md`, `BUG_REPORT.md` or the register.
   - Auto-merge is **off**: build and hold.
 - **Failure handling:**
-  - **F-tip:** `origin/eb/band-align-2-r7-work` is not `f3f254f3`, or `origin/eb/band-align-2` no longer leads to it.
-    - If either has moved on through R8 commits of an earlier attempt, continue from there and record it.
+  - **F-tip:** `origin/eb/band-align-2` is not the recorded `<R7a tip>`, or does not descend from `f3f254f3`.
+    - If it has moved on through R8 commits of an earlier attempt, continue from there and record it.
     - Otherwise stop and report to Blurby.Roadmap.
   - **F-merge:** M8 conflicts. Run `git merge --abort` and stop with the paths. Do not resolve a source conflict in this wave. If the only conflict is `docs/governance/BUG_REPORT.md`, resolve it as R7 did (main's text plus the branch's BAND-ALIGN-2 lines), record it, and continue.
   - **F-red:** a C1 row fails by error, or a control fails on the tip. Fix the tests only, at most 2 rounds, then stop.
@@ -443,7 +457,7 @@
     By the Merge Order that is EINK-CONTROLS-1. If `origin/main` already has EINK-CONTROLS-1's entry when R8 merges, R8 does it, and its tests' `14` becomes `15`.
   - **Retry ceiling:** two repair passes per failing row, then stop with the evidence.
   - **Rollback:**
-    - Before push: `git switch --detach f3f254f30da9c844e4416a988bb9325a160b109f`.
+    - Before push: `git switch --detach <R7a tip>`.
     - After push: `git revert --no-edit <C3> <C2> <C1>`.
     - After merge: `git revert -m 1 <merge>`.
     - A user whose settings were migrated keeps `flowBandEnabled`. The reverted code reads `flowZoneLines` as absent → 5, so the band shows; record this in the revert note.
@@ -486,6 +500,7 @@
     - FOCUS-WORD-ONLY-1 and NARRATE-BAND-SPACE-1.
 
     Each of the branches that merge after R8 takes `origin/main` in and re-greps R8's sites at its own merge.
+  - **R8 merges after R7a** (BUG-235, on the same branch). R8 keeps R7a's section hand-off. Done-when 2's suite runs `tests/readerModes/flowSectionHandoff.test.tsx` unedited, and R8 does not touch R7a's `handoffHold`, `isPastRenderedEnd` or `syncToWord` hand-off code.
   - At R8's merge: the arm64 launch on Rodney (R-2026-10-30-2), and F-schema if EINK-CONTROLS-1 has unexpectedly landed first.
 
 **Rulings closed (2026-10-30):**
@@ -498,16 +513,16 @@ No question is open.
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 16 | RodneySr worktree at the verified R7 tip with `origin/main` merged in as M8, `npm ci`, probe and artifact folders ready | repeat | setup | mechanical | low | 1m (median of 9 runs) | — | — |
-| 17 | Red rows (p1–p7, w6, w8, w9, u1, s1–s6) fail by assertion on the R7 tip while the controls pass, with the pinned rows edited, committed alone | repeat | positive-control | bounded | medium | 4m (median of 20 runs) | — | — |
-| 18 | The band covers the cursor's paragraph in Focus and Flow, the Band switch replaces Lines, and old settings migrate with Off kept off; all named suites, `npm test`, typecheck and build green | repeat | renderer-fix | cross-cutting | high | 2m (median of 5 runs) | — | — |
-| 19 | Live L1–L8 on the packaged x64 build: the title alone, front-matter blocks, long and short paragraphs, the cover without a band, the switch persisting, the migration, and Flow playing | repeat | live-check | bounded | medium | 10m (median of 4 runs) | — | — |
-| 20 | x64 and arm64 packages verified by the pair check; memo, time log and gate (2) row recorded; pushed and held for Brain | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+| 21 | RodneySr worktree at the verified R7a tip with `origin/main` merged in as M8, `npm ci`, probe and artifact folders ready | repeat | setup | mechanical | low | 1m (median of 9 runs) | — | — |
+| 22 | Red rows (p1–p7, w6, w8, w9, u1, s1–s6) fail by assertion on the R7a tip while the controls pass, with the pinned rows edited, committed alone | repeat | positive-control | bounded | medium | 4m (median of 20 runs) | — | — |
+| 23 | The band covers the cursor's paragraph in Focus and Flow, the Band switch replaces Lines, and old settings migrate with Off kept off; all named suites, `npm test`, typecheck and build green | repeat | renderer-fix | cross-cutting | high | 2m (median of 5 runs) | — | — |
+| 24 | Live L1–L8 on the packaged x64 build: the title alone, front-matter blocks, long and short paragraphs, the cover without a band, the switch persisting, the migration, and Flow playing | repeat | live-check | bounded | medium | 10m (median of 4 runs) | — | — |
+| 25 | x64 and arm64 packages verified by the pair check; memo, time log and gate (2) row recorded; pushed and held for Brain | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
 
 **Total:** chain 29m · sum 29m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
 
 ##### Lessons applied
-- **Standing rule 43:** red first. C1 holds the new rows and the pinned edits alone, and fails by assertion on M8 (code identical to `a5273704`). (z1), (k1) and (t4c) are controls that pass on the tip.
+- **Standing rule 43:** red first. C1 holds the new rows and the pinned edits alone, and fails by assertion on M8 (the R7a tip's code plus `origin/main`). (z1), (k1) and (t4c) are controls that pass on the tip.
 - **Standing rule 50:** every pinned row R8 removes or rewrites is named with its current and intended assertion, across `bandAlign2.test.tsx`, `bandAlign2R7.test.tsx`, `zoneLineStep.test.ts` b1d, `flowReadingZone.test.ts` and the two settings key-trust tests. Any other failure stops the run (F-pinned).
 - **Standing rule 53:** Done-when 7 follows the Temporary placement as defined by Brain1 on 2026-10-30:
   - M8 merges `origin/main` first (T2);
