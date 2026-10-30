@@ -11,7 +11,7 @@
 ### BUG-237 — A Narrate pause in the gap before a scheduled chunk skips that chunk's words and resumes after ~2.3 s of silence
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), during NARRATE-PAUSE-CANCEL-1's base D6 (`5de476ce`, x64, quiet host). Deterministic in two runs.
 **Severity:** HIGH. It is audible: words are lost, then there is silence.
-**Status:** OPEN; fix item NARRATE-GAP-PAUSE-1 (TTS / Narration Engine), stacked on `eb/narrate-pause-cancel-1`. Lane: TTS / Narration Engine.
+**Status:** RESOLVED IN SOURCE 2026-10-30 by NARRATE-GAP-PAUSE-1 (`eb/narrate-gap-pause-1` @ `e3498f60`, package-verified x64 by Blurby.Brain1; a real gap pause after the fix skipped 0 words and resumed in 86 ms). Merges with the quit-linger stack; the entry moves to Complete then. Lane: TTS / Narration Engine.
 **Observation:** *Meditations*, word ~8730, 2.00x, D6 run warm-2.00-3. The pause landed 34 ms before chunk 8730 was due to start. On resume:
 - playback restarted at the NEXT chunk (word 8748), so the 18 words 8730–8747 were never heard (heard: 8726–8729, then 8748);
 - speech started after about 2.3 s of silence. The new chunk was scheduled at startAt 6.0963, the stopped chunk's endAt.
