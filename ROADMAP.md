@@ -700,7 +700,14 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="narrate-pause-cancel-1"></a>
 
-#### NARRATE-PAUSE-CANCEL-1 — Pausing Narrate cancels queued Kokoro jobs *(Seq 86.5; Queued; Full Spec — dispatch-ready; authored 2026-10-30 by roadmap review 2026-10-30)*
+#### NARRATE-PAUSE-CANCEL-1 — Pausing Narrate cancels queued Kokoro jobs *(Seq 86.5; **In Flight — built and held, package-verified (x64, RodneySr) 2026-10-30**; Full Spec; authored 2026-10-30 by roadmap review 2026-10-30)*
+
+- **Package-verified 2026-10-30 (Blurby.Brain1), built and held, stacked on NARRATE-QUIT-LINGER-1:** branch `eb/narrate-pause-cancel-1`: fix `53adf994`, census `c4b79abb`, packages from `cf093ab7`.
+  - After (S), R2 rule: 3 of 3 pass. Press-to-cancel 13–24 ms, 0 posts after the press; linger 0.90–1.17 s against base 1.73–3.06 s.
+  - T2-2: 0 gaps on both sides.
+  - After D6: every counting resume 80–96 ms. The excepted base trial (warm-2.00-3) didn't occur after; Brain ruled that a pass, recorded in the memo.
+  - Rule 53: x64/arm64 asar identical (`F961A79C…`), with dist parity and a clean 25 s launch. Arm64 launch at merge.
+  - NARRATE-GAP-PAUSE-1's base is this branch's final tip, once the memo is pushed.
 
 - **Mid-dispatch amendment (2026-10-30, Blurby.Brain1):** the D6 slow-resume gate is now "no regression": warm-2.00-3 after ≤ base + 150 ms, one-sided, and every other resume under 2,000 ms. It supersedes the D6 stop, because base D6 exposed BUG-237, which NARRATE-GAP-PAUSE-1 fixes. The amendment text is at the end of the spec file.
 
