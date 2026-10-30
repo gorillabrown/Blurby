@@ -729,7 +729,19 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="narrate-gap-pause-1"></a>
 
-#### NARRATE-GAP-PAUSE-1 — A pause in the gap before a chunk resumes on that chunk's first word, without a silence *(Seq 86.6; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-237, HIGH)*
+#### NARRATE-GAP-PAUSE-1 — A pause in the gap before a chunk resumes on that chunk's first word, without a silence *(Seq 86.6; **In Flight — built and held, package-verified (x64, RodneySr) 2026-10-30**; Full Spec; authored 2026-10-30; fixes BUG-237, HIGH)*
+
+- **Package-verified 2026-10-30 (Blurby.Brain1), built and held, stacked on NARRATE-PAUSE-CANCEL-1:** `eb/narrate-gap-pause-1` @ `e3498f60`, package from `5f09224a`, fix `5d51d111` (`narrateEngine.ts` only).
+  - Red g1–g3 failed on the lagging-clock fake; c1–c4 pass.
+  - A real gap pause occurred in the after D6 (warm-2.00, word 5568): 0 words skipped, resume 86 ms. On the base it skipped 18 words with 2.3 s of silence.
+  - All resumes 82–92 ms. Suite 2,473/1/0.
+  - x64/arm64 asar identical (`655AD647…`). Arm64 launch at merge. BUG-237 resolved in source.
+- **Narrate merge order (Blurby.Roadmap, 2026-10-30):**
+  - NARRATE-SENTENCE-RESUME-1 (Seq 40, `35716c5f`) and NARRATE-SENTENCE-INITIALS-1 (Seq 71, `c93f7c09`) merge FIRST.
+  - Then the quit-linger stack: NARRATE-QUIT-LINGER-1 → NARRATE-PAUSE-CANCEL-1 → NARRATE-GAP-PAUSE-1. It merges second, so it resolves the conflicts:
+    - `narrateEngine.ts` (textual): keep the sentence branches' `wordAt()` and drop the stray doc line, which now lives on `nextScheduledPause` (Blurby.Brain1's ruling).
+    - The pre-existing `narrate/ModeRuntime.ts` conflict.
+  - After each resolution: re-run `tests/narrate` and take a fresh rule 53 package check before the merge go.
 
 - **What:** a Narrate pause that lands in the gap just before a scheduled chunk anchors on the first unheard chunk, measured on one clock, so the resume speaks that chunk's first word with normal latency. A chunk stopped by the pause no longer sets the next chunk's start time.
 - **Why:** BUG-237. On RodneySr, a pause 34 ms before chunk 8730 made the resume skip 18 words and wait about 2.3 s. Cause: `pause()` reads the scheduling head instead of the heard position. The unit fake hid it (LL-173).
