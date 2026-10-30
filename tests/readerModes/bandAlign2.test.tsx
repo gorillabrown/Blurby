@@ -206,17 +206,13 @@ describe("BAND-ALIGN-2 Flow: one clock", () => {
 type BandHelpers = {
   computeBandScrollTop?: (o: { scrollTop: number; lineTopPx: number; containerTopPx: number; viewportHeightPx: number; zoneTopFrac: number; maxScrollTop?: number }) => number;
   isLineInBand?: (lineTopPx: number, lineBottomPx: number, bandTopPx: number, bandBottomPx: number) => boolean;
-  computeBandEdges?: (lines: readonly BandBox[], cursor: number, n: number, stepPx?: number) => { top: number; bottom: number; first: number; last: number } | null;
   computeAnchorScrollTop?: (o: { scrollTop: number; lineTopPx: number; lineBottomPx: number; containerTopPx: number; viewportHeightPx: number; anchor: number; bandHeightPx: number; maxScrollTop: number }) => number;
   normalizeBandAnchor?: (v: unknown) => number;
-  normalizeBandLines?: (v: unknown) => number;
 };
 const need = <K extends keyof BandHelpers>(mode: string, h: BandHelpers, k: K): NonNullable<BandHelpers[K]> => {
   expect(typeof h[k], `${mode} helpers/foliateLayout.ts has no ${k}`).toBe("function");
   return h[k]!;
 };
-// Seven lines, step 27, box height 22: tops 73, 100, 127, 154, 181, 208, 235.
-const SEVEN: BandBox[] = [73, 100, 127, 154, 181, 208, 235].map((top) => ({ top, bottom: top + 22 }));
 
 for (const [mode, h] of [["focus", focusLayout], ["flow", flowLayout]] as Array<[string, BandHelpers]>) {
   describe(`BAND-ALIGN-2 ${mode}: band helpers`, () => {
@@ -228,38 +224,9 @@ for (const [mode, h] of [["focus", focusLayout], ["flow", flowLayout]] as Array<
       expect(inBand(300, 327, 94.5, 229.5)).toBe(false);
     });
 
-    it(`(r1) ${mode} the band's edges are the gap midpoints around its first and last lines`, () => {
-      const edges = need(mode, h, "computeBandEdges");
-      const band = edges(SEVEN, 3, 5)!; // the cursor on the 154 line
-      expect({ first: band.first, last: band.last }).toEqual({ first: 1, last: 5 }); // the lines at 100–208
-      expect(band.top).toBeCloseTo((73 + 22 + 100) / 2, 6); // 97.5, not the 100 box edge
-      expect(band.bottom).toBeCloseTo((208 + 22 + 235) / 2, 6); // 232.5, not 230
-    });
-
-    it(`(r2) ${mode} the cursor line is the band's middle line; at a section's first and last lines the band keeps its size (R7)`, () => {
-      const edges = need(mode, h, "computeBandEdges");
-      for (const [n, pos] of [[3, 2], [5, 3], [7, 4]] as const) {
-        const band = edges(SEVEN, 3, n)!;
-        expect(band.last - band.first + 1).toBe(n);
-        expect(3 - band.first + 1, `n=${n}`).toBe(pos);
-      }
-      const first = edges(SEVEN, 0, 5, 27)!;
-      expect({ first: first.first, last: first.last }).toEqual({ first: 0, last: 2 });
-      expect(first.top).toBeCloseTo(73 - 2.5 - 2 * 27, 6); // R7: two lines of space above, by the line step
-      const last = edges(SEVEN, 6, 5, 27)!;
-      expect({ first: last.first, last: last.last }).toEqual({ first: 4, last: 6 });
-      expect(last.bottom).toBeCloseTo(235 + 22 + 2.5 + 2 * 27, 6); // R7: two lines of space below
-    });
-
-    it(`(r3) ${mode} R7: with the leading space a section's first line scrolls to the anchor; the band does not follow it up`, () => {
+    it(`(r3) ${mode} R7: with the leading space a section's first line scrolls to the anchor`, () => {
       const scrollFor = need(mode, h, "computeAnchorScrollTop");
-      const edges = need(mode, h, "computeBandEdges");
-      const lines: BandBox[] = [212.5, 239.5, 266.5, 293.5].map((top) => ({ top, bottom: top + 22 }));
       expect(scrollFor({ scrollTop: 0, lineTopPx: 212.5, lineBottomPx: 234.5, containerTopPx: 0, viewportHeightPx: 630, anchor: 1 / 3, bandHeightPx: 135, maxScrollTop: 4000 })).toBeCloseTo(13.5, 6);
-      const band = edges(lines.map((l) => ({ top: l.top - 13.5, bottom: l.bottom - 13.5 })), 0, 5, 27)!;
-      expect(Math.abs((band.top + band.bottom) / 2 - 210)).toBeLessThanOrEqual(0.5);
-      expect(Math.abs(band.top - 142.5)).toBeLessThanOrEqual(0.5);
-      expect(Math.abs(band.bottom - 277.5)).toBeLessThanOrEqual(0.5);
     });
 
     it(`(r4) ${mode} normalizeBandAnchor, and each anchor's cursor-line centre`, () => {
@@ -273,14 +240,10 @@ for (const [mode, h] of [["focus", focusLayout], ["flow", flowLayout]] as Array<
       }
     });
 
-    it(`(r6) ${mode} normalizeBandLines maps 3, 5, 7 and 0 to themselves and anything else to 5`, () => {
-      const norm = need(mode, h, "normalizeBandLines");
-      expect([3, 5, 7, 0, 4, 6, 8, undefined].map((v) => norm(v))).toEqual([3, 5, 7, 0, 5, 5, 5, 5]);
-    });
   });
 }
 
-// ── the bottom bar's anchor and Lines controls, in Focus and Flow ──
+// ── the bottom bar's anchor controls, in Focus and Flow (R8's Band switch: bandAlign2R8.test.tsx (u1)) ──
 const bottomBarProps = {
   activeDoc: { id: "doc-1", title: "Meditations", content: "alpha beta", wordCount: 2 } as never,
   words: ["alpha", "beta"],
@@ -320,17 +283,6 @@ describe("BAND-ALIGN-2 bottom bar", () => {
       act(() => root.unmount());
     });
 
-    it(`(r6) ${readingMode}: 3 · 5 · 7 · Off, aria-pressed, and a press sets flowZoneLines to 3, 5, 7 or 0`, async () => {
-      const onSetFlowZoneLines = vi.fn();
-      const { host, root, zoneButton } = await renderBar({ readingMode, flowZoneLines: 6, onSetFlowZoneLines });
-      const labels = ["3", "5", "7", "Off"];
-      expect(labels.map((l) => Boolean(zoneButton(l))), "the four Lines buttons").toEqual([true, true, true, true]);
-      expect(labels.map((l) => zoneButton(l)!.getAttribute("aria-pressed"))).toEqual(["false", "true", "false", "false"]); // 6 reads as 5
-      expect(host.querySelector('input[type="range"].rbb-flow-zone-slider'), "the 3–8 slider is gone").toBeNull();
-      for (const l of labels) await act(async () => { zoneButton(l)!.click(); });
-      expect(onSetFlowZoneLines.mock.calls.map((c) => c[0])).toEqual([3, 5, 7, 0]);
-      act(() => root.unmount());
-    });
   }
 });
 
@@ -470,10 +422,10 @@ describe("BAND-ALIGN-2 Focus view", () => {
     act(() => root.unmount());
   });
 
-  it("(r6) with Lines Off the zone host has no --flow-zone-top and carries the band-off class, and the cursor is still painted", async () => {
+  it("(r6) with the Band switch off the zone host has no --flow-zone-top and carries the band-off class, and the cursor is still painted", async () => {
     const section = sectionDoc();
     nextSection = section.doc;
-    const { host, root, viewApiRef } = await renderFocus({ flowZonePosition: 1 / 3, flowZoneLines: 0 });
+    const { host, root, viewApiRef } = await renderFocus({ flowZonePosition: 1 / 3, flowBandEnabled: false });
     const zoneHost = host.querySelector<HTMLElement>(".rm-focus-view")!;
     expect(zoneHost.style.getPropertyValue("--flow-zone-top")).toBe("");
     expect(zoneHost.classList.contains("rm-focus-view--band-off")).toBe(true);

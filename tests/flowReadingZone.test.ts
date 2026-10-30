@@ -3,7 +3,7 @@
 //
 // Covers:
 //   a) FLOW_ZONE constants are exported with correct values
-//   b) DEFAULT_SETTINGS includes flowZonePosition and flowZoneLines
+//   b) DEFAULT_SETTINGS includes flowZonePosition and flowBandEnabled (BAND-ALIGN-2 R8 replaced flowZoneLines)
 //   c) Settings defaults match their corresponding constants
 //   d) CSS .foliate-page-view--flow rule exists and contains mask-image
 //   e) mask-image references --flow-zone-top and --flow-zone-bottom custom properties
@@ -92,8 +92,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     expect(DEFAULT_SETTINGS).toHaveProperty("flowZonePosition");
   });
 
-  it("DEFAULT_SETTINGS includes flowZoneLines field", () => {
-    expect(DEFAULT_SETTINGS).toHaveProperty("flowZoneLines");
+  it("DEFAULT_SETTINGS has the Band switch on and no flowZoneLines field (BAND-ALIGN-2 R8)", () => {
+    expect(DEFAULT_SETTINGS.flowBandEnabled).toBe(true);
   });
 
   // (c) Settings defaults match constants
@@ -101,8 +101,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     expect(DEFAULT_SETTINGS.flowZonePosition).toBe(FLOW_READING_ZONE_POSITION);
   });
 
-  it("DEFAULT_SETTINGS.flowZoneLines equals FLOW_ZONE_LINES_DEFAULT", () => {
-    expect(DEFAULT_SETTINGS.flowZoneLines).toBe(FLOW_ZONE_LINES_DEFAULT);
+  it("DEFAULT_SETTINGS no longer carries flowZoneLines (BAND-ALIGN-2 R8)", () => {
+    expect(DEFAULT_SETTINGS).not.toHaveProperty("flowZoneLines");
   });
 
   // (d) CSS .foliate-page-view--flow rule exists and contains mask-image

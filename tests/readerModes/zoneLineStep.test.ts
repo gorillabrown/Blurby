@@ -5,7 +5,7 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS, FLOW_ZONE_INITIAL_TOP, FLOW_ZONE_LINES_DEFAULT } from "../../src/constants";
+import { DEFAULT_SETTINGS, FLOW_ZONE_INITIAL_TOP } from "../../src/constants";
 import { createFakeDocument } from "./harness/fakePorts";
 import * as focusLayout from "../../src/reader/modes/focus/helpers/foliateLayout";
 import * as flowLayout from "../../src/reader/modes/flow/helpers/foliateLayout";
@@ -108,7 +108,9 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
   // FLOW_ZONE_INITIAL_TOP but around the cursor line (R1-R3), and with no cursor painted there is no band (R6). So b1d
   // asserts no band before a word is painted, then, with word 17 painted (two lines above and below it), the measured 27 px step on the zone host and a
   // band 5 x 27 / 630 tall that contains the cursor line.
-  it("(b1d) no band before a word is painted; then the band is 5 x 27 / 630 (21.43%) tall, not the 24 px fallback's 19.05%, around the cursor line", async () => {
+  // BAND-ALIGN-2 R8 (pinned edit, rule 50): the band is the cursor's paragraph, the fixture's single 40-word <p> (8 lines,
+  // tops 100 + 27k), with half-leading edges from the measured 27 px step (the 24 px fallback gives 15.714% / 49.524%).
+  it("(b1d) no band before a word is painted; then the band is the paragraph, with half-leading edges from the measured 27 px step", async () => {
     const PITCH = Number(process.env.B1D_PITCH_PX ?? 27); // rule 43: B1D_PITCH_PX=24 shows the assertions red
     nextSection = sectionDoc(`line-height: ${PITCH}px; font-size: 18px`);
     nextSection.body.innerHTML = `<p style="line-height: ${PITCH}px; font-size: 18px">${Array.from({ length: 40 }, (_, i) => `w${i}`).join(" ")}</p>`;
@@ -165,8 +167,8 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
     expect(parseFloat(zoneHost.style.getPropertyValue("--zone-line-step-px")), "the zone host's line step (24 is the fallback)").toBe(27);
     const top = parseFloat(zoneHost.style.getPropertyValue("--flow-zone-top"));
     const bottom = parseFloat(zoneHost.style.getPropertyValue("--flow-zone-bottom"));
-    const height = ((FLOW_ZONE_LINES_DEFAULT * 27) / VIEW_H) * 100; // 21.43
-    expect(bottom - top, `zone height ${bottom - top}% (the 24 px fallback gives 19.05%)`).toBeCloseTo(height, 2);
+    expect(top, "the paragraph's top, half a leading above its first line").toBeCloseTo(((100 - 2.5) / VIEW_H) * 100, 2); // 15.476
+    expect(bottom, "the paragraph's bottom, half a leading below its last line").toBeCloseTo(((100 + 189 + 22 + 2.5) / VIEW_H) * 100, 2); // 49.762
     const cursorTop = ((100 + 3 * PITCH) / VIEW_H) * 100; // word 17 is on the fourth line
     const cursorBottom = ((100 + 3 * PITCH + 22) / VIEW_H) * 100;
     expect(top <= cursorTop && bottom >= cursorBottom, `band ${top}-${bottom}% misses the cursor line ${cursorTop}-${cursorBottom}%`).toBe(true);

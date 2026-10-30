@@ -23,7 +23,6 @@ type InsetArgs = { anchor: number; viewportHeightPx: number; lineStepPx: number;
 type R7Helpers = {
   computeLeadingInsetPx?: (o: InsetArgs) => number;
   computeTrailingInsetPx?: (o: InsetArgs) => number;
-  computeBandEdges: (lines: readonly Box[], cursor: number, n: number, stepPx?: number) => { top: number; bottom: number; first: number; last: number } | null;
   computeAnchorScrollTop: (o: { scrollTop: number; lineTopPx: number; lineBottomPx: number; containerTopPx: number; viewportHeightPx: number; anchor: number; bandHeightPx: number; maxScrollTop: number }) => number;
   bandAnchorY: (anchor: number, viewportHeightPx: number, bandHeightPx: number) => number;
   isLineInBand: (lineTopPx: number, lineBottomPx: number, bandTopPx: number, bandBottomPx: number) => boolean;
@@ -52,30 +51,17 @@ function fixtureA(mode: string, h: R7Helpers, anchor: number, n: number) {
     scrollTop: 0, lineTopPx: boxes[c].top, lineBottomPx: boxes[c].bottom, containerTopPx: 0,
     viewportHeightPx: VIEW, anchor, bandHeightPx: STEP * n, maxScrollTop: H - VIEW,
   });
+  // R8 (Brain ruling, rule 50): computeBandEdges is gone; the scroll and the screen boxes remain.
   const bandAt = (c: number) => {
     const st = scrollFor(c);
     const screen = boxes.map((b) => ({ top: b.top - st, bottom: b.bottom - st }));
-    return { st, screen, band: h.computeBandEdges(screen, c, n, STEP)! };
+    return { st, screen };
   };
   return { L, T, H, boxes, scrollFor, bandAt, anchorY: h.bandAnchorY(anchor, VIEW, STEP * n) };
 }
 
 for (const [mode, h] of LAYOUTS) {
   describe(`BAND-ALIGN-2 R7 ${mode}: the band is fixed at both ends of a section (pure)`, () => {
-    it(`(a1) ${mode} the band at a section's first line equals the band mid-section`, () => {
-      for (const [name, anchor] of ANCHORS) for (const n of NS) {
-        const a = fixtureA(mode, h, anchor, n);
-        const first = a.bandAt(0).band;
-        const mid = a.bandAt(20);
-        expect(Math.abs(first.top - mid.band.top), `${name} n=${n} top`).toBeLessThanOrEqual(0.5);
-        expect(Math.abs(first.bottom - mid.band.bottom), `${name} n=${n} bottom`).toBeLessThanOrEqual(0.5);
-        expect(Math.abs(a.boxes[20].top + BOX / 2 - mid.st - a.anchorY), `${name} n=${n} centre`).toBeLessThanOrEqual(0.5);
-      }
-      const ex = fixtureA(mode, h, 1 / 3, 5);
-      expect(ex.bandAt(0).band.top).toBeCloseTo(142.5, 6);
-      expect(ex.bandAt(0).band.bottom).toBeCloseTo(277.5, 6);
-    });
-
     it(`(a2) ${mode} the leading space is the anchor's y`, () => {
       const lead = need(mode, h, "computeLeadingInsetPx");
       expect(NS.map((n) => lead({ anchor: 0, viewportHeightPx: VIEW, lineStepPx: STEP, lines: n }))).toEqual([40.5, 67.5, 94.5]);
@@ -83,24 +69,6 @@ for (const [mode, h] of LAYOUTS) {
       expect(lead({ anchor: 0.5, viewportHeightPx: VIEW, lineStepPx: STEP, lines: 5 })).toBe(315);
       expect(lead({ anchor: 0, viewportHeightPx: VIEW, lineStepPx: STEP, lines: 0 })).toBe(13.5);
       expect(lead({ anchor: 1 / 3, viewportHeightPx: 0, lineStepPx: STEP, lines: 5 })).toBe(0);
-    });
-
-    it(`(a3) ${mode} the band at a section's last line equals the band mid-section (owner Q1)`, () => {
-      for (const [name, anchor] of ANCHORS) for (const n of NS) {
-        const a = fixtureA(mode, h, anchor, n);
-        const last = a.bandAt(39);
-        const mid = a.bandAt(20).band;
-        expect(Math.abs(last.band.top - mid.top), `${name} n=${n} top`).toBeLessThanOrEqual(0.5);
-        expect(Math.abs(last.band.bottom - mid.bottom), `${name} n=${n} bottom`).toBeLessThanOrEqual(0.5);
-        expect(Math.abs((last.band.bottom - last.band.top) - (mid.bottom - mid.top)), `${name} n=${n} height`).toBeLessThanOrEqual(0.5);
-        expect(last.st, `${name} n=${n} unclamped`).toBeCloseTo(a.boxes[39].top + BOX / 2 - a.anchorY, 6);
-        expect(last.st, `${name} n=${n}`).toBeCloseTo(1066.5, 6);
-        expect(a.H - VIEW, `${name} n=${n} range end`).toBeCloseTo(1080, 6);
-        expect(h.isLineInBand(last.screen[39].top, last.screen[39].bottom, last.band.top, last.band.bottom), `${name} n=${n} in band`).toBe(true);
-      }
-      const ex = fixtureA(mode, h, 1 / 3, 5).bandAt(39).band;
-      expect(ex.top).toBeCloseTo(142.5, 6);
-      expect(ex.bottom).toBeCloseTo(277.5, 6);
     });
 
     it(`(a4) ${mode} the trailing space mirrors the top: the view below the anchor`, () => {
@@ -117,30 +85,10 @@ for (const [mode, h] of LAYOUTS) {
         const first = a.bandAt(0);
         expect(Math.abs(first.st - 13.5), `${name} n=${n} st`).toBeLessThanOrEqual(1e-6);
         expect(first.st, `${name} n=${n} unfloored`).toBeCloseTo(a.boxes[0].top + BOX / 2 - a.anchorY, 6);
-        expect(h.isLineInBand(first.screen[0].top, first.screen[0].bottom, first.band.top, first.band.bottom), `${name} n=${n} in band`).toBe(true);
+        expect(Math.abs((first.screen[0].top + first.screen[0].bottom) / 2 - a.anchorY), `${name} n=${n} centre at the anchor`).toBeLessThanOrEqual(1e-6);
       }
     });
 
-    it(`(b2) ${mode} a heading line can be the cursor line (edge deltas recorded; owner Q3 is enforced live, L1)`, () => {
-      for (const [name, anchor] of ANCHORS) {
-        const n = 5;
-        const L = need(mode, h, "computeLeadingInsetPx")({ anchor, viewportHeightPx: VIEW, lineStepPx: STEP, lines: n });
-        const boxes: Box[] = [{ top: L, bottom: L + 40 }, ...Array.from({ length: 39 }, (_, k) => ({ top: L + 45 + STEP * k, bottom: L + 45 + STEP * k + BOX }))];
-        const st = h.computeAnchorScrollTop({ scrollTop: 0, lineTopPx: L, lineBottomPx: L + 40, containerTopPx: 0, viewportHeightPx: VIEW, anchor, bandHeightPx: STEP * n, maxScrollTop: 4000 });
-        expect(Math.abs(st - 20), `${name} st`).toBeLessThanOrEqual(1e-6);
-        const anchorY = h.bandAnchorY(anchor, VIEW, STEP * n);
-        expect(Math.abs(L + 20 - st - anchorY), `${name} heading centre`).toBeLessThanOrEqual(1e-6);
-        const band = h.computeBandEdges(boxes.map((b) => ({ top: b.top - st, bottom: b.bottom - st })), 0, n, STEP)!;
-        expect(h.isLineInBand(L - 20, L + 20, band.top, band.bottom), `${name} heading in band`).toBe(true);
-        // Recorded, not gated (Blurby.Brain ruling A, 2026-10-30): R1's midpoint edges grow the band at a tall heading,
-        // here a 40 px box with a 5 px gap, so the edges sit 6.5 px above and 9 px below the mid-section band. The
-        // owner's ≤ 6 px tolerance (Q3) is enforced live on the real title row (L1), not on this synthetic box. The
-        // exact values still catch any unintended change to R1.
-        const ref = fixtureA(mode, h, anchor, n).bandAt(20).band;
-        expect(band.top - ref.top, `${name} top vs mid-section (recorded)`).toBeCloseTo(-6.5, 6);
-        expect(band.bottom - ref.bottom, `${name} bottom vs mid-section (recorded)`).toBeCloseTo(9, 6);
-      }
-    });
   });
 }
 
@@ -302,22 +250,19 @@ describe("BAND-ALIGN-2 R7: leading and trailing spaces in each mode's view (wiri
       act(() => root.unmount());
     });
 
-    it(`(w3) ${mode}: the band's screen position is the same at the first word and mid-section`, async () => {
+    it(`(w3) ${mode}: the cursor line's centre is at the anchor's y (± 0.5 px) at the first word and mid-section`, async () => {
       const at = async (idx: number) => {
         const doc = textDoc();
         nextSection = doc;
-        const { host, root } = await render(View, idx, 1 / 3);
-        const band = bandState(host.querySelector<HTMLElement>(`.${cls}`)!, cls);
+        const { root } = await render(View, idx, 1 / 3);
+        const box = doc.querySelector(`[data-word-index="${idx}"]`)!.getBoundingClientRect();
         act(() => root.unmount());
         document.body.innerHTML = "";
-        return { top: parseFloat(band.top), bottom: parseFloat(band.bottom) };
+        return (box.top + box.bottom) / 2;
       };
-      const first = await at(0);
-      const mid = await at(100);
-      expect(Math.abs(mid.top - (142.5 / 630) * 100), "mid-section top").toBeLessThanOrEqual(0.05);
-      expect(Math.abs(mid.bottom - (277.5 / 630) * 100), "mid-section bottom").toBeLessThanOrEqual(0.05);
-      expect(Math.abs(first.top - mid.top), "top").toBeLessThanOrEqual(0.05);
-      expect(Math.abs(first.bottom - mid.bottom), "bottom").toBeLessThanOrEqual(0.05);
+      const anchorY = h.bandAnchorY(1 / 3, VIEW, 27 * 5);
+      expect(Math.abs((await at(0)) - anchorY), "first word").toBeLessThanOrEqual(0.5);
+      expect(Math.abs((await at(100)) - anchorY), "mid-section").toBeLessThanOrEqual(0.5);
     });
 
     it(`(w4) ${mode}: the trailing space mirrors the top`, async () => {

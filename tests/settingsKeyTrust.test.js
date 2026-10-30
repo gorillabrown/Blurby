@@ -119,7 +119,7 @@ function setup() {
 const UI_WRITES = {
   wpm: 410, folderName: "Shelf", readingMode: "narrate", firstRunCompleted: true, viewMode: "grid",
   compactMode: true, focusTextSize: 120, flowTextSize: 130, theme: "light", sortBy: "title",
-  flowZoneLines: 7, syncIntervalMinutes: 15, syncOnMeteredConnection: true,
+  flowBandEnabled: false, syncIntervalMinutes: 15, syncOnMeteredConnection: true,
   layoutSpacing: { line: 2, character: 1, word: 1 }, justifiedText: false, defaultSort: "newest",
   defaultViewMode: "grid", libraryCardSize: "large", libraryCardSpacing: "roomy", useLegacyRenderer: true,
   focusMarks: false, readingRuler: true, focusSpan: 0.6, flowWordSpan: 4, flowCursorStyle: "highlight",
