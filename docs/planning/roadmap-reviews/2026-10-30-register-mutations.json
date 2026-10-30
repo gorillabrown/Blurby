@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,11 +14,12 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T20:47:30Z",
+  "final": "2026-10-30T20:54:00Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
   "batch3Refresh": "2026-10-30T19:57:00Z",
   "batch4Refresh": "2026-10-30T20:01:30Z",
-  "batch5Refresh": "2026-10-30T20:46:00Z"
+  "batch5Refresh": "2026-10-30T20:46:00Z",
+  "batch6Refresh": "2026-10-30T20:53:00Z"
  },
  "driftLines": [],
  "counts": {
@@ -88,6 +89,14 @@
    "confirmedRevisionsMatchFinalRead": true,
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-prereqs from origin/main 4a1b7aa5)"
+  },
+  "batch6": {
+   "refreshDiffAgainst204730Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-charter-link from origin/main c96343c4)"
   }
  },
  "changes": [
@@ -705,6 +714,31 @@
    "actualRevision": "331ad24c969a3e5d41392a119348d7ccf7d1f1a815d4bdfc308329cd9ad73ea0",
    "readbackNote": "Prerequisites written as null (empty), as for change 5",
    "batch": 5
+  },
+  {
+   "change": 22,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "store-spec-link",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T205327Z-external-store-spec-link-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Spec Reference",
+    "Notes"
+   ],
+   "before": {
+    "Spec Reference": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate."
+   },
+   "readback": {
+    "Spec Reference": "docs/planning/epics/2026-10-30-blurby-business/charter.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.\n\nChartered 2026-10-30 by the Blurby Business session: packet docs/planning/epics/2026-10-30-blurby-business/, run branch eb/blurby-business-1 on RodneySr, never merged by the run itself."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "fdd8bdd0df90a4013d603238edf01c49e36d78ec4ab98384d31c7e1c72ac06d1",
+   "readbackNote": "Spec State left Stub and Status Queued (epics are chartered, not Full Spec); packet on main at c96343c4",
+   "batch": 6
   }
  ]
 }

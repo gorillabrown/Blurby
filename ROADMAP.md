@@ -1555,6 +1555,11 @@ These headings expose existing table/bullet items to the board parser; they do n
 <a id="blurby-business-1"></a>
 #### BLURBY-BUSINESS-1 — Blurby Business: a walled-off PDF viewer and editor *(Seq 100.5; Queued; Path: epic; lane Blurby Business; absorbed 2026-10-30 from held plan `2026-10-30-blurby-business-tier1`)*
 
+- **Chartered 2026-10-30:**
+  - Packet `docs/planning/epics/2026-10-30-blurby-business/` (charter, plan, state, journal, launch; main `c96343c4`); register Spec Reference → `charter.md`.
+  - 21 DoD rows (D1–D21), 9 phases (P1–P8 plus P9 completion), about 40 sessions.
+  - Run branch `eb/blurby-business-1` on RodneySr (worktree `C:\Projects\bb-business`). The run never merges itself; every merge waits for Blurby.Roadmap's go after Brain's package confirmation.
+  - **Not launched.** The owner directed on 2026-10-30 that it be roadmapped before launch, and it is not yet sent to Brain. Launch waits for the start gate (LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes) and for an owner decision on who hosts and launches it on RodneySr (launch.md Q2).
 - **What:** a separate Blurby Business window that becomes Blurby's standard PDF viewer and editor, and the default PDF app. It covers the competitor matrix's Viewing, Annotation, Editing, Page organisation, Forms, Optimisation, Signatures, Metadata and Printing rows, plus merge, extract and split (about 121 features), in eight phases:
   - P1 Viewer, with the default-PDF handler, tabs, navigation with native text select and copy, locked PDFs, OCR, and "Send to Blurby to read";
   - P2 Annotation, form fill and save with backup;
