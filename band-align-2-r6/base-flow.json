@@ -1,0 +1,167 @@
+{
+  "exe": "C:/Projects/Blurby-artifacts/band-align-2-r6/eb-out-cfc44269/win-unpacked/Blurby.exe",
+  "mode": "Flow",
+  "userData": "C:\\Projects\\Blurby-artifacts\\band-align-2-r6\\prof-base-Flow",
+  "preflight": "passed (Session.profilePreflight)",
+  "liveBefore": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "reads": [
+    {
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-flow-view",
+        "inlineTop": "23.794382617912028%",
+        "inlineBottom": "42.872284048754636%",
+        "computedTop": "23.794382617912028%",
+        "computedBottom": "42.872284048754636%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 21.7944%, rgb(0, 0, 0) 23.7944%, rgb(0, 0, 0) 42.8723%, rgba(0, 0, 0, 0.35) 44.8723%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "cover, after switch"
+    },
+    {
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-flow-view",
+        "inlineTop": "23.794382617912028%",
+        "inlineBottom": "42.872284048754636%",
+        "computedTop": "23.794382617912028%",
+        "computedBottom": "42.872284048754636%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 21.7944%, rgb(0, 0, 0) 23.7944%, rgb(0, 0, 0) 42.8723%, rgba(0, 0, 0, 0.35) 44.8723%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": -605,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after PageDown 1"
+    },
+    {
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-flow-view",
+        "inlineTop": "23.794382617912028%",
+        "inlineBottom": "42.872284048754636%",
+        "computedTop": "23.794382617912028%",
+        "computedBottom": "42.872284048754636%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 21.7944%, rgb(0, 0, 0) 23.7944%, rgb(0, 0, 0) 42.8723%, rgba(0, 0, 0, 0.35) 44.8723%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": -1112,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after PageDown 2"
+    },
+    {
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-flow-view",
+        "inlineTop": "23.794382617912028%",
+        "inlineBottom": "42.872284048754636%",
+        "computedTop": "23.794382617912028%",
+        "computedBottom": "42.872284048754636%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 21.7944%, rgb(0, 0, 0) 23.7944%, rgb(0, 0, 0) 42.8723%, rgba(0, 0, 0, 0.35) 44.8723%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": {
+        "section": 1,
+        "word": "The",
+        "index": 0,
+        "cls": "page-word page-word--flow-cursor",
+        "top": 120,
+        "height": 30
+      },
+      "sections": [
+        {
+          "index": 1,
+          "stampedWords": 187,
+          "firstWords": [
+            "The",
+            "Project",
+            "Gutenberg",
+            "eBook",
+            "of",
+            "Meditations",
+            "This",
+            "eBook"
+          ],
+          "firstIndex": 0,
+          "images": 0,
+          "text": "The Project Gutenberg eBook of Meditations This eBook is for the use of anyone anywhere in the United States and most other parts of the world at no cost and wi",
+          "frame": {
+            "top": 24,
+            "height": 2219
+          }
+        }
+      ],
+      "label": "after PageDown 3"
+    }
+  ],
+  "pageRead": {
+    "chapter": "BOOKS",
+    "sections": [
+      {
+        "index": 0,
+        "stamped": 0,
+        "text": "",
+        "images": 1
+      }
+    ]
+  },
+  "shotCover": "base-flow-cover.png",
+  "playingAfterSwitch": false,
+  "shotText": "base-flow-text.png",
+  "liveAfter": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "liveUnchanged": true
+}

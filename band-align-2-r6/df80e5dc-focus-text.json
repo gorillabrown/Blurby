@@ -1,0 +1,134 @@
+{
+  "exe": "C:/Projects/Blurby-artifacts/band-align-2-r6/eb-out-df80e5dc/win-unpacked/Blurby.exe",
+  "mode": "Focus",
+  "userData": "C:\\Projects\\Blurby-artifacts\\band-align-2-r6\\prof-df80e5dc-FocusText",
+  "preflight": "passed (Session.profilePreflight)",
+  "liveBefore": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "reads": [
+    {
+      "band": {
+        "top": 34,
+        "bottom": 434
+      },
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view",
+        "inlineTop": "5.439189280159712%",
+        "inlineBottom": "69.05206580230276%",
+        "computedTop": "5.439189280159712%",
+        "computedBottom": "69.05206580230276%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 3.43919%, rgb(0, 0, 0) 5.43919%, rgb(0, 0, 0) 69.0521%, rgba(0, 0, 0, 0.35) 71.0521%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": {
+        "section": 1,
+        "word": "MEDITATIONS",
+        "index": 136,
+        "cls": "page-word page-word--flow-cursor",
+        "top": 194,
+        "height": 34,
+        "inBand": true
+      },
+      "sections": [
+        {
+          "index": 1,
+          "stampedWords": 187,
+          "firstWords": [
+            "The",
+            "Project",
+            "Gutenberg",
+            "eBook",
+            "of",
+            "Meditations",
+            "This",
+            "eBook"
+          ],
+          "firstIndex": 0,
+          "images": 0,
+          "text": "The Project Gutenberg eBook of Meditations This eBook is for the use of anyone anywhere in the United States and most other parts of the world at no cost and wi",
+          "frame": {
+            "top": -478,
+            "height": 2219
+          }
+        }
+      ],
+      "label": "cover, after switch"
+    },
+    {
+      "band": {
+        "top": 34,
+        "bottom": 434
+      },
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view",
+        "inlineTop": "5.439189280159712%",
+        "inlineBottom": "69.05206580230276%",
+        "computedTop": "5.439189280159712%",
+        "computedBottom": "69.05206580230276%",
+        "mask": "linear-gradient(rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.35) 3.43919%, rgb(0, 0, 0) 5.43919%, rgb(0, 0, 0) 69.0521%, rgba(0, 0, 0, 0.35) 71.0521%, rgba(0, 0, 0, 0.35) 100%)",
+        "height": 629
+      },
+      "dimmed": true,
+      "cursor": {
+        "section": 1,
+        "word": "MEDITATIONS",
+        "index": 136,
+        "cls": "page-word page-word--flow-cursor",
+        "top": 194,
+        "height": 34,
+        "inBand": true
+      },
+      "sections": [
+        {
+          "index": 1,
+          "stampedWords": 187,
+          "firstWords": [
+            "The",
+            "Project",
+            "Gutenberg",
+            "eBook",
+            "of",
+            "Meditations",
+            "This",
+            "eBook"
+          ],
+          "firstIndex": 0,
+          "images": 0,
+          "text": "The Project Gutenberg eBook of Meditations This eBook is for the use of anyone anywhere in the United States and most other parts of the world at no cost and wi",
+          "frame": {
+            "top": -478,
+            "height": 2219
+          }
+        }
+      ],
+      "label": "after PageDown 1"
+    }
+  ],
+  "pageRead": {
+    "chapter": "BOOKS",
+    "sections": [
+      {
+        "index": 0,
+        "stamped": 0,
+        "text": "",
+        "images": 1
+      }
+    ]
+  },
+  "shotCover": "df80e5dc-focus-text-cover.png",
+  "playingAfterSwitch": false,
+  "shotText": "df80e5dc-focus-text-text.png",
+  "shotAfter": "df80e5dc-focus-text-after.png",
+  "liveAfter": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "liveUnchanged": true
+}

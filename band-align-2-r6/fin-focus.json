@@ -1,0 +1,247 @@
+{
+  "exe": "C:/Projects/Blurby-artifacts/band-align-2-r6/eb-out-89862a91/win-unpacked/Blurby.exe",
+  "mode": "Focus",
+  "userData": "C:\\Projects\\Blurby-artifacts\\band-align-2-r6\\prof-fin-Focus",
+  "preflight": "passed (Session.profilePreflight)",
+  "liveBefore": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "reads": [
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "cover, after switch"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 1"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 2"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 3"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 4"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 5"
+    },
+    {
+      "band": null,
+      "chapter": "BOOKS",
+      "root": true,
+      "host": {
+        "className": "rm-focus-view rm-focus-view--band-off",
+        "inlineTop": null,
+        "inlineBottom": null,
+        "computedTop": "20%",
+        "computedBottom": "45%",
+        "mask": "none",
+        "height": 629
+      },
+      "dimmed": false,
+      "cursor": null,
+      "sections": [
+        {
+          "index": 0,
+          "stampedWords": 0,
+          "firstWords": [],
+          "firstIndex": null,
+          "images": 1,
+          "text": "",
+          "frame": {
+            "top": 24,
+            "height": 1717
+          }
+        }
+      ],
+      "label": "after Space 6"
+    }
+  ],
+  "pageRead": {
+    "chapter": "BOOKS",
+    "sections": [
+      {
+        "index": 0,
+        "stamped": 0,
+        "text": "",
+        "images": 1
+      }
+    ]
+  },
+  "shotCover": "fin-focus-cover.png",
+  "playingAfterSwitch": false,
+  "liveAfter": {
+    "library.json": "d4b884bdd7b866a729fea97e71a952850020beecb99595703aeb967a8cffbdf6",
+    "settings.json": "2e1d52452d614fcf47b623f7477e4f1371819552e687246a6c399109c67f2d2e"
+  },
+  "liveUnchanged": true
+}
