@@ -165,3 +165,35 @@ Append-only findings; each disposition change is appended under its identifier. 
 **Accountable role / next action:** planner with Blurby.Brain1 (technical authority) — decide whether the mainstream-class budgets need their own figures or whether this is a defect; NARRATE-CPU-PROFILE-1 (Seq 95) is the existing measurement item to carry it.
 
 **Disposition:** open
+
+### F-006 — disposition (dispatch-closeout, 2026-10-30)
+
+**Disposition:** fixed — AGENT-PROTOCOL-CONSOLIDATION-1's close-out Step 0 wrote the seven workstreams with `policy-set` as roadmap-review (Change.Ledger CH-002), deleted `policy.roadmap.lanes`, and the preflight reads `ready` with no lanes warning. Evidence: docs/governance/close-outs/CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md.
+
+### F-010 — Five quality-review wording items on the Step 0 text left unapplied (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
+
+**Source:** AGENT-PROTOCOL-CONSOLIDATION-1 quality review (verdict READY), recorded in the staging memo's Review verdicts and carried by the close-out.
+
+**Severity:** low
+
+**Where:** CLAUDE.md and AGENTS.md (*Mandatory MarcusAurelius Pass* pointer line; *Agent Scope Labels* caption); Virtuoso/overlays/agents/MarcusAurelius.md (*Documents*); Virtuoso/overlays/skills/virtuoso/SKILL.md (*Commands*, *Git*)
+
+**Finding:** The quality reviewer's not-applied items, all on spec-prescribed text: (1) the one-line MarcusAurelius pointer drops "after every sprint, hotfixes included, no exceptions", and *Document Lifecycle* has no LESSONS_LEARNED, BUG_REPORT or TECHNICAL_REFERENCE step; (2) the MarcusAurelius overlay's *Documents* line reads as if BUG_REPORT and TECHNICAL_REFERENCE were among the *Document Lifecycle* steps; (3) the SKILL overlay's *Commands* line should make `--arm64` primary, with `--x64` on RodneySr under standing rule 53's temporary-placement note; (4) its *Git* refspec `HEAD:refs/heads/eb/<name>` has no repository citation; (5) "Code scope labels (applied to doer agent tasks)" survives with "doer" undefined. The reviewer's suggested wording is in the merged staging memo (`git show 4a1b7aa5:docs/governance/close-outs/Memo.AGENT-PROTOCOL-CONSOLIDATION-1.GovernanceStaging.2026-10-30.md`, *Review verdicts*). Applying them at Step 0 would have moved the overlays off their memo blocks (Done-when C2), and a close-out never amends acceptance, so they were left as written.
+
+**Accountable role / next action:** planner / roadmap-review; decide each item and apply the chosen wording as an ordinary governance edit
+
+**Disposition:** open
+
+### F-011 — Registry helper `timing` writes outside a dispatch's exact-path fence (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
+
+**Source:** AGENT-PROTOCOL-CONSOLIDATION-1 dispatch and close-out worktrees, qualified helper root fcfa9295 (plugin version 1.16.1 code).
+
+**Severity:** low
+
+**Where:** docs/governance/close-outs/Timing.*.jsonl (other dispatches' closed logs); docs/governance/Change.Ledger.jsonl
+
+**Finding:** `timing` calls in a worktree appended cost-backfill lines to other dispatches' closed time logs (24 logs in the dispatch worktree, 10 in the close-out worktree), and the first one a `plugin-version` Change.Ledger record under the calling actor. In the dispatch worktree that actor was `virtuoso`, which changeLedger's allowedWriters do not name; in the close-out worktree it was `dispatch-closeout`, which they do, so that record (CH-001) was committed with the close-out. Both are outside the dispatch's exact-path fence (D9) and the close-out's (C14). LL-172.
+
+**Accountable role / next action:** planner / roadmap-review with Blurby.Brain1 (technical) — decide whether the backfill lines are committed in one maintenance change, and whether the helper should refuse the ledger write under a non-writer actor; the dispatch worktree's lines stay uncommitted until then
+
+**Disposition:** open

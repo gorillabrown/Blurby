@@ -73,7 +73,7 @@
 |---|------|-------------|--------|--------|
 | E1 | Chapter Detection for Non-EPUB | Heuristic pattern matching for chapter headings in PDF, MOBI, TXT, HTML. (BUG-035) | Medium | Medium |
 | E2 | Auto-Generated TOC | Generate TOC page at book start when no embedded TOC exists. (BUG-036) | Medium | Medium |
-| E3 | OCR for Scanned PDFs | Tesseract or similar for image-based/scanned PDFs that pdf-parse cannot read. | Medium | Large |
+| E3 | OCR for Scanned PDFs *(absorbed 2026-10-30 into BLURBY-BUSINESS-1, Phase 1 OCR)* | Tesseract or similar for image-based/scanned PDFs that pdf-parse cannot read. | Medium | Large |
 
 ### Theme F: Library & UX Polish
 

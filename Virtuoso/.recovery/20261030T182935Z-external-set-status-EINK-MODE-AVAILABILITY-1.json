@@ -1,0 +1,34 @@
+{
+  "id": "20261030T182935Z-external-set-status-EINK-MODE-AVAILABILITY-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-MODE-AVAILABILITY-1",
+  "created": "2026-10-30T18:29:35Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R6. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner design ruling 2026-10-30 (via Blurby.Brain1): enabling E-ink while Focus is active switches the reader to Page at the page containing Focus's current word; remembered-mode restore and shortcuts never land in Focus while E-ink is on; position saved through Page's normal save path, no sibling-mode imports. Still a Stub."
+    },
+    "expectedRevision": "8936ed3fbae61581ad91295416287c49f6b657308e00eeed6ee897bc5d526a98",
+    "idempotencyKey": "set-status:EINK-MODE-AVAILABILITY-1:[('notes', \"Owner smoke intake 2026-10-26. Proposed priority P2. Sources R6. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner design ruling 2026-10-30 (via Blurby.Brain1): enabling E-ink while Focus is active switches the reader to Page at the page containing Focus's current word; remembered-mode restore and shortcuts never land in Focus while E-ink is on; position saved through Page's normal save path, no sibling-mode imports. Still a Stub.\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-MODE-AVAILABILITY-1",
+      "idempotencyKey": "set-status:EINK-MODE-AVAILABILITY-1:[('notes', \"Owner smoke intake 2026-10-26. Proposed priority P2. Sources R6. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner design ruling 2026-10-30 (via Blurby.Brain1): enabling E-ink while Focus is active switches the reader to Page at the page containing Focus's current word; remembered-mode restore and shortcuts never land in Focus while E-ink is on; position saved through Page's normal save path, no sibling-mode imports. Still a Stub.\")]",
+      "actualRevision": "5bec64b3d69fd449d5d37ee22eb4bb007775b9fe591b1dd915b2b403831d82fa",
+      "recoveryId": "20261030T182935Z-external-set-status-EINK-MODE-AVAILABILITY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:29:51Z",
+  "outcome": "succeeded"
+}

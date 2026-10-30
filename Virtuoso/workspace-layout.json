@@ -392,7 +392,7 @@
       "validation": "exists",
       "classification": "active",
       "origin": "authored",
-      "label": "Change ledger \u2014 when each change took effect (append-only)"
+      "label": "Change ledger — when each change took effect (append-only)"
     },
     "x-planningArchive": {
       "path": "docs/planning/.Archive",
@@ -453,6 +453,16 @@
       "classification": "historical",
       "origin": "authored",
       "label": "Protected historical processedIssues"
+    },
+    "overlays": {
+      "path": "Virtuoso/overlays",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-only",
+      "allowedWriters": [],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored"
     }
   },
   "policy": {
@@ -515,14 +525,6 @@
       }
     },
     "roadmap": {
-      "lanes": [
-        "UX polish",
-        "TTS / Narration Engine",
-        "Reader Engine",
-        "Chrome Extension",
-        "Library & Content",
-        "Platform & Maintenance"
-      ],
       "deadlines": {},
       "lengthCeilingLines": 2000,
       "effortScale": {
@@ -538,7 +540,37 @@
         "2": 2,
         "3": 3,
         "8": 8
-      }
+      },
+      "workstreams": [
+        {
+          "id": "UX polish",
+          "name": "UX polish"
+        },
+        {
+          "id": "TTS / Narration Engine",
+          "name": "TTS / Narration Engine"
+        },
+        {
+          "id": "Reader Engine",
+          "name": "Reader Engine"
+        },
+        {
+          "id": "Chrome Extension",
+          "name": "Chrome Extension"
+        },
+        {
+          "id": "Library & Content",
+          "name": "Library & Content"
+        },
+        {
+          "id": "Platform & Maintenance",
+          "name": "Platform & Maintenance"
+        },
+        {
+          "id": "Blurby Business",
+          "name": "Blurby Business"
+        }
+      ]
     },
     "git": {
       "policy": "push",
@@ -606,6 +638,40 @@
         "Closed"
       ],
       "driftView": "Phase link drift"
+    }
+  },
+  "x-commands": {
+    "test": {
+      "run": "npm test",
+      "workingDirectory": ".",
+      "requires": [
+        "node_modules from npm ci"
+      ],
+      "produces": "Vitest run of the full suite: pass/fail/skip counts on stdout, exit 0 when nothing fails"
+    },
+    "typecheck": {
+      "run": "npm run typecheck",
+      "workingDirectory": ".",
+      "requires": [
+        "node_modules from npm ci"
+      ],
+      "produces": "tsc --noEmit diagnostics on stdout, exit 0 when clean"
+    },
+    "build": {
+      "run": "npm run build",
+      "workingDirectory": ".",
+      "requires": [
+        "node_modules from npm ci"
+      ],
+      "produces": "Vite renderer build in dist/, exit 0 on success"
+    },
+    "perf": {
+      "run": "npm run perf",
+      "workingDirectory": ".",
+      "requires": [
+        "node_modules from npm ci"
+      ],
+      "produces": "benchmark run of tests/perf-baseline.test.ts, results in tests/perf-baseline-results.json"
     }
   }
 }

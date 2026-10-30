@@ -1,0 +1,39 @@
+{
+  "id": "20261030T195739Z-external-create-item-BLURBY-BUSINESS-1",
+  "operation": "external-create-item",
+  "item_id": "BLURBY-BUSINESS-1",
+  "created": "2026-10-30T19:57:39Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Blurby Business: a walled-off PDF viewer and editor",
+      "status": "Queued",
+      "written_status": "Stub",
+      "workstream": "Blurby Business",
+      "prerequisites": [
+        "APP-TABS-1",
+        "LIBRARY-COMPLETION-VISIBILITY-1"
+      ],
+      "effort": "XL",
+      "spec_link": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+      "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.",
+      "sequence": 100.5,
+      "id": "BLURBY-BUSINESS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-30T19:57:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLURBY-BUSINESS-1"
+  },
+  "resolved": "2026-10-30T19:58:08Z",
+  "outcome": "abandoned",
+  "reason": "Notion connector refused the create (HTTP 400): Lane select has no 'Blurby Business' option. Nothing was created (SQL absence re-checked). Per coordinator instruction Lane is left empty; replaced by a create-item plan without workstream."
+}

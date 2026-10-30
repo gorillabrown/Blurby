@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30; change 26 (NARRATE-PAUSE-CANCEL-1 package-verified, In Flight) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,17 +14,25 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T18:45:00Z"
+  "final": "2026-10-30T21:27:15Z",
+  "batch2Refresh": "2026-10-30T19:49:00Z",
+  "batch3Refresh": "2026-10-30T19:57:00Z",
+  "batch4Refresh": "2026-10-30T20:01:30Z",
+  "batch5Refresh": "2026-10-30T20:46:00Z",
+  "batch6Refresh": "2026-10-30T20:53:00Z",
+  "batch7Refresh": "2026-10-30T21:14:30Z",
+  "batch8Refresh": "2026-10-30T21:22:00Z",
+  "batch9Refresh": "2026-10-30T21:26:30Z"
  },
  "driftLines": [],
  "counts": {
   "before": 197,
-  "after": 199,
-  "created": 2,
+  "after": 202,
+  "created": 5,
   "statusAfter": {
-   "Queued": 44,
-   "In Flight": 69,
-   "Completed": 71,
+   "Completed": 72,
+   "Queued": 45,
+   "In Flight": 70,
    "Dissolved": 9,
    "Superseded": 6
   },
@@ -52,7 +60,71 @@
    "NARRATE-PAUSE-CANCEL-1 (86.5)",
    "LIBRARY-WRITE-RACE-2 (87)"
   ],
-  "phaseCopiedFromNarrateQuitLinger1": "empty (source Phase is empty)"
+  "phaseCopiedFromNarrateQuitLinger1": "empty (source Phase is empty)",
+  "batch2": {
+   "refreshDiffAgainst184500Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (batch-2 recovery records written there)"
+  },
+  "batch3": {
+   "refreshDiffAgainst195230Z": "none (register unchanged between batches)",
+   "onlyIntendedRowAdded": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-absorb-blurby-business)"
+  },
+  "batch4": {
+   "refreshDiffAgainst195900Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-package-records-20261030 (branch eb/gov-spec-agent-protocol)"
+  },
+  "batch5": {
+   "refreshDiffAgainst200300Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-prereqs from origin/main 4a1b7aa5)"
+  },
+  "batch6": {
+   "refreshDiffAgainst204730Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": true,
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-business-charter-link from origin/main c96343c4)"
+  },
+  "batch7": {
+   "refreshDiffAgainst205400Z": "AGENT-PROTOCOL-CONSOLIDATION-1 closed by another session (Status Completed, Seq cleared, Completed date and Evidence set; already in the 2026-10-30T21:10:01Z snapshot on main). Not a change of this batch; its change-19 revision is superseded by that close-out.",
+   "onlyIntendedRowAdded": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (superseded by the close-out above)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-play-first-text)"
+  },
+  "batch8": {
+   "refreshDiffAgainst211630Z": "none (register unchanged between batches)",
+   "onlyIntendedChanges": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-gap-pause)"
+  },
+  "batch9": {
+   "refreshDiffAgainst212400Z": "none (register unchanged between batches)",
+   "onlyIntendedFieldsChanged": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-pause-cancel-verified)"
+  }
  },
  "changes": [
   {
@@ -399,6 +471,441 @@
    "notesAppendOnly": false,
    "actualRevision": "fbf81b8390c509577e56932771a1ea545caf7a9bd0808b84ac1061d94b23511c",
    "readbackNote": null
+  },
+  {
+   "change": 15,
+   "item": "FOLIATE-DISPLAY-LIFETIME-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T195022Z-external-set-status-FOLIATE-DISPLAY-LIFETIME-1",
+   "providerId": "4057c96c-c31e-8146-9399-c4a0739493c4",
+   "url": "https://app.notion.com/4057c96cc31e81469399c4a0739493c4",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Owner authorized independent parallel work, then separate visible cloud chats and upload before launch. Brain approved immutable v3 SHA2565407201dae92574bb0655e7b9ec2f89334d4d1967edfc8532c81e277b15ded1d; independent reviewer PASS e00d0bae3281b0ecd7cf048789dedddbcb669d8d38365197a852665a2e87b823. Named execution owner: FOLIATE-DISPLAY-LIFETIME-1 — cloud implementation; record actual thread ID before code. Base4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7 includes approved docs main85e6e5aa. Only existing foliate-js patch, tests/foliateViewReadiness.test.js, tests/foliateDisplayLifetime.test.js and item-owned docs. Source execution conditional on published full ROADMAP/admission, provider/owner/readback and fresh lane/capability checks. Cloud portable tests do not waive local owner-machine/native Windows ARM64 and package/defaults checks. No main merge/release/terminal completion. Seq68 confirmed free in193-item refresh; no existing reorder.\n\nLocal return 2026-10-27 authorized by owner. Exclusive implementation owner is local chat01a17dcd-3e4d-7161-bb2f-d8c273de5afb; worktree C:/Projects/Blurby/.worktrees/foliate-display-lifetime-20261027, branch eb/foliate-display-lifetime-1 from cloud report161172823c1c0840ac3ada4bf4873582f00d6f68 plus approved docs/protocol f299675dd8251e550f06ab47abb7c4b6ff1889f2. Current main/origin85e6e5aaedccb0501c529dbc9f739e50a0689fd7 unchanged. Immutable v3/independent PASS and exact source/test fence remain; local npm registry PONG verified, normal clean install/postinstall and actual baseline/red controls still required before corrective implementation. Independent local reviewer01a17dce-1533-7d32-9532-c6a5b0123fb0. Parent serializes live register, planning and desktop custody. Preserve normal library/settings AND sync-queue read-only hash/metadata/custody; owned91-WORD route. No main merge, release, installation, terminal completion or package waiver.\n\nLocal bounded delivery 2026-10-27: Built-and-held source e1c1c11ceac16e8cba808714172420942e8801fa independently approved and nonforce published; doc-only held handoff tip2df0f920a7963f8fa81ff2e68eeef352e4d8a418. Final identical detector candidate51PASS, base35 behavioral failures/16 active passes plus4 separately classified production rejections. Full185 files/2522 passed/2 skipped, typecheck/build PASS. Exact ARM64 package static parity77 ASAR source/dist/icon files plus full2 extra-resource trees and8 selected native PE headers/hashes independently PASS. All native launches/routes NOT RUN: artifact-local actual-path attestation collector had2 pre-control fixture failures, empty control results and unproved prior inspector endpoint ownership. Source/package bytes unchanged; package NOT QUALIFIED. Desktop reservation released. No main merge/release/terminal completion. NativeHold memo documents exact remaining observer/provenance/timeout/identity controls. Further collector attempts require Brain-prescribed ruling; actual Blurby preflight requires fresh exclusive custody and independently qualified per-launch initialized-path proof. Native original observer/census/four-mode/91-WORD/defaults/causal controls and final Brain package confirmation remain. Historical timing/ledger/perf dirt preserved unstaged/excluded.\n\nOwner-confirmed held-dispatch recording 2026-10-27: BUILT-AND-HELD / Blocked. Source e1c1c11ceac16e8cba808714172420942e8801fa and held source-branch tip2df0f920a7963f8fa81ff2e68eeef352e4d8a418 retain bounded portable/static approvals. Final prescribed collector qualification is NOT QUALIFIED / CAPABILITY HOLD: two admitted matrix runs used, two owned primary children cleaned up, zero completed actual runtime controls; Run2 22 descriptor plus11 location SYNTHETIC controls passed only. Run1 receipt999bf5062e7743bf9978c62ab99cc38562c3e436e2e7c6ce40f4cc29072c4e76; Run2e2815173d54fc205c9b051c8eba89631121db8a9b9766488810277e48fabbf26. Run2 immediate-prototype getter rejected without invocation; no Run1/Electron extrapolation. Brain and independent evidence review COMPLETE/HOLD, no pending response for this attempt. Native Blurby launches/routes NOT RUN; custody released. This final evidence supersedes earlier collector-progress summaries. Successor observation design needs separate review and explicit new qualification budget/custody. Report/issue and LL-169 persisted at governance-only main cbfbe8b2. Seq68 unchanged; no completion date/terminal ledger write/successor elevation/source merge/release/install. Historical unrelated dirt and all evidence retained.\n\nUnblocked 2026-10-30 by R-2026-10-30-1: NATIVE-PATH-ATTESTATION-1 removed as a prerequisite. Native routes run on RodneySr as job 2 (candidate 2df0f920 with origin/main merged, base 36ac7466, style-null family as the pass signal; isolation by inspector-proved scratch userData, APPDATA/LOCALAPPDATA redirect and profile-tree snapshot)."
+   },
+   "readback": {
+    "Notes": "Owner authorized independent parallel work, then separate visible cloud chats and upload before launch. Brain approved immutable v3 SHA2565407201dae92574bb0655e7b9ec2f89334d4d1967edfc8532c81e277b15ded1d; independent reviewer PASS e00d0bae3281b0ecd7cf048789dedddbcb669d8d38365197a852665a2e87b823. Named execution owner: FOLIATE-DISPLAY-LIFETIME-1 — cloud implementation; record actual thread ID before code. Base4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7 includes approved docs main85e6e5aa. Only existing foliate-js patch, tests/foliateViewReadiness.test.js, tests/foliateDisplayLifetime.test.js and item-owned docs. Source execution conditional on published full ROADMAP/admission, provider/owner/readback and fresh lane/capability checks. Cloud portable tests do not waive local owner-machine/native Windows ARM64 and package/defaults checks. No main merge/release/terminal completion. Seq68 confirmed free in193-item refresh; no existing reorder.\n\nLocal return 2026-10-27 authorized by owner. Exclusive implementation owner is local chat01a17dcd-3e4d-7161-bb2f-d8c273de5afb; worktree C:/Projects/Blurby/.worktrees/foliate-display-lifetime-20261027, branch eb/foliate-display-lifetime-1 from cloud report161172823c1c0840ac3ada4bf4873582f00d6f68 plus approved docs/protocol f299675dd8251e550f06ab47abb7c4b6ff1889f2. Current main/origin85e6e5aaedccb0501c529dbc9f739e50a0689fd7 unchanged. Immutable v3/independent PASS and exact source/test fence remain; local npm registry PONG verified, normal clean install/postinstall and actual baseline/red controls still required before corrective implementation. Independent local reviewer01a17dce-1533-7d32-9532-c6a5b0123fb0. Parent serializes live register, planning and desktop custody. Preserve normal library/settings AND sync-queue read-only hash/metadata/custody; owned91-WORD route. No main merge, release, installation, terminal completion or package waiver.\n\nLocal bounded delivery 2026-10-27: Built-and-held source e1c1c11ceac16e8cba808714172420942e8801fa independently approved and nonforce published; doc-only held handoff tip2df0f920a7963f8fa81ff2e68eeef352e4d8a418. Final identical detector candidate51PASS, base35 behavioral failures/16 active passes plus4 separately classified production rejections. Full185 files/2522 passed/2 skipped, typecheck/build PASS. Exact ARM64 package static parity77 ASAR source/dist/icon files plus full2 extra-resource trees and8 selected native PE headers/hashes independently PASS. All native launches/routes NOT RUN: artifact-local actual-path attestation collector had2 pre-control fixture failures, empty control results and unproved prior inspector endpoint ownership. Source/package bytes unchanged; package NOT QUALIFIED. Desktop reservation released. No main merge/release/terminal completion. NativeHold memo documents exact remaining observer/provenance/timeout/identity controls. Further collector attempts require Brain-prescribed ruling; actual Blurby preflight requires fresh exclusive custody and independently qualified per-launch initialized-path proof. Native original observer/census/four-mode/91-WORD/defaults/causal controls and final Brain package confirmation remain. Historical timing/ledger/perf dirt preserved unstaged/excluded.\n\nOwner-confirmed held-dispatch recording 2026-10-27: BUILT-AND-HELD / Blocked. Source e1c1c11ceac16e8cba808714172420942e8801fa and held source-branch tip2df0f920a7963f8fa81ff2e68eeef352e4d8a418 retain bounded portable/static approvals. Final prescribed collector qualification is NOT QUALIFIED / CAPABILITY HOLD: two admitted matrix runs used, two owned primary children cleaned up, zero completed actual runtime controls; Run2 22 descriptor plus11 location SYNTHETIC controls passed only. Run1 receipt999bf5062e7743bf9978c62ab99cc38562c3e436e2e7c6ce40f4cc29072c4e76; Run2e2815173d54fc205c9b051c8eba89631121db8a9b9766488810277e48fabbf26. Run2 immediate-prototype getter rejected without invocation; no Run1/Electron extrapolation. Brain and independent evidence review COMPLETE/HOLD, no pending response for this attempt. Native Blurby launches/routes NOT RUN; custody released. This final evidence supersedes earlier collector-progress summaries. Successor observation design needs separate review and explicit new qualification budget/custody. Report/issue and LL-169 persisted at governance-only main cbfbe8b2. Seq68 unchanged; no completion date/terminal ledger write/successor elevation/source merge/release/install. Historical unrelated dirt and all evidence retained.\n\nUnblocked 2026-10-30 by R-2026-10-30-1: NATIVE-PATH-ATTESTATION-1 removed as a prerequisite. Native routes run on RodneySr as job 2 (candidate 2df0f920 with origin/main merged, base 36ac7466, style-null family as the pass signal; isolation by inspector-proved scratch userData, APPDATA/LOCALAPPDATA redirect and profile-tree snapshot).\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: native A/B passes; package commit 2d5772d3 (2df0f920 + origin/main e29117b2), tip 4ac4ff76. Control 10332e5a 1 style-null line, candidate 0 across 9 runs, no error.log; suite 2523/1/0; x64/arm64 asar pair identical; live profile unchanged. BUG-222 fixed in the candidate. Arm64 launch at merge. Merges as one stack: FOLIATE-OBSERVER-LEAK-1, then LIBRARY-COMPLETION-VISIBILITY-1, then this item."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "91bcd4e980d4821b067c084da9770fa1a9ef0394d463a2c21878677bee159e23",
+   "readbackNote": null,
+   "batch": 2
+  },
+  {
+   "change": 16,
+   "item": "LIBRARY-COMPLETION-VISIBILITY-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T195126Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+   "providerId": "4057c96c-c31e-81a2-a666-c329943a6ff8",
+   "url": "https://app.notion.com/4057c96cc31e81a2a666c329943a6ff8",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Visibility agent implements/tests/packages in the exclusive isolated branch; parent review and exact-package/designated merge gates remain.\n\nParallel delivery review2026-10-26: Source candidate0dd4d940 independently approved; finaloriginaldocstip a8e31b7363da5c8dd1d8d059915081195d3cc3b6 shipping-input-identical.2469passed2skipped0failed,typecheck/build0, real91word package behavior passes. Brain WITHHOLDS originalpackage confirmation: pre-existing BUG187 flood, no waiver. Brain separately admitted combined verification with FOLIATE-OBSERVER-LEAK-1 on eb/visibility-observer-verification-20261026; full originalobserver and packagegates pending. Issue docs/governance/bug-reports/Issue.LIBRARY-COMPLETION-VISIBILITY-1.2026-10-26.md.\n\nR-2026-10-30-1 (4): RodneySr job 3 is one combined candidate (visibility 0dd4d940, observer leak 51759276 and FOLIATE-DISPLAY-LIFETIME-1's job 2 candidate, from eb/visibility-observer-verification-20261026 @ 4c9724e6) with full rule 53. This replaces the separately reviewed observation design and qualification budget requirement."
+   },
+   "readback": {
+    "Notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Visibility agent implements/tests/packages in the exclusive isolated branch; parent review and exact-package/designated merge gates remain.\n\nParallel delivery review2026-10-26: Source candidate0dd4d940 independently approved; finaloriginaldocstip a8e31b7363da5c8dd1d8d059915081195d3cc3b6 shipping-input-identical.2469passed2skipped0failed,typecheck/build0, real91word package behavior passes. Brain WITHHOLDS originalpackage confirmation: pre-existing BUG187 flood, no waiver. Brain separately admitted combined verification with FOLIATE-OBSERVER-LEAK-1 on eb/visibility-observer-verification-20261026; full originalobserver and packagegates pending. Issue docs/governance/bug-reports/Issue.LIBRARY-COMPLETION-VISIBILITY-1.2026-10-26.md.\n\nR-2026-10-30-1 (4): RodneySr job 3 is one combined candidate (visibility 0dd4d940, observer leak 51759276 and FOLIATE-DISPLAY-LIFETIME-1's job 2 candidate, from eb/visibility-observer-verification-20261026 @ 4c9724e6) with full rule 53. This replaces the separately reviewed observation design and qualification budget requirement.\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1 on combined candidate 2d5772d3; the BUG-222 WITHHOLD is lifted (no error.log). Candidate shows owned-complete in All and owned-archive in Archive; base 36ac7466 shows both halves of the defect plus 264 ResizeObserver lines. Spec suites 67/67. Arm64 launch at merge. Middle of the observer, visibility, display-lifetime merge stack."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "e4078e77e155f0327db396afc7daeb84841dccad48419729dc0423c8f7538646",
+   "readbackNote": null,
+   "batch": 2
+  },
+  {
+   "change": 17,
+   "item": "FOLIATE-OBSERVER-LEAK-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T195208Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+   "providerId": "4027c96c-c31e-810f-816f-dc1d0bd16e6e",
+   "url": "https://app.notion.com/4027c96cc31e810f816fdc1d0bd16e6e",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.\n\nParallel delivery review2026-10-26: Brain technicalruling2026-10-26 confirms this existingheld observerfix as prerequisite to cleanvisibility package acceptance. Exacttip5175927659228e2cf9c87cc74210e6d943371b41 preserved. Separateisolated combinedverification branch eb/visibility-observer-verification-20261026 admitted, fulloriginal longsession/census and strictstanding53 retained. No mainmerge/freeze lift/releasego. Admission docs/planning/roadmap-reviews/2026-10-26-visibility-observer-admission.md."
+   },
+   "readback": {
+    "Notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.\n\nParallel delivery review2026-10-26: Brain technicalruling2026-10-26 confirms this existingheld observerfix as prerequisite to cleanvisibility package acceptance. Exacttip5175927659228e2cf9c87cc74210e6d943371b41 preserved. Separateisolated combinedverification branch eb/visibility-observer-verification-20261026 admitted, fulloriginal longsession/census and strictstanding53 retained. No mainmerge/freeze lift/releasego. Admission docs/planning/roadmap-reviews/2026-10-26-visibility-observer-admission.md.\n\n2026-10-30: 51759276 is contained in FOLIATE-DISPLAY-LIFETIME-1's package-verified candidate 2d5772d3; 0 ResizeObserver-loop lines vs 264 on base. Merges first in the observer, visibility, display-lifetime stack."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "db95a2077720e604c95175e05a4d89aba241521c1a8930530cf21d5a814cc616",
+   "readbackNote": null,
+   "batch": 2
+  },
+  {
+   "change": 18,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T195823Z-external-create-item-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Prerequisites",
+    "Effort",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "fieldsNotWritten": {
+    "Lane": "Blurby Business refused by the Notion connector (HTTP 400: Lane is a select whose options are the six declared lanes; a new option needs a data-source update). Left empty per coordinator instruction."
+   },
+   "abandonedPlan": {
+    "recoveryId": "20261030T195739Z-external-create-item-BLURBY-BUSINESS-1",
+    "outcome": "abandoned",
+    "reason": "create with Lane refused (HTTP 400); nothing created, absence re-checked by SQL"
+   },
+   "before": null,
+   "readback": {
+    "Name": "Blurby Business: a walled-off PDF viewer and editor",
+    "Status": "Queued",
+    "Seq": 100.5,
+    "Spec State": "Stub",
+    "Prerequisites": "APP-TABS-1; LIBRARY-COMPLETION-VISIBILITY-1",
+    "Effort": "XL",
+    "Spec Reference": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.",
+    "Sprint Code": "BLURBY-BUSINESS-1",
+    "Lane": null,
+    "Branch": null,
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "APP-TABS-1 (100)",
+    "BLURBY-BUSINESS-1 (100.5)",
+    "RSS-AGGREGATOR-1 (101)"
+   ],
+   "actualRevision": "c17c5c9de7494b9213517cda98c1118ee81bcfff6fff83c26f9e267a767eae79",
+   "readbackNote": null,
+   "batch": 3
+  },
+  {
+   "change": 19,
+   "item": "AGENT-PROTOCOL-CONSOLIDATION-1",
+   "operation": "store-spec-link",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T200149Z-external-store-spec-link-AGENT-PROTOCOL-CONSOLIDATION-1",
+   "providerId": "4077c96c-c31e-81b4-9673-db39d6735765",
+   "url": "https://app.notion.com/4077c96cc31e81b49673db39d6735765",
+   "fieldsWritten": [
+    "Spec State",
+    "Spec Reference"
+   ],
+   "before": {
+    "Spec State": "Stub",
+    "Spec Reference": "ROADMAP.md#agent-protocol-consolidation-1"
+   },
+   "readback": {
+    "Spec State": "Full Spec",
+    "Spec Reference": "docs/planning/specs/2026-10-30/AGENT-PROTOCOL-CONSOLIDATION-1.md"
+   },
+   "actualRevision": "8c683694c660ac43b2f52cdfe71fb91094a32044b47a1b940d3b4310fb37e58e",
+   "readbackNote": "spec passed U9 and U10 (exit 0) per coordinator",
+   "batch": 4
+  },
+  {
+   "change": "20a",
+   "item": null,
+   "operation": "schema: add select option (connector notion-update-data-source; not a helper handshake: the helper has no schema operation)",
+   "outcome": "succeeded",
+   "recoveryId": null,
+   "providerId": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
+   "property": "Lane",
+   "statement": "ALTER COLUMN \"Lane\" SET SELECT('UX polish':pink, 'TTS / Narration Engine':purple, 'Reader Engine':blue, 'Chrome Extension':yellow, 'Library & Content':brown, 'Platform & Maintenance':gray, 'Blurby Business':orange) COMMENT 'Primary product lane (registry policy.roadmap.lanes)'",
+   "optionsBefore": [
+    [
+     "UX polish",
+     "pink"
+    ],
+    [
+     "TTS / Narration Engine",
+     "purple"
+    ],
+    [
+     "Reader Engine",
+     "blue"
+    ],
+    [
+     "Chrome Extension",
+     "yellow"
+    ],
+    [
+     "Library & Content",
+     "brown"
+    ],
+    [
+     "Platform & Maintenance",
+     "gray"
+    ]
+   ],
+   "optionsAfter": [
+    [
+     "UX polish",
+     "pink"
+    ],
+    [
+     "TTS / Narration Engine",
+     "purple"
+    ],
+    [
+     "Reader Engine",
+     "blue"
+    ],
+    [
+     "Chrome Extension",
+     "yellow"
+    ],
+    [
+     "Library & Content",
+     "brown"
+    ],
+    [
+     "Platform & Maintenance",
+     "gray"
+    ],
+    [
+     "Blurby Business",
+     "orange"
+    ]
+   ],
+   "diff": {
+    "added": [
+     [
+      "Blurby Business",
+      "orange"
+     ]
+    ],
+    "removed": [],
+    "recoloured": [],
+    "renamed": [],
+    "existingOptionIdsUnchanged": true,
+    "propertyDescriptionUnchanged": true,
+    "otherPropertiesUnchanged": true
+   },
+   "authority": "owner approval in chat 2026-10-30 (\"Yes, add the option\") with Blurby.Brain1 technical ruling",
+   "followUp": "policy.roadmap.lanes still lists the six original lanes; not changed by this batch",
+   "batch": 4
+  },
+  {
+   "change": "20b",
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T200241Z-external-set-status-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Lane"
+   ],
+   "before": {
+    "Lane": null
+   },
+   "readback": {
+    "Lane": "Blurby Business"
+   },
+   "actualRevision": "824e0c1dd0e87887570a6c5b0787374b06b113b101d23946b1960412ebcdf10d",
+   "readbackNote": "completes change 18, whose Lane was refused before the option existed",
+   "batch": 4
+  },
+  {
+   "change": 21,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T204636Z-external-set-status-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Prerequisites",
+    "Notes"
+   ],
+   "before": {
+    "Prerequisites": "APP-TABS-1; LIBRARY-COMPLETION-VISIBILITY-1",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now."
+   },
+   "readback": {
+    "Prerequisites": null,
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "331ad24c969a3e5d41392a119348d7ccf7d1f1a815d4bdfc308329cd9ad73ea0",
+   "readbackNote": "Prerequisites written as null (empty), as for change 5",
+   "batch": 5
+  },
+  {
+   "change": 22,
+   "item": "BLURBY-BUSINESS-1",
+   "operation": "store-spec-link",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T205327Z-external-store-spec-link-BLURBY-BUSINESS-1",
+   "providerId": "4097c96c-c31e-816d-95ef-d6fa5243812b",
+   "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+   "fieldsWritten": [
+    "Spec Reference",
+    "Notes"
+   ],
+   "before": {
+    "Spec Reference": "docs/planning/holding/2026-10-30-blurby-business-tier1.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate."
+   },
+   "readback": {
+    "Spec Reference": "docs/planning/epics/2026-10-30-blurby-business/charter.md",
+    "Notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.\n\nChartered 2026-10-30 by the Blurby Business session: packet docs/planning/epics/2026-10-30-blurby-business/, run branch eb/blurby-business-1 on RodneySr, never merged by the run itself."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "fdd8bdd0df90a4013d603238edf01c49e36d78ec4ab98384d31c7e1c72ac06d1",
+   "readbackNote": "Spec State left Stub and Status Queued (epics are chartered, not Full Spec); packet on main at c96343c4",
+   "batch": 6
+  },
+  {
+   "change": 23,
+   "item": "PLAY-FIRST-TEXT-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T211548Z-external-create-item-PLAY-FIRST-TEXT-1",
+   "providerId": "4097c96c-c31e-81a1-94f5-d6c923491f78",
+   "url": "https://app.notion.com/4097c96cc31e81a194f5d6c923491f78",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Lane",
+    "Effort",
+    "Branch",
+    "Prerequisites",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "before": null,
+   "readback": {
+    "Name": "Play on a page with no words starts reading at the first text",
+    "Status": "Queued",
+    "Seq": 86.75,
+    "Spec State": "Full Spec",
+    "Lane": "Reader Engine",
+    "Effort": "M",
+    "Branch": "eb/play-first-text-1",
+    "Prerequisites": "BAND-ALIGN-2; NARRATE-PAUSE-CANCEL-1",
+    "Spec Reference": "docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.",
+    "Sprint Code": "PLAY-FIRST-TEXT-1",
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "NARRATE-PAUSE-CANCEL-1 (86.5)",
+    "PLAY-FIRST-TEXT-1 (86.75)",
+    "LIBRARY-WRITE-RACE-2 (87)"
+   ],
+   "actualRevision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
+   "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself; no follow-up store-spec-link needed",
+   "batch": 7
+  },
+  {
+   "change": 24,
+   "item": "NARRATE-GAP-PAUSE-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212257Z-external-create-item-NARRATE-GAP-PAUSE-1",
+   "providerId": "4097c96c-c31e-815e-be67-ebce2a82b23c",
+   "url": "https://app.notion.com/4097c96cc31e815ebe67ebce2a82b23c",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Lane",
+    "Effort",
+    "Branch",
+    "Prerequisites",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "before": null,
+   "readback": {
+    "Name": "A pause in the gap before a chunk resumes on that chunk's first word, without a silence",
+    "Status": "Queued",
+    "Seq": 86.6,
+    "Spec State": "Full Spec",
+    "Lane": "TTS / Narration Engine",
+    "Effort": "S",
+    "Branch": "eb/narrate-gap-pause-1",
+    "Prerequisites": "NARRATE-PAUSE-CANCEL-1",
+    "Spec Reference": "docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.",
+    "Sprint Code": "NARRATE-GAP-PAUSE-1",
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "NARRATE-PAUSE-CANCEL-1 (86.5)",
+    "NARRATE-GAP-PAUSE-1 (86.6)",
+    "PLAY-FIRST-TEXT-1 (86.75)"
+   ],
+   "actualRevision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+   "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself",
+   "batch": 8
+  },
+  {
+   "change": 25,
+   "item": "NARRATE-PAUSE-CANCEL-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212328Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+   "providerId": "4097c96c-c31e-8131-8dbc-c9439c893bd2",
+   "url": "https://app.notion.com/4097c96cc31e81318dbcc9439c893bd2",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5."
+   },
+   "readback": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1)."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "7bd29cbc88c9cb2ce77313c7e74950530f7fc7c98dd4717bdb414235db870a92",
+   "readbackNote": null,
+   "batch": 8
+  },
+  {
+   "change": 26,
+   "item": "NARRATE-PAUSE-CANCEL-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212651Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+   "providerId": "4097c96c-c31e-8131-8dbc-c9439c893bd2",
+   "url": "https://app.notion.com/4097c96cc31e81318dbcc9439c893bd2",
+   "fieldsWritten": [
+    "Status",
+    "Notes"
+   ],
+   "before": {
+    "Status": "Queued",
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1)."
+   },
+   "readback": {
+    "Status": "In Flight",
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1).\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: fix 53adf994, census c4b79abb, packages from cf093ab7. After (S) 3/3 pass (press-to-cancel 13-24 ms, 0 posts after); T2-2 0 gaps; after D6 resumes 80-96 ms; x64/arm64 asar identical. Arm64 launch at merge. Built and held, stacked on NARRATE-QUIT-LINGER-1.",
+    "Seq": 86.5,
+    "Spec State": "Full Spec",
+    "Prerequisites": "NARRATE-QUIT-LINGER-1"
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "8dade63dd326d92fa1294fe5992be994f95f4b01a68c3c8ea9fe6f66246f7b97",
+   "readbackNote": "Seq, Spec State and Prerequisites kept (read back unchanged); built and held",
+   "batch": 9
   }
  ]
 }

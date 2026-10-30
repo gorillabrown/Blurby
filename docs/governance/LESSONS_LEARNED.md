@@ -3115,3 +3115,25 @@ Related: LL-028, LL-071, LL-072, LL-081, LL-139, LL-160; standing rules29 and36.
 **Applies to:** Work-register sequence normalization, provider adapters, planned external mutations, snapshot import, canonical ordering and helper activation.
 **Status:** Observation — bounded helper repair and registration verified; no application/native qualification or official plugin release claim.
 Related: LL-130, LL-137, LL-155, LL-163; Issue.REGISTER-SEQUENCE-PRECISION-1.2026-10-27.md.
+
+### LL-091 — status (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
+**Status:** Retired — superseded by the Virtuoso plugin's wave sizing (skills/effort-levels: tool budget <=40, wall time <=60 minutes, mixed-effort split); AGENT-PROTOCOL-CONSOLIDATION-1
+
+### LL-172 — The registry helper's `timing` writes outside a dispatch's exact-path fence (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
+**Verdict:** A `timing` call is not read-only for the rest of the tree: the helper backfills cost lines into other dispatches' closed time logs and appends a `plugin-version` Change.Ledger record under whatever `--actor` the call carries, even an actor the changeLedger role does not name.
+**Evidence:** Qualified helper root fcfa9295 (1.16.1 code). In the dispatch worktree, the first guarded `timing` calls appended one line to each of 24 other `Timing.*.jsonl` logs and CH-001 under actor `virtuoso` (not a changeLedger writer); in the close-out worktree, 10 logs and CH-001 under `dispatch-closeout`. None of it is in the D9 or C14 fence; it surfaced only because both fences named exact paths. Findings F-011.
+**Recommendation:** Stage exact paths only, and diff `git status --porcelain` against the staging plan before every commit of a dispatch that runs `timing`. Treat backfill lines and a ledger record under a non-writer actor as user-decision files, named in the close-out's *Files Created*. Run the first `timing` call of a dispatch under an actor the changeLedger role names when the record is meant to be kept.
+**Applies to:** Any dispatch or close-out with an exact-path fence (D9- or C14-style rows) that keeps a time log, and any helper call whose `--actor` is not a writer of every role the call may touch.
+**Status:** Observation
+Related: LL-171; standing rule 41.
+
+### LL-143 — status (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
+**Status:** Observation — did not hold in AGENT-PROTOCOL-CONSOLIDATION-1 (2026-10-30): the specification dry-ran Done-when C5a only against the base, not against the prescribed E3/E9 text, so C5a contradicted C6 and Blurby.Brain1 amended C5a mid-dispatch (R-C5a). Promotion candidate for roadmap-review (standing rule 44 already states the dry-run duty).
+
+### LL-173 — Audio fakes must model a lagging heard position (roadmap-review, 2026-10-30)
+**Verdict:** A test fake whose heard position equals its scheduling clock hides every defect that depends on the gap between what has been scheduled and what has been heard. Code under test can read the wrong clock and still pass.
+**Evidence:** BUG-237. Narrate's `pause()` resolves a gap pause through `nextScheduledPause()`, which compares against `output.now()` (the scheduling head) rather than the heard position. In a pause 34 ms before a scheduled chunk, the resume skipped that chunk's 18 words and waited about 2.3 s (RodneySr D6 `warm-2-00-3`, base `5de476ce`). The unit fake `fakeAudioOutput.ts:20-22` returns the same value for both clocks, so no existing test could see it (Blurby.Brain1, 2026-10-30).
+**Recommendation:** Any fake standing in for an audio output, or any producer and consumer pair with separate clocks, models the heard (playback) position lagging the scheduling head by a configurable amount. At least one test runs with a non-zero lag. A test that passes only at zero lag is labelled a control, not proof.
+**Applies to:** Narrate's engine and output fakes; any scheduler and player split (TTS, audio export, timed highlighting).
+**Status:** Observation
+Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
