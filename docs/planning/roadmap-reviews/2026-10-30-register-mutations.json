@@ -1,6 +1,6 @@
 {
  "date": "2026-10-30",
- "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30",
+ "authority": "roadmap review 2026-10-30, plan docs/planning/roadmap-reviews/2026-10-30-plan.md section C.4 (changes 1-10); coordinator addendum changes 11-12 and 13; change 14 from the owner design decision made directly to Blurby.Roadmap on 2026-10-30; changes 15-17 (Notes appends, package verification records) approved by the coordinator 2026-10-30; change 18 (BLURBY-BUSINESS-1 create) confirmed by the owner with Blurby.Roadmap 2026-10-30; change 19 (store-spec-link) and changes 20a/20b (Lane option and value) approved 2026-10-30; change 21 (BLURBY-BUSINESS-1 prerequisites cleared) approved 2026-10-30; change 22 (BLURBY-BUSINESS-1 charter link) approved 2026-10-30; change 23 (PLAY-FIRST-TEXT-1 create) approved 2026-10-30; changes 24-25 (NARRATE-GAP-PAUSE-1 create, NARRATE-PAUSE-CANCEL-1 amendment note) approved 2026-10-30",
  "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
  "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
  "actor": "roadmap-review",
@@ -14,22 +14,23 @@
   "preCreate": "2026-10-30T18:30:30Z",
   "postCreate": "2026-10-30T18:31:30Z",
   "afterChange13": "2026-10-30T18:33:30Z",
-  "final": "2026-10-30T21:16:30Z",
+  "final": "2026-10-30T21:24:00Z",
   "batch2Refresh": "2026-10-30T19:49:00Z",
   "batch3Refresh": "2026-10-30T19:57:00Z",
   "batch4Refresh": "2026-10-30T20:01:30Z",
   "batch5Refresh": "2026-10-30T20:46:00Z",
   "batch6Refresh": "2026-10-30T20:53:00Z",
-  "batch7Refresh": "2026-10-30T21:14:30Z"
+  "batch7Refresh": "2026-10-30T21:14:30Z",
+  "batch8Refresh": "2026-10-30T21:22:00Z"
  },
  "driftLines": [],
  "counts": {
   "before": 197,
-  "after": 201,
-  "created": 4,
+  "after": 202,
+  "created": 5,
   "statusAfter": {
    "Completed": 72,
-   "Queued": 45,
+   "Queued": 46,
    "In Flight": 69,
    "Dissolved": 9,
    "Superseded": 6
@@ -106,6 +107,14 @@
    "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (superseded by the close-out above)",
    "recoveryOutstanding": [],
    "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-play-first-text)"
+  },
+  "batch8": {
+   "refreshDiffAgainst211630Z": "none (register unchanged between batches)",
+   "onlyIntendedChanges": true,
+   "otherRowsUnchanged": true,
+   "confirmedRevisionsMatchFinalRead": "all except AGENT-PROTOCOL-CONSOLIDATION-1 (change-19 revision superseded by its close-out in another session)",
+   "recoveryOutstanding": [],
+   "helperRoot": "C:/Projects/Blurby/.worktrees/gov-bugs-20261030 (branch eb/gov-spec-gap-pause)"
   }
  },
  "changes": [
@@ -793,6 +802,73 @@
    "actualRevision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
    "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself; no follow-up store-spec-link needed",
    "batch": 7
+  },
+  {
+   "change": 24,
+   "item": "NARRATE-GAP-PAUSE-1",
+   "operation": "create-item",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212257Z-external-create-item-NARRATE-GAP-PAUSE-1",
+   "providerId": "4097c96c-c31e-815e-be67-ebce2a82b23c",
+   "url": "https://app.notion.com/4097c96cc31e815ebe67ebce2a82b23c",
+   "fieldsWritten": [
+    "Name",
+    "Status",
+    "Seq",
+    "Spec State",
+    "Lane",
+    "Effort",
+    "Branch",
+    "Prerequisites",
+    "Spec Reference",
+    "Notes",
+    "Sprint Code"
+   ],
+   "before": null,
+   "readback": {
+    "Name": "A pause in the gap before a chunk resumes on that chunk's first word, without a silence",
+    "Status": "Queued",
+    "Seq": 86.6,
+    "Spec State": "Full Spec",
+    "Lane": "TTS / Narration Engine",
+    "Effort": "S",
+    "Branch": "eb/narrate-gap-pause-1",
+    "Prerequisites": "NARRATE-PAUSE-CANCEL-1",
+    "Spec Reference": "docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md",
+    "Notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.",
+    "Sprint Code": "NARRATE-GAP-PAUSE-1",
+    "Phase": null
+   },
+   "seqNeighbours": [
+    "NARRATE-PAUSE-CANCEL-1 (86.5)",
+    "NARRATE-GAP-PAUSE-1 (86.6)",
+    "PLAY-FIRST-TEXT-1 (86.75)"
+   ],
+   "actualRevision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+   "readbackNote": "Spec State Full Spec and Spec Reference set in the create itself",
+   "batch": 8
+  },
+  {
+   "change": 25,
+   "item": "NARRATE-PAUSE-CANCEL-1",
+   "operation": "set-status",
+   "outcome": "succeeded",
+   "recoveryId": "20261030T212328Z-external-set-status-NARRATE-PAUSE-CANCEL-1",
+   "providerId": "4097c96c-c31e-8131-8dbc-c9439c893bd2",
+   "url": "https://app.notion.com/4097c96cc31e81318dbcc9439c893bd2",
+   "fieldsWritten": [
+    "Notes"
+   ],
+   "before": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5."
+   },
+   "readback": {
+    "Notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1)."
+   },
+   "notesAppendOnly": true,
+   "actualRevision": "7bd29cbc88c9cb2ce77313c7e74950530f7fc7c98dd4717bdb414235db870a92",
+   "readbackNote": null,
+   "batch": 8
   }
  ]
 }

@@ -443,3 +443,70 @@
   - **LL-157 and LL-159:** the quit sequence is unchanged.
   - **LL-021, LL-034 and LL-122:** chunk planning is unchanged.
   - The other live lessons concern other areas: CSS, Foliate, library, audit, governance and register tooling.
+
+##### Mid-Dispatch Amendment — 2026-10-30 (D6 gate after BUG-237)
+
+- **Authority:** Blurby.Brain1, 2026-10-30. This is a binding technical ruling under Rule 11, and it supersedes the D6 STOP for this item.
+- **What triggered it:**
+  - The base D6 run on RodneySr (`$A\d6-base`, at `5de476ce`, x64) produced a ~2.3 s resume in run `warm-2.00-3` (*Meditations*, word ~8730, 2.00x).
+  - The cause is a separate engine defect, **BUG-237**: a pause in the gap before a scheduled chunk skips that chunk and resumes after a silence (`docs/governance/BUG_REPORT.md` on `origin/main` @ `0238e3da`). It was deterministic in two runs and is present on the base, so this item did not cause it.
+  - BUG-237 is fixed by **NARRATE-GAP-PAUSE-1** (Seq 86.6), which is stacked on this branch and merges after it.
+  - This item's job is that the fix introduces no D6 regression, not that it repairs BUG-237.
+- **Rows replaced.** Everything else in the specification stands, including T2-2's gap comparison (Done-when 9, third and fourth bullets) and its stop.
+  - **Done-when 3, fourth bullet** ("The D6 check below exits 0 on `$A\d6-base-latency-e2e.json`") is replaced by: *`node $A\check-d6.cjs $A\d6-base-latency-e2e.json` exits 0 (base mode, below).*
+  - **Done-when 3, the "D6 check" block** is replaced by the checker `$A\check-d6.cjs` below. The old inline check is no longer run.
+  - **Done-when 9, second bullet** ("The D6 check exits 0 on it: every counting warm resume is under 2,000 ms at both rates") is replaced by: *`node $A\check-d6.cjs $A\d6-base-latency-e2e.json $A\d6-after-latency-e2e.json` exits 0 (compare mode, below).*
+  - **Failure handling, the bullet "T2-2 check exits 1 …, or a resume ≥ 2,000 ms: stop"** is replaced by two bullets:
+    - **T2-2 check exits 1** (more gaps than the base, or fewer than 20 resumes): stop and give the numbers to Blurby.Brain. This is unchanged.
+    - **`check-d6.cjs` exits 1:** stop and give its printed output to Blurby.Brain. That covers a counting resume ≥ 2,000 ms other than the excepted trial; `warm-2.00-3` absent, or its excepted trial not counting, on either side; or the excepted trial's after value more than 150 ms above its base value. Do not re-run to chase a pass.
+- **The new D6 gate (Blurby.Brain1):**
+  - **The excepted trial.** In run `warm-2.00-3`, the excepted trial is the resume trial with the highest `latencyMs`. Its after value must be **at most its base value + 150 ms** ("no regression"). The bound is one-sided (Blurby.Brain1, 2026-10-30): a faster after value always passes.
+  - **Every other resume** at both rates (1.00x and 2.00x), including the other trials of `warm-2.00-3`, stays under **2,000 ms** under the script's counting rules: a counting trial has `latencyMs !== null`, `cpu !== null` and `cpu.foreignPct <= 25` (`scripts/narrate-rebuild/p5-latency-e2e.mjs:165`).
+  - Both rates must hold at least 20 counting resumes.
+- **The checker** `$A\check-d6.cjs`, saved verbatim in the artifacts folder (never in the tree):
+
+  ```js
+  // NARRATE-PAUSE-CANCEL-1 Mid-Dispatch Amendment 2026-10-30 (D6 gate after BUG-237; Blurby.Brain1).
+  // Base mode:    node check-d6.cjs <base latency-e2e.json>
+  // Compare mode: node check-d6.cjs <base latency-e2e.json> <after latency-e2e.json>
+  // Reads report.warm[rate].resume.trials (fields: run, latencyMs, cpu.foreignPct) as p5-latency-e2e.mjs writes them.
+  const fs = require("fs");
+  const EXCEPT_RUN = "warm-2.00-3", TOL_MS = 150, BUDGET_MS = 2000, CEIL = 25, MIN_COUNTING = 20;
+  const counts = (x) => x.latencyMs !== null && x.cpu !== null && x.cpu.foreignPct <= CEIL;
+  function side(file) {
+    const r = JSON.parse(fs.readFileSync(file, "utf8"));
+    const rates = Object.keys(r.warm || {});
+    const trials = rates.flatMap((k) => (r.warm[k].resume.trials || []).map((x) => ({ ...x, rate: k })));
+    const own = trials.filter((x) => x.run === EXCEPT_RUN && x.latencyMs !== null);
+    const except = own.length ? own.reduce((m, x) => (x.latencyMs > m.latencyMs ? x : m)) : null;
+    const others = trials.filter((x) => x !== except && counts(x));
+    const over = others.filter((x) => x.latencyMs >= BUDGET_MS).map((x) => ({ run: x.run, rate: x.rate, latencyMs: x.latencyMs }));
+    const countingPerRate = Object.fromEntries(rates.map((k) => [k, trials.filter((x) => x.rate === k && counts(x)).length]));
+    const ok = rates.length === 2 && !!except && counts(except) && over.length === 0 && Object.values(countingPerRate).every((n) => n >= MIN_COUNTING);
+    return { file, rates, except: except && { run: except.run, rate: except.rate, word: except.word, latencyMs: except.latencyMs, counts: counts(except) }, over, countingPerRate, ok };
+  }
+  const base = side(process.argv[2]);
+  console.log(JSON.stringify({ base }));
+  let ok = base.ok;
+  if (process.argv[3]) {
+    const after = side(process.argv[3]);
+    const deltaMs = after.except && base.except ? after.except.latencyMs - base.except.latencyMs : null;
+    console.log(JSON.stringify({ after, exceptDeltaMs: deltaMs, toleranceMs: TOL_MS }));
+    ok = ok && after.ok && deltaMs !== null && deltaMs <= TOL_MS;
+  }
+  console.log(JSON.stringify({ verdict: ok ? "PASS" : "FAIL" }));
+  process.exit(ok ? 0 : 1);
+  ```
+
+  - **Fields printed:**
+    - per side: `rates`, `except` (`run`, `rate`, `word`, `latencyMs`, `counts`), `over[]`, `countingPerRate` and `ok`;
+    - in compare mode: `exceptDeltaMs` (after − base; a negative value is a speed-up and passes) and `toleranceMs`;
+    - last: `verdict`.
+  - **The memo** records both sides' output, the excepted trial's word and latency on base and after, and BUG-237 as the cause, with NARRATE-GAP-PAUSE-1 as its fix.
+- **Not changed:**
+  - the release-level D6 budget (charter D6: every counting warm resume < 2,000 ms). The exception is local to this item's gate, and NARRATE-GAP-PAUSE-1's D6 gate restores the full budget at `warm-2.00-3`;
+  - the T2-2 gap gate;
+  - the (S) gate (R2);
+  - rule 53;
+  - the fence. The checker lives under `$A` and is never staged.
+- **Lessons:** LL-143 (the replaced rows keep exact exit codes and a named checker); standing rule 55 (the base side of `check-d6.cjs` must find the excepted trial, so it can see a slow resume); LL-152 (base and after use the same script, arguments and host).

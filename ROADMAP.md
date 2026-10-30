@@ -702,6 +702,8 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 #### NARRATE-PAUSE-CANCEL-1 — Pausing Narrate cancels queued Kokoro jobs *(Seq 86.5; Queued; Full Spec — dispatch-ready; authored 2026-10-30 by roadmap review 2026-10-30)*
 
+- **Mid-dispatch amendment (2026-10-30, Blurby.Brain1):** the D6 slow-resume gate is now "no regression": warm-2.00-3 after ≤ base + 150 ms, one-sided, and every other resume under 2,000 ms. It supersedes the D6 stop, because base D6 exposed BUG-237, which NARRATE-GAP-PAUSE-1 fixes. The amendment text is at the end of the spec file.
+
 - **What:** the pause cancels Narrate's queued, not-yet-started Kokoro jobs in main through one narrow IPC, `narrate-cancel-queued`, which takes a group prefix (quit-linger's original half (a)).
 - **Why:** on RodneySr, in 3 of 3 staged base runs the queued prefetch posted after the pause (+9, +871, +600 ms).
 - **Prerequisites:** NARRATE-QUIT-LINGER-1. Stacked on `eb/narrate-quit-linger-1` @ `5de476ce`; both touch `main/narrate/producer.js`, and this one merges after it.
@@ -711,6 +713,21 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - A queued job posted within 50 ms of the press, before the cancel line, is recorded as "race window", not a failure.
   - Also required: T2-2 `--gaps` over D6 warm-resume traces, D6 resume on x64, and rule 53.
 - **Full specification:** [docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md](docs/planning/specs/2026-10-30/NARRATE-PAUSE-CANCEL-1.md). It holds the WHERE, Done-when, implementation detail, task list (8 rows, Waves A/B) and lessons applied. The builder, the merge and the close-out read it there.
+
+<a id="narrate-gap-pause-1"></a>
+
+#### NARRATE-GAP-PAUSE-1 — A pause in the gap before a chunk resumes on that chunk's first word, without a silence *(Seq 86.6; Queued; Full Spec — dispatch-ready; authored 2026-10-30; fixes BUG-237, HIGH)*
+
+- **What:** a Narrate pause that lands in the gap just before a scheduled chunk anchors on the first unheard chunk, measured on one clock, so the resume speaks that chunk's first word with normal latency. A chunk stopped by the pause no longer sets the next chunk's start time.
+- **Why:** BUG-237. On RodneySr, a pause 34 ms before chunk 8730 made the resume skip 18 words and wait about 2.3 s. Cause: `pause()` reads the scheduling head instead of the heard position. The unit fake hid it (LL-173).
+- **Gates (Blurby.Brain1):**
+  - Red tests g1–g3 on a fake with a lagging heard position.
+  - `check-skip` must flag the base trace.
+  - warm-2.00-3 resume ≤ 150 ms after the fix.
+  - No regression: ≤ base + 150 ms.
+  - Rule 53 pair on RodneySr.
+- **Base:** stacked on `eb/narrate-pause-cancel-1`'s final tip; merges after it. Prerequisite NARRATE-PAUSE-CANCEL-1. Host RodneySr, about 3–4 h.
+- **Full specification:** [docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md](docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md).
 
 <a id="play-first-text-1"></a>
 

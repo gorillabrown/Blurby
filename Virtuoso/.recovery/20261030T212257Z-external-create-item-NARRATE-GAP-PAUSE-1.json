@@ -1,0 +1,50 @@
+{
+  "id": "20261030T212257Z-external-create-item-NARRATE-GAP-PAUSE-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-GAP-PAUSE-1",
+  "created": "2026-10-30T21:22:57Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A pause in the gap before a chunk resumes on that chunk's first word, without a silence",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "workstream": "TTS / Narration Engine",
+      "effort": "S",
+      "branch": "eb/narrate-gap-pause-1",
+      "prerequisites": [
+        "NARRATE-PAUSE-CANCEL-1"
+      ],
+      "spec_link": "docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.",
+      "sequence": 86.6,
+      "id": "NARRATE-GAP-PAUSE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-30T21:22:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-GAP-PAUSE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-GAP-PAUSE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-GAP-PAUSE-1",
+      "actualRevision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+      "recoveryId": "20261030T212257Z-external-create-item-NARRATE-GAP-PAUSE-1",
+      "detail": {},
+      "providerItemId": "4097c96c-c31e-815e-be67-ebce2a82b23c",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-30T21:23:26Z",
+  "outcome": "succeeded"
+}

@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-30T21:16:30Z",
+  "takenAt": "2026-10-30T21:24:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3884,6 +3884,45 @@
       }
     },
     {
+      "id": "NARRATE-GAP-PAUSE-1",
+      "title": "A pause in the gap before a chunk resumes on that chunk's first word, without a silence",
+      "sequence": 86.6,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "NARRATE-PAUSE-CANCEL-1"
+      ],
+      "effort": "S",
+      "workstream": "TTS / Narration Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "docs/planning/specs/2026-10-30/NARRATE-GAP-PAUSE-1.md",
+      "branch": "eb/narrate-gap-pause-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-237 (HIGH): a pause 34 ms before a scheduled chunk skipped 18 words and resumed after about 2.3 s silence (RodneySr D6 warm-2.00-3). Cause: pause() reads the scheduling head instead of the heard position; the unit fake hid it (LL-173). Blurby.Brain1 gates: warm-2.00-3 resume at most 150 ms; no regression at most base + 150 ms. Stacked on the final eb/narrate-pause-cancel-1 tip.",
+      "revision": "f98a9141b1d3b6984720745817180b447ff5c2ae84de6624c1bc71259553b10e",
+      "extra": {
+        "id": "4097c96c-c31e-815e-be67-ebce2a82b23c",
+        "url": "https://app.notion.com/4097c96cc31e815ebe67ebce2a82b23c",
+        "createdTime": "2026-10-30 21:23:05Z",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
+    },
+    {
       "id": "NARRATE-HARNESS-COLDCLICK-1",
       "title": "Measure cold click on mainstream hardware",
       "sequence": 94,
@@ -4060,8 +4099,8 @@
       "completed": "",
       "evidence": "",
       "description": "",
-      "notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.",
-      "revision": "ea48feed6506c2cee382a1e69a75ad9d7401e91aa9b1007b0323c0a3bd220171",
+      "notes": "Created 2026-10-30 by roadmap review 2026-10-30 (Blurby.Roadmap) from NARRATE-QUIT-LINGER-1's original (a) design, per Blurby.Brain1 Phase C ruling 4. Reproduced on RodneySr: queued prefetch posted after pause in 3/3 staged base runs (+9, +871, +600 ms). Stacked on eb/narrate-quit-linger-1 @ 5de476ce. Specified to dispatch-ready in this review; RodneySr job 5.\n\nMid-dispatch amendment 2026-10-30 (Blurby.Brain1): the D6 slow-resume gate is no regression (warm-2.00-3 after at most base + 150 ms, one-sided; every other resume under 2,000 ms), superseding the D6 stop, because base D6 exposed BUG-237 (fixed by NARRATE-GAP-PAUSE-1).",
+      "revision": "7bd29cbc88c9cb2ce77313c7e74950530f7fc7c98dd4717bdb414235db870a92",
       "extra": {
         "id": "4097c96c-c31e-8131-8dbc-c9439c893bd2",
         "url": "https://app.notion.com/4097c96cc31e81318dbcc9439c893bd2",
