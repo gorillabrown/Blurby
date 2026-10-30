@@ -29,7 +29,7 @@
 ### BUG-236 — Play in Flow on an image-only cover does nothing
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), *Meditations*, x64 packages, isolated profiles.
 **Severity:** MEDIUM. A release defect, not a regression.
-**Status:** OPEN; goes into the usual intake. Lane: Reader Engine.
+**Status:** OPEN; fix item PLAY-FIRST-TEXT-1 (owner ruling 2026-10-30: "Start at first text"). Lane: Reader Engine.
 **Observation:** pressing Play in Flow on the image-only cover leaves playing=true in section 0, with 0 words and no cursor, for 60 s. It happens on release `36ac7466` and on the held BAND-ALIGN stack alike.
 **Evidence:** RodneySr `C:\Projects\Blurby-artifacts\band-align-2-r7\live\rel36-L2-cover`.
 **Next:** specify the intended behaviour, for example advancing to the first section with words, or disabling Play on a zero-word section. That is an owner design choice; then schedule a Flow-runtime fix.

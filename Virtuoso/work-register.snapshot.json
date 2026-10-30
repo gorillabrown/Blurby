@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-30T21:10:01Z",
+  "takenAt": "2026-10-30T21:16:30Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -5187,6 +5187,46 @@
         "date:Started:start": "2026-10-22",
         "date:Started:end": "",
         "date:Started:is_datetime": "0"
+      }
+    },
+    {
+      "id": "PLAY-FIRST-TEXT-1",
+      "title": "Play on a page with no words starts reading at the first text",
+      "sequence": 86.75,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "BAND-ALIGN-2",
+        "NARRATE-PAUSE-CANCEL-1"
+      ],
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md",
+      "branch": "eb/play-first-text-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.",
+      "revision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
+      "extra": {
+        "id": "4097c96c-c31e-81a1-94f5-d6c923491f78",
+        "url": "https://app.notion.com/4097c96cc31e81a194f5d6c923491f78",
+        "createdTime": "2026-10-30 21:15:56Z",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
       }
     },
     {

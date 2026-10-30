@@ -1,0 +1,51 @@
+{
+  "id": "20261030T211548Z-external-create-item-PLAY-FIRST-TEXT-1",
+  "operation": "external-create-item",
+  "item_id": "PLAY-FIRST-TEXT-1",
+  "created": "2026-10-30T21:15:48Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Play on a page with no words starts reading at the first text",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "workstream": "Reader Engine",
+      "effort": "M",
+      "branch": "eb/play-first-text-1",
+      "prerequisites": [
+        "BAND-ALIGN-2",
+        "NARRATE-PAUSE-CANCEL-1"
+      ],
+      "spec_link": "docs/planning/specs/2026-10-30/PLAY-FIRST-TEXT-1.md",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.",
+      "sequence": 86.75,
+      "id": "PLAY-FIRST-TEXT-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-30T21:14:30Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PLAY-FIRST-TEXT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PLAY-FIRST-TEXT-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PLAY-FIRST-TEXT-1",
+      "actualRevision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
+      "recoveryId": "20261030T211548Z-external-create-item-PLAY-FIRST-TEXT-1",
+      "detail": {},
+      "providerItemId": "4097c96c-c31e-81a1-94f5-d6c923491f78",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-30T21:16:15Z",
+  "outcome": "succeeded"
+}
