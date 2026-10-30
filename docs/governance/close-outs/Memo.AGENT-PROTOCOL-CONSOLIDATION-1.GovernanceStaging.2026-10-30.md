@@ -13,6 +13,10 @@ exactly once on `main` is a reconciliation prompt (Rule 4 *Discrepancy handling*
   without the fences. **Old** blocks were cut from `origin/main` by anchor, never retyped (LL-068).
 - Order: targets in the order below; fold-ins within a target in their numbered order. There are no Mid-Dispatch
   Amendment migrations.
+- Variables (specification § *Guarded helper*): `$WC = 'C:/Projects/Blurby/.worktrees/agent-protocol-consolidation-1-closeout'`
+  (the Step 0 worktree, cut from `main` right after the dispatch merge); `$W` = the rule 11a guarded wrapper `vreg.ps1`,
+  re-created from `docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md` if absent.
+- Overlays O1–O4: if any target file already exists, stop and report; never overwrite.
 
 ## Target: .claude/WORKFLOW_REFERENCE.md
 
@@ -221,6 +225,9 @@ The literal `--value-json` for (d) and (f):
 [{"id": "UX polish", "name": "UX polish"}, {"id": "TTS / Narration Engine", "name": "TTS / Narration Engine"}, {"id": "Reader Engine", "name": "Reader Engine"}, {"id": "Chrome Extension", "name": "Chrome Extension"}, {"id": "Library & Content", "name": "Library & Content"}, {"id": "Platform & Maintenance", "name": "Platform & Maintenance"}, {"id": "Blurby Business", "name": "Blurby Business"}]
 ~~~~
 
+Before `--apply` at (d), confirm the preview echoes all seven `{id, name}` entries unchanged (native-argument quoting
+under `pwsh -File` can strip inner double quotes); if it does not, stop and report.
+
 On any refusal at (d) or (f), or a registry reason for C1 failing: restore `<scratch>/workspace-layout.base.json`
 byte-for-byte, verify its SHA-256, stop and report to Blurby.Brain1; never hand-patch around a refusal. A ledger line
 already appended stays (append-only) and is recorded in the close-out.
@@ -236,6 +243,9 @@ Action: Append row (through the command below; compare LL-091's status with `les
 ~~~~text
 pwsh -NoProfile -File $W virtuoso_registry --root $WC --actor roadmap-review lessons --record-status LL-091 --status "Retired — superseded by the Virtuoso plugin's wave sizing (skills/effort-levels: tool budget <=40, wall time <=60 minutes, mixed-effort split); AGENT-PROTOCOL-CONSOLIDATION-1" --item AGENT-PROTOCOL-CONSOLIDATION-1 --apply
 ~~~~
+
+Run it only if `lessons --open` still lists LL-091 as `live`. If LL-091 was promoted or retired meanwhile, do not run it;
+write a plain outcome line naming its current status in the close-out (standing rule 51).
 
 ## Target: CLAUDE.md
 
@@ -800,3 +810,25 @@ fresh agent that neither wrote nor ran this item.
     no change); W1 did not name the ledger line (fixed: W1 writer note).
   - D3 positive control (R-C5a) was run by the dispatch: the checker exits 1 on a memo whose E5 New names
     `.claude/agents/zeus.md`.
+- Code quality: READY
+  - Reviewer: fresh `virtuoso:Plato` agent, read-only, on `d646695c`, 2026-10-30; no Blocking findings; checker re-run
+    `failures=0`.
+  - Applied (applying instructions only; no fold-in text changed): `$WC`/`$W` defined in the header; `--value-json`
+    preview-echo check before `--apply`; LL-091 command conditioned on `live` (standing rule 51); O1–O4 stop if a target
+    file exists.
+  - Not applied — the specification prescribes this text, so Blurby.Roadmap decides at close-out:
+    1. E8 (both files): the one-line pointer drops "after every sprint, hotfixes included, no exceptions", and
+       *Document Lifecycle* has no LESSONS_LEARNED/BUG_REPORT/TECHNICAL_REFERENCE step. Suggested New: "After EVERY
+       sprint completion, hotfixes included, no exceptions, the plugin's MarcusAurelius runs the *Document Lifecycle*
+       steps, plus LESSONS_LEARNED, BUG_REPORT and TECHNICAL_REFERENCE as `Virtuoso/overlays/agents/MarcusAurelius.md`
+       lists them."
+    2. O4 *Documents*: "steps 1–6" then BUG_REPORT/TECHNICAL_REFERENCE reads as if those were in the steps. Suggested:
+       "the *Document Lifecycle* steps; `docs/governance/LESSONS_LEARNED.md` on a non-trivial discovery;
+       `docs/governance/BUG_REPORT.md` (mark fixed bugs); `docs/governance/TECHNICAL_REFERENCE.md` if architecture
+       changed."
+    3. O1 *Commands*: rule 53 makes `--arm64` primary; suggested "`--arm64`; `--x64` on RodneySr under rule 53's
+       temporary-placement note".
+    4. O1 *Git*: the `HEAD:refs/heads/eb/<name>` refspec has no repository citation (spec item (6) prescribes it);
+       cite a source or keep as prescribed.
+    5. Outside spec scope: after E6, "Code scope labels (applied to doer agent tasks)" survives with "doer" undefined;
+       suggested "applied to implementation tasks".
