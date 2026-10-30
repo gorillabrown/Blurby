@@ -1,0 +1,35 @@
+{
+  "id": "20261030T231147Z-external-set-status-PLAY-FIRST-TEXT-1",
+  "operation": "external-set-status",
+  "item_id": "PLAY-FIRST-TEXT-1",
+  "created": "2026-10-30T23:11:47Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "notes": "Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.\n\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: ebea7311, package from c57a7b4f, stacked on eb/band-align-2 at e8e6de06. Play on the cover starts at section 1's first word in Flow, Focus and Narrate within 60-340 ms; base Flow and Focus fail. Suite 2641/1/0; x64/arm64 asar identical. BUG-236 resolved in source. Arm64 launch at merge."
+    },
+    "expectedRevision": "22907c4ad418d33149e8d666491ddee072ccc571a3ebfaa80bdb2ea0b147c5ad",
+    "idempotencyKey": "set-status:PLAY-FIRST-TEXT-1:[('notes', \"Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: ebea7311, package from c57a7b4f, stacked on eb/band-align-2 at e8e6de06. Play on the cover starts at section 1's first word in Flow, Focus and Narrate within 60-340 ms; base Flow and Focus fail. Suite 2641/1/0; x64/arm64 asar identical. BUG-236 resolved in source. Arm64 launch at merge.\"), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PLAY-FIRST-TEXT-1",
+      "idempotencyKey": "set-status:PLAY-FIRST-TEXT-1:[('notes', \"Created 2026-10-30 by Blurby.Roadmap. Fixes BUG-236 (Play in Flow on an image-only cover does nothing). Owner ruling 2026-10-30: Start at first text; Play-only skip; paused resume unchanged; the literal ruling from the cover. Blurby.Brain1 rulings Q2 (pendingFirstText, no timers), Q5–Q8. Stacked on eb/band-align-2 after R7a and R8; RodneySr job 9. Flow, Focus and Narrate each in its own runtime.\\n\\nPackage-verified (x64, RodneySr) 2026-10-30 by Blurby.Brain1: ebea7311, package from c57a7b4f, stacked on eb/band-align-2 at e8e6de06. Play on the cover starts at section 1's first word in Flow, Focus and Narrate within 60-340 ms; base Flow and Focus fail. Suite 2641/1/0; x64/arm64 asar identical. BUG-236 resolved in source. Arm64 launch at merge.\"), ('status', 'In Flight')]",
+      "actualRevision": "a6467c209a45e3b248b1a242ab9db3603f5f2b804e4695b7b2b552bbe58fb8d3",
+      "recoveryId": "20261030T231147Z-external-set-status-PLAY-FIRST-TEXT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T23:12:04Z",
+  "outcome": "succeeded"
+}
