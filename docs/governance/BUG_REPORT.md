@@ -11,7 +11,7 @@
 ### BUG-237 — A Narrate pause in the gap before a scheduled chunk skips that chunk's words and resumes after ~2.3 s of silence
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), during NARRATE-PAUSE-CANCEL-1's base D6 (`5de476ce`, x64, quiet host). Deterministic in two runs.
 **Severity:** HIGH. It is audible: words are lost, then there is silence.
-**Status:** OPEN; fix item NARRATE-GAP-PAUSE-1 (TTS / Narration Engine), stacked on `eb/narrate-pause-cancel-1`. Lane: TTS / Narration Engine.
+**Status:** RESOLVED in source (NARRATE-GAP-PAUSE-1, fix `5d51d111` on `eb/narrate-gap-pause-1`, built and held): a gap pause anchors on the first chunk not yet heard, on the heard clock, and a chunk the pause stopped never times the next. check-skip on the base traces (`5de476ce`, `narrate-pause-cancel-1\d6-base\traces`) exits 1: warm-2-00-3 expected 8730, requested 8748, 18 words skipped. On the after D6 it exits 0: 47 resumes, 0 flagged, 1 gap pause (warm-2.00, expected 5568, requested 5568, 0 skipped), whose resume took 86 ms. No after run carried the top-up label warm-2.00-3, so `check-d6-gap` exits 1 literally on that row; Blurby.Brain1 ruled (a): the warm-2.00 gap pause at word 5568 is the target. Every resume is 82–92 ms, with no regression over the base. Lane: TTS / Narration Engine.
 **Observation:** *Meditations*, word ~8730, 2.00x, D6 run warm-2.00-3. The pause landed 34 ms before chunk 8730 was due to start. On resume:
 - playback restarted at the NEXT chunk (word 8748), so the 18 words 8730–8747 were never heard (heard: 8726–8729, then 8748);
 - speech started after about 2.3 s of silence. The new chunk was scheduled at startAt 6.0963, the stopped chunk's endAt.
