@@ -766,6 +766,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.clearTimers();
     this.state.pendingStartOnLoad = false;
     this.state.pendingResume = null;
+    this.state.handoffHold = null;
     this.stopEngine();
     this.scrollEngine?.destroy();
     this.scrollEngine = null;
@@ -1086,6 +1087,17 @@ export class FlowModeRuntime implements ReaderModeRuntime {
         }
       });
     }
+    const held = s.handoffHold;
+    if (held != null) {
+      // BUG-235: resume exactly on the held word, only while the reader still wants playback.
+      this.requestFrame(() => {
+        if (!this.engine || s.handoffHold !== held || !s.playing) return; // the reader paused (pausePlayback cleared it)
+        if (!this.surface.highlight(held, "flow")) return;                // not stamped yet: the next reextraction retries
+        s.handoffHold = null;
+        this.engine.resume();                                              // schedules held + 1 after one dwell
+        s.notify();
+      });
+    }
     s.notify();
   };
 
@@ -1262,7 +1274,18 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (this.document.useFoliate && this.surface.isReady()) {
       const found = this.surface.highlight(idx, "flow", { allowMotion: false });
       if (!found) {
-        // Word not in loaded sections — pause, turn page, wait for section load (onWordsReextracted resumes).
+        if (this.scrollEngine?.isPastRenderedEnd(idx)) {
+          // BUG-235: under one clock the next section's first word is not loaded yet. Hold the word timer on it (an
+          // internal hold, handoffHold; `playing` stays true) and let the line pacer run its one-shot section hand-off
+          // (onScrollEngineComplete → goToSection). The section's load calls onWordsReextracted, which resumes on it.
+          // No page turn here: the hand-off owns the navigation.
+          this.engine?.pause();
+          s.handoffHold = idx;
+          this.scrollEngine.syncToWord(idx);
+          s.notify();
+          return;
+        }
+        // A genuinely missing word inside the rendered range: pause, turn the page, wait for the section load (unchanged).
         this.engine?.pause();
         s.pendingResume = idx;
         this.surface.next();
@@ -1390,6 +1413,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** Flow's playing flag owns both pacers: legacy modeInstance.pauseMode() + setFlowPlaying(false). */
   private pausePlayback(): void {
     this.state.pendingResume = null;
+    this.state.handoffHold = null;
     this.engine?.pause();
     this.scrollEngine?.stop();
     this.state.playing = false;

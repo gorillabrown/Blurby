@@ -433,6 +433,11 @@ export class FlowScrollEngine {
     this.callbacks.onProgressUpdate?.(this.getProgress());
   }
 
+  /** BUG-235: whether a word is past the last rendered line while the pacer follows the word timer (its section hand-off point). */
+  isPastRenderedEnd(wordIndex: number): boolean {
+    return this.running && this.wordClock && this.lines.length > 0 && wordIndex > this.lines[this.lines.length - 1].lastWord;
+  }
+
   /** BAND-ALIGN-2 R4/R5: the band's anchor and line count (settings.flowZonePosition, flowZoneLines); re-places the band at once. */
   setBandLayout(anchor: unknown, lines: unknown): void {
     this.bandAnchorSetting = anchor;
