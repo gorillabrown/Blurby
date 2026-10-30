@@ -3129,3 +3129,11 @@ Related: LL-171; standing rule 41.
 
 ### LL-143 — status (AGENT-PROTOCOL-CONSOLIDATION-1, 2026-10-30)
 **Status:** Observation — did not hold in AGENT-PROTOCOL-CONSOLIDATION-1 (2026-10-30): the specification dry-ran Done-when C5a only against the base, not against the prescribed E3/E9 text, so C5a contradicted C6 and Blurby.Brain1 amended C5a mid-dispatch (R-C5a). Promotion candidate for roadmap-review (standing rule 44 already states the dry-run duty).
+
+### LL-173 — Audio fakes must model a lagging heard position (roadmap-review, 2026-10-30)
+**Verdict:** A test fake whose heard position equals its scheduling clock hides every defect that depends on the gap between what has been scheduled and what has been heard. Code under test can read the wrong clock and still pass.
+**Evidence:** BUG-237. Narrate's `pause()` resolves a gap pause through `nextScheduledPause()`, which compares against `output.now()` (the scheduling head) rather than the heard position. In a pause 34 ms before a scheduled chunk, the resume skipped that chunk's 18 words and waited about 2.3 s (RodneySr D6 `warm-2-00-3`, base `5de476ce`). The unit fake `fakeAudioOutput.ts:20-22` returns the same value for both clocks, so no existing test could see it (Blurby.Brain1, 2026-10-30).
+**Recommendation:** Any fake standing in for an audio output, or any producer and consumer pair with separate clocks, models the heard (playback) position lagging the scheduling head by a configurable amount. At least one test runs with a non-zero lag. A test that passes only at zero lag is labelled a control, not proof.
+**Applies to:** Narrate's engine and output fakes; any scheduler and player split (TTS, audio export, timed highlighting).
+**Status:** Observation
+Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
