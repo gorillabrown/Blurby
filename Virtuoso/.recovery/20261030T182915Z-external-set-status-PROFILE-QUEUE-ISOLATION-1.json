@@ -1,0 +1,34 @@
+{
+  "id": "20261030T182915Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+  "operation": "external-set-status",
+  "item_id": "PROFILE-QUEUE-ISOLATION-1",
+  "created": "2026-10-30T18:29:15Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.\n\nR-2026-10-30-1 (2): a diagnosis, not a gate. sync-queue.json follows the overridden userData (main.js setPath before any read; main/sync-queue.js). Leading hypothesis: the owner's installed Blurby (pid 16120, running since 10-22) wrote its own queue during the 10-26 QA; check the 10-26 QA evidence for that process."
+    },
+    "expectedRevision": "f556e918a123b4e77b06b2cf41b6afab90832f781876ac562f36a00ea158493a",
+    "idempotencyKey": "set-status:PROFILE-QUEUE-ISOLATION-1:[('notes', \"Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\\n\\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.\\n\\nR-2026-10-30-1 (2): a diagnosis, not a gate. sync-queue.json follows the overridden userData (main.js setPath before any read; main/sync-queue.js). Leading hypothesis: the owner's installed Blurby (pid 16120, running since 10-22) wrote its own queue during the 10-26 QA; check the 10-26 QA evidence for that process.\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PROFILE-QUEUE-ISOLATION-1",
+      "idempotencyKey": "set-status:PROFILE-QUEUE-ISOLATION-1:[('notes', \"Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\\n\\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.\\n\\nR-2026-10-30-1 (2): a diagnosis, not a gate. sync-queue.json follows the overridden userData (main.js setPath before any read; main/sync-queue.js). Leading hypothesis: the owner's installed Blurby (pid 16120, running since 10-22) wrote its own queue during the 10-26 QA; check the 10-26 QA evidence for that process.\")]",
+      "actualRevision": "d59a4dac215ef884b548d5738dd3b1786a621ec20ea836692424333cd223bd1e",
+      "recoveryId": "20261030T182915Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:29:33Z",
+  "outcome": "succeeded"
+}

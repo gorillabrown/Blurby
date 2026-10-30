@@ -1,0 +1,35 @@
+{
+  "id": "20261030T182441Z-external-set-status-NATIVE-PATH-ATTESTATION-1",
+  "operation": "external-set-status",
+  "item_id": "NATIVE-PATH-ATTESTATION-1",
+  "created": "2026-10-30T18:24:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted.\n\nParked 2026-10-30 by Blurby.Brain1 ruling R-2026-10-30-1 (owner mandate 2026-10-30): no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. Not running; WIP candidate 9264c9b3 (also refs/archive/rodney-unpushed/eb-native-path-attestation-1), the Rodney worktree's uncommitted edits and all receipts are preserved untouched. Seq moved 67.5 to 140 by roadmap review 2026-10-30.",
+      "sequence": 140
+    },
+    "expectedRevision": "6a5113430ca34ec55bf84679e6ab7b5141109c6cd3c1b33d2eced397b64c94d2",
+    "idempotencyKey": "set-status:NATIVE-PATH-ATTESTATION-1:[('notes', \"Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted.\\n\\nParked 2026-10-30 by Blurby.Brain1 ruling R-2026-10-30-1 (owner mandate 2026-10-30): no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. Not running; WIP candidate 9264c9b3 (also refs/archive/rodney-unpushed/eb-native-path-attestation-1), the Rodney worktree's uncommitted edits and all receipts are preserved untouched. Seq moved 67.5 to 140 by roadmap review 2026-10-30.\"), ('sequence', 140)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NATIVE-PATH-ATTESTATION-1",
+      "idempotencyKey": "set-status:NATIVE-PATH-ATTESTATION-1:[('notes', \"Specification finalized and independently reviewed on 2026-10-27. G1 through G8 design choices are settled by Brain; the full contract, exact controls, limits, schemas and commands are inline in ROADMAP. Specification readiness passes; runtime qualification remains held. No operational implementation, runtime copy, fixture, custody helper, native canary, consumer completion, merge or release is admitted by this update. Separate byte review and named preparation, matrix and canary grants remain mandatory. Original exhausted collector attempts stay exhausted.\\n\\nParked 2026-10-30 by Blurby.Brain1 ruling R-2026-10-30-1 (owner mandate 2026-10-30): no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. Not running; WIP candidate 9264c9b3 (also refs/archive/rodney-unpushed/eb-native-path-attestation-1), the Rodney worktree's uncommitted edits and all receipts are preserved untouched. Seq moved 67.5 to 140 by roadmap review 2026-10-30.\"), ('sequence', 140)]",
+      "actualRevision": "a4df2787df06b78c19288a6cbf8e0d9adc31b37c9014be4b11cebd5d7288c610",
+      "recoveryId": "20261030T182441Z-external-set-status-NATIVE-PATH-ATTESTATION-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-30T18:25:31Z",
+  "outcome": "succeeded"
+}
