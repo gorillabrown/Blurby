@@ -90,10 +90,10 @@ Changed handlers/base/integration conflict: stop and return to Brain/Roadmap. Mi
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Qualified isolated inputs and exact source contracts are read back | calculable | preflight | bounded | medium | 5m | — | PP1 |
-| 2 | Six component controls and external wrong-order/value/wire seam produce valid base-red proof | calculable | positive-control | bounded | medium | 12m | — | PP1 |
-| 3 | Scoped two-button edit produces green, three negative receipts and final green | calculable | ui-fix | bounded | low | 10m | — | PP1 |
-| 4 | Ordered independent reviews and exact local-held receipt preserve every later hold | calculable | source-review-closeout | bounded | medium | 8m | — | PP1 |
+| 1 | Qualified isolated inputs and exact source contracts are read back | calculable | preflight | bounded | medium | 5m | — | — |
+| 2 | Six component controls and external wrong-order/value/wire seam produce valid base-red proof | calculable | positive-control | bounded | medium | 12m | — | — |
+| 3 | Scoped two-button edit produces green, three negative receipts and final green | calculable | ui-fix | bounded | low | 10m | — | — |
+| 4 | Ordered independent reviews and exact local-held receipt preserve every later hold | calculable | source-review-closeout | bounded | medium | 8m | — | — |
 
 **Total:** prospective serial chain35m · sum35m; 0 of4 estimates calibrated. Planner estimates only, not measured medians or an ETA. PP1 cap45m/40calls leaves10m reserve; stop before the cap when the remaining required review/receipt cannot fit. Unresolved host/custody/dependency access is an entry gate, not work to absorb silently into the reserve. PP2/package durations are not estimated here; they require separately scoped cuts. No material mixed-effort investigation is included; unexpected diagnosis returns to Brain.
 
