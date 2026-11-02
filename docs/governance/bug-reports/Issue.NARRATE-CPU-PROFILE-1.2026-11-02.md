@@ -79,3 +79,44 @@ Completed handoff on main **ac19ea60b6cd8b4fff3e5413b111925b7ef78485** was read 
 The owner answered: “It should be the Codex Blurby.Brain codex://threads/01a179e8-7a40-75c0-93f4-d3045ad99027”. New technical questions go to that local Codex chat; existing written Brain1 rulings remain inputs unless superseded. AGENTS.md and CLAUDE.md rule11 now carry the routing. No package, source, release or runtime gate is waived.
 
 The correct Codex chat was read before use. Its previous activity was the Native pause; the new request explicitly preserves that pause and all expired clocks. A bounded request for the source-wave, hard-stop/counter and U10 gaps was sent. **Actual acknowledgment observed:** “I'll review the CPU profiling rulings and return a bounded technical amendment. Native remains paused; I'll make no file changes or execution launches.” This verifies uptake of the specific new task, not completion of a ruling. No executor or Native monitor was messaged.
+
+## Decision — R-2026-11-02-CPU-3, actual Codex ruling and evidence addendum
+
+Actual final responses from turns `01a19d61-c6cb-70a1-ad93-98e20e8ee58b` and `01a19d67-27b0-7002-b5ea-db18622bfe6d` were read from the restored Brain chat. Full text is preserved in `Brain.NARRATE-CPU-PROFILE-1.ruling-3.2026-11-02.md`. They supersede the remaining source-wave and deadline ambiguities above, without admitting execution.
+
+### Source waves replacing Brain1's single Wave A
+
+| Wave | Exact existing task scope | Existing estimate | Prospective hard cap |
+|---|---|---:|---:|
+| A1 | Task1: isolated red-test commit and failing evidence | 25m | 60m |
+| A2 | Task3: profile library, summary and synthetic break control | 40m | 60m |
+| A3 | Task2: launcher process accounting, thread label and loaded-thread proof | 40m | 60m |
+| A4 | Task6: targeted/full tests, typecheck/build, package/fence evidence, memo, permitted time record, push; compliance then quality | 35m | 60m |
+
+Order A1→A2→A3→A4; ≤40 tool uses per separately admitted wave. The original source estimate140m and whole-work estimate265m remain; caps are not replacement estimates or active budgets. At a cap preserve checkpoint and stop; unfinished work requires new disposition/admission. A4 cannot accept unfinished reviews. No profiling in A1–A4. Retain exact c90d9e08 base, amended-spec input pin, RodneySr placement and existing fences. B0/B1/B2/C otherwise retain Brain1's specification, as narrowed below.
+
+### Measurement deadline/counter contract
+
+Each setting is indivisible; partial trials never resume across waves. At minute55 stop measurement and invalidate any active attempt; graceful shutdown ends at59; by60 an admitted, qualified controller must terminate the proved-owned entire workload, including Electron descendants and sampler, and prove termination. No executable-name/path-prefix/reused-PID kill authority. Missing ownership/termination proof is custody failure and STOP; no accepted record or next launch. No post-cap measurement/retry/summary/commit/push. Safety escalation does not enlarge working time. Current launcher `p.kill()`/sampler stop does not establish full custody; the actual later admission must name/qualify that mechanism. Native is not resumed or implicitly reused.
+
+Preserve accepted order4,3,2,1,4, ≥20-minute start threshold, same immutable identities/host/boot/power and gap≤24h. Every started wave receives permanent ordinal1–4; aborted waves count and counters never reset. Each labeled setting has one failed-attempt retry campaign-wide, before advancing; deadline abort counts as failure, second failure stops. One continuity restart and one noisy full rerun are ceilings, not guaranteed entitlements: each requires two remaining wave slots, and retries fit within the sweep's two waves. Global four-wave cap wins; no third completion wave. Ordinary latency-budget exceedance remains decision-rule data, not automatically an invalid-setting retry.
+
+### U10 narrow read-only route and actual proof
+
+The blanket assertion that all timing operations trigger F-011 is superseded. Under qualified commit fcfa9295, `cmd_timing` returns at1417–1422 for `--rows-from-spec`; its history/pricing path is read-only and never reaches `_TIMING_WRITES`/ledger/backfill hooks. Only that guarded operation is admitted for planning validation, with Python bytecode writes disabled in the child, stdout/stderr/status/input hashes and unrelated-log/ledger hash comparison. No mutating timing command, helper repair, patch, alternate root or global install change follows.
+
+Actual first receipt `Check.NARRATE-CPU-PROFILE-1.U10.2026-11-02.json`, SHA256 `dff986fde9b56896485ab8195bef365c0ce69b9668a83293ac0e835680e08f7f`: exit0, stderr empty, readytrue, all41 protected hashes and Git status unchanged. Brain inspected the actual receipt and ruled U10 PASS **only for the checked ROADMAP SHA2700608acc8ac5a0d07d05a51a1ac2ef1ab74f5993d989e984f5d642f5a4a222**. Final amended bytes must be revalidated. The helper's18-minute mechanically calibrated price is distinct from the original265/140-minute estimates and cannot prove elapsed-time feasibility or authorize reductions.
+
+### Result and remaining capability gates
+
+The technical scope/stop-rule questions are now resolved at planning level. Still required before any launch: separately admitted wave, actual execution-host availability and input receipt, immutable source/specification pins and repository custody; a qualified entire-workload deadline mechanism before measurements. No source branch was created, runtime probe run or budget activated. The whole item remains Queued/NOT READY; the global selector still waits on its actual In Flight harness prerequisite while the written source-only exception is retained.
+
+### Final validation and placement reconciliation
+
+Final amended ROADMAP SHA256 `12f35f7c75a0ab81df79dce6e256120dc440472df450ba58e9ba2b4a096891b9`: U9 passed with no warnings; U10 passed using the guarded read-only route and bytecode-disabled child. Receipt `Check.NARRATE-CPU-PROFILE-1.U10-final.2026-11-02.json`, SHA256 `37a44cdfc569f302f7ee4df1c3d4cbb43dcccbf3fe703a35f94ab43f8c8476b0`, retains stdout/stderr/exit,41 protected hashes and unchanged Git status. The exact18-minute helper Total is transcribed with the original265/140-minute estimate caveat. Earlier failed/pending assertions above remain historical and are superseded by this decision and actual receipt.
+
+CPU Notes alone were appended through a second plan/connector/SQL/confirm transaction, recovery `20261102T180403Z-external-set-status-NARRATE-CPU-PROFILE-1`. Full202-row SQL census confirms no other changed item; Status Queued/Seq95/prerequisites unchanged. Receipt: `Receipt.NARRATE-CPU-PROFILE-1.CPU3.2026-11-02.json`. Snapshot refreshed and board regenerated.
+
+Owner confirms RodneySr is online and available. That resolves owner-reported availability, not the actual connection, host/queue ownership or consumed input receipt. Codex Brain was asked for the established executor route and paused-job reconciliation; no launch request was sent. `Dispatch.NARRATE-CPU-PROFILE-1.A1.2026-11-02.md` is the prepared and held A1 pointer. No profiling, source change, application branch publication, merge or Native continuation occurred.
+
+Actual Brain placement response (turn `01a19d6f-daee-7570-92db-56379c4dce3f`) read and retained in `Brain.NARRATE-CPU-PROFILE-1.placement.2026-11-02.md`: historical route is Claude Remote Control bridge, not a connected Codex host; present reachability/queue ownership remains unverified. App inventory lists only local Codex projects, and no user SSH config exists. Owner connection choice requested; no message/workload was sent to the historical bridge and no new connection was invented.

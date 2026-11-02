@@ -1152,7 +1152,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 <a id="narrate-cpu-profile-1-spec"></a>
 
 #### NARRATE-CPU-PROFILE-1 — Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*
-- **Binding amendment 2026-11-02:** Brain1 R-2026-11-02-CPU-1/2 and the [verbatim ruling](docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md) supersede the old single-wave schedule and harness wait below. [Decision and remaining gaps](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md). No wave admitted; NOT READY pending source-wave feasibility, hard-stop details, host/custody and required mechanical checks.
+- **Binding amendment 2026-11-02:** Brain1 CPU-1/2 plus Codex [CPU-3 and evidence addendum](docs/governance/bug-reports/Brain.NARRATE-CPU-PROFILE-1.ruling-3.2026-11-02.md) supersede the single-wave schedule. Source order A1 (task1) -> A2 (task3) -> A3 (task2) -> A4 (task6), each separately admitted <=60m/40tools; no profiling. B0/B1/B2/C and campaign counters/deadlines follow the [Decision](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md). Scope decisions resolved; no wave admitted. Host, repository/input receipts and measurement containment remain gates.
 - **What:** a measured profile of the rebuilt Narrate's warm requests on the quiet machine (mainstream class). It records:
   - how much of the machine Blurby uses;
   - which process uses it;
@@ -1175,7 +1175,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
   - No product default changes here. A change, if the rule calls for one, is a separate follow-up item (Done-when 7).
 - **Prerequisites:**
   - NARRATE-REBUILD-1 (completed 2026-10-15).
-  - **NARRATE-HARNESS-COLDCLICK-1**, built and pushed. This item uses its trial labels (`trial-<label>.json`), the `--class auto` mainstream budget and the live-profile guard, and edits the same launcher. Source Wave A may use exact held base c90d9e08acfc356ca76941df063a0941ab488a94 before merge (Brain1 CPU-2); retain the In Flight status and phase-specific exception, not terminal completion.
+  - **NARRATE-HARNESS-COLDCLICK-1**, built and pushed. This item uses its trial labels (`trial-<label>.json`), the `--class auto` mainstream budget and the live-profile guard, and edits the same launcher. Source waves A1-A4 may use exact held base c90d9e08acfc356ca76941df063a0941ab488a94 before merge (Brain1 CPU-2); retain the In Flight status and phase-specific exception, not terminal completion.
   - RodneySr must be free of gate, smoke or other jobs for each separately admitted CPU-1 wave, with availability and consumed input receipt verified; the single 90-minute slot is superseded.
 - **Done when** (every command in `pwsh` 7 from the worktree root; the launcher and the summary through `scripts/narrate-rebuild/app-node.ps1`, LL-160):
   1. **Red first (standing rule 43).** Commit `tests/narrate/narrate.cpuProfile.test.ts` on its own. Hold the module path in a variable and import it inside each test, so the file collects and fails by assertion on the base.
@@ -1210,7 +1210,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
      - **per config:** run-level app CPU % (wall-weighted over the warm runs); the median per-process-type share; the median `waitMs`, `genMs` and `genMsPerWord` of request chunks; the fraction of requests with `otherBusy`; and `genMs` against chunk words (slope and intercept, least squares);
      - **the verdict of `profileDecision`**, with each config's admissibility and CPU gain.
      It exits 0 when a verdict is computed, and 1 when any record is invalid: `d6class` is not `mainstream`, a thread failure, or fewer than 20 counting trials in a cell. Run once with `--break`, which raises one baseline's worst click by 600 ms; it must print `noisy` and exit 1 (standing rule 55).
-  4. **The sweep, quiet machine** (i7-1185G7; run by Blurby.Brain on the pushed branch after `npm ci` and `npm run build`; nothing else heavy running; the foreign-CPU ≤ 25 % rule and the 40-cycle cap unchanged):
+  4. **The sweep, quiet machine** (i7-1185G7; run by the admitted quiet-host executor on the pushed branch after `npm ci` and `npm run build`; nothing else heavy running; the foreign-CPU ≤ 25 % rule and the 40-cycle cap unchanged):
      - Five configurations, in this order: T = 4, 3, 2, 1, 4. The two runs at 4 are baselines `t4-1` and `t4-2`, and their spread is the noise.
      - Each one is:
        ```
@@ -1221,7 +1221,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
      - Each record reads `d6class: "mainstream"` and `runtimeThreads` = T. The launcher's own exit code is recorded, not judged: T = 1 may exceed the budget, and the decision rule judges.
      - Afterwards `git status --porcelain -- docs/studies/narrate-rebuild-1/phase5` is empty, and the live-profile hashes are unchanged.
   5. **The decision rule** (`profileDecision`, applied to the five records):
-     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Blurby.Brain1.
+     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Codex Blurby.Brain.
      - **Admissible:** a config T in {3, 2, 1} is admissible when, at both rates and for every type, its worst counting trial is under 2,500 ms. It must also be at most the larger baseline worst plus the larger of the baselines' spread and 100 ms.
      - **CPU gain:** T has a gain when its median app CPU %, pooled over every counting warm trial at both rates, is at least 10 percentage points below the mean of the two baselines' medians.
      - **(A) Adapt:** some admissible config has a gain. The verdict is `adapt` to the admissible T with the lowest median app CPU (on a tie, the larger T), on hosts with fewer than 8 physical cores. The reference class keeps 4, because it was not swept here and its D6 row stays as measured.
@@ -1254,7 +1254,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 - **Effort:** S–M (scripts S; the sweep is about 90 minutes of quiet-machine time).
 - **Owners:**
   - the implementation agent: Done-when 1–3 and 8–10;
-  - Codex Blurby.Brain: Done-when 4 on the quiet machine, and the A or K ruling;
+  - quiet-host implementation agent: Done-when 4 on RodneySr; Codex Blurby.Brain: the A or K technical ruling;
   - spec-compliance reviewer first, then quality reviewer;
   - Blurby.Roadmap: the follow-up stub on A.
 - **Source:**
@@ -1292,10 +1292,10 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
   - `SWEEP_THREADS = [4, 3, 2, 1]`.
 
   No product constant changes.
-- **Branch:** `eb/narrate-cpu-profile-1` from exactly `c90d9e08acfc356ca76941df063a0941ab488a94` for source Wave A (Brain1 CPU-2); moved harness ref returns to planner. Pin this amended specification separately as an immutable input; the older base alone does not carry this amendment. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. No main merge here. At B0 only, merge current main once first if the candidate Narrate stack has landed, then freeze one measurement commit for all five settings. Merge after the harness, with fresh main reconciliation and the parent merge go.
+- **Branch:** `eb/narrate-cpu-profile-1` from exactly `c90d9e08acfc356ca76941df063a0941ab488a94` for source waves A1-A4 (Brain1 CPU-2, Codex CPU-3); moved harness ref returns to planner. Pin this amended specification separately as an immutable input; the older base alone does not carry this amendment. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. No main merge here. At B0 only, merge current main once first if the candidate Narrate stack has landed, then freeze one measurement commit for all five settings. Merge after the harness, with fresh main reconciliation and the parent merge go.
 - **Staging plan:** explicit paths only (the fence list). `tests/perf-baseline-results.json`, `docs/studies/narrate-rebuild-1/phase5/recorded-output.json` and any `phase5/latency-e2e.json` stay unstaged. Records are moved into `cpu-profile/`, not copied.
 - **Failure handling:**
-  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Blurby.Brain1.
+  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Codex Blurby.Brain.
   - **Too few counting trials.** A cell under 20 counting trials after 40 cycles (foreign load) gives the same verdict as the launcher's: ask for a quiet window, re-run that configuration once, then stop.
   - **Silent producer.** A worker stall like Decision #21's (`state.md`, the P5 final-run blocker) shows as a trial over 2,500 ms in a baseline. That makes the sweep noisy under (N). It is reported with the producer log (`NARRATE_PRODUCER_LOG=1` on the re-run), not explained away.
   - **The `--cpu-by-process` loop.** Its own CPU is counted as foreign, as the existing sampler's is. If its cost pushes foreign CPU over 25 % in more than a quarter of trials, the sweep drops the flag, and the per-process split is reported as not measured.
@@ -1313,7 +1313,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 | 5 | Summary, verdict and report written; follow-up stub on A | calculable | measurement | bounded | medium | 35m | — | — |
 | 6 | Targeted tests, suite, typecheck, build; package-unchanged record; memo, time log, push | calculable | verify | bounded | low | 35m | — | — |
 
-**Total:** chain 4h25m; sum 4h25m; 0 of 6 estimates calibrated (manual sum of existing calculable rows, not helper-priced). Historical aggregate only; separate CPU-1 caps/admissions supersede it as a dispatch schedule. U10 remains unperformed under F-011.
+**Total:** chain 18m · sum 18m; 6 of 6 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate). Mechanical history-based price only; retain original written 265m total / 140m source estimates and separate CPU-3 wave caps. No elapsed-time promise or active budget.
 ##### Lessons applied
 - **LL-142:** the stub's 78–84 % and the over-subscription cause are measured, not assumed. The baseline restates the stub's figure in a defined metric before any setting is judged.
 - **Standing rule 55 (failure detector):** the summary proves it can return a failing verdict (`--break` prints `noisy`, exit 1). The launcher's thread mismatch is a failure with its own message.
