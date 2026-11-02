@@ -1605,13 +1605,13 @@ These headings expose existing table/bullet items to the board parser; they do n
 - **Source:** docs/planning/specs/2026-10-23-5/APP-TABS-1.md; live register remains status authority.
 
 <a id="blurby-business-1"></a>
-#### BLURBY-BUSINESS-1 — Blurby Business: a walled-off PDF viewer and editor *(Seq 100.5; Queued; Path: epic; lane Blurby Business; absorbed 2026-10-30 from held plan `2026-10-30-blurby-business-tier1`)*
+#### BLURBY-BUSINESS-1 — Blurby Business: a walled-off PDF viewer and editor *(Seq 100.5; In Flight; Path: epic; lane Blurby Business; absorbed 2026-10-30 from held plan `2026-10-30-blurby-business-tier1`)*
 
 - **Chartered 2026-10-30:**
   - Packet `docs/planning/epics/2026-10-30-blurby-business/` (charter, plan, state, journal, launch; main `c96343c4`); register Spec Reference → `charter.md`.
   - 21 DoD rows (D1–D21), 9 phases (P1–P8 plus P9 completion), about 40 sessions.
   - Run branch `eb/blurby-business-1` on RodneySr (worktree `C:\Projects\bb-business`). The run never merges itself; every merge waits for Blurby.Roadmap's go after Brain's package confirmation.
-  - **Not launched.** The owner directed on 2026-10-30 that it be roadmapped before launch, and it is not yet sent to Brain. Launch waits for the start gate (LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes) and for an owner decision on who hosts and launches it on RodneySr (launch.md Q2).
+  - **Active 2026-11-02, owner-directed:** Brain solely coordinates the separate RodneySR executor. BB-2026-11-02-1 closes the visibility source window after confirmed Notes readback and approves Q2 placement; BB-2 qualifies helper relocation and the theme-export supplement. Accepted worktree/baseline-docs checkpoint `7b198da9`; full baseline2452passed/1skipped/0failed. [HB-6 task2 pointer](docs/governance/bug-reports/Dispatch.BLURBY-BUSINESS-1.HB6-T2.2026-11-02.md) narrows report-fixture work under BB-3; each wave still requires actual input consumption and Brain's admission. No whole-epic acceptance.
 - **What:** a separate Blurby Business window that becomes Blurby's standard PDF viewer and editor, and the default PDF app. It covers the competitor matrix's Viewing, Annotation, Editing, Page organisation, Forms, Optimisation, Signatures, Metadata and Printing rows, plus merge, extract and split (about 121 features), in eight phases:
   - P1 Viewer, with the default-PDF handler, tabs, navigation with native text select and copy, locked PDFs, OCR, and "Send to Blurby to read";
   - P2 Annotation, form fill and save with backup;
@@ -1630,7 +1630,7 @@ These headings expose existing table/bullet items to the board parser; they do n
 - **Origin:** held plan `2026-10-30-blurby-business-tier1` (HB-6..HB-11, epic re-scope).
 - **Prerequisites:** none in the register (cleared 2026-10-30). The gates below are carried in the epic charter as its Constraints and launch-preflight start gate.
 - **Gates:**
-  - Start: LIBRARY-COMPLETION-VISIBILITY-1's exclusive window closes. APP-TABS-1 is a merge-order dependency (shared `preload.js` and `CommandPalette.tsx`).
+  - Start window cleared by BB-2026-11-02-1 and confirmed provider readback; each execution wave retains its fresh custody/prerequisite checks. APP-TABS-1 is a merge-order dependency (shared `preload.js` and `CommandPalette.tsx`).
   - Merge: after the Stage 8 release, and after the seven held branches named under Readiness in `phase1-specs.md`.
   - Engine: permissive licences only (pdf.js, pdf-lib, `@signpdf`, bundled qpdf).
   - No shared-core touches (a separate `.d.ts` avoids `src/types.ts`).
