@@ -28,6 +28,8 @@ No A1 test edits, existing tests, launcher/collector, runtime, product/shared-co
 4. Read-only pinned sources, unchanged between c90 and A1: `scripts/narrate-rebuild/p5-latency-e2e.mjs`, functions `cpuShare`103, `firstVoiced`157, warm-report block and `finish`315; `scripts/narrate-rebuild/p5-recorded-output-check.mjs`, `readTraceEvents`144. Never import these executable checkers/launcher for helper reuse.
 5. Read-only `main/narrate/trial.js`: summary construction169 and warm-up step292; `src/reader/modes/narrate/engine/narrateEngine.ts` request/schedule/first-voiced emission; `scripts/narrate-rebuild/app-node.ps1` and `lib/app-icu-guard.mjs`. Read them as text only; A2 never invokes the wrapper or nonsynthetic route.
 
+Binding final clarification: read `Brain.NARRATE-CPU-PROFILE-1.ruling-8-atomic.2026-11-02.md` after CPU-8/amendment. It supersedes final-file-only writes with two exact output names and atomic/exclusive publication. Retain the completed temporary hard link; no cleanup authority. Read-only host volume inventory must show a supported same-volume filesystem before Ready; no pre-admission filesystem probe.
+
 ## Tasks and execution sequence
 
 1. Reconcile the existing lane and immutable inputs. Verify source HEAD/branch/index/worktree and test hash; candidate files absent; no overlapping writer/workload; historical jobs remain paused. Any lock, drift or conflicting writer is STOP, never automatic cleanup. Confirm consumed input receipt before a separately named A2 admission.
@@ -62,6 +64,12 @@ From `C:/Projects/wt-narrate-cpu-profile-1-a1`, PowerShell7, after named admissi
 
 The verifier's finite child command list is CPU-8's direct summary CLI for each named case, --synthetic always and --break only for break, plus the arity control. Expected exits: adapt0/keep0/noisy1/bad-thread1/under-count1/break1/by-type0/usage2. Exact metric expectations and diagnostics are CPU-8 plus the amendment, not a new interpretation. Source input hashes must remain identical after every case; summary output itself is not an input. Summary files use exclusive creation and cannot be reused across cases.
 
+Atomic publication is mandatory for valid, noisy and invalid summaries: inspect both exact names with lstat (only ENOENT permits continuing); serialize fully in memory; open `cpu-profile.summary.json.tmp` with wx, write all UTF-8 bytes, sync, close, read back/compare; fs.link that completed same-directory temporary file to `cpu-profile.summary.json`; read back/compare final bytes before stdout/semantic exit. Retain both names, never reopen for writing. Existing entry/symlink, unsupported link, write/sync/close/readback failure -> OUTPUT_WRITE_FAILED stderr, exit1, empty stdout; preserve artifacts/report phase, no rename/copy/direct-write fallback or retry. A final file after failed readback is not accepted evidence. This is complete-file publication, not arbitrary-storage/power-loss protection.
+
+The external builder/verifier additionally creates two fresh cases `existing-final` and `existing-temporary` from adapt inputs. Their respective pre-existing output contains the exact UTF-8 sentinel `A2-existing-output-sentinel`; the other output name is absent. Each CLI invocation uses --synthetic and must return1/OUTPUT_WRITE_FAILED/empty stdout, preserve sentinel and raw inputs byte-identically, and leave the other output name absent. Normal seven cases require both output names contain the complete expected JSON byte-identically. Hash input manifests exclude only these two reserved output names; never exclude other inputs. These are the atomic amendment's two bounded controls, within the unchanged cap.
+
+Within those existing cases, encode adapt's traces as arrays and keep's traces as `{events:[...]}`; all numeric expectations remain unchanged. The verifier must prove both CPU-8-permitted trace shapes are accepted, without another case. External accounting log: `logs/admission-accounting.jsonl` under the A2 artifact root, UTF-8, records the separately consumed admission/start, actual UTC start/deadline and aggregate tool-use count across all workers/reviews. It is an external receipt, not a Virtuoso timing-helper write; no F-011 timing mutation is permitted. Preserve raw stdout/stderr/receipt bytes and name any normalized copy distinctly. No pre-admission clock starts.
+
 ## SUCCESS CRITERIA and checkpoint evidence
 
 - Exact two-file additions only; A1 test SHA839c528c, package and lock unchanged. No product/shared-core/launcher or existing tests touched.
@@ -85,11 +93,20 @@ Product lane TTS / Narration Engine; execution surface B, evaluation harness. So
 
 ##### Lessons applied
 
+- LL-002: small isolated two-file source commit; explicit current branch/hold admission overrides historical naming/publication defaults.
+- LL-006 and LL-097: completed temporary artifact, sync/readback, exclusive hard-link publication and retained interrupted state; deterministic exact output names, no partial final accepted.
+- LL-098: persist the structured valid/noisy/invalid report before semantic exit; publication failures produce explicit stderr and preserve failure evidence.
+- LL-066: no silent I/O failures; diagnostics, actual exits and failing artifacts retained.
+- LL-113: all synthetic fixture scripts/evidence remain outside application test discovery.
+- LL-063: local nonsynced quiet-host worktree; explicit current build-and-hold admission overrides historical push defaults.
+- LL-068 and LL-128: exact diff/integrity checks and candidate-path absence prevent accidental truncation/overwrite.
+- Standing rule41 and LL-137: external accounting log identified above; UTF-8 and byte-preserving receipts, no forbidden timing-helper mutation or normalized hash substitution.
+- LL-003 and LL-004 considered not applicable: main-process modularization and distribution CI are outside this two-file harness fence.
 - LL-142: synthetic arithmetic/control results are labeled synthetic, never reported as measured CPU/runtime evidence.
 - LL-152: fixed deterministic fixtures, exact two rates/four causes/five configurations and identical source/tools; no real experimental comparison in A2.
 - LL-160: numeric-only source checks have CPU-8's explicit receipted-Node exception; no text segmentation/corpus position calculation or actual-record execution, and nonsynthetic guard remains.
 - LL-165: no live profile is opened; stored hash mappings are validated as input metadata only and do not establish actual isolation/custody.
-- LL-162: not a corpus correctness or native-runtime gate; only pure arithmetic/schema checks.
+- LL-162: corpus/native qualification is outside scope; its accepted-shapes guardrail applies to both array and events-object traces, covered by existing adapt/keep controls above.
 - Standing rules43 and55: accepted A1 red commit precedes this implementation; synthetic break/error controls must detect their known faults rather than pass trivially.
 - Standing rules36/41/52: current pinned source symbols, exact file/evidence fence, fixtures outside test discovery and unchanged A1 test.
 - Standing rule53: A2 changes development harness scripts only; full package/build verification remains the separately admitted A4/later gate, never inferred from source/synthetic tests.
