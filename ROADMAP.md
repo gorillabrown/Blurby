@@ -1,7 +1,7 @@
 # Blurby — Development Roadmap
 
 **Last updated**: 2026-10-30, roadmap review 2026-10-30 (Phases A–D). Owner mandate 2026-10-30: Blurby.Brain1 holds rule 11's technical authority and directs RodneySr to complete the roadmap; Blurby.Roadmap keeps the register, ROADMAP, merge gos and governance. Ruling R-2026-10-30-1 parks NATIVE-PATH-ATTESTATION-1 (Seq 140) and unblocks FOLIATE-DISPLAY-LIFETIME-1; RodneySr runs jobs 1–5 serially (quit-linger (b) done, display-lifetime native routes, combined visibility candidate, BAND-ALIGN-2 R7, NARRATE-PAUSE-CANCEL-1). Existing release/source holds are preserved. Previous: 2026-10-27, approved roadmap review PhasesA–C and detailed PhaseD contracts. WORD/GROUP/native proof remain NOT READY; the qualified registry-helper repair registered prerequisite items at67.5/87.5 and confirmed their dependency links. Existing release/source holds and every unrelated full specification are preserved.
-**Current review (2026-11-02)**: Phase A and B approved; Phase C [delivery plan](docs/planning/roadmap-reviews/2026-11-02-plan.md) approved; [Phase D brief](docs/planning/roadmap-reviews/2026-11-02-phase-brief.md) records readiness and held gaps. Preserve the release freeze pending Brain1 resolution of the release/integration order; no Status/Seq change, merge go or Native resume.
+**Current review (2026-11-02)**: Phase A and B approved; Phase C [delivery plan](docs/planning/roadmap-reviews/2026-11-02-plan.md) approved; [Phase D brief](docs/planning/roadmap-reviews/2026-11-02-phase-brief.md) records readiness and held gaps. The RC scope exception is confirmed in the completed main handoff ac19ea60; integration windows, package acceptance and per-branch merge gos remain required. CPU amendment/own-row reconciliation is recorded in its issue; no runtime or Native resume.
 **Current state**: v1.75.1; Page, Focus, Flow and rebuilt Narrate are four independent runtimes (Narrate completed 2026-10-15). Kokoro is the sole narration engine. Source baseline main d8e44864 has the same production code as tested release36ac7466. That release passed quiet gate(1) on 2026-10-23; the owner smoke on 2026-10-26 is RED. See the current review and live Notion register for evidence/status; built/merged held work is not complete.
 **Finish line**: the Stage8 release, only when all twelve gates hold on the approved exact candidate; no dated deadline. Gate(2) remains failed/partial after the 2026-10-26 owner smoke. This planning review does not grant a code integration window, merge go or release exception. Any changed candidate receives the applicable gates anew.
 **Queue**: live Notion is authority. First-order governance deliverable GOV-SWEEP-FOLLOWTHROUGH-1 occupies0; its approved cleanup and deferred findings have explicit acceptance, while visibility remains the first app fix. The existing release-fix Seq1–6 and held merge train remain. This review specifies five smoke repairs, first LIBRARY-COMPLETION-VISIBILITY-1; the new paused-click child occupies117 and the residual Narrate visual diagnosis moves to124. Visibility now has an owner-approved exclusive implementation window; the remaining prerequisite, package, merge and release gates still apply. Specifications are not dispatches. The phase brief reports all five readiness findings separately.
@@ -1152,14 +1152,12 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 <a id="narrate-cpu-profile-1-spec"></a>
 
 #### NARRATE-CPU-PROFILE-1 — Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*
-
-- **Readiness review 2026-11-02:** NOT dispatch-ready: the full spec waits for NARRATE-HARNESS-COLDCLICK-1 although the register omits it; the 90-minute measurement row needs bounded waves and separate runtime admission; current host/review-order instructions below need amendment. See [readiness evidence](docs/planning/roadmap-reviews/2026-11-02-readiness.md). No new run is admitted.
+- **Binding amendment 2026-11-02:** Brain1 R-2026-11-02-CPU-1/2 and the [verbatim ruling](docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md) supersede the old single-wave schedule and harness wait below. [Decision and remaining gaps](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md). No wave admitted; NOT READY pending source-wave feasibility, hard-stop details, host/custody and required mechanical checks.
 - **What:** a measured profile of the rebuilt Narrate's warm requests on the quiet machine (mainstream class). It records:
   - how much of the machine Blurby uses;
   - which process uses it;
   - how each request's latency splits into waiting, generation and delivery;
   - how latency and CPU change when onnxruntime's intra-op thread count per producer worker is 4 (today), 3, 2 or 1.
-
   A fixed decision rule turns the sweep into one of two verdicts: keep 4 threads, or adapt the thread count on hosts with fewer than 8 physical cores (to a measured value).
 - **Why:**
   - The stub (ROADMAP.md, `narrate-cpu-profile-1`): on the quiet machine (i7-1185G7, 4 cores / 8 threads), Blurby alone drove the host to 78–84 % during warm D6 requests, and to 95–98 % with foreign load.
@@ -1167,7 +1165,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
     - each warm run's own app share was 49–55 % of all 8 logical processors;
     - within click and speed trials the app share reached 89–94 %, and the host 100 %.
   - The reference Snapdragon record (`latency-e2e.completion-2-reference.json`) peaks at 61–65 %.
-  - **The likely cause is measurable, not assumed (LL-142).** The producer runs `NARRATE_PRODUCER_WORKERS` = 2 workers (`main/narrate/constants.js:21`). Each opens an onnxruntime session with `NARRATE_INTRA_OP_THREADS` = 4 intra-op threads (`:17`, applied at `main/narrate/producer-worker.js:64-67`).
+  - **The likely cause is measurable, not assumed (LL-142).** The producer runs `NARRATE_PRODUCER_WORKERS` = 2 workers (`main/narrate/constants.js:21`). Each opens an onnxruntime session with `NARRATE_INTRA_OP_THREADS` = 4 intra-op threads (`:18`, applied at `main/narrate/producer-worker.js:64-67`).
   - That count was chosen by Decision #7 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md:205`) from a sweep on the 12-core reference machine with one worker. The second worker came later (Decision #17, `:215`).
   - On 4 cores, a request generated while the other worker runs a prefetch asks for 8 compute threads at once.
   - The override already exists, so no product code is needed to sweep it: `NARRATE_INTRA_OP_THREADS` (`main/narrate/producer.js:29-35`) is read when each worker loads (`:128`).
@@ -1177,15 +1175,14 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
   - No product default changes here. A change, if the rule calls for one, is a separate follow-up item (Done-when 7).
 - **Prerequisites:**
   - NARRATE-REBUILD-1 (completed 2026-10-15).
-  - **NARRATE-HARNESS-COLDCLICK-1**, built and pushed. This item uses its trial labels (`trial-<label>.json`), the `--class auto` mainstream budget and the live-profile guard, and edits the same launcher. Until that branch exists, this item waits.
-  - Blurby.Brain's quiet machine is free of release gate (1) and smoke work for about 90 minutes.
+  - **NARRATE-HARNESS-COLDCLICK-1**, built and pushed. This item uses its trial labels (`trial-<label>.json`), the `--class auto` mainstream budget and the live-profile guard, and edits the same launcher. Source Wave A may use exact held base c90d9e08acfc356ca76941df063a0941ab488a94 before merge (Brain1 CPU-2); retain the In Flight status and phase-specific exception, not terminal completion.
+  - RodneySr must be free of gate, smoke or other jobs for each separately admitted CPU-1 wave, with availability and consumed input receipt verified; the single 90-minute slot is superseded.
 - **Done when** (every command in `pwsh` 7 from the worktree root; the launcher and the summary through `scripts/narrate-rebuild/app-node.ps1`, LL-160):
   1. **Red first (standing rule 43).** Commit `tests/narrate/narrate.cpuProfile.test.ts` on its own. Hold the module path in a variable and import it inside each test, so the file collects and fails by assertion on the base.
      - **(d1) Request breakdown.** `requestBreakdown(events)` is exported from `scripts/narrate-rebuild/lib/cpuprofile.mjs`. It is given a fixture with:
        - a `narrate-request` (cause `click`, `t` 1,000);
        - a `narrate-schedule` with `requestedT` 1,000, `genMs` 600, `chunkStart` 100, `chunkEnd` 106, `busyAtAssign.pool` 1, and `hops.stages` `{ queued: 5,000, posted: 5,040, received: 5,700 }`;
        - a `narrate-first-voiced` with `requestT` 1,000.
-
        It returns `{ cause: "click", waitMs: 40, genMs: 600, words: 6, genMsPerWord: 100, otherBusy: true }`.
      - **(d2) Decision: adapt.**
        - `profileDecision(configs)` gets a fixture with baselines `t4-1` and `t4-2`: worst per type 1,800 and 1,900 ms, and median app CPU 52 and 54 %.
@@ -1193,7 +1190,6 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
        - It returns `{ verdict: "adapt", threads: 3 }`. `t2` and `t1` are not admissible, because they go over 2,500.
      - **(d3) Decision: keep.** The same fixture with `t3` at CPU 46 % (not 10 points below 53) returns `{ verdict: "keep", threads: 4 }`.
      - **(d4) Decision: noisy.** Baselines whose worst trials differ by more than 500 ms in any type and rate return `{ verdict: "noisy" }`.
-
      On the base each test fails because the module does not exist. Record the failing output in the staging memo.
   2. **Per-process CPU in the launcher** (`scripts/narrate-rebuild/p5-latency-e2e.mjs`, on top of NARRATE-HARNESS-COLDCLICK-1):
      - **`--cpu-by-process`** extends the sampler (`:58-67`). Every 500 ms, one long-lived `pwsh` loop reads `Get-CimInstance Win32_Process` for the `electron.exe` processes whose `ExecutablePath` starts with the worktree root.
@@ -1206,29 +1202,26 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
        - The series is saved with the run's CPU file (`:113`), and `cpuShare` (`:70-79`) gains a per-type share over the same window.
      - Without the flag, nothing changes.
      - **Thread label.** `report` (`:143`) records `intraOpThreads`: the `NARRATE_INTRA_OP_THREADS` value, or `"constant"` when it is unset.
-     - **Proof the setting took effect (LL-166).** The warm trial's summary already records the producer status at "warm-up done" (`main/narrate/trial.js:253`, `runtime.threads`).
+     - **Proof the setting took effect (standing rule 55).** The warm trial's summary already records the producer status at "warm-up done" (`main/narrate/trial.js:253`, `runtime.threads`).
        - The launcher reads `trial-<label>.json` after each warm run and records `runtimeThreads`.
        - When `intraOpThreads` is set and differs from `runtimeThreads`, that is a failure: `threads <set> requested, <runtime> loaded`.
   3. **The summary** `scripts/narrate-rebuild/cpu-profile-summary.mjs <recordsDir> <artifactsRoot>` reads `<recordsDir>/latency-e2e.t<T>-<n>.json` and each run's traces and CPU files under `<artifactsRoot>/t<T>-<n>/`. It writes `<recordsDir>/cpu-profile.summary.json` and prints:
      - **per config, rate and request type:** worst counting warm latency, counting trials, and the median and maximum app CPU % over the counting trials' windows;
      - **per config:** run-level app CPU % (wall-weighted over the warm runs); the median per-process-type share; the median `waitMs`, `genMs` and `genMsPerWord` of request chunks; the fraction of requests with `otherBusy`; and `genMs` against chunk words (slope and intercept, least squares);
      - **the verdict of `profileDecision`**, with each config's admissibility and CPU gain.
-
-     It exits 0 when a verdict is computed, and 1 when any record is invalid: `d6class` is not `mainstream`, a thread failure, or fewer than 20 counting trials in a cell. Run once with `--break`, which raises one baseline's worst click by 600 ms; it must print `noisy` and exit 1 (LL-151).
+     It exits 0 when a verdict is computed, and 1 when any record is invalid: `d6class` is not `mainstream`, a thread failure, or fewer than 20 counting trials in a cell. Run once with `--break`, which raises one baseline's worst click by 600 ms; it must print `noisy` and exit 1 (standing rule 55).
   4. **The sweep, quiet machine** (i7-1185G7; run by Blurby.Brain on the pushed branch after `npm ci` and `npm run build`; nothing else heavy running; the foreign-CPU ≤ 25 % rule and the 40-cycle cap unchanged):
      - Five configurations, in this order: T = 4, 3, 2, 1, 4. The two runs at 4 are baselines `t4-1` and `t4-2`, and their spread is the noise.
      - Each one is:
-
        ```
        $env:NARRATE_INTRA_OP_THREADS = '<T>'
        pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/p5-latency-e2e.mjs --only warm --warm 20 --rates 1.0,2.0 --class auto --cpu-by-process --out C:\Projects\Blurby-artifacts\narrate-cpu-profile-1\t<T>-<n>
        Move-Item docs/studies/narrate-rebuild-1/phase5/latency-e2e.json docs/studies/narrate-rebuild-1/cpu-profile/latency-e2e.t<T>-<n>.json
        ```
-
      - Each record reads `d6class: "mainstream"` and `runtimeThreads` = T. The launcher's own exit code is recorded, not judged: T = 1 may exceed the budget, and the decision rule judges.
      - Afterwards `git status --porcelain -- docs/studies/narrate-rebuild-1/phase5` is empty, and the live-profile hashes are unchanged.
   5. **The decision rule** (`profileDecision`, applied to the five records):
-     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Blurby.Brain.
+     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Blurby.Brain1.
      - **Admissible:** a config T in {3, 2, 1} is admissible when, at both rates and for every type, its worst counting trial is under 2,500 ms. It must also be at most the larger baseline worst plus the larger of the baselines' spread and 100 ms.
      - **CPU gain:** T has a gain when its median app CPU %, pooled over every counting warm trial at both rates, is at least 10 percentage points below the mean of the two baselines' medians.
      - **(A) Adapt:** some admissible config has a gain. The verdict is `adapt` to the admissible T with the lowest median app CPU (on a tie, the larger T), on hosts with fewer than 8 physical cores. The reference class keeps 4, because it was not swept here and its D6 row stays as measured.
@@ -1243,14 +1236,14 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 
      The five records and `cpu-profile.summary.json` sit beside it.
   7. **Follow-up by verdict:**
-     - **On A:** Blurby.Roadmap registers a stub, NARRATE-THREADS-ADAPT-1: on hosts with fewer than 8 physical cores, `getThreads()` (`main/narrate/producer.js:29-35`) returns the measured T, and D6 re-runs on both classes before it merges. This is a tier 1 technical decision (Rule 11), ruled by Blurby.Brain. Latency stays inside the owner's mainstream budget and the reference class is unchanged.
+     - **On A:** Blurby.Roadmap registers a stub, NARRATE-THREADS-ADAPT-1: on hosts with fewer than 8 physical cores, `getThreads()` (`main/narrate/producer.js:29-35`) returns the measured T, and D6 re-runs on both classes before it merges. This is a tier 1 technical decision (Rule 11), ruled by Blurby.Brain1. Latency stays inside the owner's mainstream budget and the reference class is unchanged.
      - **On K:** the item closes with no follow-up.
 
      Either way, the verdict line is quoted in the close-out.
   8. **Tests and gates.**
      - `npx vitest run tests/narrate` exits 0.
      - `npx vitest list` collects exactly one more file than on NARRATE-HARNESS-COLDCLICK-1's tip (standing rule 52).
-     - `npm test` and `npm run typecheck` exit 0 on the owner's machine (standing rules 47 and 48). `npm run build` exits 0 too, because the launcher runs the built `dist`.
+     - `npm test` and `npm run typecheck` exit 0 on RodneySr (standing rules 47 and 48; AGENTS rule 6b). `npm run build` exits 0 too, because the launcher runs the built `dist`.
   9. **Package (standing rule 53):** nothing under `build.files` changes. `git diff --name-only origin/eb/narrate-harness-coldclick-1...HEAD` lists no `main.js`, `preload.js`, `main/` or `dist/` path. Record "package unchanged" with that output in the staging memo, against NARRATE-HARNESS-COLDCLICK-1's verified package.
   10. **Fence:** `git diff --name-status origin/eb/narrate-harness-coldclick-1...HEAD` lists exactly the following, plus the staging memo and time log (standing rule 41). It may also list the merge of `origin/main`, if one is made.
       - `M scripts/narrate-rebuild/p5-latency-e2e.mjs`;
@@ -1261,13 +1254,13 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 - **Effort:** S–M (scripts S; the sweep is about 90 minutes of quiet-machine time).
 - **Owners:**
   - the implementation agent: Done-when 1–3 and 8–10;
-  - Blurby.Brain: Done-when 4 on the quiet machine, and the A or K ruling;
-  - spec-compliance and quality reviewers, in parallel;
+  - Codex Blurby.Brain: Done-when 4 on the quiet machine, and the A or K ruling;
+  - spec-compliance reviewer first, then quality reviewer;
   - Blurby.Roadmap: the follow-up stub on A.
 - **Source:**
   - the stub; Decisions #7, #17 and #22 (`state.md:205`, `:215`, `:221`);
   - `latency-e2e.completion-1.json` (run-level app CPU 49–55 %, trial maxima 89–94 %) and `latency-e2e.completion-2-reference.json`;
-  - `main/narrate/constants.js:17-21`; `main/narrate/producer.js:29-35`, `:128`.
+  - `main/narrate/constants.js:18-21`; `main/narrate/producer.js:29-35`, `:128`.
 - **Path:** dispatch.
 
 ##### Owner questions
@@ -1299,10 +1292,10 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
   - `SWEEP_THREADS = [4, 3, 2, 1]`.
 
   No product constant changes.
-- **Branch:** `eb/narrate-cpu-profile-1`, cut from `origin/eb/narrate-harness-coldclick-1` with `origin/main` merged in. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. Do not merge (Stage 8 freeze). Merge order: NARRATE-HARNESS-COLDCLICK-1, then this branch.
+- **Branch:** `eb/narrate-cpu-profile-1` from exactly `c90d9e08acfc356ca76941df063a0941ab488a94` for source Wave A (Brain1 CPU-2); moved harness ref returns to planner. Pin this amended specification separately as an immutable input; the older base alone does not carry this amendment. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. No main merge here. At B0 only, merge current main once first if the candidate Narrate stack has landed, then freeze one measurement commit for all five settings. Merge after the harness, with fresh main reconciliation and the parent merge go.
 - **Staging plan:** explicit paths only (the fence list). `tests/perf-baseline-results.json`, `docs/studies/narrate-rebuild-1/phase5/recorded-output.json` and any `phase5/latency-e2e.json` stay unstaged. Records are moved into `cpu-profile/`, not copied.
 - **Failure handling:**
-  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Blurby.Brain.
+  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Blurby.Brain1.
   - **Too few counting trials.** A cell under 20 counting trials after 40 cycles (foreign load) gives the same verdict as the launcher's: ask for a quiet window, re-run that configuration once, then stop.
   - **Silent producer.** A worker stall like Decision #21's (`state.md`, the P5 final-run blocker) shows as a trial over 2,500 ms in a baseline. That makes the sweep noisy under (N). It is reported with the producer log (`NARRATE_PRODUCER_LOG=1` on the re-run), not explained away.
   - **The `--cpu-by-process` loop.** Its own CPU is counted as foreign, as the existing sampler's is. If its cost pushes foreign CPU over 25 % in more than a quarter of trials, the sweep drops the flag, and the per-process split is reported as not measured.
@@ -1320,16 +1313,17 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 | 5 | Summary, verdict and report written; follow-up stub on A | calculable | measurement | bounded | medium | 35m | — | — |
 | 6 | Targeted tests, suite, typecheck, build; package-unchanged record; memo, time log, push | calculable | verify | bounded | low | 35m | — | — |
 
+**Total:** chain 4h25m; sum 4h25m; 0 of 6 estimates calibrated (manual sum of existing calculable rows, not helper-priced). Historical aggregate only; separate CPU-1 caps/admissions supersede it as a dispatch schedule. U10 remains unperformed under F-011.
 ##### Lessons applied
 - **LL-142:** the stub's 78–84 % and the over-subscription cause are measured, not assumed. The baseline restates the stub's figure in a defined metric before any setting is judged.
-- **LL-151:** the summary proves it can return a failing verdict (`--break` prints `noisy`, exit 1). The launcher's thread mismatch is a failure with its own message.
+- **Standing rule 55 (failure detector):** the summary proves it can return a failing verdict (`--break` prints `noisy`, exit 1). The launcher's thread mismatch is a failure with its own message.
 - **LL-152:** every configuration uses the same build, machine, start word, rates and trial schedule. The baseline runs twice, first and last, so drift during the sweep shows as noise rather than as an effect.
 - **LL-160:** the launcher and the summary run under the app's Electron through `app-node.ps1`.
 - **LL-165:** every run keeps NARRATE-HARNESS-COLDCLICK-1's profile proof (the driver's exit 4 and the launcher's live-profile hashes).
-- **LL-166:** a configuration counts only when the loaded producer reports the thread count asked for (`runtime.threads`), read from state rather than inferred from the environment variable.
+- **Standing rule 55 (loaded thread proof):** a configuration counts only when the loaded producer reports the thread count asked for (`runtime.threads`), read from state rather than inferred from the environment variable.
 - **LL-162:** not applied. This is a live timing profile, not a correctness gate over a corpus.
 - **Standing rule 43:** the red file goes first, with keep, adapt and noisy fixtures for the rule.
-- **Standing rules 47 and 48:** suite, typecheck and build on the owner's machine; the timed sweep on the quiet machine, by Blurby.Brain.
+- **Standing rules 47 and 48:** suite, typecheck and build on RodneySr; the timed sweep on the quiet machine, by Blurby.Brain1.
 - **Standing rule 52:** the records are `.json` and `.md` under `docs/`, and `npx vitest list` confirms one new collected file.
 - **Standing rule 53:** no `build.files` path changes, so the package is recorded as unchanged against NARRATE-HARNESS-COLDCLICK-1's verified package.
 - **Standing rule 36:** every cited line was grep-verified at `1937e999` and is re-grepped on the base branch at dispatch.

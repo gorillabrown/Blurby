@@ -37,3 +37,45 @@ Provider KPIs:202 total,72 In Flight,43 Queued,87 terminal; buffer4 filled/5 tar
 Early Page input (PAGE-ENTRY-KEYS-1, Seq119) is not offered as a ready alternative: its own specification waits for a held Page integration window and unverified execution-host inputs. Business and Native retain their explicit gates. No known deeper dispatch is certified Ready by this gate.
 
 No runnable kickoff is printed under next-dispatch's structural-gap rule. No implementation, profile sweep, timing helper, runtime launch, release, freeze lift, main merge or Native resume occurred. Closure requires the actual Brain1 ruling, head amendment/normal register handshake if needed, exact repository/host receipts and all five findings passing. Preserve every unrelated edit and historical receipt.
+
+## Decision — 2026-11-02, acknowledged Brain1 rulings received
+
+- **Type:** planner-side technical clarification, CPU-1/CPU-2; no execution admission. The source/base question is resolved; overall readiness remains NOT READY.
+- **Authority and consumed receipt:** correct Claude session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582` was opened through the supported Computer Use skill. The specific request appeared in that chat; Brain1 read the pinned issue at `ab51d2d7` and acknowledged answering all three questions. The owner then supplied the full ruling as an attachment in this Codex chat. Verbatim bytes are preserved in `Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md`, SHA256 `458b7b9d935873fefb739862892faa0a49577754e3b1af84ae8a7bec9cab36b4`. This supersedes the earlier “delivery not verified” state; a transport acknowledgment alone was not used.
+- **Head amendment:** ROADMAP's CPU card now names the binding ruling, exact Wave-A base, quiet host, sequential compliance/quality reviews, correct constant and promoted-rule citations. Its existing 265-minute aggregate has an explicit manual Total; that aggregate is not a single-dispatch schedule or a mechanically priced U10 PASS. Only this head's surplus blank lines were compacted to retain the 2,000-line ceiling after merging the completed main handoff into the review branch.
+- **Prerequisites:** canonical identifiers are `NARRATE-REBUILD-1; NARRATE-HARNESS-COLDCLICK-1`. The built/package-verified, In Flight harness and the phase-specific permission to use exact `c90d9e08acfc356ca76941df063a0941ab488a94` before merge are in Notes and the head card. The helper splits commas/semicolons, so putting annotated prose in this field would create unknown identities; no identity, terminal status or helper rule was manufactured.
+- **Provider transaction:** recovery `20261102T174123Z-external-set-status-NARRATE-CPU-PROFILE-1`, connector write, fresh SQL readback, succeeded confirmation and full202-row re-read/import at **2026-11-02T17:43:04Z**. Exactly this row changed; only Prerequisites and Notes. Original Notes prefix preserved. SQL removes four inline-code delimiters; every remaining character matches. Status Queued/Seq95 unchanged. The receipt is `Receipt.NARRATE-CPU-PROFILE-1.register.2026-11-02.json`; recovery outstanding is empty.
+- **Selector consequence:** the terminal-only selector now skips this item while its actual harness prerequisite is In Flight. It selects BLURBY-BUSINESS-1 at100.5, already in epic packet `2026-10-30-blurby-business`; its charter gates remain and no separate epic or implementation run is launched. This is an honest dependency correction, not resequencing or authority to bypass the held CPU item.
+
+### Binding prospective waves — every admission still inactive
+
+| Wave | Outcome / allowed scope when separately admitted | Ceiling |
+|---|---|---|
+| A | Red-first tests; profile library, launcher flags/thread proof, synthetic summary/break controls; full tests/typecheck/build; package-unchanged/fence record; push. No real profiling. | 60 minutes; preserve partial state and stop at cap, no rollover to B |
+| B0 | Dependency setup/build at one measurement commit; record dist/lock/model hashes, boot session, power state and foreign-CPU baseline. | 30 minutes |
+| B1 | T4 baseline1, T3, T2 in order; start a setting only with at least20 minutes remaining. | 60 minutes |
+| B2 | Any not-started setting from B1, then T1, then T4 baseline2; same fixed order4,3,2,1,4. | 60 minutes |
+| C | Summary/report and keep/adapt verdict for technical disposition; no default changes. | 45 minutes |
+
+Continuity: same commit/hashes, host/boot, AC power/mode, gap≤24h. One failed-setting retry; second failure stops. One continuity restart; second break stops. One full noisy rerun, separately admitted B3/B4; second noisy result stops. **At most four measurement waves in total**; retries/restarts cannot create implicit extra waves. Each later runtime admission must contain exact commands/output path, remaining counters, B0 and prior-record SHA receipts committed/pushed, profile isolation/before-after hashes, free RodneySr capacity and hard-stop control. The original ruling is the full contract, not this summary.
+
+### Remaining technical and capability gaps
+
+Independent reviewer `cpu_ruling_review` agrees the ruling can be persisted but does not justify Ready:
+
+1. Wave A includes original estimated source/verification rows25+40+40+35 = **140 minutes** inside a60-minute cap. The strict partial stop is valid; a feasible complete wave or further decomposition has not been established. Do not lower estimates, enlarge a budget or promise completion by the cap without authority.
+2. The20-minute start threshold does not define safe handling for a setting still running at the60-minute hard stop. Exact lifecycle/custody behavior belongs in its later admission; no process starts until that is resolved. Global four-wave ceiling applies to all retries/restarts.
+3. U10's timing helper remains unqualified under F-011/LL-172. No timing call was made; manual totals are not its mechanical PASS.
+4. Execution branch, immutable specification transfer and RodneySr availability/dependencies/consumed receipt remain unverified. The source cut predates this amendment; its separate governance input must be pinned explicitly before launch.
+
+Brain1 is out of usage, as the owner stated. On resume the owner was asked who should decide genuinely new technical questions; pending that answer, only existing rulings are applied. No technical authority is assumed by the planner. Design/functionality and release acceptance remain the owner's.
+
+### Release / resume context
+
+Completed handoff on main **ac19ea60b6cd8b4fff3e5413b111925b7ef78485** was read and merged into this review branch without conflict. Its three amendments and PREPARED AND HELD records are retained, not reissued as running work. The owner explicitly resumed this Codex task after the temporary pause. This permits coordination/documentation, not an inactive runtime wave, an automatic release or a main merge. Native remains parked; Business retains its charter gates. No new lesson is needed: LL-143/172 and the existing admission/receipt rules already cover these gaps.
+
+## Owner routing decision — 2026-11-02
+
+The owner answered: “It should be the Codex Blurby.Brain codex://threads/01a179e8-7a40-75c0-93f4-d3045ad99027”. New technical questions go to that local Codex chat; existing written Brain1 rulings remain inputs unless superseded. AGENTS.md and CLAUDE.md rule11 now carry the routing. No package, source, release or runtime gate is waived.
+
+The correct Codex chat was read before use. Its previous activity was the Native pause; the new request explicitly preserves that pause and all expired clocks. A bounded request for the source-wave, hard-stop/counter and U10 gaps was sent. **Actual acknowledgment observed:** “I'll review the CPU profiling rulings and return a bounded technical amendment. Native remains paused; I'll make no file changes or execution launches.” This verifies uptake of the specific new task, not completion of a ruling. No executor or Native monitor was messaged.

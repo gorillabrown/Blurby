@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-02T16:54:56Z",
+  "takenAt": "2026-11-02T17:43:04Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3736,7 +3736,8 @@
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
-        "NARRATE-REBUILD-1"
+        "NARRATE-REBUILD-1",
+        "NARRATE-HARNESS-COLDCLICK-1"
       ],
       "effort": "S",
       "workstream": "TTS / Narration Engine",
@@ -3748,8 +3749,8 @@
       "completed": "",
       "evidence": "",
       "description": "A profile pass on producer and worker time, and whether chunk ramp or worker count should adapt to core count.",
-      "notes": "Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.",
-      "revision": "c250b9d9c5d44cc1e74e48a430c05eaede671165d3b7fb552a13c1d64b6c9bb6",
+      "notes": "Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.\n\nNext-dispatch reconciliation 2026-11-02: Brain1 rulings R-2026-11-02-CPU-1/2 received and acknowledged; exact source is docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md. Source Wave A may build on the In Flight, built/package-verified harness at c90d9e08acfc356ca76941df063a0941ab488a94; it does not need to be merged first. This exception is phase-specific, not terminal completion or a runtime admission. Each wave needs separate admission. NOT READY: source scope has 140m of existing estimates versus the 60m cap; retain partial-stop semantics until feasible decomposition is resolved, plus measurement hard-stop, U10 helper, host/input and custody gates. Adding the actual harness identity to canonical Prerequisites intentionally makes the terminal-only automatic selector skip this item while the harness remains In Flight; no Status/Seq/effort or helper semantics changed.",
+      "revision": "a7db7b04d0cc9363607ece964c526e24dac53b0a90939db58ac3077149122b63",
       "extra": {
         "id": "3fa7c96c-c31e-81e1-b020-ebf7e9886d7a",
         "url": "https://app.notion.com/3fa7c96cc31e81e1b020ebf7e9886d7a",

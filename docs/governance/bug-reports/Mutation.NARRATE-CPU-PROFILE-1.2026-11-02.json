@@ -1,0 +1,7 @@
+{
+  "prerequisites": [
+    "NARRATE-REBUILD-1",
+    "NARRATE-HARNESS-COLDCLICK-1"
+  ],
+  "notes": "Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.\n\nNext-dispatch reconciliation 2026-11-02: Brain1 rulings R-2026-11-02-CPU-1/2 received and acknowledged; exact source is `docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md`. Source Wave A may build on the In Flight, built/package-verified harness at `c90d9e08acfc356ca76941df063a0941ab488a94`; it does not need to be merged first. This exception is phase-specific, not terminal completion or a runtime admission. Each wave needs separate admission. NOT READY: source scope has 140m of existing estimates versus the 60m cap; retain partial-stop semantics until feasible decomposition is resolved, plus measurement hard-stop, U10 helper, host/input and custody gates. Adding the actual harness identity to canonical Prerequisites intentionally makes the terminal-only automatic selector skip this item while the harness remains In Flight; no Status/Seq/effort or helper semantics changed."
+}
