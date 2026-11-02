@@ -4,6 +4,8 @@ This is a reviewable pointer, not a runnable admission. Owner resumed planning a
 
 Brain's actual placement response is preserved in `Brain.NARRATE-CPU-PROFILE-1.placement.2026-11-02.md`. Historical executor: Claude bridge `bridge:session_019DGh1eeXnuDBxRVHXXyqz4`, reporting RodneySr and named Blurby. RS Roadmap; this is not a Codex chat ID. Historical repository anchor `C:/Projects/bq-main` must retain its detached36ac7466, stash and RUN4 evidence; use a separate execution worktree. No connected Codex RodneySr host or current idle-lane receipt is established. Do not select an executor by historical display name alone.
 
+**Owner-designated successor executor:** Codex chat `01a19d76-0837-7a43-a18d-8a40494879b8`, replacing the Claude bridge as the planning destination. The owner's actual designation was read in Brain chat turn `01a19d76-aa88-7741-b8d9-c060ce3dc44e`. After the owner reported restart complete, both direct read and read-only reconciliation message attempts returned no matching thread; inventory exposed only the local Codex host. No delivery, queue reconciliation or launch is claimed. The historical repository anchor above is not a verified checkout for this successor. Obtain the successor's actual host-side queue and immutable input receipts before a named A1 admission.
+
 ```text
 Item: NARRATE-CPU-PROFILE-1 / source wave A1 only
 Register: https://www.notion.so/3fa7c96cc31e81e1b020ebf7e9886d7a
