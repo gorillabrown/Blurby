@@ -31,3 +31,15 @@
 - **Next:** [where the following session should pick up]
 
 -->
+
+
+## S1 — 2026-11-02 22:52 UTC — isolated worktree setup
+
+- **Did:** verified main and remote equality at `ac19ea60b6cd8b4fff3e5413b111925b7ef78485`, scaffold ancestry, frozen packet input equality, branch/destination absence; created `C:/Projects/bb-business` on `eb/blurby-business-1` through the real common repository. Initial checkout was clean.
+- **Learned:** the packet's old bq-main anchor was an assumption corrected by BB-1; no old detached checkout, stash or evidence was changed. Qualified helper's 220 raw hashes, canonical blobs, inventory and import origins passed again; read-only policy permits explicit branch pushes. No registry/helper command or fresh SQL was invoked; parent-confirmed readback is labelled as such.
+- **Decisions:** consumed Brain BB-1/BB-2 at governance `5378f87a50471f485d2ecfcf6d2db6f81663c462` without merging governance into source. Source window closure and separate Business/CPU ownership accepted. Theme export is future scope only.
+- **Gate/DoD movement:** setup only; D1–D21 unmet. No npm installation, baseline suite, build, native or product source/test edits.
+- **Tried and failed:** unsupported model failure remains preserved in the chat. Python CP1252 stdout failed printing charter U+2192 before worktree creation; partial receipt preserved, same-wave UTF-8 correction explicitly authorized by coordinator.
+- **Git:** docs-only setup checkpoint on `eb/blurby-business-1`; exact resulting commit/remote equality recorded in the external final receipt. Only state.md and journal.md staged.
+- **Evidence:** `C:/Projects/Blurby-artifacts/business-worktree-prep-20261102/`; helper acceptance `C:/Projects/Blurby-artifacts/business-helper-prep-20261102/acceptance.json`.
+- **Next:** STOP for Brain setup acceptance; require a separately bounded dependency/baseline admission and resource reservation. No automatic HB-6 implementation.
