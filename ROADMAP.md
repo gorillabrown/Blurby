@@ -1152,7 +1152,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 <a id="narrate-cpu-profile-1-spec"></a>
 
 #### NARRATE-CPU-PROFILE-1 — Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*
-- **Binding amendments 2026-11-02:** Brain1 CPU-1/2 and Codex CPU-3 through CPU-8 retain source order A1(task1) -> A2(task3) -> A3(task2) -> A4(task6), each separately admitted <=60m/40tools; no profiling. A1's red-test checkpoint9dc0f386 is accepted; the whole item stays In Flight. [A2 enrichment and exact contracts](docs/governance/bug-reports/Dispatch.NARRATE-CPU-PROFILE-1.A2.2026-11-02.md) bind its unchanged A1 test, two-file fence and synthetic-only Node exception; CPU-8's narrow amendment supersedes affected wording. A2 is being prepared, not admitted. Later measurement counters/containment follow the [Decision](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md); no runtime/merge authority inferred.
+- **Binding amendments 2026-11-02:** Brain1 CPU-1/2 and Codex CPU-3 through CPU-8 retain source order A1(task1) -> A2(task3) -> A3(task2) -> A4(task6), each separately admitted <=60m/40tools; no profiling. A1 checkpoint9dc0f386 and A2 synthetic source checkpointdbd4ea3 are accepted by Brain; whole item stays In Flight. [A2 contracts](docs/governance/bug-reports/Dispatch.NARRATE-CPU-PROFILE-1.A2.2026-11-02.md) and both CPU-8 amendments bind its two-file fence. Separate A2-V1 validated final bytes:4tests,10original controls and1partial-coverage regression pass; executors stopped. [A3 contract questions](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.A3-contract.2026-11-02.md) remain planning only. Later measurement containment follows the [Decision](docs/governance/bug-reports/Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md); no A3/runtime/merge authority inferred.
 - **What:** a measured profile of the rebuilt Narrate's warm requests on the quiet machine (mainstream class). It records:
   - how much of the machine Blurby uses;
   - which process uses it;
@@ -1308,7 +1308,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 |---|---|---|---|---|---|---|---|---|
 | 1 | ✅ COMPLETED — A1 red file d1–d4 only, reviewed commit9dc0f386; whole item remains In Flight | calculable | positive control | bounded | low | 25m | — | — |
 | 2 | Launcher records CPU per process type, the thread label and the loaded thread count | calculable | harness script | bounded | medium | 40m | — | — |
-| 3 | Profile library and summary, with the `--break` control | calculable | harness script | bounded | medium | 40m | — | — |
+| 3 | ✅ COMPLETED — A2 source/synthetic checkpointdbd4ea3, including break control; whole CPU item remains In Flight | calculable | harness script | bounded | medium | 40m | — | — |
 | 4 | Five-configuration thread sweep on the quiet machine, records moved | calculable | measurement | bounded | medium | 1h30m | — | — |
 | 5 | Summary, verdict and report written; follow-up stub on A | calculable | measurement | bounded | medium | 35m | — | — |
 | 6 | Targeted tests, suite, typecheck, build; package-unchanged record; memo, time log, push | calculable | verify | bounded | low | 35m | — | — |
