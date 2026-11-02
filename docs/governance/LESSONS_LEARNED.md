@@ -3145,3 +3145,6 @@ Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
 **Applies to:** reader runtimes' engine and binding layers; IPC and preload forwarding; any adapter chain.
 **Status:** Observation
 Related: LL-139, LL-143.
+
+### LL-143 — status (2026-11-02, 2026-11-02)
+**Status:** Observation - revised at roadmap review 2026-11-02: standing rule 44 now requires exact committed-command base/prescribed/wrong-variant receipts with input identity, output and exit code; planner-surrogate and base-only checks do not qualify. Retain the lesson and earlier history; no duplicate promotion or retirement.

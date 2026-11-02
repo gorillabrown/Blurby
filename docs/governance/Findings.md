@@ -197,3 +197,11 @@ Append-only findings; each disposition change is appended under its identifier. 
 **Accountable role / next action:** planner / roadmap-review with Blurby.Brain1 (technical) — decide whether the backfill lines are committed in one maintenance change, and whether the helper should refuse the ledger write under a non-writer actor; the dispatch worktree's lines stay uncommitted until then
 
 **Disposition:** open
+
+### F-010 — partial disposition (roadmap-review, 2026-11-02)
+
+Applied the permitted AGENTS.md/CLAUDE.md subset: mandatory documentation pass explicitly covers every sprint including hotfixes and the lessons/bug/technical-reference duties; scope caption now says implementation tasks. The three overlay wording changes remain open because the registered overlays role is read-only with no allowed writers. No ownership permission is inferred or registry policy changed. Planner owns the separately previewed ownership path; technical content goes to Blurby.Brain1. Evidence: `docs/planning/roadmap-reviews/2026-11-02-phase-brief.md`. This is partial resolution, not closure of F-010.
+
+### F-011 — retained open (roadmap-review, 2026-11-02)
+
+No timing command or historical-backfill mutation was performed. Preserve the 24/10 owning-worktree logs and uncommitted records. Planner with Blurby.Brain1 owns the bounded helper exact-path/actor-permission repair and the separate history disposition; mechanical U10 remains unperformed pending qualification. This review's LL-143 status append generated CH-005 under the permitted roadmap-review actor and is explicitly in its path fence; it is not a historical time-log backfill. See the readiness report and dispatch-buffer issue. F-009 likewise remains open with the existing CPU-profiling item; no budget was relaxed.

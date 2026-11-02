@@ -124,7 +124,7 @@ Zeus routes and orders work as the plugin's `skills/virtuoso/references/zeus.md`
 
 #### Agent Scope Labels (Reference)
 
-**Code scope labels** (applied to doer agent tasks):
+**Code scope labels** (applied to implementation tasks):
 
 | Label | Scope | Files |
 |-------|-------|-------|
@@ -148,7 +148,7 @@ Before committing, verify ALL of these:
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
-Documentation runs as *Document Lifecycle* states, with Blurby's documentation facts in `Virtuoso/overlays/agents/MarcusAurelius.md`.
+After EVERY sprint completion, hotfixes included, no exceptions, the plugin's MarcusAurelius runs the *Document Lifecycle* steps, plus `docs/governance/LESSONS_LEARNED.md` on a non-trivial discovery, `docs/governance/BUG_REPORT.md` for fixed bugs, and `docs/governance/TECHNICAL_REFERENCE.md` for architecture changes, as `Virtuoso/overlays/agents/MarcusAurelius.md` lists them.
 
 ### Standing Rules
 

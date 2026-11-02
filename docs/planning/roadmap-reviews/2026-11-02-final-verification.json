@@ -1,0 +1,208 @@
+{
+  "baseline": "88e82ba59ccb93281c6c0b949e3ed4a826195897",
+  "branch": "eb/roadmap-review-20261102",
+  "roadmapLines": 2000,
+  "diffCheck": "Tracked working diff passed. Staged check reports only the three intentional preserved blank-at-EOF lines listed below; all other whitespace checks pass.",
+  "appendOnlyPrefixes": "pass",
+  "archiveHash": "pass",
+  "terminalLedger": "unchanged",
+  "registryAndOverlays": "unchanged",
+  "sourceTestBuildFiles": "unchanged",
+  "board": {
+    "rows": 202,
+    "terminalRows": 87,
+    "terminalProblems": 0,
+    "comments": 0,
+    "drift": "physical order only",
+    "ignored": true
+  },
+  "providerReadback": "202 rows unchanged; snapshot 2026-11-02T16:54:56Z",
+  "preflight": "ready / writes0 / four overlays; human-readme view info retained",
+  "independentReview": "spec-compliance APPROVE then quality APPROVE, governance branch commit/push only",
+  "execution": "no application tests/builds/runtime/package checks or merge",
+  "scope": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "ROADMAP.md",
+    "Virtuoso/work-register.snapshot.json",
+    "docs/governance/Change.Ledger.jsonl",
+    "docs/governance/Findings.md",
+    "docs/governance/LESSONS_LEARNED.md",
+    "docs/governance/bug-reports/Issue.ROADMAP-DISPATCH-BUFFER.2026-11-02.md",
+    "docs/governance/bug-reports/Issue.ROADMAP-RELEASE-ORDER.2026-11-02.md",
+    "docs/planning/.Archive/ROADMAP_snapshot_2026-11-02.md",
+    "docs/planning/roadmap-reviews/2026-11-02-assessment.md",
+    "docs/planning/roadmap-reviews/2026-11-02-audit-inventory.json",
+    "docs/planning/roadmap-reviews/2026-11-02-audit.md",
+    "docs/planning/roadmap-reviews/2026-11-02-candidates.json",
+    "docs/planning/roadmap-reviews/2026-11-02-evidence-CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md",
+    "docs/planning/roadmap-reviews/2026-11-02-evidence-Findings.md",
+    "docs/planning/roadmap-reviews/2026-11-02-evidence-business-charter.md",
+    "docs/planning/roadmap-reviews/2026-11-02-evidence-business-state.md",
+    "docs/planning/roadmap-reviews/2026-11-02-final-kpis.json",
+    "docs/planning/roadmap-reviews/2026-11-02-final-preflight.json",
+    "docs/planning/roadmap-reviews/2026-11-02-final-verification.json",
+    "docs/planning/roadmap-reviews/2026-11-02-holding.json",
+    "docs/planning/roadmap-reviews/2026-11-02-independent-review.md",
+    "docs/planning/roadmap-reviews/2026-11-02-kpis.json",
+    "docs/planning/roadmap-reviews/2026-11-02-lesson-checks.json",
+    "docs/planning/roadmap-reviews/2026-11-02-lessons-applied.md",
+    "docs/planning/roadmap-reviews/2026-11-02-live-lessons.json",
+    "docs/planning/roadmap-reviews/2026-11-02-live-register.json",
+    "docs/planning/roadmap-reviews/2026-11-02-next.json",
+    "docs/planning/roadmap-reviews/2026-11-02-phase-a-reconciliation.json",
+    "docs/planning/roadmap-reviews/2026-11-02-phase-brief.md",
+    "docs/planning/roadmap-reviews/2026-11-02-phase-c-verification.json",
+    "docs/planning/roadmap-reviews/2026-11-02-plan.md",
+    "docs/planning/roadmap-reviews/2026-11-02-provider-recheck.json",
+    "docs/planning/roadmap-reviews/2026-11-02-readiness.md",
+    "docs/planning/roadmap-reviews/2026-11-02-structure-proposal.json"
+  ],
+  "fileHashesExcludingSelf": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "89a6c4a174fccb16dc82bc77ee189387647c27268c313dbb5793c752ee5f6c54"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "69fcd381e05c4b76de23356deef74f481f3d9f900a4b95199ffb103dabb43802"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "e0ed9343a3deb7e7bcba88b1084e0bed75bf070c498dd82b34eb1cf07a567b2a"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "71d3f93426e52929ac764ea8b9e765b2ff08423a15f94f4d2e0764ac318db606"
+    },
+    {
+      "path": "docs/governance/Change.Ledger.jsonl",
+      "sha256": "f4541d12ac6d7053c7879d283edff7b89dbbc132c6bb05d862c07bc13ab8c5a1"
+    },
+    {
+      "path": "docs/governance/Findings.md",
+      "sha256": "228fbf701fa2d59e06127d6d00f672a8c4be3cacd02d722ada3894fc02f3dfa8"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "7a3c5f0d255df7b0498b4a3512b7749fd38f25b1ce76f56808c857a628776d68"
+    },
+    {
+      "path": "docs/governance/bug-reports/Issue.ROADMAP-DISPATCH-BUFFER.2026-11-02.md",
+      "sha256": "0baf43ec42ffa72b583227b0083b2286c5b583444894bc8040c4543cb1f88d27"
+    },
+    {
+      "path": "docs/governance/bug-reports/Issue.ROADMAP-RELEASE-ORDER.2026-11-02.md",
+      "sha256": "12e5e78ca743d18a70a860c1fb14160c71a814d1ec8d67704cfb6e4d745626bd"
+    },
+    {
+      "path": "docs/planning/.Archive/ROADMAP_snapshot_2026-11-02.md",
+      "sha256": "83be303aefc816e7a5e96d7c0889cefc2179e8ce958ea4f909b1a0c302f3cab6"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-assessment.md",
+      "sha256": "b712f75bba98cf6542fe49ab1464e66a4b480fbdff48d78d800a373f33bc37a7"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-audit-inventory.json",
+      "sha256": "fd3795e22ea70215ac985e118577a1cea2c6af28236c5276956c98d2aff27590"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-audit.md",
+      "sha256": "b52b62e2e27648602d95fc3ae65eba3e02e2180f83a45e0811ae4ec88f980ed4"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-candidates.json",
+      "sha256": "2de1fb4bae86df755f3752caee1b447cfe5181f7d9ba108166bbdacc521e1694"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-evidence-CloseOut.AGENT-PROTOCOL-CONSOLIDATION-1.2026-10-30.md",
+      "sha256": "6b062e11d87d38c43fb62abf6700a52aa6a2db4b8f9d113908ad81c5a4f16fb1"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-evidence-Findings.md",
+      "sha256": "bcbef575167030ffcc12afc6ab8849e5e3078a01012eeaf517d800f370b1991f"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-evidence-business-charter.md",
+      "sha256": "9ad1f08e85e7bb7db50cd222f3a30f96b6ea1b36b9fefb3f13b5af89057fefbb"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-evidence-business-state.md",
+      "sha256": "fc1269eccb93a1895020aa3a528a8a679cd7bff2b67698aa933bc83d6308f2ce"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-final-kpis.json",
+      "sha256": "8724103b5624f780f194eb1f79f67f19cd90044cc858e0ae29fe6e871b75eb2b"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-final-preflight.json",
+      "sha256": "48432da1b369db5e63c6341818959dd84e906469bbfb1008a83451e96b64f4a2"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-holding.json",
+      "sha256": "8fc84238b465c8eb85a9b73498c7e12a55e3ba903bdf3f45a2b796d274fb7864"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-independent-review.md",
+      "sha256": "d50a5b6b030905c6a763c675f2230debb99a7132265ce695e4765e985f1e40b2"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-kpis.json",
+      "sha256": "b36dba5641d9702eebbd6c51f6cc40c12f8aa82565558e7225623ee2c52209c7"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-lesson-checks.json",
+      "sha256": "59b1ba9969aa62c4139dfd1b586e6640da797bae95e422a1c9b603117163b7c3"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-lessons-applied.md",
+      "sha256": "4256ddcd80e5cfa7c3373e9b996d8cea2144e54ac2d7f2b390e47efd63c3d294"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-live-lessons.json",
+      "sha256": "29040dbdb1a86c056b476207d50be4ace3b24c60c676a5cedb2b945a411b1578"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-live-register.json",
+      "sha256": "b984b445d2cc62beaceb2a8168488a7805950f9839c016b1c5b4b676057605a0"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-next.json",
+      "sha256": "d5b5b7e8a5fda6ed5d8226e4efd9929b8067dec31888dcab4b0c29cf681087b5"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-phase-a-reconciliation.json",
+      "sha256": "a5d3bbafd5c143fcec2c5935fb609d68af3aa77e4cf343276ddc374968ea5214"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-phase-brief.md",
+      "sha256": "0a6a8a23c94eb29041d9c275682232773f26c57c201cadf5981df60489ce60a3"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-phase-c-verification.json",
+      "sha256": "b5d1fd880c7fda4dd75ea9d2b2bd5d1b6bdecd3a602e3bca157bf7560578a5b4"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-plan.md",
+      "sha256": "2efa3347dbf897e1df830e50b210f9d5dbaf595a37fed2f22f1a1ed03f670b6e"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-provider-recheck.json",
+      "sha256": "27cc55b00b62db1c040a60eb309651fe1df5b26d5612f53ad84e20087ce4c8c4"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-readiness.md",
+      "sha256": "6b576399670fe2649ce06f7a2ad67bad65f9bea8aeb5cdb9ef41c5ce49567011"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/2026-11-02-structure-proposal.json",
+      "sha256": "0eb2026a9590b06211b18af699df440fee9de15577ab3dbe764e04f3482ceb5d"
+    }
+  ],
+  "preservedEofBlankLines": [
+    "docs/planning/.Archive/ROADMAP_snapshot_2026-11-02.md:22: new blank line at EOF.",
+    "docs/planning/roadmap-reviews/2026-11-02-assessment.md:104: new blank line at EOF.",
+    "docs/planning/roadmap-reviews/2026-11-02-audit.md:75: new blank line at EOF."
+  ]
+}

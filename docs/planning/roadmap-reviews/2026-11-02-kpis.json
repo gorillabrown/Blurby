@@ -1,0 +1,255 @@
+{
+  "metrics": [
+    {
+      "name": "total-items",
+      "value": 202,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-queued",
+      "value": 43,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-in-flight",
+      "value": 72,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-blocked",
+      "value": 0,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-completed",
+      "value": 72,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-dissolved",
+      "value": 9,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-superseded",
+      "value": 6,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "count-unknown",
+      "value": 0,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "percent-complete-by-count",
+      "value": 43.1,
+      "kind": "measured",
+      "unit": "%"
+    },
+    {
+      "name": "total-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 25 item(s): BLURBY-SERVER-1, BOOK-TYPE-SCALE-2, DROPDOWN-DISMISS-1, EINK-APPEARANCE-2, EINK-DEVICE-SETTINGS-1\u2026"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "completed-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 25 item(s): BLURBY-SERVER-1, BOOK-TYPE-SCALE-2, DROPDOWN-DISMISS-1, EINK-APPEARANCE-2, EINK-DEVICE-SETTINGS-1\u2026"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "percent-complete-by-effort",
+      "value": null,
+      "computable": false,
+      "missingInputs": [
+        "effort for 25 item(s): BLURBY-SERVER-1, BOOK-TYPE-SCALE-2, DROPDOWN-DISMISS-1, EINK-APPEARANCE-2, EINK-DEVICE-SETTINGS-1\u2026"
+      ],
+      "note": "not computable"
+    },
+    {
+      "name": "dispatch-buffer-target",
+      "value": 5,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "dispatch-buffer-filled",
+      "value": 4,
+      "kind": "measured",
+      "unit": "items"
+    },
+    {
+      "name": "dispatch-buffer-ready",
+      "value": 0,
+      "kind": "measured",
+      "unit": "items",
+      "basis": "dispatch-ready items whose specification passes U9"
+    }
+  ],
+  "provenance": {
+    "provider": "connector+snapshot",
+    "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "takenAt": "2026-11-02T16:34:52Z",
+    "fields": [
+      "branch",
+      "deliverable",
+      "description",
+      "effort",
+      "evidence",
+      "group",
+      "id",
+      "notes",
+      "prerequisites",
+      "sequence",
+      "spec_link",
+      "status",
+      "title",
+      "workstream",
+      "written_status"
+    ],
+    "stale": false
+  },
+  "pace": [],
+  "invalidDeadlines": [],
+  "learning": {
+    "metrics": [
+      {
+        "name": "live-count",
+        "value": 120,
+        "kind": "measured",
+        "unit": "lessons"
+      },
+      {
+        "name": "lesson-yield",
+        "value": 1.68,
+        "kind": "measured",
+        "unit": "lessons per close-out",
+        "basis": "recorded lessons \u00f7 close-outs (8 of 87 said no new lesson)"
+      },
+      {
+        "name": "held-rate",
+        "value": 0.98,
+        "kind": "measured",
+        "basis": "applied lessons that held \u00f7 applied lessons (162)",
+        "confidence": "high"
+      },
+      {
+        "name": "promotion-rate",
+        "value": 0.12,
+        "kind": "measured",
+        "basis": "lessons promoted to a standing rule \u00f7 lessons (146)"
+      },
+      {
+        "name": "time-to-apply",
+        "value": 3.5,
+        "kind": "measured",
+        "unit": "days",
+        "basis": "median days from recorded to first applied, 52 lessons",
+        "confidence": "high"
+      },
+      {
+        "name": "repeated-trap-rate",
+        "value": 0.03,
+        "kind": "inferred",
+        "basis": "lessons recording a pattern already recorded \u00f7 lessons (146)",
+        "assumptions": [
+          "two lessons record one pattern when the duplicate rule groups them"
+        ]
+      },
+      {
+        "name": "effort-calibration",
+        "value": 0.62,
+        "kind": "measured",
+        "basis": "actual \u00f7 estimate, median of 9 records",
+        "confidence": "likely"
+      },
+      {
+        "name": "row-error",
+        "value": 0.9,
+        "kind": "measured",
+        "basis": "median |actual - predicted| / predicted, 141 rows",
+        "confidence": "high"
+      },
+      {
+        "name": "total-error",
+        "value": 0.85,
+        "kind": "measured",
+        "basis": "median |actual - estimate| / estimate, 17 runs",
+        "confidence": "high"
+      },
+      {
+        "name": "added-share",
+        "value": 0.58,
+        "kind": "measured",
+        "basis": "working minutes on rows added after the first listing \u00f7 all working minutes"
+      },
+      {
+        "name": "row-error-by-model-effort",
+        "value": {
+          "claude-fable-5-1 {high}": 1.0,
+          "claude-fable-5-1 {low}": 0.96,
+          "claude-fable-5-1 {medium}": 0.97,
+          "claude-opus-5-5 {high}": 0.89,
+          "claude-opus-5-5 {low}": 0.95,
+          "claude-opus-5-5 {medium}": 0.68,
+          "claude-sonnet-5-5 {medium}": 0.6
+        },
+        "kind": "measured",
+        "basis": "median |actual - predicted| / predicted per model {effort}, 7 pairs, 21 rows with no model recorded skipped"
+      },
+      {
+        "name": "starting-load",
+        "value": null,
+        "computable": false,
+        "missingInputs": [
+          "a time log opened by a bound session (its open event carries startingLoad)"
+        ],
+        "note": "not computable"
+      }
+    ],
+    "provenance": {
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "closeOuts": "docs/governance/close-outs",
+      "closeOutsRead": 87,
+      "asOf": "2026-11-02",
+      "ledger": "docs/governance/terminal-ledger.jsonl",
+      "timeLogs": "docs/governance/close-outs",
+      "timeLogsClosed": 26
+    }
+  },
+  "applied": [
+    {
+      "change": "CH-002",
+      "subject": "roadmap.workstreams",
+      "kind": "policy",
+      "verdict": "not yet"
+    },
+    {
+      "change": "CH-003",
+      "subject": "LL-091",
+      "kind": "lesson",
+      "verdict": "not yet"
+    },
+    {
+      "change": "CH-004",
+      "subject": "LL-143",
+      "kind": "lesson",
+      "verdict": "not yet"
+    }
+  ]
+}

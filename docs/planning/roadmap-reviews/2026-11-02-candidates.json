@@ -1,0 +1,88 @@
+{
+  "candidates": [
+    {
+      "id": "LL-006",
+      "action": "promote",
+      "why": "applied and held in 3 close-outs"
+    },
+    {
+      "id": "LL-024",
+      "action": "promote",
+      "why": "the pattern recurred in LL-026 (the same Applies to (CSS, Electron, window management))"
+    },
+    {
+      "id": "LL-068",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-088",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-093",
+      "action": "promote",
+      "why": "the pattern recurred in LL-094 (the same Applies to (refactoring, sprint planning, success criteria))"
+    },
+    {
+      "id": "LL-109",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-117",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-121",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-129",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-137",
+      "action": "promote",
+      "why": "applied and held in 5 close-outs"
+    },
+    {
+      "id": "LL-139",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-142",
+      "action": "promote",
+      "why": "applied and held in 11 close-outs"
+    },
+    {
+      "id": "LL-143",
+      "action": "revise or retire",
+      "why": "applied and did not hold in 2 close-outs"
+    },
+    {
+      "id": "LL-150",
+      "action": "promote",
+      "why": "applied and held in 3 close-outs"
+    },
+    {
+      "id": "LL-154",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    },
+    {
+      "id": "LL-157",
+      "action": "promote",
+      "why": "applied and held in 2 close-outs"
+    }
+  ],
+  "source": "docs/governance/LESSONS_LEARNED.md",
+  "closeOuts": "docs/governance/close-outs",
+  "closeOutsRead": 87,
+  "notes": []
+}

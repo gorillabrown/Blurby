@@ -1,0 +1,438 @@
+[
+  {
+    "item": "GOV-SWEEP-FOLLOWTHROUGH-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 1,
+    "result": {
+      "kind": "specification",
+      "passed": false,
+      "cited": [],
+      "findings": [
+        {
+          "code": "lessons-section-missing",
+          "severity": "error",
+          "message": "no \"Lessons applied\" section for GOV-SWEEP-FOLLOWTHROUGH-1"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "PAGE-REOPEN-CFI-1",
+    "spec": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+    "exitCode": 1,
+    "result": {
+      "kind": "specification",
+      "passed": false,
+      "cited": [],
+      "findings": [
+        {
+          "code": "lessons-section-missing",
+          "severity": "error",
+          "message": "no \"Lessons applied\" section for PAGE-REOPEN-CFI-1"
+        }
+      ],
+      "document": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "BOOK-TEXT-COLOUR-1",
+    "spec": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+    "exitCode": 1,
+    "result": {
+      "kind": "specification",
+      "passed": false,
+      "cited": [],
+      "findings": [
+        {
+          "code": "lessons-section-missing",
+          "severity": "error",
+          "message": "no \"Lessons applied\" section for BOOK-TEXT-COLOUR-1"
+        }
+      ],
+      "document": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "FOLDER-SWITCH-HEADER-1",
+    "spec": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+    "exitCode": 1,
+    "result": {
+      "kind": "specification",
+      "passed": false,
+      "cited": [],
+      "findings": [
+        {
+          "code": "lessons-section-missing",
+          "severity": "error",
+          "message": "no \"Lessons applied\" section for FOLDER-SWITCH-HEADER-1"
+        }
+      ],
+      "document": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "NARRATE-START-STACK-1",
+    "spec": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+    "exitCode": 1,
+    "result": {
+      "kind": "specification",
+      "passed": false,
+      "cited": [],
+      "findings": [
+        {
+          "code": "lessons-section-missing",
+          "severity": "error",
+          "message": "no \"Lessons applied\" section for NARRATE-START-STACK-1"
+        }
+      ],
+      "document": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "NARRATE-CPU-PROFILE-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-142",
+        "LL-151",
+        "LL-152",
+        "LL-160",
+        "LL-165",
+        "LL-166",
+        "LL-162"
+      ],
+      "findings": [
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-151 is Promoted -> standing rule 55; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-166 is Promoted -> standing rule 55; cite what it became instead"
+        },
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "115 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "PAGE-ENTRY-KEYS-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-031",
+        "LL-080",
+        "LL-160",
+        "LL-161",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "115 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "NARRATE-ARROW-PAUSE-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-158",
+        "LL-166",
+        "LL-165",
+        "LL-161",
+        "LL-138",
+        "LL-146",
+        "LL-149",
+        "LL-167"
+      ],
+      "findings": [
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-158 is Promoted -> standing rule 54; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-166 is Promoted -> standing rule 55; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-138 is Promoted -> ROADMAP standing rule 43; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-146 is Promoted -> ROADMAP standing rule 52; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-149 is Promoted -> standing rule 48; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-167 is Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23); cite what it became instead"
+        },
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "118 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "PAGE-PAGES-READ-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-158",
+        "LL-166",
+        "LL-165",
+        "LL-152",
+        "LL-138",
+        "LL-149",
+        "LL-167",
+        "LL-156"
+      ],
+      "findings": [
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-158 is Promoted -> standing rule 54; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-166 is Promoted -> standing rule 55; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-138 is Promoted -> ROADMAP standing rule 43; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-149 is Promoted -> standing rule 48; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-167 is Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23); cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-156 is Promoted -> ROADMAP standing rule 50 (restated after KF2-WAIVER-RETIRE-1's held record, which its 2026-10-14 specification required before the promotion existed); cite what it became instead"
+        },
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "118 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "LIBRARY-WRITE-RACE-3",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-158",
+        "LL-166",
+        "LL-165",
+        "LL-138",
+        "LL-156",
+        "LL-146",
+        "LL-149",
+        "LL-167"
+      ],
+      "findings": [
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-158 is Promoted -> standing rule 54; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-166 is Promoted -> standing rule 55; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-138 is Promoted -> ROADMAP standing rule 43; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-156 is Promoted -> ROADMAP standing rule 50 (restated after KF2-WAIVER-RETIRE-1's held record, which its 2026-10-14 specification required before the promotion existed); cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-146 is Promoted -> ROADMAP standing rule 52; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-149 is Promoted -> standing rule 48; cite what it became instead"
+        },
+        {
+          "code": "lesson-closed-cited",
+          "severity": "warning",
+          "message": "LL-167 is Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23); cite what it became instead"
+        },
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "119 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "NARRATE-PAUSED-CLICK-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-072",
+        "LL-108",
+        "LL-073",
+        "LL-031",
+        "LL-109",
+        "LL-160",
+        "LL-161",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "112 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "FOCUS-WORD-ONLY-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-090",
+        "LL-120",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "117 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  },
+  {
+    "item": "POSITION-PROMPT-COPY-1",
+    "spec": "ROADMAP.md",
+    "exitCode": 0,
+    "result": {
+      "kind": "specification",
+      "passed": true,
+      "cited": [
+        "LL-073",
+        "LL-090",
+        "LL-165"
+      ],
+      "findings": [
+        {
+          "code": "lessons-not-cited",
+          "severity": "info",
+          "message": "117 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026"
+        }
+      ],
+      "document": "ROADMAP.md",
+      "lessons": "docs/governance/LESSONS_LEARNED.md",
+      "prefix": "LL",
+      "notes": []
+    }
+  }
+]

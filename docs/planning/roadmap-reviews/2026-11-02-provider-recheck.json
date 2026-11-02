@@ -1,0 +1,15 @@
+{
+  "provider": "Notion SQL",
+  "source": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
+  "takenAt": "2026-11-02T16:54:56Z",
+  "query": "SELECT * WHERE Sprint Code is nonempty ORDER BY Sprint Code; three pages at offsets 0/100/200",
+  "pageCounts": [100, 100, 2],
+  "rows": 202,
+  "comparison": "All row objects including provider identity and mapped/unmapped columns matched the Phase A SQL census after sorting object keys",
+  "changedRows": 0,
+  "createdRows": 0,
+  "deletedRows": 0,
+  "canonicalImport": "Qualified guarded importer reused the byte-identical validated Phase A rows with this fresh takenAt",
+  "liveFieldMutations": 0,
+  "recoveryOutstanding": []
+}
