@@ -1,0 +1,34 @@
+{
+  "id": "20261102T234909Z-external-store-spec-link-WS-PAIR-LOG-1",
+  "operation": "external-store-spec-link",
+  "item_id": "WS-PAIR-LOG-1",
+  "created": "2026-11-02T23:49:09Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#ws-pair-log-1"
+    },
+    "expectedRevision": "c2e9903bcdceb4cb3ad73794ac04c4c7b6fe67ad1db8ccb0e329fa5e9d3df3b2",
+    "idempotencyKey": "store-spec-link:WS-PAIR-LOG-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#ws-pair-log-1')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "WS-PAIR-LOG-1",
+      "idempotencyKey": "store-spec-link:WS-PAIR-LOG-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#ws-pair-log-1')]",
+      "actualRevision": "",
+      "recoveryId": "20261102T234909Z-external-store-spec-link-WS-PAIR-LOG-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-02T23:49:12Z",
+  "outcome": "succeeded"
+}
