@@ -19,4 +19,3 @@ Final full SQL census at `2026-11-02T23:54:55Z`:202 unique rows,72Completed,9Dis
 One WindowsApps python3 launcher invocation failed before a later plan existed. No retry broadened scope; subsequent commands used the same guard-verified interpreter C:/Python314/python.exe explicitly. All seven planned writes are individually confirmed. Status, sequence, prerequisites, terminal ledger and completion dates were not changed. No source, runtime, package or release acceptance follows from repairing these indexes.
 
 Full live-row receipts retained externally at C:/Projects/Blurby-artifacts/roadmap-snapshot-reconcile-20261102-1/; external data is evidence, not independent register authority.
-
