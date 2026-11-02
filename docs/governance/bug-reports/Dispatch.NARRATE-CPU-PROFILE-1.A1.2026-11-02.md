@@ -8,6 +8,8 @@ Brain's actual placement response is preserved in `Brain.NARRATE-CPU-PROFILE-1.p
 
 **Pairing and CPU-4 amendment:** the owner completed desktop pairing. Direct read and specific request uptake now establish this executor on `remote-control:env_e_6ad10d73d698832184c47d5c34280e22`; actual host reports RODNEYSR Windows x64. The earlier connection failure is historical. [Brain CPU-4](Brain.NARRATE-CPU-PROFILE-1.ruling-4.2026-11-02.md) permits an exclusive A1 test lane while the four historical jobs remain paused/unreconciled; it replaces whole-host paused-job clearance with current competing-writer/task checks, clean isolated source worktree custody and targeted-test dependency/startup proof. Exact committed Brain1 blob custody is acceptable only with demonstrated CRLF/LF-only serialization difference and all raw hashes retained. No admission starts from this amendment.
 
+**Later actual A1 state:** setup was separately accepted for test tools only under CPU-5/6; application/native/build dependencies remain unqualified and root postinstall/hooks unrun. A1 began18:43:57UTC, then stopped18:45:16UTC before edits at9/40tools because fixture schema was missing. CPU-7 supplies the literal contract. Its full text and Type1b amendment are preserved in `../close-outs/Memo.NARRATE-CPU-PROFILE-1.GovernanceStaging.2026-11-02.md`. The original first-admission language below is historical: any explicit continuation uses the SAME A1 deadline19:43:57UTC/40-total-tool ceiling including9spent, with no clock reset/pause/extension. This pointer itself grants no resume; a consumed parent continuation is required.
+
 ```text
 Item: NARRATE-CPU-PROFILE-1 / source wave A1 only
 Register: https://www.notion.so/3fa7c96cc31e81e1b020ebf7e9886d7a
@@ -20,7 +22,11 @@ Specification bytes: SHA256 12f35f7c75a0ab81df79dce6e256120dc440472df450ba58e9ba
 Binding inputs: Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md;
   Brain.NARRATE-CPU-PROFILE-1.ruling-3.2026-11-02.md;
   Brain.NARRATE-CPU-PROFILE-1.ruling-4.2026-11-02.md;
+  Brain.NARRATE-CPU-PROFILE-1.ruling-5.2026-11-02.md;
+  Brain.NARRATE-CPU-PROFILE-1.ruling-6.2026-11-02.md;
+  Brain.NARRATE-CPU-PROFILE-1.ruling-7.2026-11-02.md;
   Issue.NARRATE-CPU-PROFILE-1.2026-11-02.md, all in docs/governance/bug-reports/
+  plus the governance staging memo in docs/governance/close-outs/
 Prospective A1 limit: <=60 minutes and <=40 tool uses, only after named admission
 Scope: existing Task1 / Done-when1 d1-d4 only; isolated red-test commit and failing evidence
 Product/test path: tests/narrate/narrate.cpuProfile.test.ts only
