@@ -1,12 +1,12 @@
 # POSITION-PROMPT-COPY-1 — bounded specification enrichment draft
 
-Date: 2026-11-02. Planning draft only; no source admission, implementation, readiness verdict, integration permission or launch. Root Roadmap reviews and folds this independently. Brain coordinates execution.
+Date: 2026-11-02. Planning draft only; no implementation, readiness verdict, integration permission or launch. Root Roadmap reviews and folds this independently. Brain coordinates execution. The parent relayed actual Brain ruling `POSITION-PROMPT-COPY-1-SOURCE-SEPARATION-20261102`; root persists that ruling independently. Its bounded source exception below is distinct from consuming a dispatch/input receipt.
 
 ## Identity and recommendation
 
 Existing identity is **POSITION-PROMPT-COPY-1**, Seq134, Queued / Full Spec, UX polish; do not create a BACKTRACK-PROMPT-COPY-1 item. Existing card: `ROADMAP.md:1901–1938`. Register URL recorded by approved smoke intake: https://app.notion.com/p/4057c96cc31e81e7b4b6f475807e73cb?pvs=204 . The live provider controls identity/status; this draft makes no provider change.
 
-Recommendation: retain the small copy/order fence, add the concrete controls below, and resolve prerequisite acceptance and execution-base custody before any source entry. The owner already settled labels/order; do not ask again.
+Recommendation: use the ruled PP1 isolated source-only exception once its host/dependency/input custody is verified; retain all later prerequisite acceptance and merge/package waits. The owner already settled labels/order; do not ask again.
 
 Outcome: the save-position dialog shows **Keep Previous Position (pgN)** first and **Move Position (pgN)** second, preserving their existing values, actions, focus and keyboard behavior.
 
@@ -14,6 +14,7 @@ Outcome: the save-position dialog shows **Keep Previous Position (pgN)** first a
 
 - Owner input ledger `docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md:37` (SMOKE-R3): “First Keep Previous Position (pg#); second Move Position (pg#); preserve anchor meanings.” Its detailed card at line240 repeats the association. This draft uses that narrow input, not a blanket approval inference.
 - Source observed in this checkout at `f9cf99b698056a8fe17effadc3e36b51c5e26525`. Existing card pins historical source `d8e44864708d40e2a472f3e6436d936e9ee96bfa`. Observed HEAD is an audit location, not an authorized replacement execution base.
+- Brain's relayed source-separation ruling names **`ac19ea60b6cd8b4fff3e5413b111925b7ef78485`**, branch **`eb/position-prompt-copy-1`**, prospective isolated worktree **`C:\Projects\wt-position-prompt-copy-1`**. Prior source contracts are stated unchanged from d8. Independently verify that exact base, source identities and isolated custody on the named host before entry; this planning agent has not done so.
 - `ROADMAP.md:616–618`: KEEP-FURTHEST-FIX-1 merged, In Flight, closeout held for owner smoke. Its archived specification remains the acceptance source. `ROADMAP.md:313` records Keep reopening on the furthest page and the required backtrack/reopen smoke.
 - Node24 is the current CI major (`.github/workflows/ci.yml:19`); package scripts are `package.json:7–17`; `dist/**/*` is shipped under `build.files` (`package.json:40`). No current host/runtime/package was tested here.
 
@@ -49,33 +50,36 @@ New `tests/backtrackPrompt.test.tsx`: jsdom, real React component/createRoot/act
 
 Preserve unchanged existing `tests/keepFurthest.test.tsx` tests: line54 “Keep saves the furthest page reached (2673) with that page's cfi, not the open position”; line61 “the prompt offers the furthest page: the mark has risen to 2673”; line67 “with no turn past the open position, Keep saves the open position with the cfi the book opened with”; line77 “control: Save at page saves the on-screen page and its cfi”. Fixture opens at1290, advances to2673, backs to416: Keep persists2673/cfiAt2673, Move persists416/cfiAt416. These hook tests protect semantics but do not by themselves prove packaged button wiring.
 
-## Execution sequence and mechanical success criteria — prospective
+## PP1 — isolated source and targeted proof, prospective
 
-1. Brain resolves the exact source base, acceptance wait, source window, execution host and package custody below. No source work before this.
-2. Implement tests and obtain actual base-red and prescribed-green receipts using the same committed targeted command, plus a separately identified wrong-order/value/handler variant receipt demonstrating detector sensitivity. Preserve each input hash, stdout/stderr and exact exit code under standing rule44; no planner surrogate counts. Base should fail exact new text/order while retained behavior controls distinguish the change. Wrong variant is a test artifact on an explicitly admitted verification surface, never an unreviewed production baseline.
-3. Make only the two-button text/order edit, then run:
+Brain's source-only exception does not require KEEP-FURTHEST-FIX's terminal acceptance before PP1 source work. That prerequisite/status and final acceptance wait remain intact for later integration/closeout. PP1 is capped at **45 minutes /40 calls**, with no automatic successor. Its outcome is a local held candidate plus a bounded receipt, not sprint completion.
+
+1. Before entry, verify consumed input/ruling receipt, quiet execution host, exact base/branch/worktree custody and qualified dependencies. Do not infer consumption from a queued message. Record Node/npm versions, lockfile/dependency identity and old source contracts; stop on divergence. Use existing qualified dependencies only; installation/repair/transfer needs its separately admitted exact paths and capability. No fallback to the everyday computer.
+2. Write the six component controls and external negative-control seam inside the one new test file. Keep the same committed target command for base-red and candidate-green:
 
    ```text
    npx vitest run tests/backtrackPrompt.test.tsx tests/keepFurthest.test.tsx tests/useProgressTracker.test.ts
-   npm test
-   npm run typecheck
-   npm run build
    ```
 
-   Each exits0; existing tests remain byte-unchanged. Inspect `git diff --stat` for truncation and exact changed paths. Record Node/npm versions and resolved dependency-lock identity.
-4. Independent reviews follow shipped Zeus: MarcusAurelius specification compliance, then Plato quality, then MarcusAurelius documentation. Review evidence is not prerequisite/release acceptance.
-5. Package the final admitted source under standing rule53 and the applicable written architecture route; changed `dist/**/*` means “package unchanged” does not apply. Record final commit, origin/main input, package/executable hashes, ASAR checks, launch/profile proof and native evidence. Fresh scratch-profile launch and package scenarios must use the assigned host and its required architecture; do not substitute x64 evidence for an ARM64 gate.
-6. On owned fixture only, exact-package UI acceptance: read forward/backtrack enough to trigger the dialog; record labels/order and first focus at normal/narrow widths; choose Keep, reopen at its furthest word/CFI; repeat independently with Move and reopen at its current word/CFI. Test Enter/Escape retaining Keep. Persisted-state readback and visible landed word/CFI must agree. A hook pass alone is insufficient.
-7. Complete only this item's admitted documentation/closeout; preserve source-freeze, merge and release holds. No terminal register/Seq change from this draft.
+   Baseline receives only the admitted new test file, not a changed production component. Base-red must fail bp1 on exact new labels/order; classify each failure and preserve old hook-test results. An import/dependency failure is not the required red. Preserve input hashes, stdout/stderr and exact exit codes. Candidate-green exits0 after only the prescribed two-button edit; retained hook tests stay byte-unchanged. Save exact before/after component and test hashes and inspect diff/stat/fence.
+3. Negative-control mechanism: the new test file reads test-only environment variable `PP1_NEGATIVE_CONTROL`; unset means the actual production component with no injection. Valid variants are `wrong-order`, `wrong-value`, `wrong-wire`; unknown nonempty input throws. After each real component mount/rerender and before assertions, the selected test-harness variant must (a) swap the two rendered DOM buttons, (b) replace Keep's displayed page with the supplied currentPage, or (c) attach capturing click interceptors on both buttons that prevent the normal click, call `stopImmediatePropagation`, and invoke the opposite current spy. The wrong-wire injector changes neither label nor DOM order. Clean up all injected listeners after each test and avoid cross-test/global leakage. No production prop, source branch edit, baseline mutation, preload, runtime or shared-core alteration implements this seam.
+4. Run the same committed target command three additional times on the exact green candidate with one variant selected per process; in PowerShell set `$env:PP1_NEGATIVE_CONTROL = 'wrong-order'` (then separately `wrong-value`, `wrong-wire`) before the command and restore the variable's original state in `finally`. Use one outer try/finally around all six invocations: capture the original variable, remove it before base-red and candidate-green, set exactly one variant per negative process, remove it before final-green, and restore the original state only after the entire sequence. Record the exact mode for every invocation; a clean run must never inherit a variant. Expect assertion exit1 for each variant: wrong-order must fail bp1 order; wrong-value must fail bp1 value; wrong-wire must fail bp2 callback association. Record the specific expected assertion and opposing clean assertions, and source/test hashes proving no file mutation. A crash, missing module, timeout or unrelated assertion alone does not qualify. Then unset injection and rerun the target command, exit0. Six target invocations total: base, green, three negatives, final green. If real runner uses a distinct documented assertion exit code, resolve that contract before claiming receipt qualification; never accept an arbitrary nonzero.
+5. Independent PP1 reviews follow shipped Zeus: MarcusAurelius specification compliance, then Plato quality, then MarcusAurelius documentation. Review only the admitted source/targeted evidence and explicitly retain unrun full verification. Record local held-candidate identity and actual PP1 receipt with 45-minute/40-call budget usage. No full suite, typecheck, build, app/native launch or package work in PP1. No merge, push or terminal/provider change is implied by a local held candidate.
+
+## Later PP2 and package acceptance — separate admissions
+
+PP2 is not launched or authorized by PP1 completion. It later runs `npm test`, `npm run typecheck`, `npm run build` on the accepted integrated source; each must exit0. Reserve one heavy slot, one test worker and a process-local2GiB JavaScript heap as already ruled. Its exact base, host, input consumption, timing and fence need a separate written cut.
+
+Final package acceptance remains later and separately admitted: standing rule53 and the applicable architecture route, final commit/origin-main inputs, executable/package hashes, ASAR checks, scratch-profile proof and required native launch. Changed `dist/**/*` means “package unchanged” does not apply; do not substitute x64 evidence for ARM64 gates. Exact-package UI acceptance on owned fixture reads forward/backtracks, verifies ordered labels/focus at normal/narrow widths, independently exercises Keep and Move, reopens at each corresponding word/CFI and checks Enter/Escape. A hook or PP1 targeted pass is not package proof. KEEP-FURTHEST acceptance, authorized integration window and package/merge confirmations remain required before final closure. No stage/status is promoted here.
 
 ## Lane ownership and fences
 
 - Product lane UX polish; execution surface C (display component/test), with E for separately admitted own documentation.
 - Production fence: `src/components/BacktrackPrompt.tsx`. New test fence: `tests/backtrackPrompt.test.tsx`.
 - Shared-core touches: none. Forbidden: ReaderContainer, progress hook, shared types, mode runtimes, CSS, page constants, backend, user books/profiles and unrelated test expectations.
-- No parallel execution is admitted. A later parallel plan must prove disjoint component/test/docs ownership and reserve any package/native resources; otherwise serialize.
-- Proposed branch remains `eb/position-prompt-copy-1`, from the exact accepted base Brain names; no implicit rebasing/source exception.
-- Existing docs staging candidates remain this item's own BUG_REPORT subcase, `docs/governance/close-outs/Memo.POSITION-PROMPT-COPY-1.GovernanceStaging.2026-10-26.md`, and `Timing.POSITION-PROMPT-COPY-1.jsonl`; exact admission/custody must precede use. Root owns folding this draft into governing specs. No broad staging or cleanup.
+- PP1 claims only the fenced component/new test in its isolated worktree. Do not assume a parallel launch from this draft; Brain must confirm no other owner of those paths. Package/native resources are unused in PP1; later scheduling is separate.
+- Ruled branch/base/worktree are `eb/position-prompt-copy-1`, `ac19ea60b6cd8b4fff3e5413b111925b7ef78485`, `C:\Projects\wt-position-prompt-copy-1`. No rebase or broader source exception.
+- Only exact item docs may accompany PP1. Existing candidate paths are this item's own BUG_REPORT subcase, `docs/governance/close-outs/Memo.POSITION-PROMPT-COPY-1.GovernanceStaging.2026-10-26.md`, and `Timing.POSITION-PROMPT-COPY-1.jsonl`; exact receipt path, any bug-subcase write and timing/log permission still need enumerating before their first write. No helper timing call is implied. Root owns folding this draft; no broad staging/cleanup.
 - Merge order: KEEP-FURTHEST-FIX acceptance plus the approved integration window first; source merge only after current package confirmation and authorized merge go. FURTHEST-PERSIST-1 is separate future schema work, not an invented prerequisite or an excuse to alter arithmetic here.
 
 ## Failure handling
@@ -86,11 +90,12 @@ Changed handlers/base/integration conflict: stop and return to Brain/Roadmap. Mi
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Six component controls distinguish prescribed text/order/actions from base and wrong variants | calculable | positive-control | bounded | medium | 4m carried from existing card; calibration source unverified | — | A |
-| 2 | The two-button component renders the approved contract within the fence | repeat | ui-fix | bounded | low | 5m carried from existing card; calibration source unverified | — | A |
-| 3 | Automated gates, independent reviews, package evidence and own documentation are complete | calculable | packaging-verify | bounded | medium | 12m carried from existing card; host/owner wait excluded; calibration source unverified | — | B |
+| 1 | Qualified isolated inputs and exact source contracts are read back | calculable | preflight | bounded | medium | 5m | — | PP1 |
+| 2 | Six component controls and external wrong-order/value/wire seam produce valid base-red proof | calculable | positive-control | bounded | medium | 12m | — | PP1 |
+| 3 | Scoped two-button edit produces green, three negative receipts and final green | calculable | ui-fix | bounded | low | 10m | — | PP1 |
+| 4 | Ordered independent reviews and exact local-held receipt preserve every later hold | calculable | source-review-closeout | bounded | medium | 8m | — | PP1 |
 
-**Total:** provisional serial chain21m · provisional sum21m from carried card values only; 0 of3 calibration sources independently verified here. Expanded controls/package obligations require repricing before dispatch; these values are not an ETA. No invented duration for unresolved custody, host or owner waits. Target waves remain ≤40 tool calls and ≤60 minutes; actual wave budgets are unresolved. Materially different effort is separated into implementation and verification/review waves.
+**Total:** prospective serial chain35m · sum35m; 0 of4 estimates calibrated. Planner estimates only, not measured medians or an ETA. PP1 cap45m/40calls leaves10m reserve; stop before the cap when the remaining required review/receipt cannot fit. Unresolved host/custody/dependency access is an entry gate, not work to absorb silently into the reserve. PP2/package durations are not estimated here; they require separately scoped cuts. No material mixed-effort investigation is included; unexpected diagnosis returns to Brain.
 
 ##### Lessons applied
 
@@ -104,12 +109,12 @@ Changed handlers/base/integration conflict: stop and return to Brain/Roadmap. Mi
 
 ## Unresolved inputs and five separate findings
 
-1. **Specification:** draft enrichment only; six controls not implemented/run, exact receipts absent, task pricing needs confirmed calibration/repricing and the full lesson census remains pending. Copy/order design is settled.
-2. **Prerequisites:** KEEP-FURTHEST-FIX-1 remains merged/In Flight pending existing acceptance/closeout. Obtain exact current provider acceptance and approved integration window; do not manufacture a held-source exception.
-3. **Repository:** Brain must name exact accepted execution tip and branch custody, reconcile historical pin with that tip, and confirm source/test/docs fence. This audit HEAD is not a launch base.
+1. **Specification:** draft enrichment only; six controls/seam unimplemented, actual receipts and full live-lesson census absent. Numeric task rows are uncalibrated planning estimates. Copy/order settled; no Ready verdict.
+2. **Prerequisites:** KEEP-FURTHEST-FIX-1 stays merged/In Flight pending its existing acceptance/closeout. The named Brain exception separates PP1 source entry only; it clears no later integration/package/final-acceptance wait.
+3. **Repository:** ruled base/branch/worktree are explicit above; actual quiet-host custody, source identity readback and exact item-doc/receipt path enumeration remain unverified. This audit HEAD is not a launch base.
 4. **External register:** latest parent-provided SQL census is 2026-11-02T22:39:26Z; this draft neither refreshes nor mutates provider state. Re-read current live prerequisites before source entry using the guard.
-5. **Execution environment:** Brain must identify/verify quiet host, repository/artifact transfer, Node24/runtime dependencies, architecture-specific package verifier and required final native/profile evidence. No host access verified here.
+5. **Execution environment:** actual host/transfer/access, qualified dependency reuse and consumed PP1 input receipt need proof. PP1 excludes suite/typecheck/build/native/package; PP2 and final architecture-specific package custody/receipts remain separately unresolved. No host access verified here.
 
-Technical question for Brain: **Which exact accepted tip and source window admit Seq134 after KEEP-FURTHEST-FIX acceptance, and which verified quiet-host/package custody route supplies final required architecture evidence?** No design re-ask is needed.
+Remaining technical inputs: **Who owns the named isolated worktree on which verified quiet host; which qualified dependency tree may it reuse; what exact PP1 input-consumption and item-doc receipt paths are admitted; and what later PP2/integration/package custody cuts preserve KEEP-FURTHEST acceptance?** Base/branch/source exception are settled by the named ruling; do not re-ask them or the copy/order design.
 
 Prepared with read-only source inspection and one authorized new draft file. No code/runtime/test execution, provider/helper writes or executor contact.

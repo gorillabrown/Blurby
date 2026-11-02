@@ -1,6 +1,6 @@
 # Narrate paused-click — canonical readiness enrichment draft
 
-Existing item NARRATE-PAUSED-CLICK-1, Seq117, TTS / Narration Engine. Planning only; NOT Ready and no execution admission. Preserve prepared execution order117 →123 →119. Brain alone coordinates RodneySR and supplies technical rulings. This draft supplements the existing ROADMAP card and historical2026-10-30 amendment; it creates no replacement registered specification.
+Existing item NARRATE-PAUSED-CLICK-1, Seq117, TTS / Narration Engine. Planning only; NOT Ready and no execution admission. Historical card records PREPARED AND HELD after the2026-10-31 owner stop. The owner subsequently said resume and directed Brain to coordinate; that direction does not supply a fresh item-specific source admission or custody receipt. Preserve prepared execution order117 →123 →119. Brain alone coordinates RodneySR and supplies technical rulings. This draft supplements the existing ROADMAP card and historical2026-10-30 amendment; it creates no replacement registered specification.
 
 ## Closed decisions to carry forward
 
@@ -28,7 +28,7 @@ Run the eight exact suites in the amendment; add narrate.playFirstText.test.ts o
 
 ## Package, parallelism and final gates
 
-Reader runtime surfaceA plus test surfaceB; owns only its Narrate paths. Shared-core touches empty. Serial ownership against any other Narrate ModeRuntime edit; disjoint Business fixture source may proceed independently. Merge after the declared sentence/gap stack. Build and hold; no main merge until Brain package confirmation and Roadmap merge go under the recorded integration exception.
+Reader runtime surfaceA plus test surfaceB; owns only its Narrate paths. Shared-core touches empty. Serial ownership against any other Narrate ModeRuntime edit. This draft amends no existing no-parallel condition: Brain must establish explicit item-specific parallel scheduling and disjoint ownership before a new117 run. Business has its own independent admission; that does not admit117. Merge after the declared sentence/gap stack. Build and hold; no main merge until Brain package confirmation and Roadmap merge go under the recorded integration exception.
 
 Preserve current rule53 temporary placement: x64/arm64 builds on RodneySR, specified entry parity and raw ASAR identities,25s x64 scratch launch with proof and packaged request/audio-cursor traces for clicked word, word0, last selection and ordinary sentence resume. ARM64 launch at merge. Owner heard-audio acceptance remains release gate2; F7/F8 and unrelated visual cursor issues are not claimed fixed.
 
@@ -36,5 +36,5 @@ Preserve current rule53 temporary placement: x64/arm64 builds on RodneySR, speci
 
 1. Brain supplies bounded actual custody/history and exact source variant/baseline; resolve only new technical conflicts.
 2. Re-cite final source symbols/lines and exact external package probe bytes/commands against that immutable base.
-3. Split production regression/repair, full verification and package work into independently admitted waves within60minutes/40aggregate calls, with finite repair ceilings and exact staging. Historical estimates are not fresh wall-time promises.
+3. Split production regression/repair, full verification and package work into independently admitted waves within60minutes/40aggregate calls, retaining the existing two-repair-pass ceiling and card stop conditions with exact staging. Historical estimates are not fresh wall-time promises.
 4. Qualified U9/U10, ordered independent pointer review, live provider confirmation, publication and actual host consumption close the five findings. No Ready label until all resolve.

@@ -3148,3 +3148,10 @@ Related: LL-139, LL-143.
 
 ### LL-143 — status (2026-11-02, 2026-11-02)
 **Status:** Observation - revised at roadmap review 2026-11-02: standing rule 44 now requires exact committed-command base/prescribed/wrong-variant receipts with input identity, output and exit code; planner-surrogate and base-only checks do not qualify. Retain the lesson and earlier history; no duplicate promotion or retirement.
+
+### LL-175 — Preserve format-required PDF cross-reference separators (Business HB6 Task2, 2026-11-02)
+**Verdict:** A text whitespace warning does not justify changing generated PDF bytes. Fixed-width cross-reference records may require a trailing separator before the line ending.
+**Evidence:** Accepted fixture checkpoint1bcceb0e has startxref3936 and31 cross-reference rows of20bytes including LF; Roadmap independently checked every in-use object offset from the published raw blob. Brain's BB-HB6-T2-PDF-XREF-20261102 disposition preserves those bytes and permits a command-local PDF-path-only blank-at-eol exception, while ordinary text-file checks remain strict. Component checkpoint and receipt provenance: `docs/governance/close-outs/Memo.BLURBY-BUSINESS-1.HB6-T2-held.2026-11-02.md`.
+**Recommendation:** Inspect the actual format and validate offsets/widths before interpreting generated-file whitespace as corruption. Any exception must be separately scoped to the exact format/path and command; do not alter global Git config, attributes, hooks or unrelated text checks. Never regenerate or trim an accepted PDF to satisfy a generic text checker.
+**Applies to:** generated PDF fixtures and format-aware Git verification; not general source whitespace.
+**Status:** Observation
