@@ -1,7 +1,7 @@
 ---
 epic: blurby-business
-last_updated: 2026-11-02 22:52 UTC
-updated_by: session 1 setup
+last_updated: 2026-11-02 23:01 UTC
+updated_by: session 1 accepted baseline checkpoint
 ---
 
 # State — single source of current truth
@@ -28,9 +28,9 @@ updated_by: session 1 setup
 
 ```
 phase:        P1 — Viewer
-next_action:  Brain admission for isolated dependency preparation and reserved baseline suite
+next_action:  await separate ready contract and Brain admission for HB-6 task 2 fixture generator
 blockers:     none
-session:      1 of ~40 budgeted; setup only, no implementation
+session:      1 of ~40 budgeted; setup and baseline accepted, no product implementation
 dod:          D1–D21 unmet
 ```
 
@@ -38,11 +38,11 @@ dod:          D1–D21 unmet
 
 1. [ ] Read the register through the rule 11a guard: confirm BLURBY-BUSINESS-1 is not
        terminal, and confirm the LIBRARY-COMPLETION-VISIBILITY-1 window is closed (start gate).
-2. [ ] GIT WORK, first session: create the worktree `C:\Projects\bb-business` on branch
-       `eb/blurby-business-1` (created); await a separate admission for `npm ci` and baseline.
+2. [x] GIT WORK, first session: worktree created on `eb/blurby-business-1`; locked
+       dependency installation and HB-6 task 1 full baseline passed and Brain accepted.
 3. [ ] Re-verify every location cited in `phase1-specs.md` against the base, and journal
        any that moved.
-4. [ ] Start HB-6 Wave A.
+4. [ ] HB-6 task 2 fixture generator: await separate ready contract and Brain admission.
 
 ## Working set — verified facts this epic relies on
 
@@ -53,7 +53,7 @@ dod:          D1–D21 unmet
 | Remote | `origin` = github.com/gorillabrown/Blurby (private) · network operations granted (`policy.git.networkOperations: allow`) | `Virtuoso/workspace-layout.json`, 2026-10-30 |
 | Branch created | `eb/blurby-business-1` from exact `ac19ea60b6cd8b4fff3e5413b111925b7ef78485` | S1; remote main equality and scaffold ancestry verified |
 | Push quirk | refs can land under `EB/`; always push with `HEAD:refs/heads/eb/blurby-business-1` | memory, Rodney 2026-10 |
-| Baseline suite | 2,452 passed / 1 skipped / 0 failed (gate (1) run 4, `36ac7466`); newer tips are higher | CLAUDE.md, HEARSAY for the run base |
+| Baseline suite | 181 files; 2,452 passed / 1 skipped / 0 failed on `a67045eaf3241a18adde990e502a90b56a8a2c68` | S1 exact full suite, exit 0, 2026-11-02 22:56:18–22:58:51 UTC; Brain accepted |
 | pdfjs-dist | 5.4.296, transitive via pdf-parse 2.4.5 only | `node_modules`, Rodney, 2026-10-30 |
 | Register | read only through the rule 11a guard (pinned helper `fcfa9295`, `python -I`); `docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md` | 2026-10-30 |
 | Technical authority | Blurby.Brain (rule 11); merge go: Blurby.Roadmap | CLAUDE.md, memory |
@@ -79,4 +79,6 @@ dod:          D1–D21 unmet
 - Qualified helper relocated to `C:/Projects/Blurby-artifacts/registry-helper-20261102-business/virtuoso-dev/plugins/virtuoso`; original manifest SHA256 `86a0fb68619372d6e73cdc4dc1ad5e7fc4c55c62fc75e2a836c0084e895c8d47`, 220 raw/canonical/inventory checks and imports reverified. No global activation or helper command invoked.
 - BB-2026-11-02-1 source window CLOSED by confirmed Notes-only provider readback (recovery `20261102T223205Z`); snapshot 202 rows at 22:33:39 UTC is parent-confirmed evidence, not a fresh SQL read here. Visibility remains In Flight.
 - Brain coordinates execution; Roadmap owns canonical governance/closeout. Business owner is this S1 executor on RodneySR, isolated from CPU/A2. BB-2 theme export supplement consumed for future HB-6; not implemented. Native remains paused.
-- Dependencies, baseline tests, builds and every DoD remain unverified. Earlier unsupported-model failure and setup CP1252 print failure are preserved externally; UTF-8 output repair authorized in this same bounded setup wave.
+- Baseline wave `BLURBY-BUSINESS-1-S1-BASELINE-20261102` ran 22:53:00–22:59:13 UTC and closed at 39/40 aggregate tools. `npm ci --no-audit --no-fund` exited 0 (660 packages, 51.76 s); expected ONNX two-block patch verified; package/lock unchanged. `npm test -- --maxWorkers=1` exited 0 once (152.53 s), with process-local 2 GiB JavaScript heap limit; this is not a total RAM cap.
+- Brain-accepted baseline evidence: `C:/Projects/Blurby-artifacts/business-s1-baseline-20261102/parent-verification.json`, SHA256 `3fad01eecec99db60a0268933a4145316fbc2847d4ab1dd6673aa24ee1555416`; worker `receipt.final.json`, SHA256 `a72f61e7287c503f2ceb682b4dd70f31388924a349e9d71aa37c9be08e94842c`. Frozen charter/storyboard/specs/matrix remain unchanged. Only generated `tests/perf-baseline-results.json` is dirty, preserved unstaged at SHA256 `4834fca0f41d7c89b83fa02677a9f23ac77cdebb3b14c8ad59ef16cdeebf3208`.
+- Builds, product implementation and D1–D21 remain unverified; no automatic successor. Earlier unsupported-model failure and setup CP1252 print failure remain preserved externally. This docs-only checkpoint changes state/journal only; exact resulting commit is recorded in its external receipt.
