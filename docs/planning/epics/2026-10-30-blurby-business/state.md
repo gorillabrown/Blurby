@@ -1,7 +1,7 @@
 ---
 epic: blurby-business
-last_updated: 2026-11-02 23:31 UTC
-updated_by: session 1 HB-6 task 2 format checkpoint
+last_updated: 2026-11-03 UTC
+updated_by: session 1 HB-6 task 3-R verified storage foundation
 ---
 
 # State — single source of current truth
@@ -28,9 +28,9 @@ updated_by: session 1 HB-6 task 2 format checkpoint
 
 ```
 phase:        P1 — Viewer
-next_action:  checkpoint verified HB-6 task 2; await separate Brain admission for task 3
+next_action:  checkpoint verified HB-6 task 3-R; STOP for Brain acceptance and separate W/I admission
 blockers:     none
-session:      1 of ~40 budgeted; setup/baseline accepted, fixture task verified; HB-6 incomplete
+session:      1 of ~40 budgeted; task 3-R storage foundation verified; HB-6 incomplete
 dod:          D1–D21 unmet
 ```
 
@@ -43,7 +43,9 @@ dod:          D1–D21 unmet
 3. [ ] Re-verify every location cited in `phase1-specs.md` against the base, and journal
        any that moved.
 4. [x] HB-6 task 2 fixture generator: scoped verification and ordered reviews passed;
-       checkpoint only. HB-6 task 3 requires a separate ready contract and Brain admission.
+       accepted checkpoint `1bcceb0efede6d33df4bba232f75832247b3f851`.
+5. [x] HB-6 task 3-R inert recent store: targeted red/green and ordered reviews passed;
+       checkpoint only. STOP for Brain acceptance; W/I and activation require separate admission.
 
 ## Working set — verified facts this epic relies on
 
@@ -87,3 +89,8 @@ dod:          D1–D21 unmet
 - All 2,479 pre-existing tracked files matched before item-document updates; frozen charter/storyboard/specs/matrix remain unchanged. Package unchanged: package/lock and `build.files` are untouched, and scripts/tests are outside that package fence. Perf remains unstaged at its recorded hash; `report.pdf.tmp` is retained unstaged and excluded from the checkpoint.
 - HB-6 and the epic remain incomplete; D1–D21 unmet. No native rendering/pixel proof, app execution, full-suite rerun, build or package verification occurred in task 2. Earlier unsupported-model and CP1252 failures remain preserved externally. No automatic successor; exact checkpoint commit and final accounting are external receipt evidence.
 - Source wave closed at 40/40 tools with a preserved partial checkpoint: `receipt.final.partial.json`, SHA256 `922b11eb9c0e8810cf47ad962d57df899104ca99863fbdf630ad674fd598311c`, under the task evidence root. Brain ruling `BB-HB6-T2-PDF-XREF-20261102` preserves PDF fixed-width cross-reference trailing separators and permits normal text-file whitespace checks plus a PDF-only `git -c core.whitespace=-blank-at-eol diff --cached --check -- tests/fixtures/business/report.pdf`, with read-only 20-byte LF row and object-offset assertions. No PDF bytes may change to satisfy a text check. Separate Git/docs wave `BB-HB6-T2-GIT-CHECKPOINT-20261102` consumed 23:31:31 UTC, deadline 23:46:31 UTC, cap 15 aggregate tools; actual check results and Git identity belong in its external receipt. No generator execution, source change, tests, build or native action is admitted by that wave.
+- Task 3-R admission `BLURBY-BUSINESS-1-HB6-T3-R-SOURCE-20261102` consumed 2026-11-03 00:24:21 UTC, deadline 01:24:21 UTC, cap 40 aggregate calls; final time/calls and checkpoint identity belong in the external final receipt. Exact source started at `1bcceb0efede6d33df4bba232f75832247b3f851`; only `main/business/recent.js`, the two approved constants and `tests/businessRecent.test.js` implement R.
+- Actual combined targeted red exited 1: 15 intended missing-module assertions failed while all six unchanged JSON-store controls passed. Test-only local commit `7fab10b3c71553b819b7ef143c1760ca8b9cef34` preceded production implementation. Red receipt SHA256 `616b23fc207d330cc9e136c437468d403e898d83181b478cbbcf2f923e5785f6`; unchanged test SHA256 `04071db70ad2dd96f57eafc2ac403bbfcece2c41cf1a6c6d7ed6264f445161da`.
+- Exact green command exited 0: two files, 21 tests passed, empty stderr. `C:/Projects/Blurby-artifacts/business-hb6-t3-r-20261102/green.receipt.json`, SHA256 `38578ab7106ad5a3aab261564399b331fb0db56bf0aa239db106596c47ac5ec9`, retains source pins, case directory/file identities and TEMP proof. Solon spec compliance APPROVED, then Plato quality READY. New R cases, red failures and logs remain retained; only unchanged jsonStore controls use their ordinary teardown of their own generated subdirectory inside the qualified owned os-temp parent.
+- R is inert and unregistered: no window, IPC, actual profile or quit integration. Paths are lexical identities, not native canonical identity or document-read permission. Before later activation, integration must stop new Business operations, await store `close()`, then global `whenWritesSettled`; R's drain tests do not qualify that unwired integration.
+- Package qualification is HELD because R changes `main/**`; this is not a package-unchanged checkpoint. HB-6 and D1–D21 remain unmet. No full suite, typecheck, build, app/native/model/profile or provider action occurred in R. Frozen inputs and accepted generator/PDF/temp remain pinned; known perf dirt remains preserved unstaged. STOP after the exact checkpoint; no automatic W/I or other successor.

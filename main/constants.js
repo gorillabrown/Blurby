@@ -198,7 +198,12 @@ const ARTICLE_IMAGE_MIN_SIZE = 200;
 /** URL path patterns that indicate junk images (logos, icons, etc.) */
 const ARTICLE_JUNK_IMAGE_PATTERNS = ["logo", "avatar", "icon", "sprite", "badge", "button", "tracking", "pixel", "spacer", "blank", "1x1"];
 
+const BUSINESS_DATA_DIR = "business";
+const BUSINESS_RECENT_MAX = 20;
+
 module.exports = {
+  BUSINESS_DATA_DIR,
+  BUSINESS_RECENT_MAX,
   // Sync
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,
