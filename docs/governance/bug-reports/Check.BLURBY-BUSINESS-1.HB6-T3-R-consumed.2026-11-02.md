@@ -1,0 +1,23 @@
+# Business HB6-T3-R — final consumed readiness
+
+**READY for Brain's separate source-only recent-store wave.** Immutable planning commit `090c6872d0a2bc98d5c9cf86f34ae59a89f21f33`, R blob `5eb80db73c498d4fe24ab53df21712963b2dd4c9`, raw SHA256 `817c972e376d317bfe1d4aa342d11fa946641e666e6b9ec25de23b6b675d234f`; source baseline `1bcceb0efede6d33df4bba232f75832247b3f851`. Check JSON SHA256 `4fffcc8907080987f961ff4e95047d6f422354085fc32912e4e3ee83f8a763a7` records qualified U9/U10/protected7 and unchanged Git status. Root's ordered independent planning reviews passed after the explicit invalid-path control correction.
+
+| Finding | Disposition |
+|---|---|
+| Specification | PASS: exact API/schema/queue/close contract and15 literal controls, independent compliance/quality, U9/U10 |
+| Prerequisites | PASS for inert/unregistered R source only under Brain's explicit exception; parent prerequisites/acceptance remain nonterminal |
+| Repository | PASS: exact source, known perf/temp/constants and new-target identity/absence, clean index, protected manifest and actual published-input consumption |
+| External register | PASS: full live SQL202 rows at2026-11-02T23:54:55Z, Business In Flight100.5/charter/prerequisites unchanged; capabilities verified |
+| Environment | PASS: accepted Node/support/dependency pins, canonical AGENTS/shipped/overlay binding and actual confined owned test TEMP/TMP preparation |
+
+Brain accepted readiness SHA256 `ab30440e58a046cffd2a7dd441fd5cb0c40af93b66834a4635d96c6678d8f5f1`, closed4/8; final input receipt `C:/Projects/Blurby-artifacts/business-hb6-t3-r-inputs-20261102/receipt.json`, SHA256 `c1d36a402c2735637ee76fcc2915c81d0e38a1c6a4b9f55cd2da4f3332a66e81`,00:15:19–00:16:41.261544Z on2026-11-03 (ChicagoNov2), closed5/12. Root read Brain's actual full receipt-acceptance message; raw remote JSON was read by Brain, not independently accessed by Roadmap.
+
+The earlier task3-vs-t3 prospective artifact label was corrected during final preparation: only the published `business-hb6-t3-r-20261102` root is binding. It was checked absent before ownership, then explicitly prepared with EMPTY red/green data and os-temp directories. Source activation rechecks those accepted precreated empty directories; it must not falsely assert the root is still absent. Built-in-only Node custody evidence establishes observed current namespace confinement, not Native/reparse-tag attestation. Existing unchanged JSON-store test owns its ordinary generated TEMP fixture lifecycle; all new R evidence/data is retained.
+
+Brain alone names a fresh at-most60minute/40aggregate-call source admission and verifies consumed start. Actual host zeus.toml SHA63e7b6… session-start read precedes code per its ruling; no missing-filename guess, source-governance copy or generic substitution is allowed. No P-completion wait. No IPC/window/real-profile/quit activation, full suite/build, package qualification, main merge, terminal record, successor elevation, Native continuation or whole-HB6 completion. Main-process source changes will require later package qualification; never claim package unchanged for R.
+
+## Actual Brain acceptance (verbatim)
+
+Brain ACCEPTS FULL Rfinalinput/custodyJSON C:/Projects/Blurby-artifacts/business-hb6-t3-r-inputs-20261102/receipt.json SHAc1d36a402c2735637ee76fcc2915c81d0e38a1c6a4b9f55cd2da4f3332a66e81. 00:15:19→00:16:41.261544Z closed5/12. Exact090c6872/R817c/Check4fff/Brain5541 completehash+semanticreads; canonicalAGENTSaab/overlay/epic/seedqualifiedunchangedreuse/currentLL175delta+Rlessonsfresh. Namedfetchancestorverifiedtipc194..., source1bcce/knownperf/tmp/constants/2newtargetsunchanged/indexempty. Actualt3artifactroot checkedABSENTthenownedEMPTYonlyred/green/{data,os-temp}; directorymanifestfullprinted. Briefbuilt-in-onlyNodecustodychildexit0/no stderr, actualred/greenTEMP/TMP/os.tmpdir+allobservedancestor/ownedDirrealpaths staywithinownedroot, nolstatobservedsymlink; scopedcurrentnamespaceproofONLY/noNative/all-reparsetagclaim. No tests/store/source/runtimeactivation, ambiguity[].
+
+ReadyforlastRfive-findings closure NOWagainstimmutable090c; no republishneededforreceipt-onlyfinding. Sourceadmissionwillrecheckacceptedprecreatedemptydirs (NOTrootabsence), re-readactualsharedhost .codex/agents/zeus.toml63e7b6... before ANYcode ifnotyetqualifiedinBusinesscontext—knownactualsame-hostfilealreadyreadinCPUinputs, no substitute/missingpathguess or sourceoverlaycopy. Thisisnormalsessionstartprotocol, notnewalgorithm/readinessgate. SamegenericSolon→Plato→Marcus binding. ParentfullRwindow exception/packageholds unchanged. PleasefinalReadyandBrainwillstartseparateRsourcewave; no Pcompletiondependency.
