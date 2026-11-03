@@ -1,4 +1,4 @@
-#### LIBRARY-DELETE-SAFE-1 — Deleting a book never erases your own file *(Seq 109 recommended (new item; register Seq is the planner's to assign); Full Spec 2026-11-03, cited against RC tip `70d64237` (identical to `main` `c5bb507f`); Library & Content; BUG-238, HIGH; lands before LIBRARY-CONTENT-DEDUP-1)*
+#### LIBRARY-DELETE-SAFE-1 — Deleting a book never erases your own file *(Seq 89.5 (register; Blurby.Brain1 acknowledged 2026-11-03); Full Spec 2026-11-03, cited against RC tip `70d64237` (identical to `main` `c5bb507f`); Library & Content; BUG-238, HIGH; lands before LIBRARY-CONTENT-DEDUP-1)*
 
 - **What:**
   - Delete in the library (list card, grid card menu, the `#` key, and the "Remove" action on a load-failure toast) never calls `fs.unlink` again.
@@ -56,7 +56,10 @@
 | Nothing on disk, or the sample | otherwise | Delete? | Delete this book? | Yes, delete | Deleted "*Title*" |
 
     - The sample uses the plain text because its file is either the bundled resource (never touched) or the relinked copy (trashed); "Delete?" is true for both.
-- **Technical question for Blurby.Brain1 (TQ1, persistence of a removal). The recommendation is what the edit sites below build; a different ruling changes only the exclusion edit sites.**
+- **Persistence of a removal: TQ1, ruled by Blurby.Brain1 2026-11-03 (`Brain1.held-items-TQ.2026-11-03.md`, Batch 4 Q1): the recommendation is approved, with one condition.**
+  - **One key form (the condition).** The exclusion key is written and checked with folder-sync's own `pathKey` of `originalFilepath || filepath`. That is the same form the scan builds at `folder-sync.js:111`/`:201` and in `rescan-folder`. It is never the `realpath` form that the owned-file search uses for trashing. Otherwise a source folder reached through a junction or an 8.3 path would store one key and check another, and the book would come back. Row (fr6) proves it.
+  - **Paths only, no content hash.**
+  - **Known limit (accepted; record it in the memo):** a file replaced in place at the same path stays excluded until it is proven gone or dropped in again.
   - **Question:** the tombstone protects a removed folder book only until it is purged (cloud sync, 30 days) or pruned (folder switch). How should the removal persist?
   - **Recommendation: a device-local, main-private exclusion list.**
     - `settings._removedFolderBooks`: an array of `pathKey`s of removed folder books' user files (`originalFilepath || filepath`).
@@ -72,10 +75,10 @@
   - **Alternative:** a separate `removed-books.json` in the data directory. It needs its own load, save and quit-flush step; the settings key reuses all three.
 - **Prerequisites:**
   - The RC integration window merged to `origin/main`; cut from that merge (re-grep every cited line, standing rule 36).
-  - Blurby.Brain1's answer to TQ1 (the recommendation is built unless ruled otherwise).
+  - TQ1: ruled 2026-11-03 (above).
   - No other active editor of `main/ipc/library.js`, `main/folder-sync.js`, `DocCard.tsx` or `DocGridCard.tsx`. LIBRARY-CONTENT-DEDUP-1 (Seq 138) and AUTO-ARCHIVE-1's Wave B re-grep after this item lands.
 - **Done when** (PowerShell 7, `pwsh`, worktree root on RodneySr; each command passes only on exit 0 unless stated):
-  1. **Red first (standing rule 43).** Commit the three new test files alone. On the base, `npx vitest run tests/libraryDeleteSafe.test.js tests/folderSyncRemoved.test.js tests/deleteCopy.test.tsx` exits 1: (ds1)–(ds11), (fr1)–(fr3) and (dl1)–(dl3) fail as stated, and (ds12c), (fr4c), (fr5c) and (dl4c) pass. Record the output in the memo.
+  1. **Red first (standing rule 43).** Commit the three new test files alone. On the base, `npx vitest run tests/libraryDeleteSafe.test.js tests/folderSyncRemoved.test.js tests/deleteCopy.test.tsx` exits 1: (ds1)–(ds11), (fr1)–(fr3), (fr6) and (dl1)–(dl3) fail as stated, and (ds12c), (fr4c), (fr5c) and (dl4c) pass. Record the output in the memo.
   2. **The change** at the edit sites below, and nowhere else.
   3. `npx vitest run tests/libraryDeleteSafe.test.js tests/folderSyncRemoved.test.js tests/deleteCopy.test.tsx tests/saveLibraryTrust.test.js tests/saveLibraryMerge.test.js tests/libraryWriteThrough.test.js tests/folderSync.test.js tests/folderWatcher.test.js tests/folderUnreachableGuard.test.js tests/settingsKeyTrust.test.js tests/settingsKeyTrustKeys.test.ts tests/useLibrary.test.ts` exits 0, with no existing test edited (standing rule 50).
   4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rule 48). Record the counts.
@@ -165,6 +168,11 @@
     - **(fr3)** A full sync of a reachable root that no longer lists an excluded path under the folder: `forgetExcluded` is called with it. *Base: never called.*
     - **(fr4c) control:** a root that lists empty while folder books are held (BUG-195): `forgetExcluded` is not called and nothing is pruned.
     - **(fr5c) control:** a new, non-excluded file is added as before.
+    - **(fr6) one key form (Brain1 condition).**
+      - Set `settings.sourceFolder` to a non-canonical spelling of the folder: different letter case plus a trailing separator.
+      - The key that `delete-doc` writes to `_removedFolderBooks` equals the key the full sync's filter computes for that file, and the key `rescan-folder` computes for it.
+      - A following full sync does not add the book.
+      - *Base: no exclusion exists (red by absence).*
   - **`tests/deleteCopy.test.tsx` (new, jsdom).** Renders `DocCard` and `DocGridCard` directly with minimal props.
     - **(dl1)** A folder book's list-card confirmation reads "Remove from Blurby? Your file stays." *Base: "Delete?".*
     - **(dl2)** Its grid-menu confirmation reads "Remove this book from Blurby? Your file stays in its folder." with a "Remove" button. *Base: "Delete this book and its file?".*
@@ -201,7 +209,7 @@
 ##### Lessons applied
 
 - **Standing rule 36:** every site is cited at `70d64237` and re-grepped at the cut; the files shared with LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 are named for rebase.
-- **Standing rule 43 (LL-138):** (ds1)–(ds11), (fr1)–(fr3) and (dl1)–(dl3) are red first, with (ds12c), (fr4c), (fr5c) and (dl4c) as controls.
+- **Standing rule 43 (LL-138):** (ds1)–(ds11), (fr1)–(fr3), (fr6) and (dl1)–(dl3) are red first, with (ds12c), (fr4c), (fr5c) and (dl4c) as controls.
 - **Standing rule 48 (LL-149):** typecheck and build are in Done-when 4.
 - **Standing rule 49 (LL-148):** BUG-238's status line names the item, never a merge sha.
 - **Standing rule 52 (LL-146):** copied harnesses; the probe is saved as `.mjs.txt`.

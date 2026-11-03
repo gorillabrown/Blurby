@@ -1,6 +1,6 @@
 # CHAPTER-STEP-CFI-1 — Amendment 1: the landing completes on the relocate, not on the jump's promise
 
-*Planner: Blurby.Roadmap, 2026-11-03. This amends [the full specification](../2026-10-23-5/CHAPTER-STEP-CFI-1.md) (roadmap review 2026-10-23-5). The amendment replaces design 2 and the sections listed below; everything else in the specification stands. The stop that this answers is commit `796282c2` on `eb/chapter-step-cfi-1`: [base memo](../../../studies/investigations/CHAPTER-STEP-CFI-1.base.2026-10-23.md) on that branch, and its governance staging memo. Tier 1 (design within the approved behaviour) is the planner's, as the stop memo records; Blurby.Brain1 is informed and may supersede it.*
+*Planner: Blurby.Roadmap, 2026-11-03. This amends [the full specification](../2026-10-23-5/CHAPTER-STEP-CFI-1.md) (roadmap review 2026-10-23-5). The amendment replaces design 2 and the sections listed below; everything else in the specification stands. The stop that this answers is commit `796282c2` on `eb/chapter-step-cfi-1`: [base memo](../../../studies/investigations/CHAPTER-STEP-CFI-1.base.2026-10-23.md) on that branch, and its governance staging memo. Tier 1 (design within the approved behaviour) is the planner's, as the stop memo records. Blurby.Brain1 reviewed it on 2026-11-03: not superseded; (cl9) and 2a′ added at its ruling.*
 
 ## What the stop proved
 
@@ -18,7 +18,8 @@ The early `commitShared` in `navigateTo` publishes the entry's word, which is in
   - Flow `syncSection` (`flow/ModeRuntime.ts:1181`);
   - Narrate `syncSection` (`narrate/ModeRuntime.ts:594`).
 
-  This removes the second `goTo` that the stop measured. Design 1 already stops `navigateTo` from publishing the word early on an EPUB, so 2a is a guard, not the only fix.
+  This removes the second `goTo` that the stop measured.
+- **2a′. Narrate's owed arrival sync (Blurby.Brain1, 2026-11-03).** NARRATE-ARRIVAL-SYNC-1 adds `arrivalSyncOwed`, cleared on every user intent. A contents jump is a user intent, so Narrate's `go-to-href` clears `arrivalSyncOwed` (through the hotfix's own clear path) **before** it arms the landing. Otherwise `settleArrivalSync` and the landing would make competing `goTo`s, the very failure that stopped run 1. Design 1 already stops `navigateTo` from publishing the word early on an EPUB, so 2a is a guard, not the only fix.
 - **2b. The landing completes at the earliest of:**
   1. `surface.goTo` resolves and a cfi was captured;
   2. `LANDING_SETTLE_MS` (500) after the most recent relocate captured for this landing, which handles a promise that never settles.
@@ -37,7 +38,7 @@ Designs 1, 3, 4 and 5 are unchanged. The `completeLanding` body (the commit with
 
 - **`<base>`** is `origin/main` at dispatch.
   - It is at or after `c5bb507f`, the RC integration merge, which contains both prerequisites: `eb/band-align-2` and `eb/jump-landing-save-1` are ancestors of `c5bb507f`.
-  - It also contains the run-5 hotfix (the PLAY-FIRST-TEXT-1 regression fix ruled by Blurby.Brain1, to be registered at Seq 88.5). That hotfix edits Narrate's `go-to-href` handler (`narrate/ModeRuntime.ts:499-507`, `pendingFirstText`), which this item also edits, so this item starts after it lands.
+  - It also contains the run-5 hotfix NARRATE-ARRIVAL-SYNC-1 (Seq 88.5; Blurby.Brain1 ruling `Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`). That hotfix edits Narrate's `go-to-href` handler (`narrate/ModeRuntime.ts:499-507`, `pendingFirstText`), which this item also edits, so this item starts after it lands.
 - **Edit sites at `c5bb507f`** (re-grep at `<base>`, standing rule 36):
 
   | Mode | `navigateTo` | `go-to-href` | `onRelocate` | `syncSection` | `commitShared` |
@@ -61,11 +62,16 @@ Designs 1, 3, 4 and 5 are unchanged. The `completeLanding` body (the commit with
     The value is reached through behaviour, by advancing 600 ms, so the file runs on the base. On the base it fails by assertion, with the early `"cfi:old"` save.
   - **(cl7), all three modes:** between `go-to-href` and completion, a published word in another section does not make `surface.goToSection` run. That is, the stub's `goToSection` spy is not called while the landing is armed. On the base it fails.
   - **(cl8), all three modes:** a `goTo` that never settles and fires no relocate saves nothing. After 6 s of fake time, a relocate takes the normal path again: `onRelocate` reaches `scheduleRelocateSave` once `resumeAnchor` is clear. On the base it fails, because of the early save.
+  - **(cl9), Narrate only (Blurby.Brain1 2026-11-03):**
+    - Arrive in Narrate from Page at a saved word, with the arrival sync still owed (the section map not yet loaded).
+    - Then make a contents jump.
+    - Exactly one `goTo` follows, the landing's, and the only save since the jump is the landing's word with its cfi.
+    - Before writing (cl6)–(cl9), re-grep `pendingFirstText`, `arrivalSyncOwed` and `syncSection` on the hotfix merge.
 - **Done-when 3 (the change):**
   - Add 2a to each mode's `syncSection`, and 2b–2d to the `go-to-href` case, `onRelocate`, `completeLanding` and `stop()`.
   - `go-to-href` arms the landing and the timeout, then `void this.surface.goTo(href).then(() => { if (landing.cfi != null) this.completeLanding(landing); })`.
   - `onRelocate`, while armed: store `detail.cfi`, restart the settle timer, `s.notify()`, and return before the passive highlight and `scheduleRelocateSave`, as design 1 specified.
-- **Done-when 4 (tests):** add to the command `tests/readerModes/chapterStepLanding.test.ts` (cl6)–(cl8). The rest is unchanged.
+- **Done-when 4 (tests):** add to the command `tests/readerModes/chapterStepLanding.test.ts` (cl6)–(cl9). The rest is unchanged.
 - **Done-when 5 (fixed build):** (a)–(e) stand. Add:
   - **(f)** Each of (i)–(iii) in each mode makes **exactly one** `view.goTo` call: the runtime's, with the fragment.
   - **(g)** For each landing, record which path completed it (resolve or settle), and whether the runtime's `goTo` resolved. Either path passes. A landing completed by neither path, or a second save, stops the item.
