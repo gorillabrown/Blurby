@@ -28,6 +28,7 @@
 | A2 | Cross-Book Continuous Reading | Finishing a book auto-loads next from reading queue — seamless transition, no return to library. | High | Medium |
 | A3 | Paragraph Jump Shortcuts | Shift+Left/Right jumps to paragraph boundaries in all reading modes. Requires paragraph detection in words array. (BUG-069) | Medium | Medium |
 | A4 | Scroll Wheel Word Advance | Mouse scroll wheel advances/retreats one word at a time in reading modes instead of page scrolling. (BUG-070) | Low | Small |
+| A5 | Paused Flow Line Keys (FLOW-PAUSED-LINE-1) | ↑/↓ move a line while Flow is paused, not only while it plays. Paused there is no line map: the line pacer builds one only while running, and the Flow surface has no line lookup (`flow/surface.ts`). The fix needs a line lookup over the rendered word spans, so it is new design. At v1.28.0 paused ↓ changed speed (f0, `v128-flow-2.json`), so this was never a feature. (FLOW-KEYS-FIX-1, BUG-211) | Low | Medium |
 
 ### Theme B: Chrome Extension & Web Capture
 

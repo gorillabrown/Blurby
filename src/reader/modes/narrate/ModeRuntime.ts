@@ -150,6 +150,12 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   private readonly rafs = new Set<number>();
   private alive = true;
   private destroyed = false;
+  /** PLAY-FIRST-TEXT-1: the start in flight while the view moves from a section with no words to the first text after it. */
+  private firstTextToken: symbol | null = null;
+  /** PLAY-FIRST-TEXT-1: true only while start() re-enters after that move, so the re-entry never skips again. */
+  private firstTextReentry = false;
+  /** PLAY-FIRST-TEXT-1 (Brain1 Q2): a Play made on a section with no words before the section map exists. */
+  private pendingFirstText: { sectionIndex: number; request: ReaderModeStartRequestV1 } | null = null;
   private arrivalCursorPending: boolean;
 
   constructor(input: ReaderModeCreateInput, deps: NarrateRuntimeDeps = defaultNarrateDeps()) {
@@ -236,6 +242,11 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (next === this.documentSnapshot) return;
     this.documentSnapshot = next;
     this.state.notify();
+    const pending = this.pendingFirstText;
+    if (pending && next.bookWords) {
+      this.pendingFirstText = null; // exactly once
+      if (this.surface.getDisplayedSectionIndex() === pending.sectionIndex) this.start(pending.request);
+    }
   };
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -256,6 +267,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   start(_request: ReaderModeStartRequestV1): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
+    if (this.startAtFirstText(_request)) return;
     this.arrivalCursorPending = false;
     const s = this.state;
     s.pendingStartOnLoad = false;
@@ -272,6 +285,14 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }
     const effectiveWords = [...this.effectiveWords()];
     if (this.document.useFoliate && effectiveWords.length === 0 && this.surface.isReady()) {
+      const shownEmpty = this.surface.getDisplayedSectionIndex();
+      if (!this.document.bookWords && shownEmpty != null) {
+        // Brain1 Q2 (a): wait for the section map; adoptDocument re-runs this Play once. No next(), no timer.
+        this.pendingFirstText = { sectionIndex: shownEmpty, request: _request };
+        this.ports.diagnostics.record("play-first-text", `section ${shownEmpty} has no words and no section map yet: waiting for it`);
+        s.notify();
+        return;
+      }
       this.traceSectionNav("empty-words-retry", this.state.currentWordIndex);
       this.surface.next();
       this.setTimer(() => {
@@ -304,7 +325,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   }
 
   pause(): void {
-    if (!this.alive || !this.state.playing) return;
+    if (!this.alive) return;
+    this.firstTextToken = null;
+    this.pendingFirstText = null;
+    if (!this.state.playing) return;
     this.state.pendingStartOnLoad = false;
     this.engine?.pause();
     this.state.playing = false;
@@ -332,6 +356,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.unsubscribeDocument?.();
     this.unsubscribeDocument = null;
     this.clearTimers();
+    this.firstTextToken = null;
+    this.pendingFirstText = null;
     this.engine?.stop();
     this.engine = null;
     this.output?.close();
@@ -358,6 +384,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   jumpToWord(wordIndex: number, _cause: ReaderModeJumpCause): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     if (this.state.playing && this.engine) { this.engine.play(wordIndex, "navigate"); return; }
     this.state.currentWordIndex = wordIndex;
     this.state.notify();
@@ -410,6 +437,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   // ── User intents ──────────────────────────────────────────────────────────
   hardSelect(input: ReaderHardSelectInput): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     const s = this.state;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
@@ -447,6 +475,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   jumpBack(): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     const anchor = this.state.canonicalWordIndex;
     this.anchor.syncVisualToPersistentWord({ navigate: true });
     if (this.document.useFoliate) {
@@ -460,6 +489,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   handleCommand(command: ReaderModeCommand): void {
     if (!this.alive) return;
+    this.pendingFirstText = null;
     if (command.kind !== "go-to-href") return;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
@@ -708,6 +738,56 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   }
 
   // ── Private ────────────────────────────────────────────────────────────────
+  /**
+   * PLAY-FIRST-TEXT-1 (owner ruling 2026-10-30 "Start at first text"; Brain1 rulings 1–2). Play with the view on a
+   * section that has no words (no entry in the book's section map) moves to the first later section with words and
+   * starts on its first word. Returns true when it took the start over (moving, or inert because no later section has
+   * words); false when the start goes on as before (a section with words, no section map yet, or no view).
+   * The move is one navigation (LL-070: sectionNavInFlight holds followSpokenSection off), traced first (BUG-191).
+   */
+  private startAtFirstText(request: ReaderModeStartRequestV1): boolean {
+    if (this.firstTextReentry || !this.document.useFoliate) return false;
+    const bookWords = this.document.bookWords;
+    const shown = this.surface.getDisplayedSectionIndex();
+    if (!bookWords || shown == null) return false; // Brain1 Q2: no map yet; the empty-words path sets pendingFirstText
+    if (bookWords.sections.some((section) => section.sectionIndex === shown)) return false;
+    const target = bookWords.sections.find((section) => section.sectionIndex > shown);
+    if (!target) {
+      this.ports.diagnostics.record("play-first-text", `section ${shown} has no words and no later section has words: Play does nothing`);
+      return true; // ruling 1: the existing no-text state stands (no engagement, no navigation, no clock)
+    }
+    const s = this.state;
+    const token = Symbol("play-first-text");
+    this.firstTextToken = token;
+    s.explicitSelectionAnchor = target.startWordIdx; // the re-entry's consumeModeStartAnchor starts here
+    s.resumeAnchor = target.startWordIdx; // no relocate save of an earlier word while the view moves
+    this.publishHighlight(target.startWordIdx);
+    s.currentSection = target.sectionIndex;
+    s.sectionNavInFlight = target.sectionIndex; // LL-070: one navigation owner; followSpokenSection waits
+    this.ports.diagnostics.record("play-first-text", `section ${shown} has no words: to section ${target.sectionIndex}, word ${target.startWordIdx}`);
+    this.traceSectionNav("play-first-text", target.startWordIdx, target.sectionIndex, shown);
+    this.surface.goToSection(target.sectionIndex)
+      .then(() => this.surface.waitForSectionReady(target.sectionIndex))
+      .then((ready) => {
+        if (s.sectionNavInFlight === target.sectionIndex) s.sectionNavInFlight = null;
+        if (!this.alive || this.firstTextToken !== token) return; // paused, stopped or superseded during the move
+        this.firstTextToken = null;
+        if (ready !== target.sectionIndex) {
+          this.ports.diagnostics.record("play-first-text", `section ${target.sectionIndex} not ready: not started`);
+          s.notify();
+          return;
+        }
+        this.firstTextReentry = true;
+        try { this.start(request); } finally { this.firstTextReentry = false; }
+      })
+      .catch((error: unknown) => {
+        if (s.sectionNavInFlight === target.sectionIndex) s.sectionNavInFlight = null;
+        if (this.alive) this.ports.diagnostics.record("play-first-text", `move failed: ${String(error)}`); // LL-066
+      });
+    s.notify();
+    return true;
+  }
+
   private consumeModeStartAnchor(): number {
     const s = this.state;
     const startAnchor = resolveModeStartWordIndex(s.explicitSelectionAnchor, s.resumeAnchor, s.canonicalWordIndex, s.highlightedWordIndex, s.softWordIndex);

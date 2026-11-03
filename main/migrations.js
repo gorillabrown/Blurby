@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 13;
+const CURRENT_SETTINGS_SCHEMA = 14;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -178,6 +178,16 @@ const settingsMigrations = [
   },
   // v12 → v13: Narrate removed (NARRATE-REMOVE-1) — a saved narrate mode becomes flow
   (data) => { normalizeReaderModes(data); data.schemaVersion = 13; return data; },
+  // v13 → v14: BAND-ALIGN-2 R8 — the band covers the cursor's paragraph; the Lines count is dropped. Stored Off (0)
+  // stays off; any line count is on; a file without flowZoneLines gets no new key (absent = on).
+  (data) => {
+    if (Object.hasOwn(data, "flowZoneLines")) {
+      data.flowBandEnabled = data.flowZoneLines !== 0;
+      delete data.flowZoneLines;
+    }
+    data.schemaVersion = 14;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -311,7 +321,7 @@ const SETTINGS_DEFAULTS = {
   readingGoals: [],
   // Absent until set: the rest of BlurbySettings (src/types.ts).
   focusWpm: undefined, flowWpm: undefined, justifiedText: undefined,
-  flowWordSpan: undefined, flowCursorStyle: undefined, flowZonePosition: undefined, flowZoneLines: undefined,
+  flowWordSpan: undefined, flowCursorStyle: undefined, flowZonePosition: undefined, flowBandEnabled: undefined,
   ttsPauseCommaMs: undefined, ttsPauseClauseMs: undefined, ttsPauseSentenceMs: undefined,
   ttsPauseParagraphMs: undefined, ttsDialogueSentenceThreshold: undefined, ttsFootnoteMode: undefined,
   lastReadingMode: undefined, isNarrating: undefined, firstRunCompleted: undefined,
