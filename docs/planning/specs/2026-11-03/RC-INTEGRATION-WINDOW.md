@@ -18,7 +18,7 @@ Every carried item is In Flight by design: this window is how they integrate (ow
 
 ## Baseline
 
-- Base: the `origin/main` merge commit that carries this specification onto main (named by SHA in the kickoff). Its only difference from `b58b0117f1328fe76136c51adc092732667eeb70`, the commit the trial integration ran on, is files under `docs/planning/`, so the trial results hold. If main has moved by launch, check `git diff --name-only b58b0117 <main>`: any path outside `docs/` means re-running the packet's read-only trial and returning any new conflict to the planner. Every `<base>` in the criteria means this base.
+- Base: `origin/main` at or after the merge that carries this specification, named by SHA in the kickoff. The trial integration ran on `b58b0117f1328fe76136c51adc092732667eeb70`. The base check prints nothing when the trial results hold: `git diff --name-only b58b0117 <base> -- src main tests preload.js package.json package-lock.json electron-builder.yml`. Only governance and planning documents have changed since. Any output means re-running the packet's read-only trial on the base and returning any new conflict to the planner. Every `<base>` in the criteria means this base.
 - Tips (from `origin`, verify each SHA at launch; any moved tip returns to the planner):
 
 | Wave | Order | Tip branch | Carries |
