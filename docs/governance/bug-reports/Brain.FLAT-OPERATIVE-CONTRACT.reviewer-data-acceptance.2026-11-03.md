@@ -1,0 +1,8 @@
+# Shared reviewer definitions — scoped DATA acceptance disposition
+
+2026-11-03. Complete actual Brain message `exec-c9b6a75a-276e-4000-af89-10ce898d91b9`, local chat `01a179e8-7a40-75c0-93f4-d3045ad99027`, turn `01a1a0f3-3169-7d02-989b-e4fb2c90254c`. Scope limited to the closed three-definition DATA preparation, not whole instruction readiness or a new admission.
+
+Brain disposition SHARED-REVIEWER-DATA-ACCEPTANCE-20261103: accept the closed six-call, three-definition DATA preparation for the actual quiet CPU chat 01a19d76-0837-7a43-a18d-8a40494879b8, turn 01a1a0e5-ed5c-7c20-bc17-63c5192d7157. Basis: previously inspected complete results plus independent compliance-first/quality acceptance, seven-chunk reassembly of all 38875 bytes, exact full-file equality and unchanged three pinned hashes. Preserve original review f3638199 and corrective review 2b23695e, documented timestamp defect, conservative 10:13:05 UTC start bound and 10:23:05 deadline bound. No exact before-read timestamp claim, unused-time transfer, or extra calls.
+
+Scope is only MarcusAurelius, Plato and Hippocrates definitions at the exact admitted .claude paths/hashes. This is provenance and same-actor historical read coverage under ACTOR-SPECIFIC-READ-CARRY; it does not cover the other twelve rows, activate roles, establish a new worker's consumption, mark any application contract Ready, or admit authoring/review/runtime. Preserve the Root capsule as a Root-produced evidence artifact, not a quiet receipt. Continue the already authorized local scoped documentation/review/publication closeout and independent remaining-route planning in parallel where independent. No new quiet preparation or operational clock is granted.
+

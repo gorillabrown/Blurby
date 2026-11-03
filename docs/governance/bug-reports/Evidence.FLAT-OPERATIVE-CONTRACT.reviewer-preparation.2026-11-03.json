@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "scope": "CLOSED_THREE_REVIEWER_DEFINITIONS_DATA_ONLY",
+  "actor": {
+    "hostId": "remote-control:env_e_6ad10d73d698832184c47d5c34280e22",
+    "chatId": "01a19d76-0837-7a43-a18d-8a40494879b8",
+    "turnId": "01a1a0e5-ed5c-7c20-bc17-63c5192d7157"
+  },
+  "authoritativeTurn": {
+    "startedAt": 1793700785,
+    "completedAt": 1793700831,
+    "durationMs": 46154
+  },
+  "actualCommands": [
+    {
+      "id": "exec-26595766-267d-4627-9f63-0766e16e0e28",
+      "exitCode": 0,
+      "durationMs": 231,
+      "returnedTextCharacters": 5038,
+      "returnedOutputTruncated": false,
+      "kind": "metadata"
+    },
+    {
+      "id": "exec-67f5288a-28b0-4c45-b44e-06b0f367fb46",
+      "exitCode": 0,
+      "durationMs": 181,
+      "returnedTextCharacters": 9002,
+      "returnedOutputTruncated": false,
+      "kind": "source-frame"
+    },
+    {
+      "id": "exec-8551b6c1-ad85-4058-b031-1a76d7f397e2",
+      "exitCode": 0,
+      "durationMs": 185,
+      "returnedTextCharacters": 9002,
+      "returnedOutputTruncated": false,
+      "kind": "source-frame"
+    },
+    {
+      "id": "exec-580cf679-3252-454d-b4fb-2bee08ca3e7e",
+      "exitCode": 0,
+      "durationMs": 196,
+      "returnedTextCharacters": 9002,
+      "returnedOutputTruncated": false,
+      "kind": "source-frame"
+    },
+    {
+      "id": "exec-9add4221-8caa-4e7c-8e4c-01ad3a4b2ed8",
+      "exitCode": 0,
+      "durationMs": 189,
+      "returnedTextCharacters": 9001,
+      "returnedOutputTruncated": false,
+      "kind": "source-frame"
+    },
+    {
+      "id": "exec-34020978-a7b8-48fe-89ec-02370bc68bd9",
+      "exitCode": 0,
+      "durationMs": 192,
+      "returnedTextCharacters": 8027,
+      "returnedOutputTruncated": false,
+      "kind": "source-frame-and-closure"
+    }
+  ],
+  "actualMetadata": {
+    "status": "PACKING_FROZEN",
+    "startUTC": "2026-11-03T10:13:25.016896+00:00",
+    "deadlineUTC": "2026-11-03T10:23:25.016896+00:00",
+    "calls": 1,
+    "attributes": [
+      {
+        "path": "C:\\Python314\\python.exe",
+        "resolved": "C:\\Python314\\python.exe",
+        "mode": 33279,
+        "attributes": 32
+      },
+      {
+        "path": "C:\\Python314",
+        "resolved": "C:\\Python314",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\",
+        "resolved": "C:\\",
+        "mode": 16895,
+        "attributes": 22
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+        "mode": 33206,
+        "attributes": 32
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude",
+        "resolved": "C:\\Users\\estra\\.claude",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users\\estra",
+        "resolved": "C:\\Users\\estra",
+        "mode": 16895,
+        "attributes": 16
+      },
+      {
+        "path": "C:\\Users",
+        "resolved": "C:\\Users",
+        "mode": 16749,
+        "attributes": 17
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+        "mode": 33206,
+        "attributes": 32
+      },
+      {
+        "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Hippocrates.md",
+        "resolved": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Hippocrates.md",
+        "mode": 33206,
+        "attributes": 32
+      }
+    ],
+    "groups": [
+      {
+        "number": 1,
+        "serializedChars": 9000,
+        "pieces": [
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+            "totalBytes": 13714,
+            "fullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+            "offset": 0,
+            "bytes": 8310,
+            "chunkSHA256": "7cb79c4fd3bb1375171d1f733db75166aca0b5921f0fb0332eb69f4397b8dd96"
+          }
+        ]
+      },
+      {
+        "number": 2,
+        "serializedChars": 9000,
+        "pieces": [
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+            "totalBytes": 13714,
+            "fullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+            "offset": 8310,
+            "bytes": 5404,
+            "chunkSHA256": "3f7c67a360aab33bb8b5bae6a4045bb22ddecb0ce09ae58f7e0b79052e48ca4f"
+          },
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+            "totalBytes": 13843,
+            "fullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+            "offset": 0,
+            "bytes": 2608,
+            "chunkSHA256": "44f797056d642862c98da1fa4c43c12a47ec6c209b7cefec7a82b6de7d18ec99"
+          }
+        ]
+      },
+      {
+        "number": 3,
+        "serializedChars": 9000,
+        "pieces": [
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+            "totalBytes": 13843,
+            "fullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+            "offset": 2608,
+            "bytes": 8212,
+            "chunkSHA256": "165280785c8f3c8cd7f7be3d6bb92f3dafdeb19f1f325f61b880a6b56bd88490"
+          }
+        ]
+      },
+      {
+        "number": 4,
+        "serializedChars": 8999,
+        "pieces": [
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+            "totalBytes": 13843,
+            "fullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+            "offset": 10820,
+            "bytes": 3023,
+            "chunkSHA256": "7dd377f237092df8cb6acebab0973a20f1197a58cb3eefae4cab0eb676a05f6e"
+          },
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Hippocrates.md",
+            "totalBytes": 11318,
+            "fullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+            "offset": 0,
+            "bytes": 4949,
+            "chunkSHA256": "15b0df5fa206059edaafdb419f1a17ddd00f4969be7e08072b4c1f7a466df182"
+          }
+        ]
+      },
+      {
+        "number": 5,
+        "serializedChars": 7130,
+        "pieces": [
+          {
+            "path": "C:\\Users\\estra\\.claude\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Hippocrates.md",
+            "totalBytes": 11318,
+            "fullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+            "offset": 4949,
+            "bytes": 6369,
+            "chunkSHA256": "e5eb021ba5c4e9eb311f88fa5e8429f97b61094de6b9a30e5b864f590a13b6da"
+          }
+        ]
+      }
+    ]
+  },
+  "actualClosure": {
+    "status": "ROLE_DEFINITION_DATA_QUALIFIED",
+    "calls": 6,
+    "recordedFirstCallUTC": "2026-11-03T10:13:25.016896+00:00",
+    "deadlineUTC": "2026-11-03T10:23:25.016896+00:00",
+    "endUTC": "2026-11-03T10:13:44.968563+00:00",
+    "unchanged": [
+      {
+        "name": "MarcusAurelius.md",
+        "bytes": 13714,
+        "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d"
+      },
+      {
+        "name": "Plato.md",
+        "bytes": 13843,
+        "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77"
+      },
+      {
+        "name": "Hippocrates.md",
+        "bytes": 11318,
+        "sha256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3"
+      }
+    ],
+    "coverageBytes": {
+      "MarcusAurelius.md": [
+        [
+          0,
+          8310
+        ],
+        [
+          8310,
+          13714
+        ]
+      ],
+      "Plato.md": [
+        [
+          0,
+          2608
+        ],
+        [
+          2608,
+          10820
+        ],
+        [
+          10820,
+          13843
+        ]
+      ],
+      "Hippocrates.md": [
+        [
+          0,
+          4949
+        ],
+        [
+          4949,
+          11318
+        ]
+      ]
+    },
+    "gapFree": true,
+    "writes": false,
+    "clockCaveat": "First timestamp was captured after first-call input verification/packing, not before; exact earlier consumption instant unrecorded."
+  },
+  "rootValidation": {
+    "method": "Existing five frame outputs decoded as DATA; per-piece UTF8/raw SHA and exact offsets; reconstructed three complete files byte-equal to Root shipped raw definitions using Node builtins only",
+    "allSevenChunkHashesMatch": true,
+    "allThreeFullHashesAndLengthsMatch": true,
+    "allThreeRawLocalByteEquality": true,
+    "allThreeGapFree": true,
+    "noQuietCommands": true
+  },
+  "timingDisposition": {
+    "defect": "FIRST_TIMESTAMP_AFTER_INITIAL_VERIFICATION_AND_PACKING; EXACT_CONSUMPTION_UNRECORDED",
+    "conservativeStartUTC": "2026-11-03T10:13:05Z",
+    "conservativeDeadlineUTC": "2026-11-03T10:23:05Z",
+    "authoritativeTurnEndUTC": "2026-11-03T10:13:51Z",
+    "ruling": "Brain.FLAT-OPERATIVE-CONTRACT.reviewer-preparation-clock.2026-11-03.md",
+    "rulingSHA256": "4146b57c5a80e1c47d8809ace765837d58173215bb319e634a91ce826870d26a",
+    "originalRecordedTimesPreserved": true,
+    "noClockReuse": true
+  },
+  "review": {
+    "original": "Review.FLAT-OPERATIVE-CONTRACT.reviewer-preparation.2026-11-03.md",
+    "originalSHA256": "f3638199cc90e8b6560822b7ca30ea7ec3e982c73bd7ca1e61065c129ac125ec",
+    "clockDelta": "Review.FLAT-OPERATIVE-CONTRACT.reviewer-preparation-clock-delta.2026-11-03.md",
+    "clockDeltaSHA256": "2b23695e942a05ff783326911b425f5b1e5080fae4ff00e3a0d987678c989058",
+    "orderedResult": "COMPLIANCE_ACCEPTED_WITH_TIMESTAMP_DEFECT_THEN_NARROW_DATA_QUALITY_ACCEPTED"
+  },
+  "nonClaims": [
+    "No role source copied here or activated",
+    "No semantic-read credit to another actor",
+    "No qualification of other twelve instruction rows",
+    "No full instruction preparation or application contract Ready",
+    "No new clock/calls/root/slot",
+    "No source/runtime/native/package/release/item/terminal acceptance"
+  ]
+}
+
