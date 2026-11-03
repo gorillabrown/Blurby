@@ -18,7 +18,7 @@ Every carried item is In Flight by design: this window is how they integrate (ow
 
 ## Baseline
 
-- Base: the `origin/main` merge commit that carries this specification onto main (named by SHA in the kickoff). Its only difference from `b58b0117f1328fe76136c51adc092732667eeb70`, the commit the trial integration ran on, is files under `docs/planning/`, so the trial results hold. If main has moved by launch, check `git diff --name-only b58b0117 <main>`: any path outside `docs/` means re-running the packet's read-only trial and returning any new conflict to the planner. Every `<base>` in the criteria means this base.
+- Base: `origin/main` at or after the merge that carries this specification, named by SHA in the kickoff. The trial integration ran on `b58b0117f1328fe76136c51adc092732667eeb70`. The base check prints nothing when the trial results hold: `git diff --name-only b58b0117 <base> -- src main tests preload.js package.json package-lock.json electron-builder.yml`. Only governance and planning documents have changed since. Any output means re-running the packet's read-only trial on the base and returning any new conflict to the planner. Every `<base>` in the criteria means this base.
 - Tips (from `origin`, verify each SHA at launch; any moved tip returns to the planner):
 
 | Wave | Order | Tip branch | Carries |
@@ -50,7 +50,7 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 ## Execution host and custody
 
 - Host: RodneySr (rule 6b), reconnected and idle, having first reported each branch's state and pushed its local-only commits. Arm64 launch at merge: Rodney.
-- Worktree: `C:\Projects\Blurby\.worktrees\rc-integration-20261103` (standing rule "Worktree placement"); branch `eb/rc-integration-20261103` from the base above.
+- Worktree: `C:\Users\estra\Projects\Blurby\.worktrees\rc-integration-20261103` (RodneySr's canonical clone; confirm with `git -C C:/Users/estra/Projects/Blurby rev-parse --git-common-dir` before starting, and any mismatch is a STOP) (standing rule "Worktree placement"); branch `eb/rc-integration-20261103` from the base above.
 - `npm ci` once at the base; re-run only if a wave changes `package.json` or `package-lock.json`.
 
 ## Conflict resolutions
@@ -87,7 +87,7 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 
 ## Repository plan
 
-- Branch `eb/rc-integration-20261103` from the base above, in `C:\Projects\Blurby\.worktrees\rc-integration-20261103` on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
+- Branch `eb/rc-integration-20261103` from the base above, in `C:\Users\estra\Projects\Blurby\.worktrees\rc-integration-20261103` (RodneySr's canonical clone; confirm with `git -C C:/Users/estra/Projects/Blurby rev-parse --git-common-dir` before starting, and any mismatch is a STOP) on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
 - Merge commits take each tip whole. Each resolution commit stages only its named paths: R2 `main/ipc/library.js` and `main/ipc/misc.js`; R3 `src/reader/modes/narrate/ModeRuntime.ts` and `src/reader/modes/narrate/engine/narrateEngine.ts`; R4 `main/migrations.js`, the two named tests and the new `tests/settingsMigrationV15.test.js`; R5 `docs/governance/BUG_REPORT.md` and `CLAUDE.md`. Never `git add -A`.
 - Policy `push`: push after each green wave. The merge to `main` happens only after Brain1's package confirmation and Roadmap's merge go.
 

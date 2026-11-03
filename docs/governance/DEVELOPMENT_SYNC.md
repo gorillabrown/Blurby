@@ -31,7 +31,7 @@ Read-only ceremonies inspect status/upstream with zero writes; they do not pull,
 
 This applies to Claude, Codex, cloud sessions and any other agent or tool working on Blurby. It is a standing rule in `CLAUDE.md` and `AGENTS.md`.
 
-1. **One clone, one worktree root.** The canonical clone is `C:\Projects\Blurby`. Every checkout that holds governed work (any `eb/` branch, planning, sprint, close-out or preservation work) is a worktree of that clone at `C:\Projects\Blurby\.worktrees\<name>`, where `<name>` is the branch name without `eb/`.
+1. **One clone, one worktree root per machine.** The canonical clone is `C:\Projects\Blurby` on Rodney and `C:\Users\estra\Projects\Blurby` on RodneySr (`C:\Projects\bq-main` on RodneySr is retained test evidence, never a work clone). Every checkout that holds governed work (any `eb/` branch, planning, sprint, close-out or preservation work) is a worktree of that clone at `<clone>\.worktrees\<name>`, where `<name>` is the branch name without `eb/`.
 2. **Create:** `git -C C:/Projects/Blurby worktree add -b eb/<name> .worktrees/<name> origin/main` (or from the base the specification names).
 3. **Never** keep governed work in a tool-private folder (`~/.codex/worktrees`, `.claude/worktrees`, a temp or app-data folder) or in a separate clone. Those places are invisible to the other services and are lost when the tool cleans up.
 4. **Relocate, don't copy.** If a tool created its own worktree, move it before the first commit or handoff: `git worktree move <old-path> C:/Projects/Blurby/.worktrees/<name>`. If the move fails with "Permission denied", the owning app still holds a file: close it and retry. Never copy, re-clone, reset, stash or delete to relocate.
