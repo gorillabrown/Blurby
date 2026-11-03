@@ -301,8 +301,8 @@ describe("scan contract and wiring (BUG-195)", () => {
   it("(n) main.js wires the guard, the hook and the corrected toast", () => {
     const src = fs.readFileSync(new URL("../main.js", import.meta.url), "utf8");
     for (const text of [
-      'const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");',
-      "  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),",
+      'const { startWatcher, scanFolderAsync, rootHasContent, timeLimit } = require("./main/folder-watcher");', // + timeLimit (LARGE-FOLDER-SYNC-3)
+      "  scanFolderAsync, rootHasContent, statFile: (p) => timeLimit(fsPromises.stat(p)),", // bounded (LARGE-FOLDER-SYNC-3)
       "emitProgress: emitSyncProgress, reportFolderProblem,",
       "reason: folderNotice.get()",
       "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.",
