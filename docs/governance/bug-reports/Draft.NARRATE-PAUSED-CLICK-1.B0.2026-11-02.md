@@ -2,6 +2,8 @@
 
 Date: 2026-11-02. PLANNING ONLY / NOT READY / NO B0 ADMISSION. Brain alone coordinates execution. This draft does not create a source base/ref/worktree, resolve a conflict, publish source, install dependencies, run a test, launch a helper/app, or change the live register.
 
+Binding actual ruling: `Brain.NARRATE-PAUSED-CLICK-1.B0-contract.2026-11-02.md`, NARRATE-PAUSED-CLICK-1-B0-GIT-20261102. It settles source variant, standard Git mechanism, topology and LOCAL-ONLY disposition. This revision explicitly replaces the prior draft's mandatory merge-tree/write-tree inventory with standard staged merges in a fresh exclusive worktree. Do not run redundant merge-tree --write-tree, private-index plumbing or a new resolution framework. No old run resumes.
+
 ## Identity and supersession
 
 Existing sprint NARRATE-PAUSED-CLICK-1, Seq117. Read together:
@@ -16,7 +18,7 @@ The old three-build dispatch was withdrawn; cards were prepared/held, not eviden
 
 Produce a reviewed, immutable, local integration-base identity containing exactly the approved main + sentence-initials + gap-pause history and only the previously ruled conflict resolutions. Hand the exact commit/tree/resolution manifest and custody/input receipts to Brain for a separately admitted source wave. B0 is preparation, not the paused-click repair.
 
-Exact proposed input order, locally resolvable in this planning repository:
+Exact ruled input order, locally resolvable in this planning repository:
 
 1. main input `ac19ea60b6cd8b4fff3e5413b111925b7ef78485`.
 2. sentence-initials `c93f7c09186187b98ac6af83a7abce782e555517`.
@@ -32,22 +34,39 @@ Reported quiet-host facts, to re-read at consumed start: RODNEYSR; common Git di
 
 Brain must verify all three exact input objects and ancestry in that common repository, source/spec hashes, index/worktree/locks, relevant refs and existing writer/workload ownership. Preserve old gap/play-first worktrees and their performance dirt, bq-main's detached36ac7466, all stashes and RUN4 evidence. No broad scan, cleanup, reset, stash, pull, branch deletion or worktree pruning. Unexpected state/ownership returns to Brain.
 
-Pin the immutable published governance input containing the final B0 contract separately from source. Read its actual bytes; record commit/blob/SHA256 and destination. Transport acknowledgment alone is not consumed-input evidence. Receipt source identities and target absence again before any eventual base-ref publication; an absence check now is not a future overwrite permission.
+Pin the immutable published governance input containing the final B0 contract separately from source. Read its actual bytes; record commit/blob/SHA256 and destination. Transport acknowledgment alone is not consumed-input evidence. Receipt source identities and target absence again before local worktree/ref creation; an absence check now is not a future overwrite permission. Check exact remote refs and case variants as well as local refs/worktree registrations. Only a separately named existing-input fetch/readback is permitted if needed; never source publication or automatic pull/local-main update.
 
-## Proposed bounded Git-only sequence — requires Brain's exact operation admission
+## Ruled staged-merge sequence — requires fresh B0 admission
 
-1. **Inventory without checkout:** resolve input commits/trees and prescribed ancestry; obtain current source-object and ownership receipt. No dependency/runtime setup.
-2. **Merge-tree inventory:** mainac19 withc93 first; then the reviewed step1 integration with e349. Use bounded `git merge-tree --write-tree --name-only` inventory and read the conflict stages/diff. Although it avoids checkout, --write-tree writes Git objects; this draft does not call or pre-authorize it.
-3. **Allowed known resolutions only:**
-   - ModeRuntime import conflict: retain `import { logNarrateStartError } from "./helpers/logStartError";` and then `import { sentenceStartAt } from "./engine/chunkPlan";`.
-   - narrateEngine conflict: retain sentence branch's complete `wordAt()` doc/body; remove only the orphan `/** Paused in a gap: resume from the first chunk not yet started, at its trim. */` line; retain the BUG237 doc line attached to `nextScheduledPause()`.
-   - Docs-only BUG_REPORT conflicts: N-Q3 retains ac19 main's existing status lines **plus** branch-only new entries and resolution lines. Do not use the old blanket keep-main-docs rule to drop those sections.
-4. **STOP on drift:** any new source/test conflict, new doc family conflict, changed surrounding contract, ambiguous duplicate symbol, unexpected resolution hunk or unproved ancestry stops for Brain. Do not repair product behavior, adjust a test or widen the fence to make integration green. A clean auto-merge is not test/runtime acceptance.
-5. **Static manifest:** record merge-tree exit/stdout/stderr, exact intermediate/final tree IDs, complete input-parent identities, conflict files and exact before/after resolution hunks. Verify no conflict markers and each retained import/method/doc resolution. Inventory complete final changes relative to main and each parent; distinguish inherited stack changes from B0-authored resolution hunks. Preserve all external evidence.
-6. **Independent review:** standard Marcus specification-compliance pass first, Plato quality pass second, against the exact resolution manifest and staged Git objects. No tests, builds or app observations are requested in B0.
-7. **Base identity proposal, not a chosen technical mechanism:** create reviewed local integration commit(s) only after Brain pins the accepted commit topology/metadata/ref mechanism. Candidate work branch remains `eb/narrate-paused-click-1`; exact published/local base identity must be receipted before repair. Do not assert that a tree alone proves the intended merged ancestry.
+1. **Fresh exclusive checkout:** after the exact absence/case-variant/custody checks, from the common repository use `git worktree add -b eb/narrate-paused-click-1 C:/Projects/wt-narrate-paused-click-1 ac19ea60b6cd8b4fff3e5413b111925b7ef78485`. No -B/-f, detached old worktree, extra branch/tag/ref or local-main shortcut. Only this new worktree/index belongs to B0. No dependencies/runtime setup.
+2. **I1 staged merge:** inside only that new worktree, `git merge --no-ff --no-commit --no-edit c93f7c09186187b98ac6af83a7abce782e555517`. Record raw exit/output and `git ls-files -u`, every unmerged stage and actual conflict hunk before resolution. Expected exit1 reflects unmerged files, not permission to ignore another command failure. Actual first conflict is ONLY ModeRuntime imports; no ROADMAP/docs conflict. Retain both `import { logNarrateStartError } from "./helpers/logStartError";` then `import { sentenceStartAt } from "./engine/chunkPlan";`. Leave inherited auto-staged changes indexed; git add ONLY the resolved exact ModeRuntime path. Verify staged projection against historical intermediate7e8a4a9a128fdf56da18cf018927a3d5fa69c6a6 and preservation below. Standard Solon-role compliance FIRST, Plato quality SECOND on the exact staged tree/manifest, BEFORE commit. Then normal `git commit -m 'NARRATE-PAUSED-CLICK-1 B0: integrate sentence baseline'`. I1 must have ordered parents[ac19,c93]. Receipt actual configured author/committer identities/timestamps; no invented identity/backdating/signature/hook bypass.
+3. **I2 staged merge:** `git merge --no-ff --no-commit --no-edit e3498f602e440605cf15409c4f25e0dd5561790d`. Record actual unmerged stages/hunks first. Expected conflicts ONLY engine wordAt/doc-body and BUG_REPORT status; ModeRuntime auto-merges. Retain sentence branch's complete wordAt doc/body; remove only orphan `/** Paused in a gap: resume from the first chunk not yet started, at its trim. */`; retain BUG237 doc attached to nextScheduledPause. N-Q3 keeps ac19 main's existing status lines PLUS branch-only entries/resolutions. Stage ONLY resolved engine and BUG_REPORT paths. Verify complete nongovernance projection against40f74988b799605d4fcb264a3f8f5870a2aa300d and all3 final source pins below; explain remaining governance differences. A SECOND ordered Solon-role compliance -> Plato quality pair reviews exact final staged tree and cumulative I1+I2 manifest BEFORE normal `git commit -m 'NARRATE-PAUSED-CLICK-1 B0: integrate gap-pause baseline'`. I2 ordered parents[I1,e349]; branch pointsI2, initial repair base is exact I2.
+4. **New conflict/mismatch STOP:** any new source/test conflict, new doc family, unexpected hunk, unproved ancestry or projection mismatch preserves in-progress merge and reports to Brain. No merge abort/reset/cleanup or wholesale source checkout to force parity. At most2 repairs within an already ruled hunk and remaining cap; changed bytes require repeated ordered review before commit.
+5. **Return exact local checkpoint:** complete input/parent/tree/blob/raw-byte manifests, resolution hunks, both ordered review pairs and final refs/index/working-state/accounting. A clean merge is not behavioral acceptance. No tests/builds/helpers/runtime/app/probes/provider/terminal actions.
 
-The old amendment's push row does not automatically admit network publication in this fresh B0. Proposed default is retain reviewed base locally and return its exact identity to Brain; any source push, ref creation/update or worktree creation needs Brain's explicit B0 disposition and exact target/refspec. No main update or merge go is proposed. Parent must not label local Git-object creation as publication.
+Publication disposition is settled: LOCAL ONLY I1/I2, exact117 branch and new worktree under the future admission; NO push/network source publication/tag/main update. Later repair/checkpoint publication requires its own accepted pointer. On the same quiet common repository, exact local commit/tree/custody receipts satisfy transfer, never a false origin publication claim. Old amendment push wording is superseded for B0.
+
+## Projection and preservation acceptance
+
+Read-only planning comparison confirms oldmain88e82ba5 -> inputac19 changes exactly FIVE governance files:
+
+- ROADMAP.md
+- docs/planning/roadmap-reviews/2026-10-31-handoff-upcoming-work.md
+- docs/planning/specs/2026-10-30/FOCUS-WORD-ONLY-1.amendment.md
+- docs/planning/specs/2026-10-30/NARRATE-PAUSED-CLICK-1.amendment.md
+- docs/planning/specs/2026-10-30/PAGE-ENTRY-KEYS-1.amendment.md
+
+Preserve their exact ac19 blob/bytes in both stages. For I1, compare every remaining Git path/mode/blob to historical7e8a4a9a; for I2 compare every remaining path/mode/blob to40f74988, except only separately documented BUG_REPORT N-Q3 differences. This is a full nongovernance projection including source/tests/package/lock/config, not a3-file spot check. Governance-only differences outside the five and documented N-Q3 STOP. Never require old whole-tree IDs on new governance input.
+
+Final source pins read directly from historical40f74988 Git blob bytes during planning:
+
+| Path | Expected final Git blob | Expected SHA256 of Git blob bytes |
+|---|---|---|
+| src/reader/modes/narrate/ModeRuntime.ts | 261c725ef3af41683b4dd994247835fd2dd80373 | 37819f3d7f28e70e5c193fc0c8ec6c3be292cd894c4cd0171ef813fb94141c1a |
+| src/reader/modes/narrate/engine/narrateEngine.ts | 1848b7768c5f6723855c5ad1a7b8cdc486059706 | cce3c660e1ef8b7945864339b53375af9de80ba76ebd0ac550422e68c98cf130 |
+| tests/narrate/narrate.mode.test.ts | 76585ab3afc74c6cb95989122d7a7c1fd9ee5d33 | c6164c25c9c012b559183b9b32c99338856713ff050514e70b2b3adfe1d0af69 |
+
+Hash staged Git blob bytes separately from worktree raw bytes; configured line-ending conversion must not be silently normalized or confused with source identity. I1's full projection, not only these final I2 pins, must pass before its own review/commit.
 
 ## Source fence versus integration fence
 
@@ -61,11 +80,39 @@ Retain original base-preparation estimate10minutes as historical task sizing; pr
 
 Proposed external evidence root: `C:/Projects/Blurby-artifacts/narrate-paused-click-b0-20261102/`; require fresh target absence/custody. Record consumed admission/start, UTC deadline and aggregate calls in `logs/admission-accounting.jsonl`; UTF-8/raw bytes and exact hashes. No F-011 timing-helper writes, install, test, runtime/probe or source-branch publication by implication. At cap or failure, preserve all objects/receipts and report partial/STOP; no automatic retry/new allowance. No deletion of partial artifacts or existing dirty files.
 
-## Exact technical dispositions still needed from Brain
+##### Task list
 
-1. Confirm this exact three-input, no-PLAY-FIRST B0 variant and held-source dependency exception, preserving ns10 later integration ownership. No owner design question is involved.
-2. Name the permitted Git plumbing/resolution mechanism, intermediate/final commit topology and whether B0 stops at tree/manifests or may create the local base commit/ref. Do not let the executor invent commit ancestry or a synthetic parent graph.
-3. Specify whether to create the fresh117 worktree/ref during B0 or defer it, and whether any exact explicit source refspec publication is admitted. Local inventory alone grants neither.
-4. Supply a fresh bounded admission and consumed custody/input proof with actual quiet-host refs/objects/writers/locks and immutable governance bytes. Unresolved target drift or new conflict returns to Brain.
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Fresh exact input/custody/absence receipt and exclusive117 worktree | calculable | setup | bounded | low | 5m | — | — |
+| 2 | I1 staged merge, projection manifest, ordered compliance/quality and exact-parent commit | calculable | integration-merge | bounded | medium | 15m | — | — |
+| 3 | I2 staged merge, full parity/preservation, second ordered review pair and exact-parent commit | calculable | integration-merge | bounded | medium | 15m | — | — |
+| 4 | Local-only final identity/accounting/STOP checkpoint with all old work preserved | calculable | merge-and-docs | bounded | low | 5m | — | — |
+
+**Total:** mechanical chain10m · sum10m; 4 of4 rows priced from recorded history. Separate serial planner chain40m · sum40m remains provisional and uncalibrated as an elapsed-time forecast. Original historical base estimate10m remains separately recorded. Final byte-bound protected read-only U10 is required before Ready; <=60m/40aggregate-call prospective ceiling includes both review pairs and every worker/receipt. At40calls preserve partial I1 or in-progress merge and STOP; no automatic second allowance. Hard caps supersede any estimate.
+
+##### Lessons applied
+
+- LL-002: two narrowly named integration commits with exact ordered parents and no main/source push.
+- LL-063: fresh local quiet-host checkout; preserve old dirty/stashed work and defer publication under the explicit local-only ruling.
+- LL-068: complete staged tree/path/blob manifests and exact3source hashes detect unintended truncation; no build is admitted for this Git-only base task.
+- LL-128: prospective ref/worktree/artifact roots are checked absent, including case variants; no overwrite/reset shortcuts.
+- LL-137: Git blob bytes, worktree bytes and UTF-8 evidence remain explicitly distinct and hashed.
+- LL-090: read the actual current unmerged source hunks before applying each historical resolution; a familiar path is not evidence that its conflict is unchanged.
+- LL-098: preserve exact failed command output/status and partial merge/review artifacts before STOP; an unexpected Git error cannot be relabeled as an expected conflict exit.
+- LL-143 / standing rules44 and55: exact named-shell committed verification must retain base/prescribed/wrong-variant identities, output and exit evidence, including an observed detector FAIL before trusting PASS. Brain's bounded Git-state-only control mechanism is still pending; this draft admits no helper/test framework to fill that gap.
+- LL-172 plus standing rule41: exact owned source resolutions and external accounting only; no mutating timing/helper operation.
+- Standing rule36: actual input/source/ancestor identities and unmerged hunks are captured before resolution, never assumed from historical line numbers.
+- Standing rule42: exact committed ruling/draft and full reconciliation recipe accompany the input receipt.
+- Standing rule44: static checks name exact accepted exit/state expectations; merge exit1 is accepted only for the enumerated unmerged result, not a generic failure waiver.
+- Standing rule46: B0 writes no register/status/Seq/completion fields.
+- Standing rule50: retain ruled wordAt/nextScheduledPause contract and all branch-only N-Q3 records; no broad keep-main-docs shortcut.
+- Standing rules47/53: long execution stays on RodneySr; source-tree parity does not qualify native runtime/package/ARM64/owner acceptance.
+- LL-113/standing rule52: manifests/evidence stay externally outside test discovery; no copied test file or new fixture is committed here.
+- LL-174 considered not applicable: this base reconstruction changes no callback API; LL-169/173 behavior controls remain later repair requirements, not rerun here. LL-006/097 artifact principles apply to owned evidence persistence, not permission to replace Git's own index/object mechanisms. No app JSON data is written.
+
+## Remaining readiness facts, not new technical choices
+
+Source variant, topology/mechanism and local-only disposition are ruled. Still pending: actual fresh host refs/objects/locks/ownership/target-absence and full current input hashes, immutable reviewed pointer consumption, protected U9/U10, ordered independent pointer reviews and Brain's separately named B0 admission/consumed start. Do not ask Brain or the owner to decide those settled choices again. New source/doc conflicts or evidence mismatches alone reopen technical disposition.
 
 The source regression, dependency qualification, full verification, rule53 packages, scratch/profile proof, owner gate2, designated merge go and terminal close-out all remain later separately admitted work. No Ready or dispatch-start claim follows from authoring this draft.
