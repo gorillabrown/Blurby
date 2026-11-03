@@ -1,0 +1,9 @@
+# Desktop library harness investigation — independent review
+
+Prior audit29418bytes SHA256 `7076ce04913fa8bf48773366c5b66d00663c9fc36a68992c1d20ac259a370b11` received independent roadmap_stub_scope full-source compliance/quality WITH_CONCERNS: H01–H15 were source-backed proposals, but three paragraphs retained stale T1/T2/unconditional A/B language. All14 pinned historical harness files were read; no historical accepted receipt was invalidated.
+
+Author amended only those three paragraphs. Final audit SHA256 `ea43764b6bb334f0705fe542e14585a9cc442d5911dae67e614413e562433808` received compliance PASS consumed FIRST then quality PASS. Full unchanged source-review coverage retained; actual baea ruling now closes T1/T2. Conditional historical applicability means no new counterfactual/five-control replay when proved; fresh candidate nine routes plus distinct INITIAL visibility remain required. Failed proof stops for separate control specification. One cumulative landing/three item-specific findings+gos remain explicit.
+
+Root read the full final audit. H01–H15 proposed scopes, deadlines, control names and output/target/custody/oracle contracts remain technical proposals to Brain. This is NOT READY and grants no harness authoring, mock execution, dependency activation, native process capability, runtime, merge or completion. Actual runtime/ancestor/fixture/package evidence still needs exact qualification; no source-static observation supplies native acceptance.
+
+The separately reviewed future Q2 provenance clarification Memo.BLURBY-BUSINESS-1.Q2-source-provenance.2026-11-03.md SHA256 `cbd7ef115461e580697fd8bf30c31c04858844f0f36aaee9cf2883dafc7ee4da` received independent compliance PASS then quality PASS: source command field3015UTF8bytes SHA5aea... confirmed, Root-local planning container distinguished from quiet-file custody, active frozen packet/history/clock untouched. That is a future handoff clarification, not an additional active admission.
