@@ -7,7 +7,7 @@
 // through the thin router (useReaderModeOrchestrator). The shell renders exactly one active mode view,
 // keyed by session, and hands the runtimes infrastructure through the owner-checking port broker.
 import { useState, useCallback, useRef, useMemo, useEffect, type ComponentType } from "react";
-import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx } from "../utils/text";
+import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx, tocChapterStep } from "../utils/text";
 import {
   CROSS_BOOK_TRANSITION_FALLBACK_TIMEOUT_MS,
   DEFAULT_EINK_WPM_CEILING,
@@ -645,27 +645,6 @@ export default function ReaderContainer({
   }, [handlePauseToPage]);
 
   // Chapter navigation (explicit navigation of the canonical anchor in the active mode)
-  const handlePrevChapter = useCallback(() => {
-    const chs = docChapters.length > 0
-      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
-      : detectChapters(activeDoc.content, words);
-    if (chs.length < 2) return;
-    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
-    const targetIdx = curIdx > 0 ? chs[curIdx - 1].wordIndex : chs[0].wordIndex;
-    handleNavigateTo(targetIdx);
-  }, [activeDoc, docChapters, words, canonicalWordAnchor, handleNavigateTo]);
-
-  const handleNextChapter = useCallback(() => {
-    const chs = docChapters.length > 0
-      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
-      : detectChapters(activeDoc.content, words);
-    if (chs.length < 2) return;
-    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
-    if (curIdx < chs.length - 1) {
-      handleNavigateTo(chs[curIdx + 1].wordIndex);
-    }
-  }, [activeDoc, docChapters, words, canonicalWordAnchor, handleNavigateTo]);
-
   const handleJumpToChapter = useCallback((chapterIndex: number) => {
     hasEngagedRef.current = true;
     markPageActivity();
@@ -686,6 +665,31 @@ export default function ReaderContainer({
       handleNavigateTo(chs[chapterIndex].wordIndex);
     }
   }, [activeDoc, docChapters, words, useFoliate, markPageActivity, handleCommand, handleNavigateTo, hasEngagedRef]);
+
+  // JUMP-LANDING-SAVE-1: a foliate EPUB has no content to rebuild chapters from; its contents entries hold word
+  // indices, so a chapter step is a contents jump to the previous or next entry.
+  const handlePrevChapter = useCallback(() => {
+    if (useFoliate) { const t = tocChapterStep(docChapters, canonicalWordAnchor, -1); if (t >= 0) handleJumpToChapter(t); return; }
+    const chs = docChapters.length > 0
+      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
+      : detectChapters(activeDoc.content, words);
+    if (chs.length < 2) return;
+    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
+    const targetIdx = curIdx > 0 ? chs[curIdx - 1].wordIndex : chs[0].wordIndex;
+    handleNavigateTo(targetIdx);
+  }, [activeDoc, docChapters, words, canonicalWordAnchor, handleNavigateTo, useFoliate, handleJumpToChapter]);
+
+  const handleNextChapter = useCallback(() => {
+    if (useFoliate) { const t = tocChapterStep(docChapters, canonicalWordAnchor, 1); if (t >= 0) handleJumpToChapter(t); return; }
+    const chs = docChapters.length > 0
+      ? chaptersFromCharOffsets(activeDoc.content, docChapters)
+      : detectChapters(activeDoc.content, words);
+    if (chs.length < 2) return;
+    const curIdx = getCurChIdx(chs, canonicalWordAnchor);
+    if (curIdx < chs.length - 1) {
+      handleNavigateTo(chs[curIdx + 1].wordIndex);
+    }
+  }, [activeDoc, docChapters, words, canonicalWordAnchor, handleNavigateTo, useFoliate, handleJumpToChapter]);
 
   // ── Keyboard callbacks (each forwards to the active runtime through the router) ──
   // Page turns are owned by each mode's Foliate view (its own keydown); the shell records engagement.

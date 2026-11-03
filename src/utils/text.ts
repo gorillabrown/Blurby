@@ -265,6 +265,22 @@ export function currentChapterIndex(chapters: Chapter[], wordIndex: number): num
   return -1;
 }
 
+/**
+ * JUMP-LANDING-SAVE-1: the contents entry a Previous or Next chapter step goes to, for a foliate EPUB, whose entries'
+ * charOffset already holds a word index. The current entry is the last one whose charOffset is at or before
+ * wordIndex. Next gives the following entry, or -1 at the last one; Previous gives the entry before, or 0 at the
+ * first one (the legacy rule). With fewer than two entries there is no step: -1.
+ */
+export function tocChapterStep(chapters: ReadonlyArray<{ charOffset: number }>, wordIndex: number, dir: 1 | -1): number {
+  if (chapters.length < 2) return -1;
+  let current = -1;
+  for (let i = chapters.length - 1; i >= 0; i--) {
+    if (chapters[i].charOffset <= wordIndex) { current = i; break; }
+  }
+  if (dir === 1) return current < chapters.length - 1 ? current + 1 : -1;
+  return current > 0 ? current - 1 : 0;
+}
+
 /** Convert charOffset-based chapters (from EPUB TOC) to wordIndex-based chapters.
  *  Single-pass O(n) implementation — sorts offsets and scans content once. */
 export function chaptersFromCharOffsets(
