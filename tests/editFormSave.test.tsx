@@ -203,6 +203,11 @@ describe("the Edit form waits for its save (LIBRARY-WRITE-RACE-2)", () => {
   it("(ef5) a rejected content save keeps the form open with the typed title and text, and no toast", async () => {
     await renderLibrary();
     api.updateDoc.mockRejectedValue(new Error("boom"));
+    // APP-TABS-1: pasted text (manual, no ext) lives in Newsroom (owner ruling, Question 4), so open that tab first.
+    const newsroom = container.querySelector<HTMLButtonElement>('.app-tab-bar [role="tab"]#app-tab-newsroom');
+    expect(newsroom, "no Newsroom tab").not.toBeNull();
+    await act(async () => { newsroom!.click(); await flushPromises(); });
+    expect(newsroom!.getAttribute("aria-selected")).toBe("true");
     await openEdit("Manual");
     await act(async () => { type(titleInput(), "Typed"); type(contentInput(), "three four"); });
     await save();
