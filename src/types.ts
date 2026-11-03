@@ -137,7 +137,7 @@ export type ReaderMode = "page" | "focus" | "flow" | "narrate";
 export type ReaderLastMode = "focus" | "flow" | "narrate";
 
 export interface BlurbySettings {
-  schemaVersion: number;
+  schemaVersion?: number;
   wpm: number;
   /** OC-6: Focus's own WPM (additive, optional; absent → wpm). No migration. */
   focusWpm?: number;

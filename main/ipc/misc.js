@@ -14,6 +14,7 @@ const { COVER_CACHE_MAX, ARTICLE_IMAGE_TIMEOUT_MS, ARTICLE_IMAGE_MIN_SIZE } = re
 const { normalizeAuthor } = require("../author-normalize");
 const { imageMediaType } = require("../epub-converter");
 const { validateHttpHttpsUrl } = require("./url-validation");
+const { writeConversionResult } = require("../library-write");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -270,17 +271,19 @@ function register(ctx) {
         });
         await fsPromises.unlink(tempHtmlPath).catch(() => {});
 
-        newDoc.convertedEpubPath = convResult.epubPath;
-        newDoc.filepath = convResult.epubPath;
-        newDoc.ext = ".epub";
-        newDoc.originalSourceUrl = url;
-        // Remove inline content — EPUB is the canonical source
-        delete newDoc.content;
-
-        const docsAfterConv = ctx.getLibrary();
-        ctx.setLibrary(docsAfterConv.map((d) => (d.id === newDoc.id ? newDoc : d)));
-        ctx.saveLibrary();
-        ctx.broadcastLibrary();
+        // LIBRARY-WRITE-RACE-1: write to the live record (content removed: the EPUB is the canonical source); an
+        // article deleted during the conversion is not put back
+        const written = await writeConversionResult(ctx, docId, {
+          convertedEpubPath: convResult.epubPath,
+          filepath: convResult.epubPath,
+          ext: ".epub",
+          originalSourceUrl: url,
+          content: undefined,
+        }, convResult.epubPath);
+        if (written) {
+          ctx.saveLibrary();
+          ctx.broadcastLibrary();
+        }
       } catch (convErr) {
         logToFile(`URL EPUB conversion failed: ${convErr.message}`, ctx.getErrorLogPath());
         // Keep inline content as fallback — doc still readable via legacy path
@@ -415,11 +418,14 @@ function register(ctx) {
   ipcMain.handle("regenerate-ws-pairing-token", () => {
     const token = wsServer.generatePairingToken();
     const settings = ctx.getSettings();
-    settings._wsPairingToken = token;
+    // The stored form startServer reads (WS-TOKEN-REGEN-1); without safeStorage nothing is stored (never plaintext).
+    const stored = wsServer.encodePairingToken(token);
+    if (stored) settings._wsPairingToken = stored;
+    else delete settings._wsPairingToken;
     ctx.saveSettings();
-    // Restart server with new token
+    // Restart server with new token (passed through: without safeStorage it exists in memory only)
     wsServer.stopServer();
-    const { port } = wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx, { token });
     return { port };
   });
 
