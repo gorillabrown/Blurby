@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T16:48:09Z",
+  "takenAt": "2026-11-03T17:36:38Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3267,13 +3267,14 @@
     {
       "id": "BROWSER-EXT-FINALIZE-1",
       "title": "Finalize the Chrome and Firefox extensions",
-      "sequence": 142,
+      "sequence": 143,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
-        "APP-TABS-1"
+        "APP-TABS-1",
+        "BLURBY-SERVER-1"
       ],
       "effort": "L",
       "workstream": "Chrome Extension",
@@ -3284,9 +3285,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond).",
+      "description": "Save pages, selections and links to the Blurby account from Chrome and Firefox (owner design 2026-11-03): sign in from the extension; a pop-up on selected text prompts to save, and right-click saving stays; a Saved to your library notice opens the item in Blurby; desktop pairing stays as the fallback. Firefox port; listed on the Chrome Web Store and Firefox Add-ons. Saved articles land in Newsroom (APP-TABS-1). Supersedes the deferred Track B lane (EXT-ENR-C and beyond); reading inside the browser is out of scope.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "eb5a5f7858cfa0072978861a0db8d4d9b56fa3d4035cd0a09fdb3be946685008",
+      "revision": "026875ae5c37cb3b6d9fb54fcc72ce9bc452b9ee868383f45f26f5d13203d053",
       "extra": {
         "id": "3fa7c96c-c31e-810d-9027-c06d98a400e2",
         "url": "https://app.notion.com/3fa7c96cc31e810d9027c06d98a400e2",
@@ -4687,9 +4688,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md.",
+      "description": "Path: epic. Blurby on Android as a React Native app, distributed through Google Play open testing (owner 2026-11-03): all four reading modes (Page, Focus, Flow, Narrate), the synced library through BLURBY-SERVER-1 with offline books, Kokoro running on the phone with the exact word-table cursor behind a phone speed test (a failure returns to the owner), background playback, and an Android Auto media app from day 1 that browses books and starts, pauses and skips narration from the car screen. iOS, Apple CarPlay and server narration are out of scope. Supersedes the deferred Track C (APK-0 to APK-4) lane.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "9408bf362848947a70f2db5199837a83c463382dd3297e5a73d76e1c965f4e7d",
+      "revision": "4ca2a0ba5100353fdf2ff8fd3a65365ea7445daf235b9bdc25f0b85d988a3298",
       "extra": {
         "id": "3fa7c96c-c31e-81f6-9659-faedb3e2139f",
         "url": "https://app.notion.com/3fa7c96cc31e81f69659faedb3e2139f",
@@ -5289,13 +5290,13 @@
     {
       "id": "BLURBY-SERVER-1",
       "title": "One library on every device (blrby.app server)",
-      "sequence": 143,
+      "sequence": 142,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [],
-      "effort": "",
+      "effort": "XL",
       "workstream": "Platform & Maintenance",
       "deliverable": "",
       "group": "",
@@ -5304,9 +5305,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Path: epic. Server on Cloudflare (blrby.app): accounts, one library across devices, drag-and-drop intake, plan limits, then payments (no desktop ads) and Kokoro server narration. Charter draft: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md.",
+      "description": "Path: epic. Server on Cloudflare (`blrby.app`): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: `docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`; scope: `docs/planning/holding/2026-11-03-first-finish-line.md`.",
       "notes": "origin: held storyboard 2026-10-23-blurby-server (absorbed by roadmap review 2026-10-23-3)",
-      "revision": "44d8a200335d8a9ff0b60b02d8a1d7e5cb81791775d625bcb19efc01036cdcd4",
+      "revision": "3cb17f7f2345cae639309d4aef6e36a6917ab2f24ab5d03fe373a92cb9c724a5",
       "extra": {
         "id": "4027c96c-c31e-815a-a164-e4239b509875",
         "url": "https://app.notion.com/4027c96cc31e815aa164e4239b509875",
@@ -6160,14 +6161,13 @@
     },
     {
       "id": "CAR-AUDIO-1",
-      "title": "Android Auto and Apple CarPlay compatibility",
+      "title": "Apple CarPlay compatibility",
       "sequence": 155,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
-        "ANDROID-APP-1",
         "IOS-APP-1"
       ],
       "effort": "L",
@@ -6179,9 +6179,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Narrated books (and podcasts) play through Android Auto and Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates).",
+      "description": "Narrated books (and podcasts) play through Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates). Android Auto moved into ANDROID-APP-1 by owner direction 2026-11-03 (roadmap review 2026-11-03-2).",
       "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub; needs owner design decisions (what the car shows, on-phone Kokoro vs server streaming, CarPlay audio entitlement).",
-      "revision": "a204865ea54372fe5dd6e9731e0ddf85724fb03f5bfed570fd474ad914af70c1",
+      "revision": "2642a232e2d3a44410c412214c2a40f073a65ed8440843bed8ad73a61d5c08cf",
       "extra": {
         "id": "4037c96c-c31e-81f3-b58d-f02b3b626a3b",
         "url": "https://app.notion.com/4037c96cc31e81f3b58df02b3b626a3b",
@@ -7739,6 +7739,43 @@
         "date:Started:start": "",
         "date:Started:end": "",
         "date:Started:is_datetime": ""
+      }
+    },
+    {
+      "id": "BLURBY-SITE-1",
+      "title": "Blurby website with downloads",
+      "sequence": 142.5,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "L",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#blurby-site-1",
+      "branch": "eb/blurby-site-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "One landing page at `blrby.app` on Cloudflare Pages: the Windows download (x64 or ARM64, chosen automatically, from the latest GitHub release), Google Play open-testing, Chrome Web Store and Firefox Add-ons links, privacy policy and terms, and the sign-in pages the server needs. The Windows installer is signed with Azure Trusted Signing. The download may go live right after the Stage 8 Windows release; sign-in pages follow BLURBY-SERVER-1 phase 2, and each store link is added as its listing goes live.",
+      "notes": "origin: held plan 2026-11-03-first-finish-line (website draft stub; absorbed by roadmap review 2026-11-03-2). Stub; needs /write-plan before dispatch. Owner accounts needed: Azure Trusted Signing (identity validation), Cloudflare Pages.",
+      "revision": "e35d0127028ddde73062c3361d0872893c8645dde951d785f5625dffd5def74c",
+      "extra": {
+        "id": "40d7c96c-c31e-8120-9a43-f10f92bd2a8a",
+        "url": "https://app.notion.com/40d7c96cc31e81209a43f10f92bd2a8a",
+        "createdTime": "2026-11-03 17:36:00Z",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "0",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": "0"
       }
     }
   ],

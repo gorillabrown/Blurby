@@ -1,0 +1,36 @@
+{
+  "id": "20261103T173552Z-external-set-status-BLURBY-SERVER-1",
+  "operation": "external-set-status",
+  "item_id": "BLURBY-SERVER-1",
+  "created": "2026-11-03T17:35:52Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "effort": "XL",
+      "description": "Path: epic. Server on Cloudflare (`blrby.app`): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: `docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`; scope: `docs/planning/holding/2026-11-03-first-finish-line.md`.",
+      "sequence": 142
+    },
+    "expectedRevision": "44d8a200335d8a9ff0b60b02d8a1d7e5cb81791775d625bcb19efc01036cdcd4",
+    "idempotencyKey": "set-status:BLURBY-SERVER-1:[('description', 'Path: epic. Server on Cloudflare (`blrby.app`): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: `docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`; scope: `docs/planning/holding/2026-11-03-first-finish-line.md`.'), ('effort', 'XL'), ('sequence', 142)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLURBY-SERVER-1",
+      "idempotencyKey": "set-status:BLURBY-SERVER-1:[('description', 'Path: epic. Server on Cloudflare (`blrby.app`): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: `docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`; scope: `docs/planning/holding/2026-11-03-first-finish-line.md`.'), ('effort', 'XL'), ('sequence', 142)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T173552Z-external-set-status-BLURBY-SERVER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:36:24Z",
+  "outcome": "succeeded"
+}

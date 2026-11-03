@@ -1,0 +1,34 @@
+{
+  "id": "20261103T173555Z-external-set-status-ANDROID-APP-1",
+  "operation": "external-set-status",
+  "item_id": "ANDROID-APP-1",
+  "created": "2026-11-03T17:35:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Path: epic. Blurby on Android as a React Native app, distributed through Google Play open testing (owner 2026-11-03): all four reading modes (Page, Focus, Flow, Narrate), the synced library through BLURBY-SERVER-1 with offline books, Kokoro running on the phone with the exact word-table cursor behind a phone speed test (a failure returns to the owner), background playback, and an Android Auto media app from day 1 that browses books and starts, pauses and skips narration from the car screen. iOS, Apple CarPlay and server narration are out of scope. Supersedes the deferred Track C (APK-0 to APK-4) lane."
+    },
+    "expectedRevision": "9408bf362848947a70f2db5199837a83c463382dd3297e5a73d76e1c965f4e7d",
+    "idempotencyKey": "set-status:ANDROID-APP-1:[('description', 'Path: epic. Blurby on Android as a React Native app, distributed through Google Play open testing (owner 2026-11-03): all four reading modes (Page, Focus, Flow, Narrate), the synced library through BLURBY-SERVER-1 with offline books, Kokoro running on the phone with the exact word-table cursor behind a phone speed test (a failure returns to the owner), background playback, and an Android Auto media app from day 1 that browses books and starts, pauses and skips narration from the car screen. iOS, Apple CarPlay and server narration are out of scope. Supersedes the deferred Track C (APK-0 to APK-4) lane.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ANDROID-APP-1",
+      "idempotencyKey": "set-status:ANDROID-APP-1:[('description', 'Path: epic. Blurby on Android as a React Native app, distributed through Google Play open testing (owner 2026-11-03): all four reading modes (Page, Focus, Flow, Narrate), the synced library through BLURBY-SERVER-1 with offline books, Kokoro running on the phone with the exact word-table cursor behind a phone speed test (a failure returns to the owner), background playback, and an Android Auto media app from day 1 that browses books and starts, pauses and skips narration from the car screen. iOS, Apple CarPlay and server narration are out of scope. Supersedes the deferred Track C (APK-0 to APK-4) lane.')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T173555Z-external-set-status-ANDROID-APP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:36:27Z",
+  "outcome": "succeeded"
+}

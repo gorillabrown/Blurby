@@ -15,6 +15,7 @@
 | Date | State | By | Note |
 |---|---|---|---|
 | 2026-11-03 | storyboarded | storyboard | aligned; 4 items (server P1-2, website, extension, Android + Android Auto) |
+| 2026-11-03 | absorbed | roadmap-review | as BLURBY-SITE-1 (queued, stub); re-scoped BLURBY-SERVER-1 (Seq 142), BROWSER-EXT-FINALIZE-1 (Seq 143), ANDROID-APP-1 (Path: epic); CAR-AUDIO-1 narrowed to CarPlay |
 
 ## Storyboard
 
