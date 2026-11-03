@@ -10,13 +10,12 @@ const {
   EPUB_HEADING_MAX_LENGTH,
   EPUB_CHAPTER_CACHE_MAX,
 } = require("./constants");
-const { createEntryReader } = require("./zip-read");
+const { createEntryReader, openZip } = require("./zip-read");
 const { extractPdfText } = require("./pdf-text");
 
 // ── Lazy-loaded heavy modules (cached after first require) ─────────────────
-let _cheerio, _admZip;
+let _cheerio;
 function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
-function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
 
 // ── Image validation helpers ───────────────────────────────────────────────
 
@@ -357,8 +356,7 @@ async function extractContent(filepath) {
     if (ext === ".epub") {
       let zip;
       try {
-        const AdmZip = getAdmZip();
-        zip = new AdmZip(filepath);
+        zip = await openZip(filepath);
       } catch (err) {
         const msg = err.message || "";
         const userMessage = msg.toLowerCase().includes("invalid") || msg.toLowerCase().includes("zip")
@@ -367,7 +365,6 @@ async function extractContent(filepath) {
         console.error(`EPUB ZIP open failed for ${filepath}:`, msg);
         return { userError: userMessage };
       }
-      const AdmZip = getAdmZip();
       const cheerio = getCheerio();
       const entries = zip.getEntries();
       const readEntry = createEntryReader();
@@ -547,8 +544,7 @@ async function readFileContentAsync(filepath) {
 
 async function extractEpubCover(filepath, docId, dataPath) {
   try {
-    const AdmZip = getAdmZip();
-    const zip = new AdmZip(filepath);
+    const zip = await openZip(filepath);
     const entries = zip.getEntries();
     const readEntry = createEntryReader();
 
@@ -624,9 +620,8 @@ async function extractEpubCover(filepath, docId, dataPath) {
 
 async function extractEpubMetadata(filepath) {
   try {
-    const AdmZip = getAdmZip();
     const cheerio = getCheerio();
-    const zip = new AdmZip(filepath);
+    const zip = await openZip(filepath);
     const entries = zip.getEntries();
     const readEntry = createEntryReader();
 
