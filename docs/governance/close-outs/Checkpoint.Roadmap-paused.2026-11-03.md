@@ -43,3 +43,15 @@ No implementation, test, app/native runtime, source merge, release, cleanup, sta
 
 Brain's final scoped acceptance confirms all preservation commands terminal and no known owned preservation handle requiring action. The source backups above are machine-local on RODNEY and RODNEYSR; verified remote publication covers the planning documents only. This is not an off-machine source disaster-recovery attestation or a claim that unrelated owner connectivity work was stopped. The remaining source edits stay uncommitted/held with verified copies; this checkpoint is not product completion.
 
+
+## Handback to Claude — 2026-11-03
+
+**Routing change only. Project work remains paused; nothing is admitted.**
+
+The owner moved Blurby back from Codex to Claude. Effective now:
+
+- **Technical authority (rule 11):** Claude Blurby.Brain1 (Claude Code session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582`) replaces Codex Blurby.Brain (`01a179e8-7a40-75c0-93f4-d3045ad99027`) for new technical questions, coordination of executors and stop/preservation receipts. Codex Brain's written rulings from 2026-11-02 and 2026-11-03 remain inputs unless Brain1 supersedes them.
+- **Planning:** Claude Blurby.Roadmap owns planning, readiness and independent assessment.
+- **Resume pointers:** read `CLAUDE.md` (not `AGENTS.md`, which stays as the Codex companion file) and the Claude Virtuoso plugin cache (`~/.claude/plugins/cache/virtuoso-marketplace/virtuoso/`). ROADMAP.md's operative "Codex Blurby.Brain" routing lines and its readiness-rubric path now point to Claude.
+- **Planning branch:** unchanged location for now: worktree `C:/Users/estra/.codex/worktrees/blurby-roadmap-review-20261102/Blurby`, local ref `refs/heads/EB/roadmap-review-20261102` (case-folded; push with `git push origin HEAD:refs/heads/eb/roadmap-review-20261102`).
+- **Unchanged:** every gate, hold, backup and boundary listed above, including A, B-READ v2 and C-REVIEW-CLOSE NOT READY, Native PARTIAL / CAPABILITY HOLD / TESTS PENDING with its Codex executor chat archived, and no merge, release, status or Seq change. Historical records that name Codex stay as written.

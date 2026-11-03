@@ -1052,7 +1052,7 @@ LL-028/071/072/081 and LL-170 require actual source-occurrence/canonical authori
 - **Prerequisites:** completed NARRATE-REBUILD-1; WAIT for FLOW-PARA-PAUSE-INDEX-1, BLOCK-TAG-CASE-1, BLOCK-TEXT-ORDER-1 and NATIVE-PATH-ATTESTATION-1. Canonical live register controls status; a held source stack is not terminal prerequisite acceptance.
 - **Effort:** liveM retained; task difficulty high for numbering/migration, medium for measurement and verification. **Owners:** planner, implementation agent, independent spec/quality reviewers; Brain technical authority; owner retains product decisions. **Path:** dispatch.
 - **Source:** approved [Phase C plan](docs/planning/roadmap-reviews/2026-10-27-plan.md), exact Brain proposal/amendment/dependency/legacy/identity/observer/delivery rulings in the same registered review directory; [gate issue](docs/governance/bug-reports/Issue.WORD-INDEX-UNIFY-1.2026-10-27.md). [Archived prior specification and historical evidence](docs/planning/.Archive/ROADMAP.pre-word-native-review.2026-10-27.md#word-index-unify-1-spec) is superseded wherever it conflicts with this contract. The owner decision(b) is closed, not a renewed question.
-Readiness identifiers U1–U10 refer to the shared rubric v1.2 at `C:/Users/estra/.codex/plugins/cache/virtuoso-marketplace/virtuoso/1.16.1/references/readiness-rubric.md`: U3=precisely runnable tests/assertions, U4=mechanical acceptance commands, U7=verified source evidence/no deferred decisions. Lowercase u1–u8 below are test-case names, not rubric checks.
+Readiness identifiers U1–U10 refer to the shared rubric v1.2 at `C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.1/references/readiness-rubric.md`: U3=precisely runnable tests/assertions, U4=mechanical acceptance commands, U7=verified source evidence/no deferred decisions. Lowercase u1–u8 below are test-case names, not rubric checks.
 ##### Goal, baseline and source entry
 Historical input stack is f61ae02ddf16a023314369685d4dbfcab1ac9a36, carrying BLOCK61cbbf7e. Future source branch `eb/word-index-unify-1` must cut from an exact independently reviewed GROUP integrated tip carrying that stack and safely integrate current governing main; freeze/read back that actual base before source entry. No unreviewed GROUP approximation becomes a product baseline. Changed source pins/conflicts/integration behavior STOP for Brain, never silently rebase an acceptance oracle.
 The source edit fence is `src/utils/segmentWords.ts` FIRST, then CommonJS copy `main/word-segments.js`; `main/epub-word-extractor.js`, `main/word-numbering.js`, `main/constants.js`, `main/migrations.js`, `main.js`, `main/ipc/{library,tts,documents}.js`, `src/utils/loadDocResult.ts`; exact tests/probes below and approved census/schema/count-pin changes. No `src/types.ts`, ReaderContainer, FlowScrollEngine, sibling-runtime imports, shared mutable store, cloud merge, narration timing, cache redesign or new playback feature.
@@ -1221,7 +1221,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
      - Each record reads `d6class: "mainstream"` and `runtimeThreads` = T. The launcher's own exit code is recorded, not judged: T = 1 may exceed the budget, and the decision rule judges.
      - Afterwards `git status --porcelain -- docs/studies/narrate-rebuild-1/phase5` is empty, and the live-profile hashes are unchanged.
   5. **The decision rule** (`profileDecision`, applied to the five records):
-     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Codex Blurby.Brain.
+     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Blurby.Brain1.
      - **Admissible:** a config T in {3, 2, 1} is admissible when, at both rates and for every type, its worst counting trial is under 2,500 ms. It must also be at most the larger baseline worst plus the larger of the baselines' spread and 100 ms.
      - **CPU gain:** T has a gain when its median app CPU %, pooled over every counting warm trial at both rates, is at least 10 percentage points below the mean of the two baselines' medians.
      - **(A) Adapt:** some admissible config has a gain. The verdict is `adapt` to the admissible T with the lowest median app CPU (on a tie, the larger T), on hosts with fewer than 8 physical cores. The reference class keeps 4, because it was not swept here and its D6 row stays as measured.
@@ -1236,10 +1236,10 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 
      The five records and `cpu-profile.summary.json` sit beside it.
   7. **Follow-up by verdict:**
-     - **On A:** Blurby.Roadmap registers a stub, NARRATE-THREADS-ADAPT-1: on hosts with fewer than 8 physical cores, `getThreads()` (`main/narrate/producer.js:29-35`) returns the measured T, and D6 re-runs on both classes before it merges. New tier1 technical decisions route to Codex Blurby.Brain under rule11; prior Brain1 rulings remain inputs. Latency stays inside the owner's mainstream budget and the reference class is unchanged.
+     - **On A:** Blurby.Roadmap registers a stub, NARRATE-THREADS-ADAPT-1: on hosts with fewer than 8 physical cores, `getThreads()` (`main/narrate/producer.js:29-35`) returns the measured T, and D6 re-runs on both classes before it merges. New tier1 technical decisions route to Blurby.Brain1 under rule11; prior Brain1 and Codex Brain rulings remain inputs. Latency stays inside the owner's mainstream budget and the reference class is unchanged.
      - **On K:** the item closes with no follow-up.
 
-     Either way, the verdict line is quoted in the close-out; new technical questions go to Codex Blurby.Brain under current rule11.
+     Either way, the verdict line is quoted in the close-out; new technical questions go to Blurby.Brain1 under current rule11.
   8. **Tests and gates.**
      - `npx vitest run tests/narrate` exits 0.
      - `npx vitest list` collects exactly one more file than on NARRATE-HARNESS-COLDCLICK-1's tip (standing rule 52).
@@ -1254,7 +1254,7 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 - **Effort:** S–M (scripts S; the sweep is about 90 minutes of quiet-machine time).
 - **Owners:**
   - the implementation agent: Done-when 1–3 and 8–10;
-  - quiet-host implementation agent: Done-when 4 on RodneySr; Codex Blurby.Brain: the A or K technical ruling;
+  - quiet-host implementation agent: Done-when 4 on RodneySr; Blurby.Brain1: the A or K technical ruling;
   - spec-compliance reviewer first, then quality reviewer;
   - Blurby.Roadmap: the follow-up stub on A.
 - **Source:**
@@ -1295,7 +1295,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **Branch:** `eb/narrate-cpu-profile-1` from exactly `c90d9e08acfc356ca76941df063a0941ab488a94` for source waves A1-A4 (Brain1 CPU-2, Codex CPU-3); moved harness ref returns to planner. Pin this amended specification separately as an immutable input; the older base alone does not carry this amendment. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. No main merge here. At B0 only, merge current main once first if the candidate Narrate stack has landed, then freeze one measurement commit for all five settings. Merge after the harness, with fresh main reconciliation and the parent merge go.
 - **Staging plan:** explicit paths only (the fence list). `tests/perf-baseline-results.json`, `docs/studies/narrate-rebuild-1/phase5/recorded-output.json` and any `phase5/latency-e2e.json` stay unstaged. Records are moved into `cpu-profile/`, not copied.
 - **Failure handling:**
-  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Codex Blurby.Brain.
+  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Blurby.Brain1.
   - **Too few counting trials.** A cell under 20 counting trials after 40 cycles (foreign load) gives the same verdict as the launcher's: ask for a quiet window, re-run that configuration once, then stop.
   - **Silent producer.** A worker stall like Decision #21's (`state.md`, the P5 final-run blocker) shows as a trial over 2,500 ms in a baseline. That makes the sweep noisy under (N). It is reported with the producer log (`NARRATE_PRODUCER_LOG=1` on the re-run), not explained away.
   - **The `--cpu-by-process` loop.** Its own CPU is counted as foreign, as the existing sampler's is. If its cost pushes foreign CPU over 25 % in more than a quarter of trials, the sweep drops the flag, and the per-process split is reported as not measured.
@@ -1323,7 +1323,7 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **Standing rule 55 (loaded thread proof):** a configuration counts only when the loaded producer reports the thread count asked for (`runtime.threads`), read from state rather than inferred from the environment variable.
 - **LL-162:** not applied. This is a live timing profile, not a correctness gate over a corpus.
 - **Standing rule 43:** the red file goes first, with keep, adapt and noisy fixtures for the rule.
-- **Standing rules 47 and 48:** suite, typecheck and build on RodneySr; timed sweeps only by a separately admitted quiet-host executor, with Codex Blurby.Brain's technical ruling.
+- **Standing rules 47 and 48:** suite, typecheck and build on RodneySr; timed sweeps only by a separately admitted quiet-host executor, with Blurby.Brain1's technical ruling.
 - **Standing rule 52:** the records are `.json` and `.md` under `docs/`, and `npx vitest list` confirms one new collected file.
 - **Standing rule 53:** no `build.files` path changes, so the package is recorded as unchanged against NARRATE-HARNESS-COLDCLICK-1's verified package.
 - **Standing rule 36:** every cited line was grep-verified at `1937e999` and is re-grepped on the base branch at dispatch.
