@@ -43,6 +43,8 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
     props = {
       library: [], settings: { ...DEFAULT_SETTINGS, viewMode: "grid" },
       wpm: 400, isMac: false, folderName: "Owned fixtures", loadingContent: false, toast: null,
+      // APP-TABS-1: LibraryView shows only the active tab's items; the fixtures' folder EPUBs live in the Library.
+      activeTab: "library", onTabChange: vi.fn(),
       onOpenDoc: vi.fn(), onAddDoc: vi.fn(), onAddDocFromUrl: vi.fn(),
       onDeleteDoc: vi.fn(), onResetProgress: vi.fn(), onSelectFolder: vi.fn(),
       onSwitchFolder: vi.fn(), onSetWpm: vi.fn(), onSetFolderName: vi.fn(),
@@ -66,16 +68,22 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
   const cards = () => [...container.querySelectorAll<HTMLElement>("[data-doc-id]")];
   const ids = () => cards().map(el => el.dataset.docId!).sort();
   const card = (id: string) => container.querySelector<HTMLElement>(`[data-doc-id="${id}"]`);
+  // APP-TABS-1: the status and type filters live in the tab bar's filter menu (FilterMenu), one menu per tab.
   async function tab(label: string) {
-    const button = [...container.querySelectorAll<HTMLButtonElement>(".library-tabs-row button")]
-      .find(el => el.textContent?.toLowerCase().startsWith(label.toLowerCase()));
+    const menuButton = container.querySelector<HTMLButtonElement>('.app-tab-bar button[aria-label="Filter"]');
+    expect(menuButton, "missing real filter menu button").not.toBeNull();
+    if (!container.querySelector('[role="menu"][aria-label="Filter"]')) {
+      await act(async () => { menuButton!.click(); await flush(); });
+    }
+    const button = [...container.querySelectorAll<HTMLButtonElement>('[role="menu"] [role="menuitemradio"]')]
+      .find(el => el.textContent?.trim().toLowerCase() === label.toLowerCase());
     expect(button, `missing real ${label} filter`).toBeDefined();
     await act(async () => { button!.click(); await flush(); });
   }
   async function search(value: string) {
     if (!container.querySelector('input[aria-label="Search library"]')) {
       await act(async () => {
-        container.querySelector<HTMLButtonElement>('button[aria-label="Search library"]')!.click();
+        container.querySelector<HTMLButtonElement>('.app-tab-bar button[aria-label="Search"]')!.click();
         await flush();
       });
     }
@@ -153,7 +161,7 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
     await render(library, mode);
     await tab("new"); expect(ids()).toEqual(["article", "book", "pdf"]);
     await tab("favorites"); expect(ids()).toEqual(["book"]);
-    await tab("all (");
+    await tab("all");
     await tab("books"); expect(ids()).toEqual(["book", "old"]);
     await tab("articles"); expect(ids()).toEqual(["article"]);
     await tab("PDFs"); expect(ids()).toEqual(["pdf"]);
@@ -172,8 +180,27 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
     await tab("archived"); expect(ids()).toEqual(["transition"]);
     await render([doc("transition", { archived: false })], mode);
     expect(ids()).toEqual([]);
-    await tab("all ("); expect(ids()).toEqual(["transition"]);
+    await tab("all"); expect(ids()).toEqual(["transition"]);
     expect(props.onArchiveDoc).not.toHaveBeenCalled();
     expect(props.onUnarchiveDoc).not.toHaveBeenCalled();
+  });
+
+  it.each(modes)("(lv-tab) a completed Newsroom read stays once in Newsroom's All and only there (%s)", async mode => {
+    // APP-TABS-1 x LIBRARY-COMPLETION-VISIBILITY-1: pasted text (manual, no ext) and an explicit home both live in Newsroom.
+    const library = [doc("pasted", { source: "manual", ext: undefined }), doc("moved", { home: "newsroom" }),
+      doc("book", { position: 3 })];
+    const before = JSON.stringify(library);
+    props = { ...props, activeTab: "newsroom" };
+    await render(library, mode);
+    expect(ids()).toEqual(["moved", "pasted"]);
+    expect(new Set(ids()).size).toBe(2);
+    expect(card("pasted")?.closest('[role="list"]')?.previousElementSibling?.textContent).toBe("Reading Now");
+    expect(card("moved")?.closest('[role="list"]')?.previousElementSibling?.textContent).toBe("Reading Now");
+    await tab("archived"); expect(ids()).toEqual([]);
+    await tab("all"); expect(ids()).toEqual(["moved", "pasted"]);
+    expect(JSON.stringify(library)).toBe(before);
+    for (const callback of [props.onArchiveDoc, props.onUnarchiveDoc, props.onResetProgress, props.onOpenDoc]) {
+      expect(callback).not.toHaveBeenCalled();
+    }
   });
 });
