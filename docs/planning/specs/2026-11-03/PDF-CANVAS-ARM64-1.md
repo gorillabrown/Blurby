@@ -70,7 +70,7 @@ Isolation: vitest runs each file in its own context. Do not set or delete `globa
 
 ## Execution sequence
 
-T1 → T2 → T3 (T2 and T3 may run in parallel) → T4 → spec-compliance review → quality review → T5 → documentation pass → close-out. This is one wave, well under the tool budget.
+T1 → T2 → T3 (T2 and T3 may run in parallel) → T4 → spec-compliance review → quality review → T5 (D2, D3, D3b, D4) → documentation pass → close-out. This is one wave, well under the tool budget.
 
 ## Done when (SUCCESS CRITERIA)
 
@@ -93,6 +93,13 @@ T1 → T2 → T3 (T2 and T3 may run in parallel) → T4 → spec-compliance revi
   - the same extracted text on x64 and arm64.
 
   If `ELECTRON_RUN_AS_NODE` is refused by the packaged exe, stop and report it to Blurby.Brain1. Do not substitute a plain-Node run.
+- **D3b. In-app import, both architectures (Blurby.Brain1, 2026-11-03).** `main/pdf-text.js` loads the binding only when a PDF is parsed, so a plain launch proves nothing. Steps:
+  1. In each packaged build, on a scratch profile with the LL-165 profile proof, import the T2 fixture PDF through the app's own import path.
+  2. Check stdout, stderr and the profile's `error.log`. Each must have 0 lines matching `@napi-rs/canvas not available`.
+  3. Check that the imported doc's extracted text equals the fixture's text.
+  4. **Positive control:** the same import on an arm64 package built from `c5bb507f` on Rodney must show that line at least once. That proves the detector can see the failure.
+
+  Record the outputs of all four steps in the close-out.
 - **D4. Rule 53.** Build `--dir` for both architectures from the final commit and from `origin/main`. Then run a 25 s native-arm64 scratch-profile launch of the arm64 build on Rodney (the `launch25.mjs` pattern; LL-165), with no error or crash. Check the asar contents against `origin/main`'s: the only difference is the canvas package set. Write a "Package verification" section in the close-out, and get Blurby.Brain1's package confirmation before the merge go.
 - **D5. Suite.** `npm test` is green, at least 2,452 passed plus the new test, 0 failed, run on RodneySr. `npm run typecheck` exits 0. `npm run build` exits 0. The existing PDF tests (`tests/pdfLoadDocContent.test.js`, `tests/pdf-export.test.js` and the `ensurePdfGlobals` case in `tests/epub-converter.test.js`) all pass.
 - **D6. Runbook.** The three edits in T3 are present. The x64 and arm64 native checks fail when a package lacks its canvas binding. Prove this by running each check's `if` expression against a list with that line removed, and quote the output in the close-out.
