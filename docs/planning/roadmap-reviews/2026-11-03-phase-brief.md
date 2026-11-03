@@ -25,11 +25,9 @@ NARRATE-CPU-PROFILE-1 (Seq 95, In Flight, U9 PASS) resumes its remaining Wave A 
 
 **Implementation highlights:** each item builds and holds on RodneySr in the clone's `.worktrees\<name>`, then gets its own rule 53 pair, Brain1's package confirmation and Blurby.Roadmap's merge go. Owner smoke checks are batched into gate (2).
 
-**Parallelism (Brain1 serializes):**
-- LWR-3 may run beside NAP-1.
-- PAGE-ENTRY and FOCUS share no files with PAUSED-CLICK and may run beside it.
-- NAP-1 then PAUSED-CLICK run in sequence, because both edit Narrate runtime.
-- `src/types.ts` work (LWR-3) is serialized by Brain1 after the RC window closes.
+**Serialization (Brain1 ruling, 2026-11-03; supersedes the parallelism notes this brief carried before):**
+- After the RC merge, the five items run **one at a time** on RodneySr, in Seq order: LWR-3, NAP-1, PAUSED-CLICK, PAGE-ENTRY, FOCUS-RC.
+- They have no file conflicts with one another. The reason is the gates: every item gates on timing-sensitive suites and on a rule 53 launch on a 4-core host, and parallel runs would skew both.
 
 ## Prerequisites into and out of the buffer
 
