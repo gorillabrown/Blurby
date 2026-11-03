@@ -1,4 +1,4 @@
-#### DROPDOWN-DISMISS-1 — Every dropdown closes on an outside click, Escape or a click into the book, without changing its selection *(Seq 133; draft Full Spec, 2026-11-03, cited against RC tip `70d64237`; UX polish; proposed P2)*
+#### DROPDOWN-DISMISS-1 — Every dropdown closes on an outside click, Escape or a click into the book, without changing its selection *(Seq 133; Full Spec, 2026-11-03, cited against RC tip `70d64237`; UX polish; proposed P2)*
 
 - **What:**
   - The Folder menu (`RecentFolders`) closes on a mouse press outside it, on Escape, and when the window loses focus. It changes no folder.

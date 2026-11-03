@@ -1,4 +1,4 @@
-#### TRAY-ICON-SIZE-1 — The Windows tray icon fills its slot instead of rendering as a dot *(Seq 137; draft Full Spec, 2026-11-03, cited against RC tip `70d64237`; Platform & Maintenance; proposed P3)*
+#### TRAY-ICON-SIZE-1 — The Windows tray icon fills its slot instead of rendering as a dot *(Seq 137; Full Spec, 2026-11-03, cited against RC tip `70d64237`; Platform & Maintenance; proposed P3)*
 
 - **What:** `createTray` stops handing Electron the raw 1024×1024 PNG path. It builds the tray image from a tight square crop of the same artwork, with one representation per display scale (16 DIP at 1×, 1.25×, 1.5× and 2×), and passes that image to `new Tray(...)`. Menu, tooltip and click behaviour are unchanged.
 - **Out of scope:**

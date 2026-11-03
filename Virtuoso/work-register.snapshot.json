@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T18:33:00Z",
+  "takenAt": "2026-11-03T18:35:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -6625,8 +6625,8 @@
       "sequence": 125,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "EINK-CONTROLS-1"
       ],
@@ -6634,14 +6634,14 @@
       "workstream": "Platform & Maintenance",
       "deliverable": "Classify device-local settings and exclude them from cross-device upload/apply. Clean-profile default is off; explicit on survives local restarts; computer/phone settings do not override the E-ink device. Preserve migration and existing choices.",
       "group": "",
-      "spec_link": "ROADMAP.md#eink-device-settings-1",
+      "spec_link": "docs/planning/specs/2026-11-03/EINK-DEVICE-SETTINGS-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "An unconfigured device should start in regular mode; an explicitly configured E-ink device remembers E-ink. The tested upgrade inherited einkMode=true; source defaults are already false.",
       "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R2, R9. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
-      "revision": "9b58b58831eb264cfac7f888a8af85b9fc802134c22966ebeb8cd7f5bf1fc42d",
+      "revision": "d4f618fbc3758f7f68fa9c46473a9bbaf83cce5f41ceeed7375282514da69b4b",
       "extra": {
         "id": "4057c96c-c31e-8151-97ae-f3090001e3e4",
         "url": "https://app.notion.com/4057c96cc31e815197aef3090001e3e4",
@@ -6780,8 +6780,8 @@
       "sequence": 115,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "READER-ARROW-GUARD-1",
         "BLOCK-TAG-CASE-1"
@@ -6790,14 +6790,14 @@
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "Reader Polish",
-      "spec_link": "ROADMAP.md#page-para-keys-1",
+      "spec_link": "docs/planning/specs/2026-11-03/PAGE-PARA-KEYS-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "BUG-220: in Page, Shift+right moves the highlight from 187 to -1 and Shift+left to 0; probably the paragraph command's slice index.",
       "notes": "origin: Blurby.Brain finding during package verification, filed by roadmap review 2026-10-25. Stub; needs a trace on the held key-fix stack. Not a release gate.",
-      "revision": "83799099145857480783872223569f6b9d165003c6d7af82cbb275b7a6f43a15",
+      "revision": "f88e897cfb4716b2d940671eefab251eb15665d51e06a0b73f3e1507888e7f5b",
       "extra": {
         "id": "4057c96c-c31e-815d-bb12-fd8623475643",
         "url": "https://app.notion.com/4057c96cc31e815dbb12fd8623475643",
@@ -6900,8 +6900,8 @@
       "sequence": 128,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "BAND-ALIGN-2",
         "EINK-CONTROLS-1"
@@ -6910,14 +6910,14 @@
       "workstream": "Reader Engine",
       "deliverable": "Flow-owned implementation: correct word tracking throughout a stationary viewport, one advance at the bottom boundary, defined browse/clamp/chapter behavior, and regular-mode behavior unchanged. No Narrate-runtime dependency.",
       "group": "",
-      "spec_link": "ROADMAP.md#eink-flow-viewport-1",
+      "spec_link": "docs/planning/specs/2026-11-03/EINK-FLOW-VIEWPORT-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "In E-ink, keep Flow's viewport stationary until its reading position reaches the bottom, then advance. Compare the held BAND-ALIGN-2 Flow stepping before prescribing residual work.",
       "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R7. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
-      "revision": "284bd8b895b7819e9cc867f2ef7448041210f88331930896d0dbef0974bd20d3",
+      "revision": "f36b4b8164e68cbd150d5cc02174fbd858748b86ba938d4c2b4669a3a706790b",
       "extra": {
         "id": "4057c96c-c31e-818f-826c-ed498ff8659b",
         "url": "https://app.notion.com/4057c96cc31e818f826ced498ff8659b",

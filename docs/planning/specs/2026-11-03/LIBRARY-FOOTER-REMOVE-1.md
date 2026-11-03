@@ -1,4 +1,4 @@
-#### LIBRARY-FOOTER-REMOVE-1 — Start-at-login, Backup and Restore move to Settings; the library footer is removed *(Seq 136; draft Full Spec, 2026-11-03, cited against RC tip `70d64237`; UX polish; proposed P3)*
+#### LIBRARY-FOOTER-REMOVE-1 — Start-at-login, Backup and Restore move to Settings; the library footer is removed *(Seq 136; Full Spec, 2026-11-03, cited against RC tip `70d64237`; UX polish; proposed P3)*
 
 - **What:** Add a Settings sub-page, **Startup & Backup** (`startup-backup`), holding the existing "Start at login" switch and the existing Backup and Restore actions, unchanged in behaviour. Then delete the library footer (`.library-footer`): the speed/WPM slider, the start-at-login checkbox, the backup/restore buttons and the "change folder" button.
 - **Out of scope:** any change to the IPC channels (`get/set-launch-at-login`, `export-library`, `import-library`), to `main/`, `preload.js` or `src/types.ts`; the reader's own WPM controls; the Folder menu; LIBRARY-SETTINGS-FIX-1 (completed, unrelated); converting `alert()` result messages to toasts.
