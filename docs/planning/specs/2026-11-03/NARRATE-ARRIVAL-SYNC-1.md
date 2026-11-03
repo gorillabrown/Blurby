@@ -23,7 +23,7 @@
      - the frame that `queuePostModeAnchorSync` schedules (`:808-…`);
      - `adoptDocument` (`:242-…`), when `bookWords` with sections arrives.
   3. `startAtFirstText` (`:756-…`) returns `false` while an arrival sync is owed or in flight. The play-first-text rule never judges a view that has not yet been moved.
-  4. `arrivalSyncOwed` is cleared by every user intent: a click or selection, the keys, a contents jump, Play started by the user, and `navigateTo`. `destroy()` (`:387-…`) also clears it.
+  4. `arrivalSyncOwed` is cleared by every user intent: a click or selection, the keys, a contents jump and `navigateTo`, immediately. `destroy()` (`:387-…`) also clears it. **Amendment 1 (c):** a Play started by the user clears it only once a start actually begins, and in `adoptDocument`, `settleArrivalSync` runs before the pending start re-runs.
   5. `pendingFirstText`'s existing clears (`:252`, `:275`, `:338`, `:368`, `:395`, `:448`, `:486`, `:500`) are unchanged.
   6. No sibling-mode import, and no edit to `useModeBindings.ts`, FoliateView, `ReaderContainer.tsx`, `src/types.ts` or `FlowScrollEngine.ts`.
 
@@ -47,12 +47,16 @@
      Each arrives from Page at a saved word, with the cover still shown, then presses Play. Record every result in the memo.
      - **If the Focus or Flow row is RED:** STOP to Blurby.Brain1 with the trace before editing that runtime. Mode isolation makes each runtime's fix its own scope decision.
      - **If both are GREEN:** they stay as regression rows. Focus's row is also input to FOCUS-PAUSED-HANDOFF-1's Wave A.
+     - **Settled (amendments 1 and 2):** both rows were RED with the fake view, and packaged probes on `c5bb507f` showed Focus and Flow open at the saved section. That makes it a fixture artifact. Correct fo-sp1 and fl-sp1 to open the fake view at the saved section (`focus/FoliateView.tsx:992-1003`, `flow :1102-1113`). They become GREEN regression rows with no runtime edit, and no `it.fails` remains at the final tip. The cover-start variants are memo findings.
+     - **Row sp6 (amendment 1):** arrival with the map pending, then Play, then a click before the map arrives. The start is the clicked word's sentence.
   2. **The change** as above. `tests/narrate/narrate.playFirstText.test.ts` rows n1–n9 and nc1–nc5 are green and **unedited** (standing rule 50).
   3. `npx vitest run tests/narrate tests/readerModes tests/readerModeIsolation.test.ts` exits 0. Then `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47 and 48). Record the counts.
   4. **Packaged probe**, on RodneySr's `--dir` package of the tip, with a scratch profile proved before the first input (LL-165):
      - open *Meditations* in Page at 8723, switch to Narrate, press Play;
      - the first request word is in 8723's sentence, with no play-first-text navigation.
   5. **Control:** the same probe on `c5bb507f` starts at section 1's first word. This is the base RED, recorded.
+     - **Amendment 2:** the clean recipe (8723 seeded with no cfi) does not reproduce run 5's cover start on the base. Steps 4 and 5 therefore use run 5's exact recipe on base and tip (LL-152). Each run records the saved cfi and position, the resolved `initialCfi` and the section shown on arrival.
+     - **Amendment 3:** the memo lists every production caller that writes a word index without a matching cfi. The stale-cfi defect it found (R2, confirmed live) is out of this item's scope. It is CFI-POSITION-CONSISTENCY-1 (Seq 97.5). If no production caller explains run 5's cover, the Narrate fix stands as a defensive arrival rule.
   6. **Rule 53 pair on RodneySr:**
      - the tip's package plus `origin/main`'s;
      - a 25 s scratch-profile launch with no error;
@@ -75,6 +79,18 @@
   - Blurby.Roadmap gives the merge go and closes it out.
 - **Merge order:** first among post-RC items. CHAPTER-STEP-CFI-1 (amendment 1, 2a′ and (cl9)) re-greps after it, because both edit Narrate's `go-to-href` path.
 - **Path:** dispatch (hotfix).
+
+##### Amendments (Blurby.Brain1, 2026-11-03, during execution on RodneySr)
+
+Source: `Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`, sections "Amendment 1" to "Amendment 3". They are folded into item 4 and Done-when 1 and 5 above.
+- **Amendment 1** came after the red-first STOP (`77b93dcb`). It adds the Play-clears-on-start refinement and row sp6, and allows a temporary `it.fails` for the Focus and Flow rows, none of which may remain at the tip.
+- **Amendment 2** came from the packaged probes. Focus and Flow were a fixture artifact, so there is no runtime edit there. Steps 4 and 5 use run 5's exact recipe. The pre-map click clamp (clicked 15 → 9) is a finding (Findings F-015).
+- **Amendment 3** came from the stale-cfi audit. It is out of scope here, and registered as CFI-POSITION-CONSISTENCY-1.
+- **Progress recorded by Brain1:**
+  - Narrate fix and sp6 at `98ce1e84`; trial.js hardening at `9c491553`.
+  - `npm test`: 3,044 passed, 2 expected-fail (temporary), 1 skipped. Typecheck exits 0.
+  - Not yet built or pushed at the time of the amendment.
+- **The fence (Done-when 8) is unchanged.** The corrected Focus and Flow rows stay in their two added test files.
 
 ##### Lessons applied
 - **LL-142:** the order is measured on the control, and the base RED is recorded, before the fix is trusted.

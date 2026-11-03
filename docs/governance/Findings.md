@@ -265,3 +265,17 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner; raise with the owner only if a later item needs the timing to change.
 
 **Disposition:** open; no item
+
+### F-015 — A Narrate click before the section map arrives is clamped to an earlier word (NARRATE-ARRIVAL-SYNC-1 sp6, 2026-11-03)
+
+**Source:** Blurby.Brain1, NARRATE-ARRIVAL-SYNC-1 amendment 2 (`Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`), from RodneySr's row sp6.
+
+**Severity:** low (a unit-row observation; not yet seen in a packaged run)
+
+**Where:** `src/reader/modes/narrate/ModeRuntime.ts`, the click path while `bookWords` has no section map yet
+
+**Finding:** in sp6 (arrival with the map pending, then Play, then a click before the map arrives), the clicked word 15 was clamped to 9. The start still honours the clicked anchor's sentence as ruled, but the clamp means a pre-map click can resolve to a different word than the one clicked.
+
+**Accountable role / next action:** planner. Read NARRATE-ARRIVAL-SYNC-1's memo for the clamp's source line once it is pushed. Then either specify a Reader Engine item or close the finding as the intended sentence-start rule.
+
+**Disposition:** open

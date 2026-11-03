@@ -1,0 +1,50 @@
+{
+  "id": "20261103T235603Z-external-create-item-UNCERTIFIED-ANCHOR-HOLD-1",
+  "operation": "external-create-item",
+  "item_id": "UNCERTIFIED-ANCHOR-HOLD-1",
+  "created": "2026-11-03T23:56:03Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "UNCERTIFIED-ANCHOR-HOLD-1",
+      "title": "Flow, Focus and Narrate never save or start from an unverified first visible word",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#uncertified-anchor-hold-1",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "description": "Completes the owner's OQ4 ruling for anchors: in a section whose spans BLOCK-TEXT-ORDER-1 could not certify, the first-visible-word paths (soft and relocate anchor saves, and Play from the first visible word) in Flow, Focus and Narrate save the cfi only, or start from canonical words, instead of trusting a span index. One commit per mode, inside each mode's ownership window.",
+      "notes": "origin: Blurby.Brain1 ruling Q2 on BLOCK-TEXT-ORDER-1 Wave B, 2026-11-03 (Brain1.held-items-TQ.2026-11-03.md). Sequenced directly after BLOCK-TEXT-ORDER-1. Stub; spec to follow.",
+      "sequence": 87.75
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T23:37:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UNCERTIFIED-ANCHOR-HOLD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "UNCERTIFIED-ANCHOR-HOLD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UNCERTIFIED-ANCHOR-HOLD-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T235603Z-external-create-item-UNCERTIFIED-ANCHOR-HOLD-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-81db-852d-c590c1226444",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T23:56:26Z",
+  "outcome": "succeeded"
+}
