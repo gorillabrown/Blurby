@@ -737,12 +737,17 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
         bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: 160 }],
         getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined),
       });
-      await settle();
-      await settle();
-      const spans = Array.from(doc.querySelectorAll("[data-word-index]")) as HTMLElement[];
-      expect(spans).toHaveLength(160);
-      expect(spans.map((s) => [s.textContent, Number(s.getAttribute("data-word-index"))]))
-        .toEqual(words.map((w, i) => [w, 20 + i]));
+      // Two wraps of 160 block groups run back to back (the load's, then the re-stamp's), each yielding every
+      // WRAP_BATCH_SIZE (50) groups. Wait for the end state itself, not a fixed sleep: under a loaded full suite a
+      // 50-group batch can outlast settle()'s 50 ms, and the re-stamp is then caught mid-wrap (100 of 160 spans).
+      await act(async () => {
+        await vi.waitFor(() => {
+          const spans = Array.from(doc.querySelectorAll("[data-word-index]")) as HTMLElement[];
+          expect(spans).toHaveLength(160);
+          expect(spans.map((s) => [s.textContent, Number(s.getAttribute("data-word-index"))]))
+            .toEqual(words.map((w, i) => [w, 20 + i]));
+        }, { timeout: 5000, interval: 20 });
+      });
     });
 
     // (pc1) a word click after the word count is known to have failed still saves its cfi.
