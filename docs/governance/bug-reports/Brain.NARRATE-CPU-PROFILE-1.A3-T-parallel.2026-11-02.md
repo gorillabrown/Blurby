@@ -1,0 +1,5 @@
+# CPU T — disjoint runner authoring
+
+Actual Brain send-message tool argument `exec-d991d127-a7ea-40f0-8cb6-3a6996837b81`, read completely. Verbatim prospective scheduling clarification follows; no admission or cap increase.
+
+Apply the owner's parallel-work instruction prospectively inside T-CONTROL-AUTHOR: the three independent runner files may be authored concurrently by doers with disjoint exact ownership (transport-import.controls.mjs; transport.controls.mjs; publication.controls.mjs), sharing only the frozen written contract/template/P source. Each worker must know others are present and must not revert/edit their files. Serial command/control execution remains one global test slot; then same-byte compliance/quality reviews concurrent. All worker calls fit the same45m/40 aggregate cap; parallelism is not extra allowance or a reduced control set. Do NOT split same helper source among competing editors in T-FULL. IC-T's single test file remains one writer while independent planning/reviews/other-lane read-only work run alongside it. This is scheduling clarification within alreadyapproved prospective fences, no new phase admission.
