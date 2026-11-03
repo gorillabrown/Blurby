@@ -35,4 +35,4 @@
 | 29 | 〃 | Which copy is preselected | The one with the most reading progress |
 | 30 | Library footer removal (LIBRARY-FOOTER-REMOVE-1, 136; already Full Spec) | Name of the new Settings page | "Startup & Backup" (rename any time without reopening the item) |
 
-**Owner answers:** *(to be recorded here verbatim, with the date)*
+**Owner answers (2026-11-03, to Blurby.Roadmap):** "Approve all (Recommended)". All 30 recommended answers above are the owner's rulings. #23 (repro steps) received no steps: FOCUS-PAUSED-HANDOFF-1 keeps its diagnosis-first route without them.
