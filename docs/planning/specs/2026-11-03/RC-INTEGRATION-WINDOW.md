@@ -1,6 +1,6 @@
-# RC integration window — one integrated desktop release candidate (DRAFT, pending Brain1 rulings)
+# RC integration window — one integrated desktop release candidate
 
-**Status: draft, NOT READY.** Open rulings (merge-train packet `docs/planning/roadmap-reviews/2026-11-03-rc-merge-train.md`, questions 1–5) are marked ⟨R1⟩–⟨R5⟩. This is the integration window CLAUDE.md requires for shared-core edits by several items; it is not a new register item. The register items it carries stay In Flight until their own close-outs.
+**Status: specification complete; rulings R1–R5 accepted by Brain1 on 2026-11-03 (merge-train packet `docs/planning/roadmap-reviews/2026-11-03-rc-merge-train.md`, questions 1–5, marked ⟨R1⟩–⟨R5⟩ below). R1: one integration branch in four waves, one package pair, one merge to main.** This is the integration window CLAUDE.md requires for shared-core edits by several items; it is not a new register item. The register items it carries stay In Flight until their own close-outs.
 
 ## Goal
 
@@ -55,10 +55,17 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 
 ## Conflict resolutions
 
-- **⟨R2⟩ ERROR-LOG-CAP-1 into LIBRARY-WRITE-RACE-2 (proposed, awaiting Brain1).** In both `main/ipc/library.js` and `main/ipc/misc.js`, the conflict is only the import block. Keep LIBRARY-WRITE-RACE-2's `require("../library-write")` line exactly as it is (`{ writeConversionResult, setEditedField }` in library.js, `{ writeConversionResult }` in misc.js). Add ERROR-LOG-CAP-1's `const { logToFile } = require("../error-log");`. Delete the local `async function logToFile(message, errorLogPath)`. `main/error-log.js` exports `logToFile(message, errorLogPath, maxBytes = ERROR_LOG_MAX_BYTES)`, so every existing two-argument call keeps working, now with the cap. Check: `git grep -n "async function logToFile" -- main/ipc` returns nothing.
+- **⟨R2⟩ ERROR-LOG-CAP-1 into LIBRARY-WRITE-RACE-2 (RULED by Brain1, 2026-11-03; Brain1 added the single-copy check).** In both `main/ipc/library.js` and `main/ipc/misc.js`, the conflict is only the import block. Keep LIBRARY-WRITE-RACE-2's `require("../library-write")` line exactly as it is (`{ writeConversionResult, setEditedField }` in library.js, `{ writeConversionResult }` in misc.js). Add ERROR-LOG-CAP-1's `const { logToFile } = require("../error-log");`. Delete the local `async function logToFile(message, errorLogPath)`. `main/error-log.js` exports `logToFile(message, errorLogPath, maxBytes = ERROR_LOG_MAX_BYTES)`, so every existing two-argument call keeps working, now with the cap. Check: `git grep -n "async function logToFile" -- main/ipc` returns nothing.
 - **⟨R3⟩ Narrate stack (RULED by Brain1, 2026-11-03).** Resolve SENTENCE-INITIALS-1 (12) and GAP-PAUSE-1 (13) by reusing the 2026-10-31 resolved integration, tree `40f74988`. Never use an automatic `-X ours` or `-X theirs`. After wave B, `git rev-parse HEAD:src/reader/modes/narrate/ModeRuntime.ts` must equal `261c725ef3af41683b4dd994247835fd2dd80373` and `git rev-parse HEAD:src/reader/modes/narrate/engine/narrateEngine.ts` must equal `1848b7768c5f6723855c5ad1a7b8cdc486059706`. Any difference is a STOP returned to Brain1. PLAY-FIRST-TEXT-1 (17) then merges cleanly apart from `BUG_REPORT.md`.
-- **⟨R4⟩ EINK-CONTROLS-1 after BAND-ALIGN-2 (proposed, awaiting Brain1).** In `main/migrations.js`, keep BAND-ALIGN-2's v13 → v14 entry unchanged. Append EINK-CONTROLS-1's migration as the next entry, commented `// v14 → v15: EINK-CONTROLS-1 — …`, with `data.schemaVersion = 15`, and set `CURRENT_SETTINGS_SCHEMA = 15`. In `tests/settingsMigrationV13.test.js` and `tests/settingsNarrateNormalization.test.js`, keep BAND-ALIGN-2's v13 → v14 comment and add a line saying EINK-CONTROLS-1 added v14 → v15. Literal `schemaVersion: 14` expectations that pin the final schema become 15; expectations that pin the v13 runner stay as they are. Check: `settingsMigrations.length === 15`, and `npx vitest run tests/einkControls.test.tsx tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js tests/einkFoundation.test.ts` exits 0.
-- **⟨R5⟩ Docs (proposed, awaiting Brain1).** `BUG_REPORT.md` follows N-Q3: keep main's status lines plus any branch-only new entries or resolution lines. For `CLAUDE.md` (NSIS), keep main's text and add only the NSIS branch's intended line.
+- **⟨R4⟩ EINK-CONTROLS-1 after BAND-ALIGN-2 (RULED by Brain1, 2026-11-03).** In `main/migrations.js`, keep BAND-ALIGN-2's v13 → v14 entry unchanged. Append EINK-CONTROLS-1's migration as the next entry, commented `// v14 → v15: EINK-CONTROLS-1 — …`, with `data.schemaVersion = 15`, and set `CURRENT_SETTINGS_SCHEMA = 15`. In `tests/settingsMigrationV13.test.js` and `tests/settingsNarrateNormalization.test.js`, keep BAND-ALIGN-2's v13 → v14 comment and add a line saying EINK-CONTROLS-1 added v14 → v15. Literal `schemaVersion: 14` expectations that pin the final schema become 15; expectations that pin the v13 runner stay as they are. Check: `settingsMigrations.length === 15`, and `npx vitest run tests/einkControls.test.tsx tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js tests/einkFoundation.test.ts` exits 0.
+  - **New test (Brain1's R4 addition):** `tests/settingsMigrationV15.test.js`, in the style of `tests/settingsMigrationV13.test.js` (`createRequire`, `runMigrations(data, settingsMigrations, CURRENT_SETTINGS_SCHEMA)`). Its describe block is "settings migration v13 → v15 (BAND-ALIGN-2 then EINK-CONTROLS-1)". Cases:
+    - `(a)` `{ schemaVersion: 13, theme: "eink", flowZoneLines: 3 }` → `toEqual({ schemaVersion: 15, theme: "light", einkMode: true, flowBandEnabled: true })`; separately, `flowZoneLines: 0` gives `flowBandEnabled: false`.
+    - `(b)` `{ schemaVersion: 14, theme: "eink", flowBandEnabled: false }` → `toEqual({ schemaVersion: 15, theme: "light", einkMode: true, flowBandEnabled: false })`.
+    - `(c)` `{ schemaVersion: 15, theme: "dark", einkMode: true, flowBandEnabled: true }` → deep-equal to its input.
+    - `(d)` `CURRENT_SETTINGS_SCHEMA === 15` and `settingsMigrations.length === 15`.
+
+    This test is written in wave C after the R4 resolution. It is a positive control: on a candidate with EINK at v14 it fails (a) and (d).
+- **⟨R5⟩ Docs (RULED by Brain1, 2026-11-03).** `BUG_REPORT.md` follows N-Q3: keep main's status lines plus any branch-only new entries or resolution lines. For `CLAUDE.md` (NSIS), keep main's text and add only the NSIS branch's intended line.
 
 ## Tasks
 
@@ -74,7 +81,22 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 2. The only non-merge commits on the branch are the ruled conflict resolutions and any Brain1-ruled fixes, each named in its message.
 3. The final tip passes `npm test` (no fewer tests than the base's suite plus each carried branch's added tests, 0 failed), `npm run typecheck` and `npm run build`.
 4. Rule 53 evidence for the final tip is recorded in a close-out section "Package verification", with Brain1's confirmation.
-5. No file outside the union of the carried branches' changes and the ruled resolutions differs from the base (`git diff --stat` reviewed).
+5. Path fence. Every path in `git diff --name-only <base> HEAD` appears in the union of `git diff --name-only <base>...origin/<tip>` over the 21 tips, plus `tests/settingsMigrationV15.test.js`. A script prints any path outside that set, and the expected output is empty.
+6. The single-copy check prints nothing: `git grep -n "async function logToFile" -- main/ipc`. After wave B, both Narrate blobs equal R3's hashes.
+7. The `npm test` summary line on the final tip shows 0 failed, and passed ≥ 2,452 (main's gate (1) count) plus the new migration test.
+
+## Repository plan
+
+- Branch `eb/rc-integration-20261103` from `b58b0117`, in `C:\Projects\Blurby\.worktrees\rc-integration-20261103` on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
+- Merge commits take each tip whole. Each resolution commit stages only its named paths: R2 `main/ipc/library.js` and `main/ipc/misc.js`; R3 `src/reader/modes/narrate/ModeRuntime.ts` and `src/reader/modes/narrate/engine/narrateEngine.ts`; R4 `main/migrations.js`, the two named tests and the new `tests/settingsMigrationV15.test.js`; R5 `docs/governance/BUG_REPORT.md` and `CLAUDE.md`. Never `git add -A`.
+- Policy `push`: push after each green wave. The merge to `main` happens only after Brain1's package confirmation and Roadmap's merge go.
+
+## Lane ownership, forbidden areas, shared core, merge order
+
+- **Lanes:** all A–E execution surfaces, as a declared integration window, with no other code-changing sprint running in parallel.
+- **Shared-core touches:** `src/types.ts` (several tips) and `src/components/ReaderContainer.tsx` (BAND-ALIGN-2 stack, RESTAMP stack). This window is the scheduled integration window for both.
+- **Forbidden:** edits beyond the ruled resolutions and the one new test; register writes; the live user profile; release publication.
+- **Merge order:** waves A → B → C → D as tabled. This window lands before PAUSED-CLICK, FOCUS-WORD-ONLY and PAGE-ENTRY-KEYS, which are re-based on the merged main afterwards.
 
 ## Failure handling and rollback
 
@@ -94,4 +116,4 @@ Two repair passes per wave at most; a third failure stops the window. A bad wave
 
 ## Lessons applied
 
-LL-165 (prove the profile before the first action), LL-167 (packaged-build verification), LL-169 (FOLIATE-DISPLAY-LIFETIME stack keeps its separate currentness and lifetime guards across the merge), LL-174 (widened callbacks: re-run the BAND-ALIGN R8 test after waves C and D), LL-181 (worktree placement; packed EB/ refs).
+LL-165 (prove the profile before the first action), standing rule 53 (packaged-build verification; promoted from LL-167), LL-169 (FOLIATE-DISPLAY-LIFETIME stack keeps its separate currentness and lifetime guards across the merge), LL-174 (widened callbacks: re-run the BAND-ALIGN R8 test after waves C and D), LL-181 (worktree placement; packed EB/ refs).
