@@ -1,0 +1,7 @@
+# Business repair1b — independent literal-delta review
+
+Frozen addendum/Ready SHA256 `701771abd8091d46ac06dca24a0ff90d8d913a5f31db7f7addc8a8a7c7a3c5f7`. Independent compliance PASS by roadmap_stub_scope consumed first, then independent quality PASS by cpu_ruling_review on identical bytes. Both read actual Brain ruling exec-08f7f511-f8e1-49f7-ab11-9c55942d9634 and the already reviewed complete b75 parent packet. Neither edited the addendum or executed source/tests/helper commands.
+
+Verified ONLY fresh output-root substitution, phase/admission identity, separate30minute/30aggregate ceiling and unchanged44aeb stopped-source revalidation. Exact three repairs/all28 boundaries, relative output manifest, qualified original V2/root-only V3 rule, old immutable originalT/repair1 roots, same-byte compliance-first source reviews and local-only checkpoint remain unchanged. No inferred global cancellation, owner-pause override, active clock/slot or controller/Q/whole-epic/terminal authority.
+
+Parent U9/U10 Check e74a8e49… and substantive source-bound reviews remain attached to their exact immutable b75 bytes; this delta is not falsely presented as a new mechanical source test or wholesale re-audit. Root must publish the actual complete three-file packet and Brain must freshly consume/revalidate/schedule/admit before any continuation. Old partials are preserved without rewriting clocks or evidence.
