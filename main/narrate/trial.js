@@ -58,7 +58,8 @@ const HELPERS = `
   h.docState = () => JSON.stringify(h.docs().map((d) => ({ text: d.body ? d.body.textContent.length : -1, spans: d.querySelectorAll("[data-word-index]").length, pageWords: d.querySelectorAll(".page-word").length })));
   h.clickWord = (offset) => {
     for (const d of h.docs()) {
-      const spans = Array.from(d.querySelectorAll("[data-word-index]"));
+      // NARRATE-ARRIVAL-SYNC-1: never a span inside a link (Narrate's view ignores clicks on links, so no request).
+      const spans = Array.from(d.querySelectorAll("[data-word-index]")).filter((el) => !el.closest("a[href]"));
       if (!spans.length) continue;
       const el = spans[Math.min(spans.length - 1, Math.max(0, offset))];
       el.scrollIntoView({ block: "center" });
@@ -105,7 +106,7 @@ const HELPERS = `
 // Renderer snippet run inside the section frame: click the span at `offset` among the frame's word spans.
 const CLICK_WORD = (offset) => `
 (() => {
-  const spans = Array.from(document.querySelectorAll("[data-word-index]"));
+  const spans = Array.from(document.querySelectorAll("[data-word-index]")).filter((el) => !el.closest("a[href]"));
   if (!spans.length) return null;
   const el = spans[Math.min(spans.length - 1, Math.max(0, ${Number(offset)}))];
   el.scrollIntoView({ block: "center" });
@@ -167,6 +168,26 @@ async function run(ctx) {
     step("reader ready", wc.getURL());
 
     const timeoutMs = cfg.timeoutMs ?? 120000;
+    // NARRATE-ARRIVAL-SYNC-1: after the first Play, its first request word must lie in the section holding
+    // cfg.position; otherwise the trial measures the wrong place (gate (1) run 5) and fails fast, naming the word.
+    // It runs after the first voiced sample, never between Play and a timed click (the click race stays as it was).
+    let firstRequestChecked = false;
+    const guardFirstRequest = async () => {
+      if (firstRequestChecked || typeof cfg.position !== "number") return;
+      await waitFor(async () => (await js('window.__narrateTrial.count("narrate-request")')) > 0, { what: "the first request", timeoutMs, everyMs: 20 });
+      firstRequestChecked = true;
+      const verdict = JSON.parse(await js(`(async () => {
+        const req = window.__narrateTrial.events().find((e) => e.kind === "narrate-request");
+        const r = await window.electronAPI.extractEpubWords("sample-meditations");
+        const sections = (r && r.sections) || [];
+        const of = (w) => { const s = sections.find((x) => w >= x.startWordIdx && w < x.endWordIdx); return s ? s.sectionIndex : null; };
+        return JSON.stringify({ word: req ? req.word : null, text: req && r && r.words ? r.words[req.word] : null, section: req ? of(req.word) : null, wanted: of(${Math.floor(cfg.position)}) });
+      })()`));
+      step("first request", verdict);
+      if (verdict.section == null || verdict.section !== verdict.wanted) {
+        throw new Error(`trial: first request word ${verdict.word} ("${verdict.text}") is in section ${verdict.section}, not section ${verdict.wanted} that holds position ${Math.floor(cfg.position)}`);
+      }
+    };
     const enterNarrate = async () => {
       await js('window.__narrateTrial.click(\'[aria-label="Narrate mode"]\')');
       if (cfg.diag) {
@@ -232,6 +253,7 @@ async function run(ctx) {
       const before = await count("play");
       await press(".rbb-play-btn");
       await waitVoiced("play", before, "Play");
+      await guardFirstRequest();
       step("playing");
       await waitWords();
       await sleep((cfg.minutes ?? 5) * 60000 + 2000);
@@ -298,6 +320,7 @@ async function run(ctx) {
         step("clicked while playing", { clicked, voicedBeforeClick });
       }
       await waitFor(async () => (await count(null)) > b, { what: `the first voiced sample (cold ${type})`, timeoutMs: 60000, everyMs: 50 });
+      await guardFirstRequest();
       await sleep(1500);
       await press(".rbb-play-btn");
       step("cold done", { type, notice: await js("window.__narrateTrial.notice()") });
