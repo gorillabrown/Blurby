@@ -15,13 +15,7 @@ const { normalizeAuthor } = require("../author-normalize");
 const { imageMediaType } = require("../epub-converter");
 const { validateHttpHttpsUrl } = require("./url-validation");
 const { writeConversionResult } = require("../library-write");
-
-async function logToFile(message, errorLogPath) {
-  try {
-    const timestamp = new Date().toISOString();
-    await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
-  } catch { /* Intentional: error logging should never crash the app */ }
-}
+const { logToFile } = require("../error-log");
 
 /**
  * Detect image format from magic bytes. Returns extension or null if not a recognized image.
