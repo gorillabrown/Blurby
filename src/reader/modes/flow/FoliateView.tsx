@@ -35,7 +35,18 @@ import {
   FOLIATE_SECTION_READY_TIMEOUT_MS,
 } from "../../../constants";
 import { injectStyles } from "./helpers/foliateStyles";
-import { getFoliateMaxColumnCount } from "./helpers/foliateLayout";
+import {
+  collectLineBoxesAround,
+  collectParagraphAround,
+  computeAnchorScrollTop,
+  computeParagraphBandEdges,
+  getFoliateMaxColumnCount,
+  normalizeBandAnchor,
+  readZoneLineStepPx,
+  computeLeadingInsetPx,
+  computeTrailingInsetPx,
+  writeZoneLineStepPx,
+} from "./helpers/foliateLayout";
 import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
@@ -47,6 +58,8 @@ import {
 import type { ChunkReadingVisualState } from "../../../types/chunkReading";
 import {
   FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
+  FLOW_SCROLL_POSITION_PROVIDER_KEY,
+  type FlowScrollPositionProvider,
   type FlowRenderedWordRootDescriptor,
 } from "./helpers/FlowScrollEngine";
 import {
@@ -58,6 +71,8 @@ import {
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { collectParagraphStartWordIndexes } from "./helpers/foliateParagraphStarts";
+import { isFlowBrowseKey } from "./helpers/flowBrowseKey";
 
 const FLOW_HIGHLIGHT_MODE = "flow";
 
@@ -232,6 +247,8 @@ export interface FlowWordState {
 export interface FlowFoliateViewAPI {
   getWords: () => FoliateWord[];
   getParagraphBreaks: () => Set<number>;
+  /** FLOW-PARA-KEYS-1: book-wide block-start words of the sections stamped against the book (provisional ones left out). */
+  getParagraphStartWordIndexes: () => number[];
   goTo: (target: string | number) => Promise<unknown>;
   next: () => void;
   prev: () => void;
@@ -249,6 +266,8 @@ export interface FlowFoliateViewAPI {
   getScrollContainer: () => HTMLElement | null;
   /** FLOW-ZONE-AUTO: the masked outer element that carries the --flow-zone-* vars. */
   getFlowZoneHost: () => HTMLElement | null;
+  /** BAND-ALIGN-2 R8: place the paragraph band over the painted cursor (the pacer's band report); false with none (R6). */
+  placeBandAtCursor: () => boolean;
 }
 
 export interface FlowFoliateViewProps {
@@ -311,10 +330,15 @@ export default function FlowFoliateView({
   // injectStyles only reads settings; the frozen snapshot is passed through its legacy parameter type.
   const settings = frozenSettings as BlurbySettings;
   const containerRef = useRef<HTMLDivElement>(null);
+  /** BAND-ALIGN-1: the zone effect's apply, re-run when the measured body line step changes. */
+  const applyZoneRef = useRef<(() => void) | null>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
   const foliateParagraphBreaksRef = useRef<Set<number>>(new Set());
+  // FLOW-PARA-KEYS-1: section documents whose spans carry the book's numbering (wrapped, or re-stamped, against the
+  // book's sections). A document wrapped before those arrived carries provisional numbering and is not in the set.
+  const bookStampedDocsRef = useRef(new WeakSet<Document>());
   const wordPositionIndexRef = useRef<WordPositionIndex>(new WordPositionIndex());
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
@@ -470,6 +494,21 @@ export default function FlowFoliateView({
         [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: () => FlowRenderedWordRootDescriptor[];
       };
       hostWithRoots[FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY] = () => getRenderedWordRoots();
+      // BAND-ALIGN-2: the line pacer scrolls through the renderer when the paginator's scroller is out of reach.
+      const rendererOf = () => {
+        const renderer = viewRef.current?.renderer;
+        return renderer && typeof renderer.containerPosition === "number" ? renderer : null;
+      };
+      (scrollEl as HTMLElement & { [FLOW_SCROLL_POSITION_PROVIDER_KEY]?: FlowScrollPositionProvider })[FLOW_SCROLL_POSITION_PROVIDER_KEY] = {
+        get: () => rendererOf()?.containerPosition ?? scrollEl.scrollTop,
+        set: (value: number) => {
+          const renderer = rendererOf();
+          if (renderer) renderer.containerPosition = value;
+          else scrollEl.scrollTop = value;
+        },
+        viewportHeight: () => rendererOf()?.size ?? scrollEl.clientHeight,
+        contentHeight: () => rendererOf()?.viewSize ?? scrollEl.scrollHeight,
+      };
     }
     return scrollEl;
   }, [getRenderedWordRoots]);
@@ -480,28 +519,15 @@ export default function FlowFoliateView({
     return containerRef.current?.clientHeight ?? 0;
   }, [resolveFoliateScrollContainer]);
 
-  const getFlowLeadingInsetPx = useCallback((): number => {
-    const viewportHeight = getFlowViewportHeightPx();
-    if (viewportHeight <= 0) return 0;
-    return Math.max(0, Math.round(viewportHeight * FLOW_ZONE_INITIAL_TOP));
-  }, [getFlowViewportHeightPx]);
-
-  const getFlowTrailingInsetPx = useCallback((): number => {
-    const viewportHeight = getFlowViewportHeightPx();
-    if (viewportHeight <= 0) return 0;
-    return Math.max(0, Math.round(viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP)));
-  }, [getFlowViewportHeightPx]);
-
   const getFlowFollowOffsetPx = useCallback((): number => {
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
     const container = containerRef.current;
-    const lineHeight = container ? parseFloat(getComputedStyle(container).lineHeight) || 24 : 24;
-    const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+    const lineHeight = container ? readZoneLineStepPx(container) : 24;
+    const zoneLines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
     return Math.max(0, Math.round((viewportHeight * FLOW_ZONE_INITIAL_TOP) + ((lineHeight * zoneLines) / 2)));
   }, [
     getFlowViewportHeightPx,
-    settings.flowZoneLines,
   ]);
 
   const setFlowInsetsForRenderedDocs = useCallback((leadingInsetPx: number, trailingInsetPx: number) => {
@@ -510,12 +536,150 @@ export default function FlowFoliateView({
     const trailingValue = `${Math.max(0, Math.round(trailingInsetPx))}px`;
     for (const { doc } of view?.renderer?.getContents?.() ?? []) {
       try {
-        doc?.documentElement?.style.setProperty("--blurby-flow-leading-inset", leadingValue);
+        // R7 (owner Q2): a zero-word section (the cover) starts at the top of the view, with no leading space.
+        const hasWords = doc?.querySelector?.("[data-word-index]") != null;
+        doc?.documentElement?.style.setProperty("--blurby-flow-leading-inset", hasWords ? leadingValue : "0px");
         doc?.documentElement?.style.setProperty("--blurby-flow-trailing-inset", trailingValue);
       } catch {
         // Detached Foliate iframe documents can disappear during section changes.
       }
     }
+  }, []);
+
+  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) comes from
+  // settings.flowZonePosition; R8 (owner, 2026-10-30): the Band switch (settings.flowBandEnabled, on unless false).
+  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), on: settings.flowBandEnabled !== false };
+  const bandLayoutRef = useRef(bandLayout);
+  bandLayoutRef.current = bandLayout;
+
+  /**
+   * R7 (owner, 2026-10-30): a section with words starts below a leading space equal to the band anchor's y, and ends
+   * above a trailing space of the view below it, so any cursor line can reach the anchor and the band never moves.
+   * Declared below bandLayoutRef so nothing reads the ref before it exists (LL-087).
+   */
+  const getFlowLeadingInsetPx = useCallback((): number => {
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
+    const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
+    return Math.max(0, Math.round(computeLeadingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
+  }, [getFlowViewportHeightPx]);
+
+  const getFlowTrailingInsetPx = useCallback((): number => {
+    const viewportHeight = getFlowViewportHeightPx();
+    if (viewportHeight <= 0) return 0;
+    const { anchor } = bandLayoutRef.current;
+    const lines = FLOW_ZONE_LINES_DEFAULT; // R8 B1: the anchor geometry's line count
+    const lineStepPx = containerRef.current ? readZoneLineStepPx(containerRef.current) : 24;
+    return Math.max(0, Math.round(computeTrailingInsetPx({ anchor, viewportHeightPx: viewportHeight, lineStepPx, lines })));
+  }, [getFlowViewportHeightPx]);
+  /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
+  const appliedBandLayoutRef = useRef<{ anchor: number; on: boolean } | null>(null);
+
+  /**
+   * R6 (owner, 2026-10-23): with no cursor line on screen (an image-only section such as the cover, or a cursor word
+   * not in the loaded sections) the zone host shows no band, as Lines Off: no --flow-zone-* and the band-off class.
+   */
+  const hideBand = useCallback((): void => {
+    const host = containerRef.current;
+    if (!host) return;
+    host.style.removeProperty("--flow-zone-top");
+    host.style.removeProperty("--flow-zone-bottom");
+    host.classList.add("rm-flow-view--band-off");
+  }, []);
+
+  /** R8: put the band on the zone host over a word span's paragraph, from the rendered line boxes (no scroll). */
+  const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
+    const host = containerRef.current;
+    if (!host) return false;
+    if (!bandLayoutRef.current.on) {
+      host.style.removeProperty("--flow-zone-top");
+      host.style.removeProperty("--flow-zone-bottom");
+      return true;
+    }
+    const para = span ? collectParagraphAround(span) : null;
+    const band = para
+      ? computeParagraphBandEdges({ blockLines: para.blockLines, prevBottom: para.prevBottom, nextTop: para.nextTop, stepPx: readZoneLineStepPx(host) })
+      : null;
+    if (!band) {
+      hideBand();
+      return false;
+    }
+    const hostRect = host.getBoundingClientRect();
+    if (hostRect.height <= 0) return false;
+    const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - hostRect.top) / hostRect.height) * 100))}%`;
+    host.style.setProperty("--flow-zone-top", pct(band.top));
+    host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
+    host.classList.remove("rm-flow-view--band-off");
+    return true;
+  }, [hideBand]);
+
+  /**
+   * BAND-ALIGN-2: where the view scrolls. Foliate's scrolled paginator scrolls an element inside a closed shadow root;
+   * its renderer exposes the position (containerPosition), the visible height (size) and the content height
+   * (viewSize). Otherwise the resolved scroll container's own scrollTop.
+   */
+  const getScrollPosition = useCallback(() => {
+    const el = resolveFoliateScrollContainer();
+    const renderer = viewRef.current?.renderer;
+    if (renderer && typeof renderer.containerPosition === "number" && typeof renderer.size === "number" && typeof renderer.viewSize === "number") {
+      return {
+        topPx: (el ?? containerRef.current)?.getBoundingClientRect().top ?? 0,
+        viewportHeightPx: renderer.size as number,
+        contentHeightPx: renderer.viewSize as number,
+        get: (): number => renderer.containerPosition as number,
+        set: (value: number): void => { renderer.containerPosition = value; },
+      };
+    }
+    if (!el) return null;
+    return {
+      topPx: el.getBoundingClientRect().top,
+      viewportHeightPx: getFlowViewportHeightPx() || el.clientHeight,
+      contentHeightPx: el.scrollHeight,
+      get: (): number => el.scrollTop,
+      set: (value: number): void => { el.scrollTop = value; },
+    };
+  }, [resolveFoliateScrollContainer, getFlowViewportHeightPx]);
+
+  /**
+   * R3: scroll so that the span's line centre sits at the anchor, clamped to the scroll range (the leading inset
+   * included), then place the band around the line wherever it ended up.
+   */
+  const alignSpanToBand = useCallback((span: Element): void => {
+    const scroll = getScrollPosition();
+    const around = collectLineBoxesAround(span, 0);
+    if (scroll && around) {
+      const line = around.lines[around.cursor];
+      const { anchor } = bandLayoutRef.current;
+      const host = containerRef.current;
+      const scrollTop = scroll.get();
+      const target = computeAnchorScrollTop({
+        scrollTop,
+        lineTopPx: line.top,
+        lineBottomPx: line.bottom,
+        containerTopPx: scroll.topPx,
+        viewportHeightPx: scroll.viewportHeightPx,
+        anchor,
+        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * FLOW_ZONE_LINES_DEFAULT, // R8 B1
+        maxScrollTop: scroll.contentHeightPx - scroll.viewportHeightPx,
+      });
+      if (Math.abs(scrollTop - target) > 0.5) scroll.set(target);
+    }
+    placeBandAroundSpan(span);
+  }, [getScrollPosition, placeBandAroundSpan]);
+
+  /** The painted reading cursor's span in the loaded sections, if any. */
+  const findCursorSpan = useCallback((): Element | null => {
+    for (const { doc } of viewRef.current?.renderer?.getContents?.() ?? []) {
+      try {
+        const span = doc?.querySelector?.(".page-word--highlighted, .page-word--flow-cursor");
+        if (span) return span;
+      } catch {
+        // Detached Foliate iframe documents can disappear during section changes.
+      }
+    }
+    return null;
   }, []);
 
   const clearWordPositionRebuildTimer = useCallback(() => {
@@ -583,6 +747,7 @@ export default function FlowFoliateView({
     clearVisualWordClasses(contents);
 
     if (!state.found || !state.span) {
+      if (!userBrowsingRef.current) hideBand(); // R6: no cursor word on screen, no band
       return false;
     }
 
@@ -591,11 +756,11 @@ export default function FlowFoliateView({
       el.classList.add(highlightClass);
     });
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
+    // BAND-ALIGN-2 R3: every cursor move places the band by one rule; a move without motion places the band only.
+    if (state.doc && !userBrowsingRef.current) {
       try {
-        const range = state.doc.createRange();
-        range.selectNodeContents(state.span);
-        view.renderer.scrollToAnchor?.(range);
+        if (allowMotion) alignSpanToBand(state.span);
+        else placeBandAroundSpan(state.span);
       } catch {
         // Safe to ignore.
       }
@@ -605,35 +770,23 @@ export default function FlowFoliateView({
     // relies on explicit jump-back to clear (legacy: auto-clear only in page mode).
 
     return true;
-  }, [clearVisualWordClasses, viewApiRef]);
+  }, [clearVisualWordClasses, viewApiRef, alignSpanToBand, placeBandAroundSpan, hideBand]);
 
   const centerResolvedTokenInReadingWindow = useCallback((
     doc: Document,
     resolution: RenderedTokenResolution,
   ): boolean => {
-    const view = viewRef.current;
-    const range = buildResolvedTokenRange(doc, resolution);
-    if (!view?.renderer?.scrollToAnchor || !range) return false;
-
+    // BAND-ALIGN-2 R3: the clicked or selected word's line goes to the anchor, and the band around it.
+    const span = getResolvedTokenHighlightSpans(doc, resolution)[0] ?? null;
+    if (!span) return false;
     userBrowsingRef.current = false;
-    const zoneOffset = getFlowFollowOffsetPx();
-
-    (async () => {
-      try {
-        await view.renderer.scrollToAnchor(range);
-        if (zoneOffset > 0) {
-          const renderer = viewRef.current?.renderer;
-          if (renderer && typeof renderer.containerPosition === "number") {
-            renderer.containerPosition = Math.max(0, renderer.containerPosition - zoneOffset);
-          }
-        }
-      } catch {
-        // The section can unload while a click/selection scroll is in flight.
-      }
-    })();
-
+    try {
+      alignSpanToBand(span);
+    } catch {
+      // The section can unload while a click/selection scroll is in flight.
+    }
     return true;
-  }, [getFlowFollowOffsetPx]);
+  }, [alignSpanToBand]);
   const centerResolvedTokenInReadingWindowRef = useRef(centerResolvedTokenInReadingWindow);
   centerResolvedTokenInReadingWindowRef.current = centerResolvedTokenInReadingWindow;
 
@@ -723,6 +876,8 @@ export default function FlowFoliateView({
             flowLeadingInsetPx: getFlowLeadingInsetPx(),
             flowTrailingInsetPx: getFlowTrailingInsetPx(),
           });
+          // BAND-ALIGN-1: the zone's line step from the first loaded section's body text
+          if (containerRef.current && writeZoneLineStepPx(containerRef.current, view.renderer?.getContents?.()?.[0]?.doc ?? doc)) applyZoneRef.current?.();
           invalidateWordPositionIndex();
 
           // Extract words and wrap in spans
@@ -743,7 +898,10 @@ export default function FlowFoliateView({
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
+              // FLOW-PARA-KEYS-1: book-stamped only when the wrap is against the book's section.
+              bookStampedDocsRef.current.delete(doc);
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              if (bookSection) bookStampedDocsRef.current.add(doc);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -767,11 +925,16 @@ export default function FlowFoliateView({
               if (sectionStart >= 0) {
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
                 const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                // FLOW-PARA-KEYS-1: book-stamped only once a wrap against the book's sections completes.
+                const stampsWithBook = Boolean(liveSections()?.some((section) => section.sectionIndex === index));
+                bookStampedDocsRef.current.delete(doc);
                 await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                if (stampsWithBook) bookStampedDocsRef.current.add(doc);
               }
             }
           }
 
+          applyZoneRef.current?.(); // R7: once the words are stamped, a zero-word section drops its leading space
           lastLoadedSectionIndexRef.current = index;
           scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
@@ -1056,6 +1219,8 @@ export default function FlowFoliateView({
             return extracted.words;
           },
           getParagraphBreaks: () => foliateParagraphBreaksRef.current,
+          getParagraphStartWordIndexes: () =>
+            collectParagraphStartWordIndexes(view.renderer?.getContents?.() ?? [], (d) => bookStampedDocsRef.current.has(d)),
           goTo: (target) => view.goTo(target),
           next: () => view.renderer.next(),
           prev: () => view.renderer.prev(),
@@ -1111,6 +1276,7 @@ export default function FlowFoliateView({
           },
           getScrollContainer: () => resolveFoliateScrollContainer(),
           getFlowZoneHost: () => containerRef.current,
+          placeBandAtCursor: () => placeBandAroundSpan(findCursorSpan()),
         };
         // FLOW-3A: expose the scroll container for FlowScrollEngine (legacy flowMode toggle effect).
         scrollContainerRef.current = resolveFoliateScrollContainer();
@@ -1126,8 +1292,8 @@ export default function FlowFoliateView({
             const roots = getRenderedWordRoots();
             for (const { root } of roots) {
               const el = root.querySelector?.(`[data-word-index="${targetIdx}"]`) as HTMLElement | null;
-              if (el?.scrollIntoView) {
-                el.scrollIntoView({ block: "center", behavior: "auto" });
+              if (el) {
+                alignSpanToBand(el); // BAND-ALIGN-2 R3: the arrival places the band by the same rule
                 return;
               }
             }
@@ -1191,12 +1357,16 @@ export default function FlowFoliateView({
         if (!doc?.body) continue;
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;
+        const stampsWithBook = (bookWordSections as SectionBoundary[]).some((section) => section.sectionIndex === index);
+        bookStampedDocsRef.current.delete(doc); // FLOW-PARA-KEYS-1: not book-stamped while it is re-wrapped
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
         await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        if (stampsWithBook) bookStampedDocsRef.current.add(doc);
       }
       if (!cancelled) {
+        applyZoneRef.current?.(); // R7: a re-wrapped section regains its leading space
         scheduleWordPositionIndexRebuild("section-restamp", 0);
       }
     };
@@ -1224,6 +1394,8 @@ export default function FlowFoliateView({
         flowTrailingInsetPx: getFlowTrailingInsetPx(),
       });
     }
+    // BAND-ALIGN-1: the text size or font may have changed the body line step
+    if (containerRef.current && writeZoneLineStepPx(containerRef.current, view.renderer.getContents?.()?.[0]?.doc)) applyZoneRef.current?.();
     invalidateWordPositionIndex();
     scheduleWordPositionIndexRebuild("font-or-layout-change");
   }, [
@@ -1244,22 +1416,25 @@ export default function FlowFoliateView({
     if (!container) return;
 
     const applyZoneProperties = () => {
-      const lineHeight = parseFloat(getComputedStyle(container).lineHeight) || 24;
-      const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
-      const zoneHeightFrac = (lineHeight * zoneLines) / viewportHeight;
-      const zoneTop = FLOW_ZONE_INITIAL_TOP;
-      const zoneBottom = Math.min(zoneTop + zoneHeightFrac, 0.95);
-      container.style.setProperty("--flow-zone-top", `${zoneTop * 100}%`);
-      container.style.setProperty("--flow-zone-bottom", `${zoneBottom * 100}%`);
-      setFlowInsetsForRenderedDocs(
-        viewportHeight * zoneTop,
-        viewportHeight * (1 - zoneTop),
-      );
+      setFlowInsetsForRenderedDocs(getFlowLeadingInsetPx(), getFlowTrailingInsetPx());
+      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3); with no cursor painted there is no band (R6).
+      // An anchor or Lines change re-places it at once (scrolling the cursor line to the new anchor) without moving
+      // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
+      const layout = bandLayoutRef.current;
+      const layoutChanged = appliedBandLayoutRef.current !== null
+        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.on !== layout.on);
+      appliedBandLayoutRef.current = layout;
+      if (userBrowsingRef.current) return;
+      const cursorSpan = findCursorSpan();
+      if (!cursorSpan) hideBand();
+      else if (layoutChanged) alignSpanToBand(cursorSpan);
+      else placeBandAroundSpan(cursorSpan);
     };
 
     applyZoneProperties();
+    applyZoneRef.current = applyZoneProperties;
 
     const observer = new ResizeObserver(() => {
       applyZoneProperties();
@@ -1271,14 +1446,22 @@ export default function FlowFoliateView({
       observer.disconnect();
       container.style.removeProperty("--flow-zone-top");
       container.style.removeProperty("--flow-zone-bottom");
+      applyZoneRef.current = null;
       setFlowInsetsForRenderedDocs(0, 0);
     };
   }, [
     getFlowViewportHeightPx,
-    settings.flowZoneLines,
+    getFlowLeadingInsetPx,
+    getFlowTrailingInsetPx,
+    settings.flowBandEnabled,
+    settings.flowZonePosition,
     setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,
     scheduleWordPositionIndexRebuild,
+    findCursorSpan,
+    alignSpanToBand,
+    placeBandAroundSpan,
+    hideBand,
   ]);
 
   // Reflow text when the container resizes (window maximize/restore/drag)
@@ -1299,17 +1482,18 @@ export default function FlowFoliateView({
   }, [invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
 
   // Keyboard (FLOW-3A / NARR-FIX-1): FlowScrollEngine drives pacing, but the user can still browse away
-  // manually. Page navigation keys set the browse-away flag AND navigate the renderer so the user can
-  // peek ahead/behind; jump-back returns to the active reading position.
+  // manually. Unmodified PageUp/PageDown set the browse-away flag AND navigate the renderer so the user can
+  // peek ahead/behind; jump-back returns to the active reading position. The arrows belong to useReaderKeys
+  // (FLOW-KEYS-FIX-1 amendment: plain ←/→ change speed only), so they never browse away here.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const view = viewRef.current;
       if (!view?.renderer) return;
-      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp") {
+      if (isFlowBrowseKey(e)) {
         markUserBrowsingAway();
         // Navigate the Foliate renderer so the user sees different content.
         // The iframe's native handler won't see this window-level event.
-        if (e.key === "ArrowRight" || e.key === "PageDown") {
+        if (e.key === "PageDown") {
           view.renderer.next();
         } else {
           view.renderer.prev();
@@ -1334,7 +1518,7 @@ export default function FlowFoliateView({
   }, [markUserBrowsingAway]);
 
   return (
-    <div className="rm-flow-view" ref={containerRef}>
+    <div className={`rm-flow-view${bandLayout.on ? "" : " rm-flow-view--band-off"}`} ref={containerRef}>
       {/* Jump back to persistent last-read word — shown when user has browsed away */}
       {showJumpBackToAnchor && (
         <button

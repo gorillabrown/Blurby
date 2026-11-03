@@ -75,8 +75,9 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
+import { findBookParagraphStart, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 import { createChunkReadingVisualState } from "./helpers/chunkReadingVisualState";
-import { FlowScrollEngine, type FlowProgress } from "./helpers/FlowScrollEngine";
+import { FlowScrollEngine, type FlowBandEdges, type FlowProgress } from "./helpers/FlowScrollEngine";
 import type { FoliateWord } from "./helpers/foliateHelpers";
 
 /**
@@ -765,6 +766,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.clearTimers();
     this.state.pendingStartOnLoad = false;
     this.state.pendingResume = null;
+    this.state.handoffHold = null;
     this.stopEngine();
     this.scrollEngine?.destroy();
     this.scrollEngine = null;
@@ -819,6 +821,8 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.settingsSnapshot = own(next) as ReaderSettingsSnapshot;
     this.wpm = ownFlowWpm(this.settingsSnapshot);
     if (this.getEffectiveWpm() !== previousEffectiveWpm) this.scrollEngine?.setWpm(this.getEffectiveWpm());
+    // BAND-ALIGN-2 R4: an anchor change re-places the band at once, without moving the word.
+    this.scrollEngine?.setBandLayout(this.settingsSnapshot.settings.flowZonePosition);
     this.state.notify();
   }
 
@@ -917,9 +921,23 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (!this.alive) return;
     switch (command.kind) {
       case "flow-line":
-        // Legacy handleFlowPrevLine / handleFlowNextLine.
-        if (this.scrollEngine?.getState().running) this.scrollEngine.jumpToLine(command.direction);
-        return;
+        // Legacy handleFlowPrevLine / handleFlowNextLine; the word timer follows the line pacer's new word.
+        if (!this.scrollEngine?.getState().running) return;
+        this.scrollEngine.jumpToLine(command.direction);
+        this.engine?.jumpTo(this.scrollEngine.getWordIndex());
+        break;
+      case "seek-words":
+        this.moveReadingWord(this.navigationWord() + command.delta);
+        break;
+      case "sentence":
+        this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
+        break;
+      case "paragraph": {
+        const target = this.paragraphTarget(command.direction === "next" ? "forward" : "backward");
+        if (target == null) return; // no book sections known yet: the key does nothing
+        this.moveReadingWord(target);
+        break;
+      }
       case "go-to-href":
         // Legacy handleJumpToChapter foliate branch.
         this.markEngaged();
@@ -930,6 +948,45 @@ export class FlowModeRuntime implements ReaderModeRuntime {
         return; // seek-words / page keyboard commands belong to other modes.
     }
     this.state.notify();
+  }
+
+  /** The word the navigation keys step from: the playing word timer's word, else the highlighted word. */
+  private navigationWord(): number {
+    return this.state.playing && this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
+  }
+
+  /**
+   * FLOW-PARA-KEYS-1: the paragraph start to move to, in the index space of effectiveWords(). With full-book words
+   * (book-wide indices) it comes from the rendered block starts of book-stamped sections and the book's section
+   * starts (Blurby.Brain, ruling A, as Focus); null when no section is known. Otherwise the view's loaded-slice
+   * breaks or the document's breaks index the same words the keys step over.
+   */
+  private paragraphTarget(direction: "forward" | "backward"): number | null {
+    const current = this.navigationWord();
+    const lastIndex = this.effectiveWords().length - 1;
+    if (!this.document.useFoliate) return findParagraphStart(this.document.paragraphBreaks, current, direction, lastIndex);
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return findParagraphStart(this.surface.getParagraphBreaks(), current, direction, lastIndex);
+    const sectionStarts = bookWords.sections.map((section) => section.startWordIdx);
+    return findBookParagraphStart(this.surface.getParagraphStarts(), sectionStarts, current, direction, lastIndex);
+  }
+
+  /**
+   * FLOW-KEYS-FIX-1: move the reading word. Playing, both pacers jump (as a playing hard selection does);
+   * paused or before a play, the word becomes the explicit start anchor that Flow's cold restart consumes.
+   */
+  private moveReadingWord(target: number): void {
+    const s = this.state;
+    const word = this.clampToEffectiveWordRange(target);
+    if (s.playing && this.engine) {
+      this.engine.jumpTo(word);
+      this.scrollEngine?.jumpToWord(word);
+      return;
+    }
+    s.explicitSelectionAnchor = word;
+    s.currentWordIndex = word;
+    this.publishHighlight(word);
+    if (this.document.useFoliate && this.surface.isReady()) this.surface.highlight(word, "flow", { allowMotion: false });
   }
 
   // ── View events (bound by useModeBindings) ────────────────────────────────
@@ -1029,6 +1086,17 @@ export class FlowModeRuntime implements ReaderModeRuntime {
         }
       });
     }
+    const held = s.handoffHold;
+    if (held != null) {
+      // BUG-235: resume exactly on the held word, only while the reader still wants playback.
+      this.requestFrame(() => {
+        if (!this.engine || s.handoffHold !== held || !s.playing) return; // the reader paused (pausePlayback cleared it)
+        if (!this.surface.highlight(held, "flow")) return;                // not stamped yet: the next reextraction retries
+        s.handoffHold = null;
+        this.engine.resume();                                              // schedules held + 1 after one dwell
+        s.notify();
+      });
+    }
     s.notify();
   };
 
@@ -1099,7 +1167,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   };
 
   /** useFlowScrollSync effect 1, startWhenReady: start the line pacer against this mode's view. */
-  startScrollEngine = (container: HTMLElement, cursor: HTMLDivElement, onZoneTopChange: (topFrac: number) => void): void => {
+  startScrollEngine = (container: HTMLElement, cursor: HTMLDivElement, onZoneTopChange: (topFrac: number, band?: FlowBandEdges) => void): void => {
     if (!this.alive || !this.state.playing) return;
     const engine = this.scrollEngine ?? (this.scrollEngine = this.createScrollEngine());
     const totalWords = this.document.bookWords?.totalWords || this.document.wordCount || this.engineWords.length;
@@ -1107,6 +1175,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     engine.setChunks(this.readingChunks());
     this.publishFlowVisualState(this.state.highlightedWordIndex);
     const settings = this.settingsSnapshot.settings;
+    engine.setBandLayout(settings.flowZonePosition); // BAND-ALIGN-2 R4
     engine.start(
       container,
       cursor,
@@ -1114,9 +1183,10 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       this.getEffectiveWpm(),
       numberArrayToSet(this.document.paragraphBreaks),
       this.settingsSnapshot.isEink,
-      settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT,
+      FLOW_ZONE_LINES_DEFAULT, // BAND-ALIGN-2 R8 B1: the anchor geometry's line count
       onZoneTopChange,
       true,
+      true, // BAND-ALIGN-2: one clock; the line pacer follows the word timer (syncToWord)
     );
     this.state.notify();
   };
@@ -1203,12 +1273,27 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (this.document.useFoliate && this.surface.isReady()) {
       const found = this.surface.highlight(idx, "flow", { allowMotion: false });
       if (!found) {
-        // Word not in loaded sections — pause, turn page, wait for section load (onWordsReextracted resumes).
+        if (this.scrollEngine?.isPastRenderedEnd(idx)) {
+          // BUG-235: under one clock the next section's first word is not loaded yet. Hold the word timer on it (an
+          // internal hold, handoffHold; `playing` stays true) and let the line pacer run its one-shot section hand-off
+          // (onScrollEngineComplete → goToSection). The section's load calls onWordsReextracted, which resumes on it.
+          // No page turn here: the hand-off owns the navigation.
+          this.engine?.pause();
+          s.handoffHold = idx;
+          this.scrollEngine.syncToWord(idx);
+          s.notify();
+          return;
+        }
+        // A genuinely missing word inside the rendered range: pause, turn the page, wait for the section load (unchanged).
         this.engine?.pause();
         s.pendingResume = idx;
         this.surface.next();
+        s.notify();
+        return;
       }
     }
+    // BAND-ALIGN-2: one clock. The line pacer follows this word (not when Flow paused above to turn the page).
+    this.scrollEngine?.syncToWord(idx);
     s.notify();
   }
 
@@ -1261,7 +1346,9 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     const currentWord = this.state.highlightedWordIndex;
     const meta = this.document.bookWords;
     const totalWords = meta?.totalWords || this.document.wordCount || this.engineWords.length;
-    const nextSection = meta?.sections.find((section) => section.startWordIdx > currentWord);
+    // BAND-ALIGN-2: under one clock the word timer's word is already the next section's first word when the line pacer
+    // hands off (the old line clock handed off on the last rendered word), so a section starting at it is the next one.
+    const nextSection = meta?.sections.find((section) => section.startWordIdx >= currentWord);
     if (nextSection && currentWord < totalWords - 1) {
       Promise.resolve(this.surface.goToSection(nextSection.sectionIndex))
         .then(() => this.surface.waitForSectionReady(nextSection.sectionIndex))
@@ -1325,6 +1412,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** Flow's playing flag owns both pacers: legacy modeInstance.pauseMode() + setFlowPlaying(false). */
   private pausePlayback(): void {
     this.state.pendingResume = null;
+    this.state.handoffHold = null;
     this.engine?.pause();
     this.scrollEngine?.stop();
     this.state.playing = false;

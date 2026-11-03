@@ -167,7 +167,9 @@ export interface BlurbySettings {
   flowWordSpan: number; // how many words to highlight at once in Flow mode (3-5, default 3)
   flowCursorStyle: "underline" | "highlight"; // flow cursor visual style (default: underline)
   flowZonePosition: number;  // fraction of viewport for zone top (0.15 | 0.25 | 0.35 | 0.55, default 0.25)
-  flowZoneLines: number;     // lines visible in reading zone (3-8, default 5)
+  /** @deprecated BAND-ALIGN-2 R8: no longer a setting (migrated to flowBandEnabled); read only by Narrate until NARRATE-BAND-SPACE-1 removes it. */
+  flowZoneLines?: number;
+  flowBandEnabled?: boolean; // BAND-ALIGN-2 R8: the reading band over the cursor's paragraph, on unless false
   // E-ink display optimization settings
   einkMode: boolean;
   einkWpmCeiling: number;

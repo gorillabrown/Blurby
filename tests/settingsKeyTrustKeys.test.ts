@@ -14,7 +14,7 @@ const TYPE_KEYS = {
   recentFolders: true, theme: true, launchAtLogin: true, focusTextSize: true, accentColor: true, fontFamily: true,
   compactMode: true, readingMode: true, focusMarks: true, readingRuler: true, focusSpan: true, flowTextSize: true,
   rhythmPauses: true, layoutSpacing: true, justifiedText: true, initialPauseMs: true, punctuationPauseMs: true,
-  viewMode: true, flowWordSpan: true, flowCursorStyle: true, flowZonePosition: true, flowZoneLines: true,
+  viewMode: true, flowWordSpan: true, flowCursorStyle: true, flowZonePosition: true, flowZoneLines: true, flowBandEnabled: true,
   einkMode: true, einkWpmCeiling: true, einkRefreshInterval: true, einkPhraseGrouping: true,
   ttsEnabled: true, ttsEngine: true, ttsVoiceName: true, ttsRate: true,
   ttsPauseCommaMs: true, ttsPauseClauseMs: true, ttsPauseSentenceMs: true, ttsPauseParagraphMs: true,
@@ -24,6 +24,7 @@ const TYPE_KEYS = {
   ttsCacheEnabled: true, pronunciationOverrides: true, narrationProfiles: true, activeNarrationProfileId: true,
   readingGoals: true, sortBy: true,
 } satisfies Record<keyof BlurbySettings, true>;
+const DEPRECATED_TYPE_KEYS = new Set(["flowZoneLines"]); // BAND-ALIGN-2 R8; removed with the field by NARRATE-BAND-SPACE-1
 
 // main.js's settings literal before this item; a first-run settings.json must stay byte-identical (ruled).
 const PRE_ITEM_MAIN_DEFAULTS = {
@@ -45,7 +46,7 @@ describe("SETTINGS-KEY-TRUST-1 main's settings keys", () => {
   const mainKeys = () => new Set(Object.keys(SETTINGS_DEFAULTS));
 
   it("(t1) every BlurbySettings key is one of main's settings keys", () => {
-    expect(Object.keys(TYPE_KEYS).filter((k) => !mainKeys().has(k))).toEqual([]);
+    expect(Object.keys(TYPE_KEYS).filter((k) => !DEPRECATED_TYPE_KEYS.has(k) && !mainKeys().has(k))).toEqual([]);
   });
 
   it("(t2) every renderer DEFAULT_SETTINGS key is one of main's settings keys", () => {

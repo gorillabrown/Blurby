@@ -3,7 +3,7 @@
 //
 // Covers:
 //   a) FLOW_ZONE constants are exported with correct values
-//   b) DEFAULT_SETTINGS includes flowZonePosition and flowZoneLines
+//   b) DEFAULT_SETTINGS includes flowZonePosition and flowBandEnabled (BAND-ALIGN-2 R8 replaced flowZoneLines)
 //   c) Settings defaults match their corresponding constants
 //   d) CSS .foliate-page-view--flow rule exists and contains mask-image
 //   e) mask-image references --flow-zone-top and --flow-zone-bottom custom properties
@@ -70,8 +70,9 @@ function computeZoneProperties(
 describe("FLOW-INF-A: Flow reading zone", () => {
 
   // (a) Constants exported with correct values
-  it("FLOW_READING_ZONE_POSITION constant equals 0.25", () => {
-    expect(FLOW_READING_ZONE_POSITION).toBe(0.25);
+  // BAND-ALIGN-2 R4 (pinned test, rule 50): the default anchor is Top third, not the 0.25 zone position.
+  it("FLOW_READING_ZONE_POSITION constant equals 1/3 (Top third)", () => {
+    expect(FLOW_READING_ZONE_POSITION).toBe(1 / 3);
   });
 
   it("FLOW_ZONE_LINES_DEFAULT constant equals 5", () => {
@@ -91,8 +92,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     expect(DEFAULT_SETTINGS).toHaveProperty("flowZonePosition");
   });
 
-  it("DEFAULT_SETTINGS includes flowZoneLines field", () => {
-    expect(DEFAULT_SETTINGS).toHaveProperty("flowZoneLines");
+  it("DEFAULT_SETTINGS has the Band switch on and no flowZoneLines field (BAND-ALIGN-2 R8)", () => {
+    expect(DEFAULT_SETTINGS.flowBandEnabled).toBe(true);
   });
 
   // (c) Settings defaults match constants
@@ -100,8 +101,8 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     expect(DEFAULT_SETTINGS.flowZonePosition).toBe(FLOW_READING_ZONE_POSITION);
   });
 
-  it("DEFAULT_SETTINGS.flowZoneLines equals FLOW_ZONE_LINES_DEFAULT", () => {
-    expect(DEFAULT_SETTINGS.flowZoneLines).toBe(FLOW_ZONE_LINES_DEFAULT);
+  it("DEFAULT_SETTINGS no longer carries flowZoneLines (BAND-ALIGN-2 R8)", () => {
+    expect(DEFAULT_SETTINGS).not.toHaveProperty("flowZoneLines");
   });
 
   // (d) CSS .foliate-page-view--flow rule exists and contains mask-image
@@ -201,9 +202,10 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     }
   });
 
-  it("FLOW_READING_ZONE_POSITION (0.25) is one of the valid dropdown option values", () => {
-    const zonePositionOptions = [0.15, 0.25, 0.35, 0.55];
-    expect(zonePositionOptions).toContain(FLOW_READING_ZONE_POSITION);
+  // BAND-ALIGN-2 R4 (pinned test, rule 50): the anchor options are Top, Top third and Center.
+  it("FLOW_READING_ZONE_POSITION (1/3) is one of the band anchor options (0, 1/3, 0.5)", () => {
+    const bandAnchorOptions = [0, 1 / 3, 0.5];
+    expect(bandAnchorOptions).toContain(FLOW_READING_ZONE_POSITION);
   });
 
   // Extra: CSS gradient is a linear-gradient to bottom (vertical mask)

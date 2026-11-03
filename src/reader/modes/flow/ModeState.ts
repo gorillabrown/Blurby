@@ -27,6 +27,10 @@ export class FlowModeState implements PersistentReadingAnchorState {
   playing = false;
   /** Legacy useReadingModeInstance.pendingResumeRef (Flow pause-on-miss). */
   pendingResume: number | null = null;
+  /** BUG-235 (BAND-ALIGN-2 R7a): the word the word timer is held on while the line pacer hands off to the next section.
+   *  An internal hold, never the reader's pause: `playing` stays true. Set in onEngineWordAdvance; cleared when
+   *  onWordsReextracted resumes on it, and by pausePlayback and stop. */
+  handoffHold: number | null = null;
   /** Design §F.2: a start that waits for this mode's view to load its first section. */
   pendingStartOnLoad = false;
   /** Legacy useFoliateSync effect 3 refs (currentNarrationSectionRef starts at -1). */

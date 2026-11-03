@@ -16,6 +16,8 @@ export interface FocusSurface {
   extractWords(): void;
   /** Legacy getEffectiveParagraphBreaks (foliate branch) as a sorted array; [] while no view is mounted. */
   getParagraphBreaks(): readonly number[];
+  /** FOCUS-KEYS-FIX-1: book-wide block-start words of book-stamped sections (provisional ones left out); [] with no view. */
+  getParagraphStarts(): readonly number[];
   /** Legacy foliateApiRef.current.next() (empty-words retry). */
   next(): void;
   goToSection(sectionIndex: number): void;
@@ -41,6 +43,7 @@ export function createFocusSurface(viewApiRef: MutableRefObject<FocusFoliateView
       const breaks = api()?.getParagraphBreaks();
       return breaks ? [...breaks].sort((a, b) => a - b) : [];
     },
+    getParagraphStarts: () => api()?.getParagraphStartWordIndexes() ?? [],
     next: () => api()?.next(),
     goToSection: (sectionIndex) => { api()?.goToSection(sectionIndex).catch(() => {}); },
     highlight: (wordIndex, kind, options) => api()?.highlightWordByIndex(wordIndex, kind, options) ?? false,
