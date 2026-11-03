@@ -10,6 +10,7 @@
 - **Branch:** `eb/narrate-paused-click-1` from the base, in the canonical clone's `.worktrees\narrate-paused-click-1` on RodneySr (standing rule "Worktree placement"). Push with `git push origin HEAD:refs/heads/eb/narrate-paused-click-1`.
 - **N-Q2 is moot:** play-first-text is in the base, so (ns10) runs in this item.
 - **N-Q3 is moot:** there is no docs merge in this item.
+- **Order:** in Seq order (117), after NARRATE-ARROW-PAUSE-1 (99), which is also Narrate runtime work. Brain1 runs the two in sequence and re-greps this item's sites once arrow-pause has merged.
 
 ###### Edit sites (re-grep at the base; play-first-text's layout)
 

@@ -10,7 +10,7 @@
 - **(ek6):** no longer scratch-only. With the arrow guard in the base, (ek6) is a normal row in the item's vitest command and must pass there.
 - **Branch:** `eb/page-entry-keys-1` from the base, in RodneySr's canonical clone's `.worktrees\page-entry-keys-1`. Push with `git push origin HEAD:refs/heads/eb/page-entry-keys-1`.
 - **Re-grep:** every edit site is re-grepped at the base. `src/reader/modes/page/FoliateView.tsx` changed in four RC stacks, so line numbers will move. A changed contract for `onSectionLoad`, `wrapWordsInSpans` or the key forwarder returns to the planner.
-- **Order:** after FOCUS-WORD-ONLY-1 in the feed. No shared files with PAUSED-CLICK or FOCUS-WORD-ONLY.
+- **Order:** in Seq order (119), after NARRATE-PAUSED-CLICK-1 (117) and before FOCUS-WORD-ONLY-1 (123). It shares no files with either, so Brain1 may run it in parallel with them if RodneySr has capacity.
 
 ###### Host and hold
 

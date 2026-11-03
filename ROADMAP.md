@@ -819,6 +819,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 <a id="narrate-arrow-pause-1"></a>
 
 #### NARRATE-ARROW-PAUSE-1 — In Narrate, an arrow pressed with a modifier key pauses, and the cursor holds its word *(Seq 99 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/reader-arrow-guard-1` @ `51202c1c`; owner ruling 2026-10-25 (tier 3), relayed by Blurby.Brain and Blurby.Roadmap; stacked on READER-ARROW-GUARD-1; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*
+- **Current amendment (2026-11-03, post-RC cut):** [docs/planning/specs/2026-11-03/NARRATE-ARROW-PAUSE-1.post-rc-amendment.md](docs/planning/specs/2026-11-03/NARRATE-ARROW-PAUSE-1.post-rc-amendment.md) settles the cut and prerequisites below. Cut moves from 51202c1c to the RC merge; re-grep the Narrate sites; control row is a build of the cut. Waits on the RC window merge.
 
 - **What:** While Narrate is playing, ←/→ with Shift, Ctrl, Alt or Meta, or any combination of them, pauses playback. The cursor stays on the word it was on, and Space resumes from it. Plain ←/→ and PageUp/PageDown keep their current behaviour: browse away and turn the page.
 - **Why:**
@@ -899,6 +900,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 <a id="library-write-race-3"></a>
 
 #### LIBRARY-WRITE-RACE-3 — A library edit stamps only what the reader changed, a missing book fails the save, and a save answers only its own form *(Seq 89 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `origin/eb/library-write-race-2` @ `c46e9332`, from that item's memo (W2, N1, N2) and Blurby.Brain's ruling relayed by Blurby.Roadmap 2026-10-25; must merge before BLURBY-SERVER-1's sync is on for anyone; not a Stage 8 release gate)*
+- **Current amendment (2026-11-03, post-RC cut):** [docs/planning/specs/2026-11-03/LIBRARY-WRITE-RACE-3.post-rc-amendment.md](docs/planning/specs/2026-11-03/LIBRARY-WRITE-RACE-3.post-rc-amendment.md) settles the cut and prerequisites below. All three prerequisites ride the RC window; cut from the RC merge; shared core src/types.ts serialized by Brain1. Waits on the RC window merge.
 
 - **What:**
   - **W2 (BUG-223, Medium).** The renderer's library edits send only the fields the reader edited, each with the value the renderer loaded (`from`) and the new value (`to`). Main applies and stamps a field only when its own value still equals `from`.

@@ -10,7 +10,7 @@
 - **Retired:** the F0 local base component (`8810511e` on `origin/eb/focus-word-only-1`, "integrate play-first baseline"). The RC merge already contains that base, so F0 is preserved as history and not reused.
 - **Branch:** create a new branch, `eb/focus-word-only-1-rc`, from the base, in RodneySr's canonical clone's `.worktrees\focus-word-only-1`. The existing `eb/focus-word-only-1` ref is preserved, never reset or force-pushed. Push with `git push origin HEAD:refs/heads/eb/focus-word-only-1-rc`.
 - **Re-grep:** every edit site in the 2026-10-30 amendment is re-grepped at the base. A moved symbol or changed contract returns to the planner.
-- **Order:** after NARRATE-PAUSED-CLICK-1 in the feed. No shared files with it (Focus runtime and styles against Narrate's `ModeRuntime.ts`), so Brain1 may run them in parallel worktrees if RodneySr has capacity.
+- **Order:** in Seq order (123), after PAGE-ENTRY-KEYS-1 (119). It shares no files with NARRATE-PAUSED-CLICK-1 or PAGE-ENTRY-KEYS-1 (Focus runtime and styles against Narrate's `ModeRuntime.ts` and Page's `FoliateView.tsx`), so Brain1 may run it in parallel with them if RodneySr has capacity.
 
 ###### Host and hold
 
