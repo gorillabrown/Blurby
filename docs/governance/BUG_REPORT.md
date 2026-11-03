@@ -2,11 +2,20 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-26 (owner smoke intake)
+**Last updated:** 2026-11-03 (BUG-238)
 
 ---
 
 ## Incomplete
+
+### BUG-238 — Deleting a book permanently erases the user's own file
+**Reported:** 2026-11-03, Blurby.Brain1, read-only trace on `c5bb507f` while ruling on LIBRARY-CONTENT-DEDUP-1's technical question T1.
+**Severity:** HIGH. Data loss: the file is not sent to the Recycle Bin, and no path is shown before it is erased.
+**Status:** OPEN. Fix item LIBRARY-DELETE-SAFE-1 (Library & Content). It lands before LIBRARY-CONTENT-DEDUP-1.
+**Observation:** a card's Delete runs `delete-doc`, which calls `fs.unlink(doc.filepath)` (`main/ipc/library.js:106-120`). For a folder-synced book, `filepath` is the user's original file in their own folder (`main/folder-sync.js:205`, `main/folder-watcher.js:83`). So Delete permanently erases that file.
+**Owner design ruling (2026-11-03, to Blurby.Roadmap):** "Only remove from Blurby". The user's file stays untouched. Files Blurby owns (imported copies, converted EPUBs, the sample) go to the Recycle Bin.
+**Technical ruling (Blurby.Brain1, 2026-11-03):** never hard-unlink. Every removal of a file goes through `shell.trashItem`, and only for files inside Blurby's own data directory. A book whose file lives outside that directory loses its library entry only.
+**Next:** LIBRARY-DELETE-SAFE-1 also settles whether a removed folder book reappears on rescan or after the 30-day tombstone purge.
 
 ### BUG-237 — A Narrate pause in the gap before a scheduled chunk skips that chunk's words and resumes after ~2.3 s of silence
 **Reported:** 2026-10-30, RodneySr (Blurby.Brain1), during NARRATE-PAUSE-CANCEL-1's base D6 (`5de476ce`, x64, quiet host). Deterministic in two runs.
@@ -132,7 +141,7 @@
 **Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
 **Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
 
-**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. BUG-235 and BUG-236 were filed 2026-10-30 from RodneySr's Flow checks. BUG-237 was filed 2026-10-30 from NARRATE-PAUSE-CANCEL-1's base D6 on RodneySr. The next free number is BUG-238.
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. BUG-233 and BUG-234 were filed 2026-10-30 from RodneySr's BAND-ALIGN-2 R7 run. BUG-235 and BUG-236 were filed 2026-10-30 from RodneySr's Flow checks. BUG-237 was filed 2026-10-30 from NARRATE-PAUSE-CANCEL-1's base D6 on RodneySr. BUG-238 was filed 2026-11-03 from Blurby.Brain1's DEDUP T1 trace. The next free number is BUG-239.
 
 ### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
 **Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
