@@ -1,0 +1,54 @@
+{
+  "protectedUnchanged": true,
+  "hashes": [
+    {
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "path": "AGENTS.md"
+    },
+    {
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "path": "CLAUDE.md"
+    },
+    {
+      "sha256": "5ad959ee4d11d742c89da9556fcb9a80b4e1c7fde8b782cc95f7fa49e983e604",
+      "path": "ROADMAP.md"
+    },
+    {
+      "sha256": "47460439db0db7613103922f170aefb39eae07cd8dab5db17463cfc58475bde8",
+      "path": "docs/governance/LESSONS_LEARNED.md"
+    },
+    {
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "path": "Virtuoso/workspace-layout.json"
+    },
+    {
+      "sha256": "bd509c335197b66486de812f8fb2477ce6eee1067e443f10cc20e3b6476d743d",
+      "path": "Virtuoso/work-register.snapshot.json"
+    },
+    {
+      "sha256": "d7e80d0f9a67c832cb5c49d16b54517d20a1f8f955cd327cd554c5bc2758a0da",
+      "path": "docs/governance/bug-reports/Draft.NARRATE-PAUSED-CLICK-1.B0.2026-11-02.md"
+    }
+  ],
+  "u9Output": [
+    "U9 lessons applied (NARRATE-PAUSED-CLICK-1): PASS",
+    "  cited: LL-002, LL-063, LL-068, LL-128, LL-137, LL-090, LL-098, LL-143, LL-172, LL-113, LL-174, LL-169, LL-006",
+    "  [info] lessons-not-cited: 108 live lesson(s) not cited — confirm none applies: LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures), LL-018 (reader, flow mode, performance), LL-019 (renderer, pagination)…",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Output": [
+    "1. Fresh exact input/custody/absence receipt and exclusive117 worktree [calculable] @setup — 1m (median of 11 runs)",
+    "2. I1 staged merge, projection manifest, ordered compliance/quality and exact-parent commit [calculable] @integration-merge — 3m (median of 71 runs)",
+    "3. I2 staged merge, full parity/preservation, second ordered review pair and exact-parent commit [calculable] @integration-merge — 3m (median of 71 runs)",
+    "4. Local-only final identity/accounting/STOP checkpoint with all old work preserved [calculable] @merge-and-docs — 3m (median of 10 runs)",
+    "Total: chain 10m · sum 10m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "u10Exit": 0,
+  "observedAt": "2026-11-03T01:16:47.5668323Z",
+  "gitStatusUnchanged": true,
+  "u9Exit": 0,
+  "scope": "planning only; no B0 controls/source/runtime admission",
+  "spec": "docs/governance/bug-reports/Draft.NARRATE-PAUSED-CLICK-1.B0.2026-11-02.md",
+  "item": "NARRATE-PAUSED-CLICK-1",
+  "phase": "B0"
+}
