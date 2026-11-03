@@ -22,6 +22,8 @@ No PATH probe, executable lookup, PowerShell launch or CIM qualification in T. A
 
 Store the entire following text as one `String.raw` JavaScript template constant inside the existing helper. Its ONLY substitution tokens are `@@ROOT_UTF8_BASE64@@` and `@@LAUNCHER_PID@@`, each occurring once. The base64 token is within a single-quoted PowerShell string; it contains only base64 alphabet/padding. PID is a validated positive safe-integer decimal literal. No raw root/command line or shell expression is interpolated; no Invoke-Expression.
 
+**CPU17 exact canonical literal boundary:** the unsubstituted script is4775 UTF8 bytes, LF only, no BOM, no leading LF and NO FINAL LF; first character `$`, last character `}`. Raw SHA256 `1756e618f18a4f051fc047117109354066bb4ec81d5de307dd5adb3a78ebb288`. Put first `$` immediately after the opening String.raw backtick and last `}` immediately before its closing backtick, or construct exactly equivalent bytes. Markdown's presentation LF before the closing fence is not part of the script. No generic trim, locale transformation or EOL normalization. Freeze the two-token template before safe root/PID substitution; the instantiated script naturally has its own input-specific raw identity. Final text acceptance is in the adjacent producer-final ruling record; no PowerShell parser/CIM run occurred.
+
 ```powershell
 $ErrorActionPreference = 'Stop'
 try {
