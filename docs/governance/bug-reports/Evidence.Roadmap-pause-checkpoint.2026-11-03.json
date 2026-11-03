@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "blurby.roadmap-pause-checkpoint.v1",
+  "scope": "PRESERVATION_ONLY_NOT_READY_NOT_COMPLETION",
+  "createdAt": "2026-11-03T12:31:22.9864170Z",
+  "backupRoot": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z",
+  "artifacts": [
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.C-exclusive-Root-writer.2026-11-03.md",
+      "bytes": 3489,
+      "sha256": "bdaf9dd7844ec1c29a646399536d69540379645fa7480a6b6c354f13ef76d11d",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Brain.FLAT-OPERATIVE-CONTRACT.C-exclusive-Root-writer.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.execution-action-unit.2026-11-03.md",
+      "bytes": 3612,
+      "sha256": "1a5082a933ddc7b98cf3f98da1b81eb0e1c15bd1ea96b8a7b825da011a4b0240",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Brain.FLAT-OPERATIVE-CONTRACT.execution-action-unit.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+      "bytes": 34067,
+      "sha256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+      "bytes": 34882,
+      "sha256": "7b18909cb4f1562812bfa120b2e29de002076777040d4df3329b18827b3b080f",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-acquisition-A.2026-11-03.md",
+      "bytes": 54457,
+      "sha256": "f26784e06abd6af1af5ce3257d39f6ef920a5ae7d9d3d0de8524df9b9e5534b1",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-acquisition-A.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Review.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+      "bytes": 13292,
+      "sha256": "3c4f78aae9caaff520b3bdbf80529d882e28a763434c78207850cc92f56b5e66",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Review.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Capacity.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.json",
+      "bytes": 98034,
+      "sha256": "facf8c58cf1fdc345b75738c4f20b1a4ab320a54453b78c16e650f285f98b23e",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Capacity.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.json",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Capacity.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.json",
+      "bytes": 28131,
+      "sha256": "a7e3cbdf65e4c603fab1fb2defa488349d0c88067f767c12e447e971f2b6b9fd",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Capacity.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.json",
+      "backupVerified": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Capacity.FLAT-OPERATIVE-CONTRACT.instruction-acquisition-A.2026-11-03.json",
+      "bytes": 116936,
+      "sha256": "ae5575fedc90adbfbaa1a594800c26e76d5eadc4b38af2ed0f97e4bc3c0a88b8",
+      "backupPath": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z\\Capacity.FLAT-OPERATIVE-CONTRACT.instruction-acquisition-A.2026-11-03.json",
+      "backupVerified": true
+    }
+  ],
+  "sourceBranch": "eb/roadmap-review-20261102",
+  "previousPublishedCommit": "420b87231326b42362158ca2a1ac7197971861fc",
+  "mainUnchanged": "ac19ea60b6cd8b4fff3e5413b111925b7ef78485",
+  "broaderGoal": "PAUSED",
+  "localWorkerState": {
+    "phase_d_readiness_review": "STOPPED_NO_OWNED_RUNNING_HANDLE_REPORTED",
+    "cpu_ruling_review": "COMPLETED_PLANNING_PACKET_NOT_READY",
+    "roadmap_stub_scope": "COMPLETED_PLANNING_PACKET_NOT_READY",
+    "b_read_independent_review": "COMPLETED_REVIEW_NOT_READY"
+  },
+  "knownGates": {
+    "acquisitionA": "CURRENT_DRAFT_NOT_MEASURED_CAPACITY_STALE_KEEP_BOTH_AS_IS",
+    "bReadV2": "AUTHOR_FROZEN_NOT_INDEPENDENTLY_ACCEPTED_MINIMUM_41_OVER_40_COMPLETE_SOURCE_PENDING",
+    "cReviewClose": "PLANNING_REVIEW_ONLY_NOT_READY_SOURCE_CAPACITY_AND_SUCCESSOR_INPUT_GATES",
+    "runtime": "NO_NEW_TEST_NATIVE_OR_RUNTIME_AUTHORITY",
+    "completion": "NO_STATUS_SEQ_TERMINAL_SUCCESSOR_OR_MAIN_MERGE_CHANGE"
+  },
+  "executorSideState": "BRAIN_CLOSE_ONLY_COORDINATION_REQUESTED_RECEIPTS_PENDING_AT_MANIFEST_CREATION",
+  "restartRule": "EXPLICIT_OWNER_RESUME_AND_NEW_APPLICABLE_ADMISSIONS_REQUIRED_NO_CLOCK_OR_BUDGET_REUSE"
+}
+
