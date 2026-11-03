@@ -1086,7 +1086,6 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md) (moved by roadmap review 2026-10-25 to keep ROADMAP.md under its length ceiling; the item is In Flight). The branch's staging memo records the build.
 
-
 <a id="narrate-harness-coldclick-1-spec"></a>
 
 #### NARRATE-HARNESS-COLDCLICK-1 — Cold click is measured on mainstream hardware *(built and held `c90d9e08` on `eb/narrate-harness-coldclick-1`; its reference smoke ran short and was stopped and reported (see the branch's staging memo); Seq 94, In Flight, merge held for the Stage 8 freeze; not a release gate)*
@@ -1109,7 +1108,6 @@ Future guard constants WORD_NUMBERING_VERSION=2 and measured WORD_NUMBERING_FING
     - The quiet x64 result stands, with no re-run. Both rates pass. At 1.00x the median is 1,580 ms and the worst 1,609 ms (n = 4). At 2.00x the median is 1,298 ms and the worst 1,746 ms (n = 37).
     - The charter's D6 row (`docs/planning/epics/2026-10-12-narrate-rebuild/charter.md`) and `second-machine.md:22` now carry the (B) definition (roadmap review 2026-10-25, follow-up branch).
     - **Closing:** Blurby.Brain says close the item on this evidence. Its branch `c90d9e08` carries the harness change and is held for the Stage 8 freeze, so the dispatch close-out (the terminal record and Completed) runs when the branch merges in the post-release train.
-
 
 <a id="narrate-cpu-profile-1-spec"></a>
 
@@ -1293,13 +1291,11 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **Standing rule 50:** the launcher's warm-budget waiver moved to NARRATE-HARNESS-COLDCLICK-1's class-aware budget, and this item judges against that, not against the old fixed 2,000 ms.
 - **Standing rule 51:** this specification appends no lesson-status line.
 
-
 <a id="chapter-step-cfi-1-spec"></a>
 
 #### CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): "First word of chapter"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*
 
 - **Full specification:** [`docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md`](docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
-
 
 <a id="restamp-rerun-race-1-spec"></a>
 
@@ -1307,7 +1303,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 - **Full specification:** [`docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md`](docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
 - **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** tip `79e1d9d0`. It is stacked on TOC-JUMP-SAVE-1, then PAGE-SAVE-RESTAMP-3 Wave A, then JUMP-LANDING-SAVE-1, and it touches `src/components/ReaderContainer.tsx` through that stack. **Merge order:** after JUMP-LANDING-SAVE-1.
-
 
 <a id="eink-controls-1"></a>
 
@@ -1428,7 +1423,10 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 <a id="auto-archive-1-spec"></a>
 
-#### AUTO-ARCHIVE-1 — Confirm completion before archiving *(Seq111; Queued / Stub; owner amendment approved 2026-10-26)*
+#### LIBRARY-DELETE-SAFE-1 — Deleting a book never erases your own file *(Seq89.5; Queued; Full Spec 2026-11-03; Library & Content; BUG-238 HIGH)* <a id="library-delete-safe-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/LIBRARY-DELETE-SAFE-1.md](docs/planning/specs/2026-11-03/LIBRARY-DELETE-SAFE-1.md). Delete never unlinks: Blurby's own files go to the Recycle Bin; a book in the user's folder loses its library entry only and stays removed across rescans (owner ruling #31; Brain1). Exclusion mechanism: Brain1 to confirm before admission.
+#### AUTO-ARCHIVE-1 — Confirm completion before archiving *(Seq113.5 (moved after PAGE-PAGES-READ-1, Brain1 T4); Queued; Full Spec 2026-11-03; owner amendment approved 2026-10-26)*
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/AUTO-ARCHIVE-1.md](docs/planning/specs/2026-11-03/AUTO-ARCHIVE-1.md). "Finished *Title*?" dialog on leaving a finished book (Keep focused / Archive; Escape keeps); both count the finish; Undo 5 s with a new `unmark-doc-completed` decrement; Flow auto-continue and the legacy window are dismissals (owner batch #17–21; Brain1 T1–T5). Two waves, own shared-core window.
 - **Outcome:** on assumed completion, Keep in Library or Archive; dismissal/default keeps it visible. Archive needs an affirmative action. Preserve compatible explicit Mark complete/Undo behavior; amended completion/history/prompt tests are required before Full Spec.
 - **History:** the superseded automatic-on-exit design and its earlier assertions are preserved in [the dated snapshot](docs/planning/roadmap-reviews/2026-10-26-roadmap-before-specification.md#auto-archive-1-spec); they are not executable instructions. LIBRARY-COMPLETION-VISIBILITY-1 repairs the display independently.
 
@@ -1436,7 +1434,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 - <a id="page-para-keys-1"></a>**PAGE-PARA-KEYS-1 — Page's paragraph keys move the highlight to a real paragraph start** *(Seq 115 — stub; added by roadmap review 2026-10-25 from Blurby.Brain's finding during package verification; BUG-220; not a release gate)*. In Page, with the highlight on word 187, Shift+→ moved it to −1 and Shift+← to 0, on a packaged build. The probable cause is the paragraph command's slice index. Specify after a trace of Page's paragraph command (Shift+←/→ through `useReaderKeys`) on the held key-fix stack: FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → FLOW-PARA-KEYS-1 → BLOCK-TAG-CASE-1. Those fixed the same keys in Focus and Flow. Prerequisites: READER-ARROW-GUARD-1 and BLOCK-TAG-CASE-1. Lane: Reader Engine.
 - <a id="furthest-persist-1"></a>**FURTHEST-PERSIST-1 — The furthest page a reader reached is remembered across sessions** *(Seq 114 — stub; added by roadmap review 2026-10-25, split from PAGE-SAVE-RESTAMP-3 Wave C; tier 2: it changes what the backtrack prompt offers)*. Today the furthest mark lives only in memory for one open (`useProgressTracker.ts:150-164`). `update-doc-progress` (`main/ipc/documents.js:15-33`) saves only `position` and `cfi`, and `useLibrary.updateProgress` (`src/hooks/useLibrary.ts:158-163`) copies only those. `src/types.ts:108` declares `furthestPosition` with an out-of-date comment, has no `furthestCfi`, and main never writes either. So a reader who backs up and quits without the exit prompt loses the furthest page, and the next session's prompt measures from the saved position. A fix saves `furthestPosition` and `furthestCfi`, only when higher, through the progress IPC, and touches `src/types.ts` (shared core), `preload.js:54`, `main/ipc/documents.js`, `useLibrary.ts` and possibly the sync merge (`main/sync-engine.js:328-338`). **Owner ruling (2026-10-25, tier 2): the furthest page ever reached.** The backtrack prompt in a later session offers the furthest page the reader has ever reached in that book. It still needs a full specification (the edit sites above); it is beyond the buffer. Lane: Reader Engine.
-
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
@@ -1667,6 +1664,8 @@ These headings expose existing table/bullet items to the board parser; they do n
 #### PAGE-PARA-KEYS-1 — Page paragraph keys move the highlight to a real paragraph start *(live Seq115; Queued; Full Spec 2026-11-03; BUG-220)*
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/PAGE-PARA-KEYS-1.md](docs/planning/specs/2026-11-03/PAGE-PARA-KEYS-1.md). On an EPUB, Page's paragraph keys read an empty word list; a Page-owned copy of Focus's paragraph-start collector fixes it. Merges before PAGE-ENTRY-KEYS-1 (same section-load code).
 
+#### PAGE-SENTENCE-KEYS-1 — Page's sentence keys move to a real sentence start *(live Seq115.5; Queued; Full Spec 2026-11-03; after PAGE-PARA-KEYS-1)* <a id="page-sentence-keys-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/PAGE-SENTENCE-KEYS-1.md](docs/planning/specs/2026-11-03/PAGE-SENTENCE-KEYS-1.md). Ctrl+Up/Down read the book-wide word table instead of the empty EPUB token list; no-op until book words load (Brain1 R-B).
 ### Smoke findings intake — 2026-10-26
 
 ### Verification contract for the five smoke-fix specifications
@@ -1874,8 +1873,8 @@ Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json c
 - LL-120 and LL-165 — keep mode-owned visual state and prove the actual package profile; standing rules37/43/53/55 require isolated ownership, red visual controls and exact-package verification.
 - Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
 
-#### NARRATE-SELECTION-START-1 — Diagnose Narrate's paused band and start viewport *(Seq124; Queued / Stub; TTS / Narration Engine; P1 residual F7/F8)* <a id="narrate-selection-start-1"></a>
-F9 moves to NARRATE-PAUSED-CLICK-1 at117. This parent keeps the separate paused-band mismatch and Play viewport jump. Owner policy approved 2026-10-26: keep the current viewport when the selected word is already visible, align its paused highlight, and follow only when it leaves the reading area or on explicit Jump back. Before a visual fix, record actual scroll writers/geometry with a known-failing control; no causal attribution to the click fix or other modes.
+#### NARRATE-SELECTION-START-1 — Diagnose Narrate's paused band and start viewport *(Seq124; Queued; Full Spec 2026-11-03; TTS / Narration Engine; P1 residual F7/F8)* <a id="narrate-selection-start-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/NARRATE-SELECTION-START-1.md](docs/planning/specs/2026-11-03/NARRATE-SELECTION-START-1.md). Measure first (packaged probe of the cursor shift when the loading notice appears; under 1 px stops); then a ResizeObserver restores the cursor position in the next animation frame; the view holds, then catches up (owner batch #24).
 
 #### EINK-DEVICE-SETTINGS-1 — Remember E-ink preferences separately on each device *(Seq125; Queued; Full Spec 2026-11-03; Platform & Maintenance; proposed P2) <a id="eink-device-settings-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/EINK-DEVICE-SETTINGS-1.md](docs/planning/specs/2026-11-03/EINK-DEVICE-SETTINGS-1.md). `einkMode` and its three sub-settings become device-local (never uploaded, downloaded or merged), and a legacy `theme: "eink"` is never carried between devices. No schema bump. Owner R9/R2. Cut from the RC merge.
@@ -1887,8 +1886,8 @@ F9 moves to NARRATE-PAUSED-CLICK-1 at117. This parent keeps the separate paused-
 - **Owner design ruling (2026-10-30, via Blurby.Brain1; owner chose "(b) Page" over the recommended Flow):** when E-ink turns on while Focus is active, the reader switches to **Page** and opens the page containing Focus's current word. Remembered-mode restore and shortcuts never land in Focus while E-ink is on. The position is saved through Page's normal save path, with no sibling-mode imports (reading-mode isolation). This settles the active-Focus transition above; the item stays a Stub until specified.
 #### EINK-FLOW-VIEWPORT-1 — Flow advances a screen at a time on E-ink *(Seq128; Queued; Full Spec 2026-11-03; Reader Engine; proposed P2) <a id="eink-flow-viewport-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/EINK-FLOW-VIEWPORT-1.md](docs/planning/specs/2026-11-03/EINK-FLOW-VIEWPORT-1.md). BAND-ALIGN-2 already holds the E-ink page still; the residuals are the 20-line step trigger and no step when the cursor line is above the view. The screen's own edges become the only trigger. Owner R7. Cut from the RC merge.
-#### EINK-NARRATE-VIEWPORT-1 — Narrate advances a screen at a time on E-ink *(Seq130.5, after EINK-VIEW-REFRESH-1 per Blurby.Brain1 R-A 2026-11-03; Queued / Stub; TTS / Narration Engine; proposed P2) <a id="eink-narrate-viewport-1"></a>
-In E-ink, keep Narrate's viewport stationary while the heard word advances, then move at the bottom boundary. Narrate-owned implementation retains exact audio-word timing, advances once per screen boundary, defines manual browsing and chapters, and leaves regular-mode behavior unchanged. Mirror the contract, not Flow's mutable runtime.
+#### EINK-NARRATE-VIEWPORT-1 — Narrate advances a screen at a time on E-ink *(Seq130.5, after EINK-VIEW-REFRESH-1 per Blurby.Brain1 R-A 2026-11-03; Queued; Full Spec 2026-11-03; TTS / Narration Engine; proposed P2) <a id="eink-narrate-viewport-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/EINK-NARRATE-VIEWPORT-1.md](docs/planning/specs/2026-11-03/EINK-NARRATE-VIEWPORT-1.md). Narrate's E-ink page holds still and turns at the bottom edge, with the line landing at the top; manual scroll-away as in regular Narrate (owner batch #12–13). Hooks `reportViewAdvance` from EINK-VIEW-REFRESH-1 (hard prerequisite).
 #### EINK-VIEW-REFRESH-1 — Refresh E-ink on view changes instead of elapsed time *(Seq130; Queued; Full Spec 2026-11-03; UX polish; proposed P2) <a id="eink-view-refresh-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/EINK-VIEW-REFRESH-1.md](docs/planning/specs/2026-11-03/EINK-VIEW-REFRESH-1.md). The E-ink flash fires once per view change (screen turns, the side menu, its pages, full-screen overlays), never per word or on a timer; the interval slider is hidden (owner batch #14–15). Two waves; edits ReaderContainer.tsx in its Seq slot. Adds `reportViewAdvance`, which EINK-NARRATE-VIEWPORT-1 (130.5) uses.
 #### FOLDER-RETRY-FEEDBACK-1 — Retry visibly reports checking and an unavailable folder *(Seq131; Queued; Full Spec 2026-11-03; UX polish; proposed P2) <a id="folder-retry-feedback-1"></a>
@@ -1937,15 +1936,15 @@ The owner requests larger library UI text; the warning banner and Retry screensh
 - LL-165 — exact scratch-profile identity in package checks; standing rules43/48/53/54 require red order/callback tests, type/build gates and a real committing user choice.
 - Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
 
-#### READER-PAGE-COUNTER-1 — Display the reading page near the remaining time *(Seq135; Queued / Stub; UX polish; proposed P3) <a id="reader-page-counter-1"></a>
-Add a page display near reading time. This is distinct from PAGE-PAGES-READ-1's goal counter. Specify pagination semantics for reflowable books, PDFs and each mode; display the current page and an honest total where computable, with coherent resize/font-change behavior.
+#### READER-PAGE-COUNTER-1 — Display the reading page near the remaining time *(Seq135; Queued; Full Spec 2026-11-03; UX polish; proposed P3) <a id="reader-page-counter-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/READER-PAGE-COUNTER-1.md](docs/planning/specs/2026-11-03/READER-PAGE-COUNTER-1.md). "p. 40 of ~312" (250-word pages) before the reading times; shown only once book words are known; same page number across all four modes at the same word (owner batch #5–6; Brain1 R-C).
 #### LIBRARY-FOOTER-REMOVE-1 — Remove the unused settings controls from the library footer *(Seq136; Queued; Full Spec 2026-11-03; UX polish; proposed P3) <a id="library-footer-remove-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/LIBRARY-FOOTER-REMOVE-1.md](docs/planning/specs/2026-11-03/LIBRARY-FOOTER-REMOVE-1.md). A new Settings page, "Startup & Backup", holds Start at login, Backup and Restore unchanged; then the footer (WPM slider and change-folder button included, both duplicated elsewhere) is removed. Owner may rename the page at gate (2).
 - **Owner ruling (2026-10-30):** the footer is currently the only place for start-at-login, backup and restore. Move those into the Settings menu, then remove the footer.
 #### TRAY-ICON-SIZE-1 — Make the Windows tray icon legible at normal scaling *(Seq137; Queued; Full Spec 2026-11-03; Platform & Maintenance; proposed P3) <a id="tray-icon-size-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/TRAY-ICON-SIZE-1.md](docs/planning/specs/2026-11-03/TRAY-ICON-SIZE-1.md). The tray is built from a measured square crop of `assets/tray-icon.png` (character fills ~96%) with 16/20/24/32 px representations; the asset's sha256 is pinned by a test. BUG-203. Cut from the RC merge.
-#### LIBRARY-CONTENT-DEDUP-1 — Make identical books at different source paths understandable *(Seq138; Queued / Stub; Library & Content; proposed P3) <a id="library-content-dedup-1"></a>
-Duplicate-looking cards came from different Books and Books\\Books paths; two sampled pairs had identical SHA256. No repeated exact filepath was found. Specify non-destructive content-identity detection/presentation, distinguish editions, and preserve progress/favorites. No source deletion, auto-merge or automatic hiding is authorized by this report.
+#### LIBRARY-CONTENT-DEDUP-1 — Make identical books at different source paths understandable *(Seq138; Queued; Full Spec 2026-11-03; Library & Content; proposed P3) <a id="library-content-dedup-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/LIBRARY-CONTENT-DEDUP-1.md](docs/planning/specs/2026-11-03/LIBRARY-CONTENT-DEDUP-1.md). Content-hash duplicates get a "duplicate" badge and "Choose which to keep…", preselecting the copy with the most progress (owner batch #28–29); removal reuses LIBRARY-DELETE-SAFE-1 (Recycle Bin only for Blurby-owned files, ruling #31). After LIBRARY-DELETE-SAFE-1; before NARRATE-BAND-SPACE-1.
 - **Owner design ruling (2026-10-30, via Blurby.Brain1; owner chose (c), then amended):** detect duplicates by content hash; show a duplicate marker and a "choose which to keep" action. By default the chosen-away copy is removed from the library only: no automatic hiding, merging of progress or file deletion unless the owner acts. Owner amendment: "ideally your able to delete within the app with a confirmation", so the action may also delete the chosen-away copy's file, but only after an explicit confirmation dialog naming the full path. This supersedes the report's "no source deletion" line above for this owner-confirmed action only.
 - **Technical rulings (Blurby.Brain1, 2026-10-30):**
   - Deletion moves the file to the Recycle Bin (`shell.trashItem`), never a permanent unlink.
