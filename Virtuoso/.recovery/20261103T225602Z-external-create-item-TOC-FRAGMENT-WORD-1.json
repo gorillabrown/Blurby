@@ -1,0 +1,50 @@
+{
+  "id": "20261103T225602Z-external-create-item-TOC-FRAGMENT-WORD-1",
+  "operation": "external-create-item",
+  "item_id": "TOC-FRAGMENT-WORD-1",
+  "created": "2026-11-03T22:56:02Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "TOC-FRAGMENT-WORD-1",
+      "title": "A contents entry that points inside a chapter lands on its own word",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#toc-fragment-word-1",
+      "description": "A contents entry whose link points into the middle of a section (an href with a fragment) lands on its section's first word, because `resolveTocWordIndex` maps by section only. Five of the 23 entries in Meditations do this. Map the fragment to its own word.",
+      "notes": "origin: CHAPTER-STEP-CFI-1 owner question 3 (ruling 2026-10-23: decided by Done-when 1's count); the 2026-10-23 control count found 5 such entries in Meditations, selecting A: a follow-up in a `ReaderContainer.tsx` integration window. Stub; needs a shared-core window.",
+      "prerequisites": [
+        "CHAPTER-STEP-CFI-1"
+      ],
+      "sequence": 110.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T22:55:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:TOC-FRAGMENT-WORD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "TOC-FRAGMENT-WORD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:TOC-FRAGMENT-WORD-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T225602Z-external-create-item-TOC-FRAGMENT-WORD-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-8116-8820-cf1cc54c8262",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T22:56:54Z",
+  "outcome": "succeeded"
+}

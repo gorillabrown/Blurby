@@ -1293,8 +1293,9 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 <a id="chapter-step-cfi-1-spec"></a>
 
-#### CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): "First word of chapter"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*
+#### CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**Queued again 2026-11-03 under amendment 1** (the 2026-10-23 run stopped at Done-when 1, `796282c2`; design 2's resolve order failed on the control; that branch stays as the record; re-dispatch on `eb/chapter-step-cfi-1-r2` from `origin/main` after the run-5 hotfix); position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): "First word of chapter"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*
 
+- **Amendment 1 (2026-11-03, planner tier 1):** [docs/planning/specs/2026-11-03/CHAPTER-STEP-CFI-1.amendment-1.md](docs/planning/specs/2026-11-03/CHAPTER-STEP-CFI-1.amendment-1.md). The landing completes on the jump's promise or 500 ms after its last relocate, whichever comes first; `syncSection` makes no competing `goTo` while a landing is armed; a landing with no relocate saves nothing after 5 s. Base `origin/main` (≥ `c5bb507f`, both prerequisites merged). Red rows (cl6)–(cl8) added; control re-measured on the new base.
 - **Full specification:** [`docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md`](docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
 
 <a id="restamp-rerun-race-1-spec"></a>
@@ -1437,10 +1438,8 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-
 - <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1** is now a full specification: [NARRATE-HARNESS-COLDCLICK-1](#narrate-harness-coldclick-1-spec) (roadmap review 2026-10-23-5).
 - <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1** is now a full specification: [NARRATE-CPU-PROFILE-1](#narrate-cpu-profile-1-spec) (roadmap review 2026-10-23-5).
-
 
 - <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1** is now a full specification: [WORD-INDEX-UNIFY-1](#word-index-unify-1-spec) (roadmap review 2026-10-23-5).
 
@@ -1478,7 +1477,6 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
-
 
 <a id="blurby-server-1"></a>
 
@@ -1652,8 +1650,11 @@ These headings expose existing table/bullet items to the board parser; they do n
 #### CAR-AUDIO-1 — Apple CarPlay compatibility *(live Seq155; Queued; Stub)*
 - **Source:** ROADMAP.md#car-audio-1; live register remains status authority.
 
-#### FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter first word *(live Seq110; Queued; Stub)*
-- **Source:** ROADMAP.md#flow-toc-jump-word-1; live register remains status authority.
+#### FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter first word *(live Seq110; Queued; Full Spec 2026-11-03)*
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md](docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md). Flow's `completeLanding` (CHAPTER-STEP-CFI-1 amendment 1) calls `moveReadingWord`: paused, the chapter's first word gets Flow's paused cursor and Play starts there; playing, the engine jumps there and keeps playing. One file plus one test; after CHAPTER-STEP-CFI-1.
+
+#### TOC-FRAGMENT-WORD-1 — A contents entry that points inside a chapter lands on its own word *(live Seq110.5; Queued; Stub; Reader Engine; after CHAPTER-STEP-CFI-1; needs a `ReaderContainer.tsx` window)* <a id="toc-fragment-word-1"></a>
+- **Gist:** `resolveTocWordIndex` maps a contents entry by section only, so an entry whose href has a fragment lands on its section's first word. *Meditations* has 5 of 23 such entries (CHAPTER-STEP-CFI-1 control count, 2026-10-23); the owner's question-3 ruling makes this a follow-up (A).
 
 #### QUEUE-SYNC-1 — One reading queue and one listening queue, synced across every surface *(live Seq156; Queued; Stub)*
 - **Source:** ROADMAP.md#queue-sync-1; live register remains status authority.
@@ -1673,7 +1674,6 @@ Every Done-when below includes these **unwaived** gates (standing rules43/47/48/
 Build the final implementation with approved main integrated: npm run build; npx electron-builder --win --arm64 --dir --publish never. The output is release/win-arm64-unpacked/Blurby.exe. Before first input, launch with both BLURBY_USER_DATA_DIR and --user-data-dir pointing to a fresh owned profile, read back actual app userData/data path/PID/exe, and abort if normal profile. Hash exactly %APPDATA%/blurby/blurby-data/library.json and settings.json before/after. Preserve logs, build/asar hashes, package files and fixture hashes; source staging never includes personal books/audio.
 Standing-rule53 requires 25-second native-ARM64 survival, no unhandled/crash/error beyond its enumerated known noise, unchanged live hashes, matching renderer bundle/asar inclusion, automatable checks rerun against the exact package, owner UI/heard-audio acceptance where named, and confirmation by the designated package verifier before merge. A missing capability or unavailable owner is an execution-environment hold, never a perceptual PASS. Use no install/uninstall operation for these reader/UI items; retain LL-168 if packaging scope later changes.
 All five run **serially in approved integration windows**. No sibling mode imports or shared mutable mode store; do not widen the shared-core freeze set. This review creates no implementation branch or exception to the Stage8 freeze. Rollback is revert of the item's own implementation commits, never reset/restore of user data. The plan/repository must be committed and reachable from the execution base before any kickoff.
-
 
 Owner-authorized targeted roadmap update from the Stage 8 smoke of release 36ac7466749688c9ba5e17de841224fab08d7bae (v1.75.1 ARM64). **Overall RED.** All 17 findings and 13 requests are traced in the [intake and priority report](docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md); defects are indexed in [Issue.SMOKE8-20261026](docs/governance/bug-reports/Issue.SMOKE8-20261026.2026-10-26.md) and BUG_REPORT.md. Notion remains live status authority. No code changes, dispatch, release waiver, completion, merge or new release-gate classification is implied.
 
