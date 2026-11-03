@@ -1,5 +1,5 @@
 {
- "takenAt": "2026-11-03T18:31:00.000Z",
+ "takenAt": "2026-11-03T17:36:38.000Z",
  "rows": [
   {
    "id": "3f87c96c-c31e-810a-bf65-f7821d8b2fee",
@@ -4150,7 +4150,7 @@
    "date:Completed:is_datetime": null,
    "Spec Reference": "ROADMAP.md#blurby-server-1",
    "Notes": "origin: held storyboard 2026-10-23-blurby-server (absorbed by roadmap review 2026-10-23-3)",
-   "Description": "Path: epic. Server on Cloudflare (blrby.app): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md; scope: docs/planning/holding/2026-11-03-first-finish-line.md.",
+   "Description": "Path: epic. Server on Cloudflare (`blrby.app`): accounts and one library across devices. First finish line (owner 2026-11-03) = phases 1 and 2 only: server foundation, then desktop sign-in (Google, Microsoft, email, Apple), sync of books, positions, highlights, notes and settings, and offline books; plan limits exist only as settings and everyone is Unlimited. Phases 3 (payments) and 4 (Kokoro server narration) follow the first finish line. Charter draft: `docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`; scope: `docs/planning/holding/2026-11-03-first-finish-line.md`.",
    "Branch": "eb/blurby-server-1",
    "Phase": null,
    "Evidence": null,
@@ -6070,7 +6070,7 @@
    "date:Completed:is_datetime": 0,
    "Spec Reference": "ROADMAP.md#blurby-site-1",
    "Notes": "origin: held plan 2026-11-03-first-finish-line (website draft stub; absorbed by roadmap review 2026-11-03-2). Stub; needs /write-plan before dispatch. Owner accounts needed: Azure Trusted Signing (identity validation), Cloudflare Pages.",
-   "Description": "One landing page at blrby.app on Cloudflare Pages: the Windows download (x64 or ARM64, chosen automatically, from the latest GitHub release), Google Play open-testing, Chrome Web Store and Firefox Add-ons links, privacy policy and terms, and the sign-in pages the server needs. The Windows installer is signed with Azure Trusted Signing. The download may go live right after the Stage 8 Windows release; sign-in pages follow BLURBY-SERVER-1 phase 2, and each store link is added as its listing goes live.",
+   "Description": "One landing page at `blrby.app` on Cloudflare Pages: the Windows download (x64 or ARM64, chosen automatically, from the latest GitHub release), Google Play open-testing, Chrome Web Store and Firefox Add-ons links, privacy policy and terms, and the sign-in pages the server needs. The Windows installer is signed with Azure Trusted Signing. The download may go live right after the Stage 8 Windows release; sign-in pages follow BLURBY-SERVER-1 phase 2, and each store link is added as its listing goes live.",
    "Branch": "eb/blurby-site-1",
    "Phase": null,
    "Evidence": null,
@@ -6090,36 +6090,6 @@
    "Spec State": "Stub",
    "Seq": 142.5,
    "Name": "Blurby website with downloads"
-  },
-  {
-   "id": "40d7c96c-c31e-815a-8479-c9ba00d9e410",
-   "url": "https://app.notion.com/40d7c96cc31e815a8479c9ba00d9e410",
-   "createdTime": "2026-11-03 18:27:25Z",
-   "date:Completed:start": null,
-   "date:Completed:end": null,
-   "date:Completed:is_datetime": null,
-   "Spec Reference": "docs/planning/specs/2026-11-03/PDF-CANVAS-ARM64-1.md",
-   "Notes": "origin: Findings F-012 (Blurby.Brain1 asar comparison, RC merge c5bb507f, 2026-11-03); fix ruling by Blurby.Brain1 2026-11-03. Touches package.json, package-lock.json, one new test and RELEASE_RUNBOOK.md only; no shared core. Built on RodneySr (x64), arm64 package and launch on Rodney. Gate (2) item (v) stays until release.",
-   "Description": "The Windows arm64 install reads PDFs with the native @napi-rs/canvas binding instead of polyfills. An npm override pins @napi-rs/canvas to 0.1.100, the first 0.1.x line with a win32-arm64 package, and the lockfile is regenerated. A pdfkit-generated fixture extracts the same text natively inside both packaged builds. The release runbook's native checks then require each architecture's binding.",
-   "Branch": "eb/pdf-canvas-arm64-1",
-   "Phase": null,
-   "Evidence": null,
-   "Status": "Queued",
-   "Sprint Code": "PDF-CANVAS-ARM64-1",
-   "Lane": "Platform & Maintenance",
-   "Monday Item ID": null,
-   "Board Group": null,
-   "Workstream": null,
-   "Phase page": null,
-   "date:Started:start": null,
-   "date:Started:end": null,
-   "date:Started:is_datetime": null,
-   "Deliverable": null,
-   "Prerequisites": null,
-   "Effort": "S",
-   "Spec State": "Full Spec",
-   "Seq": 123.5,
-   "Name": "PDF text reads natively on Windows arm64"
   }
  ]
 }
