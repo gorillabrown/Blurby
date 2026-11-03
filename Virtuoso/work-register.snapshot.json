@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T23:29:30Z",
+  "takenAt": "2026-11-03T23:37:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -7487,8 +7487,8 @@
       "sequence": 87.5,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "NARRATE-REBUILD-1",
         "FLOW-PARA-PAUSE-INDEX-1",
@@ -7498,14 +7498,14 @@
       "workstream": "Reader Engine",
       "deliverable": "Preserve ordered accepted block runs and exact canonical source correspondence in independent reading modes without activating WORD numbering",
       "group": "",
-      "spec_link": "ROADMAP.md#block-text-order-1",
+      "spec_link": "docs/planning/specs/2026-11-03/BLOCK-TEXT-ORDER-1.md",
       "branch": "eb/block-text-order-1",
       "started": "",
       "completed": "",
       "evidence": "docs/planning/roadmap-reviews/2026-10-27-group-source-trace.md; docs/governance/bug-reports/Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md",
       "description": "",
       "notes": "Owner approved Phase C2026-10-27 and explicitly directed qualified registry-helper repair followed by registration at87.5. Authored Stub/NOT READY: accepted-text equivalence, non-lossy canonical alignment, hydration authority and semantic paragraph contracts remain G-A through G-D holds. Narrow four-helper-only preservation premise is insufficient; exact minimal source-fence correction requires review. Preserve legacy main tokenizer/word/cue output; WORD joining/migration remains separate. No source/process/native admission.\n\nPrerequisite NATIVE-PATH-ATTESTATION-1 removed 2026-10-30 (R-2026-10-30-1; Brain1 Phase C ruling 2). Native measurement uses the RodneySr substitute: inspector-proved scratch userData (LL-165), APPDATA and LOCALAPPDATA redirected, profile-tree snapshot/diff/restore-only-on-difference, no other Blurby running. Bound: owned fixtures and public-domain books only; any run reading the owner's own library needs the owner's explicit OK.",
-      "revision": "0fa26cb76fe77dcc012e32ca43512ce87d8abac4cfdb3bff189ec810b9bec090",
+      "revision": "d56a2309304b6de7975b3c5c1e86d863ee48f8dfa42a5630409f3182bac42c8f",
       "extra": {
         "id": "4067c96c-c31e-81a6-8f0a-e776b050f662",
         "url": "https://app.notion.com/4067c96cc31e81a68f0ae776b050f662",
