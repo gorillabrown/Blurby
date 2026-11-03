@@ -31,7 +31,7 @@ describe("BAND-ALIGN-2 R8: settings v13 → v14 (flowZoneLines → flowBandEnabl
   it("(s1) Off stays off", () => {
     const out = loadSettingsData({ schemaVersion: 13, flowZoneLines: 0 });
     expect({ flowBandEnabled: out.flowBandEnabled, hasLines: Object.hasOwn(out, "flowZoneLines"), schemaVersion: out.schemaVersion })
-      .toEqual({ flowBandEnabled: false, hasLines: false, schemaVersion: 14 });
+      .toEqual({ flowBandEnabled: false, hasLines: false, schemaVersion: 15 });
   });
 
   it("(s2) a line count is on: 3, 5, 7 and a legacy 6", () => {
@@ -45,12 +45,12 @@ describe("BAND-ALIGN-2 R8: settings v13 → v14 (flowZoneLines → flowBandEnabl
   it("(s3) no old key, no new key", () => {
     const out = loadSettingsData({ schemaVersion: 13, wpm: 300 });
     expect({ hasBand: Object.hasOwn(out, "flowBandEnabled"), wpm: out.wpm, schemaVersion: out.schemaVersion })
-      .toEqual({ hasBand: false, wpm: 300, schemaVersion: 14 });
+      .toEqual({ hasBand: false, wpm: 300, schemaVersion: 15 });
   });
 
   it("(s4) an old settings file loads cleanly", () => {
     const input = { ...structuredClone(V13), flowZonePosition: 1 / 3, flowZoneLines: 7 };
-    const expected: Record<string, unknown> = { ...structuredClone(input), flowBandEnabled: true, schemaVersion: 14 };
+    const expected: Record<string, unknown> = { ...structuredClone(input), flowBandEnabled: true, schemaVersion: 15 };
     delete expected.flowZoneLines;
     let out: Record<string, unknown> = {};
     expect(() => { out = loadSettingsData(input); }).not.toThrow();
@@ -62,7 +62,7 @@ describe("BAND-ALIGN-2 R8: settings v13 → v14 (flowZoneLines → flowBandEnabl
 
   it("(s5) the oldest file runs every migration and keeps Off", () => {
     const out = loadSettingsData({ flowZoneLines: 0 });
-    expect({ flowBandEnabled: out.flowBandEnabled, schemaVersion: out.schemaVersion }).toEqual({ flowBandEnabled: false, schemaVersion: 14 });
+    expect({ flowBandEnabled: out.flowBandEnabled, schemaVersion: out.schemaVersion }).toEqual({ flowBandEnabled: false, schemaVersion: 15 });
   });
 
   it("(s6) main stores flowBandEnabled, not flowZoneLines", () => {
