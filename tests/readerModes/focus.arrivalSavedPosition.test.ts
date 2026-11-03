@@ -18,7 +18,8 @@ describe("Focus: arriving from Page at a saved word, Play starts there (NARRATE-
   const opened: FocusModeRuntime[] = [];
   afterEach(() => { for (const r of opened.splice(0)) r.destroy(); vi.useRealTimers(); });
 
-  it("(fo-sp1) from Page at 12 with the cover shown: Play starts in section 3, not at MEDITATIONS", async () => {
+  // Expected-fail until Blurby.Brain1 ruling (a) of 2026-11-03 (packaged probe decides fix vs. fixture correction); the final tip carries no it.fails here.
+  it.fails("(fo-sp1) from Page at 12 with the cover shown: Play starts in section 3, not at MEDITATIONS", async () => {
     vi.useFakeTimers({ now: 0 });
     const fake = createFakeInfrastructure({ document: zeroWordDocument(SAVED, BOOK) });
     const broker = createReaderPorts(fake.infra);

@@ -104,6 +104,31 @@ describe("Narrate: arriving at a saved place shows it, so Play starts there (NAR
     expect(inSaved(firstRequestWord(o))).toBe(true);
   });
 
+  it("(sp6) map pending, Play, then a click on another word before the map: the start is the clicked word, not 12's sentence", async () => {
+    // Brain1 ruling (c), 2026-11-03. The click clears both the arrival sync and the pending Play (PLAY-FIRST-TEXT-1's
+    // existing clear, spec item 5), so the map's arrival starts nothing; the next Play starts at the clicked word.
+    const o = open({ shown: 0, position: SAVED, book: null, fromPage: true });
+    opened.push(o.runtime);
+    await wait(FRAMES_MS);
+    o.runtime.togglePlay();
+    await wait(100);
+    o.view.shown = 3; // the reader paged to section 3 and clicked word 15 there
+    o.runtime.onWordClick("epubcfi(/6/8!/4/2/1:0)", BOOK.words[15], 3, 5, 15);
+    // Before the map the click resolves against the shown section's words (an existing clamp, reported to Brain1):
+    // the start must be exactly the anchor the click set, whatever it is, and never 12's sentence start (10).
+    const clicked = o.runtime.getSnapshot().canonicalWordIndex;
+    await wait(100);
+    o.fake.publishDocument(zeroWordDocument(SAVED, BOOK));
+    await wait(300);
+    expect(completedStarts(o)).toEqual([]);
+    expect(o.api.goToSection).not.toHaveBeenCalled();
+    o.runtime.togglePlay();
+    await flush(); await flush();
+    expect(firstTextNavs(o)).toEqual([]);
+    expect(firstRequestWord(o)).toBe(clicked);
+    expect(firstRequestWord(o)).not.toBe(10);
+  });
+
   it("(sp4) control: after the sync the reader pages back to the cover; Play starts at MEDITATIONS via play-first-text", async () => {
     const o = open({ shown: 0, position: SAVED, fromPage: true });
     opened.push(o.runtime);
