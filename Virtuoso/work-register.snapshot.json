@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T18:35:00Z",
+  "takenAt": "2026-11-03T22:15:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -6661,14 +6661,15 @@
     {
       "id": "EINK-NARRATE-VIEWPORT-1",
       "title": "Narrate advances a screen at a time on E-ink",
-      "sequence": 129,
+      "sequence": 130.5,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
         "NARRATE-SELECTION-START-1",
-        "EINK-CONTROLS-1"
+        "EINK-CONTROLS-1",
+        "EINK-VIEW-REFRESH-1"
       ],
       "effort": "",
       "workstream": "TTS / Narration Engine",
@@ -6681,7 +6682,7 @@
       "evidence": "",
       "description": "In E-ink, keep Narrate's viewport stationary while the heard word advances, then move at the bottom boundary.",
       "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R7. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
-      "revision": "a91d6657f7aa6a1006709e34a2e604d4598a7fbc6d0c8fed3128755d08638f26",
+      "revision": "c19327dc4d2174ff83af105b2362217027dbb587f0d8d330676eecc1cb6b5853",
       "extra": {
         "id": "4057c96c-c31e-8152-89df-ca4f54f40102",
         "url": "https://app.notion.com/4057c96cc31e815289dfca4f54f40102",
