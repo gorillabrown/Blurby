@@ -2,11 +2,20 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-11-03 (BUG-238)
+**Last updated:** 2026-11-03 (BUG-239)
 
 ---
 
 ## Incomplete
+
+### BUG-239 — A damaged EPUB leaves Flow, Focus and Narrate with no words
+**Reported:** 2026-11-03, Blurby.Brain1 static finding (1) while ruling on BLOCK-TEXT-ORDER-1's contracts (`Brain1.held-items-TQ.2026-11-03.md`); traced in the contracts' §C.2 (`docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md`).
+**Severity:** MEDIUM. A damaged or unusual EPUB opens, but three of the four reading modes can't start.
+**Status:** OPEN, not scheduled. The owner kept today's behaviour inside BLOCK-TEXT-ORDER-1 (OQ3, 2026-11-03), so it is input to WORD-INDEX-UNIFY-1's design. Lane: Reader Engine.
+**Observation:** when main's full-book word extraction fails, `extractWords` returns an empty book rather than an error: `{ words: [], sections: [], footnoteCues: [], totalWords: 0 }` (`main/epub-word-extractor.js:171`, `:188` at `c5bb507f`). The renderer can't tell a failure from a book with no words.
+- **Page** treats empty `sections` as a failure and saves the cfi only.
+- **Flow, Focus and Narrate** take a non-null empty word list as authoritative. Start then retries and never falls back to the words visible on the page.
+**Next:** WORD-INDEX-UNIFY-1 decides how a failure is reported (an error distinct from "no words") and what each mode does with it. Any change to start or speech behaviour goes to the owner first.
 
 ### BUG-238 — Deleting a book permanently erases the user's own file
 **Reported:** 2026-11-03, Blurby.Brain1, read-only trace on `c5bb507f` while ruling on LIBRARY-CONTENT-DEDUP-1's technical question T1.

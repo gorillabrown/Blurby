@@ -237,3 +237,31 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner with Blurby.Brain1 (technical) — read-only diagnosis before any fix spec: (a) whether a `win32-arm64` build of `@napi-rs/canvas` exists for the locked version line; (b) whether the polyfill path degrades extraction, tested with a synthetic PDF only. Until then, release gate (2) carries "PDF opens and reads on the arm64 install" (`docs/governance/SMOKE_CHECKLIST_STAGE8.md`, RC integration window additions).
 
 **Disposition:** open
+
+### F-013 — Flow, Focus and Narrate re-stamps don't check that their document is still current (BLOCK-TEXT-ORDER-1 TQ-B3, 2026-11-03)
+
+**Source:** Blurby.Brain1 ruling TQ-B3 on BLOCK-TEXT-ORDER-1's contracts (`Brain1.held-items-TQ.2026-11-03.md`), confirmed by the planner on `origin/main` `c5bb507f`.
+
+**Severity:** medium (a source-only race; no user report yet)
+
+**Where:** `src/reader/modes/{flow,focus,narrate}/FoliateView.tsx`, the `restampVisibleSections` effect. Page's (`src/reader/modes/page/FoliateView.tsx:1104-1138`) has the three guards the others lack.
+
+**Finding:** the other three modes' re-stamps don't wait for a section's in-progress wrap, don't register their own wrap, and check `cancelled` only after the loop. A word-list arrival during a yielding wrap can unwrap a section halfway through. Brain1 named Flow and Narrate. Focus's re-stamp has the same gaps, so the planner registered it too, pending Brain1's confirmation. The defect predates BLOCK-TEXT-ORDER-1 and is outside its fence.
+
+**Accountable role / next action:** planner. Registered as FLOW-RESTAMP-CURRENT-1 (Seq 111), FOCUS-RESTAMP-CURRENT-1 (Seq 111.5) and NARRATE-RESTAMP-CURRENT-1 (Seq 112): reproduce first, then fix or close as not reachable. Specs are in `docs/planning/specs/2026-11-03/`.
+
+**Disposition:** open; scheduled
+
+### F-014 — Word re-extraction timing adds no paragraph pause today; moving it is a design change (BLOCK-TEXT-ORDER-1 TQ-D1, 2026-11-03)
+
+**Source:** Blurby.Brain1 ruling TQ-D1 on BLOCK-TEXT-ORDER-1's contracts (`Brain1.held-items-TQ.2026-11-03.md`); owner answer OQ5 ("No pause"), 2026-11-03.
+
+**Severity:** low
+
+**Where:** each mode's `onWordsReextracted` handler; contracts §G-D (`docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md`)
+
+**Finding:** BLOCK-TEXT-ORDER-1 leaves `onWordsReextracted` timing unchanged. Moving it would add paragraph pauses the owner would notice, so any change is a design question for the owner (OQ5b), not a technical fix.
+
+**Accountable role / next action:** planner; raise with the owner only if a later item needs the timing to change.
+
+**Disposition:** open; no item

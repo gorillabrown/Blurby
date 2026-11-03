@@ -855,7 +855,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **LL-149 / standing rule 48:** typecheck and build are restated.
 - **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
 - **Standing rule 51:** this specification appends no lesson-status line.
-
 #### NARRATE-ARRIVAL-SYNC-1 — Narrate shows the saved place when you switch to it, so Play starts there *(Seq 88.5; Queued; Full Spec 2026-11-03; TTS / Narration Engine; release-candidate hotfix for gate (1) run 5 RED)* <a id="narrate-arrival-sync-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/NARRATE-ARRIVAL-SYNC-1.md](docs/planning/specs/2026-11-03/NARRATE-ARRIVAL-SYNC-1.md). Arrival sync waits for the section map (`arrivalSyncOwed`, `settleArrivalSync`), and play-first-text never judges a view not yet moved; `narrate/ModeRuntime.ts` plus trial hardening only (Blurby.Brain1 ruling, Aristotle diagnosis). Red first with Focus and Flow rows; rule 53 pair and gate (1) run 6 on RodneySr; the 21 RC close-outs wait for run 6.
 
@@ -967,7 +966,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-30.md) (moved by roadmap review 2026-10-30 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `e29117b2`; search for `#### NATIVE-PATH-ATTESTATION-1`). Its WIP candidate `9264c9b3` (also `refs/archive/rodney-unpushed/eb-native-path-attestation-1`), the Rodney worktree's 7 uncommitted harness edits and all receipts are kept untouched.
 - **Parked (R-2026-10-30-1, Blurby.Brain1 under the owner's 2026-10-30 mandate):** no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. On RodneySr the owner's data is absent, so native runs there use inspector-proved scratch userData (LL-165), APPDATA/LOCALAPPDATA redirected, a profile-tree snapshot/diff/restore-only-on-difference, and no other Blurby running — bounded to owned fixtures and public-domain books; reading the owner's library needs the owner's explicit OK. Seq 67.5 → 140.
-
 #### FOLIATE-DISPLAY-LIFETIME-1 — EPUB display lifetime repair (In Flight; built/held; Seq68) <a id="foliate-display-lifetime-1"></a>
 - **Held specification:** source branch `eb/foliate-display-lifetime-1`; package/tip `2d5772d3`/`4ac4ff76`. See the opening Held dispatch update and current readiness report. Observer -> visibility -> display-lifetime; ARM64 launch, integration and release gates remain. Status summary only, not a new implementation specification.
 <a id="block-text-order-1"></a>
@@ -1430,7 +1428,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/AUTO-ARCHIVE-1.md](docs/planning/specs/2026-11-03/AUTO-ARCHIVE-1.md). "Finished *Title*?" dialog on leaving a finished book (Keep focused / Archive; Escape keeps); both count the finish; Undo 5 s with a new `unmark-doc-completed` decrement; Flow auto-continue and the legacy window are dismissals (owner batch #17–21; Brain1 T1–T5). Two waves, own shared-core window.
 - **Outcome:** on assumed completion, Keep in Library or Archive; dismissal/default keeps it visible. Archive needs an affirmative action. Preserve compatible explicit Mark complete/Undo behavior; amended completion/history/prompt tests are required before Full Spec.
 - **History:** the superseded automatic-on-exit design and its earlier assertions are preserved in [the dated snapshot](docs/planning/roadmap-reviews/2026-10-26-roadmap-before-specification.md#auto-archive-1-spec); they are not executable instructions. LIBRARY-COMPLETION-VISIBILITY-1 repairs the display independently.
-
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 - <a id="page-para-keys-1"></a>**PAGE-PARA-KEYS-1 — Page's paragraph keys move the highlight to a real paragraph start** *(Seq 115 — stub; added by roadmap review 2026-10-25 from Blurby.Brain's finding during package verification; BUG-220; not a release gate)*. In Page, with the highlight on word 187, Shift+→ moved it to −1 and Shift+← to 0, on a packaged build. The probable cause is the paragraph command's slice index. Specify after a trace of Page's paragraph command (Shift+←/→ through `useReaderKeys`) on the held key-fix stack: FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → FLOW-PARA-KEYS-1 → BLOCK-TAG-CASE-1. Those fixed the same keys in Focus and Flow. Prerequisites: READER-ARROW-GUARD-1 and BLOCK-TAG-CASE-1. Lane: Reader Engine.
@@ -1625,16 +1622,12 @@ These headings expose existing table/bullet items to the board parser; they do n
   - Host: RodneySr, for now.
 - **Lane:** "Blurby Business", the seventh product lane, confirmed by the owner on 2026-10-30. It enters registry policy through AGENT-PROTOCOL-CONSOLIDATION-1's `roadmap.lanes` → `workstreams` rename.
 - **Follow-ups:** a separate future storyboard for main-app document tabs (it reopens APP-TABS-1's "reader stays full-screen" decision) and for the main app as the EPUB default.
-
 #### RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom *(live Seq151; Queued; Stub)*
 - **Source:** ROADMAP.md#rss-aggregator-1; live register remains status authority.
-
 #### PODCAST-SOURCE-1 — Podcast source service integration *(live Seq152; Queued; Stub)*
 - **Source:** ROADMAP.md#podcast-source-1; live register remains status authority.
-
 #### BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions *(live Seq143; Queued; Stub)*
 - **Source:** ROADMAP.md#browser-ext-finalize-1; live register remains status authority.
-
 #### BLURBY-SITE-1 — Blurby website with downloads *(live Seq142.5; Queued; Stub)*
 - **Source:** ROADMAP.md#blurby-site-1; live register remains status authority.
 
@@ -1654,6 +1647,13 @@ These headings expose existing table/bullet items to the board parser; they do n
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md](docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md). Flow's `completeLanding` (CHAPTER-STEP-CFI-1 amendment 1) calls `moveReadingWord`: paused, the chapter's first word gets Flow's paused cursor and Play starts there; playing, the engine jumps there and keeps playing. One file plus one test; after CHAPTER-STEP-CFI-1.
 #### TOC-FRAGMENT-WORD-1 — A contents entry that points inside a chapter lands on its own word *(live Seq110.5; Queued; Stub; Reader Engine; after CHAPTER-STEP-CFI-1; needs a `ReaderContainer.tsx` window)* <a id="toc-fragment-word-1"></a>
 - **Gist:** `resolveTocWordIndex` maps a contents entry by section only, so an entry whose href has a fragment lands on its section's first word. *Meditations* has 5 of 23 such entries (CHAPTER-STEP-CFI-1 control count, 2026-10-23); the owner's question-3 ruling makes this a follow-up (A).
+
+#### FLOW-RESTAMP-CURRENT-1 — Flow's word renumbering never runs over a section that is still being numbered *(Seq 111; Queued; Full Spec 2026-11-03; Reader Engine; not a release gate)* <a id="flow-restamp-current-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/FLOW-RESTAMP-CURRENT-1.md](docs/planning/specs/2026-11-03/FLOW-RESTAMP-CURRENT-1.md). Flow's re-stamp lacks Page's three guards (wait for the section's registered wrap, register its own, re-check `cancelled`). Reproduce first, then mirror them mode-locally or close as not reachable (Blurby.Brain1 TQ-B3; Findings F-013).
+#### FOCUS-RESTAMP-CURRENT-1 — Focus's word renumbering never runs over a section that is still being numbered *(Seq 111.5; Queued; Full Spec 2026-11-03; Reader Engine; not a release gate)* <a id="focus-restamp-current-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/FOCUS-RESTAMP-CURRENT-1.md](docs/planning/specs/2026-11-03/FOCUS-RESTAMP-CURRENT-1.md). Focus's re-stamp lacks Page's three guards (wait for the section's registered wrap, register its own, re-check `cancelled`). Reproduce first, then mirror them mode-locally or close as not reachable (Blurby.Brain1 TQ-B3; Findings F-013). Registered by the planner beside Brain1's Flow and Narrate items; Brain1 confirms before admission.
+#### NARRATE-RESTAMP-CURRENT-1 — Narrate's word renumbering never runs over a section that is still being numbered *(Seq 112; Queued; Full Spec 2026-11-03; Reader Engine; not a release gate)* <a id="narrate-restamp-current-1"></a>
+- **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/NARRATE-RESTAMP-CURRENT-1.md](docs/planning/specs/2026-11-03/NARRATE-RESTAMP-CURRENT-1.md). Narrate's re-stamp lacks Page's three guards (wait for the section's registered wrap, register its own, re-check `cancelled`). Reproduce first, then mirror them mode-locally or close as not reachable (Blurby.Brain1 TQ-B3; Findings F-013).
 
 #### QUEUE-SYNC-1 — One reading queue and one listening queue, synced across every surface *(live Seq156; Queued; Stub)*
 - **Source:** ROADMAP.md#queue-sync-1; live register remains status authority.
