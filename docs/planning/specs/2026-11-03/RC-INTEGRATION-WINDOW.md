@@ -6,6 +6,16 @@
 
 Merge the held desktop fixes into one candidate branch, prove that candidate with the full local gates and one package pair, and land it on `main` in one `--no-ff` merge. Owner authority: freeze lift for one integrated release candidate (2026-11-02), resumed by the 2026-11-03 goal.
 
+## Scope
+
+- **In:** merging the 21 tips below, with their 43 held items, into `eb/rc-integration-20261103`; the ruled conflict resolutions; per-wave local gates; the final package pair; one `--no-ff` merge to `main` after the merge go.
+- **Out:** any new fix or feature; CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-HARNESS-COLDCLICK-1 and every unbuilt item; register status or Seq changes (close-outs happen later, item by item, after gates (1) and (2)); release publication; the owner's gate (2) smoke run itself.
+- **Outcome:** `origin/main` contains all 21 tips through one reviewed integration merge whose final tip passed suite, typecheck, build and rule 53.
+
+## Prerequisites
+
+Every carried item is In Flight by design: this window is how they integrate (owner freeze lift 2026-11-02). No register prerequisite gates the window. Its encoded waits are Brain1's rulings R1, R2, R4 and R5; RodneySr reachable and idle; and `origin/main` still at the base below, or the read-only trial re-run on the new main.
+
 ## Baseline
 
 - Base: `origin/main` @ `b58b0117f1328fe76136c51adc092732667eeb70`. If main moves before launch, re-run the packet's read-only trial and return any new conflict to the planner.
@@ -69,6 +79,18 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 ## Failure handling and rollback
 
 Two repair passes per wave at most; a third failure stops the window. A bad wave is reverted with `git revert -m 1 <merge>`; never reset or force-push. The integration branch is never deleted by the dispatch.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Wave A merged, resolved per R2/R5 and green on suite, typecheck and build | calculable | integration-wave | bounded | medium | 20m | — | — |
+| 2 | Wave B merged, Narrate files match tree 40f74988's blobs, gates green | calculable | integration-wave | bounded | high | 25m | — | — |
+| 3 | Wave C merged, migration v15 per R4, BAND-ALIGN R8 test green, gates green | calculable | integration-wave | bounded | high | 25m | — | — |
+| 4 | Wave D (APP-TABS-1) merged, gates green | calculable | integration-wave | bounded | medium | 15m | — | — |
+| 5 | Rule 53 package pair and packaged Done-when checks recorded on the final tip | calculable | packaging-verify | bounded | medium | 30m | — | — |
+
+**Total:** chain 1h55m · sum 1h55m; 0 of 5 estimated tasks calibrated. Calculable basis per wave: one `npm test` run (~3m; 181 files, gate (1) run 4) plus typecheck and build (~2m), times two attempts (repair ceiling), plus merge and resolution time; packaging: two `--dir` builds plus the scratch-profile launch and asar check.
 
 ## Lessons applied
 
