@@ -7,6 +7,7 @@
 // section lookup is `>=` (h4); a reader's Pause during the hold is honoured (h5).
 // The harness is copied from bandAlign2.test.tsx (rect, layout, openFlow, runtime, timerWord), not imported.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { PUNCTUATION_PAUSE_MS } from "../../src/constants";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { createReaderModeRouter } from "../../src/reader/useReaderModeOrchestrator";
@@ -16,6 +17,12 @@ import { flowMode } from "../../src/reader/modes/flow/index";
 vi.mock("foliate-js/view.js", () => ({}));
 
 const WORD_MS = 60_000 / 300; // the fake settings' 300 wpm; no word is punctuated, so no rhythm pause
+/**
+ * FLOW-PARA-PAUSE-INDEX-1: word 99 ends section 0, so it ends a paragraph. Flow's scheduleNext adds the paragraph pause
+ * round(2 × PUNCTUATION_PAUSE_MS × 0.5) at these tests' rhythm settings (paragraphs on; the 0.5 is scheduleNext's inline
+ * visual-only factor, not exported), which equals PUNCTUATION_PAUSE_MS.
+ */
+const SECTION_END_PAUSE_MS = PUNCTUATION_PAUSE_MS;
 const PER_LINE = 5;
 const LINE_PX = 20;
 const GLYPH_PX = 16;
@@ -150,7 +157,7 @@ describe("BAND-ALIGN-2 R7a (BUG-235): Flow hands off to the next section under o
   it("(h1) a word timer word past the last rendered line hands off once (goToSection(1)), never turns the page, and holds the timer on it", () => {
     const t = setup();
     t.play();
-    vi.advanceTimersByTime(WORD_MS * 5 + 1); // 96 … 100: 100 is past the last line (word 99)
+    vi.advanceTimersByTime(WORD_MS * 5 + SECTION_END_PAUSE_MS + 1); // 96 … 100: 100 is past the last line (word 99)
     expect(timerWord(t.r)).toBe(100);
     expect(t.highlights.filter((h) => h.word === 100).map((h) => h.found), "highlight(100) misses: section 1 is not loaded").toContain(false);
     expect({ goToSection: t.goToSection.mock.calls, next: t.next.mock.calls.length }, "the pacer's hand-off, and no page turn for a past-end word")
@@ -167,7 +174,7 @@ describe("BAND-ALIGN-2 R7a (BUG-235): Flow hands off to the next section under o
   it("(h2) after the next section loads, playback resumes on the held word and continues with the pacer and band on it", async () => {
     const t = setup();
     t.play();
-    vi.advanceTimersByTime(WORD_MS * 5 + 1);
+    vi.advanceTimersByTime(WORD_MS * 5 + SECTION_END_PAUSE_MS + 1);
     const bandsBeforeLoad = t.bands.length;
     await t.load();
     const last = t.highlightWordByIndex.mock.calls.at(-1)!;
@@ -220,7 +227,7 @@ describe("BAND-ALIGN-2 R7a (BUG-235): Flow hands off to the next section under o
   it("(h5) a reader's Pause during the hold is honoured: the section load does not resume, and the next Play continues from the held word", async () => {
     const t = setup();
     t.play();
-    vi.advanceTimersByTime(WORD_MS * 5 + 1);
+    vi.advanceTimersByTime(WORD_MS * 5 + SECTION_END_PAUSE_MS + 1);
     expect(t.goToSection.mock.calls, "the hold begins with the hand-off").toEqual([[1]]);
     t.r.togglePlay(); // the reader's Pause
     expect(runtime(t.r).state.playing).toBe(false);
@@ -245,7 +252,7 @@ describe("BAND-ALIGN-2 R7a (BUG-235): Flow hands off to the next section under o
   it("(h6) the timer resumes exactly on the held word, once: no word skipped or repeated", async () => {
     const t = setup();
     t.play();
-    vi.advanceTimersByTime(WORD_MS * 5 + 1);
+    vi.advanceTimersByTime(WORD_MS * 5 + SECTION_END_PAUSE_MS + 1);
     await t.load();
     vi.advanceTimersByTime(WORD_MS * 4 + 1);
     const seq = t.flowHighlights();

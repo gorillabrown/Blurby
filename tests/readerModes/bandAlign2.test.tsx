@@ -8,7 +8,7 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS } from "../../src/constants";
+import { DEFAULT_SETTINGS, PUNCTUATION_PAUSE_MS } from "../../src/constants";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { createReaderModeRouter } from "../../src/reader/useReaderModeOrchestrator";
@@ -166,7 +166,9 @@ describe("BAND-ALIGN-2 Flow: one clock", () => {
     runtime(r).startScrollEngine(container, cursor, () => {});
     expect(runtime(r).scrollEngine!.getState().running).toBe(true);
     const sectionCalls = () => goToSection.mock.calls.map((call) => (call as unknown[])[0]).filter((s) => s === 1);
-    vi.advanceTimersByTime(WORD_MS * 5 + 1); // the word timer reaches 100, past the last line
+    // FLOW-PARA-PAUSE-INDEX-1: word 99 ends section 0, so it ends a paragraph: Flow's halved paragraph pause
+    // (round(2 × PUNCTUATION_PAUSE_MS × 0.5)) is added to its 200 ms.
+    vi.advanceTimersByTime(WORD_MS * 5 + PUNCTUATION_PAUSE_MS + 1); // the word timer reaches 100, past the last line
     expect(timerWord(r)).toBe(100);
     expect(sectionCalls(), "the word timer's crossing hands off at once").toEqual([1]);
     vi.advanceTimersByTime(WORD_MS * 2); // 101, 102: still past it, and no second hand-off
