@@ -1,0 +1,75 @@
+{
+  "item": "FOCUS-WORD-ONLY-1",
+  "phase": "D0",
+  "scope": "prospective scripts-skipped own dependency extraction only; no startup or mode qualification",
+  "observedAt": "2026-11-03T05:02:48.0475020Z",
+  "spec": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.D0-dependencies.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "7de1ac17e3842e2c71af18e2fbada47516257da574ca679a6c4d5e76a1b07a80",
+      "publishedBaseSHA256": "7de1ac17e3842e2c71af18e2fbada47516257da574ca679a6c4d5e76a1b07a80",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "publishedBaseSHA256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.D0-dependencies.2026-11-02.md",
+      "sha256": "66ebf7b181bd6ad226026e76f1842dd21fc62e16beba6d954f78be369179faaa",
+      "publishedBaseSHA256": "f004306b8f02f479b876723ac5c240fd2461c4d7ef390fcc8eb6be3eb2847fe9",
+      "matchesPublishedBase": false,
+      "changedInPacket": true
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (FOCUS-WORD-ONLY-1): PASS",
+    "  cited: LL-063, LL-066, LL-068, LL-128, LL-134, LL-142, LL-169, LL-172, LL-176",
+    "  [info] lessons-not-cited: 113 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Fresh source/tool/config custody and the frozen recorder boundary are independently qualified [calculable] @dependency-preparation-entry \u2014 0m (median of 6 runs)",
+    "2. One exact locked scripts-skipped extraction yields retained complete raw-output and dependency evidence [frontier] @dependency-extraction \u2014 14m (timeboxed)",
+    "3. Same-byte independent reviews and external preservation report establish extraction-only held disposition [calculable] @held-evidence-review \u2014 3m (median of 71 runs)",
+    "Total: chain 3m \u00b7 sum 3m + 1 timeboxed \u226414m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "78e48be2cc01461b4af33ccbe44b0a1355f5e497",
+  "sha256Domain": "working-tree raw; prior published-base raw separately recorded; approved amended spec differs from preserved historical proposal",
+  "priorWarningCheck": {
+    "path": "C:/Projects/Blurby-artifacts/focus-d0-planning-checks-20261102/Check.before-promoted-lesson-fix.json",
+    "sha256": "0c468a2bc3bfe5ab1f163f7d16249ab7e35b7175d199f71d68ecbf13296cf544",
+    "disposition": "Preserved actual first check exit0 warning; promoted lesson reference corrected to standing rule42; this result actually reruns final66eb specification"
+  }
+}
