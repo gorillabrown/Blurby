@@ -57,6 +57,7 @@ export default function QuickSettingsPopover({
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         onClose();
       }
     },
@@ -64,8 +65,9 @@ export default function QuickSettingsPopover({
   );
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // capture: before the reader's window listener (ShortcutsOverlay pattern)
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [handleKeyDown]);
 
   // Close on click outside
