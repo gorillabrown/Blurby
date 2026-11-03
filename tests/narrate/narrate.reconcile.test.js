@@ -88,4 +88,23 @@ describe("narrate reconciliation (P6b)", () => {
     const text = "HE WAS THE LAST OF HIS OWN KINDRED O what care did his predecessors take, that they might leave a successor,";
     expectCovers(await reconcile(text), text);
   });
+
+  // NARRATE-YEARS-1: the producer speaks preNormalize(text) and still maps it exactly onto the original source words.
+  const spokenOf = (r, word) => r.units.find((u) => u.words.includes(word))?.spoken;
+
+  it("NARRATE-YEARS-1: 1066 is a year and 1,974 a count, and the chunk reconciles with each word's spoken words by text", async () => {
+    const text = "In 1066 the Normans came, and 1,974 coins were struck.";
+    const r = await reconcile(text);
+    expectCovers(r, text);
+    expect(spokenOf(r, "1066")).toEqual(["10", "66"]);
+    expect(spokenOf(r, "1,974")).toEqual(["1974"]);
+  });
+
+  it("NARRATE-YEARS-1 (y10): an en-dash year range, a decade before 1100 and an en dash between non-years all reconcile", async () => {
+    const text = "From 1914–1918 and in the 1060s, pages 10–12 were lost.";
+    const r = await reconcile(text);
+    expectCovers(r, text);
+    expect(spokenOf(r, "1914–1918")).toEqual(["19", "14", "to", "19", "18"]);
+    expect(spokenOf(r, "1060s,")).toEqual(["10", "60s"]);
+  });
 });

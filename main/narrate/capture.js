@@ -6,6 +6,8 @@
 // and the harness share it, so provenance is written in exactly one place: synthesize() below, from
 // what the model returned (LL-142; ROADMAP NARRATE-REBUILD-1 Core, "provenance, not a trusted flag").
 
+const { preNormalize } = require("./normalize");
+
 const TOKEN_CAP = 400; // T2: about 400 phoneme tokens, under the model's 512
 const PROVENANCE_SOURCE = "model-output";
 
@@ -50,7 +52,7 @@ function attachCapture(tts, ph) {
 async function synthesize(tts, capture, text, { voice, speed }) {
   capture.take();
   const t0 = performance.now();
-  const audio = await tts.generate(text, { voice, speed });
+  const audio = await tts.generate(preNormalize(text), { voice, speed }); // NARRATE-YEARS-1: 1001-1099 read as years
   const genMs = performance.now() - t0;
   const c = capture.take();
   if (c.tok.length !== 1 || c.model.length !== 1) throw new Error(`capture: expected 1 tokenizer and 1 model call, saw ${c.tok.length} and ${c.model.length}`);
