@@ -1,0 +1,35 @@
+{
+  "id": "20261103T183024Z-external-store-spec-link-DROPDOWN-DISMISS-1",
+  "operation": "external-store-spec-link",
+  "item_id": "DROPDOWN-DISMISS-1",
+  "created": "2026-11-03T18:30:24Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/specs/2026-11-03/DROPDOWN-DISMISS-1.md",
+      "written_status": "Full Spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "store-spec-link:DROPDOWN-DISMISS-1:[('spec_link', 'docs/planning/specs/2026-11-03/DROPDOWN-DISMISS-1.md'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "DROPDOWN-DISMISS-1",
+      "idempotencyKey": "store-spec-link:DROPDOWN-DISMISS-1:[('spec_link', 'docs/planning/specs/2026-11-03/DROPDOWN-DISMISS-1.md'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T183024Z-external-store-spec-link-DROPDOWN-DISMISS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T18:31:05Z",
+  "outcome": "succeeded"
+}
