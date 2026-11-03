@@ -17,6 +17,7 @@
 - At `ebea7311`, `pause()` starts at line 327 and `resume()` at 338. Re-grep both at the base; a moved or changed contract returns to the planner.
 - **`resume()`:** after the alive/engine/not-playing guard and the engine-paused guard, add `if (this.state.explicitSelectionAnchor != null) { this.start({ cause: "play-button" }); return; }`. Otherwise keep `this.engine.resume()`.
 - **`pause()` (N-Q1):** before the existing `this.firstTextToken = null;`, add `if (this.firstTextToken != null) this.state.explicitSelectionAnchor = null;`. This clears the first-text anchor that `startAtFirstText()` set, but only for a move still in flight. A word the reader clicked while paused keeps its anchor, so ns1–ns4 still start at the clicked word. `resumeAnchor` is not changed.
+- **(ns10) asserts behaviour, not anchor values (Brain1, N-Q1 confirmation 2026-11-03):** the first-text move also sets `resumeAnchor = target.startWordIdx` (ebea7311 `ModeRuntime.ts:763`), which survives the pause. (ns10) asserts that the no-selection path runs under (ns6)'s sentence policy and that no narrate-request is made from the stale explicit anchor; it does not assert `explicitSelectionAnchor` or `resumeAnchor` values.
 - **Fence:** unchanged: `src/reader/modes/narrate/ModeRuntime.ts`, `tests/narrate/narrate.mode.test.ts`, this item's memo, time log and `BUG_REPORT.md` subcase.
 
 ###### Done-when 3 (command)
