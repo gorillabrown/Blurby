@@ -1,0 +1,6 @@
+# Library Source-S split — chosen binding and review contract
+
+2026-11-03. Complete actual Brain message `exec-4874907c-e0ec-46bb-afc2-2a2776a51395`, local chat `01a179e8-7a40-75c0-93f4-d3045ad99027`, turn `01a1a088-cdaa-7eb2-a5ca-0d1e32b48b33`. Verbatim clarification; no authoring or assembly admission.
+
+Independent a3module review read full9973SourceS/8d0foperator and supports two fresh dependent cuts + one inert PowerShellcollector/comparator/controlsource, no A-H weakening, carry exactcompletepriorreads only and refreshallobservations. Reviewer proposed a separate closed binding map and six-output alternative. My exact technical choice remains the ALREADY issued8-file fence and THREEonce-only literal rendering (same narrowly reviewed Focus pattern), avoiding a new runtimebindingAPI/configsurface. Template hash and rendered-source hash are DISTINCT; renderedsource is never calledidenticalfrozenbytes. Require exactonly3literal fullbyte inverse/diff, fullaffectedpreinvoke source/effectsreview, then actualqualify beforeactivation. No frozen comparator/argv/sourcefence/oracle change permitted. This is deliberate bounded sourcebinding, not a license to editclockinsideadmittedrun. No unresolveddesignquestion. Oldquietfinalledger stillpending, so planningnotReadyuntilactualclosure bound; neither proposalgrantsexecution.
+

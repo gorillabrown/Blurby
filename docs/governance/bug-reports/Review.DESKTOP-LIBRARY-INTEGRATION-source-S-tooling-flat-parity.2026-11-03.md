@@ -1,0 +1,30 @@
+# FOLIATE-DISPLAY-LIFETIME-1 — independent flat tooling parity review
+
+2026-11-03. Planning-document review only. Reviewer roadmap_stub_scope did not author either subject. No tooling source exists or is accepted by this review, no authoring/assembly admission is granted, and no instruction-manifest WAIT is cleared.
+
+## Exact reviewed subjects and full read scope
+
+- Draft.DESKTOP-LIBRARY-INTEGRATION-source-S-tooling-flat.2026-11-03.md: 38293 bytes, raw SHA256 `429b6e3f7594b60eb6c5149ebf4b46b424b2b04c15da2caec093bed736ef61f5`.
+- Parity.DESKTOP-LIBRARY-INTEGRATION-source-S-tooling-flat.2026-11-03.md: 20980 bytes, raw SHA256 `2e52a5644196824a36f8f018d50304996ce3201394011aeb86453e3964b816f3`.
+
+Both complete subjects were read in bounded, nontruncated sections. Full clause comparison used original Source-S37245/`9973f1f998b5734320d709626641835fde9a0ea9f3c01a11bda59d7f53b0b8b8`, complete operator9311/`8d0f2ba3e2f3fe6eb22473c7edb77df0eb40b0cba60e4624548216635ecc1f65`, complete current tooling17c198 and assemblyeaa45 predecessors, and complete actual source-scope48c1, topologybaea, split47e268, clarification66986, carry-placement1e3cd9, input-access0332f8 and flat03be5115 rulings. The original/tooling/assembly files were consumed through their ends, including source tables, operator, controls, output map, publication, stop and later-gate qualifiers. These are local planning DATA reads, not quiet-host access, source-body carry, new raw archive/repository validation or operational evidence.
+
+## First — SPECIFICATION COMPLIANCE / semantic parity PASS
+
+No uniquely binding tooling-author criterion was found omitted or silently demoted. P2's63 clause dispositions and P3 reference classifications accurately separate author requirements, authored downstream behavior, actual assembly qualifications and historical provenance. The flat text itself carries the operative criteria; it does not ask an executor to resolve the old recursive plan chain. Provenance-only treatment is conditional on accepted independent parity and the separately closed current instruction packet, not permission to ignore a missing rule.
+
+F4/F8/F9 preserve ONE complete inert PowerShell subject, exact eight output files and exact optional temporary/transport names, three once-only top-level literal bindings, no open configuration API, actual purpose-built writer capability or bounded4096-byte decoded/8192-ASCII-command/max32 transport, complete readback and one exclusive assembly. Name ceilings do not confer calls. All reads/writers/reviewers/failures/publication count in the unchanged proposed30m25; measured actual whole plan must fit before transmission or stop. No implicit repair, restart, retained helper, source invocation/import/eval/compile, Node/control/probe, heavy slot or source/Git mutation is granted.
+
+F5–F7 retain all20 literal paths/object IDs/type/mode/order, outside-base preservation, one noncyclic memo and complete A–H source behavior. Exact no-checkout bootstrap, C-before-restore/status/index-refresh qualification, one-dot D, selected20 restore, one raw20-path batch, exact21 staging, same comparator s01–s09/reasons/exits, full frozen-tree ordered reviews and one later local sole-parentac19 commit remain intact. Those are source semantics to AUTHOR; their execution is separately admitted ASSEMBLY only. The closed documentation Gitshow exception in F3 adds no object walk, fetch, ref/config/index query/mutation or dynamic input discovery.
+
+Original refs/history, sole ac19 baseline versus selected4ac source and observer→visibility→lifetime provenance are not merged-by-ancestry or omitted. App20 semantic read/carry qualifies in ASSEMBLY ONLY, with actual path/object/raw identity/reviewer/ranges/limits and affected reread; compact8799/all20 count is explicitly insufficient. Newly authored tooling always receives full independent source/effects review. Dynamic config/refs/attrs/hooks/index/custody facts never carry. F10 preserves the three separate acceptance findings/gos, common package/one landing, historical causal-applicability limits, nine fresh routes plus distinct INITIAL, Rule53/x64/ARM64/all12RC/owner gates without an author acceptance claim.
+
+**Known holds remain mandatory:** F3 has unbound exact current instruction/packet/tool/ordinary-source rows; their literal published paths, hashes, required semantic ranges and actual reachable source kinds must be qualified before Ready. Full parity PASS does not supply those facts, the actual author's future source/freeze/reviews, fresh namespace/custody, budget fit, Root checks or separately consumed Brain admission. The draft correctly remains NOT READY.
+
+## Then — QUALITY PASS on the same frozen bytes
+
+After the compliance PASS above, the separate quality assessment finds no concrete corrective defect. The flat contract is sufficiently explicit about the difference between authoring inert source and executing A–H, and between opaque identity comparison and app semantic acceptance. Fixed tables, schemas, transport/publication rules and stop conditions provide a bounded author target; source/control output qualification is honestly a future inside-phase result. It preserves prior26-versus22 accounting and scoped read limits without rewriting old records or repinning820 inputs.
+
+Current manifest qualification and realistic capacity remain entry/planning holds rather than assumed successes. If full instruction reading, subject transport and complete new-source reviews cannot fit30m25, the prescribed result is HOLD before transmission or honest partial, with no reduced subject or extended allowance. This is planning parity/quality approval only, not Ready, a current tool capability, quiet custody, actual collector/control PASS, assembly or source acceptance, package/native qualification, item completion or terminal authority.
+
+Only this new review Markdown was authored. No other file, source, helper, provider or Git state was changed; no module/test/runtime or executor messaging occurred.
