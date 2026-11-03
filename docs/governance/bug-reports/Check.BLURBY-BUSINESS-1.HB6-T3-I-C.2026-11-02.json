@@ -1,0 +1,63 @@
+{
+  "u10Output": [
+    "1. IC-T fixtures and all argument/byte/ownership/race/opposing detectors are frozen and actual base red collected [calculable] @test-preparation — 0m (median of 6 runs)",
+    "2. IC-T independent test review and retained local partial test-only receipt close the bounded preparation cut [calculable] @review-checkpoint — 3m (median of 71 runs)",
+    "3. IC-Q complete inert controller/constant satisfies exact global queue/generation/release/error contract [calculable] @file-controller — 0m (median of 6 runs)",
+    "4. IC-Q full original/opposing controls and syntax results qualify final bytes [calculable] @qualification — 0m (median of 6 runs)",
+    "5. IC-Q same-byte parallel review pair with compliance-first acceptance, then docs and exact held checkpoint preserve exclusions [calculable] @review-checkpoint — 3m (median of 71 runs)",
+    "Total: chain 6m · sum 6m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "item": "BLURBY-BUSINESS-1",
+  "u10Exit": 0,
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "fbdca7629a99381fc4f4b38b88041504e651f3690756cd6cde8ba0599b949652"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "47460439db0db7613103922f170aefb39eae07cd8dab5db17463cfc58475bde8"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C.2026-11-02.md",
+      "sha256": "72da53d2be876f0fc1999153c734f6bf499045497625893a5425640274624513"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.NARRATE-CPU-PROFILE-1.A3-T.2026-11-02.md",
+      "sha256": "bde19aa48c50a6f4dce13df309569b4a6b432537cf2981379617ee884acdf1a1"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.F0.2026-11-02.md",
+      "sha256": "6dcd403acf0938893174716f1c25b1e5e8a8b1a2bd1b32dd7dc57e98faa757b8"
+    }
+  ],
+  "u9Output": [
+    "U9 lessons applied (BLURBY-BUSINESS-1): PASS",
+    "  cited: LL-175, LL-002, LL-003, LL-031, LL-109, LL-169, LL-063, LL-066, LL-068, LL-087, LL-088, LL-090, LL-092, LL-096, LL-097, LL-098, LL-113, LL-137, LL-118, LL-128, LL-139, LL-134, LL-142, LL-143, LL-144, LL-145, LL-162, LL-172, LL-174, LL-006, LL-132, LL-157, LL-159, LL-165, LL-168, LL-004, LL-007, LL-008, LL-065, LL-067, LL-069, LL-089, LL-093, LL-129, LL-131, LL-133, LL-140, LL-150, LL-152, LL-154, LL-155, LL-160, LL-161, LL-163, LL-170, LL-171, LL-173",
+    "  [info] lessons-not-cited: 64 live lesson(s) not cited — confirm none applies: LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures), LL-018 (reader, flow mode, performance), LL-019 (renderer, pagination), LL-020 (renderer, pagination, CSS), LL-021 (TTS, narration), LL-022 (reader, TTS, flow cursor), LL-023 (settings, TTS, narration)…",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "scope": "planning qualification only; no source/control/runtime admission",
+  "phase": "HB6-T3-I-C",
+  "gitStatusUnchanged": true,
+  "spec": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C.2026-11-02.md",
+  "observedAt": "2026-11-03T01:54:51.8664660Z",
+  "u9Exit": 0,
+  "protectedUnchanged": true
+}
