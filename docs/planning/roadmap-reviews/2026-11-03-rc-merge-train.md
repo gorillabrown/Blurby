@@ -64,6 +64,10 @@ Because the trial skipped the three source-conflict tips, items 16 and 17 were t
 
 **Excluded from the candidate:** CHAPTER-STEP-CFI-1 (stopped), BLURBY-BUSINESS-1 (own charter gates), NARRATE-CPU-PROFILE-1 and NARRATE-HARNESS-COLDCLICK-1 (merge after release, R-2026-11-02-CPU-2), and the not-yet-built PAUSED-CLICK, FOCUS-WORD-ONLY and PAGE-ENTRY-KEYS.
 
+**Narrate stack follow-up (checked pairwise):** NARRATE-SENTENCE-INITIALS-1 (`c93f7c09`) also conflicts with NARRATE-GAP-PAUSE-1 (`e3498f60`) in `ModeRuntime.ts` and `engine/narrateEngine.ts`, and with PLAY-FIRST-TEXT-1 in `ModeRuntime.ts`. A resolved integration of main plus exactly those two tips already exists in the object store as tree `40f74988` (the paused-click amendment's base; ModeRuntime blob `261c725e`, narrateEngine blob `1848b776`). Its commit `63f5b1f7` is local to RodneySr. That tree is the natural resolution source for question 3, re-applied on current main.
+
+The re-run in the draft dispatch's wave order (`docs/planning/specs/2026-11-03/RC-INTEGRATION-WINDOW.md`) gives the same three source conflicts and the same docs conflicts.
+
 ## Questions for Brain1 (technical)
 
 1. **Topology:** build one integration branch (`eb/rc-integration-20261103` from `origin/main`) merging the 21 tips in waves, gated by suite, typecheck and build per wave and one rule 53 package pair on the final tip, then one `--no-ff` merge to main. Or merge each tip separately with its own rule 53. Roadmap recommends the single integration branch: 21 separate package pairs on RodneySr duplicate the final candidate's gate (1) without qualifying anything it does not.
