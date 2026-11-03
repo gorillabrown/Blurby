@@ -50,7 +50,7 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 ## Execution host and custody
 
 - Host: RodneySr (rule 6b), reconnected and idle, having first reported each branch's state and pushed its local-only commits. Arm64 launch at merge: Rodney.
-- Worktree: `C:\Projects\Blurby\.worktrees\rc-integration-20261103` (standing rule "Worktree placement"); branch `eb/rc-integration-20261103` from the base above.
+- Worktree: `C:\Users\estra\Projects\Blurby\.worktrees\rc-integration-20261103` (RodneySr's canonical clone; confirm with `git -C C:/Users/estra/Projects/Blurby rev-parse --git-common-dir` before starting, and any mismatch is a STOP) (standing rule "Worktree placement"); branch `eb/rc-integration-20261103` from the base above.
 - `npm ci` once at the base; re-run only if a wave changes `package.json` or `package-lock.json`.
 
 ## Conflict resolutions
@@ -87,7 +87,7 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 
 ## Repository plan
 
-- Branch `eb/rc-integration-20261103` from the base above, in `C:\Projects\Blurby\.worktrees\rc-integration-20261103` on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
+- Branch `eb/rc-integration-20261103` from the base above, in `C:\Users\estra\Projects\Blurby\.worktrees\rc-integration-20261103` (RodneySr's canonical clone; confirm with `git -C C:/Users/estra/Projects/Blurby rev-parse --git-common-dir` before starting, and any mismatch is a STOP) on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
 - Merge commits take each tip whole. Each resolution commit stages only its named paths: R2 `main/ipc/library.js` and `main/ipc/misc.js`; R3 `src/reader/modes/narrate/ModeRuntime.ts` and `src/reader/modes/narrate/engine/narrateEngine.ts`; R4 `main/migrations.js`, the two named tests and the new `tests/settingsMigrationV15.test.js`; R5 `docs/governance/BUG_REPORT.md` and `CLAUDE.md`. Never `git add -A`.
 - Policy `push`: push after each green wave. The merge to `main` happens only after Brain1's package confirmation and Roadmap's merge go.
 
