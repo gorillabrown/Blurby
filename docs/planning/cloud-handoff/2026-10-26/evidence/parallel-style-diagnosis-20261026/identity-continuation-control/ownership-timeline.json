@@ -1,0 +1,628 @@
+[
+  {
+    "at": "2026-10-26T21:30:11.583Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 2,
+      "activeRendererID": 3,
+      "activeConnected": true,
+      "activeMode": "rm-page-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 4,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.00994454493111009,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.32625,\"total\":352.86875},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2,/4/282/1:7)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:11.898Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 5,
+      "activeRendererID": 6,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 7,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:13.338Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 8,
+      "activeRendererID": 9,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 10,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:14.663Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 11,
+      "activeRendererID": null,
+      "activeMode": "rm-narrate-root",
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:14.846Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 11,
+      "activeRendererID": 12,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 13,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:16.180Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": null,
+      "activeRendererID": null,
+      "activeMode": "rm-flow-root",
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:16.378Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 14,
+      "activeRendererID": 15,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 16,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:17.711Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 17,
+      "activeRendererID": 18,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 19,
+          "sameRetiredDocument": false,
+          "body": false,
+          "words": 0
+        }
+      ],
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:17.943Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 17,
+      "activeRendererID": 18,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 19,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:19.385Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 20,
+      "activeRendererID": 21,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 22,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:20.718Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 23,
+      "activeRendererID": null,
+      "activeMode": "rm-narrate-root",
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:20.886Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 23,
+      "activeRendererID": 24,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 25,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:22.408Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 26,
+      "activeRendererID": 27,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 28,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:23.935Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 29,
+      "activeRendererID": 30,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 31,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:25.251Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": null,
+      "activeRendererID": null,
+      "activeMode": "rm-flow-root",
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:25.449Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 32,
+      "activeRendererID": 33,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 34,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:26.777Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 35,
+      "activeRendererID": 36,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 37,
+          "sameRetiredDocument": false,
+          "body": false,
+          "words": 0
+        }
+      ],
+      "header": "INTRODUCTION"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:27.010Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 35,
+      "activeRendererID": 36,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 37,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:28.443Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 38,
+      "activeRendererID": 39,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 40,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:30.019Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 41,
+      "activeRendererID": 42,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 43,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:31.547Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 44,
+      "activeRendererID": 45,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 46,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:32.988Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 47,
+      "activeRendererID": 48,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 49,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:34.507Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 50,
+      "activeRendererID": 51,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 52,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:36.021Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 53,
+      "activeRendererID": 54,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 55,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:37.532Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 56,
+      "activeRendererID": 57,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 58,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:39.030Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 59,
+      "activeRendererID": 60,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 61,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:40.564Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 62,
+      "activeRendererID": 63,
+      "activeConnected": true,
+      "activeMode": "rm-flow-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 64,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  },
+  {
+    "at": "2026-10-26T21:30:42.053Z",
+    "state": {
+      "retiredID": 1,
+      "oldRendererID": 1,
+      "oldConnected": false,
+      "oldContents": [],
+      "activeFvID": 65,
+      "activeRendererID": 66,
+      "activeConnected": true,
+      "activeMode": "rm-narrate-root",
+      "activeContents": [
+        {
+          "index": 2,
+          "docID": 67,
+          "sameRetiredDocument": false,
+          "body": true,
+          "words": 5293
+        }
+      ],
+      "header": "INTRODUCTION",
+      "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+    }
+  }
+]

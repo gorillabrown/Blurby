@@ -69,8 +69,8 @@ const defaultSettings: BlurbySettings = {
   syncOnMeteredConnection: false,
   flowWordSpan: 3,
   flowCursorStyle: "underline",
-  flowZonePosition: 0.25,
-  flowZoneLines: 5,
+  flowZonePosition: 1 / 3, // BAND-ALIGN-2 R4: the Top third anchor
+  flowBandEnabled: true,
   lastReadingMode: "flow",
   isNarrating: false,
   ttsEnabled: false,

@@ -162,6 +162,23 @@
 **Location:** Page's paragraph-step command (Shift+←/→ through `useReaderKeys`). The probable cause is the paragraph command's slice index.
 **Description:** measured on a packaged build: in Page, with the highlight on word 187, Shift+→ set it to −1, and Shift+← set it to 0. Focus and Flow have their own paragraph-key fixes (FOCUS-KEYS-FIX-1, FLOW-PARA-KEYS-1, BLOCK-TAG-CASE-1). **Next step:** trace Page's paragraph command on the held key-fix stack, then specify (PAGE-PARA-KEYS-1).
 
+### BUG-219 — Escape in the highlights and quick-settings overlays also exits the reader; five panels and the mode-button hover read undefined theme tokens
+**Reported:** 2026-10-23 (OVERLAY-THEME-SWEEP-1 stub, from UX-POLISH-2's quality review W1; confirmed live on the packaged base 2026-10-24)
+**Severity:** LOW (Escape leaves the book; the panels show dark navy in Light and E-ink)
+**Status:** RESOLVED in source (OVERLAY-THEME-SWEEP-1)
+**Location:** `src/components/HighlightsOverlay.tsx` and `src/components/QuickSettingsPopover.tsx` (bubble-phase window keydown listeners); `src/styles/keyboard.css` (go-to indicator, highlights overlay, snooze and tag pickers, quick-settings popover); `src/styles/page-reader.css` (`.rbb-mode-btn:hover`).
+**Description:** The reader's window listener (`useReaderKeys`) registers first and runs `exitReader()` on Escape, so Escape in either overlay also left the reader. The five panels and the hovered mode button read `--color-bg`, `--color-border`, `--color-text` and `--color-text-secondary`, which no theme defines, so every theme got the dark fallbacks (`rgb(26, 26, 46)` panels, `rgb(68, 68, 68)` hover). Both overlays now listen in the capture phase and stop Escape (ShortcutsOverlay pattern), and the reads use `--bg-raised`, `--border`, `--text` and `--text-dim`. Evidence: `docs/studies/investigations/OVERLAY-THEME-SWEEP-1.base.2026-10-24.md` and `.after.2026-10-24.md`.
+
+### BUG-218 — A modified ←/→ in Narrate or Page turns a page (and pauses Narrate)
+**Reported:** 2026-10-23 (Blurby.Brain, from FLOW-KEYS-FIX-1's diagnosis; measured live by READER-ARROW-GUARD-1's k0 on the `5bc18a6c` x64 `--dir` package)
+**Severity:** LOW (a modified arrow does its own job through `useReaderKeys` and also turns a page). Not a release gate.
+**Status:** RESOLVED in source (READER-ARROW-GUARD-1, branch `eb/reader-arrow-guard-1`, held for after the Stage 8 release). Lane: Reader Engine.
+**Location:** the book view's window keydown listeners: Narrate `src/reader/modes/narrate/FoliateView.tsx` (the `// Keyboard (NARR-FIX-1)` effect), Page `src/reader/modes/page/FoliateView.tsx` (the `// Keyboard page turn` effect). Neither checked Shift, Ctrl, Alt or Meta.
+**Description:**
+- **Page, paused:** Shift, Ctrl and Alt with ←/→ each turned a page (k0: every row moved `renderer.start` 720 ↔ 1440). Shift+←/→ also moved the highlight by paragraph through `useReaderKeys`.
+- **Narrate, playing:** each modified arrow turned a page and set `isBrowsedAway` true. Measured, it did not pause: `playing` stayed true and the engine word kept advancing. The title's "pauses" comes from the stub and was not borne out live.
+- **Fix:** `isNarrateBrowseKey` and `isPageTurnKey` (one helper per mode, FLOW-KEYS-FIX-1's pattern) ignore ←/→ with any modifier. Plain ←/→ and PageUp/PageDown (with or without a modifier) are unchanged. Evidence: `docs/governance/close-outs/Memo.READER-ARROW-GUARD-1.GovernanceStaging.2026-10-23.md`.
+
 ### BUG-217 — First launch on a fresh profile logs a library backup failure
 **Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
 **Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.
@@ -299,7 +316,7 @@ Ruled out by measurement: the restamp guard's cfi-only save, the renderer's full
 | Producer done, instrumented | 1.86–8.01 |
 
 No run hit the 30 s terminate, and every exit code was 0. Gate status and fix direction are for Blurby.Brain (the report's BUG-207 section).
-**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
+**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN for the slow quit. The relaunch lost during the quit linger is RESOLVED in source (NARRATE-QUIT-LINGER-1, (b)): on x64, 9 of 9 counted relaunches 0.5–2.0 s after quit now show one Blurby window (base: 0 of 8; `docs/studies/investigations/NARRATE-QUIT-LINGER-1.after.2026-10-30.md`). The generation posted after a pause is RESOLVED in source (NARRATE-PAUSE-CANCEL-1): Pause now cancels the engine's queued prefetch in main; staged runs posting a generation after the press, base 3 of 3, after 0 of 3 (`docs/studies/investigations/NARRATE-PAUSE-CANCEL-1.2026-10-30.md`). The teardown linger after Node's exit is a finding for ELECTRON-42-UPGRADE-1's lane. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
 
 ### BUG-200 — The quick-settings "Sort by" does not change the library order
 **Reported:** 2026-10-14 (code trace while specifying SETTINGS-KEY-TRUST-1, on `eb/ipc-path-trust-1` @ `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
@@ -381,7 +398,7 @@ No run hit the 30 s terminate, and every exit code was 0. Gate status and fix di
 ### BUG-191 — Narration reads four-digit years as cardinal numbers
 **Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
-**Status:** OPEN — stub NARRATE-YEARS-1, after NARRATE-REBUILD-1 closes (roadmap review 2026-10-14). Lane: TTS / Narration Engine.
+**Status:** RESOLVED in source (NARRATE-YEARS-1): NARRATE-REBUILD-1 reads 1100–2099 as years (kokoro's own normalizer, reproduced in `main/narrate/normalize.js`); NARRATE-YEARS-1 adds 1001–1099 and their decades ("1066" → "ten sixty-six", "the 1060s" → "the ten sixties") and reads an en dash between two years as "to", per the owner's rulings of 2026-10-22 and 2026-10-23. A comma marks a count ("1,974 coins"). The owner's listening check is on the next smoke list. Lane: TTS / Narration Engine.
 **Location:** the removed Narrate pipeline's spoken-text normalization (Kokoro, voice `am_adam`, 1.2x); no live code path until NARRATE-REBUILD-1.
 **Description:** "Years are read like one thousand and seventy four instead of the standard nineteen seventy four." A year such as 1974 is spoken as a cardinal number instead of in paired-digit year form.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-20T21-03-25Z.json` and `.png` (gitignored, local to the owner's machine).
@@ -410,7 +427,7 @@ No run hit the 30 s terminate, and every exit code was 0. Gate status and fix di
 ### BUG-188 — Focus and Flow horizontal cursor band sits apart from the word cursor
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
 **Severity:** LOW (visual; reading stays possible)
-**Status:** OPEN — measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as BAND-ALIGN-1 (in that report). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
+**Status:** band height and band placement RESOLVED in source (BAND-ALIGN-1, BAND-ALIGN-2). The band is sized from the loaded section's body line step (BAND-ALIGN-1). It belongs to the reading location: its edges sit in the gaps between lines, the cursor line is its middle line, the cursor line's centre is scrolled to the reader's anchor (Top, Top third or Center) and the band follows the cursor where the scroll clamps, and Flow's line pacer follows the word timer on one clock (BAND-ALIGN-2). Lines is 3, 5, 7 or Off. Closes after the owner's smoke check. Measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
 **Location:** corrected 2026-10-12 (roadmap review static census): the visible "band" is the reading-zone mask (`mask-image` on `.rm-focus-view` / `.rm-flow-view`, `src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), positioned by `applyZoneProperties` and the Flow line pacer; `.flow-shrink-cursor` is hidden and is not the band.
 **Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
 **Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):**
@@ -424,7 +441,7 @@ No run hit the 30 s terminate, and every exit code was 0. Gate status and fix di
 ### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (log noise and possible render cost; no visible failure reported)
-**Status:** OPEN — root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as FOLIATE-OBSERVER-LEAK-1 (in that report). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
+**Status:** RESOLVED in source (FOLIATE-OBSERVER-LEAK-1): `patches/foliate-js+1.0.1.patch` makes `View.destroy()` and `Paginator.destroy()` disconnect their observers; the packaged-session count (0 `ResizeObserver loop` lines) is owed before it closes. Root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
 **Location (corrected 2026-10-23):** not the app's `ResizeObserver`s. It is foliate-js 1.0.1's `View` observer (`node_modules/foliate-js/paginator.js:201`, observed on load `:265`), which `View.destroy()` (`:410-411`) fails to unobserve. Our mode views detach the book frame before the deferred `view.close()` runs (`src/reader/modes/focus/FoliateView.tsx:1086-1096`; Flow and Page are the same).
 **Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
 **Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):** after a mode switch, foliate `View` observers are left watching dead 0×0 section bodies, and Chromium reports "loop completed with undelivered notifications" every frame. Leaving Focus then entering Flow on the packaged build gave 60 errors a second for the rest of the session (14,428 in 328.7 s). Disconnecting the leaked `View` observers mid-loop dropped the rate from 60 to 0 a second; how they drive the loop is not established (their callbacks ran once each). The app's own observers write equal values and do not loop.

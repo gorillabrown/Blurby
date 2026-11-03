@@ -40,6 +40,8 @@ export const NARRATE_PREFETCH_AHEAD_S = 8;
 /** Narrate (Decision #18): past the ramp, a chunk holds at most this many words, which bounds the stale generation a
  * request can wait behind (onnxruntime cannot abort a run). Planned in the renderer, so it lives here, not in main. */
 export const NARRATE_STEADY_CHUNK_MAX_WORDS = 30;
+/** A queued Kokoro job cancelled by a pause; twin of main/narrate/constants.js (the renderer cannot import main's CommonJS). */
+export const NARRATE_CANCELLED_ERROR = "narrate generation cancelled";
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 
@@ -248,8 +250,14 @@ export const NON_FOLIATE_PROGRESS_SAVE_MS = 2000;
 export const MIN_ACTIVE_READING_MS = 1000;
 
 // ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
-/** Fraction of viewport height where the active line sits (reading zone) */
-export const FLOW_READING_ZONE_POSITION = 0.25;
+/** The reading band's default anchor, Top third (BAND-ALIGN-2 R4; stored in settings.flowZonePosition) */
+export const FLOW_READING_ZONE_POSITION = 1 / 3;
+/** Band anchor Top: the band's top edge at the view's top */
+export const FLOW_BAND_ANCHOR_TOP = 0;
+/** Band anchor Top third: the band's centre at one third of the view height */
+export const FLOW_BAND_ANCHOR_TOP_THIRD = 1 / 3;
+/** Band anchor Center: the band's centre at half the view height */
+export const FLOW_BAND_ANCHOR_CENTER = 0.5;
 /** Default cursor height in pixels for flow scroll mode */
 export const FLOW_CURSOR_HEIGHT_PX = 3;
 /** Cursor height in pixels for e-ink mode (thicker for visibility) */
@@ -260,12 +268,16 @@ export const FLOW_SCROLL_RESUME_DELAY_MS = 2000;
 export const FLOW_LINE_ADVANCE_BUFFER_MS = 50;
 /** Duration of opacity flash at line completion for visual rhythm (ms) */
 export const FLOW_LINE_COMPLETE_FLASH_MS = 100;
-/** Default number of lines visible in the flow reading zone */
+/** Anchor geometry's line count (BAND-ALIGN-2 R8, B1): a geometry constant, not a user setting. Top puts the cursor line half this many line steps down; R7's spaces are sized from it. */
 export const FLOW_ZONE_LINES_DEFAULT = 5;
 /** Minimum lines for flow reading zone */
 export const FLOW_ZONE_LINES_MIN = 3;
 /** Maximum lines for flow reading zone */
 export const FLOW_ZONE_LINES_MAX = 8;
+/** The band's line counts the reader can choose (BAND-ALIGN-2 R5); any other stored value reads as the default */
+export const FLOW_ZONE_LINES_OPTIONS = [3, 5, 7] as const;
+/** flowZoneLines value for Lines Off: no band and no dimming */
+export const FLOW_ZONE_LINES_OFF = 0;
 /** Opacity for de-emphasized content outside reading zone (0-1) */
 export const FLOW_ZONE_OPACITY = 0.35;
 /** Soft edge transition width as percentage of container */
@@ -327,7 +339,7 @@ export const DEFAULT_SETTINGS = {
   syncOnMeteredConnection: false,
   flowWordSpan: DEFAULT_FLOW_WORD_SPAN,
   flowZonePosition: FLOW_READING_ZONE_POSITION,
-  flowZoneLines: FLOW_ZONE_LINES_DEFAULT,
+  flowBandEnabled: true,
   lastReadingMode: "flow" as const,
   isNarrating: false,
   ttsEnabled: false,
@@ -343,3 +355,6 @@ export const DEFAULT_SETTINGS = {
   pronunciationOverrides: [] as import("./types").PronunciationOverride[],
   readingGoals: [] as ReadingGoal[],
 } satisfies BlurbySettings;
+
+// APP-TABS-1: how long the filter menu stays open after the pointer leaves a hover-opened menu
+export const FILTER_MENU_HOVER_CLOSE_MS = 250;

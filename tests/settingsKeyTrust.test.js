@@ -45,6 +45,9 @@ function write(rel, text) {
 }
 
 const call = (channel, ...args) => handlers.get(channel)({}, ...args);
+// WS-TOKEN-REGEN-1 amendment: whether the fake ws-server's safeStorage is available, and its startServer spy.
+let fakeEncryption = true;
+const wsStartServer = vi.fn(() => ({ port: 48924, token: "live-token" }));
 const anything = () => new Proxy({}, { get: () => vi.fn() });
 
 function setup() {
@@ -73,7 +76,9 @@ function setup() {
     // startServer and getStatus return what the real server's do: the live token included (GET-STATE-SECRET-1).
     "../ws-server": new Proxy({
       generatePairingToken: () => "new-token",
-      startServer: () => ({ port: 48924, token: "live-token" }),
+      // WS-TOKEN-REGEN-1: the stored form startServer reads; null when safeStorage is unavailable (amendment)
+      encodePairingToken: (t) => (fakeEncryption ? `enc:${t}` : null),
+      startServer: wsStartServer,
       getStatus: () => ({ running: true, port: 48924, clients: 0, token: "live-token" }),
       getShortCode: () => ({ code: "123456", expiresAt: 1 }),
       getClientCount: () => 0,
@@ -119,7 +124,7 @@ function setup() {
 const UI_WRITES = {
   wpm: 410, folderName: "Shelf", readingMode: "narrate", firstRunCompleted: true, viewMode: "grid",
   compactMode: true, focusTextSize: 120, flowTextSize: 130, theme: "light", sortBy: "title",
-  flowZoneLines: 7, syncIntervalMinutes: 15, syncOnMeteredConnection: true,
+  flowBandEnabled: false, syncIntervalMinutes: 15, syncOnMeteredConnection: true,
   layoutSpacing: { line: 2, character: 1, word: 1 }, justifiedText: false, defaultSort: "newest",
   defaultViewMode: "grid", libraryCardSize: "large", libraryCardSpacing: "roomy", useLegacyRenderer: true,
   focusMarks: false, readingRuler: true, focusSpan: 0.6, flowWordSpan: 4, flowCursorStyle: "highlight",
@@ -336,10 +341,22 @@ describe("SETTINGS-KEY-TRUST-1 controls", () => {
     expect(ctx.saveSettings).toHaveBeenCalledTimes(1);
   });
 
-  it("(o) regenerate-ws-pairing-token still writes main's secret", async () => {
+  it("(o) regenerate-ws-pairing-token still writes main's secret, in its stored (encoded) form", async () => {
     await call("regenerate-ws-pairing-token");
-    expect(settings._wsPairingToken).toBe("new-token");
+    expect(settings._wsPairingToken).toBe("enc:new-token"); // WS-TOKEN-REGEN-1: never the raw token
     expect(ctx.saveSettings).toHaveBeenCalled();
+  });
+
+  it("(r4) without safeStorage, regenerate-ws-pairing-token writes no token and keeps it for the session", async () => {
+    fakeEncryption = false;
+    try {
+      settings._wsPairingToken = "enc:old"; // whatever was stored before must not survive as a stale credential
+      await call("regenerate-ws-pairing-token");
+      expect("_wsPairingToken" in settings).toBe(false);
+      expect(wsStartServer.mock.lastCall?.[1]).toEqual({ token: "new-token" }); // the session token is passed through
+    } finally {
+      fakeEncryption = true;
+    }
   });
 });
 
@@ -372,7 +389,7 @@ describe("GET-STATE-SECRET-1 renderer reads", () => {
     const { SETTINGS_DEFAULTS } = require("../main/migrations.js");
     // Traced: the renderer reads only SETTINGS_DEFAULTS keys from get-state, and no renderer code reads schemaVersion.
     const read = Object.keys(SETTINGS_DEFAULTS).filter((k) => k !== "schemaVersion");
-    expect(read.length).toBe(57);
+    expect(read.length).toBe(58);
     for (const k of read) if (!Object.hasOwn(settings, k)) settings[k] = `value-${k}`;
     const shown = (await call("get-state")).settings;
     for (const k of read) expect(shown[k]).toEqual(settings[k]);

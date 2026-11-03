@@ -3,7 +3,7 @@
 // "www." "gutenberg." "org" (plain Node's ICU keeps them whole; that form is covered too). The first chunk of an epoch is
 // one sentence (at most 15 words), so its end shows where the plan saw the sentence end.
 import { describe, expect, it } from "vitest";
-import { planChunks } from "../../src/reader/modes/narrate/engine/chunkPlan";
+import { estimateTokens, PACK_TARGET_TOKENS, planChunks, sentenceStartAt } from "../../src/reader/modes/narrate/engine/chunkPlan";
 
 const firstEnd = (text: string) => planChunks(text.split(" "), 0, { maxChunks: 1 })[0].endWord;
 
@@ -33,5 +33,85 @@ describe("narrate chunk plan: sentence ends (P6b)", () => {
   });
   it("a title at the end of the text still ends it", () => {
     expect(firstEnd("He called for the Dr.")).toBe(5);
+  });
+});
+
+// NARRATE-TOKEN-CAP-1 — a digit is spoken as a whole word ("e4" → "e four"), so it costs 5.6–12.5 input ids, not the
+// 1.15 per character of letters. A digit-dense passage estimated at the letter rate was planned as one chunk the producer
+// then refused for exceeding its 400-id cap.
+describe("narrate chunk plan: digits (NARRATE-TOKEN-CAP-1)", () => {
+  // 30 words of long algebraic chess notation, 60 digits.
+  const CHESS = "21. e2e4 e7e5 22. g1f3 b8c6 23. f1b5 a7a6 24. b5a4 g8f6 25. e1g1 f8e7 26. f1e1 b7b5 27. a4b3 d7d6 28. c2c3 e8g8 29. h2h3 c6b8 30. d2d4 b8d7";
+
+  it("digit-dense text is estimated at its spoken cost and planned in more than one chunk", () => {
+    const words = CHESS.split(" ");
+    expect(words).toHaveLength(30);
+    expect((CHESS.match(/\d/g) || []).length).toBeGreaterThanOrEqual(60);
+    const chunks = planChunks(words, 0, { rampIndex: 1, maxWords: 30 });
+    expect(chunks.length).toBeGreaterThanOrEqual(2);
+    for (const c of chunks) expect(estimateTokens(c.text)).toBeLessThanOrEqual(PACK_TARGET_TOKENS);
+  });
+
+  it("text with no digit is estimated exactly as before", () => {
+    for (const text of ["", "The quick brown fox jumps over the lazy dog.", "Twenty-one, twenty-two; and so on — to the end!"]) {
+      expect(estimateTokens(text)).toBe(Math.ceil(text.length * 1.15) + 2);
+    }
+  });
+});
+
+// NARRATE-SENTENCE-RESUME-1 — Narrate starts and resumes at the first word of the sentence it is in, never across a break.
+describe("narrate chunk plan: sentence start (NARRATE-SENTENCE-RESUME-1)", () => {
+  const words = "He came home. She met Mr. Smith at the gate today. Then they left.".split(" ");
+  // 0 He 1 came 2 home. 3 She 4 met 5 Mr. 6 Smith 7 at 8 the 9 gate 10 today. 11 Then 12 they 13 left.
+  it("a sentence start is its own sentence start", () => {
+    expect(sentenceStartAt(words, 3, new Set())).toBe(3);
+    expect(words[3]).toBe("She");
+    expect(sentenceStartAt(words, 0, new Set())).toBe(0);
+  });
+  it("a word mid-sentence gives the sentence's first word (a title is not a sentence end)", () => {
+    expect(sentenceStartAt(words, 8, new Set())).toBe(3);
+    expect(words[sentenceStartAt(words, 8, new Set())]).toBe("She");
+    expect(sentenceStartAt(words, 13, new Set())).toBe(11);
+    expect(words[11]).toBe("Then");
+  });
+  it("never goes back across a chunk break", () => {
+    expect(sentenceStartAt(words, 8, new Set([5]))).toBe(6); // a break after "Mr." (word 5)
+    expect(words[6]).toBe("Smith");
+  });
+  it("an index outside the words is returned unchanged", () => {
+    expect(sentenceStartAt(words, words.length + 4, new Set())).toBe(words.length + 4);
+    expect(sentenceStartAt(words, -1, new Set())).toBe(-1);
+  });
+});
+
+describe("narrate chunk plan: a single-letter initial (NARRATE-SENTENCE-INITIALS-1)", () => {
+  const split = (s: string) => s.split(" ");
+  it("\"M. Annius Verus\": an uppercase initial before a capitalised name does not end a sentence", () => {
+    expect(sentenceStartAt(split("He met M. Annius Verus there."), 4, new Set())).toBe(0);
+  });
+  it("\"J. R. R. Tolkien wrote.\": no sentence end inside the initials", () => {
+    const w = split("J. R. R. Tolkien wrote.");
+    for (let i = 1; i < w.length; i++) expect(sentenceStartAt(w, i, new Set())).toBe(0);
+  });
+  it("control: \"I.\" still ends a sentence", () => {
+    expect(sentenceStartAt(split("so do I. Then it rained."), 4, new Set())).toBe(3);
+  });
+  it("a dotted era abbreviation still ends before a capital (\"250 B. C. Cyprus\", as Electron's ICU splits B.C.)", () => {
+    expect(sentenceStartAt(split("born 250 B. C. Cyprus has been"), 5, new Set())).toBe(4);
+  });
+  it("a common sentence opener after the letter still starts a new sentence (SENTENCE_OPENER); a name does not", () => {
+    for (const opener of ["The", "He", "It", "But", "Then"]) {
+      const w = split(`We chose plan B. ${opener} went well.`);
+      expect(sentenceStartAt(w, 5, new Set())).toBe(4); // the opener, word 4
+    }
+    expect(sentenceStartAt(split("We chose plan B. Smith went well."), 5, new Set())).toBe(0); // a name joins
+  });
+  it("a Roman paragraph numeral opens its paragraph (\"affairs. X. Of Catulus\")", () => {
+    const w = split("urgent affairs. X. Of Catulus, not to neglect");
+    expect(sentenceStartAt(w, 3, new Set())).toBe(2);
+    expect(w[2]).toBe("X.");
+  });
+  it("control: a lowercase single letter still ends a sentence", () => {
+    expect(sentenceStartAt(split("call it x. Then more."), 4, new Set())).toBe(3);
   });
 });

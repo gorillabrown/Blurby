@@ -23,7 +23,9 @@ const WORD_S = (8 * SPF) / 24000; // FakeProducer default: 8 frames per word at 
 function open(options: { producer?: FakeProducer; output?: FakeAudioOutput; document?: Partial<ReaderDocumentSnapshot> } = {}) {
   const producer = options.producer ?? new FakeProducer();
   const output = options.output ?? new FakeAudioOutput();
-  const fake = createFakeInfrastructure({ document: createFakeDocument({ position: 7, ...options.document }) });
+  // NARRATE-SENTENCE-RESUME-1: the fixture words have no sentence ends, so a start rewinds to its paragraph's first
+  // word; the break after w6 keeps w7, where these tests start, a paragraph (and so a sentence) start.
+  const fake = createFakeInfrastructure({ document: createFakeDocument({ position: 7, paragraphBreaks: [6, 8, 17], ...options.document }) });
   const broker = createReaderPorts(fake.infra);
   const document = fake.infra.document.snapshot();
   broker.openDocument(document.documentId);
@@ -212,5 +214,47 @@ describe("narrate mode (P4)", () => {
       expect(container.querySelector(".rm-narrate-notice--timing-missing")?.textContent).toContain("couldn't be timed");
       expect(runtime.getSnapshot()).toMatchObject({ playing: false, clockOwner: "none", highlightedWordIndex: 20 });
     });
+  });
+});
+
+// NARRATE-SENTENCE-RESUME-1 — Play, Space and a reopened book start at the first word of the sentence the saved word is
+// in; a word click and a navigation keep their own word. "w4." ends a sentence, so w5 begins the one holding w7.
+describe("narrate mode: sentence start (NARRATE-SENTENCE-RESUME-1)", () => {
+  const opened: NarrateModeRuntime[] = [];
+  afterEach(() => { for (const r of opened.splice(0)) r.destroy(); });
+  const tokenWords = Array.from({ length: 25 }, (_, i) => (i === 4 ? "w4." : `w${i}`));
+  const document = { tokenWords, paragraphBreaks: [8, 17] };
+
+  it("sentence start (s4): start from a mid-sentence saved word begins at the sentence's first word; it is highlighted and saved", async () => {
+    const { runtime, producer, output } = open({ document });
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.start({ cause: "play-button" });
+    expect(runtime.getNarrationWordIndex()).toBe(5);
+    await flush();
+    expect(producer.requests[0].text.startsWith("w5 ")).toBe(true);
+    output.advance(INTO_FIRST_WORD_S);
+    runtime.tick();
+    expect(runtime.getSnapshot()).toMatchObject({ highlightedWordIndex: 5, currentWordIndex: 5, canonicalWordIndex: 5 });
+    expect(tokenWords[runtime.getSnapshot().highlightedWordIndex]).toBe("w5");
+  });
+
+  it("sentence start (s5): a word click and a jump keep their own word", async () => {
+    const { runtime, producer } = open({ document });
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.hardSelect({ cfi: null, word: "w7", globalWordIndex: 7 }); // clicked before Play: Play starts there
+    runtime.start({ cause: "play-button" });
+    await flush();
+    expect(producer.requests[0].text.startsWith("w7 ")).toBe(true);
+    expect(tokenWords[7]).toBe("w7");
+    let n = producer.requests.length;
+    runtime.jumpToWord(6, "navigate" as never); // while playing: the engine restarts at the jumped word
+    await flush();
+    expect(producer.requests[n].text.startsWith("w6 ")).toBe(true); // the request (a prefetch follows it)
+    n = producer.requests.length;
+    runtime.hardSelect({ cfi: null, word: "w7", globalWordIndex: 7 }); // a click while playing
+    await flush();
+    expect(producer.requests[n].text.startsWith("w7 ")).toBe(true);
   });
 });

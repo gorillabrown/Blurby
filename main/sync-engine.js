@@ -13,12 +13,13 @@
 
 const crypto = require("crypto");
 const fsPromises = require("fs/promises");
-const { renameWithRetry } = require("./json-store");
+const { writeJSON } = require("./json-store");
 const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
 const syncQueue = require("./sync-queue");
 const { pickUserSettings } = require("./migrations");
+const { mergeEditedFields } = require("./library-write");
 const {
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,
@@ -94,9 +95,7 @@ async function loadSyncState() {
 
 async function saveSyncState() {
   if (!syncStatePath) return;
-  const tmp = syncStatePath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(syncState, null, 2), "utf-8");
-  await renameWithRetry(tmp, syncStatePath);
+  await writeJSON(syncStatePath, syncState); // serialized per path: overlapping saves never share a .tmp (RENAME-TMP-RACE-1)
 }
 
 // ── 19A: Revision Counter ─────────────────────────────────────────────────
@@ -322,6 +321,8 @@ function mergeLibrary(localDocs, cloudDocs, currentRevision) {
     }
 
     const mergedDoc = { ...winner };
+    // Renderer and Edit-form fields come from the side with the later editedAt stamp (LIBRARY-WRITE-RACE-2)
+    mergeEditedFields(mergedDoc, localDoc, cloudDoc);
 
     // 19H: Merge reading position.
     // Check if there is a pending reset-progress op in the sync queue that is

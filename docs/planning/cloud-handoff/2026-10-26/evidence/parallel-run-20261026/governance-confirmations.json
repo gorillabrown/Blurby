@@ -1,0 +1,642 @@
+[
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-REOPEN-CFI-1",
+    "idempotencyKey": "parallelgov20261026-PAGE-REOPEN-CFI-1",
+    "actualRevision": "6d1f1ff8f584900358ada639e3696379b2531205d1d19bca13e2bfd6d9965574",
+    "recoveryId": "20261026T204050Z-external-set-status-PAGE-REOPEN-CFI-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "BOOK-TEXT-COLOUR-1",
+    "idempotencyKey": "parallelgov20261026-BOOK-TEXT-COLOUR-1",
+    "actualRevision": "e9b1bf7604e984a692eab2a51040310300c19fcc7d0dba549bb2c534a456f763",
+    "recoveryId": "20261026T204051Z-external-set-status-BOOK-TEXT-COLOUR-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLDER-SWITCH-HEADER-1",
+    "idempotencyKey": "parallelgov20261026-FOLDER-SWITCH-HEADER-1",
+    "actualRevision": "cef668287efc8ff781bd54ff6db1684caac0fe6572b18270c45b57f26122804b",
+    "recoveryId": "20261026T204052Z-external-set-status-FOLDER-SWITCH-HEADER-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-START-STACK-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-START-STACK-1",
+    "actualRevision": "7b2c892fc042e74aaface728ff230080efd50e4c7e122f8499eb299c20e31a31",
+    "recoveryId": "20261026T204053Z-external-set-status-NARRATE-START-STACK-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "BOOK-TYPE-SCALE-1",
+    "idempotencyKey": "parallelgov20261026-BOOK-TYPE-SCALE-1",
+    "actualRevision": "e97397f3d5a300d4b130c82515d2e31a9149e906c51e2590ebdacc221dcb7019",
+    "recoveryId": "20261026T204054Z-external-set-status-BOOK-TYPE-SCALE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "KEEP-FURTHEST-FIX-1",
+    "idempotencyKey": "parallelgov20261026-KEEP-FURTHEST-FIX-1",
+    "actualRevision": "249e4229e20e850f17eae1e9869e06daeb84926b69a3fca04502b48d2eafdaa7",
+    "recoveryId": "20261026T204055Z-external-set-status-KEEP-FURTHEST-FIX-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "RELEASE-RUNBOOK-1",
+    "idempotencyKey": "parallelgov20261026-RELEASE-RUNBOOK-1",
+    "actualRevision": "a3d5d64cfe7a77d8237322392238f67db0493d6c0d4d3dfbcd99b9380d9d351e",
+    "recoveryId": "20261026T204056Z-external-set-status-RELEASE-RUNBOOK-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "ELECTRON-42-UPGRADE-1",
+    "idempotencyKey": "parallelgov20261026-ELECTRON-42-UPGRADE-1",
+    "actualRevision": "56127e1222b35d4c459eb3329ff841e743730733a330125725778f04f38601d6",
+    "recoveryId": "20261026T204057Z-external-set-status-ELECTRON-42-UPGRADE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PDF-IMPORT-DIAG-1",
+    "idempotencyKey": "parallelgov20261026-PDF-IMPORT-DIAG-1",
+    "actualRevision": "d17022a55e9d7767e8d8c802137a308a0e66ee8ab0437108a61836289055f131",
+    "recoveryId": "20261026T204057Z-external-set-status-PDF-IMPORT-DIAG-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PACKAGING-FIX-1",
+    "idempotencyKey": "parallelgov20261026-PACKAGING-FIX-1",
+    "actualRevision": "f68f037fb2e8cc887fed1f08ed7fe673c54745b6a975671cca1d54e932dd8c4a",
+    "recoveryId": "20261026T204058Z-external-set-status-PACKAGING-FIX-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "UX-POLISH-1",
+    "idempotencyKey": "parallelgov20261026-UX-POLISH-1",
+    "actualRevision": "541c324dc00a8c95c7d32503fbc53daaa0397314a6b1d8bf5d2e27a35b751398",
+    "recoveryId": "20261026T204059Z-external-set-status-UX-POLISH-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "UX-POLISH-2",
+    "idempotencyKey": "parallelgov20261026-UX-POLISH-2",
+    "actualRevision": "55e2bd86df8adbab740e435235919f837bb1ebd8b1eb96c37bcc26a31bd130f1",
+    "recoveryId": "20261026T204100Z-external-set-status-UX-POLISH-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LARGE-FOLDER-SYNC-1",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-1",
+    "actualRevision": "be31ea45628f33e4a1ff865661dddaa60e4d012efa4f4fa21260c26e2eafd7e1",
+    "recoveryId": "20261026T204101Z-external-set-status-LARGE-FOLDER-SYNC-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LIBRARY-READ-ALLOW-1",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-READ-ALLOW-1",
+    "actualRevision": "c0d96484021338f72ab417a08340defbfad68b0cc10e34ae16a916f2e884e1e8",
+    "recoveryId": "20261026T204102Z-external-set-status-LIBRARY-READ-ALLOW-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-POSITION-SAVE-1",
+    "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-1",
+    "actualRevision": "d1c3b2719410da0e8e3e4473b200641acef9d103bb6b00c5d734eb78b2735923",
+    "recoveryId": "20261026T204103Z-external-set-status-PAGE-POSITION-SAVE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "DEPS-AUDIT-1",
+    "idempotencyKey": "parallelgov20261026-DEPS-AUDIT-1",
+    "actualRevision": "90acb136f2e00d732e8d83de47ac732ef5cc9cccabc4551f3a624a8562a88f88",
+    "recoveryId": "20261026T204104Z-external-set-status-DEPS-AUDIT-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "SAVE-LIBRARY-TRUST-1",
+    "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-TRUST-1",
+    "actualRevision": "3f1bc9bfb8e74237a7822b11dadb11e4fb9cae083979a57c577fa607f55430ee",
+    "recoveryId": "20261026T204105Z-external-set-status-SAVE-LIBRARY-TRUST-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "IPC-PATH-TRUST-1",
+    "idempotencyKey": "parallelgov20261026-IPC-PATH-TRUST-1",
+    "actualRevision": "444d016eec62cb6006efdf32aa182c5601043e34c9391de3c41285d6eb9bf1d2",
+    "recoveryId": "20261026T204106Z-external-set-status-IPC-PATH-TRUST-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "SAVE-LIBRARY-MERGE-1",
+    "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-MERGE-1",
+    "actualRevision": "32531c849df8164aafe50ca28481b890e7660b0deac1f1a0971c67bafe87a2a2",
+    "recoveryId": "20261026T204107Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "SETTINGS-KEY-TRUST-1",
+    "idempotencyKey": "parallelgov20261026-SETTINGS-KEY-TRUST-1",
+    "actualRevision": "fcaf56171387c87badcf5dc14dc64c2469e0f3f1acad5a40bfb9e7f9e5a82d5d",
+    "recoveryId": "20261026T204108Z-external-set-status-SETTINGS-KEY-TRUST-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+    "idempotencyKey": "parallelgov20261026-FOLDER-UNREACHABLE-GUARD-1",
+    "actualRevision": "cd31c5cf52c0402a729799f6babb32892b57e1e6a71e91cd764562febb6b3406",
+    "recoveryId": "20261026T204109Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "GET-STATE-SECRET-1",
+    "idempotencyKey": "parallelgov20261026-GET-STATE-SECRET-1",
+    "actualRevision": "428e49c05a30776362dfbd5605e22bd0decf4538a666a638744fd6b2566d00ba",
+    "recoveryId": "20261026T204110Z-external-set-status-GET-STATE-SECRET-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LARGE-FOLDER-SYNC-2",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-2",
+    "actualRevision": "9b220d0600322f314d4aebcabf29cf0ec894d1d3b1fb6aaa9a07eab76ede48b3",
+    "recoveryId": "20261026T204111Z-external-set-status-LARGE-FOLDER-SYNC-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-SAVE-RESTAMP-GUARD-1",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-GUARD-1",
+    "actualRevision": "a9dc733447d9dd5f2721d5c7f6c7851362fdb1ef7ff861a5de3572f80acac690",
+    "recoveryId": "20261026T204111Z-external-set-status-PAGE-SAVE-RESTAMP-GUARD-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-SAVE-RESTAMP-2",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-2",
+    "actualRevision": "f19d09e62fca4f220919082fb78f198f154224740591a7f88efd995103d5b14d",
+    "recoveryId": "20261026T204112Z-external-set-status-PAGE-SAVE-RESTAMP-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-POSITION-SAVE-2",
+    "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-2",
+    "actualRevision": "c10989515b020da82954d2c56ae6854a84102c051e90a2bd2131d644afd66681",
+    "recoveryId": "20261026T204113Z-external-set-status-PAGE-POSITION-SAVE-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLDER-NOTICE-1",
+    "idempotencyKey": "parallelgov20261026-FOLDER-NOTICE-1",
+    "actualRevision": "dfa232398545420ae05eddfc2a8fdd0c1300af141fc1bc8bdd7aaefef03c145e",
+    "recoveryId": "20261026T204114Z-external-set-status-FOLDER-NOTICE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "ZIP-READ-FOLLOWUPS-1",
+    "idempotencyKey": "parallelgov20261026-ZIP-READ-FOLLOWUPS-1",
+    "actualRevision": "336e15f5aeefe326dfec6df333927b1a22a0e9b78487e1d2672292145210feb1",
+    "recoveryId": "20261026T204115Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LIBRARY-WRITE-RACE-1",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-1",
+    "actualRevision": "5a328ef73255b7d38cd3da021633ff0036a3bffefbe379e93dd3b8f2abaae07b",
+    "recoveryId": "20261026T204116Z-external-set-status-LIBRARY-WRITE-RACE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-YEARS-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-YEARS-1",
+    "actualRevision": "8267937235df0a04dc4bb00acef237fc4c098b7e0d58d1c280f9717432b923a3",
+    "recoveryId": "20261026T204117Z-external-set-status-NARRATE-YEARS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-SENTENCE-RESUME-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-RESUME-1",
+    "actualRevision": "279142b3346e1119a4015946ed007b97834dee5cc217bb4f59c139728c20973d",
+    "recoveryId": "20261026T204118Z-external-set-status-NARRATE-SENTENCE-RESUME-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-TOKEN-CAP-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-TOKEN-CAP-1",
+    "actualRevision": "5191ca9df6dbd3a938c7a029a797388664d1350400b04660bfcd272515a15fcb",
+    "recoveryId": "20261026T204119Z-external-set-status-NARRATE-TOKEN-CAP-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "WS-TOKEN-REGEN-1",
+    "idempotencyKey": "parallelgov20261026-WS-TOKEN-REGEN-1",
+    "actualRevision": "83dd6063d45d4d1f6c7cbee8207c88356ee369cb369914ad006b6e840cd69f1d",
+    "recoveryId": "20261026T204120Z-external-set-status-WS-TOKEN-REGEN-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LARGE-FOLDER-SYNC-3",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-3",
+    "actualRevision": "2e594cd30676620241f8a4247e6bf6d9c8d27bdc0475c06f56795e2178da8f44",
+    "recoveryId": "20261026T204121Z-external-set-status-LARGE-FOLDER-SYNC-3",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-TRACE-LABELS-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-TRACE-LABELS-1",
+    "actualRevision": "f2c8e20fcc03ced24ce3725592b8714c1029a88ba4c335ebde41ab8499745bf5",
+    "recoveryId": "20261026T204122Z-external-set-status-NARRATE-TRACE-LABELS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "TOC-JUMP-SAVE-1",
+    "idempotencyKey": "parallelgov20261026-TOC-JUMP-SAVE-1",
+    "actualRevision": "0be15a151943572ee36451809ecc9333bf75b141ef0666d149e2e5a54680b2e6",
+    "recoveryId": "20261026T204123Z-external-set-status-TOC-JUMP-SAVE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-KEY-REPEAT-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-KEY-REPEAT-1",
+    "actualRevision": "1bddde10440e11c716cce894dbc508401c0053523b21816126da007f704cf373",
+    "recoveryId": "20261026T204124Z-external-set-status-NARRATE-KEY-REPEAT-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "RENAME-TMP-RACE-1",
+    "idempotencyKey": "parallelgov20261026-RENAME-TMP-RACE-1",
+    "actualRevision": "b8e290a4758c1fa1d414e6c0ebcb49603ee8a8410f57af022ed57ed8d5ec5cee",
+    "recoveryId": "20261026T204125Z-external-set-status-RENAME-TMP-RACE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-HELD-TURN-FAIL-1",
+    "idempotencyKey": "parallelgov20261026-PAGE-HELD-TURN-FAIL-1",
+    "actualRevision": "47519c26254a86db1a770b0142bd40ae055e370e8ddba71f0e51ce7746a475a6",
+    "recoveryId": "20261026T204126Z-external-set-status-PAGE-HELD-TURN-FAIL-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "WS-PAIR-LOG-1",
+    "idempotencyKey": "parallelgov20261026-WS-PAIR-LOG-1",
+    "actualRevision": "993af52bed416d36e0ed8af172fbbe5b3bbc5f353ee4fd883e929354aada3533",
+    "recoveryId": "20261026T204127Z-external-set-status-WS-PAIR-LOG-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "BAND-ALIGN-1",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-1",
+    "actualRevision": "fb73b2e53b19ae3a30d951e7c312b53a65af97e0e154f5bff6e1bff9bf4b4718",
+    "recoveryId": "20261026T204127Z-external-set-status-BAND-ALIGN-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLIATE-OBSERVER-LEAK-1",
+    "idempotencyKey": "parallelgov20261026-FOLIATE-OBSERVER-LEAK-1",
+    "actualRevision": "b8215c9c9cb8ac5ba2b5ae553cd636610cf2428fb1b5404d31db61c2b43dad18",
+    "recoveryId": "20261026T204128Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-SENTENCE-INITIALS-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-INITIALS-1",
+    "actualRevision": "6af2915e530d98b32d41b9fec6f8c88037624cd636eb48c2368ba15b895e8ec3",
+    "recoveryId": "20261026T204129Z-external-set-status-NARRATE-SENTENCE-INITIALS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "ERROR-LOG-CAP-1",
+    "idempotencyKey": "parallelgov20261026-ERROR-LOG-CAP-1",
+    "actualRevision": "642c7550e6202b30f29b52d0c3a0066b490c3713ac69651987a3f383469c90dd",
+    "recoveryId": "20261026T204130Z-external-set-status-ERROR-LOG-CAP-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOCUS-KEYS-FIX-1",
+    "idempotencyKey": "parallelgov20261026-FOCUS-KEYS-FIX-1",
+    "actualRevision": "26ac835394e815499c2e4b3f5ea67c5a5e68a6dcd4c5b4616e98bd78da165736",
+    "recoveryId": "20261026T204131Z-external-set-status-FOCUS-KEYS-FIX-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FLOW-KEYS-FIX-1",
+    "idempotencyKey": "parallelgov20261026-FLOW-KEYS-FIX-1",
+    "actualRevision": "d440e8f741878ad4114ea8a6add9735b9069f7932d99f3ae22596bf3d3114520",
+    "recoveryId": "20261026T204132Z-external-set-status-FLOW-KEYS-FIX-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PAGE-SAVE-RESTAMP-3",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-3",
+    "actualRevision": "3b982f4e02b15cedf7a8d6740f87fa66dcd6a3578da854905591928539bc1436",
+    "recoveryId": "20261026T204133Z-external-set-status-PAGE-SAVE-RESTAMP-3",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "JUMP-LANDING-SAVE-1",
+    "idempotencyKey": "parallelgov20261026-JUMP-LANDING-SAVE-1",
+    "actualRevision": "307a437fab96dfc0d3aea34cc0825fb160465ed9651e177e039813ccfb45fd41",
+    "recoveryId": "20261026T204134Z-external-set-status-JUMP-LANDING-SAVE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "ZIP-ASYNC-READ-1",
+    "idempotencyKey": "parallelgov20261026-ZIP-ASYNC-READ-1",
+    "actualRevision": "eab38f4eb2f7fa86e0ae3849f764c09097cfe14df5c169558a6f4d7a494fee33",
+    "recoveryId": "20261026T204135Z-external-set-status-ZIP-ASYNC-READ-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "BAND-ALIGN-2",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-2",
+    "actualRevision": "c1d3068b2f82300a96e5d27877e242f1aea90ef9a1db45c82864a5b272efe2bc",
+    "recoveryId": "20261026T204136Z-external-set-status-BAND-ALIGN-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FLOW-PARA-KEYS-1",
+    "idempotencyKey": "parallelgov20261026-FLOW-PARA-KEYS-1",
+    "actualRevision": "26852aaeefe7230472d940c5d1308dd48adabc0eee15c2ffcbab50a9d3a914a1",
+    "recoveryId": "20261026T204137Z-external-set-status-FLOW-PARA-KEYS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "BLOCK-TAG-CASE-1",
+    "idempotencyKey": "parallelgov20261026-BLOCK-TAG-CASE-1",
+    "actualRevision": "0c490bb48abfd0f3b1486e2045623739bacca1cfcb006481af257b6372c01d45",
+    "recoveryId": "20261026T204137Z-external-set-status-BLOCK-TAG-CASE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-QUIT-LINGER-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-QUIT-LINGER-1",
+    "actualRevision": "71b1c810458a6c997d1e0f595a13c43ce5658211e81fcaa0460b523e8f576c76",
+    "recoveryId": "20261026T204138Z-external-set-status-NARRATE-QUIT-LINGER-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LIBRARY-WRITE-RACE-2",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-2",
+    "actualRevision": "fb3fdbd4b81c1e9053c661a90d90a46035bf10abf3793f15a6b4483d5aafce08",
+    "recoveryId": "20261026T204139Z-external-set-status-LIBRARY-WRITE-RACE-2",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "OVERLAY-THEME-SWEEP-1",
+    "idempotencyKey": "parallelgov20261026-OVERLAY-THEME-SWEEP-1",
+    "actualRevision": "7b98f57eabf6d0685ea4aa37984a2cd6502c40cd79628bec40bd1c4c33be5d34",
+    "recoveryId": "20261026T204140Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "READER-ARROW-GUARD-1",
+    "idempotencyKey": "parallelgov20261026-READER-ARROW-GUARD-1",
+    "actualRevision": "56493b6cb62bb0ef2d3004c054bb33ea0f72250c6a49ede5a11ecd2749371802",
+    "recoveryId": "20261026T204141Z-external-set-status-READER-ARROW-GUARD-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "WIN-TARGET-NSIS-1",
+    "idempotencyKey": "parallelgov20261026-WIN-TARGET-NSIS-1",
+    "actualRevision": "2301e5a567196cd570df7a825d15a5207e97ba0d859fc3cc5f9b65b50c84a17d",
+    "recoveryId": "20261026T204142Z-external-set-status-WIN-TARGET-NSIS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-RECONCILE-RESIDUAL-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-RECONCILE-RESIDUAL-1",
+    "actualRevision": "8877213594429347de92357bd857d46b7893a673592edbb6cb9b12c92989c508",
+    "recoveryId": "20261026T204143Z-external-set-status-NARRATE-RECONCILE-RESIDUAL-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+    "idempotencyKey": "parallelgov20261026-NARRATE-HARNESS-COLDCLICK-1",
+    "actualRevision": "147e5d6878f0a738782b5a825b30258340c0ef63f0e44e1a2029a4458dd039d8",
+    "recoveryId": "20261026T204144Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "EINK-CONTROLS-1",
+    "idempotencyKey": "parallelgov20261026-EINK-CONTROLS-1",
+    "actualRevision": "750c58f32daadd560e4bb1017d8e24a2b9967b2bdc5de8e25e2543d54f40e6a4",
+    "recoveryId": "20261026T204146Z-external-set-status-EINK-CONTROLS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "CHAPTER-STEP-CFI-1",
+    "idempotencyKey": "parallelgov20261026-CHAPTER-STEP-CFI-1",
+    "actualRevision": "81ed5f2d9036073576623f1fdce1f3d6d03dd7386106a9d87f7e2d56feb45dca",
+    "recoveryId": "20261026T204147Z-external-set-status-CHAPTER-STEP-CFI-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "RESTAMP-RERUN-RACE-1",
+    "idempotencyKey": "parallelgov20261026-RESTAMP-RERUN-RACE-1",
+    "actualRevision": "398dcdefc12ea4e580ea9f17a4b45a036b31a4ea1f1f9a3fbed7f8d944da8e9c",
+    "recoveryId": "20261026T204148Z-external-set-status-RESTAMP-RERUN-RACE-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "APP-TABS-1",
+    "idempotencyKey": "parallelgov20261026-APP-TABS-1",
+    "actualRevision": "e582a03dfb6f23cf7bb64a08c79e7fae27884f6e54ee7fcb66c32c405e122e3c",
+    "recoveryId": "20261026T204149Z-external-set-status-APP-TABS-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FLOW-PARA-PAUSE-INDEX-1",
+    "idempotencyKey": "parallelgov20261026-FLOW-PARA-PAUSE-INDEX-1",
+    "actualRevision": "4da9f4c7b9b3816c167d476b6f2d210d277866cf357cd9c628c6030f121c07a9",
+    "recoveryId": "20261026T204150Z-external-set-status-FLOW-PARA-PAUSE-INDEX-1",
+    "detail": {}
+  }
+]

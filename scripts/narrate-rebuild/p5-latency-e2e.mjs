@@ -11,7 +11,7 @@ import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Usage (pwsh, in the phase worktree, after `npm run build`; never while npm test or npm run build runs):
 //   node scripts/narrate-rebuild/p5-latency-e2e.mjs [--only session|warm|cold] [--warm 20] [--cold 5] [--rates 1.0,2.0]
 //        [--minutes 5] [--out C:\Projects\Blurby-artifacts\narrate-rebuild-1\p5] [--analyze-only]
-// Writes docs/studies/narrate-rebuild-1/phase5/latency-e2e.json (D6) and recorded-output.json (D3 and D5 in the app,
+// Writes latency-e2e.json (D6) into --out, and docs/studies/narrate-rebuild-1/phase5/recorded-output.json (D3 and D5 in the app,
 // through p5-recorded-output-check.mjs's analysis). Exit 0 only when every warm trial < 2,000 ms, every cold trial
 // < 8,000 ms and every session analysis is PASS; 1 otherwise. --analyze-only re-reads the traces already in --out.
 import fs from "node:fs";
@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { analyze, readTraceEvents } from "./p5-recorded-output-check.mjs";
+import { parseRates } from "./lib/rates.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -29,7 +30,14 @@ const arg = (name, dflt) => { const i = process.argv.indexOf(name); return i > 0
 const ONLY = arg("--only", null);
 const WARM = Number(arg("--warm", 20));
 const COLD = Number(arg("--cold", 5));
-const RATES = String(arg("--rates", "1.0,2.0")).split(",").map(Number);
+// NARRATE-TRACE-LABELS-1: a rate off Narrate's grid stops the run before anything launches ("1.0 2.0" was NaN, a false PASS).
+let RATES;
+try {
+  RATES = parseRates(String(arg("--rates", "1.0,2.0")));
+} catch (err) {
+  console.error(err.message);
+  process.exit(2);
+}
 const MINUTES = Number(arg("--minutes", 5));
 const OUT = path.resolve(arg("--out", "C:/Projects/Blurby-artifacts/narrate-rebuild-1/p5"));
 const ANALYZE_ONLY = process.argv.includes("--analyze-only");
@@ -242,7 +250,8 @@ if (want("cold")) {
 report.verdict = failures.length ? "FAIL" : "PASS";
 report.failures = failures;
 fs.mkdirSync(RECORDS_DIR, { recursive: true });
-if (want("warm") || want("cold")) fs.writeFileSync(path.join(RECORDS_DIR, "latency-e2e.json"), JSON.stringify(report, null, 2));
+fs.mkdirSync(OUT, { recursive: true });
+if (want("warm") || want("cold")) fs.writeFileSync(path.join(OUT, "latency-e2e.json"), JSON.stringify(report, null, 2));
 if (want("session")) fs.writeFileSync(path.join(RECORDS_DIR, "recorded-output.json"), JSON.stringify({ generatedAt: report.generatedAt, host: report.host, minutes: MINUTES, sessions: report.sessions, runs: report.runs.filter((r) => r.label.startsWith("session")) }, null, 2));
 console.log(JSON.stringify({ verdict: report.verdict, failures, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
 process.exit(failures.length ? 1 : 0);

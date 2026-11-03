@@ -1,6 +1,6 @@
 // DEPS-AUDIT-1 (C1): every EPUB entry read in main/ is capped, declared and inflated.
 // Real EPUBs are built with adm-zip under os.tmpdir() and parsed by the real parsers.
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 
 const os = require("os");
 const fs = require("fs");
@@ -120,4 +120,97 @@ describe("EPUB reads at the default caps", () => {
     expect(fs.statSync(cover).size).toBe(41943044);
     expect(await validateEpub(file)).toEqual({ valid: true, errors: [] });
   }, 60_000);
+});
+
+// ZIP-READ-FOLLOWUPS-1 (N3): the per-operation cap, at parser level. extractWords reads container.xml, the OPF
+// and the spine (not the cover), so the OPF is padded: every entry is under the entry cap, together they are over.
+describe("operation cap, parser level", () => {
+  let savedOpCap;
+  beforeAll(() => { savedOpCap = constants.ZIP_OPERATION_MAX_BYTES; });
+  afterAll(() => { constants.ZIP_OPERATION_MAX_BYTES = savedOpCap; });
+
+  it("(q) extractWords rejects when its entries together pass the operation cap", async () => {
+    const file = buildEpub({ chapterBytes: 4096, opfPadBytes: 2048 });
+    expect(constants.ZIP_ENTRY_MAX_BYTES).toBe(savedCap);
+    constants.ZIP_OPERATION_MAX_BYTES = 6144;
+    try {
+      await expect(extractWords(file)).rejects.toThrow(/too large/);
+    } finally {
+      constants.ZIP_OPERATION_MAX_BYTES = savedOpCap;
+    }
+    expect((await extractWords(file)).totalWords).toBeGreaterThan(0); // control: the default cap reads it
+  });
+});
+
+// ZIP-READ-FOLLOWUPS-1 (N1): an archive over ZIP_FILE_MAX_BYTES is refused before adm-zip reads the whole file.
+describe("archive size cap", () => {
+  const OPEN_ERROR = "Could not open this EPUB — the file may be corrupted.";
+  let savedFileCap;
+  beforeAll(() => { savedFileCap = constants.ZIP_FILE_MAX_BYTES; });
+  afterAll(() => { constants.ZIP_FILE_MAX_BYTES = savedFileCap; });
+
+  it("(o) every EPUB open refuses an archive over the cap and takes its open-failure path", async () => {
+    const file = buildEpub();
+    expect(fs.statSync(file).size).toBeGreaterThan(1024);
+    constants.ZIP_FILE_MAX_BYTES = 1024;
+    const reads = vi.spyOn(fs, "readFileSync"); // adm-zip's whole-file read: the cap must refuse before it
+    try {
+      expect(await extractWords(file)).toEqual({ words: [], sections: [], footnoteCues: [], totalWords: 0 });
+      expect(await extractContent(file)).toEqual({ userError: OPEN_ERROR });
+      const dataPath = fs.mkdtempSync(path.join(tmp, "cover-o-"));
+      expect(await extractEpubCover(file, "doc1", dataPath)).toBeNull();
+      const coversDir = path.join(dataPath, "covers");
+      expect(fs.existsSync(coversDir) ? fs.readdirSync(coversDir) : []).toEqual([]);
+      expect(await extractEpubMetadata(file)).toEqual({ title: null, author: null });
+      const r = await validateEpub(file);
+      expect(r.valid).toBe(false);
+      expect(r.errors.join("\n")).toMatch(/too large/);
+      expect(reads.mock.calls.filter(([p]) => p === file)).toEqual([]);
+    } finally {
+      reads.mockRestore();
+      constants.ZIP_FILE_MAX_BYTES = savedFileCap;
+    }
+  });
+
+  it("(r) a large archive whose entries are small and unread is not refused (cap admits 700 MiB)", async () => {
+    // A 700 MiB EPUB of mostly unread media reads today, since only container, OPF and spine are read; the archive
+    // cap must not refuse it. Its on-disk size is stubbed; adm-zip reads the real (small) file.
+    const fsp = require("fs/promises");
+    const file = buildEpub();
+    const realStat = fsp.stat;
+    const stat = vi.spyOn(fsp, "stat").mockImplementation(async (p, ...rest) => {
+      const s = await realStat(p, ...rest);
+      return p === file ? Object.assign(s, { size: 700 * 1024 * 1024 }) : s;
+    });
+    try {
+      expect((await extractWords(file)).totalWords).toBeGreaterThan(0);
+      expect(stat).toHaveBeenCalledWith(file);
+      stat.mockImplementation(async () => ({ size: constants.ZIP_FILE_MAX_BYTES + 1 })); // control: just over the cap
+      expect(await extractWords(file)).toEqual({ words: [], sections: [], footnoteCues: [], totalWords: 0 });
+    } finally {
+      stat.mockRestore();
+    }
+  });
+
+  it("(s) a path stat cannot see keeps its existing open error", async () => {
+    // Before this item adm-zip reported a missing file as "ADM-ZIP: Invalid filename", which extractContent maps
+    // to its ZIP wording; a stat failure must reach the same path, not a new message.
+    // Outside tmp: its "zip-entry-cap-" name would put "zip" into any error text and hide a changed message.
+    const missing = path.join(os.tmpdir(), `blurby-missing-book-${process.pid}.epub`);
+    expect(missing.toLowerCase()).not.toMatch(/zip|invalid/);
+    expect(await extractContent(missing)).toEqual({ userError: "Could not open this EPUB — the file appears to be a corrupted ZIP archive." });
+    expect(await extractWords(missing)).toEqual({ words: [], sections: [], footnoteCues: [], totalWords: 0 });
+  });
+
+  it("(p) control: with the cap restored, the same file reads as (f) does", async () => {
+    const file = buildEpub();
+    expect((await extractWords(file)).totalWords).toBeGreaterThan(0);
+    const text = await extractContent(file);
+    expect(typeof text).toBe("string");
+    expect(text).toContain("word");
+    const dataPath = fs.mkdtempSync(path.join(tmp, "cover-p-"));
+    expect(fs.statSync(await extractEpubCover(file, "doc1", dataPath)).size).toBe(1028);
+    expect((await extractEpubMetadata(file)).title).toBe("Bomb");
+    expect(await validateEpub(file)).toEqual({ valid: true, errors: [] });
+  });
 });

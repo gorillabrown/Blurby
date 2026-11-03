@@ -1,0 +1,49 @@
+{
+  "label": "candidate-combined",
+  "passed": true,
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\candidate-combined-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 55100,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "steps": [
+    {
+      "check": "initial-grid-all",
+      "ids": [
+        "owned-complete",
+        "owned-control"
+      ]
+    },
+    {
+      "check": "render-does-not-change-progress-or-archive",
+      "passed": true
+    },
+    {
+      "check": "completed-card-opens-owned91-word-text",
+      "wordCount": 91
+    },
+    {
+      "check": "return-to-library-visible-in-correct-status",
+      "ids": [
+        "owned-archive",
+        "owned-complete"
+      ],
+      "record": {
+        "id": "owned-complete",
+        "position": 90,
+        "wordCount": 91,
+        "archived": true
+      }
+    },
+    {
+      "check": "reopen-owned91-word-text",
+      "wordCount": 91
+    }
+  ],
+  "aliveAtMs": 26008,
+  "rendererErrors": [],
+  "dumpFiles": [],
+  "liveUnchanged": true
+}

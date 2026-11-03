@@ -1,0 +1,4 @@
+
+> blurby@1.75.1 typecheck
+> tsc --noEmit
+

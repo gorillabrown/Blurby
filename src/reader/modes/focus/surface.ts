@@ -16,12 +16,18 @@ export interface FocusSurface {
   extractWords(): void;
   /** Legacy getEffectiveParagraphBreaks (foliate branch) as a sorted array; [] while no view is mounted. */
   getParagraphBreaks(): readonly number[];
+  /** FOCUS-KEYS-FIX-1: book-wide block-start words of book-stamped sections (provisional ones left out); [] with no view. */
+  getParagraphStarts(): readonly number[];
   /** Legacy foliateApiRef.current.next() (empty-words retry). */
   next(): void;
   goToSection(sectionIndex: number): void;
+  /** PLAY-FIRST-TEXT-1: the move to the first text waits for the target section's load (the view API already has it). */
+  waitForSectionReady(sectionIndex?: number | null): Promise<number | null>;
   /** S1 G6: the paused arrival cursor (Focus's only highlight call). */
   highlight(wordIndex: number, kind?: "flow" | "narrate", options?: FocusFoliateHighlightOptions): boolean;
   findFirstVisibleWordIndex(): number;
+  /** PLAY-FIRST-TEXT-1: the section on screen; null with no view, or a view without the getter. */
+  getDisplayedSectionIndex(): number | null;
   isUserBrowsing(): boolean;
   clearUserBrowsing(): void;
   clearSoftHighlight(): void;
@@ -41,10 +47,13 @@ export function createFocusSurface(viewApiRef: MutableRefObject<FocusFoliateView
       const breaks = api()?.getParagraphBreaks();
       return breaks ? [...breaks].sort((a, b) => a - b) : [];
     },
+    getParagraphStarts: () => api()?.getParagraphStartWordIndexes() ?? [],
     next: () => api()?.next(),
     goToSection: (sectionIndex) => { api()?.goToSection(sectionIndex).catch(() => {}); },
+    waitForSectionReady: (sectionIndex) => Promise.resolve(api()?.waitForSectionReady(sectionIndex) ?? null),
     highlight: (wordIndex, kind, options) => api()?.highlightWordByIndex(wordIndex, kind, options) ?? false,
     findFirstVisibleWordIndex: () => api()?.findFirstVisibleWordIndex() ?? -1,
+    getDisplayedSectionIndex: () => api()?.getDisplayedSectionIndex?.() ?? null,
     isUserBrowsing: () => api()?.isUserBrowsing() ?? false,
     clearUserBrowsing: () => api()?.clearUserBrowsing(),
     clearSoftHighlight: () => api()?.clearSoftHighlight(),

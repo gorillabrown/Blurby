@@ -1,0 +1,101 @@
+{
+  "sourceCommit": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
+  "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+  "archive": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\resources\\app.asar",
+  "exeSha256": "cdbc080ccc68b50565d0b51151082ab46e710083703f3d778951a8bfa80e5ac2",
+  "asarSha256": "26e7cc8bcaaa5af5dec04a298ffdf408ce8e340e1d1abaf6722afe72cbaca01e",
+  "arch": "ARM64 (0xaa64)",
+  "rendererFiles": 21,
+  "files": [
+    {
+      "file": "dist\\index.html",
+      "sha256": "675b14b55bd931d675662db950c1dc079bc37d78b27a9c09f20723fc5b3b57d0"
+    },
+    {
+      "file": "dist\\assets\\App-DbzqKJv4.css",
+      "sha256": "fdcee1985183c471e8c9013be1758b152f0064dc989d7fde29802d6f81e322fe"
+    },
+    {
+      "file": "dist\\assets\\App-iJSC-wbg.js",
+      "sha256": "623efe4617fb4717611ed0e146d437d1dd03d73a9bfe97d74978c6b2e3da5f02"
+    },
+    {
+      "file": "dist\\assets\\blurby-icon-ejRjiByq.png",
+      "sha256": "143e2bbffcb60a38202eac6a5728df5bf299bf7f6b3c35cc8222a2d7b28df74b"
+    },
+    {
+      "file": "dist\\assets\\comic-book-DIQGts9b.js",
+      "sha256": "41809c14e3e98a83afb97dfdc8ad62d8bb48489aff1672a886492dc05007814c"
+    },
+    {
+      "file": "dist\\assets\\epub-CnwfK77K.js",
+      "sha256": "7466c82f59bc28d421c87d7bf4ed6fa352a2965428fb4e1278a1eafa83e56f56"
+    },
+    {
+      "file": "dist\\assets\\fb2-DoA4UCCO.js",
+      "sha256": "ce2144e4b46af9646f603d0c37b9541b70f17027079914e81d4e81d03ad64514"
+    },
+    {
+      "file": "dist\\assets\\fflate-CtUkkcu7.js",
+      "sha256": "165df8eee6bd8c60cefdc67e51acb57335ba0e01762b2698b73c8972027c7991"
+    },
+    {
+      "file": "dist\\assets\\fixed-layout-E39NmGzb.js",
+      "sha256": "f2a0740856add8790b71cd27ecdb232a38deb8a73fef7d0c58643668ee5ec2de"
+    },
+    {
+      "file": "dist\\assets\\index-BbFixAbX.js",
+      "sha256": "229c0dd355a4ccdb51b5d2f8372c6d9af071115e75e10cf08777df6c2efe8770"
+    },
+    {
+      "file": "dist\\assets\\index-D3QB8vZK.css",
+      "sha256": "fb3117e0dcfef3e86a83de74620cd44eadfdd956497f70b9e3e513571bedd418"
+    },
+    {
+      "file": "dist\\assets\\mobi-CUP3Mkj_.js",
+      "sha256": "32cf44c14ffcc6fbcfe952e2cebef827ff9d3d27d6f99ac2bdb29b2b1530232c"
+    },
+    {
+      "file": "dist\\assets\\paginator-DVT_4TtX.js",
+      "sha256": "95b9a47f0fa36d4197728be733ced1b62aa296b528b4058d6fc822279630fcff"
+    },
+    {
+      "file": "dist\\assets\\search-DFtD2c8n.js",
+      "sha256": "a78583928bb6657a128d72570edab7f7f0f4991cb785279ea94b1a480956616c"
+    },
+    {
+      "file": "dist\\assets\\settings-uM7U0W1P.js",
+      "sha256": "717c8b4d7cdaf8e787d2b663b6e9b79211434df5bb8203b6e547fa88bb07430e"
+    },
+    {
+      "file": "dist\\assets\\tts-CfM_63jl.js",
+      "sha256": "958bd7639e959bb0379db0a143b8ec7b67972041e528b48e9b1fb3e182007613"
+    },
+    {
+      "file": "dist\\assets\\tts-HaHKBHMJ.js",
+      "sha256": "e7d8c833106888015672ecd5991e3c73795da55f932d9503c3ce34c4bb79ca04"
+    },
+    {
+      "file": "dist\\assets\\vendor-DXnWpCqd.js",
+      "sha256": "3058905d71c0b5c6c60a017837d013d3fb501313807b386e62e2afe31970294a"
+    },
+    {
+      "file": "dist\\assets\\view-CN1eBYbT.js",
+      "sha256": "4f9b7976f60fbed18d3e45b0552d273904688e55b1efe44e99a89eaafe97abf1"
+    },
+    {
+      "file": "dist\\assets\\zip-Y2spjjw9.js",
+      "sha256": "9654156c7b0b3da6c06520ef276652e9f3d5a17bccf5c6594a214f91fce12afe"
+    },
+    {
+      "file": "dist\\resources\\sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb"
+    }
+  ],
+  "mainParity": true,
+  "profileOverridePresent": true,
+  "patchedDestroyBodies": [
+    "destroy(){this.document&&e(this,X).unobserve(this.document.body),e(this,X).disconnect()}}X=new WeakMap,T=new WeakMap,b=new WeakMap,nt=new WeakMap,E=new WeakMap,C=new WeakMap,ot=new WeakMap,G=new WeakMap,R=new WeakMap,K=new WeakMap;var A,Y,L,I,z,V,D,p,k,M,N,$,P,J,j,rt,at",
+    "destroy(){var t,i;e(this,Y).unobserve(this),e(this,Y).disconnect(),e(this,p).destroy(),g(this,p,null),(i=(t=this.sections[e(this,$)])==null?void 0:t.unload)==null||i.call(t),e(this,ht).removeEventListener(\"change\",e(this,U))}}A=new WeakMap,Y=new WeakMap,L=new WeakMap,I="
+  ]
+}

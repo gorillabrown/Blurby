@@ -17,7 +17,11 @@ export interface FoliateWord {
   sourceLineBreakAfter?: boolean;
 }
 
-export const BLOCK_TAGS = new Set(["P", "DIV", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "LI", "TD", "SECTION", "ARTICLE"]);
+/**
+ * Lowercase block tags, matched against `localName.toLowerCase()`: an EPUB section is application/xhtml+xml, where
+ * `tagName` keeps the source's case, so an uppercase set found no block there (BLOCK-TAG-CASE-1).
+ */
+export const BLOCK_TAGS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "li", "td", "section", "article"]);
 
 export function parseWordIndexAttribute(value: string | null | undefined): number | null {
   const parsed = Number.parseInt(value || "", 10);
@@ -96,7 +100,7 @@ export function isSuppressedNarrationTextNode(node: Node): boolean {
 
 export function getBlockParent(node: Node): Element | null {
   let el = node.parentElement;
-  while (el && !BLOCK_TAGS.has(el.tagName)) el = el.parentElement;
+  while (el && !BLOCK_TAGS.has(el.localName.toLowerCase())) el = el.parentElement;
   return el;
 }
 
@@ -106,7 +110,8 @@ export function collectBlockTextNodes(root: ParentNode, sectionIndex = 0): Array
       const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
     acceptNode: (node: Node) => {
       const parent = node.parentElement;
-      if (parent && (parent.tagName === "SCRIPT" || parent.tagName === "STYLE")) return NodeFilter.FILTER_REJECT;
+      const parentName = parent?.localName.toLowerCase();
+      if (parentName === "script" || parentName === "style") return NodeFilter.FILTER_REJECT;
       if (!node.textContent) return NodeFilter.FILTER_REJECT;
       if (isSuppressedNarrationTextNode(node)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;

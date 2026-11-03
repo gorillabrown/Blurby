@@ -7,6 +7,7 @@ import Badge from "./Badge";
 import IconBtn from "./IconBtn";
 import DeleteConfirmation from "./DeleteConfirmation";
 import { triggerCoachHint } from "./HotkeyCoach";
+import { homeOf, APP_TAB_LABELS } from "../utils/libraryHome";
 
 const TYPE_COLORS: Record<string, string> = {
   epub: "#6b9f6b",
@@ -66,6 +67,7 @@ interface DocCardProps {
   onUnarchive: (id: string) => void;
   onOpenScroll?: (doc: BlurbyDoc) => void;
   onOpenNewWindow?: (doc: BlurbyDoc) => void;
+  onMoveHome?: (id: string, home: "library" | "newsroom") => void;
   focused?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
@@ -76,7 +78,7 @@ interface DocCardProps {
   ttsCached?: boolean;
 }
 
-const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocCardProps) {
+const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset, onEdit, onDelete, onConfirmDelete, onCancelDelete, onToggleFavorite, onArchive, onUnarchive, onOpenScroll, onOpenNewWindow, onMoveHome, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocCardProps) {
   const wordCount = doc.wordCount || 0;
   const pos = doc.position || 0;
   const rawPct = wordCount > 0 ? (pos / wordCount) * 100 : 0;
@@ -87,10 +89,22 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
   const typeColor = TYPE_COLORS[typeLabel] || "#c4a882";
   const apaSubtext = formatApaSubtext(doc);
 
+  // APP-TABS-1: right-click menu with the one Move item (the grid card's pattern)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener("click", close);
+    window.addEventListener("contextmenu", close);
+    return () => { window.removeEventListener("click", close); window.removeEventListener("contextmenu", close); };
+  }, [contextMenu]);
+  const moveTarget = homeOf(doc) === "newsroom" ? "library" : "newsroom";
+
   return (
     <div className="doc-card-wrapper" role="listitem">
       <div
         onClick={() => onOpen(doc)}
+        onContextMenu={onMoveHome ? (e) => { e.preventDefault(); e.stopPropagation(); setContextMenu({ x: e.clientX, y: e.clientY }); } : undefined}
         className={`doc-card${doc.archived ? " doc-card-archived" : ""}${focused ? " doc-card-focused" : ""}${selected ? " doc-card-selected" : ""}${doc.unread ? " doc-card-unread" : ""}`}
         role="button"
         tabIndex={focused ? 0 : -1}
@@ -100,6 +114,17 @@ const DocCard = memo(function DocCard({ doc, wpm, confirmDelete, onOpen, onReset
       >
         {/* NAR-4: Cache indicator */}
         {ttsCached && <span className="doc-card-cached-badge" title="Narration cached" aria-label="Narration cached">✓</span>}
+        {contextMenu && onMoveHome && (
+          <div
+            className="doc-context-menu doc-context-menu--at"
+            style={{ "--menu-x": `${contextMenu.x}px`, "--menu-y": `${contextMenu.y}px` } as React.CSSProperties}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button onClick={() => { onMoveHome(doc.id, moveTarget); setContextMenu(null); }}>
+              Move to {APP_TAB_LABELS[moveTarget]}
+            </button>
+          </div>
+        )}
         {/* Selection checkbox */}
         {selectionMode && onToggleSelect && (
           <div className="doc-card-checkbox" onClick={(e) => { e.stopPropagation(); onToggleSelect(doc.id); }}>

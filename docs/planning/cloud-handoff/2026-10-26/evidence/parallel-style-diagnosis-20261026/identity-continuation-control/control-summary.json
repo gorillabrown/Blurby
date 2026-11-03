@@ -1,0 +1,15 @@
+{
+  "bothPathPositiveOppositePairs": 7,
+  "allPairsBothPaths": true,
+  "nativeLoadSameDocumentViewIframe": 6,
+  "allNativeSame": true,
+  "realLoadStackRecorded": true,
+  "readyBothPathControls": 6,
+  "readyStylesCorrect": true,
+  "retiredNativeLoadFired": false,
+  "lateAsyncContinuationProof": "NOT PROVEN in this run; retired native load did not fire. Manual old View.render is not a substitute.",
+  "oldRendererContentsEmptyAllSamples": true,
+  "ownershipTimelineFirst": "2026-10-26T21:30:11.583Z",
+  "ownershipTimelineLast": "2026-10-26T21:30:42.053Z",
+  "explicitOldRenderActiveSnapshotUnchanged": true
+}

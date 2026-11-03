@@ -116,6 +116,7 @@ export interface BlurbyDoc {
   convertedEpubPath?: string;    // path to converted EPUB in userData/converted/
   originalFilepath?: string;     // original file path before conversion
   legacyRenderer?: boolean;      // user opted for PageReaderView
+  home?: "library" | "newsroom"; // APP-TABS-1: set only by a user move; absent → derived from source
 }
 
 // ── Settings schema ─────────────────────────────────────────────────────────
@@ -137,7 +138,7 @@ export type ReaderMode = "page" | "focus" | "flow" | "narrate";
 export type ReaderLastMode = "focus" | "flow" | "narrate";
 
 export interface BlurbySettings {
-  schemaVersion: number;
+  schemaVersion?: number;
   wpm: number;
   /** OC-6: Focus's own WPM (additive, optional; absent → wpm). No migration. */
   focusWpm?: number;
@@ -167,7 +168,9 @@ export interface BlurbySettings {
   flowWordSpan: number; // how many words to highlight at once in Flow mode (3-5, default 3)
   flowCursorStyle: "underline" | "highlight"; // flow cursor visual style (default: underline)
   flowZonePosition: number;  // fraction of viewport for zone top (0.15 | 0.25 | 0.35 | 0.55, default 0.25)
-  flowZoneLines: number;     // lines visible in reading zone (3-8, default 5)
+  /** @deprecated BAND-ALIGN-2 R8: no longer a setting (migrated to flowBandEnabled); read only by Narrate until NARRATE-BAND-SPACE-1 removes it. */
+  flowZoneLines?: number;
+  flowBandEnabled?: boolean; // BAND-ALIGN-2 R8: the reading band over the cursor's paragraph, on unless false
   // E-ink display optimization settings
   einkMode: boolean;
   einkWpmCeiling: number;
@@ -212,6 +215,7 @@ export interface BlurbySettings {
   activeNarrationProfileId?: string | null;  // null = use flat settings (no profile)
   // GOALS-6B: Local-first reading goals
   readingGoals?: ReadingGoal[];
+  libraryTab?: "library" | "newsroom" | "podcasts" | "marketplace"; // APP-TABS-1: the last-used tab, device-local
 }
 
 // ── Toast ───────────────────────────────────────────────────────────────────
@@ -311,6 +315,7 @@ export interface ElectronAPI {
   toggleFavorite: (docId: string) => Promise<boolean>;
   archiveDoc: (docId: string) => Promise<void>;
   unarchiveDoc: (docId: string) => Promise<void>;
+  setDocHome?: (docId: string, home: "library" | "newsroom") => Promise<{ ok: boolean }>; // APP-TABS-1; optional so the test-harness stub stays as it is
   openReaderWindow: (docId: string) => Promise<void>;
   checkForUpdates: () => Promise<{ status: string; version?: string | null; message?: string }>;
   installUpdate: () => Promise<void>;

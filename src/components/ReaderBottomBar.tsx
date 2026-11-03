@@ -1,6 +1,11 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { FOCUS_TEXT_SIZE_STEP } from "../constants";
+import {
+  FOCUS_TEXT_SIZE_STEP,
+  FLOW_BAND_ANCHOR_CENTER,
+  FLOW_BAND_ANCHOR_TOP,
+  FLOW_BAND_ANCHOR_TOP_THIRD,
+} from "../constants";
 import type { BlurbyDoc, ReaderMode } from "../types";
 import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
 import ReaderSpeedDialog, { formatSpeedMultiplier, formatSpeedValueText } from "./ReaderSpeedDialog";
@@ -42,14 +47,25 @@ interface ReaderBottomBarProps {
   onSetSpeed?: (speed: ReaderModeSpeed) => void;
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
-  flowZoneLines?: number;
-  onSetFlowZoneLines?: (lines: number) => void;
+  /** BAND-ALIGN-2 R8: the Band switch, on unless false (settings.flowBandEnabled). */
+  flowBandEnabled?: boolean;
+  onSetFlowBandEnabled?: (on: boolean) => void;
+  /** BAND-ALIGN-2 R4: the band's anchor, 0 Top, 1/3 Top third or 0.5 Center (settings.flowZonePosition). */
+  flowZonePosition?: number;
+  onSetFlowZonePosition?: (anchor: number) => void;
   flowProgress?: {
     bookPct: number;
     estimatedMinutesLeft: number;
   } | null;
   currentChapterName?: string;
 }
+
+/** BAND-ALIGN-2 R4: where the reading band sits. */
+const BAND_ANCHOR_OPTIONS = [
+  { label: "Top", value: FLOW_BAND_ANCHOR_TOP },
+  { label: "Top third", value: FLOW_BAND_ANCHOR_TOP_THIRD },
+  { label: "Center", value: FLOW_BAND_ANCHOR_CENTER },
+] as const;
 
 const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu",
@@ -83,12 +99,19 @@ export default function ReaderBottomBar({
   speed = null,
   onSetSpeed,
   foliateFraction,
-  flowZoneLines,
-  onSetFlowZoneLines,
+  flowBandEnabled,
+  onSetFlowBandEnabled,
+  flowZonePosition,
+  onSetFlowZonePosition,
   flowProgress,
   currentChapterName,
 }: ReaderBottomBarProps) {
   const surfaceMode = readingMode;
+  // BAND-ALIGN-2: a legacy stored anchor shows as the setting it reads as (Top third); R8: the band is on unless false.
+  const bandOn = flowBandEnabled !== false;
+  const bandAnchor = flowZonePosition === FLOW_BAND_ANCHOR_TOP || flowZonePosition === FLOW_BAND_ANCHOR_CENTER
+    ? flowZonePosition
+    : FLOW_BAND_ANCHOR_TOP_THIRD;
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
   const chapterGroupRef = useRef<HTMLDivElement | null>(null);
@@ -342,24 +365,37 @@ export default function ReaderBottomBar({
           </button>
         </div>
 
-        {/* Flow zone controls and progress — visible in flow mode only */}
+        {/* Reading band controls (BAND-ALIGN-2 R4, R8) — Focus and Flow both have the band; progress — Flow only */}
+        {(surfaceMode === "focus" || surfaceMode === "flow") && (
+          <div className="rbb-flow-zone-controls">
+            <div className="rbb-flow-zone-group" role="group" aria-label="Band position">
+              {BAND_ANCHOR_OPTIONS.map(({ label, value }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`rbb-flow-zone-btn${bandAnchor === value ? " rbb-flow-zone-btn--active" : ""}`}
+                  aria-pressed={bandAnchor === value}
+                  onClick={() => onSetFlowZonePosition?.(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="rbb-flow-zone-group" role="group" aria-label="Band">
+              <button
+                type="button"
+                className={`rbb-flow-zone-btn${bandOn ? " rbb-flow-zone-btn--active" : ""}`}
+                aria-label="Band"
+                aria-pressed={bandOn}
+                onClick={() => onSetFlowBandEnabled?.(!bandOn)}
+              >
+                Band
+              </button>
+            </div>
+          </div>
+        )}
         {surfaceMode === "flow" && (
           <>
-            <div className="rbb-flow-zone-controls">
-              <label className="rbb-flow-zone-label">
-                Lines
-                <input
-                  type="range"
-                  className="rbb-flow-zone-slider"
-                  min={3}
-                  max={8}
-                  step={1}
-                  value={flowZoneLines ?? 5}
-                  onChange={(e) => onSetFlowZoneLines?.(parseInt(e.target.value, 10))}
-                />
-                <span className="rbb-flow-zone-value">{flowZoneLines ?? 5}</span>
-              </label>
-            </div>
             {flowProgress && (
               <div className="rbb-flow-progress">
                 <span className="rbb-flow-progress-text">

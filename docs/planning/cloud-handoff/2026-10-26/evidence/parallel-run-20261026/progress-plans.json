@@ -1,0 +1,65 @@
+[
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1",
+    "fields": {
+      "notes": "Owner direction2026-10-26: include the referenced governance sweep as first-order upcoming deliverables. Live source thread01a178b2-c694-70b0-90df-0edae537aed0 was read: discovery/plan/approval complete; implementation stopped on drift and changed no files. Seq0 prioritizes governance; visibility remains the first app fix with its source window intact. This is a new follow-through item; historical GOVERNANCE-SWEEP remains Completed. Original sweep approval is commit-only, excludes its merge/push. Scope and16-action matrix: docs/planning/roadmap-reviews/2026-10-26-governance-deliverables.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Governance agent executes the refreshed approved16-action cleanup; parent owns live register writes and final review. Original sweep commit-only boundary retained.\n\nParallel delivery review2026-10-26: Parent and independent reviewer approved governance commit60d11b4285447f6b1d9496a7564c0be911848906: all16 actions, exact12authoredpaths,513existing protectedfiles preserved,64heldmetadata reconciled with readback,Findings F001-F008, currentboard. Commit-only boundary retained; no source code or profile changes. Report docs/governance/GovernanceSweep.2026-10-26.md.",
+      "deliverable": "Parent and independent reviewer approved governance commit60d11b4285447f6b1d9496a7564c0be911848906: all16 actions, exact12authoredpaths,513existing protectedfiles preserved,64heldmetadata reconciled with readback,Findings F001-F008, currentboard. Commit-only boundary retained; no source code or profile changes. Report docs/governance/GovernanceSweep.2026-10-26.md."
+    },
+    "expectedRevision": "6254aa106d5b3c2da47b2f8bfd0a73b6853f94a9428380d8dc8f3d38891df199",
+    "idempotencyKey": "parallelprogress20261026-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "recoveryId": "20261026T205952Z-external-set-status-GOV-SWEEP-FOLLOWTHROUGH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Visibility agent implements/tests/packages in the exclusive isolated branch; parent review and exact-package/designated merge gates remain.\n\nParallel delivery review2026-10-26: Source candidate0dd4d940 independently approved; finaloriginaldocstip a8e31b7363da5c8dd1d8d059915081195d3cc3b6 shipping-input-identical.2469passed2skipped0failed,typecheck/build0, real91word package behavior passes. Brain WITHHOLDS originalpackage confirmation: pre-existing BUG187 flood, no waiver. Brain separately admitted combined verification with FOLIATE-OBSERVER-LEAK-1 on eb/visibility-observer-verification-20261026; full originalobserver and packagegates pending. Issue docs/governance/bug-reports/Issue.LIBRARY-COMPLETION-VISIBILITY-1.2026-10-26.md.",
+      "deliverable": "Source candidate0dd4d940 independently approved; finaloriginaldocstip a8e31b7363da5c8dd1d8d059915081195d3cc3b6 shipping-input-identical.2469passed2skipped0failed,typecheck/build0, real91word package behavior passes. Brain WITHHOLDS originalpackage confirmation: pre-existing BUG187 flood, no waiver. Brain separately admitted combined verification with FOLIATE-OBSERVER-LEAK-1 on eb/visibility-observer-verification-20261026; full originalobserver and packagegates pending. Issue docs/governance/bug-reports/Issue.LIBRARY-COMPLETION-VISIBILITY-1.2026-10-26.md.",
+      "prerequisites": [
+        "FOLIATE-OBSERVER-LEAK-1"
+      ]
+    },
+    "expectedRevision": "f99eebfe5586f996e8828ec59b90273cba04dd9295459c9685c47326adad57a3",
+    "idempotencyKey": "parallelprogress20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+    "recoveryId": "20261026T205953Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLDER-SWITCH-CONTENT-1",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.",
+      "deliverable": "Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md."
+    },
+    "expectedRevision": "f6e64499318b43e5c05e47a2f14d096e4016565109492c049b24996bef4d603e",
+    "idempotencyKey": "parallelprogress20261026-FOLDER-SWITCH-CONTENT-1",
+    "recoveryId": "20261026T205954Z-external-set-status-FOLDER-SWITCH-CONTENT-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PROFILE-QUEUE-ISOLATION-1",
+    "fields": {
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.",
+      "deliverable": "Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md."
+    },
+    "expectedRevision": "b5fa6bdcae4d1d4bf9cf1dfb63bf4ec04d95a2a996f55a16b040de09fe550b18",
+    "idempotencyKey": "parallelprogress20261026-PROFILE-QUEUE-ISOLATION-1",
+    "recoveryId": "20261026T205955Z-external-set-status-PROFILE-QUEUE-ISOLATION-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLIATE-OBSERVER-LEAK-1",
+    "fields": {
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.\n\nParallel delivery review2026-10-26: Brain technicalruling2026-10-26 confirms this existingheld observerfix as prerequisite to cleanvisibility package acceptance. Exacttip5175927659228e2cf9c87cc74210e6d943371b41 preserved. Separateisolated combinedverification branch eb/visibility-observer-verification-20261026 admitted, fulloriginal longsession/census and strictstanding53 retained. No mainmerge/freeze lift/releasego. Admission docs/planning/roadmap-reviews/2026-10-26-visibility-observer-admission.md.",
+      "deliverable": "Brain technicalruling2026-10-26 confirms this existingheld observerfix as prerequisite to cleanvisibility package acceptance. Exacttip5175927659228e2cf9c87cc74210e6d943371b41 preserved. Separateisolated combinedverification branch eb/visibility-observer-verification-20261026 admitted, fulloriginal longsession/census and strictstanding53 retained. No mainmerge/freeze lift/releasego. Admission docs/planning/roadmap-reviews/2026-10-26-visibility-observer-admission.md."
+    },
+    "expectedRevision": "b8215c9c9cb8ac5ba2b5ae553cd636610cf2428fb1b5404d31db61c2b43dad18",
+    "idempotencyKey": "parallelprogress20261026-FOLIATE-OBSERVER-LEAK-1",
+    "recoveryId": "20261026T205956Z-external-set-status-FOLIATE-OBSERVER-LEAK-1"
+  }
+]

@@ -24,7 +24,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 
 const themes: Record<string, Record<string, string>> = {
   dark: {
-    "--bg": "#0f0f0f",
+    "--bg": "#000000",
     "--bg-raised": "#181818",
     "--bg-hover": "#1e1e1e",
     "--bg-secondary": "#1a1a1a",
@@ -133,7 +133,8 @@ const themes: Record<string, Record<string, string>> = {
   },
 };
 
-const themeOrder = ["blurby", "dark", "light", "eink", "system"];
+// EINK-CONTROLS-1: E-ink is the Display Mode switch (einkMode), not a theme choice.
+const themeOrder = ["blurby", "dark", "light", "system"];
 
 export function nextTheme(current: string): string {
   const idx = themeOrder.indexOf(current);
@@ -185,11 +186,13 @@ export function ThemeProvider({ children, initialTheme = "blurby" }: { children:
   useEffect(() => {
     const root = document.documentElement;
     const resolvedTheme = theme === "system" ? systemTheme : theme;
-    const vars = themes[resolvedTheme] || themes.blurby;
+    // The E-ink switch carries the E-ink colours over whatever theme is saved; the saved theme is kept.
+    const appliedTheme = einkMode ? "eink" : resolvedTheme;
+    const vars = themes[appliedTheme] || themes.blurby;
     for (const [key, value] of Object.entries(vars)) {
       root.style.setProperty(key, value);
     }
-    root.setAttribute("data-theme", resolvedTheme);
+    root.setAttribute("data-theme", appliedTheme);
     if (einkMode) {
       root.setAttribute("data-eink", "true");
     } else {
@@ -197,7 +200,7 @@ export function ThemeProvider({ children, initialTheme = "blurby" }: { children:
     }
 
     // Apply custom accent color override (blocked for blurby — brand palette is static)
-    if (accentColor && resolvedTheme !== "blurby") {
+    if (accentColor && appliedTheme !== "blurby") {
       root.style.setProperty("--accent", accentColor);
       const rgb = hexToRgb(accentColor);
       if (rgb) {

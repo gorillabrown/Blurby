@@ -104,6 +104,19 @@ describe("createEntryReader", () => {
     expect(s.compressed).toHaveBeenCalledTimes(0);
   });
 
+  it("(n) a stored entry whose header lies small is rejected on its real size, without getData", () => {
+    constants.ZIP_ENTRY_MAX_BYTES = 4096;
+    const entry = new AdmZip(buildZip({ "a.txt": { data: eightK(), stored: true } }, 16)).getEntry("a.txt");
+    expect(entry.header.method).toBe(0);
+    expect(entry.header.size).toBe(16);
+    const s = spies(entry);
+    let err;
+    try { createEntryReader()(entry); } catch (e) { err = e; }
+    expect(err && err.code).toBe("ZIP_ENTRY_TOO_LARGE");
+    expect(s.compressed).toHaveBeenCalledTimes(1);
+    expect(s.getData).toHaveBeenCalledTimes(0);
+  });
+
   it("(l) a corrupted stored entry fails the CRC check", () => {
     const buf = buildZip({ "a.txt": { data: Buffer.from("hello world"), stored: true } });
     const at = buf.indexOf(Buffer.from("hello world"));

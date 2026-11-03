@@ -124,6 +124,7 @@ export interface LibraryKeyboardActions {
   getDocIdAtIndex?: (index: number) => string | undefined;
   getVisibleDocCount?: () => number;
   showUndoToast?: (message: string, undoFn: () => void) => void;
+  onSwitchTab?: (index: number) => void; // APP-TABS-1: Ctrl/Cmd+1–4, 0-based tab index
 }
 
 // ── useReaderKeys (updated with Sprint 20 changes) ────────────────────────
@@ -426,6 +427,13 @@ export function useLibraryKeyboard(
         if (inInput) { (target as HTMLInputElement)?.blur?.(); return; }
         if (selectedIds.size > 0) { setSelectedIds(new Set()); return; }
         if (activeFilter !== "all") { setActiveFilter("all"); a.onNavigateFilter?.("all"); return; }
+        return;
+      }
+
+      // APP-TABS-1: Ctrl/Cmd+1–4 switch library tabs, even from a library input; never while an overlay is open
+      if (!activeOverlay && (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && /^Digit[1-4]$/.test(e.code)) {
+        e.preventDefault();
+        a.onSwitchTab?.(Number(e.code.slice(5)) - 1);
         return;
       }
 

@@ -1,0 +1,12 @@
+{
+  ".idea/.gitignore": null,
+  ".idea/Blurby.iml": null,
+  ".idea/libraries/audit.xml": null,
+  ".idea/libraries/blurby_tts_audit_package.xml": null,
+  ".idea/misc.xml": "20de00f55fc74dbd598f465f8bc13010feae3247dcc16ee4d07f093817a18c78",
+  ".idea/modules.xml": "2848a4889ccf5643a312f8e0ff0582226adf6026a2436219f190448a0c64a7c6",
+  ".idea/workspace.xml": "2ccab13822fa39362f517b8f0ca89b1c2c76ade66d8ac30a1958070bde0040ea",
+  "docs/governance/close-outs/SpecRetro.Lessons_Learned.md": "308f865f27ec325cd36926974911d8ced331c598af4440fc583bdb543f4aa3a2",
+  "docs/planning/roadmap-reviews/checkins/2026-05-31-status.md": "f9e3f56db701f3e40f70d44f90c817f6f7d6cde8385bb4227f4c97ff54972bba",
+  "tests/perf-baseline-results.json": "0343f363a1313bdad2dab10f205c883dac31ecac26a813d05c32c1ac8ae1ac22"
+}

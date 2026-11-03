@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { BlurbyDoc, BlurbySettings, ToastAction, ToastState } from "../types";
 import { DEFAULT_SETTINGS, TOAST_DEFAULT_DURATION_MS } from "../constants";
+import { APP_TAB_LABELS } from "../utils/libraryHome";
 
 const api = window.electronAPI;
 
@@ -43,11 +44,14 @@ export default function useLibrary() {
         const doc = await api.addManualDoc(title, content);
         setLibrary((prev) => [doc, ...prev]);
       }
+      return true;
     } catch (err) {
-      showToast("Could not save document — please try again.");
+      // An edit's failure shows in the Edit form, which stays open (LIBRARY-WRITE-RACE-2); the Add form keeps its toast
+      if (!editingId) showToast("Could not save document — please try again.");
       window.electronAPI.logError?.(`addDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
+      return false;
     }
   }, [showToast]);
 
@@ -200,11 +204,26 @@ export default function useLibrary() {
     }
   }, [showToast]);
 
+  // APP-TABS-1: a manual move between the Library and Newsroom; main sets only `home`.
+  const moveDocHome = useCallback(async (docId: string, home: "library" | "newsroom") => {
+    try {
+      const result = await api.setDocHome?.(docId, home);
+      if (!result?.ok) throw new Error("set-doc-home refused");
+      setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, home } : d)));
+      showToast(`Moved to ${APP_TAB_LABELS[home]}`);
+    } catch (err) {
+      showToast("Could not move this item — please try again.");
+      window.electronAPI.logError?.(`moveDocHome error: ${err}`);
+      const state = await api.getState();
+      setLibrary(state.library);
+    }
+  }, [showToast]);
+
   return {
     library, setLibrary, settings, setSettings, loaded, platform,
     loadingContent, toast,
     addDoc, deleteDoc, resetProgress, selectFolder, switchFolder,
     loadDocContent, addDocFromUrl, importDroppedFiles, updateProgress,
-    toggleFavorite, archiveDoc, unarchiveDoc, showToast,
+    toggleFavorite, archiveDoc, unarchiveDoc, moveDocHome, showToast,
   };
 }

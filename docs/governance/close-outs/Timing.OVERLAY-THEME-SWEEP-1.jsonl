@@ -1,0 +1,13 @@
+{"event": "open", "rows": [{"id": 1, "title": "Setup: preflight checks, branch from origin/main, npm ci", "item": "OVERLAY-THEME-SWEEP-1", "kind": "setup"}, {"id": 2, "title": "Base packaged --dir arm64 build and live probe (Done-when 1)", "item": "OVERLAY-THEME-SWEEP-1", "kind": "positive-control"}, {"id": 3, "title": "Red file (k1-k4, t1-t4) committed alone (Done-when 2)", "item": "OVERLAY-THEME-SWEEP-1", "kind": "positive-control"}, {"id": 4, "title": "Fix: two capture listeners, 25 token reads (Done-when 3, 4)", "item": "OVERLAY-THEME-SWEEP-1", "kind": "ui-fix"}, {"id": 5, "title": "Merge origin/main, tip package build, after probe (Done-when 5)", "item": "OVERLAY-THEME-SWEEP-1", "kind": "merge-and-verify"}, {"id": 6, "title": "npm test, typecheck, rule 53 (b)-(c), docs, push", "item": "OVERLAY-THEME-SWEEP-1", "kind": "merge-and-verify"}], "at": "2026-10-24T02:48:41Z"}
+{"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T02:48:41Z"}
+{"event": "end", "row": 1, "evidence": "index.lock absent; branch absent on origin; spec on HEAD d2a70ff1; npm ci exit 0", "result": "done", "at": "2026-10-24T02:50:30Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T02:50:30Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T02:50:40Z"}
+{"event": "end", "row": 3, "evidence": "a5d67e66; vitest exit 1, 5 failed | 3 passed (k3, k4, t4 pass)", "result": "done", "at": "2026-10-24T02:51:36Z"}
+{"event": "end", "row": 2, "evidence": "base-unpacked from d2a70ff1; rec-base-3: c1, c2 pass; b1, b2 reader exited; panels rgb(26,26,46) x20; hover rgb(68,68,68) x4; live unchanged (3 attempts: probe fixes)", "result": "done", "at": "2026-10-24T02:57:58Z"}
+{"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T02:58:10Z"}
+{"event": "end", "row": 4, "evidence": "7d044063; vitest 8/8; gates 2 / exit 1 / 4 lines", "result": "done", "at": "2026-10-24T02:59:12Z"}
+{"event": "start", "row": 5, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T03:00:05Z"}
+{"event": "end", "row": 5, "evidence": "0379b6ca; release-tip build exit 0; rec-tip-1 and rec-tip-2: b1, b2 reader open; 20/20 panels; hover = --border x4; live unchanged", "result": "done", "at": "2026-10-24T03:05:30Z"}
+{"event": "start", "row": 6, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-24T03:05:30Z"}
+{"event": "end", "row": 6, "evidence": "npm test 2459 passed / 2 skipped exit 0; typecheck exit 0; launch25 alive, no error.log or dump; asar dist identical; memo, BUG-218", "result": "done", "at": "2026-10-24T03:12:43Z"}

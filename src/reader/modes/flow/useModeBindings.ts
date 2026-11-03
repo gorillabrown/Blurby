@@ -8,6 +8,8 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { FLOW_ZONE_LINES_DEFAULT, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
 import type { FlowFoliateViewProps } from "./FoliateView";
+import type { FlowBandEdges } from "./helpers/FlowScrollEngine";
+import { readZoneLineStepPx } from "./helpers/foliateLayout";
 import type { FlowModeRuntime } from "./ModeRuntime";
 
 /** useFlowScrollSync startWhenReady: the surface refs can attach a tick after play flips. */
@@ -27,21 +29,33 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
   const renderVersion = runtime.getRenderVersion();
   const scrollContainerRef = useRef<HTMLElement | null>(null);
   const flowCursorRef = useRef<HTMLDivElement | null>(null);
-  const flowZoneLines = settings.settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
+  const bandOn = settings.settings.flowBandEnabled !== false; // BAND-ALIGN-2 R8: the Band switch
 
   // FLOW-ZONE-AUTO: the engine reports the descending zone's top fraction per line advance. Write it
   // straight to the masked element's CSS vars (line-advance rate is too fast for React state).
-  const onZoneTopChange = useCallback((topFrac: number) => {
+  // BAND-ALIGN-2 R8: in the stable window the engine reports the cursor line's box; the view then places the band over
+  // the cursor's paragraph (none without a painted cursor, R6). With the Band switch off: no band, no dimming.
+  const onZoneTopChange = useCallback((topFrac: number, band?: FlowBandEdges) => {
     const host = runtime.viewApiRef.current?.getFlowZoneHost() ?? null;
     if (!host) return;
+    if (!bandOn) {
+      host.style.removeProperty("--flow-zone-top");
+      host.style.removeProperty("--flow-zone-bottom");
+      return;
+    }
+    if (band) {
+      runtime.viewApiRef.current?.placeBandAtCursor();
+      return;
+    }
     const ch = host.clientHeight;
     if (ch <= 0) return;
-    const lineHeight = parseFloat(getComputedStyle(host).lineHeight) || 24;
-    const zoneHeightFrac = (lineHeight * flowZoneLines) / ch;
+    const lineHeight = readZoneLineStepPx(host); // BAND-ALIGN-1
+    const zoneHeightFrac = (lineHeight * FLOW_ZONE_LINES_DEFAULT) / ch;
     const botFrac = Math.min(topFrac + zoneHeightFrac, 0.95);
     host.style.setProperty("--flow-zone-top", `${topFrac * 100}%`);
     host.style.setProperty("--flow-zone-bottom", `${botFrac * 100}%`);
-  }, [runtime, flowZoneLines]);
+    host.classList.remove("rm-flow-view--band-off");
+  }, [runtime, bandOn]);
   const onZoneTopChangeRef = useRef(onZoneTopChange);
   onZoneTopChangeRef.current = onZoneTopChange;
 
@@ -82,7 +96,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
         }
         return;
       }
-      runtime.startScrollEngine(container, cursor, (topFrac) => onZoneTopChangeRef.current(topFrac));
+      runtime.startScrollEngine(container, cursor, (topFrac, band) => onZoneTopChangeRef.current(topFrac, band));
     };
     void startWhenReady();
     return () => {
@@ -97,7 +111,8 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
     runtime.syncScrollEngineChunks();
   }, [runtime, renderVersion, snapshot.playing]);
 
-  // useFlowScrollSync effect 5: rebuild the line map after a font-size change.
+  // useFlowScrollSync effect 5: rebuild the line map after a font-size change, an anchor change (R7: the leading space
+  // follows the band's anchor, so every line's y moves) or the Band switch (R8: the band is placed again).
   useEffect(() => {
     if (!runtime.isScrollEngineRunning()) return;
     let cancelled = false;
@@ -108,7 +123,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [runtime, settings.focusTextSize]);
+  }, [runtime, settings.focusTextSize, settings.settings.flowZonePosition, settings.settings.flowBandEnabled]);
 
   // useFlowScrollSync effect 5b: rebuild after this view stamps a new rendered-word surface.
   const lastHandledRenderVersionRef = useRef(renderVersion);

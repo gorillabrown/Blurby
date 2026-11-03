@@ -69,6 +69,14 @@ const EPUB_CHAPTER_CACHE_MAX = 50;
 const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;
 /** Largest total read by one archive operation (bytes, 512 MiB; a large illustrated EPUB can pass 256 MiB) */
 const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;
+/** Largest EPUB/ZIP archive opened from disk (bytes, 2 GiB - 1): adm-zip reads the whole file into memory, and Node's
+ *  whole-file read already fails above this, so the cap only turns that throw into an early, clean refusal. The memory
+ *  bounds against decompression bombs are ZIP_ENTRY_MAX_BYTES and ZIP_OPERATION_MAX_BYTES (Blurby.Brain, 2026-10-23). */
+const ZIP_FILE_MAX_BYTES = 2 * 1024 * 1024 * 1024 - 1;
+
+// ── Error Log ───────────────────────────────────────────────────────────────
+/** error.log rotates to error.log.1 before an append would take it past this size (bytes, 10 MiB; ERROR-LOG-CAP-1) */
+const ERROR_LOG_MAX_BYTES = 10 * 1024 * 1024;
 
 // ── EPUB Converter ──────────────────────────────────────────────────────────
 /** Subdirectory for converted EPUBs in userData */
@@ -173,6 +181,8 @@ const FOLDER_WATCHER_STABILITY_MS = 500;
 const FOLDER_SCAN_YIELD_EVERY = 500;
 /** A folder listing or file stat in the scan, or a root check, that has not settled by then counts as unreadable; a folder switch also waits no longer than this for a cancelled sync (ms) */
 const FOLDER_LIST_TIMEOUT_MS = 30000;
+/** After a root listing times out, root checks report "cannot be listed" at once for this long instead of starting another listing on a hung mount (ms) */
+const FOLDER_ROOT_BREAKER_MS = 60000;
 
 // ── Window Dimensions ───────────────────────────────────────────────────
 /** Default main window width (px) */
@@ -233,6 +243,9 @@ module.exports = {
   EPUB_CHAPTER_CACHE_MAX,
   ZIP_ENTRY_MAX_BYTES,
   ZIP_OPERATION_MAX_BYTES,
+  ZIP_FILE_MAX_BYTES,
+  // Error Log
+  ERROR_LOG_MAX_BYTES,
   // EPUB Converter
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,
@@ -285,6 +298,7 @@ module.exports = {
   FOLDER_WATCHER_STABILITY_MS,
   FOLDER_SCAN_YIELD_EVERY,
   FOLDER_LIST_TIMEOUT_MS,
+  FOLDER_ROOT_BREAKER_MS,
   // Window Dimensions
   MAIN_WINDOW_WIDTH,
   MAIN_WINDOW_HEIGHT,

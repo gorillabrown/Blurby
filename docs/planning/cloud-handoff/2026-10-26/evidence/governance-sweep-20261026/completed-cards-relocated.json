@@ -1,0 +1,46 @@
+[
+  {
+    "id": "SMOKE8-DIAG-1",
+    "card": "#### SMOKE8-DIAG-1 \u2014 Diagnose the two smoke failures: Page reopen position (BUG-201) and the stale folder header (BUG-202) \u2705 COMPLETED 2026-10-23 *(TR-083; merges `0625f9df`, `67678dbb`; spec and its 2026-10-23 amendment archived)*\n\n- Closed out: [`CloseOut.SMOKE8-DIAG-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md). Report: `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Release fixes (In Flight, held for the release gate): [PAGE-REOPEN-CFI-1](#page-reopen-cfi-1), [FOLDER-SWITCH-HEADER-1](#folder-switch-header-1), [BOOK-TEXT-COLOUR-1](#book-text-colour-1), [NARRATE-START-STACK-1](#narrate-start-stack-1), [BOOK-TYPE-SCALE-1](#book-type-scale-1), [KEEP-FURTHEST-FIX-1](#keep-furthest-fix-1); BUG-207 to [NARRATE-QUIT-LINGER-1](#narrate-quit-linger-1).\n\n<a id=\"page-pages-read-1\"></a>\n\n"
+  },
+  {
+    "id": "UI-SWEEP-TRIAGE-1",
+    "card": "#### UI-SWEEP-TRIAGE-1 \u2014 Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates \u2705 COMPLETED 2026-10-23 *(TR-082; merge `de453e64`; spec archived)*\n\n- Closed out: [`CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md). Report: `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`. Bugs: BUG-210\u2013BUG-216. Fixes: [FOCUS-KEYS-FIX-1](#focus-keys-fix-1), [FLOW-KEYS-FIX-1](#flow-keys-fix-1); chapter navigation in [JUMP-LANDING-SAVE-1](#jump-landing-save-1).\n\n<a id=\"error-log-cap-1\"></a>\n\n"
+  },
+  {
+    "id": "UI-SWEEP-1",
+    "card": "#### UI-SWEEP-1 \u2014 Press every control on every screen and report what breaks \u2705 COMPLETED 2026-10-23 *(TR-081; merge `420efa85`; spec archived)*\n\n- Closed out: [`CloseOut.UI-SWEEP-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md). Report: `docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`; harness `scripts/ui-sweep/sweep.mjs`. Candidates triaged by [UI-SWEEP-TRIAGE-1](#ui-sweep-triage-1).\n\n"
+  },
+  {
+    "id": "CI-AUDIT-ALLOWLIST-1",
+    "card": "#### CI-AUDIT-ALLOWLIST-1 \u2014 CI fails on a new high advisory, not on the reviewed ones \u2705 COMPLETED 2026-10-22 *(TR-079; merge `47ae6e1f`; spec archived)*\n\n- Closed out: [`CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md`](docs/governance/close-outs/CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md). Its merge `47ae6e1f` is the Stage 8 freeze point and the gate (1) target. Full specification moved to `docs/planning/.Archive/ROADMAP_legacy.md`.\n\n<a id=\"release-runbook-1\"></a>\n\n"
+  },
+  {
+    "id": "JSONSTORE-TIMEOUT-1",
+    "card": "#### JSONSTORE-TIMEOUT-1 \u2014 Give the jsonStore concurrency test real headroom \u2705 COMPLETED 2026-10-22 *(TR-078; merge `8e834ea3`; spec archived)*\n\n- Closed out: [`CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md`](docs/governance/close-outs/CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md). `tests/jsonStore.test.js` left Stage 8's closed list. Full specification moved to `docs/planning/.Archive/ROADMAP_legacy.md`.\n\n<a id=\"ci-audit-allowlist-1\"></a>\n\n"
+  },
+  {
+    "id": "RENAME-RETRY-1",
+    "card": "#### RENAME-RETRY-1 \u2014 Every atomic rename in the main process retries a transient Windows lock \u2705 COMPLETED 2026-10-22 *(TR-076; merge `40c01ceb`; spec archived)*\n\n- Closed out: [`CloseOut.RENAME-RETRY-1.2026-10-22.md`](docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md). Full specification moved to `docs/planning/.Archive/ROADMAP_legacy.md`.\n\n<a id=\"jsonstore-timeout-1\"></a>\n\n"
+  },
+  {
+    "id": "KF2-WAIVER-RETIRE-1",
+    "card": "#### KF2-WAIVER-RETIRE-1 \u2014 Retire the KF-2 rename waiver \u2705 COMPLETED 2026-10-22 *(TR-077; merge `3f4798b2`; spec archived)*\n\n- Closed out: [`CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md`](docs/governance/close-outs/CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md). Full specification, including its 2026-10-22 amendments, moved to `docs/planning/.Archive/ROADMAP_legacy.md`.\n\n<a id=\"folder-notice-1\"></a>\n\n"
+  },
+  {
+    "id": "GOV-NOTION-MAPPING-1",
+    "card": "#### GOV-NOTION-MAPPING-1 \u2014 Restore the Notion mapping and sync the podcast addition \u2705 COMPLETED 2026-10-22 *(TR-075; spec archived)*\n\n- Closed out: [`CloseOut.GOV-NOTION-MAPPING-1.2026-10-22.md`](docs/governance/close-outs/CloseOut.GOV-NOTION-MAPPING-1.2026-10-22.md). Full specification moved to `docs/planning/.Archive/ROADMAP_legacy.md` by roadmap review 2026-10-22.\n\n<a id=\"page-position-save-2\"></a>\n\n"
+  },
+  {
+    "id": "QUIT-FLUSH-1",
+    "card": "#### QUIT-FLUSH-1 \u2014 Finish every save before the app quits \u2705 COMPLETED 2026-10-14\n\nCompleted 2026-10-14 (merge `d21009b3`). The quit saves run in the cancelled first `will-quit` under `QUIT_FLUSH_TIMEOUT_MS` (3 s), each guarded, the Narrate producer shutdown is awaited uncapped (`main/quit-sequence.js`), and BUG-192 is resolved. The specification is archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md).\n\n<a id=\"packaging-fix-1\"></a>\n\n"
+  },
+  {
+    "id": "READER-VISUAL-DIAG-1",
+    "card": "#### READER-VISUAL-DIAG-1 \u2014 Diagnose the Focus/Flow reading band and the ResizeObserver flood \u2705 COMPLETED 2026-10-23 *(TR-080; merge `22d4f7b3`; spec archived)*\n\n- Closed out: [`CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md). Report: `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`. Fixes: [BAND-ALIGN-1](#band-align-1), [FOLIATE-OBSERVER-LEAK-1](#foliate-observer-leak-1).\n\n"
+  },
+  {
+    "id": "NARRATE-REBUILD-1",
+    "card": "#### NARRATE-REBUILD-1 \u2014 Rebuild Narrate with the cursor attached to the playing word \u2705 COMPLETED 2026-10-15 *(TR-074; spec archived)*\n\n- Closed out: [`CloseOut.NARRATE-REBUILD-1.2026-10-15.md`](docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md). Full specification moved to `docs/planning/.Archive/ROADMAP_legacy.md` by roadmap review 2026-10-22.\n\n<a id=\"ux-polish-1\"></a>\n\n"
+  }
+]

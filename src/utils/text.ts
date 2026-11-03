@@ -84,6 +84,49 @@ export function findSentenceBoundary(words: string[], currentIndex: number, dire
   return 0;
 }
 
+/**
+ * The first word of the previous or next paragraph. paragraphBreaks hold each paragraph's last word, so a
+ * paragraph starts at break + 1. Previous: the nearest start before currentIndex (else 0). Next: the nearest
+ * start after it (else lastIndex).
+ */
+export function findParagraphStart(paragraphBreaks: readonly number[], currentIndex: number, direction: "forward" | "backward", lastIndex: number): number {
+  const starts = [...paragraphBreaks].sort((a, b) => a - b).map((b) => b + 1);
+  if (direction === "forward") {
+    const next = starts.find((start) => start > currentIndex);
+    return next === undefined ? lastIndex : Math.min(next, lastIndex);
+  }
+  for (let i = starts.length - 1; i >= 0; i--) {
+    if (starts[i] < currentIndex) return starts[i];
+  }
+  return 0;
+}
+
+/**
+ * The previous or next paragraph start in book-wide word indices, for an EPUB with full-book words. renderedStarts
+ * are the rendered block-start words of sections stamped against the book; sectionStarts are the book's section
+ * starts, which are paragraph starts too and cover the sections not rendered (or still provisionally numbered).
+ * Next: the nearest start after currentIndex, else lastIndex. Previous: the nearest start before it, else 0.
+ * With no sections known it returns null, and the caller does not move.
+ */
+export function findBookParagraphStart(
+  renderedStarts: readonly number[],
+  sectionStarts: readonly number[],
+  currentIndex: number,
+  direction: "forward" | "backward",
+  lastIndex: number,
+): number | null {
+  if (sectionStarts.length === 0) return null;
+  const starts = [...new Set([...renderedStarts, ...sectionStarts])].sort((a, b) => a - b);
+  if (direction === "forward") {
+    const next = starts.find((start) => start > currentIndex);
+    return next === undefined ? lastIndex : Math.min(next, lastIndex);
+  }
+  for (let i = starts.length - 1; i >= 0; i--) {
+    if (starts[i] < currentIndex) return starts[i];
+  }
+  return 0;
+}
+
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",
@@ -220,6 +263,22 @@ export function currentChapterIndex(chapters: Chapter[], wordIndex: number): num
     if (wordIndex >= chapters[i].wordIndex) return i;
   }
   return -1;
+}
+
+/**
+ * JUMP-LANDING-SAVE-1: the contents entry a Previous or Next chapter step goes to, for a foliate EPUB, whose entries'
+ * charOffset already holds a word index. The current entry is the last one whose charOffset is at or before
+ * wordIndex. Next gives the following entry, or -1 at the last one; Previous gives the entry before, or 0 at the
+ * first one (the legacy rule). With fewer than two entries there is no step: -1.
+ */
+export function tocChapterStep(chapters: ReadonlyArray<{ charOffset: number }>, wordIndex: number, dir: 1 | -1): number {
+  if (chapters.length < 2) return -1;
+  let current = -1;
+  for (let i = chapters.length - 1; i >= 0; i--) {
+    if (chapters[i].charOffset <= wordIndex) { current = i; break; }
+  }
+  if (dir === 1) return current < chapters.length - 1 ? current + 1 : -1;
+  return current > 0 ? current - 1 : 0;
 }
 
 /** Convert charOffset-based chapters (from EPUB TOC) to wordIndex-based chapters.

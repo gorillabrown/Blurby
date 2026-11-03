@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\parallel-style-diagnosis-20261026\\precise-continuation-control\\modes-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 43532,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "liveUnchanged": true,
+  "routeQualified": false,
+  "intentionalFailure": "Real close at native resolve boundary leaves Focus with0words; ordinary four-mode words assertion fails as expected under destructive scratch control.",
+  "logCounts": {
+    "total": 2,
+    "style": 1,
+    "resizeObserverLoop": 0
+  },
+  "dumpFiles": [],
+  "activeNativePostAwaitPostAssignmentObserved": true,
+  "oldNativeAwaitResumedAfterRealClose": true,
+  "oldDestroyedViewReassigned": true,
+  "laterActiveCorruptionProven": false,
+  "limitations": "The requested Page click did not establish replacement before old continuation. This control proves actual close-before-native-resolve and stale #display reassignment, not corruption of a later replacement reader. No timer retry or manual render substitutes used."
+}

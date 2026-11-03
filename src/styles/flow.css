@@ -99,6 +99,37 @@
   font-size: 12px;
   color: var(--text-primary);
 }
+/* BAND-ALIGN-2: band position (Top · Top third · Center) and Lines (3 · 5 · 7 · Off) button groups */
+.rbb-flow-zone-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rbb-flow-zone-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.rbb-flow-zone-btn:hover {
+  background: var(--color-border, #444);
+}
+.rbb-flow-zone-btn:focus {
+  outline: none;
+}
+.rbb-flow-zone-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.rbb-flow-zone-btn--active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 
 /* FLOW-INF-B: Flow progress display */
 .rbb-flow-progress {

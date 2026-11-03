@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 6,
+  "docs": [
+    {
+      "id": "f-epub", "title": "Meditations",
+      "filepath": "C:\\Books\\Meditations.epub", "filename": "Meditations.epub",
+      "ext": ".epub", "size": 412345, "modified": 1760000000000,
+      "wordCount": 61234, "position": 812, "created": 1760000100000, "source": "folder",
+      "author": "Marcus Aurelius", "coverPath": null, "lastReadAt": 1760500000000,
+      "cfi": "epubcfi(/6/14!/4/2/10:0)", "furthestPosition": 0.31, "revision": 3,
+      "sourceDomain": null, "publishedDate": null, "authorFull": "Marcus Aurelius",
+      "deleted": false, "syncContent": false, "contentHash": null,
+      "unread": false, "snoozedUntil": null, "tags": ["stoic"], "collection": null
+    },
+    {
+      "id": "f-pdf", "title": "Field Notes",
+      "filepath": "C:\\Books\\Field Notes.pdf", "filename": "Field Notes.pdf",
+      "ext": ".pdf", "size": 98765, "modified": 1760000200000,
+      "wordCount": 5400, "position": 40, "created": 1760000300000, "source": "folder",
+      "author": null, "coverPath": null, "lastReadAt": 1760400000000,
+      "sourceDomain": null, "publishedDate": null, "authorFull": null,
+      "deleted": false, "syncContent": false, "contentHash": null,
+      "unread": false, "snoozedUntil": null, "tags": [], "collection": null,
+      "needsEpubConversion": true
+    },
+    {
+      "id": "f-pdf-arch", "title": "Old Report",
+      "filepath": "C:\\Books\\Old Report.pdf", "filename": "Old Report.pdf",
+      "ext": ".pdf", "size": 45678, "modified": 1750000000000,
+      "wordCount": 2100, "position": 2100, "created": 1750000100000, "source": "folder",
+      "author": null, "coverPath": null, "lastReadAt": 1755000000000,
+      "archived": true, "archivedAt": 1755000000500,
+      "sourceDomain": null, "publishedDate": null, "authorFull": null,
+      "deleted": false, "syncContent": false, "contentHash": null,
+      "unread": false, "snoozedUntil": null, "tags": [], "collection": null,
+      "needsEpubConversion": true
+    },
+    {
+      "id": "u-art", "title": "Meditations on modern Stoicism",
+      "wordCount": 2400, "sourceUrl": "https://example.com/stoicism", "position": 120,
+      "created": 1760600000000, "source": "url",
+      "author": "Doe", "authorFull": "Jane Doe", "sourceDomain": "example.com", "publishedDate": "2026-10-01",
+      "coverPath": null, "lastReadAt": 1760700000000,
+      "convertedEpubPath": "C:\\Users\\x\\blurby-data\\converted\\u-art.epub",
+      "filepath": "C:\\Users\\x\\blurby-data\\converted\\u-art.epub",
+      "ext": ".epub", "originalSourceUrl": "https://example.com/stoicism",
+      "queuePosition": 0,
+      "deleted": false, "syncContent": true, "contentHash": null,
+      "unread": false, "snoozedUntil": null, "tags": [], "collection": null
+    },
+    {
+      "id": "u-ext", "title": "A Clipped Essay",
+      "wordCount": 1800, "position": 0, "created": 1760800000000, "source": "url",
+      "sourceUrl": "https://news.example.org/essay", "author": null,
+      "sourceDomain": "news.example.org", "publishedDate": null, "authorFull": null,
+      "lastReadAt": null, "unread": true, "queuePosition": 1, "coverPath": null,
+      "content": "A clipped essay saved from the browser extension.",
+      "deleted": false, "syncContent": true, "contentHash": null,
+      "snoozedUntil": null, "tags": [], "collection": null
+    },
+    {
+      "id": "m-text", "title": "Pasted Note",
+      "content": "Some pasted text about reading.", "wordCount": 5, "position": 0,
+      "created": 1760900000000, "source": "manual", "modified": 1760900000000, "revision": 2,
+      "author": null, "coverPath": null, "lastReadAt": null,
+      "sourceDomain": null, "publishedDate": null, "authorFull": null,
+      "deleted": false, "syncContent": true, "contentHash": null,
+      "unread": true, "snoozedUntil": null, "tags": [], "collection": null
+    },
+    {
+      "id": "m-drop", "title": "Dropped Paper",
+      "content": "Dropped paper text.", "wordCount": 3, "ext": ".epub",
+      "position": 0, "created": 1760950000000, "source": "manual",
+      "convertedEpubPath": "C:\\Users\\x\\blurby-data\\converted\\m-drop.epub",
+      "originalFilepath": "C:\\Downloads\\Dropped Paper.pdf",
+      "filepath": "C:\\Users\\x\\blurby-data\\converted\\m-drop.epub",
+      "author": null, "coverPath": null, "lastReadAt": null,
+      "sourceDomain": null, "publishedDate": null, "authorFull": null,
+      "deleted": false, "syncContent": true, "contentHash": null,
+      "unread": true, "snoozedUntil": null, "tags": [], "collection": null
+    },
+    {
+      "id": "s-sample", "title": "The Sample Book",
+      "filepath": "C:\\Program Files\\Blurby\\resources\\sample-meditations.epub",
+      "wordCount": 3000, "position": 0, "created": 1759000000000, "source": "sample",
+      "author": "Marcus Aurelius", "coverPath": null, "lastReadAt": null,
+      "sourceDomain": null, "publishedDate": null, "authorFull": "Marcus Aurelius",
+      "deleted": false, "syncContent": true, "contentHash": null,
+      "unread": true, "snoozedUntil": null, "tags": [], "collection": null
+    },
+    {
+      "id": "t-del", "title": "Removed Article",
+      "wordCount": 900, "sourceUrl": "https://example.com/removed", "position": 0,
+      "created": 1758000000000, "source": "url",
+      "author": null, "authorFull": null, "sourceDomain": "example.com", "publishedDate": null,
+      "coverPath": null, "lastReadAt": null,
+      "deleted": true, "deletedAt": 7, "deletedBy": "dev-1", "deletedAtTimestamp": 1759500000000,
+      "syncContent": true, "contentHash": null,
+      "unread": false, "snoozedUntil": null, "tags": [], "collection": null
+    }
+  ]
+}

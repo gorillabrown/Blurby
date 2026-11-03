@@ -10,9 +10,13 @@ interface AddEditPanelProps {
   metaMode?: boolean;
   newAuthor?: string;
   onAuthorChange?: (value: string) => void;
+  /** An edit save is waiting for main's answer: Save is disabled */
+  saving?: boolean;
+  /** The last edit save failed: the inline retry message shows beside Save */
+  saveFailed?: boolean;
 }
 
-export default function AddEditPanel({ newTitle, newText, editingId, onTitleChange, onTextChange, onSave, onCancel, metaMode, newAuthor, onAuthorChange }: AddEditPanelProps) {
+export default function AddEditPanel({ newTitle, newText, editingId, onTitleChange, onTextChange, onSave, onCancel, metaMode, newAuthor, onAuthorChange, saving, saveFailed }: AddEditPanelProps) {
   const canSave = metaMode ? newTitle.trim().length > 0 : (newTitle.trim().length > 0 && newText.trim().length > 0);
 
   // Split author into last/first for the two fields
@@ -75,10 +79,11 @@ export default function AddEditPanel({ newTitle, newText, editingId, onTitleChan
         </>
       )}
       <div className="add-edit-actions">
+        {saveFailed && <span className="add-edit-error" role="alert">Couldn't save — try again</span>}
         <button onClick={onCancel} className="btn">cancel</button>
         <button
           onClick={onSave}
-          disabled={!canSave}
+          disabled={!canSave || saving}
           className="btn-fill"
           style={{ opacity: canSave ? 1 : 0.3 }}
         >{editingId ? "save" : "add"}</button>

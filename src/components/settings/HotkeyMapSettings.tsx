@@ -27,6 +27,7 @@ const SECTIONS: Array<{ title: string; shortcuts: ShortcutEntry[] }> = [
       { action: "Toggle select", key: "X" },
       { action: "Select all", key: "Ctrl + Shift + A" },
       { action: "Focus search", key: "/" },
+      { action: "Switch tab", key: "Ctrl + 1–4" },
       { action: "Cycle focus zones", key: "Tab" },
       { action: "Jump to top", key: "Ctrl + Up" },
       { action: "Jump to bottom", key: "Ctrl + Down" },

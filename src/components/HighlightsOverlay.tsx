@@ -93,6 +93,7 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
+        e.stopPropagation();
         onClose();
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -110,8 +111,9 @@ export default function HighlightsOverlay({ onClose, onJumpTo }: HighlightsOverl
   );
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // capture: before the reader's window listener (ShortcutsOverlay pattern)
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [handleKeyDown]);
 
   return (
