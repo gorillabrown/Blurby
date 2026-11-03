@@ -10,6 +10,7 @@ const migrations = require("../main/migrations.js");
 const { CURRENT_SETTINGS_SCHEMA, settingsMigrations, runMigrations } = migrations;
 
 // BAND-ALIGN-2 R8 added v13 -> v14 (standing rule 50): these rows pin the v13 runner, its first 13 migrations.
+// EINK-CONTROLS-1 then added v14 -> v15 (RC window, R4).
 const upgrade = (data) => runMigrations(data, settingsMigrations.slice(0, 13), 13);
 
 // A realistic v12 profile: every narration-adjacent field the migration must leave alone.

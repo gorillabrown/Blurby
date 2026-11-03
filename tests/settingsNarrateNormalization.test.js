@@ -71,6 +71,7 @@ function makeCtx(initial) {
 
 describe("(a) startup: loadSettingsData", () => {
   // BAND-ALIGN-2 R8 (standing rule 50): schema 14 follows; v13 -> v14 leaves the reading modes alone.
+  // EINK-CONTROLS-1 then added v14 -> v15 (RC window, R4); neither touches the reading modes.
   it("keeps a schema-13 object that holds narrate", () => {
     const result = migrations.loadSettingsData({
       schemaVersion: 13,
@@ -79,7 +80,7 @@ describe("(a) startup: loadSettingsData", () => {
       wpm: 300,
     });
     expect(result).toEqual({
-      schemaVersion: 14,
+      schemaVersion: 15,
       readingMode: "narrate",
       lastReadingMode: "narrate",
       wpm: 300,
@@ -94,7 +95,7 @@ describe("(a) startup: loadSettingsData", () => {
       wpm: 300,
     });
     expect(result).toEqual({
-      schemaVersion: 14,
+      schemaVersion: 15,
       readingMode: "flow",
       lastReadingMode: "flow",
       wpm: 300,

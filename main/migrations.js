@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 14;
+const CURRENT_SETTINGS_SCHEMA = 15;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -186,6 +186,15 @@ const settingsMigrations = [
       delete data.flowZoneLines;
     }
     data.schemaVersion = 14;
+    return data;
+  },
+  // v14 → v15: EINK-CONTROLS-1 — the E-ink theme is folded into the E-ink switch (light underneath)
+  (data) => {
+    if (data.theme === "eink") {
+      data.theme = "light";
+      data.einkMode = true;
+    }
+    data.schemaVersion = 15;
     return data;
   },
 ];
