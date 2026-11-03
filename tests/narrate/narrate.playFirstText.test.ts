@@ -185,14 +185,21 @@ describe("Narrate: Play on a section with no words starts at the first text (PLA
   });
 
   it("(nc2) control: a section with words starts where it is", async () => {
+    // NARRATE-SENTENCE-RESUME-1 (owner decision 2026-10-14; standing rule 50): Play rewinds to the sentence's first
+    // word. Section 1 (words 0–9) has no sentence end before word 5, so the start is its first word, 0, in the same
+    // section: no navigation.
     const o = open({ shown: 1, position: 5 });
     opened.push(o.runtime);
     o.runtime.togglePlay();
     await flush(); await flush();
     expect(o.api.goToSection).not.toHaveBeenCalled();
     expect(o.api.next).not.toHaveBeenCalled();
-    expect(highlightedWithMotion(o.api, 5, "narrate")).toBe(true);
-    expect(o.producer.requests[0].text.startsWith("s1w5 ")).toBe(true);
+    expect(highlightedWithMotion(o.api, 0, "narrate")).toBe(true);
+    expect(o.producer.requests[0].text.startsWith("MEDITATIONS s1w1 ")).toBe(true);
+    // Still section 1, in place: the start is that section's first word, by index and text (LL-161).
+    const section1 = BOOK.sections.find((s) => s.sectionIndex === 1)!;
+    expect(section1.startWordIdx).toBe(0);
+    expect(o.producer.requests[0].text.split(" ")[0]).toBe(BOOK.words[section1.startWordIdx]);
   });
 
   it("(nc3) control: the map never arrives, so nothing starts", async () => {
