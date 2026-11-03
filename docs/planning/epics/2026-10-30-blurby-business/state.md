@@ -1,7 +1,7 @@
 ---
 epic: blurby-business
 last_updated: 2026-11-03 UTC
-updated_by: session 1 HB-6 task 3-R verified storage foundation
+updated_by: session 1 HB-6 task 3-W mocked checkpoint closeout
 ---
 
 # State — single source of current truth
@@ -28,9 +28,9 @@ updated_by: session 1 HB-6 task 3-R verified storage foundation
 
 ```
 phase:        P1 — Viewer
-next_action:  checkpoint verified HB-6 task 3-R; STOP for Brain acceptance and separate W/I admission
+next_action:  close verified W mocked checkpoint under W-GIT-CLOSEOUT-20261102; then STOP
 blockers:     none
-session:      1 of ~40 budgeted; task 3-R storage foundation verified; HB-6 incomplete
+session:      1 of ~40 budgeted; R accepted, W mocked source verified pending Git; HB-6 incomplete
 dod:          D1–D21 unmet
 ```
 
@@ -94,3 +94,8 @@ dod:          D1–D21 unmet
 - Exact green command exited 0: two files, 21 tests passed, empty stderr. `C:/Projects/Blurby-artifacts/business-hb6-t3-r-20261102/green.receipt.json`, SHA256 `38578ab7106ad5a3aab261564399b331fb0db56bf0aa239db106596c47ac5ec9`, retains source pins, case directory/file identities and TEMP proof. Solon spec compliance APPROVED, then Plato quality READY. New R cases, red failures and logs remain retained; only unchanged jsonStore controls use their ordinary teardown of their own generated subdirectory inside the qualified owned os-temp parent.
 - R is inert and unregistered: no window, IPC, actual profile or quit integration. Paths are lexical identities, not native canonical identity or document-read permission. Before later activation, integration must stop new Business operations, await store `close()`, then global `whenWritesSettled`; R's drain tests do not qualify that unwired integration.
 - Package qualification is HELD because R changes `main/**`; this is not a package-unchanged checkpoint. HB-6 and D1–D21 remain unmet. No full suite, typecheck, build, app/native/model/profile or provider action occurred in R. Frozen inputs and accepted generator/PDF/temp remain pinned; known perf dirt remains preserved unstaged. STOP after the exact checkpoint; no automatic W/I or other successor.
+- W admission `BLURBY-BUSINESS-1-HB6-T3-W-SOURCE-20261102` consumed 2026-11-03 01:29:29 UTC, deadline 02:29:29 UTC, cap 40 aggregate calls. Accepted R parent is `cc7e0018c66186d4a71041b62b7f5c1b14fa1bb2`. W is VERIFIED_MOCKED_SOURCE_PENDING_GIT, not an accepted or published checkpoint; final accounting and preserved worktree state belong in the external receipt.
+- Actual W red collected all 16 controls: 15 intended missing-module assertion failures and the standalone w15 default-CSP pass. Test-only local commit `8d5c244f8245aeb48c740c299cdc8e35e69ba616` preceded production. Test SHA256 `2eeca601495973e238f7678bf0bf2861b4a3d7205824fe40c23104f42c6b133b` stayed unchanged through green. Both syntax checks exited 0 with empty output/error; targeted green passed 16/16 with empty stderr. Green receipt: `C:/Projects/Blurby-artifacts/business-hb6-t3-w-20261102/receipts/green.json`, SHA256 `d5cc1eda41df2f76473b532bb6db22b933f4aae874e35f1731bafdfb9cd868fb`; frozen candidate SHA256 `a20ed635d04ae0c5bcfee919854a421eb7b7b416d6fb513f7bb258e50af9d84a`.
+- W compliance and quality reviewed the same frozen candidate concurrently under the published parallel-review amendment. Solon first withheld approval for truncated readback, then completed the scoped read and APPROVED; Plato READY was accepted only after that compliance pass. Four wrong observations are derived from unconditional assertions in passed groups: sandbox:false/w03/assertOptions, stale instance/w08/assertCurrent, mixed-case CSP/w12/assertHeaders, unprevented navigation/w13/assertDenied. Individual console-line delivery is not evidenced. The pre-child identifier-only driver failure is retained; no source/test repair or test retry occurred.
+- W remains inert/unregistered and mock-only. `main/**` changes keep package qualification HELD; there is no actual Electron/window/session/profile activation, I/task4/IPC/preload/renderer/assets integration, full suite, typecheck, build, native qualification or fixture generation. HB-6 and D1–D21 remain unmet. Perf/temp, R, frozen packet and accepted fixture pins are preserved. The final source/docs checkpoint is not committed or pushed; red-test commit is local only. STOP at the source-wave cap for Brain's separate Git/docs disposition; no automatic successor.
+- Fresh Git/docs closeout `W-GIT-CLOSEOUT-20261102` consumed 2026-11-03 01:54:31 UTC, deadline 02:09:31 UTC, cap 18 aggregate calls. The prior W source wave is CLOSED at 40/40; its source evidence remains unchanged. Its path-fence HOLD counted the already known excluded perf dirt, not a new source/test defect. Correct accounting requires exactly five cumulative paths from accepted R base through the final checkpoint, with only four current stage changes because the test is already in red-test parent `8d5c244f8245aeb48c740c299cdc8e35e69ba616`. Exclude only the separately raw-hash-verified unstaged perf file and untracked retained PDF temp; preserve both. Exact Git checks, final commit/tree/remote equality and actual outcome belong in `C:/Projects/Blurby-artifacts/business-hb6-t3-w-git-20261102/receipt.json`; no publication success is asserted before that receipt. All activation/package/native/HB-6/D1–D21 holds remain, and this closeout grants no successor.
