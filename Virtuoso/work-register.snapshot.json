@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T01:35:22Z",
+  "takenAt": "2026-11-03T01:47:43Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3664,14 +3664,14 @@
       "workstream": "TTS / Narration Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "",
+      "spec_link": "ROADMAP.md#narrate-band-space-1",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "",
       "notes": "Created 2026-10-30 by roadmap review 2026-10-30. Owner design ruling 2026-10-30: R7 ('Add space, band fixed') covers Flow and Focus only; Narrate's band (src/reader/modes/narrate/mode.css, placed at FLOW_ZONE_INITIAL_TOP) gets the same treatment as a separate item, in Narrate's own runtime (no sibling imports). Includes the owner's R7 sub-rulings: band fixed at both section ends, no leading space on zero-word sections, a few px shift on headings acceptable.",
-      "revision": "fbf81b8390c509577e56932771a1ea545caf7a9bd0808b84ac1061d94b23511c",
+      "revision": "6df6cd3e84c21287bcca8e69d8736b4ca7e16f991de29d168162dd211803a0f7",
       "extra": {
         "id": "4097c96c-c31e-81b9-b8fc-fb18b650ba54",
         "url": "https://app.notion.com/4097c96cc31e81b9b8fcfb18b650ba54",
