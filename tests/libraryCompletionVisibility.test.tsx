@@ -158,15 +158,31 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
       doc("article", { source: "url", ext: undefined, title: "Article needle", position: 3 }),
       doc("pdf", { ext: ".pdf", position: 3 }), doc("archive", { archived: true }),
     ];
+    // APP-TABS-1: the url article lives in Newsroom, and the "articles" type filter is gone (spec: "Filters belong to
+    // each tab"). Each tab's filters are checked on that tab; across the two tabs New still admits article, book and pdf.
     await render(library, mode);
-    await tab("new"); expect(ids()).toEqual(["article", "book", "pdf"]);
+    await tab("new"); expect(ids()).toEqual(["book", "pdf"]);
     await tab("favorites"); expect(ids()).toEqual(["book"]);
     await tab("all");
     await tab("books"); expect(ids()).toEqual(["book", "old"]);
-    await tab("articles"); expect(ids()).toEqual(["article"]);
     await tab("PDFs"); expect(ids()).toEqual(["pdf"]);
     await tab("all types");
+    await act(async () => { container.querySelector<HTMLButtonElement>('.app-tab-bar button[aria-label="Filter"]')!.click(); await flush(); });
+    const libraryItems = [...container.querySelectorAll('[role="menu"] [role="menuitemradio"]')].map(el => el.textContent);
+    expect(libraryItems).toEqual(["All", "New", "Favorites", "Archived", "All types", "Books", "PDFs"]);
+    expect(libraryItems).not.toContain("Articles");
+    props = { ...props, activeTab: "newsroom" };
+    await render(library, mode);
+    expect(ids()).toEqual(["article"]);
+    await tab("new"); expect(ids()).toEqual(["article"]);
+    await tab("favorites"); expect(ids()).toEqual([]);
+    await act(async () => { container.querySelector<HTMLButtonElement>('.app-tab-bar button[aria-label="Filter"]')!.click(); await flush(); });
+    expect([...container.querySelectorAll('[role="menu"] [role="menuitemradio"]')].map(el => el.textContent))
+      .toEqual(["All", "New", "Favorites", "Archived"]);
+    await tab("all");
     await search("needle"); expect(ids()).toEqual(["article"]);
+    expect([...container.querySelectorAll(".search-result-item .search-result-tab")].map(el => el.textContent))
+      .toEqual(["Newsroom"]);
     await search("absent"); expect(ids()).toEqual([]);
   });
 
