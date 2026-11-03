@@ -1,0 +1,69 @@
+{
+  "item": "NARRATE-CPU-PROFILE-1",
+  "phase": "T-CONTROL-REPAIR1",
+  "scope": "prospective external controls/recorder repair qualification only; no helper/runtime grant",
+  "observedAt": "2026-11-03T04:22:16.2994317Z",
+  "spec": "docs/governance/bug-reports/Draft.NARRATE-CPU-PROFILE-1.A3-T-control-repair1.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "2a467e74f41f82b0b5eb67759065616ed2092ba4148e630786c148824f7760e8",
+      "publishedBaseSHA256": "2a467e74f41f82b0b5eb67759065616ed2092ba4148e630786c148824f7760e8",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "publishedBaseSHA256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.NARRATE-CPU-PROFILE-1.A3-T-control-repair1.2026-11-02.md",
+      "sha256": "8de5fb770fb39e4296805aede505d9bb7c67c1e9183f05c980d8f9ca42fae6e8",
+      "publishedBaseSHA256": null,
+      "matchesPublishedBase": null
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (NARRATE-CPU-PROFILE-1): PASS",
+    "  cited: LL-176, LL-063, LL-087, LL-096, LL-118, LL-134, LL-142, LL-144, LL-162, LL-169, LL-172, LL-174, LL-175",
+    "  [info] lessons-not-cited: 109 live lesson(s) not cited — confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)…",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Current quiet custody/inputs/three-role successor/V3 are frozen and preinvoke-reviewed [calculable] @control-preparation — 0m (median of 6 runs)",
+    "2. Actual recorder, CLI and existing-P causal baseline yield full35-command/100+40-case receipts [calculable] @qualification — 0m (median of 6 runs)",
+    "3. Independent same-byte compliance then quality acceptance and complete external held report preserve every nonclaim [calculable] @review-checkpoint — 3m (median of 71 runs)",
+    "Total: chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "37d326ea21aecc3bb00b8c3bfa22748e54d6bb57",
+  "sha256Domain": "working-tree raw; prior published-base raw separately recorded"
+}
