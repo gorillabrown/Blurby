@@ -1,0 +1,36 @@
+{
+  "retirement": true,
+  "id": 1,
+  "oldViewConnected": false,
+  "oldRendererConnected": false,
+  "oldFvConnected": false,
+  "oldCurrentDocument": false,
+  "activeRendererIsOld": false,
+  "oldRenderError": null,
+  "before": {
+    "mode": "rm-narrate-root",
+    "activeRendererSame": true,
+    "contents": [
+      {
+        "index": 2,
+        "words": 5293,
+        "body": true
+      }
+    ],
+    "header": "INTRODUCTION",
+    "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+  },
+  "after": {
+    "mode": "rm-narrate-root",
+    "activeRendererSame": true,
+    "contents": [
+      {
+        "index": 2,
+        "words": 5293,
+        "body": true
+      }
+    ],
+    "header": "INTRODUCTION",
+    "lastLocation": "{\"fraction\":0.008799271251065159,\"section\":{\"current\":2,\"total\":19},\"location\":{\"current\":3,\"next\":3,\"total\":380},\"time\":{\"section\":19.06724724514608,\"total\":352.6097472451461},\"tocItem\":{\"label\":\"INTRODUCTION\",\"href\":\"OEBPS/5709277951690388395_2680-h-1.htm.xhtml#pgepubid00003\",\"subitems\":null,\"id\":3},\"pageItem\":null,\"cfi\":\"epubcfi(/6/6!/4/2[pgepubid00003],/2/2[link2H_INTR],/4/414/1:4)\",\"range\":{}}"
+  }
+}

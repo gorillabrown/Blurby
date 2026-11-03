@@ -1,0 +1,33 @@
+{
+  "label": "baseline-v2",
+  "passed": false,
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\library-completion-visibility-1-20261026\\baseline-v2-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\rc-36ac7466\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 17608,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "steps": [
+    {
+      "check": "initial-grid-all",
+      "ids": [
+        "owned-control"
+      ]
+    },
+    {
+      "check": "baseline-archive-missing",
+      "ids": []
+    },
+    {
+      "check": "baseline-incomplete-card-opens-identical91word-EPUB",
+      "wordCount": 91
+    }
+  ],
+  "aliveAtMs": 26013,
+  "errorLogLines": 1471,
+  "rendererErrors": [],
+  "dumpFiles": [],
+  "failure": "AssertionError [ERR_ASSERTION]: unexpected error.log\n    at file:///C:/Projects/Blurby-artifacts/library-completion-visibility-1-20261026/package-check.mjs:102:3",
+  "liveUnchanged": true
+}

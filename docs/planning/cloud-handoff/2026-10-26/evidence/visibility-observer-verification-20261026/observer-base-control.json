@@ -1,0 +1,21 @@
+{
+  "sourcePath": "C:/Projects/Blurby/.worktrees/library-completion-visibility-1/node_modules/foliate-js/paginator.js",
+  "sourceSha256": "25beb8f4350f7873d34c317f46b0ff8435bd370eeb448bb3a4b8b54ca3068cc6",
+  "cases": [
+    {
+      "name": "View.destroy() disconnects its ResizeObserver",
+      "expectedContainsDisconnect": true,
+      "actualContainsDisconnect": false,
+      "destroyBody": "destroy() {\n        if (this.document) this.#observer.unobserve(this.document.body)\n    }",
+      "passed": false
+    },
+    {
+      "name": "Paginator.destroy() disconnects its ResizeObserver",
+      "expectedContainsDisconnect": true,
+      "actualContainsDisconnect": false,
+      "destroyBody": "destroy() {\n        this.#observer.unobserve(this)\n        this.#view.destroy()\n        this.#view = null\n        this.sections[this.#index]?.unload?.()\n        this.#mediaQuery.removeEventListener('change', this.#mediaQueryListener)\n    }",
+      "passed": false
+    }
+  ],
+  "expectation": "both disconnect assertions FAIL on real unpatched installed dependency"
+}

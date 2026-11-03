@@ -1,0 +1,50 @@
+{
+  "label": "session",
+  "sourceCommit": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
+  "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+  "profile": "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\session-profile",
+  "fixtureSha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+  "fixtureWords": 80479,
+  "script": "C:\\Projects\\Blurby-artifacts\\reader-visual-diag-1\\session.mjs",
+  "scriptSha256": "ffeac5f30f6a71547699e3d12464e244f945355a1d7e49a4ec7daff40b290556",
+  "bandProbeSha256": "ba1d7aa904798d109104e5e1f3e7b6523df56f41f9c1ad12ff3982544e9a8bc9",
+  "roWrapSha256": "cddd574d85552ae58940a3e73b443590f105f543bf0b619872ee8319abf920ad",
+  "liveBefore": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "startedAt": "2026-10-26T20:59:28.083Z",
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\session-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\visibility-observer-verification-20261026\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 57692,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "uninstrumentedBefore": true,
+  "scriptArgs": [
+    "C:\\Projects\\Blurby-artifacts\\reader-visual-diag-1\\session.mjs",
+    "9441",
+    "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\session-profile\\blurby-data\\error.log",
+    "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\session-result.json"
+  ],
+  "scriptExit": 0,
+  "aliveAtMs": 329236,
+  "logCounts": {
+    "total": 0,
+    "resizeObserverLoop": 0,
+    "destructureStyle": 0
+  },
+  "errorLogSha256": null,
+  "errorLog": "C:\\Projects\\Blurby-artifacts\\visibility-observer-verification-20261026\\session-profile\\blurby-data\\error.log",
+  "capturedCdpEvents": [],
+  "dumpFiles": [],
+  "routeQualified": true,
+  "packageQualified": true,
+  "liveAfter": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "liveUnchanged": true,
+  "finishedAt": "2026-10-26T21:04:57.395Z"
+}

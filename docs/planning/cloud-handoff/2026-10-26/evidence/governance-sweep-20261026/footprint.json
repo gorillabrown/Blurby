@@ -1,0 +1,80 @@
+{
+  "candidates": [
+    {
+      "path": "C:\\Projects\\Blurby\\.tmp\\footprint-extract",
+      "kind": "scratch",
+      "size": 655106484,
+      "class": "evidence",
+      "reason": "patches extracted by the footprint tool",
+      "next": "owner only: Remove-Item -LiteralPath 'C:\\Projects\\Blurby\\.tmp\\footprint-extract' -Recurse -Force"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.claude\\worktrees\\kind-visvesvaraya-77bbf5",
+      "kind": "worktree",
+      "size": 2395854899,
+      "class": "unique",
+      "reason": "4 uncommitted path(s)",
+      "branch": "eb/app-tabs-1",
+      "head": "8539ec4c55c5359cdafbd3dfa146de5881f062c9",
+      "next": "owner: extract first (virtuoso_registry --root . footprint --extract \"C:\\Projects\\Blurby\\.claude\\worktrees\\kind-visvesvaraya-77bbf5\" --apply), then decide"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.worktrees\\coldclick-pkg",
+      "kind": "worktree",
+      "size": 2020125398,
+      "class": "unique",
+      "reason": "clean, but main does not contain its HEAD",
+      "head": "0ca285e54b2b9c3bdd06a74e653e1c2489385646",
+      "next": "owner: extract first (virtuoso_registry --root . footprint --extract \"C:\\Projects\\Blurby\\.worktrees\\coldclick-pkg\" --apply), then decide"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1",
+      "kind": "worktree",
+      "size": 2396452662,
+      "class": "unique",
+      "reason": "1 uncommitted path(s)",
+      "branch": "eb/library-completion-visibility-1",
+      "head": "0dd4d94026f2574f735031b2b1569aee09d17120",
+      "next": "owner: extract first (virtuoso_registry --root . footprint --extract \"C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1\" --apply), then decide"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.worktrees\\rc-36ac7466",
+      "kind": "worktree",
+      "size": 3539670111,
+      "class": "redundant",
+      "reason": "clean, and main contains its HEAD",
+      "head": "36ac7466749688c9ba5e17de841224fab08d7bae",
+      "next": "virtuoso_registry --root . footprint --remove \"C:\\Projects\\Blurby\\.worktrees\\rc-36ac7466\" --apply"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.tmp\\Dispatch.Notion-Roadmap-Views-and-Phase-Layer.md",
+      "kind": "scratch",
+      "size": 19883,
+      "class": "regenerable",
+      "reason": "scratch in the temp role with no git tree",
+      "next": "virtuoso_registry --root . footprint --remove \"C:\\Projects\\Blurby\\.tmp\\Dispatch.Notion-Roadmap-Views-and-Phase-Layer.md\" --apply"
+    },
+    {
+      "path": "C:\\Projects\\Blurby\\.tmp\\gitignore.ide-template.2026-10-10",
+      "kind": "scratch",
+      "size": 352,
+      "class": "regenerable",
+      "reason": "scratch in the temp role with no git tree",
+      "next": "virtuoso_registry --root . footprint --remove \"C:\\Projects\\Blurby\\.tmp\\gitignore.ide-template.2026-10-10\" --apply"
+    }
+  ],
+  "freeBytes": 121173262336,
+  "totalBytes": 1021771247616,
+  "places": {
+    "driveRoot": "C:\\",
+    "temp": "C:\\Users\\estra\\AppData\\Local\\Temp",
+    "parent": "C:\\Projects",
+    "tempRole": "C:\\Projects\\Blurby\\.tmp"
+  },
+  "defaultBranch": "main",
+  "dispatch": null,
+  "notes": [
+    "23 folder(s) could not be read and were not checked: C:\\Recovery, C:\\System Volume Information, C:\\Users\\estra\\AppData\\Local\\Temp\\WinSAT, C:\\Users\\estra\\AppData\\Local\\Temp\\d7_mut_test_33iaugii, C:\\Users\\estra\\AppData\\Local\\Temp\\d7_mut_test_8uq9dzhn, ..."
+  ],
+  "liveItemsRead": true
+}

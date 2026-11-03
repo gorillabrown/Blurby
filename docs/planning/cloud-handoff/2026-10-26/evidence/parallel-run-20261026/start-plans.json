@@ -1,0 +1,54 @@
+[
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner direction2026-10-26: include the referenced governance sweep as first-order upcoming deliverables. Live source thread01a178b2-c694-70b0-90df-0edae537aed0 was read: discovery/plan/approval complete; implementation stopped on drift and changed no files. Seq0 prioritizes governance; visibility remains the first app fix with its source window intact. This is a new follow-through item; historical GOVERNANCE-SWEEP remains Completed. Original sweep approval is commit-only, excludes its merge/push. Scope and16-action matrix: docs/planning/roadmap-reviews/2026-10-26-governance-deliverables.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Governance agent executes the refreshed approved16-action cleanup; parent owns live register writes and final review. Original sweep commit-only boundary retained."
+    },
+    "expectedRevision": "a167cae5cf0e80df3c2f9f932ede0092469a5a1012a6a52fb368b6f447da01e0",
+    "idempotencyKey": "parallelrun20261026-start-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "recoveryId": "20261026T203311Z-external-set-status-GOV-SWEEP-FOLLOWTHROUGH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Visibility agent implements/tests/packages in the exclusive isolated branch; parent review and exact-package/designated merge gates remain."
+    },
+    "expectedRevision": "8a4e2e10415dc86991caa22a7130c49cde4096a1361c0e6a5f54c9a37d9a31f3",
+    "idempotencyKey": "parallelrun20261026-start-LIBRARY-COMPLETION-VISIBILITY-1",
+    "recoveryId": "20261026T203312Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLDER-SWITCH-CONTENT-1",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix."
+    },
+    "expectedRevision": "e4c14cb4c3eca19fdff9271455b8eafd40db189ac7f8e5685ea623c8e3f0d28d",
+    "idempotencyKey": "parallelrun20261026-start-FOLDER-SWITCH-CONTENT-1",
+    "recoveryId": "20261026T203313Z-external-set-status-FOLDER-SWITCH-CONTENT-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PROFILE-QUEUE-ISOLATION-1",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-26",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix."
+    },
+    "expectedRevision": "7d903dff32849ae96315e87c233ca42982b2ab09111ce1c9ca941d5c89948c07",
+    "idempotencyKey": "parallelrun20261026-start-PROFILE-QUEUE-ISOLATION-1",
+    "recoveryId": "20261026T203314Z-external-set-status-PROFILE-QUEUE-ISOLATION-1"
+  }
+]

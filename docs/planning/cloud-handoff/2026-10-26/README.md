@@ -1,0 +1,19 @@
+# Blurby cloud parallel handoff — 2026-10-26
+
+Owner explicitly requested independent visible cloud chats, and upload of relevant local work BEFORE launch. Repository: https://github.com/gorillabrown/Blurby (private remote). This branch inherits the held visibility+observer sources; it is not a main merge or release.
+
+Read `admission.json`, the full root ROADMAP section `foliate-display-lifetime-1`, and `evidence/parallel-style-diagnosis-20261026/readiness-lifecycle-dispatch-v3-final.md`. That immutable proposal still says admission withheld because it predates Brain's approval; the dated admission.json is the later ruling. Verify the technical and independent review hashes in admission.json. User design/functionality decisions remain with the user; technical decisions belong to Blurby.Brain.
+
+## Parallel ownership
+
+1. **FOLIATE-DISPLAY-LIFETIME-1 — cloud implementation** owns only the dependency patch, two named new tests and its own memo/timing/receipt. Implement exact v3 in bounded waves after entry gates. Use isolated branch `eb/foliate-display-lifetime-1` from this published handoff, preserving inherited held code/docs. Record actual cloud task identity. Run available portable red/green, suite, typecheck and build checks. Do not substitute cloud results for owner-machine/native Windows ARM64 or package checks. Preserve observer disconnects and four independent mode runtimes.
+2. **Blurby folder/profile — cloud specifications** owns only its task-specific planning reports, no application code/shared ROADMAP/live register changes. Existing bounded diagnoses are completed and approved; do not redo them. Turn their exact remaining technical decisions into concrete execution-ready proposed specs/control contracts. Route technical questions to Brain, design/functionality to owner. Preserve visibility-first priority and all holds.
+3. **Blurby cloud review and coordination** independently audits this packet/governance closure and later the implementation branch. Own only review/coordination reports. Check exact v3/source fence, controls, preserved failures and local qualification holds. Monitor the other cloud tasks where supported; return final approval or concrete blockers. No source/main/release/terminal writes. Do not claim to see another task or filesystem unless actually accessible.
+
+## Evidence portability
+
+`upload-manifest.json` maps local source paths to exact uploaded bytes. Evidence text/scripts/logs are preserved under `evidence/`; `.gitattributes` disables text normalization here so immutable raw hashes survive Git publication. Original Windows C: paths inside traces/scripts are provenance, not cloud paths. Use this packet's corresponding relative path for reading. Do not blindly execute a Windows artifact script in cloud. Actual source is in the tracked repository; install dependencies normally if capabilities permit. Source extraction tests must execute actual installed production behavior, never duplicate the algorithm.
+
+The completed governance work and both folder/profile reports are already committed in the inherited tree. Current source repair is approved for build-and-hold, not complete. Original package gate FAIL/WITHHOLD and all induced diagnostic FAILs remain intact. Some raw trace/run helpers are instrumented causal controls, not clean-package qualification. Full native acceptance routes and clean logs remain required later on Windows.
+
+The normal library/settings and personal book/audio/profile data, credentials, installers, executables/ASAR and node_modules are excluded. The manifest contains only intended work evidence; unrelated local changes are untouched. Completed-work summary moved verbatim to an archive with relative links rebased so the root ROADMAP stays below 2,000 lines; no status changed.

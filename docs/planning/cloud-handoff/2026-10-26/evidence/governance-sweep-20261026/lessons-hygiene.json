@@ -1,0 +1,369 @@
+{
+  "duplicates": [
+    {
+      "keep": "LL-024",
+      "supersede": [
+        "LL-026"
+      ],
+      "why": "the same Applies to (CSS, Electron, window management)"
+    },
+    {
+      "keep": "LL-093",
+      "supersede": [
+        "LL-094"
+      ],
+      "why": "the same Applies to (refactoring, sprint planning, success criteria)"
+    }
+  ],
+  "stale": [
+    {
+      "id": "LL-002",
+      "recorded": "2026-03-21",
+      "ageDays": 219
+    },
+    {
+      "id": "LL-003",
+      "recorded": "2026-03-21",
+      "ageDays": 219
+    },
+    {
+      "id": "LL-004",
+      "recorded": "2026-03-21",
+      "ageDays": 219
+    },
+    {
+      "id": "LL-007",
+      "recorded": "2026-03-21",
+      "ageDays": 219
+    },
+    {
+      "id": "LL-008",
+      "recorded": "2026-03-21",
+      "ageDays": 219
+    },
+    {
+      "id": "LL-014",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-015",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-018",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-019",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-020",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-021",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-022",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-023",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-024",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-025",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-026",
+      "recorded": "2026-03-24",
+      "ageDays": 216
+    },
+    {
+      "id": "LL-027",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-028",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-029",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-030",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-031",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-032",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-033",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-034",
+      "recorded": "2026-03-26",
+      "ageDays": 214
+    },
+    {
+      "id": "LL-063",
+      "recorded": "2026-03-31",
+      "ageDays": 209
+    },
+    {
+      "id": "LL-065",
+      "recorded": "2026-04-01",
+      "ageDays": 208
+    },
+    {
+      "id": "LL-066",
+      "recorded": "2026-04-01",
+      "ageDays": 208
+    },
+    {
+      "id": "LL-067",
+      "recorded": "2026-04-01",
+      "ageDays": 208
+    },
+    {
+      "id": "LL-069",
+      "recorded": "2026-04-04",
+      "ageDays": 205
+    },
+    {
+      "id": "LL-070",
+      "recorded": "2026-04-04",
+      "ageDays": 205
+    },
+    {
+      "id": "LL-071",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-072",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-073",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-074",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-075",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-076",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-077",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-078",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-079",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-080",
+      "recorded": "2026-04-05",
+      "ageDays": 204
+    },
+    {
+      "id": "LL-081",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-082",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-083",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-084",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-085",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-086",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-087",
+      "recorded": "2026-04-06",
+      "ageDays": 203
+    },
+    {
+      "id": "LL-089",
+      "recorded": "2026-04-07",
+      "ageDays": 202
+    },
+    {
+      "id": "LL-090",
+      "recorded": "2026-04-07",
+      "ageDays": 202
+    },
+    {
+      "id": "LL-093",
+      "recorded": "2026-04-07",
+      "ageDays": 202
+    },
+    {
+      "id": "LL-092",
+      "recorded": "2026-04-07",
+      "ageDays": 202
+    },
+    {
+      "id": "LL-094",
+      "recorded": "2026-04-07",
+      "ageDays": 202
+    },
+    {
+      "id": "LL-096",
+      "recorded": "2026-04-16",
+      "ageDays": 193
+    },
+    {
+      "id": "LL-097",
+      "recorded": "2026-04-16",
+      "ageDays": 193
+    },
+    {
+      "id": "LL-098",
+      "recorded": "2026-04-16",
+      "ageDays": 193
+    },
+    {
+      "id": "LL-099",
+      "recorded": "2026-04-16",
+      "ageDays": 193
+    },
+    {
+      "id": "LL-100",
+      "recorded": "2026-04-17",
+      "ageDays": 192
+    },
+    {
+      "id": "LL-101",
+      "recorded": "2026-04-17",
+      "ageDays": 192
+    },
+    {
+      "id": "LL-102",
+      "recorded": "2026-04-17",
+      "ageDays": 192
+    },
+    {
+      "id": "LL-103",
+      "recorded": "2026-04-17",
+      "ageDays": 192
+    },
+    {
+      "id": "LL-105",
+      "recorded": "2026-04-20",
+      "ageDays": 189
+    },
+    {
+      "id": "LL-107",
+      "recorded": "2026-04-20",
+      "ageDays": 189
+    },
+    {
+      "id": "LL-110",
+      "recorded": "2026-04-20",
+      "ageDays": 189
+    },
+    {
+      "id": "LL-111",
+      "recorded": "2026-04-21",
+      "ageDays": 188
+    }
+  ],
+  "incomplete": [
+    {
+      "id": "LL-145",
+      "missing": [
+        "recommendation"
+      ]
+    },
+    {
+      "id": "LL-159",
+      "missing": [
+        "evidence"
+      ]
+    }
+  ],
+  "malformed": [],
+  "unrecorded": [
+    {
+      "id": "LL-104",
+      "claims": "**Verdict:** Once `narrate` is promoted into the shared mode contract, any Foliate or Flow lifecycle guard that distinguishes \u201cflow-surface\u201d vs \u201cpage/focus\u201d behavior must branch on the surface semantics, not on the legacy literal `mode === \"flow\"` check.",
+      "status": "Promoted \u2014 Verdict: Once narrate is promoted into the shared mode contract, any Foliate or ",
+      "command": "lessons --record-status LL-104 --status \"Promoted \u2014 Verdict: Once narrate is promoted into the shared mode contract, any Foliate or \" --actor governance-sweep --item sweep",
+      "problem": ""
+    }
+  ],
+  "staleAfterDays": 180,
+  "source": "docs/governance/LESSONS_LEARNED.md",
+  "closeOuts": "docs/governance/close-outs",
+  "closeOutsRead": 85,
+  "notes": []
+}

@@ -1,0 +1,14 @@
+[
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv1) 91/91 remains once in All with unchanged data and no persistence callback (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv1) 91/91 remains once in All with unchanged data and no persistence callback (list)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv2) completed archive record appears once in Archive and not All (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv2) completed archive record appears once in Archive and not All (list)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv3) complete and over-complete cards reopen through their existing callback (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv3) complete and over-complete cards reopen through their existing callback (list)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv4) all boundary positions have one actual card; wordCount=91 (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv4) all boundary positions have one actual card; wordCount=91 (list)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv5) New/Favorites/type/search filters retain inclusion and exclusion (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv5) New/Favorites/type/search filters retain inclusion and exclusion (list)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv6) progress and archive/unarchive transitions never lose or double a card (grid)",
+  "tests/libraryCompletionVisibility.test.tsx > completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1) > (lv6) progress and archive/unarchive transitions never lose or double a card (list)"
+]

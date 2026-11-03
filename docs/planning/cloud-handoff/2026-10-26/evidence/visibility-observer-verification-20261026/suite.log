@@ -1,0 +1,13 @@
+
+> blurby@1.75.1 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026
+
+
+ Test Files  183 passed (183)
+      Tests  2471 passed | 2 skipped (2473)
+   Start at  15:57:57
+   Duration  25.14s (transform 16.29s, setup 1.55s, import 55.57s, tests 82.32s, environment 47.42s)
+

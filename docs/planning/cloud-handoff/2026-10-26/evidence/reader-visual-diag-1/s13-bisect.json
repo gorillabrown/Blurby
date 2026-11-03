@@ -1,0 +1,44 @@
+{
+  "base": {
+    "errors5s": 301,
+    "perSecond": 60.2
+  },
+  "steps": [
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:8376) -> div.(detached) 0x0",
+      "errorsPerSecondAfter": 60
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:3734) -> ",
+      "errorsPerSecondAfter": 60.3
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker 0x0",
+      "errorsPerSecondAfter": 60.3
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:8376) -> div.(detached) 0x0",
+      "errorsPerSecondAfter": 60
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker 0x0",
+      "errorsPerSecondAfter": 0
+    },
+    {
+      "disconnected": "/App-zEyVC33j.js:111:30135 -> div.rm-flow-view 1002x630",
+      "errorsPerSecondAfter": 0
+    },
+    {
+      "disconnected": "/App-zEyVC33j.js:111:30417 -> div.rm-flow-view 1002x630",
+      "errorsPerSecondAfter": 0
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:8376) -> div. 987x630",
+      "errorsPerSecondAfter": 0
+    },
+    {
+      "disconnected": "/paginator-sOM65Gn3.js:1:3734) -> body.x-ebookmaker 720x10450",
+      "errorsPerSecondAfter": 0
+    }
+  ]
+}
