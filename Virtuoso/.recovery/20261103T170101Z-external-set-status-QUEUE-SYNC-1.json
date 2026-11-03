@@ -1,0 +1,34 @@
+{
+  "id": "20261103T170101Z-external-set-status-QUEUE-SYNC-1",
+  "operation": "external-set-status",
+  "item_id": "QUEUE-SYNC-1",
+  "created": "2026-11-03T17:01:01Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 156
+    },
+    "expectedRevision": "1602fc3b403083be62ab79f1ebec3633e3be3bcd6ca9077f7f76e1ee25345ddd",
+    "idempotencyKey": "set-status:QUEUE-SYNC-1:[('sequence', 156)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "QUEUE-SYNC-1",
+      "idempotencyKey": "set-status:QUEUE-SYNC-1:[('sequence', 156)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T170101Z-external-set-status-QUEUE-SYNC-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:01:43Z",
+  "outcome": "succeeded"
+}

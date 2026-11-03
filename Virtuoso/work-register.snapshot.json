@@ -3267,7 +3267,7 @@
     {
       "id": "BROWSER-EXT-FINALIZE-1",
       "title": "Finalize the Chrome and Firefox extensions",
-      "sequence": 103,
+      "sequence": 142,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -3286,7 +3286,7 @@
       "evidence": "",
       "description": "Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond).",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "c24f03e6d86052ae899d1675d943f8bb4be92154095d4b7b822d97de024724a7",
+      "revision": "eb5a5f7858cfa0072978861a0db8d4d9b56fa3d4035cd0a09fdb3be946685008",
       "extra": {
         "id": "3fa7c96c-c31e-810d-9027-c06d98a400e2",
         "url": "https://app.notion.com/3fa7c96cc31e810d9027c06d98a400e2",
@@ -3343,7 +3343,7 @@
     {
       "id": "CLOUD-CONNECTORS-1",
       "title": "Connections to the mainstream cloud services",
-      "sequence": 105,
+      "sequence": 153,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -3362,7 +3362,7 @@
       "evidence": "",
       "description": "Rescoped 2026-10-23 (owner): book and article sources only (Drive, OneDrive, Box, Dropbox, iCloud), after BLURBY-SERVER-1; imports go through the server intake and plan limits. Cross-device sync moved to BLURBY-SERVER-1.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "5f4031089c2f8b9897905cae7e9da7e6eca954dbd42f69040f1bf806f8e8db5e",
+      "revision": "9d0ab97ff90dd053d7c0abff003fff0b175d850f979a8d2ee84c7424218e60ef",
       "extra": {
         "id": "3fa7c96c-c31e-8123-b0f4-c9d52baf0ad5",
         "url": "https://app.notion.com/3fa7c96cc31e8123b0f4c9d52baf0ad5",
@@ -4439,7 +4439,7 @@
     {
       "id": "RSS-AGGREGATOR-1",
       "title": "RSS feed aggregator for Newsroom",
-      "sequence": 101,
+      "sequence": 151,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -4458,7 +4458,7 @@
       "evidence": "",
       "description": "Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "dcb426c2547c29fa7f0e4f1a79f82e631674a44e09d27d0b71e8710d156a3a3f",
+      "revision": "d7363dca6ac2d25b20af3c756a7200c0fc6979e041158059a6dbf3442c99397e",
       "extra": {
         "id": "3fa7c96c-c31e-81db-adbd-ca7e0d7170c9",
         "url": "https://app.notion.com/3fa7c96cc31e81dbadbdca7e0d7170c9",
@@ -4555,7 +4555,7 @@
     {
       "id": "PODCAST-SOURCE-1",
       "title": "Podcast source service integration",
-      "sequence": 102,
+      "sequence": 152,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -4574,7 +4574,7 @@
       "evidence": "",
       "description": "After APP-TABS-1, replace the Podcasts tab's Coming Soon banner with directory search, show profiles, episode lists and built-in audio streaming. Use an aggregator API for discovery and metadata, evaluating Podcast Index first; retain Apple's iTunes Search API and Listen Notes / PodcastAPI.com as alternatives. Resolve episode audio from API enclosure metadata or the show's RSS enclosure and stream directly from the publisher's host. Blurby does not host or persist episode audio in this initial scope. ROADMAP.md#podcast-source-1 holds the detailed direction; this remains a stub awaiting investigation and specification.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.\n\nOwner direction 2026-10-15: aggregator-based discovery and episode metadata; Podcast Index evaluated first, Apple iTunes Search and Listen Notes as alternatives. Stream publisher-hosted enclosure audio directly. Before specification, settle provider credentials, quotas/caching terms, UI/playback behavior and error handling. Transcripts and offline downloads remain separate scope decisions. Planning update only; no podcast implementation or authenticated playback test. See ROADMAP.md#podcast-source-1.",
-      "revision": "4b2a4c3d9fc1def22783da1b4cc01030b57b6ad742579fde59a347bd2262ae3c",
+      "revision": "fcee9803054460f49b71e2fdd080b7a2732a1292bf27aed5b7ad63690d342aa0",
       "extra": {
         "id": "3fa7c96c-c31e-81ec-947a-e2d365205441",
         "url": "https://app.notion.com/3fa7c96cc31e81ec947ae2d365205441",
@@ -4670,7 +4670,7 @@
     {
       "id": "ANDROID-APP-1",
       "title": "Establish the Android app",
-      "sequence": 106,
+      "sequence": 144,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -4689,7 +4689,7 @@
       "evidence": "",
       "description": "Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "ecf6a3dc3a5a582c08702643455011efdc292fa4593af780ff9f05ae695597a0",
+      "revision": "9408bf362848947a70f2db5199837a83c463382dd3297e5a73d76e1c965f4e7d",
       "extra": {
         "id": "3fa7c96c-c31e-81f6-9659-faedb3e2139f",
         "url": "https://app.notion.com/3fa7c96cc31e81f69659faedb3e2139f",
@@ -4748,7 +4748,7 @@
     {
       "id": "IOS-APP-1",
       "title": "Establish the iOS app",
-      "sequence": 107,
+      "sequence": 154,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -4767,7 +4767,7 @@
       "evidence": "",
       "description": "Stand up Blurby on iOS and iPadOS: reading modes, library, and sync with the desktop app.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "6402d06c2030d8b32b56d4dab3af284fafec1dd36602ba0fd2455f929fb2a160",
+      "revision": "7e86e8c638fa2572863e746cb81088e16f431a398757b6e30aadb25e4f5528d4",
       "extra": {
         "id": "3fa7c96c-c31e-81fe-b3ff-fddd891ae127",
         "url": "https://app.notion.com/3fa7c96cc31e81feb3fffddd891ae127",
@@ -5289,7 +5289,7 @@
     {
       "id": "BLURBY-SERVER-1",
       "title": "One library on every device (blrby.app server)",
-      "sequence": 104,
+      "sequence": 143,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -5306,7 +5306,7 @@
       "evidence": "",
       "description": "Path: epic. Server on Cloudflare (blrby.app): accounts, one library across devices, drag-and-drop intake, plan limits, then payments (no desktop ads) and Kokoro server narration. Charter draft: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md.",
       "notes": "origin: held storyboard 2026-10-23-blurby-server (absorbed by roadmap review 2026-10-23-3)",
-      "revision": "fe933c10c11c03dd6a0c626b7548c9569cefe4802e41bed9006594ae482af597",
+      "revision": "44d8a200335d8a9ff0b60b02d8a1d7e5cb81791775d625bcb19efc01036cdcd4",
       "extra": {
         "id": "4027c96c-c31e-815a-a164-e4239b509875",
         "url": "https://app.notion.com/4027c96cc31e815aa164e4239b509875",
@@ -5965,7 +5965,7 @@
     {
       "id": "QUEUE-SYNC-1",
       "title": "One reading queue and one listening queue, synced across every surface",
-      "sequence": 112,
+      "sequence": 156,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -5984,7 +5984,7 @@
       "evidence": "",
       "description": "Reading and listening queues sync through the blrby.app server to desktop, Android, iOS, Android Auto and CarPlay.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub; needs owner design decisions (one queue or two; podcasts in the listening queue; reorder conflicts).",
-      "revision": "1602fc3b403083be62ab79f1ebec3633e3be3bcd6ca9077f7f76e1ee25345ddd",
+      "revision": "5a5f0adcd6021779e1bc84c07017c1282b2b6fdff31660cba94d9f64ed41262d",
       "extra": {
         "id": "4037c96c-c31e-8140-837b-e15918f2c0bc",
         "url": "https://app.notion.com/4037c96cc31e8140837be15918f2c0bc",
@@ -6161,7 +6161,7 @@
     {
       "id": "CAR-AUDIO-1",
       "title": "Android Auto and Apple CarPlay compatibility",
-      "sequence": 109,
+      "sequence": 155,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -6181,7 +6181,7 @@
       "evidence": "",
       "description": "Narrated books (and podcasts) play through Android Auto and Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates).",
       "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub; needs owner design decisions (what the car shows, on-phone Kokoro vs server streaming, CarPlay audio entitlement).",
-      "revision": "eb995a6fd73e67e6c41dba654d0a7850b1c8b723f6783a25399bffc893ab9dbe",
+      "revision": "a204865ea54372fe5dd6e9731e0ddf85724fb03f5bfed570fd474ad914af70c1",
       "extra": {
         "id": "4037c96c-c31e-81f3-b58d-f02b3b626a3b",
         "url": "https://app.notion.com/4037c96cc31e81f3b58df02b3b626a3b",
@@ -7589,7 +7589,7 @@
     {
       "id": "BLURBY-BUSINESS-1",
       "title": "Blurby Business: a walled-off PDF viewer and editor",
-      "sequence": 100.5,
+      "sequence": 150,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "stub",
@@ -7606,7 +7606,7 @@
       "evidence": "",
       "description": "",
       "notes": "Absorbed 2026-10-30 by Blurby.Roadmap from held plan 2026-10-30-blurby-business-tier1 (storyboard aligned 2026-10-30, re-scoped to epic). Path: epic, so /epic BLURBY-BUSINESS-1 charters it; the Phase 1 seed specs are in the holding entry's phase1-specs.md. Eight phases, about 121 features; permissive licences only. Lane Blurby Business confirmed by the owner 2026-10-30. Merges after the Stage 8 release and the held branches named in phase1-specs.md. Host RodneySr for now.\n\nPrerequisites cleared 2026-10-30 by Blurby.Roadmap: APP-TABS-1 is a merge-order dependency (shared preload.js and CommandPalette.tsx), and LIBRARY-COMPLETION-VISIBILITY-1 is a start gate (its exclusive source/test window), not build prerequisites. Both, plus the Stage 8 release and the seven held branches, are carried as the epic charter's Constraints (merge order) and its launch-preflight start gate.\n\nChartered 2026-10-30 by the Blurby Business session: packet docs/planning/epics/2026-10-30-blurby-business/, run branch eb/blurby-business-1 on RodneySr, never merged by the run itself.\n\nOwner-directed parallel epic execution started 2026-11-02 on RodneySR under sole coordinator Codex Blurby.Brain. Separate S1 executor 01a19e5f-a0f9-7831-ab5a-c864e33a3a30; worktree C:/Projects/bb-business, branch eb/blurby-business-1 from exact main ac19ea60b6cd8b4fff3e5413b111925b7ef78485. Brain accepted qualified-helper relocation (220 raw/canonical/import checks), then worktree receipt and docs-only checkpoint a67045eaf3241a18adde990e502a90b56a8a2c68, independently fetched/read by Roadmap. Charter/storyboard/seed specs/matrix match frozen packet-add 0d705ae2f43f080056e7322c0480c5438cc2787e. Brain separately admitted isolated dependency preparation and baseline suite; no HB-6 product implementation, package acceptance, merge or release is claimed by this start record. BB-2026-11-02-1 source-window disposition is confirmed in visibility Notes; BB-2 helper/theme supplement applies. Worktree receipt C:/Projects/Blurby-artifacts/business-worktree-prep-20261102/receipt.final.json SHA256 acdfedc7e68a0db840a8490b647a8f34899e28630e8f2c43d8bd82ca5d857c30. All charter merge/release/owner acceptance gates remain; Native stays parked.",
-      "revision": "45ab4289ad65a2260f511d47ce123b0eac948ee12f2e4805c23960710ca1d666",
+      "revision": "b8d4863c9b4e2b09e1a4d20e2285eaf991e9b7d5c620d85dceeaf0c3cfd29550",
       "extra": {
         "id": "4097c96c-c31e-816d-95ef-d6fa5243812b",
         "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",

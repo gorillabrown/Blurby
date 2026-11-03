@@ -205,3 +205,20 @@ Applied the permitted AGENTS.md/CLAUDE.md subset: mandatory documentation pass e
 ### F-011 — retained open (roadmap-review, 2026-11-02)
 
 No timing command or historical-backfill mutation was performed. Preserve the 24/10 owning-worktree logs and uncommitted records. Planner with Blurby.Brain1 owns the bounded helper exact-path/actor-permission repair and the separate history disposition; mechanical U10 remains unperformed pending qualification. This review's LL-143 status append generated CH-005 under the permitted roadmap-review actor and is explicitly in its path fence; it is not a historical time-log backfill. See the readiness report and dispatch-buffer issue. F-009 likewise remains open with the existing CPU-profiling item; no budget was relaxed.
+
+### F-009 — disposition (roadmap-review, 2026-11-03)
+
+**Disposition:** fixed by a planned item. NARRATE-CPU-PROFILE-1 (Seq 95) carries it in block 2 of the 2026-11-03 plan. Under Blurby.Brain1's R-2026-11-02-CPU-1, its remaining Wave A (A3 + A4, one wave of 60 minutes or less on RodneySr) measures the x64 mainstream-class figures. No budget is relaxed before that evidence. Evidence: `docs/planning/roadmap-reviews/2026-11-03-plan.md`.
+
+### F-010 — disposition (roadmap-review, 2026-11-03)
+
+**Disposition:** accepted. The three remaining items are overlay wording. The registered overlays role is read-only with no allowed writers, and this review changes no registry permission. The substance already governs through CLAUDE.md's standing rules:
+- the worktree-placement rule cites the `HEAD:refs/heads/eb/<name>` refspec with LL-181;
+- rule 53 names arm64 as primary, with RodneySr x64 placement;
+- the scope caption was fixed on 2026-11-02.
+
+Overlays add facts only and never override the plugin. Evidence: `docs/planning/roadmap-reviews/2026-11-03-assessment.md`.
+
+### F-011 — disposition (roadmap-review, 2026-11-03)
+
+**Disposition:** accepted, as a lesson. LL-172 governs: no `timing` run inside a dispatch worktree, and no historical backfill committed. The 24 and 10 uncommitted backfill lines stay preserved in their owning worktrees. The helper's path-fence and actor-permission repair belongs upstream in the Virtuoso plugin. Blurby keeps no local patched copy (owner: follow the plugin to the letter). Evidence: `docs/planning/roadmap-reviews/2026-11-03-assessment.md`.

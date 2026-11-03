@@ -1,0 +1,34 @@
+{
+  "id": "20261103T170057Z-external-set-status-PODCAST-SOURCE-1",
+  "operation": "external-set-status",
+  "item_id": "PODCAST-SOURCE-1",
+  "created": "2026-11-03T17:00:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 152
+    },
+    "expectedRevision": "4b2a4c3d9fc1def22783da1b4cc01030b57b6ad742579fde59a347bd2262ae3c",
+    "idempotencyKey": "set-status:PODCAST-SOURCE-1:[('sequence', 152)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PODCAST-SOURCE-1",
+      "idempotencyKey": "set-status:PODCAST-SOURCE-1:[('sequence', 152)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T170057Z-external-set-status-PODCAST-SOURCE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:01:39Z",
+  "outcome": "succeeded"
+}
