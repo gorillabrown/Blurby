@@ -3145,3 +3145,11 @@ Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
 **Applies to:** reader runtimes' engine and binding layers; IPC and preload forwarding; any adapter chain.
 **Status:** Observation
 Related: LL-139, LL-143.
+
+### LL-181 — Governed worktrees live in one place, and packed eb/ refs break lowercase HEADs (Codex handback, 2026-11-03)
+**Verdict:** Work kept in a tool-private worktree is invisible to other services, and on this Windows clone a worktree whose HEAD names `refs/heads/eb/<name>` resolves only while the ref is a loose file under `refs/heads/EB/`.
+**Evidence:** Codex ran Blurby's planning from `~/.codex/worktrees/blurby-roadmap-review-20261102/Blurby` and `~/.codex/worktrees/local-folder-profile-planning-20261027/Blurby`; on the handback to Claude both had to be found through `git worktree list` and moved. One `git fetch` packed the case-folded refs, and ten worktrees (both Codex ones and eight under `.worktrees/`) then showed "No commits yet" with every file staged as added. `git symbolic-ref HEAD refs/heads/EB/<name>` restored each, with its working tree and uncommitted work unchanged. `git worktree move` of a worktree still open in the Codex app failed with "Permission denied" and left the source intact.
+**Recommendation:** Create every governed worktree under `C:\Projects\Blurby\.worktrees\<name>` and move any tool-made one there before the first commit or handoff (standing rule "Worktree placement"; `DEVELOPMENT_SYNC.md`). After a fetch, a worktree that shows "No commits yet" needs its HEAD repointed to the `EB/` ref, never a reset, re-add or checkout.
+**Applies to:** every service (Claude, Codex, cloud) and every `eb/` worktree on this clone.
+**Status:** Rule
+Related: standing rule 10.

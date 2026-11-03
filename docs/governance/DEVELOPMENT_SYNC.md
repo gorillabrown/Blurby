@@ -27,6 +27,17 @@ C:\Projects\Blurby                    C:\Projects\Blurby
 
 Read-only ceremonies inspect status/upstream with zero writes; they do not pull, stage, commit or push merely to start. Resolve policy.git before any mutation. If the worktree is dirty, preserve unrelated paths and use a dedicated branch/worktree; do not stash, reset or clean as a convenience. Stage exact approved paths only. During the Stage8 freeze, implementation may build-and-hold in its admitted source window; code merges require the designated package confirmation and merge go. Documentation-only work follows its own explicit approval: this governance sweep is commit-only, with no merge/push. Branch deletion/pruning is separate maintenance.
 
+## Worktree placement — mandatory for every service (owner directive 2026-11-03)
+
+This applies to Claude, Codex, cloud sessions and any other agent or tool working on Blurby. It is a standing rule in `CLAUDE.md` and `AGENTS.md`.
+
+1. **One clone, one worktree root.** The canonical clone is `C:\Projects\Blurby`. Every checkout that holds governed work (any `eb/` branch, planning, sprint, close-out or preservation work) is a worktree of that clone at `C:\Projects\Blurby\.worktrees\<name>`, where `<name>` is the branch name without `eb/`.
+2. **Create:** `git -C C:/Projects/Blurby worktree add -b eb/<name> .worktrees/<name> origin/main` (or from the base the specification names).
+3. **Never** keep governed work in a tool-private folder (`~/.codex/worktrees`, `.claude/worktrees`, a temp or app-data folder) or in a separate clone. Those places are invisible to the other services and are lost when the tool cleans up.
+4. **Relocate, don't copy.** If a tool created its own worktree, move it before the first commit or handoff: `git worktree move <old-path> C:/Projects/Blurby/.worktrees/<name>`. If the move fails with "Permission denied", the owning app still holds a file: close it and retry. Never copy, re-clone, reset, stash or delete to relocate.
+5. **Name the path.** Every dispatch, handoff, checkpoint and resume prompt names the `.worktrees` path and the branch.
+6. **Case-folded refs.** On this Windows clone, local `eb/` refs are stored under `refs/heads/EB/`. Push with `git push origin HEAD:refs/heads/eb/<name>` and check with `git ls-remote origin refs/heads/eb/<name>`. If a worktree suddenly shows "No commits yet" with every file staged as added, a fetch has packed its ref: nothing is lost. Repair with `git -C <worktree> symbolic-ref HEAD refs/heads/EB/<name>` and confirm `git status` matches what was there before (LL-181).
+
 ## The Two Rules
 
 ### Rule 1: Push after every sprint
