@@ -87,3 +87,24 @@ After each batch: compare live provider and terminal ledger, verify item-to-evid
 ## Review
 
 Independent review approved this operating memo's compliance and quality with two minor clarifications, both incorporated: the seven missing references belong specifically to In Flight rows, and the 27/40/6 inventory is now a reproducible linked artifact. Parent reconciled all 73 inventory identities against the timestamped SQL rows. This review qualifies the plan document; it does not qualify application code or retire any item.
+
+## Desktop delivery milestone — current critical path, 2026-11-02
+
+The first delivery milestone remains the approved integrated desktop release candidate, including its required repairs and all twelve same-candidate release requirements. Qualifying the first Library stack is one integration wave, not a redefinition of the milestone as only three fixes. The earlier2–4week planning range is unsubstantiated; no delivery date is computed from historical package counts or unfinished preparation.
+
+Actual technical ruling DESKTOP-INTEGRATION-CPU-20261102 (exec-782b8b6d-fa54-4456-b38e-671b933a8c76) is preserved in Brain.DESKTOP-INTEGRATION-CPU.2026-11-02.md. CPU profiling qualification is NOT a universal integration prerequisite. The existing owner-confirmed integrated-RC exception permits preparation of independently qualified desktop fixes; it supplies no branch merge/release/native/owner waiver. Brain remains sole execution coordinator.
+
+First stack to QUALIFY: observer→completion visibility→display lifetime. Current read-only inventory reports mainac19; observer51759276; visibility branch tipa8e31b73 (implementation0dd4d940); display4ac4ff76. None is already merged. Historical combined package2d5772 used maine291, not currentac19. Main's intervening90 paths are governance/docs; held4ac differs from package2d5772 only in two docs/fourteen harness files. These comparisons do NOT qualify generated dist/asar, installed patches, native compatibility or current-main Rule53 evidence.
+
+The source-bound audit at Audit.DESKTOP-LIBRARY-INTEGRATION.2026-11-02.md records exact ancestry/path/overlap and historical evidence. Legacy read-only merge previews showed BUG_REPORT as the only shared changed path and zero conflict markers; they are not an actual merge/index/rename-aware acceptance. N-Q3 applies only if actual docs-only conflicts occur; semantic/source/config/registry conflicts go to Brain.
+
+Brain's subsequent scoped-composition ruling (exec-0b6d1b38-af51-4d7a-93cb-e7c4625e431c; Brain.DESKTOP-LIBRARY-INTEGRATION-scope.2026-11-02.md) selects a narrow candidate FROM CURRENT MAIN using exact needed application, tests and harness blobs plus scoped governance. The old held tree has 378 changed paths: 2 application, 4 tests, 14 harness, 4 retired local agent configurations and 354 governance/evidence paths (including 338 historical cloud-handoff paths). Do not wholesale merge the obsolete local protocols or historical handoff payloads. Preserve all old branches and evidence; current-main plugin policy remains binding. Exact final path/blob manifest, dependency order, bug dispositions, finite qualification waves and merge/qualification topology remain to be frozen before admission.
+
+Next planning gates:
+1. Brain resolves exact one-unit versus per-branch qualification/merge topology, plus fresh candidate/control/native route applicability under the existing R-2026-10-30-1 disposition. Do not revive parked Native or presume shared-package waivers.
+2. Freeze an exact current-main/held-tip integration packet with ownership, full cumulative path fence, named branch/host/artifact transfer, source/conflict directions, finite qualification waves and actual fixture/tool/custody inputs.
+3. Brain schedules separately admitted quiet x64 source/test/build/package work and required brief native ARM64 merge-time verification; Root reviews exact evidence and issues only the designated merge gos after technical package confirmation. No generic merge or runtime authority follows from this plan.
+4. Continue the remaining approved desktop repair/integration train, then all applicable gate(1), D3/D6/zero-crash and owner batched gate(2) on the SAME exact final RC. Independent-branch green results cannot substitute.
+5. Reserve an uncontended quiet window for genuine CPU measurements; package/build/smoke must not overlap those measurements. Low-RAM planning/reviews may overlap now. CPU instrumentation and Business preparation do not become new universal desktop release dependencies.
+
+No Status/Seq/provider/terminal change, source merge, execution start or package/owner acceptance is performed here. Actual qualification results and remaining train inventory must precede a defensible milestone forecast.
