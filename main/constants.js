@@ -201,11 +201,13 @@ const ARTICLE_JUNK_IMAGE_PATTERNS = ["logo", "avatar", "icon", "sprite", "badge"
 const BUSINESS_DATA_DIR = "business";
 const BUSINESS_RECENT_MAX = 20;
 const BUSINESS_PARTITION = "persist:blurby-business";
+const BUSINESS_READ_CHUNK_BYTES = 1048576;
 
 module.exports = {
   BUSINESS_DATA_DIR,
   BUSINESS_RECENT_MAX,
   BUSINESS_PARTITION,
+  BUSINESS_READ_CHUNK_BYTES,
   // Sync
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,

@@ -386,9 +386,9 @@ describe.sequential("Business inert read-controller — frozen IC-T controls", (
     const { createReadController } = load("bc06");
     const handle = fakeHandle(new Uint8Array(1048577).fill(0xA5)); installFs([handle]); const c = make(createReadController); const d = await open(c);
     expect(d.length).toBe(1048577); expect(d.initialData.length).toBe(CHUNK);
-    for (const byte of d.initialData) expect(byte).toBe(0xA5);
+    expect(Uint8Array.prototype.every.call(d.initialData, byte => byte === 0xA5)).toBe(true);
     const full = await c.read(d.id, 0, CHUNK); expect(full.data.length).toBe(CHUNK);
-    for (const byte of full.data) expect(byte).toBe(0xA5);
+    expect(Uint8Array.prototype.every.call(full.data, byte => byte === 0xA5)).toBe(true);
     const calls = handle.calls.length;
     await rejectCode(c.read(d.id, 0, 1048577), "INVALID_REQUEST"); expect(handle.calls).toHaveLength(calls);
     assertExactView((await c.read(d.id, 1048576, 1048577)).data, [0xA5]);
