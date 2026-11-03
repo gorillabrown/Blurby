@@ -1,0 +1,122 @@
+# POSITION-PROMPT-COPY-1 PP2 — installer-body and activation audit
+
+2026-11-02. **READ-ONLY PLANNING / NOT READY / NO INSTALLATION OR EXECUTION ADMISSION.** Recommendation: preserve original PP1 partial ignore-scripts dependencies; create a separately admitted fresh verification worktree/cache, extract the lock with scripts disabled, then activate only the precisely reviewed tools required by Node tests/typecheck/Vite. Do not run a generic rebuild or packaging installer merely because the lock marks an install script. Brain makes the narrow activation/omission decisions after the finite missing-body inputs below; CLI must not investigate them while installing.
+
+## Evidence and independent read scope
+
+Read all SEVEN decoded DATA files under `C:/Projects/Blurby-artifacts/position-prompt-copy-1-pp2-body-courier-planning-20261102/`, including the complete patch-package index with inline source map. Parsed all EIGHT records in chunks.json, strict-base64 decoded every chunk, checked declared chunk lengths/hashes, untruncated flags, contiguous offsets, complete length/full SHA and equality to each local data file. Nothing was imported/evaluated as JavaScript, installed, downloaded or probed. These files came from the quiet-host copy/courier accepted by Root; local whole-byte verification proves delivered contents, not live current dependency custody.
+
+| Delivered path | Bytes | Independently verified whole SHA256 |
+|---|---:|---|
+| node_modules/esbuild/install.js |11160|`10f6fa3644d8d23d066ff67b0ae449074e75884503546a9fedb667f1dcb9ade2`|
+| node_modules/onnxruntime-node/script/install.js |5293|`4c97bb4a70454c18caea9217cc5da39a35e4e53ea6ee8454ed864fdabfc46b2d`|
+| node_modules/sharp/lib/libvips.js |5947|`ae8cbc8008bf88f5100ca56729ed43d45cd88316e030dc2eed62e142f657cd79`|
+| node_modules/electron/install.js |3274|`5a83199076ae20cfe57576a984e31b92890a2ae4e0759454bb6df4f9e7f47460`|
+| node_modules/electron/index.js |1605|`331e1e14d5f00ccbc61af0df6af6767ebabd48cf2f05d38d3d3345b20f8ce3f9`|
+| node_modules/patch-package/dist/index.js |21196|`cce4d4d7973b32c3f0afcd2bad461e894938e1b984d03ac468358a0296c7f648`|
+| scripts/patch-onnxruntime.js |4310|`d22cd62530d2d47ad5f4469afc9cbb1839df21e0f51fb4a5caa28dbf5a8ec875`|
+
+Source courier command IDs: esbuild exec-17610785-f275-4eaa-8ec8-6362a4f4e964; ORT exec-98a844d3-566f-4b79-8797-38791bbc710f; libvips exec-4dc168ce-3479-4f8e-9b75-8df63ba45f44; Electron install exec-ce5f1051-08bd-44a3-a476-3b74a4f61e58; Electron index exec-b8f7b76a-b2b6-4271-b6da-e8f692b15105; patch-package offsets0/remaining exec-624efa52-33f5-44a0-bb8d-a0c8c7f035aa and exec-874a39dd-dcce-4287-bfab-1fc2b19e6b3b; root patch exec-de82c90c-d8df-472f-91fc-6912da39c16f. Those are provenance identifiers, not new process results.
+
+Root subsequently recovered SEVEN already-collected small bodies from complete untruncated body receipt `exec-4b3…`; no new quiet courier was needed. Read all seven in full and independently verified local bytes/length/SHA against small-bodies.json.completeText and its raw metadata:
+
+| Additional delivered path | Bytes | SHA256 |
+|---|---:|---|
+| node_modules/electron-winstaller/script/select-7z-arch.js |540|`3819ea164df4ab1d23a6e3f8a551f2029974aead10422f929d2ad169ef3049f4`|
+| node_modules/protobufjs/scripts/postinstall.js |1071|`5af8463b97ee8e309b4a2111f9479bacdf0c180de0ca0155527679b1fc6d9e6c`|
+| node_modules/sharp/install/check.js |383|`31fd360ede9ff3e80d643faff6c4570d0b2b5c621dc421b6c4086dfe86ce981f`|
+| node_modules/sharp/install/build.js |882|`37f7c9591d75dbc5fe734c5a196a46c355b3d7de5134260ba011efed8433a718`|
+| node_modules/electron/cli.js |693|`186a8ffa8cfea268bfef39569a145f8122d662db1ac4c022f3ef60bb4c894cc5`|
+| node_modules/patch-package/index.js |49|`2e2b90e92290eb695877a7bae32dc393366ceb479d60112268ad74b2323a60b0`|
+| node_modules/phonemizer/package.json |1256|`997824e7b16a1d30b000256146f4d8251eb1348823640bfa251b56ef5678a060`|
+
+Read [current PP2 planning draft](Draft.POSITION-PROMPT-COPY-1.PP2.2026-11-02.md), actual [PP2 final-candidate ruling](Brain.POSITION-PROMPT-COPY-1.PP2-final-candidate.2026-11-02.md) and ac19 package/lock/config/test facts. Brain accepts exact candidate5a660ff9ff3215cd674bd88c430385dc33be0045/tree68d84ee3723bd1c8041fcbd4556a1ca1c0cfd92f/soleparentac19; Root has actual graph/custody projections, not its own local candidate Git object. The ruling closes candidate-versus-integrated-source ambiguity: PP2 verifies unchanged5a, no KEEP-FURTHEST integration prerequisite. D0≤30m30/D1≤60m40/V≤60m40 structure is technically approved, each still needs fresh Ready/custody/admission; D1 activation commands remain held. No missing tree hex or new owner design gate remains. Package/lock equivalence to ac19 is accepted and rechecked at entry. No new source/branch/worktree created.
+
+## Necessary behavior versus unnecessary lifecycle work
+
+### 1. esbuild — actual build/test tool activation, narrow fast path available
+
+The inspected installer computes platform key from process.platform/os.arch()/endianness; Windows x64 chooses **@esbuild/win32-x64/esbuild.exe**. With no ESBUILD_BINARY_PATH override and that optional binary resolvable, it does NOT run fallback npm install/download. On Windows maybeOptimizePackage does not perform the Unix hardlink/rename optimization. It still calls validateBinaryVersion via `execFileSync(process.execPath,[<esbuild>/bin/esbuild,'--version'])`, which runs the Node shim and then the actual native esbuild tool; stdout must equal package.version. This is actual native TOOL execution, not Electron/app/native-reader qualification. Brain must explicitly admit it as dependency preparation, not hide it under a “no process” install label.
+
+If optional package resolution fails, installer creates esbuild/lib/npm-install, writes package.json, shells `npm install --loglevel=error --prefer-offline --no-audit --progress=false <platform>@0.25.12`, renames binary and recursively removes that OWN temporary subtree; if that fails it performs HTTPS registry tarball fetch (redirects301/302), unzip/tar extraction/write/chmod into downloaded binary path. This fallback is broader than deterministic extraction and includes shell/PATH/network/deletion. **Recommendation: require the exact optional Windows package/binary present and reviewed; missing means HOLD, not implicit fallback authority.** No ESBUILD_BINARY_PATH override is recommended: it rewrites bin/esbuild AND lib/main.js, creating an avoidable different tool source.
+
+Direct prospective `node node_modules/esbuild/install.js` is a source-backed explicit activation command only after that branch's closure and native tool/input custody are approved. Need actual esbuild package.json, bin/esbuild and lib/main.js plus @esbuild/win32-x64 package metadata/binary raw hash to prove the chosen success path and native command; main.js can itself select/launch native tools on test/build entry. Do not claim installer body alone qualifies Vite/Vitest import/service behavior.
+
+### 2. Electron — require(index) itself can download; full suite cannot leave it unresolved
+
+Inspected index.js calls getElectronPath at module import. It reads path.txt; if missing or target dist executable missing it `spawnSync(process.execPath,[install.js],{stdio:'inherit'})`, then reads the newly written path. Thus **even requiring Electron for ICU refusal tests can trigger an installer/download** on the untouched ignore-scripts dependency tree. The PP2 draft's prior description of index as a path resolver must include this discovered side effect. Do not launch tests first and let require initiate an unbounded hidden download.
+
+Inspected install.js eagerly requires @electron/get and @electron-internal/extract-zip, reads own package.version, selects platform from ELECTRON_INSTALL_PLATFORM/npm_config_platform/os.platform, architecture from ELECTRON_INSTALL_ARCH/npm_config_arch/process.arch. isInstalled checks dist/version exact version,path.txt exact platform path and executable existence. No ELECTRON_SKIP_BINARY_DOWNLOAD guard is present in this actual body; do not invent one from another Electron version. Override dist path affects checks/type-definition source while extraction still targets package/dist: **do not use ELECTRON_OVERRIDE_DIST_PATH as a shortcut**.
+
+When not installed, downloadArtifact uses exact version,artifactName electron,force_no_cache,explicit electron_config_cache and either bundled checksums.json or remote checksums when configured. Extraction writes node_modules/electron/dist, may rename electron.d.ts up one level, then writes path.txt. Error stack stderr and exit1 are actual failure route; native Electron executable is not launched by install.js. Darwin-only Rosetta sysctl branch is unreachable only after win32/platform/arch facts are pinned; no macOS probe allowed. Actual @electron/get download/cache/mirror/proxy/checksum and zip extractor traversal/write closure is **still unread**, so no exact download allowance follows yet.
+
+PP2 needs actual installed Electron path/binary bytes to make its Node-only appIcu require safe, but no Electron app launch/version probe is required by those tests. Additionally inspected cli.js693bytes confirms that the electron CLI **does spawn the actual executable with windowsHide:false** and forwards signals/exits; it is excluded from PP2. Use Node directly for installer/static checks, never electron CLI --version as an innocent check. Prefer an explicitly bounded Electron install/download into fresh private cache/dist after closure review, then static path.txt/version/executable hash checks before full tests. If download not authorized/available, keep PP2 full suite HELD rather than deleting or substituting its ICU test. Error text suggesting delete-node_modules is package advice, **not authorization**.
+
+### 3. onnxruntime-node — entry is bootstrap+metadata dispatcher, not proof GPU installation needed
+
+Top-level install.js imports global-agent bootstrap, local install-utils and install-metadata, then calls globalAgentBootstrap **before** skip handling. Skip=true route still executes those imports/bootstrap. parseInstallFlag accepts undefined/default,false skip,true force,string manifest; actual flag/env parsing is in unread install-utils. Default local-install shortcut depends on npm_config_local_prefix/npm_package_json, so directly invoking install.js outside npm may take a different branch from package lifecycle. Do not set those vars to manufacture an early exit.
+
+Metadata chooses requirements for `${os.platform()}/${os.arch()}`; missing mapping defaults[]. It creates destination names under own bin/napi-v6/<platform>/<arch>, maps package/feed names, checks fs.existsSync only for missing files when default, then `void installPackages(...)`. Comments say most binaries bundled and extra CUDA files can be downloaded from NuGet, but **unread metadata determines actual Windows needs**. This file cannot prove which native files are bundled/required or whether skip avoids required loader data. No downloads/child execution/write-boundary/error behavior of installPackages is established by the top-level call.
+
+PP2's real Kokoro/transformers import may initialize ORT even with stub model; root patch test definitely reads backend.js. Need package.json, dist entry/backend/native binding loader, bin native file manifest, install-utils.js and install-metadata.js before deciding whether the installer can be omitted for bundled CPU-only Node text tests. **Recommendation to Brain:** permit omission of extra GPU install only after actual metadata/runtime loader proves required Windows CPU files present; do not request generic CUDA/NuGet prep for a button-copy verification by default. No new global-agent environment mutation or `ONNXRUNTIME_NODE_INSTALL=skip` execution is admitted by this recommendation.
+
+### 4. Sharp — libvips is a helper, not the actual install entry
+
+lib/libvips.js eagerly imports three semver functions, detect-libc and own package config/engines/optionalDependencies; reads minimum libvips config env at import. Its exported runtimePlatformArch/buildPlatformArch select platform/arch/libc and optional @img package paths. useGlobalLibvips normally returns false on Windows because globalLibvipsVersion returns empty; **SHARP_FORCE_GLOBAL_LIBVIPS can override this**. Source is not universally child-free: exports can shell node-gyp rebuild, pkg-config, Darwin sysctl/brew under respective branches. These are potential branches, not operations observed here.
+
+Recovered actual install/check.js383bytes now closes that body gap: it requires libvips,useGlobalLibvips(); if true OR npm_config_build_from_source truthy, process.exit1. Its catch logs only the first error line as “skipping install check” and can finish0; therefore0 does not establish native availability. Actual install/build.js882bytes logs source-build intent, requires node-addon-api/node-gyp (missing→exit1), optionally reports global libvips, then calls spawnRebuild and propagates nonzero status. Neither script is a downloader in the inspected text; build invokes native compiler toolchain through libvips. On ordinary win32 without force/global/source env, check's library search returnsfalse and should not request build—static inference, not observed execution.
+
+Do not courier these check/build/libvips files again. Need only existing already-collected actual Sharp package lifecycle metadata (Root recover it as data rather than a new job), then actual declared runtime loader and selected @img Windows package/native manifests. An unchecked `check.js || build` chain could hide catch-to-success or invoke toolchain; no build/node-gyp authorization follows. Brain may approve narrow optional-prebuilt route only after loader/native files proven present and required PP2 import closure read. No packaging/image processing acceptance claimed.
+
+### 5. patch-package and root patch — two materially different operations
+
+Delivered patch-package/dist/index.js eagerly imports applyPatches,getAppRootPath,makePatch,makeRegExp,detectPackageManager,path,rebase plus chalk/minimist/slash/ci-info; calls getAppRootPath at startup. Zero-argument root script calls applyPatchesForApp on normalized relative patches directory. No tracked patches is an ac19 source fact, **not** proof this eager import/empty-directory branch performs no I/O/child action. Locally it can report patch application failures without exit1 unless error-on-fail/NODE_ENV/CI conditions select failure. Never treat exit0 alone as an applied-patch receipt.
+
+Root scripts/patch-onnxruntime.js is fully read and matches known source behavior: dependency package/backend reads, idempotent no-setImmediate route, bounded-pattern backend write+readback, warnings may exit0. It does not download/import ORT or start native workers. Required outcome is independent backend content check, not log/exit alone; actual tests/onnxruntime-patch.test.js supplies three unchanged assertions. Running only the known root patch directly would avoid the unreviewed patch-package branch, **but changes lifecycle semantics**, so Brain must explicitly approve that narrow omission given no tracked patches and no injected local patch directory. Do not silently say full root postinstall ran.
+
+Recovered patch-package/index.js49bytes is only shebang+require('./dist/index.js'), now read/hashed; no need courier it again. If Brain requires exact original root postinstall, recover already-collected package manifest then courier only the seven eager local modules/selected branch closure not yet supplied; execute only actual zero-argument root postinstall under reviewed env, not make/rebase/create-issue/package-name paths. No generic npm rebuild needed to reach this known patch.
+
+### 6. Packaging installer and incidental protobuf hook
+
+Now independently read/hashed the recovered **540byte electron-winstaller/script/select-7z-arch.js**. Actual `const arch = os.arch` stores the function object rather than calling it; both copyFileSync sources concatenate that function for vendor/7z-<arch>.exe/.dll, targeting vendor/7z.exe/.dll, and catch simply rethrows. **Static inference:** architecture path likely invalid/broken if executed in the intended package cwd. No installer was executed; no observed failure or repair claimed. Do not change that package/source. This source gap is CLOSED without another courier.
+
+Electron-winstaller belongs to packaging tooling; PP2 commands are Node tests/TypeScript/Vite, not electron-builder/Squirrel. No inspected PP2 script/test requires running its packaging install hook. **Recommendation: exclude its activation from the explicit PP2 dependency-tool route** under Brain's scoped ruling, rather than let a generic lifecycle/rebuild fail then “fix” it. If broader startup census reveals a PP2 import of electron-winstaller, hold that concrete route; do not enable packaging. A complete installer runtime path remains a separate package gate.
+
+Recovered protobufjs/scripts/postinstall.js1071bytes now closes its body gap: requires own package.json; if no versionScheme immediately returns. Otherwise reads parent node_modules/package.json, returning on absent/unreadable parent, and emits compatibility WARN text for version-scheme mismatches in dependencies/dev/optional/peer declarations. **No writes/downloads/child process/native activation** in this exact body. Actual own metadata/versionScheme and cwd/parent path must be read as data, but this hook is not evidence a binary/compiled artifact must be prepared. Recommendation to Brain: omit or explicitly permit this read/warn-only hook under minimal activation; no need another body courier. fsevents remains Darwin-only optional per lock, expected omitted with actual Windows inventory, no installer execution.
+
+Recovered phonemizer/package.json1256bytes pins1.2.1 and Node require export **./dist/phonemizer.cjs**, Node import export ./dist/phonemizer.js. No install hook is declared. Its development build script includes destructive rm -rf; **do not run it**. The PP2 real CJS reconcile path needs dist/phonemizer.cjs and any actual referenced WASM/data file body/manifest, not a speculative lifecycle. This removes phonemizer manifest from the next courier list.
+
+## Finite next read-only byte handoff
+
+Do not request entire node_modules, execute require.resolve, import a module or run installers to discover entry points. **Root's already-collected full metadata/body receipt contains the package manifests/lifecycle fields and small bodies; recover/read those existing exact fields first, not a duplicate quiet job.** Metadata read as JSON DATA determines actual main/exports filename; no Node resolution/execution. If declared file absent, report absence, never install/fallback.
+
+**Next genuinely missing exact files (first bounded courier, no duplicate manifests/small bodies):**
+
+1. node_modules/onnxruntime-node/script/install-utils.js
+2. node_modules/onnxruntime-node/script/install-metadata.js
+3. node_modules/esbuild/bin/esbuild
+4. node_modules/esbuild/lib/main.js
+5. node_modules/phonemizer/dist/phonemizer.cjs
+
+For phonemizer obtain metadata of actual referenced WASM/data assets after reading that entry; do not build the package. Also return ONLY missing static artifact metadata for selected @esbuild/win32-x64/esbuild.exe; Electron dist/version,path.txt,dist/electron.exe; ORT bin/napi-v6/win32/x64 children; selected @img Windows dirs **if not already present in the accepted metadata receipt**. Need actual win32/x64 host/Node, no filename architecture inference. Raw hash/existence is not native execution qualification. Full body chunks follow existing offset/size/SHA discipline, no partial preview claim.
+
+**Then at most one manifest-directed entry batch:** from Root-recovered existing actual package metadata, name the exact Sharp runtime main/loader, @electron/get declared CommonJS entry and direct download/cache/checksum files, extract-zip declared entry/direct traversal/write files, ORT actual main/native binding loader, Kokoro CJS/transformers actual Node entry. The final request must list literal resulting filenames after metadata read; this audit intentionally does not fabricate absent export choices. Do NOT request protobuf postinstall, Sharp check/build/libvips, Electron install/index/cli, phonemizer manifest, patch-package root/index or root patch again: full bytes now inspected. If needed selected file exposes another required child loader, report only its actual filename/body requirement for Brain's bounded disposition; no generic recursive dependency sweep or import-as-investigation.
+
+**Conditional exact-root-postinstall closure only if Brain elects not to omit empty patch-package:** missing local filenames node_modules/patch-package/dist/applyPatches.js,dist/getAppRootPath.js,dist/makePatch.js,dist/makeRegExp.js,dist/detectPackageManager.js,dist/path.js,dist/rebase.js (prefix node_modules/patch-package/ on each). Package manifest/root entry already collected, dist/index delivered. These eager modules load even without patches; their actual direct startup imports/selected empty-apply branch are a bounded follow-up if needed. A named omission/direct root patch could avoid this unnecessary branch after Brain rules; do not courier its creation/rebase dependency closure reflexively for PP2.
+
+Existing full-suite source fixes tokenizer fixture/remote modelsfalse. Exact runtime export/WASM/native closure, rather than another model/lifecycle run, is the remaining text-path input. No real model download, Node module execution or speculative full installer run is authorized. Missing required byte proof remains HOLD for that concrete import, not an infinite audit or a guessed ready claim.
+
+## Resolved route shape and decisions still owned by Brain
+
+The facts now resolve the generic recipe ambiguity enough to reject blind full lifecycle rebuilding:
+
+1. NEW exact5a verification tree/private caches, original PP1 untouched. D0 `npm ci --ignore-scripts` with exact locked config supplies fresh isolated package extraction only; no subsequent npm ci over that populated tree.
+2. D1 explicit required tool preparation, not `npm rebuild`: esbuild exact optional Windows binary path+version command; Electron explicit bounded download/extract/static installed-state qualification BEFORE tests can auto-trigger index downloader; known ORT backend patch outcome. These command candidates must receive Brain's exact approved argv/env/network/write/native-tool fence after A/B.
+3. Do NOT activate electron-winstaller packaging hook; do NOT prepare CUDA/NuGet extras, source-build Sharp/node-gyp, or run incidental protobuf lifecycle without an actual required route and Brain ruling. Empty patch-package omission/direct root patch also needs named technical decision rather than a claim original postinstall ran.
+4. V uses unchanged full tests one worker/typecheck/Vite build with actual counts, logs and protected source, then HELD. No native Electron app, package/ARM64, owner smoke, main merge or source change.
+
+Only unresolved technical decisions: Brain accept minimal activation versus exact original root lifecycle semantics; ORT optional-extra omission after actual metadata; selected Sharp prebuilt/no-source-build and protobuf read/warn-only treatment; exact Electron downloader/esbuild native-tool side-effect allowance/argv. D0/D1/V structure and final-candidate5a/soleparent/tree are ALREADY ruled, not new questions; each still needs its exact input/custody/Ready/admission. No owner design gate or KEEP-FURTHEST completion manufactured.
+
+LL-090 actual byte bodies before prescription; LL-066/098 warning/error visibility and failure receipts; LL-068/137 raw fullbody/chunk/input hashes; LL-128 fresh owned targets; LL-134 bounded phases rather than installer investigation inside CLI; LL-142 static inference is not native/tool execution proof; LL-143 no skipped failure family or guessed successful install; LL-172 no helper timing writes; LL-176 prospective recorder stdout/exits independent of these JS bodies. No blanket cleanup/source repair/global config permission. No Ready verdict.
+
+Only this owned audit was authored/updated. All fourteen local files were read as DATA; original eight chunks and seven recovered small-body raw pins independently verified. No Node/npm/installer/import/product/test/native execution, network download, source/helper/provider/Git mutation or executor contact.

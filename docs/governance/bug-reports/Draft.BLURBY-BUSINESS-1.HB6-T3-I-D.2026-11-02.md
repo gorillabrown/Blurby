@@ -1,6 +1,6 @@
 # BLURBY-BUSINESS-1 — HB-6 task3 I-D bridge and lifecycle draft
 
-Date: 2026-11-02. PLANNING ONLY / NOT READY / NO SOURCE OR ACTIVATION ADMISSION. Effort: high. Binding inputs: `Brain.BLURBY-BUSINESS-1.HB6-T3-I-architecture.2026-11-02.md`, `Brain.BLURBY-BUSINESS-1.HB6-T3-I-C.2026-11-02.md`, and the complete chronological `Brain.BLURBY-BUSINESS-1.HB6-T3-I-D.2026-11-02.md`, including D15, D16 reservation, sandbox and final STOP-race amendments. Later named precision governs. Brain alone coordinates execution; Roadmap owns canonical planning/feed/closeout. No new item, queue change, reduced feature stub, renderer activation or clock follows.
+Date: 2026-11-02. PLANNING ONLY / NOT READY / NO SOURCE OR ACTIVATION ADMISSION. Effort: high. Binding inputs: `Brain.BLURBY-BUSINESS-1.HB6-T3-I-architecture.2026-11-02.md`, `Brain.BLURBY-BUSINESS-1.HB6-T3-I-C.2026-11-02.md`, complete chronological `Brain.BLURBY-BUSINESS-1.HB6-T3-I-D.2026-11-02.md` (D15, D16 reservation, sandbox, STOP-race), and final `Brain.BLURBY-BUSINESS-1.HB6-T3-I-D-controls.2026-11-02.md`, BB-HB6-T3-I-D-CONTROLS-20261102. All prior technical/control seams are CLOSED by those actual rulings. Read with `Brain.PARALLEL-REVIEW-20261102.md`/0176 and `Brain.SR44-source-qualification.2026-11-02.md`. Later named precision governs. Brain alone coordinates execution; Roadmap owns canonical planning/feed/closeout. No new item, queue change, reduced feature stub, renderer activation or clock follows.
 
 ## Goal, baseline and remaining entry gates
 
@@ -31,7 +31,7 @@ Read AGENTS, shipped Virtuoso/Zeus and declared overlays; current lessons/status
 | `main/ipc/state.js:15–28` | Existing get-state returns broader settings/library and get-system-theme uses existing manager. Business must NOT call/forward it; return only its exact five-field projection and narrow own event. |
 | `tests/documentsOpenSource.test.js:14–59`, `tests/ipcPathTrust.test.js` | CJS createRequire/Module._load mock/restore patterns. Use exact parent-module-aware overrides/cache restoration; never load real electron/main.js. Do not copy old fixture cleanup into new retained evidence. |
 | `tests/quitSequence.test.js:25–45,101–278,401–425` | Fake app models Electron ignoring async will-quit; real handler tested for cap, failure-continue, repeated quit and uncapped producer; main.js itself only source-inspected because import locks/starts app. New Business quit tests reuse these patterns with REAL quit-sequence plus REAL Business lifecycle; source-check the two main edits separately. Existing tests remain byte-identical. |
-| `tsconfig.json`, `vite.config.js`, `tests/setup.js` | Project includes src/tests; Node Vitest setup only supplies PDF DOM shims. No real browser/electron required. Main project typecheck remains a later full gate unless separately admitted; targeted external declaration checks are specified below, exact installed compiler control exits must be frozen before pointer finalization. |
+| `tsconfig.json`, `vite.config.js`, `tests/setup.js` | Project includes src/tests; Node Vitest setup only supplies PDF DOM shims. No real browser/electron required. Main project typecheck remains later; exact separate TypeScript5.9.3 noEmit controls below use types:[] and explicit fixture files. Root's inspected compiler source establishes negative exit1; actual quiet package/tsc.js/_tsc.js hashes/version/body remain input qualification, not an unknown exit policy. |
 
 ## Exact owned source fence
 
@@ -132,15 +132,19 @@ onSystemThemeChanged validates function, registers one wrapped event handler tha
 
 ## Ownership, path grants and awaited admission
 
-register(ctx) import/factory initialization is inert until called. Validate exactly four functions getMainWindow/getSettings/getDataPath/getProjectRoot and boolean isDev before effects. Create actual R store at register using ctx.getDataPath; add one nativeTheme updated listener; register once, second call throws Error BUSINESS_ALREADY_REGISTERED. stop/shutdown before register are harmless permanent stop: later registration cannot reopen Business. Exact failure branding of pre-stopped/invalid ctx registration remains a narrow technical seam below; do not invent half registration side effects.
+register(ctx) import/factory initialization is inert until called. Permanent stopping FIRST throws Error with BOTH code/message BUSINESS_SHUTTING_DOWN, even before ctx validation; otherwise already registered throws Error code/message BUSINESS_ALREADY_REGISTERED. Validate exactly four own-DATA function ports getMainWindow/getSettings/getDataPath/getProjectRoot and own-DATA boolean isDev without invoking accessor ports; validate required root returns. Missing/invalid/accessor ports/booleans/root returns throw TypeError with BOTH code/message BUSINESS_INVALID_CONTEXT, original cause INTERNAL only, BEFORE handlers/listener registration. Do not impose a closed ctx key whitelist: actual main ctx contains other domains.
 
-Every request FIRST verifies current live `getBusinessWindow()` and exact `event.sender === win.webContents`, live wc, `event.senderFrame === wc.mainFrame`, and BOTH `senderFrame.url` and `wc.getURL()` equal the expected FULL route. Dev exactly `http://localhost:5173/business.html`; production exactly `pathToFileURL(path.join(ctx.getProjectRoot(),"dist","business.html")).href`. No query/hash/origin-only/basename/relative/file-scheme relaxation. Main/reader/old window/subframe/wrongURL is unauthorized before any payload getter, recent read, grant or file I/O. I-D does not implement the reserved primary-main-window sender route.
+Call getDataPath once through the inert R factory; snapshot validated absolute getProjectRoot once for the expected production URL, not on every request. getSettings/getMainWindow functions are validated, not called merely to construct a new window; I-D constructs no window. Root lexical validation matches the native absolute rules, without realpath/stat/access. Create R store before registration effects, then acquire exact handlers/theme listener. Keep handlers inactive (UNAVAILABLE) until all registration commits.
+
+Partial registration failure uses only a simple acquired-prefix list/try/catch, not a registration framework. Set permanent stop/poison BEFORE cleanup; residual callbacks refuse work. Record a channel acquired only after THIS ipcMain.handle call returns SUCCESS. Remove ONLY those successful acquired-prefix channels, never the failing/foreign/pre-existing channel or other domains. Off ONLY this exact nativeTheme updated listener if attempted, not removeAllListeners. Attempt all own cleanup, retain primary Error code/message BUSINESS_REGISTRATION_FAILED with original cause/secondary cleanup failures INTERNAL, and throw synchronously. An uncertain native handle-call ownership outcome remains UNCONFIRMED/HOLD; no claim complete unregistration, foreign-handler removal or auto retry. Test-only fresh cache isolation is allowed; the poisoned production module cannot retry. No controller/handle/work exists during registration. These two nonpublic error brands are NOT added to BusinessErrorCode.
+
+Every INITIAL request FIRST verifies current live `getBusinessWindow()` and exact `event.sender === win.webContents`, live wc, `event.senderFrame === wc.mainFrame`, and BOTH `senderFrame.url` and `wc.getURL()` equal the expected FULL route. Dev exactly `http://localhost:5173/business.html`; production exactly pathToFileURL(path.join(the once-validated ctx project root,"dist","business.html")).href. No query/hash/origin-only/basename/relative/file-scheme relaxation. Main/reader/old window/subframe/wrongURL gives BUSINESS_UNAUTHORIZED before payload access, stopping checks, recent read, grant or file I/O. I-D does not implement the reserved primary-main-window sender route. Already-accepted continuations use the separately ruled stop-first precedence below; never reroute them through an initial request gate for a newer owner.
 
 Lazily bind the current trusted Business window/document generation BEFORE accepting work, using its actual controller factory and captured opaque token. Keep owned controller/release provenance for all work still draining; never drop failed release state because current owner changed. Attach wc mainframe did-start-navigation/did-navigate-in-page and render-process-gone/destroyed, plus owned BrowserWindow closed hooks. Actual replacement/navigation/gone synchronously revokes dialog grants/ack admission and invalidates controller generation; immediately observe/retain any asynchronous invalidate failure. A mere blocked will-navigate attempt is not proof navigation committed. Use mainframe event flags/identity, not every subframe event; never serialize generation tokens.
 
-Capture owner/wc/mainframe/generation before ANY awaited permission/dialog/R/read/ack operation. After EVERY await check both SAME trusted owner/generation AND !stopping before creating a grant/lease/new I/O/recent operation/success handoff. Do not reauthorize a stale continuation against a newer current generation. Never close/invalidate all documents for normal one-tab close. Existing active read may finish normal close per C; post-await handoff checks owner/generation/stopping, not a fresh getPath that would incorrectly discard permitted normal-close completion. For stale/stopping failures use the final ruled precedence below, still awaiting Brain's exact tie disposition.
+Capture owner/wc/mainframe/generation before ANY awaited permission/dialog/R/read/ack operation. After EVERY await check permanent stopping FIRST -> BUSINESS_SHUTTING_DOWN; ELSE changed/untrusted captured owner/generation -> BUSINESS_DOCUMENT_STALE; otherwise continue. Check before creating any grant/lease/new I/O/recent operation/success handoff. Do not reauthorize against a newer generation. Existing accepted ack R writes drain despite the stale/stopped response. Never close/invalidate all documents for normal one-tab close. Existing active read may finish normal close per C; post-await handoff checks owner/generation/stopping, not a fresh getPath that would incorrectly discard permitted normal-close completion.
 
-Dialog: `dialog.showOpenDialog(currentBusinessWindow,{properties:["openFile","multiSelections"],filters:[{name:"PDF",extensions:["pdf"]}]})`. Canceled -> []; normalize/validate all selected paths with the same strict R native lexical rules, no stat/read/PDF parse. AFTER await revalidate captured owner/gen/!stopping before installing reusable generation-local grants and returning paths. Do not install partial grants from a failed/invalid dialog list. Exact treatment of malformed non-canceled native dialog output remains a narrow control seam below.
+Dialog: `dialog.showOpenDialog(currentBusinessWindow,{properties:["openFile","multiSelections"],filters:[{name:"PDF",extensions:["pdf"]}]})`. Read required own-DATA canceled boolean without accessor invocation; missing/wrong type -> DIALOG_FAILED. canceled true ->[]/zero grants; canceled false requires own-DATA filePaths ARRAY of strings, EACH strictly native-path-admissible. Normalize ALL first, then recheck stop-first/captured owner/generation and atomically install grants/return normalized list. Any bad item/nonarray/native rejection -> DIALOG_FAILED and ZERO grants, never an accepted prefix. Empty valid list succeeds[]/zero grants. Preserve valid order/duplicates; grant Set may reuse normalized keys internally, no tab dedup design. Ignore unrelated native result fields such as bookmarks; this native API object is not a closed renderer payload. No stat/read/PDF parse.
 
 Path open: normalize MAIN native lexical input first after sender/payload checks, never device/root-relative/drive-relative/NUL/relative. Private source:file is accepted only through trusted sandbox preload discriminator, not a renderer-controlled flag. Source:path must match this generation's reusable dialog grants OR actual CURRENT R.getRecent() list at that open invocation. Await R read inside handler then recheck captured owner/gen/!stopping BEFORE controller.open. No cached recent list, extension/magic/existence access, ungranted file read or new grant on arbitrary removeRecent. Removing recent leaves independent dialog grants intact. Trusted-main openPaths grants remain Task6, not currently active.
 
@@ -171,7 +175,7 @@ Only one nativeTheme updated listener per registration, no polling/settings writ
 
 stopNewWork synchronously FIRST sets global permanent stopping, invalidates ALL current binding generations/revokes all grants/ack admission, stops delivery/removes theme listener and stops all owned controllers. Observe/retain invalidation/release jobs. This must happen BEFORE shutdown snapshots controllers/acks, so an already-awaited dialog or R.getRecent cannot resume later to create a new grant, lease or recent operation after close/snapshot.
 
-shutdown is a non-async wrapper returning ONE retained identical Promise, calls stop synchronously, attempts ALL owned controller.shutdown releases and R.close, waits their owned pending opens/reads/releases/accepted ack work with all-settled semantics, then surfaces first deterministic release failure after all attempts. Do not chase an ever-growing unrelated global I/O queue; C defines owned snapshots. R.close itself drains failed callers without changing their failures into success. Never erase failed handles/releases or silently clear them. The precise deterministic failure traversal can be stable controller creation order followed by retained release-job order and R.close; if Brain requires a different existing ordering, freeze it before admission rather than letting completion timing select a winner.
+shutdown is a non-async wrapper returning ONE retained identical Promise, calls stop synchronously, attempts ALL owned controller.shutdown releases and R.close, waits their owned pending opens/reads/releases/accepted ack work with all-settled semantics, then surfaces first deterministic release failure after all attempts. Do not chase an ever-growing unrelated global I/O queue; C defines owned snapshots. R.close itself drains failed callers without changing their failures into success. Never erase failed handles/releases or silently clear them. Use stable controller creation order followed by retained release-job creation order and R.close for the outer all-settled traversal; each accepted C itself selects first release failure by reserved document ID under its binding controls. Completion timing never selects a different first error. No extra public diagnostic API or lifecycle helper is added.
 
 Exact main edits only:
 
@@ -193,7 +197,9 @@ All new tests use Vitest/Node source controls only. No real Electron/window/brow
 - Lifecycle suite: use REAL accepted R store/C controller with their real module-object references; path-filter fs.promises/read-handle and jsonStore.writeJSON spies to the exact case-owned Business paths. Fake metadata/read handles/deferred recent writes exercise composition/drain without user I/O. R durability/C range algorithms were accepted earlier; this suite verifies their actual queue/lifecycle APIs are invoked/awaited in correct order. No production DI framework or reimplemented close stub is substituted for these composition controls.
 - Quit suite: REAL createWillQuitHandler/runQuitSteps from unchanged quit-sequence, REAL new Business lifecycle, fake app that ignores handler's Promise and only honors synchronous preventDefault, fake timers/deferred operations. Read main.js source for exact two-line wiring (do not import main.js); combine real behavior test with exact source-site assertion. Existing quit tests remain untouched.
 
-Prospective new artifact root `C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-20261102/`, require fresh absence/ownership before creation. New tests take process-local BUSINESS_ID_TEST_ROOT explicitly for retained case artifacts; no fallback to os.tmpdir/live profile. Under an admitted phase use distinct prep/base/opposing/green/repair subdirectories. Permitted actual test filesystem resources are tiny own fixture/receipt/source-copy files only, never a PDF/user profile; mocked real C/R operations are confined by spies to explicit synthetic paths below this root. No deletion/cleanup of new files, local work or evidence. Parent/root directories precreated only by separately admitted owner; no recursive overwrite reuse. Logs/accounting remain external, not discovery.
+Exact DISTINCT phase roots are `C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-t-20261102/` (TESTPREP) and `C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-q-20261102/` (ATOMIC). Require only current phase root absent/owned before creation, never require old T root absent for Q. Each owns logs/, receipts/, os-temp/, types/ with EXACT eight files listed below, identified repair-1/repair-2 if needed, exact review reports, append-only logs/admission-accounting.jsonl and control-receipt.json.tmp/final. No arbitrary external generic runner/framework, source mirror or real application fixture.
+
+New tests use process-local BUSINESS_ID_TEST_ROOT exactly the current phase's root, explicitly set/restored; no os.tmpdir/live-profile fallback. Permitted actual test filesystem resources are tiny own typed fixtures/receipts; mock real C/R calls are path-filtered to synthetic locations under that owned root, never actual PDFs/user profile. No deletion/cleanup/overwrite reuse. Q copies accepted T's eight fixture/config templates BYTE-EXACT into Q/types before compiling against the actual declaration; their relative files targets resolve locally in Q. Never rewrite T evidence. Logs/accounting are external, not repository discovery.
 
 ## Named controls and opposing cases
 
@@ -201,14 +207,14 @@ Each row expands into independent named Vitest cases with literal expected fixed
 
 | Case ID | Required exact observation |
 |---|---|
-| id01-import-register | Import creates no store/controller/window/handler/theme listener/I/O. Invalid ctx function/boolean shapes cause no side effect; valid register creates one R factory, six invokes and one theme listener. Re-register fails ALREADY_REGISTERED. No Task6 handler/openPaths export. Pre-stop then register cannot reopen. |
+| id01-import-register | Import creates no store/controller/window/handler/theme listener/I/O. Validate own-DATA ctx functions/boolean/root returns, reject accessors without invocation/no handler or listener effects. Prestop wins with exact SHUTTING_DOWN; alreadyregistered ALREADY_REGISTERED; invalid ctx TypeError INVALID_CONTEXT. getDataPath/projectRoot called once, other ports not called just to construct. During each acquired-prefix failure poison first, remove ONLY successful own channels, off only own attempted listener, attempt all cleanup, preserve failing/foreign channel and secondary errors; throw REGISTRATION_FAILED. Residual handler returns UNAVAILABLE, no controller/I/O; uncertain failing-call ownership UNCONFIRMED/HOLD, no same-module retry. All nonpublic code/message exact, no extra public enum. |
 | id02-sender-first | Primary main, reader, old wc, destroyed wc, subframe, wrong mainframe identity, frameURL!=wcURL, query/hash, origin-only/basename-only URLs all UNAUTHORIZED before payload getters/R/dialog/C. Exact dev and exact pathToFileURL prod pass; basename-same sibling does not. |
 | id03-closed-payloads | Every channel/op valid exact own DATA shape passes its control; arrays/custom prototypes/null payload, extra/missing/nonenumerable/accessor/symbol keys, omitted/extra invoke args, bad op/source/id/range reject INVALID_REQUEST without I/O. Getter spies stay0. Null-prototype exact objects accepted. |
 | id04-recent | Real getRecent successful string[]; removeRecent wraps null (does not expose store array). R invalid data -> exact RECENT_INVALID_DATA, Rclosed -> SHUTTING_DOWN, EACCES/other native -> RECENT_IO with no raw details. Removing recent does not revoke independent current dialog grant. |
-| id05-dialog | Exact owned modal/options; canceled []; multiple valid paths normalize, become reusable only after post-await trust check. No stat/read/PDF check. Dialog native reject -> DIALOG_FAILED. Malformed-output outcome awaits narrow ruling below. |
+| id05-dialog | Exact owned modal/options; own-DATA canceled boolean required/getters0; true[]/zero grants; false own-DATA array with all strings normalized FIRST/atomically installed only after trust. Missing/wrong/accessor canceled/filePaths, nonarray or one invalid later item -> DIALOG_FAILED/zero prefix grants; native reject same. Empty list succeeds[]; valid order/duplicates preserved, unrelated bookmarks ignored. No stat/read/PDF check. |
 | id06-path-permission | Untitled/unknown string path -> PATH_NOT_GRANTED, zero C.open. Current recent at invocation or reusable current dialog grant authorizes; Windows case-equivalent normalized match; stale prior-generation grant rejected. source:file accepts only valid main shape/path; public API cannot expose source override. No read or ack write on permission failure. |
-| id07-stop-during-dialog | Hold modal, call stop/shutdown, then resolve valid selected paths: no grant/lease/new R operation/success output; proper stopped/stale Result. Rclose snapshot does not miss late work. |
-| id08-stop-during-recent | Hold current R.getRecent used for open, call stop/shutdown then resolve list containing path: C.open remains0; no late lease/read/success. Navigation/replacement variants likewise fail old generation without reauthorizing current owner. |
+| id07-stop-during-dialog | Hold modal, call stop/shutdown then resolve valid paths: SHUTTING_DOWN wins even when owner also changed; no grant/lease/new R operation/success. Navigation-only -> DOCUMENT_STALE. Rclose snapshot misses no admitted work. |
+| id08-stop-during-recent | Hold current R.getRecent for open, stop/shutdown then resolve containing path: SHUTTING_DOWN, C.open0/no late lease/read/success. Navigation/replacement only -> STALE; stopped+stale -> SHUTTING_DOWN. Initial wrong sender stays UNAUTHORIZED before payload/stopping. |
 | id09-open-read-close | Real C composition returns exact descriptor/Uint8Array and range DTO, no full buffer leak; IDs/path delegated; wrong id/span/length -> C's mapped errors, no clamping. Close wraps closed:true only after awaited close; close absent valid id no-op. No R.addRecent on open/read. |
 | id10-post-read-ownership | Hold open/read, replace owner/navigate/gone/stop then settle: no byte/descriptor handoff. Normal single close does not invalidate sibling tab; accepted active normal-close read may complete per C while queued ones refuse. No old callback clears new owner. |
 | id11-revoke-events | Mainframe actual navigation/in-page/render gone/destroy/closed synchronously revoke generation and grants, call real invalidate, observe failed release. Subframe event and blocked will-navigate attempt do not manufacture committed navigation. |
@@ -232,63 +238,176 @@ Each row expands into independent named Vitest cases with literal expected fixed
 
 Opposing detectors must use the SAME named assertions: unauthorized fake mainframe/url despite same basename, extra own payload/accessor spy, missing post-await stopping check in a test-owned historical/wrong mock path, duplicate ack-write observation, unwrapped raw error, extra exposed preload method and realquit pendingwrites-before-deferred-Business observation must fail. Preserve those failures/counterexamples before prescribed PASS. Do not weaken predicates/expected messages or production source to fit a failure; copied external wrong variants only where a committed command requires them, never execute real app. Base missing new module/preload assertions fail inside test functions after collection, not top-level missing-import abort.
 
-## Proposed finite staging — no half bridge
+## Approved finite staging — no half bridge
 
-Volume is materially larger than R/W: six invoke channels, nine public methods, validation/error table, async ownership/ack/state/lifecycle and real quit integration. Do not call original parent task3 estimate120m or a mechanical row price a promise that all source/tests/reviews fit60minutes. Recommended proposal to Brain: a separately bounded TEST PREPARATION phase, then a separately bounded COMPLETE I-D source checkpoint. Preparation may add only the four test files and explicitly owned external type/fixture files, produce honest base-red receipts on actual accepted I-C, and expose no handler/preload/type/lifecycle. It must stop after its own review/docs/checkpoint. Source phase subsequently lands ALL five production/declaration paths together with complete controls and typed interface; no partial method stub or automatic second admission.
+Brain APPROVED I-D-TESTPREP → I-D-ATOMIC as dependent separately admitted cuts. Volume remains six invokes/nine methods plus validation/ownership/ack/state/lifecycle/realquit; parent task3 estimate120m is historical, not an automatically allocated budget or forecast.
 
-Within the complete source phase, if Brain prices/approves parallel authorship, disjoint author A owns ipc.js + coordinator + two main edits; author B owns electron-only preload + Business declaration. No shared production file ownership; tests frozen from prep except specifically reviewed identified repairs. Sequential compliance -> quality -> docs still inspect one final coherent candidate; all agents/calls/reviews count against ONE aggregate cap. This draft proposes placement/ownership only, does not dispatch agents or authorize executor contact. If the final literal work still cannot fit the separate cap, return a coherent method-GROUP split proposal to Brain BEFORE source authoring; every exposed group's handler/preload/type/lifecycle must remain atomic and full final nine-method outcome stays required. Do not silently publish a reduced API.
+1. **TESTPREP <=45minutes/40 aggregate calls:** ONLY four new tests businessIpc/businessPreload/businessLifecycle/businessQuit plus eight external type/config templates, compiler-smoke controls and receipts. ALL five production/declaration paths untouched. Run causal new-module/interface assertion red after successful collection on actual accepted I-C; no main.js import, bridge export/registration acceptance or fake stub. Independent frozen-test reviews and local TEST_ONLY_HELD checkpoint follow; docs here are external receipts, not epic source edits. Positive/wrong Business declaration gates are NOT RUN until ATOMIC creates the declaration. Stop; no automatic next allowance.
+2. **ATOMIC <=60minutes/40 aggregate calls:** parent is EXACT accepted test-only checkpoint. ALL five production/declaration paths land TOGETHER, with frozen four tests, all28 complete groups, typed/opposing/syntax gates, parallel same-byte independent reviews, then two epic docs/Git. Preserve test/oracle bytes unless separately reviewed identified repair. No accepted half API/method stub or code checkpoint that exposes incomplete handlers/preload/types/lifecycle. At cap/failure preserve PARTIAL, do not publish a working half bridge or omit controls.
 
-##### Proposed preparation task list
+Within ATOMIC, possible separately priced disjoint authors A (ipc.js/coordinator/two main edits) and B (preload/types) share NO production file; test preparation is already frozen. This scheduling idea dispatches nobody and changes no cap. Every worker/review/receipt/docs/Git call counts toward the SAME phase's aggregate limit. Independent compliance/quality reviewers read SAME frozen bytes concurrently under0176; consume compliance PASS FIRST, then accept quality on SAME bytes; early quality is provisional. Repair invalidates affected old-byte evidence, both accepted gates precede Marcus/docs/Git.
 
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Author all four deterministic mock/realquit test surfaces plus external type cases and preserve exact accepted-base red receipts | calculable | tests | bounded | high | 45m | — | — |
-
-**Total:** uncalibrated planner45m serial; mechanical price not computed. Separate proposed admission<=60minutes/<=40 aggregate calls includes prep reviews/docs/receipts/checkpoint. No active allowance.
-
-##### Proposed complete source task list
+##### TESTPREP task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Complete coherent main ownership/handlers/ack/theme/lifecycle and bridge/type/quit wiring; qualify frozen source controls and review one atomic candidate | calculable | feature | bounded | high | 55m | — | — |
+| 1 | Four deterministic mock/realquit tests, eight external type templates and compiler-smoke/base-red receipts | calculable | test-preparation | bounded | high | 32m | — | — |
+| 2 | Independent frozen-test review pair and external held receipt/local test-only checkpoint | calculable | review-checkpoint | bounded | medium | 8m | — | — |
 
-**Total:** uncalibrated planner55m serial row (possible disjoint-author schedule requires separately reviewed pricing, no automatic Group). Mechanical price/qualified U10 pending. Separate proposed<=60minutes/<=40 aggregate calls includes EVERY worker, control, receipt, ordered review, docs/checkpoint. Each phase max two identified in-fence repair passes within remaining cap; no unchanged retry, cleanup/reset, borrowed clock/calls, reinstall, source push/merge or automatic successor. Cap/failure -> preserve partial/unaccepted candidate and STOP. Estimates are not new grants. Final exact phase split and fence need Brain acceptance before Ready.
+**Total:** conservative serial planner40m,0of2 estimates calibrated;5m reserve under approved45m40 ceiling. Review row includes concurrent readers without a speculative timing discount. Qualified mechanical U10 remains pending; estimates are not medians/ETA/active clocks. No epic-doc/production change in TESTPREP.
 
-## Literal prospective commands and receipt obligations
+##### ATOMIC task list
 
-Use receipted Node24.14.1/PowerShell7 and actual accepted worktree/dependencies, one worker/2GiB process-local JavaScript heap; no total-RAM containment claim. Preserve and restore NODE_OPTIONS and BUSINESS_ID_TEST_ROOT previous presence/value in one outer try/finally around actual commands. Parent must own/create the new external root before tests; no suite-global fixture cleanup. Final flags/exits are phase controls, NOT RUN now.
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Complete main ownership/handler/ack/theme/lifecycle plus bridge/types and exact thin wiring | calculable | feature | bounded | high | 32m | — | — |
+| 2 | Frozen28 source groups, typed/opposing compiler controls and four syntax gates qualify coherent bytes | calculable | qualification | bounded | high | 13m | — | — |
+| 3 | Same-byte parallel review pair, compliance-first acceptance, two docs and exact held checkpoint | calculable | review-checkpoint | bounded | medium | 10m | — | — |
+
+**Total:** conservative serial planner55m,0of3 estimates calibrated;5m reserve under approved60m40 ceiling. Full T+Q chain95m is planning, not a new cumulative hard cap or automatically granted time. Qualified U10 pending. If actual requirements cannot fit, preserve partial and STOP before accepting/publishing incomplete work. Maximum two identified in-fence repair passes per phase within remaining cap; fresh outputs retain old failures. No cleanup/reset/reinstall/borrowed clock/source push/main merge/automatic successor. Each cut still needs final readiness, custody, Brain admission and consumed start.
+
+## Frozen literal unit/syntax commands
+
+Use actual qualified Node24.14.1, PowerShell7, existing worktree/dependencies and current phase-owned root. Preserve/restore previous presence/value of NODE_OPTIONS/BUSINESS_ID_TEST_ROOT/TEMP/TMP in ONE outer try/finally. Set NODE_OPTIONS exactly `--max-old-space-size=2048`; TEMP/TMP exactly current root/os-temp. One global quiet test slot, one Node/compiler process/unit worker at a time, no implied full/heavy suite. This is a JavaScript old-space limit, not total RAM confinement.
+
+Freeze this exact argv FROM THE START for red AND green, including absolute Vitest entry, file order and verbose reporter:
 
 ```powershell
-$env:NODE_OPTIONS = '--max-old-space-size=2048'
-$env:BUSINESS_ID_TEST_ROOT = 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-20261102/base'
-& 'C:/Program Files/nodejs/node.exe' './node_modules/vitest/vitest.mjs' run tests/businessIpc.test.js tests/businessPreload.test.js tests/businessLifecycle.test.js tests/businessQuit.test.js --maxWorkers=1
-# Prep base: exit1, intended new-interface assertions fail after successful collection; no unrelated control failure.
-# Complete source: SAME command, fresh green root, exit0; required named/opposing controls all present.
+& 'C:/Program Files/nodejs/node.exe' 'C:/Projects/bb-business/node_modules/vitest/vitest.mjs' run tests/businessIpc.test.js tests/businessPreload.test.js tests/businessLifecycle.test.js tests/businessQuit.test.js --maxWorkers=1 --reporter=verbose
+```
+
+Explicit cwd `C:/Projects/bb-business`. TESTPREP env BUSINESS_ID_TEST_ROOT=`C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-t-20261102`; red exit1 from each intended in-case missing new module/interface assertion after successful collection. Do not import main.js or read a missing module source before that causal assertion. ATOMIC env root ends `i-d-q-20261102`; same test bytes/argv, prescribed exit0/all28 groups and subcases accounted for. Environment root is the expected phase difference, not a hidden mode/test classifier. Preserve every actual stdout/stderr/exit; no argv normalization midway through proof.
+
+After coherent ATOMIC implementation ONLY, four serial syntax commands, each expected0; no imports or app launch:
+
+```powershell
 & 'C:/Program Files/nodejs/node.exe' --check main/business/ipc.js
 & 'C:/Program Files/nodejs/node.exe' --check main/ipc-handlers.js
 & 'C:/Program Files/nodejs/node.exe' --check preload-business.js
 & 'C:/Program Files/nodejs/node.exe' --check main.js
-# Four syntax exits0 only after coherent implementation; these parse source without importing/launching it.
 ```
 
-Targeted external type fixture `<artifactroot>/types/business-api.types.ts` imports exported BusinessAPI/Result/DTO types from the exact candidate absolute declaration. Positive assignments exercise all nine methods/both readFile overloads/discriminated Result/Uint8Array/state string; `@ts-expect-error` cases reject raw invoke/source override, extra method/callback event, wrong state shape and non-result returns. A separate wrong-variant copy deliberately removes the expected error annotation/changes required Result and must be rejected by the SAME installed compiler. Proposed exact command:
+## Exact eight type/config files — no ambient or generated output
+
+Both phase roots own ONLY these types/ files:
+
+1. business-api.positive.ts
+2. business-api.wrong.ts
+3. tsconfig.positive.json
+4. tsconfig.wrong.json
+5. compiler-smoke.good.ts
+6. compiler-smoke.bad.ts
+7. tsconfig.smoke.good.json
+8. tsconfig.smoke.bad.json
+
+TESTPREP authors/freezes all eight; Q copies them BYTE-EXACT to its own types/. Relative explicit `files` names mean identical configs consume their own local phase copies. The Business import is the exact candidate absolute module `C:/Projects/bb-business/src/business/businessAPI` in both fixtures/phases, never another checkout/default shared src/types.ts.
+
+Exact compiler options in EACH of four configs:
+
+```json
+{"compilerOptions":{"noEmit":true,"strict":true,"target":"ES2020","module":"ESNext","moduleResolution":"Bundler","lib":["ES2022","DOM"],"skipLibCheck":true,"types":[]},"files":["business-api.positive.ts"]}
+```
+
+tsconfig.positive.json is exactly this shape; wrong changes ONLY files[0] to business-api.wrong.ts. Smoke good/bad configs use IDENTICAL compilerOptions and ONLY files target compiler-smoke.good.ts or compiler-smoke.bad.ts. No include/exclude/extends/ambient types or incremental/composite output. No emitted JavaScript/.tsbuildinfo permitted; unexpected output remains preserved failure, never cleaned away.
+
+Literal positive Business fixture (compile DATA, never executed):
+
+```ts
+import type { BusinessAPI, BusinessDocument, BusinessRange, BusinessState, BusinessErrorCode, Result } from "C:/Projects/bb-business/src/business/businessAPI";
+declare const api: BusinessAPI;
+declare const file: File;
+const recent: Promise<Result<string[]>> = api.getRecent();
+const removed: Promise<Result<null>> = api.removeRecent("C:/fixture.pdf");
+const dialog: Promise<Result<string[]>> = api.openDialog();
+const openedPath: Promise<Result<BusinessDocument>> = api.readFile("C:/fixture.pdf");
+const openedFile: Promise<Result<BusinessDocument>> = api.readFile(file);
+const range: Promise<Result<BusinessRange>> = api.readRange(1, 0, 1);
+const closed: Promise<Result<{closed:true}>> = api.closeFile(1);
+const acknowledged: Promise<Result<null>> = api.documentOpened(1);
+const state: Promise<Result<BusinessState>> = api.getState();
+const unsubscribe: () => void = api.onSystemThemeChanged((theme) => {
+  const exact: "dark" | "light" = theme;
+});
+const validState: BusinessState = {theme:"unknown-string",einkMode:false,accentColor:"",fontFamily:null,systemTheme:"dark"};
+function inspect(result: Result<BusinessDocument>): void {
+  if (result.ok) {
+    const bytes: Uint8Array = result.data.initialData;
+    const id: number = result.data.id;
+  } else {
+    const code: BusinessErrorCode = result.error.code;
+    const message: string = result.error.message;
+  }
+}
+// @ts-expect-error Forbidden raw invocation is not public.
+api.invoke('forbidden');
+// @ts-expect-error Private provenance cannot be a public argument.
+api.readFile("C:/fixture.pdf", "file");
+// @ts-expect-error Task6 launcher is not this bridge.
+api.open();
+// @ts-expect-error Noargs method has strict typed arity.
+api.getRecent("extra");
+// @ts-expect-error IPC event is not a callback parameter.
+api.onSystemThemeChanged((_event: unknown, _theme: "dark" | "light") => {});
+// @ts-expect-error System theme remains the two-value type.
+const invalidState: BusinessState = {...validState,systemTheme:"system"};
+// @ts-expect-error Public calls return Result envelopes.
+const invalidResult: Promise<Result<null>> = Promise.resolve(null);
+```
+
+Wrong fixture is a byte copy with ONLY the comment line immediately before `api.invoke('forbidden');` removed. All other bytes, imports/annotations/options/declaration/compiler remain identical. It must produce EXACT diagnostic TS2339 for that property and exit1; missing module, ambient/config diagnostic or other accidental failure is not the opposing proof. Positive exit0 also rejects unused @ts-expect-error widening. No template changes/oracle adjustment just to obtain a desired diagnostic.
+
+Literal compiler-smoke.good.ts: `const value: number = 1;` plus newline. Literal bad: `const value: number = 'bad';` plus newline. TESTPREP executes good first (exit0), bad (exit1/TS2322); neither imports Business declarations. Positive/wrong Business compiler invocations remain NOT_RUN until ATOMIC has created the actual declaration, never count missing-module output as their negative.
+
+CPU-independent source fact supplied by Brain: Root read installed TypeScript5.9.3 `_tsc.js` emitFilesAndReportErrorsAndGetExitStatus; noEmit diagnostic =>EXIT1, success0. This is NOT quiet-host qualification. Future inputs MUST pin actual existing installed package/version, bin/tsc, lib/tsc.js and lib/_tsc.js raw hashes plus enum/body, pinned5.9.3 lock; mismatch ->HOLD, no install/alternate compiler guessed into the recipe.
+
+Exact compiler argv pattern uses the SAME Node/tsc/cwd/options; only owned config path changes:
 
 ```powershell
-& 'C:/Program Files/nodejs/node.exe' './node_modules/typescript/bin/tsc' --noEmit --strict --target ES2020 --module ESNext --moduleResolution bundler --lib ES2022,DOM --skipLibCheck 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-20261102/types/business-api.types.ts'
+# TESTPREP:
+& 'C:/Program Files/nodejs/node.exe' './node_modules/typescript/bin/tsc' -p 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-t-20261102/types/tsconfig.smoke.good.json' --pretty false
+& 'C:/Program Files/nodejs/node.exe' './node_modules/typescript/bin/tsc' -p 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-t-20261102/types/tsconfig.smoke.bad.json' --pretty false
+# ATOMIC, after exact T templates copied and actual declaration created:
+& 'C:/Program Files/nodejs/node.exe' './node_modules/typescript/bin/tsc' -p 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-q-20261102/types/tsconfig.positive.json' --pretty false
+& 'C:/Program Files/nodejs/node.exe' './node_modules/typescript/bin/tsc' -p 'C:/Projects/Blurby-artifacts/business-hb6-t3-i-d-q-20261102/types/tsconfig.wrong.json' --pretty false
 ```
 
-Positive expected exit0. The exact installed compiler's diagnostic-exit convention and no-ambient-extra-type assumptions must be read/frozen from qualified dependencies before the final pointer; no compiler/dependency exists in this planning checkout and no exit number is invented for its opposing diagnostic. This is a remaining CONTROL-spec seam, not an owner/API question. Do not substitute source-text-only type assertions, full project typecheck, installation or an unpriced extra generic helper. Type fixture/control paths/argv and receipt names are part of the separately admitted external fence.
+TESTPREP smoke does not qualify actual Business types; ATOMIC positive0/wrong1+TS2339 do. Unexpected compiler diagnostic/exit stops after raw logs are persisted. No generic nonzero, full project typecheck, source-text-only type pass or framework substituted.
 
-Retain source/test/type-template/fixture hashes, raw stdout/stderr/actual exact exits, named base/opposing/prescribed verdicts, full actual source parent/tree/pins, cache/mock/environment restoration, protected before/after paths/stat and all failed evidence. External `logs/admission-accounting.jsonl` counts aggregate calls/deadline; `control-receipt.json` names each phase and exact complete/partial outcomes. Receipts must be persisted independently before reporting PASS/STOP, never by skipping failed runs. No F-011 timing backfill or canonical ledger/BUG write. Standard Solon-role compliance FIRST, Plato quality SECOND, then Marcus exact state/journal; no mocked native/package/owner acceptance. Checkpoint disposition/refspec must be separately named by Brain; no default main merge or source publication implied.
+## Inline recorder, complete receipts and immutable outputs
 
-## Remaining genuine technical/control seams
+Use ONLY an INLINE Python standard-library coordination driver supplied on stdin to the actual qualified interpreter, no persistent runner/helper framework. Before TESTPREP pin its exact existing absolute executable/hash/identity and consumed inline-driver bytes, Node/Vitest/compiler entry/version/transitive startup, actual cwd/environment and accepted source. No guessed Python path/install/global config. Driver subprocess uses exact frozen argv lists, shell=False, explicit cwd/env, raw binary stdout/stderr capture and check=False. One process at a time, same global quiet slot/2GiB/TEMP/TMP policy. Persist fresh exclusive raw binary logs, await flush/fsync/close, hash bytes and append a complete JSONL command record BEFORE interpreting/asserting exit/case results. Native diagnostic/execution failure is never silently retried or mislabeled expected red.
 
-All named architecture, nine API methods, error table, sandbox restrictions, task6 reservation and STOP-race requirement are ruled; do not re-ask them. Before final CLI freeze resolve only:
+Each phase has its OWN complete UTF8 control-receipt.json.tmp -> final control-receipt.json using IC's explicit exclusive create/write/sync/close/readback/exclusive same-volume hard link/final readback protocol. Retain BOTH names, all failed logs/reviews/typed fixtures; collision or publication failure is preserved STOP. No rename/copy/direct-write fallback, deletion, truncation or backfill. Exact separately persisted reviews are receipts/review-compliance.json and receipts/review-quality.json plus their .tmp companions, same immutable protocol. Append-only logs/admission-accounting.jsonl and logs/commands.jsonl are flushed/synced per complete record; Q only reads immutable T receipts/templates.
 
-1. **Precise response precedence:** initial exact sender gate FIRST is fixed. For an already accepted request after await, both permanent stopping and stale owner/generation may now be true. Recommend SHUTTING_DOWN before STALE for stopped continuations, otherwise DOCUMENT_STALE; unauthorized only for initial sender rejection. Brain should confirm this exact public classification once, including already-admitted ack writes whose persistence remains intact. No new I/O/handoff is allowed regardless of code choice.
-2. **Malformed native dialog return and synchronous registration failures:** native canceled output is[], native rejection DIALOG_FAILED and valid selected paths are ruled. Confirm malformed non-canceled response/path list maps DIALOG_FAILED (recommended), with zero grants; do not invent a new public code. Invalid ctx/pre-stopped registration must fail before effects; exact synchronous Error/TypeError message/code for these nonpublic calls is not named. Freeze only those narrow failure-control expectations; second registration ALREADY_REGISTERED is already fixed.
-3. **Actual future accepted C/W and lifecycle control placement:** exact source cut/APIs/private imports must be read when accepted, not presumed. The proposed real-C/R module-object spy composition and deterministic all-settled failure order should be reviewed against those actual bytes; no production DI/refactor permission follows. R's actual private normalizer was verified nonexported, so no missing-helper dependency is assumed.
-4. **Finite preparation/source split and targeted type-control diagnostic exit:** accept/prices/fences for the proposed phases (or another coherent grouping), plus exact qualified compiler controls/paths/exits before pointer finalization. No total140/265-style budget fiction or automatic second phase. Host/dependencies/input/provider/readiness facts are separately pending, not algorithm/design questions.
+Receipt contract mirrors IC's closed complete schema with item BLURBY-BUSINESS-1, cut I-D-TESTPREP/I-D-ATOMIC, actual host/admission/start/deadline/end, phase limits/aggregate calls, input path/commit/blob/raw SHA, actual source parent/tree/branch/worktree, command argv/cwd/env/UTC/exit/raw stdout/stderr paths+SHA, source/test/type/config/compiler hashes and every case/subcase expected/observed/status/opposing evidence. Case status PASS/FAIL/NOT_RUN never silently drops an unreached case; receipt status TEST_ONLY_HELD/BRIDGE_SOURCE_HELD/PARTIAL/FAILED. Keep unrunGates explicit. TESTPREP expected causal red is FAIL-with-expected-red evidence, NOT28 implementation PASS; Business type gates NOT_RUN then. ATOMIC no group/subcase/opposing control unexecuted can PASS. Own absent production bytes in T are explicitly absent, never invented hashes. Input fixtures serialize BigInts as canonical decimal strings and bytes as arrays or length+SHA, not backing buffers.
+
+Closed I-D receipt shape, all fields required/no extras; byte identities for all source/test/type/config/compiler/driver inputs are rows in inputs, and multi-file source/test review bindings use their exact immutable manifest raw SHA:
+
+```text
+{schemaVersion:'blurby.business.id-controls.v1',admission,item,cut,host,
+ startUTC,deadlineUTC,endUTC,limits:{minutes,tools},usage:{aggregateTools},
+ inputs:[{path,commit,blob,sha256}],source:{base,parent,commit,tree,branch,worktree},
+ commands:[{runId,argv,cwd,environment:{NODE_OPTIONS,BUSINESS_ID_TEST_ROOT,TEMP,TMP},
+   startedUTC,endedUTC,exitCode,stdout:{path,sha256},stderr:{path,sha256},
+   testBytesSha256,sourceBytesSha256,
+   cases:[{id,name,status:'PASS'|'FAIL'|'NOT_RUN',evidenceKind:'FUNCTIONAL'|'STATIC',expected,observed,opposingEvidence}]}],
+ reviews:[{role,identity,verdict,sourceSha256,testSha256}],preserved:[{path,sha256}],
+ status:'TEST_ONLY_HELD'|'BRIDGE_SOURCE_HELD'|'PARTIAL'|'FAILED',unrunGates:[string]}
+```
+
+Absent/uncreated identity fields remain present with null plus the explicit absence observation in case expected/observed; never use a fake hash. Type checks/main-wiring source checks are STATIC, actual IPC/preload/lifecycle unit behavior FUNCTIONAL. Complete final receipt/command logs distinguish qualified local compiler smoke from unrun Business types in T and actual declared-type compilation in Q.
+
+Retain all source/test/type fixture hashes, failed/success command logs, exact actual exits, protected before/after full fence/stat and restore evidence. No production callback writes the receipt. Full receipt remains authoritative; optional compact<=18k projection binds full original hash and preserves every unrun case, never replaces/truncates original. No F-011 helper backfill/canonical ledger/BUG write. Concurrent frozen-byte compliance and quality reading, compliance-first acceptance, both before Marcus/docs/Git under0176. Checkpoint publication/refspec remains separately Brain-admitted; no default main merge or source publication permission.
+
+## Closed technical seams and remaining facts
+
+**All remaining technical/control seams CLOSED** by actual I-D-controls: initial sender-first; accepted stop-first then stale; own-DATA canceled/filePaths atomic normalization and zero-grant failure/order/duplicate preservation; exact nonpublic registration brands/own ports/one-time roots/poison/acquired-prefix cleanup and foreign handler preservation/UNCONFIRMED; approved45m40 TESTPREP then60m40 complete ATOMIC; exact TypeScript5.9.3 noEmit exits/TS2339/independent TS2322 smoke/types:[] eight fixtures and same-declaration controls; separate roots/verbose unit argv/inline Python exclusive recorder. No owner design question is reopened, no raw-default new framework or half bridge is substituted.
+
+**Specification:** full source/control/typed/lifecycle contract compiled. Final qualified U9/U10/live lesson census and concurrent independent same-byte planning review pair remain after this enrichment. Actual source controls run INSIDE their separately admitted phase before checkpoint acceptance under SR44; future unbuilt tests are not a false pre-authoring PASS/failure gate.
+
+**Prerequisites/repository:** actual accepted post-W/I-C source cut (then exact TESTPREP parent for ATOMIC), current branch/worktree/common-repo/locks/owner/new-target absence/protected hashes and preserved R/W/C/fixture/tmp/perf remain entry facts. No future SHA or unavailable private source is fabricated. Main mechanical WHERE is already investigated; do not wait for W just to recite its unchanged main sites.
+
+**External register/environment:** existing epic only, no new Status/Seq/terminal operation. Root supplies fresh guarded register/pointer readback; quiet Node/Vitest/TypeScript package+bin/lib hashes/version/exit implementation and Python/driver qualification, current phase's exact absent/owned root/TEMP/TMP/resource slot, immutable consumed input hashes and Brain's separate actual admission/start remain pending. These are custody/qualification facts, not reopened technical choices. Native/package/owner/Task6 gates stand.
 
 ## Lessons and held outcomes
 
