@@ -14,7 +14,7 @@
 |---|---|---|
 | Already in `origin/main` (branch fully merged), release-held | 27 | Seq 1–27 and 29 (PAGE-REOPEN-CFI-1 … FOLDER-NOTICE-1) |
 | Held branch on origin, not merged | 43 | Seq 35–116 (list below) |
-| No branch on origin | 2 | NARRATE-CPU-PROFILE-1 (commit `270bf721` local to RodneySr), GOV-SWEEP-FOLLOWTHROUGH-1 (`eb/governance-sweep-2026-10-26` not on origin) |
+| No branch on origin at first read | 2 | NARRATE-CPU-PROFILE-1 (`270bf721` reached `origin/eb/narrate-cpu-profile-1` later on 2026-11-03, as did FOCUS-WORD-ONLY-1 `8810511e`), GOV-SWEEP-FOLLOWTHROUGH-1 (`eb/governance-sweep-2026-10-26` @ `60d11b42` is local to Rodney; its sweep disposition is commit-only, no push) |
 | No branch recorded (diagnosis/explanation items) | 2 | FOLDER-SWITCH-CONTENT-1, PROFILE-QUEUE-ISOLATION-1 |
 
 The 27 merged items still need the same-candidate release gates (gate (1) and the owner's batched gate (2)) before close-out; their code is already on main.
