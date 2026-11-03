@@ -1,9 +1,11 @@
-#### BLOCK-TEXT-ORDER-1 — Keep block text in DOM order in every reading mode *(Seq 87.5; Full Spec 2026-11-03, cited against `origin/main` `c5bb507f`; Reader Engine; contracts G-A to G-D frozen, owner answers OQ1–OQ6 and Blurby.Brain1 rulings TQ-A1 to TQ-D1 and OQ4 applied; two waves; build-and-hold; four open questions for Blurby.Brain1 listed at the end, which must be ruled before Wave B is dispatched)*
+#### BLOCK-TEXT-ORDER-1 — Keep block text in DOM order in every reading mode *(Seq 87.5; Full Spec 2026-11-03, cited against `origin/main` `c5bb507f`; Reader Engine; contracts G-A to G-D frozen, owner answers OQ1–OQ6 and Blurby.Brain1 rulings TQ-A1 to TQ-D1, OQ4 and Q1–Q4 applied; two waves; build-and-hold; both waves dispatch-ready subject to the stated prerequisites, with Wave B's Page click save subject to prerequisite R-Q5)*
 
 - **What:** text inside nested blocks reads in true document order in Page, Focus, Flow and Narrate. Today, text that comes after a nested block is read before that block. Word spans are also stamped only where the renderer's text provably matches main's word list (a "certified" section). Where it doesn't match, clicks and saves fall back to the cfi only, instead of risking the wrong word.
   - **Wave A** (tests red, then the certifier): ordered runs (G-D), one shared acceptance rule (G-A), and the fail-closed certifier with its certified stamping branch (G-B). The edits are in the four helper copies, the four wrapper copies and one dormant main helper. No view or runtime edits.
-  - **Wave B** (the OQ4 hold): per-mode hold of clicks and saves in uncertified sections (G-C as widened by OQ4), the Electron ICU checker (TQ-B2), the full gates, and the standing rule 53 package pair.
+  - **Wave B** (the OQ4 hold): the hold of clicks in uncertified sections in all four modes, plus Page's turn and click saves (G-C as widened by OQ4, Q1–Q3); the Electron ICU checker (TQ-B2); the full gates; and the standing rule 53 package pair.
+  - **OQ4 is delivered in two steps (Blurby.Brain1 Q2).** This item delivers it for clicks in every mode and for Page's turn and click saves. In Flow, Focus and Narrate, the first-visible-word paths (soft and relocate anchor saves, and Play from the first visible word) are delivered by the follow-up **UNCERTIFIED-ANCHOR-HOLD-1**. That item is Reader Engine, one commit per mode, sequenced directly after this item inside each mode's ownership window.
   - **Out of scope:**
+    - Flow, Focus and Narrate's first-visible-word paths in an uncertified section (UNCERTIFIED-ANCHOR-HOLD-1, Q2);
     - main's word numbering and footnote cues. `extractWords`, `extractBlockPlans`, `extractBlockTexts`, `isLikelyFootnoteRef`, `isFootnoteBodyNode` and `buildFootnoteTargetTextMap` stay byte-unchanged. The new main helper stays dormant until WORD-INDEX-UNIFY-1.
     - fallback footnote handling before the book's words arrive (owner OQ1: keep today);
     - an internal extractor failure that looks like an empty book (owner OQ3: keep today; filed as BUG-239, "an extractor failure gives an empty book in Flow, Focus and Narrate");
@@ -16,7 +18,12 @@
   - **Outcome:**
     - `<div>Intro <blockquote>Quoted.</blockquote> and the continuation.</div>` reads "Intro", "Quoted.", "and the continuation." in every mode, with no extra pause before "and" (OQ5).
     - Before the book's words arrive, Narrate speaks that order, and "Play from the first visible word" starts on the true first word (OQ6).
-    - A section whose spans cannot be certified saves the cfi only (Page, Flow, Focus) or ignores the click (Narrate). It never saves a wrong word (OQ4).
+    - In a section whose spans cannot be certified:
+      - a click paints no highlight and commits no word in any mode;
+      - Page, Flow and Focus save the cfi only, and Narrate ignores the click;
+      - a Page turn saves the cfi only.
+
+      None of these saves a wrong word (OQ4). The first-visible-word paths of Flow, Focus and Narrate follow in UNCERTIFIED-ANCHOR-HOLD-1.
 - **Why:**
   - **The bug.** Each mode's `collectBlockTextNodes` groups text nodes by their nearest block element and emits the groups in first-encounter order. For `<div>before <p>inside</p> after</div>` the groups are `div: "before  after"` and then `p: "inside"`. So the fallback words, their numbering, the paragraph flags and Narrate's pre-arrival speech all come out as "before after inside". Sources:
     - flow/focus/narrate `helpers/foliateHelpers.ts:86-122`; Page `:107-143`;
@@ -24,7 +31,7 @@
     - the issue `docs/governance/bug-reports/Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md`.
   - **Canonical stamping can also land on the wrong source text.** `contentAlignWords` (`helpers/foliateWordWrapping.ts:19-66`) uses `indexOf` within each group. With `MAX_PEEK_AHEAD = 8` (`:13`, `:49-61`), it consumes a missing word without stamping a span. Duplicate text inside a plain-ID footnote target can then take another word's index.
     - Clicks trust any in-range index (`foliateWordOffsets.ts:109-131`). A count is not a certificate (LL-170).
-  - **The contracts.** The frozen contracts are `docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md` (G-A to G-D, with the owner answers at the end). The Blurby.Brain1 rulings are in `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.held-items-TQ.2026-11-03.md`, in the sections "BLOCK-TEXT-ORDER-1 (Seq 87.5)" and "technical shape of the owner's OQ4".
+  - **The contracts.** The frozen contracts are `docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md` (G-A to G-D, with the owner answers at the end). The Blurby.Brain1 rulings are in `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.held-items-TQ.2026-11-03.md`, in the sections "BLOCK-TEXT-ORDER-1 (Seq 87.5)", "technical shape of the owner's OQ4" and "BLOCK-TEXT-ORDER-1 Wave B: Q1–Q4 (spec at `c0f0bbed`)".
 - **Design decisions:**
   - **Owner rulings (2026-11-03, to Blurby.Roadmap):**
     - **OQ1, keep today.** Fallback words before arrival keep today's footnote handling. Only their order changes.
@@ -39,8 +46,8 @@
     - **TQ-B3 (inside this item):**
       - no yield between `certifyCanonicalAlignment` and the last wrap of that section;
       - record the stamping time of the sample's largest section in the memo;
-      - if it is over 16 ms and yielding is needed, re-check `node.isConnected && node.data === capturedText[k]` before each node is wrapped. On a mismatch, stop stamping that section and report `reason: "dom-changed"`;
-      - add row (b12).
+      - re-check `node.isConnected && node.data === capturedText[k]` before each node is wrapped. On a mismatch, stop stamping that section and report `reason: "dom-changed"`. Per Q4, this re-check is **always present**, whatever the measured time;
+      - add row (b12), driven through the test-only hook `__testBetweenNodes` (Q4).
 
       The second half (restamp currency) is FLOW-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1.
     - **TQ-A1.** The D4 opposing fixture, row (b11), belongs in this item. It is test-only.
@@ -48,11 +55,15 @@
     - **TQ-D1.** `onWordsReextracted` timing is unchanged.
     - **OQ4 shape:**
       - **What the hold covers.** In an uncertified document, every word index derived from a span is untrusted. Indices from the canonical word table (Narrate's engine cursor, and the saves it makes during playback) are never held.
+        - In this item (Q2): clicks and selections in all four modes, and Page's turn and click saves.
+        - The first-visible-word paths of Flow, Focus and Narrate go to UNCERTIFIED-ANCHOR-HOLD-1.
       - **When a document is uncertified.** `bookWords` has non-empty `sections`, and either this section's report is `ok:false` or it has no canonical slice. The "missing", "empty" and "load failure" rows keep today's behaviour.
-      - **Page** reuses `rendererNumberedDocsRef`, with the condition at `FoliateView.tsx:671` widened.
-      - **Flow, Focus and Narrate** each own an `uncertifiedDocsRef: WeakSet<Document>`. Flow and Focus save the cfi only; Narrate ignores the click.
+      - **All four modes** own a mode-local `uncertifiedDocsRef: WeakSet<Document>`. This is Q1 for Page, which revises the earlier "reuse `rendererNumberedDocsRef`" shape.
+        - Page never adds an uncertified document to `rendererNumberedDocsRef`, and `FoliateView.tsx:671` stays unchanged.
+        - A held click paints no highlight and commits no word in any mode (Q3).
+        - Page, Flow and Focus save the cfi only. Narrate ignores the click.
       - **Lifecycle.** A later restamp's result replaces the hold. A report from a superseded wrap is discarded.
-      - **Fence.** The four helpers, the four wrappers, the main helper, the four `FoliateView.tsx` and the four `ModeRuntime.ts`, plus the tests. Never shared core.
+      - **Fence.** The four helpers, the four wrappers, the main helper, the four `FoliateView.tsx`, the Flow and Focus `ModeRuntime.ts` and the Flow and Focus `useModeBindings.ts` (Q3), plus the tests. Never shared core.
       - **Runtime rows** (o1)–(o6) are mandatory per mode.
 
 ##### The change
@@ -78,49 +89,68 @@ Every line below was re-grepped on `origin/main` `c5bb507f` on 2026-11-03. The c
      - When `canonicalWords` is undefined or empty: `{ok:false, reason:"no-canonical-slice"}`, then today's fallback path runs unchanged.
      - Otherwise, compute `nodes = collectMainAcceptedTextNodes(doc.body)` and certify.
        - **Certified:** report `{ok:true}`. Wrap every placement synchronously, with no yield (TQ-B3), using `buildWrappedFragmentForNode` (`nodeStart = 0`, `globalIndex = globalOffset + i`, `tokenId = makeFoliateTokenId(sectionIndex, i)`). Return `globalOffset + canonical.length`.
+         - **Per-node re-check, always present (Q4).** Capture `capturedText[k] = nodes[k].data` at certification. Before each node is wrapped, check `node.isConnected && node.data === capturedText[k]`. On a mismatch, stop stamping that section, leave no span at a stale offset, and report `{ok:false, reason:"dom-changed"}` through the same `onCertification`. This is a second report, after the earlier `{ok:true}`, and the view's latest-report rule applies it.
+         - **Test-only hook (Q4).** An optional `__testBetweenNodes?: (k: number) => void` is invoked between nodes. It sits in an options position after `onCertification`, and production call sites never pass it.
        - **Not certified:** report the failure, then run the legacy `contentAlignWords` path. `contentAlignWords` (`:19-66`) stays byte-unchanged.
    - Keep the yield statement `await new Promise<void>((resolve) => setTimeout(resolve, 0));` (`:144`) text-identical in the legacy path. The census anchors it (`boundary-policy.json:783` and siblings).
-   - Record the certified stamping time (see Done-when B5). If it is over 16 ms, apply TQ-B3's per-node re-check and `dom-changed` exactly as ruled. The implementer does not choose between these; see open question Q4.
+   - The certified branch never yields. B5 records the certified stamping time (`stampMs`) for the memo (TQ-B3, Pike rule 1). The time changes no code shape (Q4).
 
-**Wave B: the OQ4 hold (views, plus the Flow and Focus runtimes)**
+**Wave B: the OQ4 hold (views, plus the Flow and Focus runtimes and bindings)**
 
 4. **Report handling, the same shape in each view.**
    - Each view keeps a mode-local `wrapGenerationRef: WeakMap<Document, number>`.
    - Each `wrapWordsInSpans` call site bumps the document's generation and passes an `onCertification` closure. The closure applies its report only if the generation is still the latest and, in a restamp effect, `!cancelled`. Otherwise it is discarded (the OQ4 lifecycle; row o4).
    - "Uncertified" means `report.ok === false && (liveSections()?.length ?? 0) > 0`, read when the report arrives. A certified report clears the hold.
    - Every hop of the new callback is widened (LL-174).
-5. **Page** (`src/reader/modes/page/FoliateView.tsx`):
-   - `:671`: the add widens. Today the document is added when `!liveSections()?.length`. Now it is also added from the load wrap's `onCertification` when the document is uncertified. That runs synchronously inside the `wrapWordsInSpans` call at `:672`, so the document is marked before the wrap first yields, as today.
-   - Restamp effect `:1102-1137`: the unconditional `rendererNumberedDocsRef.current.delete(doc)` (`:1127`) runs only when that rewrap's report was certified. `reportHeldTurnRef.current(doc)` (`:1128`) still runs. A held turn on a document that stays uncertified then saves its cfi through `reportFirstWordOnPage` with `wordIndex: null` (`:579-581`).
-   - The held turn and click paths (`:586-643`, `:680`, `:729`, `:782`), `checkBookWords` and `bookStampedDocsRef` are otherwise unchanged. **But see Q1:** a turn or click on an uncertified document after the words have arrived is held with nothing to release it.
+5. **Page** (`src/reader/modes/page/FoliateView.tsx`; Q1):
+   - **New set.** Add `uncertifiedDocsRef: WeakSet<Document>` beside `rendererNumberedDocsRef` (`:313`). The pre-arrival hold keeps exactly today's meaning. The new set means "the words have arrived, and this document is untrusted".
+   - **`:671` stays unchanged.** An uncertified document is never added to `rendererNumberedDocsRef`. The load wrap's `onCertification` (call at `:672`) adds the document to `uncertifiedDocsRef` when it is uncertified, and removes it when the wrap is certified. The report is synchronous, so the document is marked before the wrap first yields.
+   - **Report at once, cfi only.** `reportFirstWordOnPage` (`:579-581`) reports `wordIndex: null` when the document is in either set. With that, a document in `uncertifiedDocsRef` reports at once and is never held:
+     - in `reportTurn` (`:604-620`): the held branch at `:611` tests `rendererNumberedDocsRef` only, so the turn falls through to the immediate `reportFirstWordOnPage`, which now gives `wordIndex: null`;
+     - in `holdWordClick` (`:626-637`): an uncertified document reports at once through `reportFirstWordOnPage(doc, start, end, true)` with `wordIndex: null`. It is never put in `pendingTurnRef`;
+     - at the section load (`:680`): a pending turn on an uncertified document reports at once with `wordIndex: null`.
+   - **Click handlers** (click `:692-741`, selectionchange `:745-795`; `holdSave` at `:729` and `:782`). In an uncertified document, return before the highlight is painted (`:700-707` and `:759-…`) and before `onWordClickRef` is called, then make the cfi-only click save (Q3: no highlight, no word). How that save reaches the runtime is prerequisite **R-Q5** below.
+   - **Restamp** (effect `:1102-1137`, lines `:1127-1128`):
+     - **Certified:** remove the document from both sets, then `reportHeldTurnRef.current(doc)`, which releases a held save with its word, as today.
+     - **Uncertified:** move the document from `rendererNumberedDocsRef` into `uncertifiedDocsRef`, then `reportHeldTurnRef.current(doc)`, which releases a held save as cfi-only.
+
+     Making the delete at `:1127` conditional is confirmed by Brain1 (Q1).
+   - `checkBookWords`, `bookWordsFailedRef` and `bookStampedDocsRef` are unchanged.
 6. **Flow** (`src/reader/modes/flow/FoliateView.tsx`):
    - Add `uncertifiedDocsRef: WeakSet<Document>` beside `bookStampedDocsRef` (`:343`).
    - Wire `onCertification` at the incremental load wrap (`:905`), the first-load wrap (`:933`) and the restamp wrap (`:1368`).
-   - In the click handler (`:944-990`) and the selectionchange handler (`:993-1040`), a held document commits no word: return before any highlight is painted or `onWordClickRef` is called (the shape of the link return at `:947`), and make the cfi-only save. The cfi is `v.getCFI(match.index, range)` of the clicked span. How that save reaches the runtime is Q3.
-   - `src/reader/modes/flow/ModeRuntime.ts`: a cfi-only save through the existing port, `this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, cfi)`, plus `recordCfi(cfi)`. It uses a Flow-local `const KEEP_STORED_POSITION = -1`, mirroring `page/ModeRuntime.ts:117` with no import from Page.
+   - In the click handler (`:944-990`) and the selectionchange handler (`:993-1040`), a held document commits no word (Q3).
+     - Return before any highlight is painted or `onWordClickRef` is called (the shape of the link return at `:947`). The existing highlight and cursor stay where they were.
+     - Then call the new prop `onHeldWordClick(cfi)` through its ref, where `cfi` is `v.getCFI(match.index, range)` of the clicked span.
+   - **New prop (Q3).** `onHeldWordClick?: (cfi: string) => void` on the Flow `FoliateView` props interface (`:286` area), held in a ref like `onWordClickRef` (`:354-355`). Do not overload `onWordClick`.
+   - `src/reader/modes/flow/useModeBindings.ts`: bind `onHeldWordClick: runtime.onHeldWordClick` beside `onWordClick` (`:156`).
+   - `src/reader/modes/flow/ModeRuntime.ts`: a public `onHeldWordClick = (cfi: string): void => …` beside `onWordClick` (`:1154`). If `!this.alive` it returns. Otherwise it calls `this.ports.persistence.recordCfi(cfi)` and then `this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, cfi)`.
+     - It uses a Flow-local `const KEEP_STORED_POSITION = -1`, mirroring `page/ModeRuntime.ts:117` with no import from Page.
      - This path is reachable with no IPC or port change. `ReaderPorts.ts:20` takes any number; `main/ipc/documents.js:22` treats a negative position as cfi-only; `useLibrary.ts:161-167` keeps the stored position.
-     - No anchor is committed.
+     - It commits no anchor and changes no state other than the recorded cfi. It does not call `hardSelect`.
 7. **Focus:** the same as Flow.
-   - `src/reader/modes/focus/FoliateView.tsx`: `bookStampedDocsRef` `:315`, load wrap `:824`, restamp wrap `:1256`, click `:834-880`, selectionchange `:883-930`, link return `:837`.
-   - `src/reader/modes/focus/ModeRuntime.ts`: the Focus-local cfi-only save.
+   - `src/reader/modes/focus/FoliateView.tsx`: `bookStampedDocsRef` `:315`, load wrap `:824`, restamp wrap `:1256`, click `:834-880`, selectionchange `:883-930`, link return `:837`, `onWordClickRef` `:326-327`; the new `onHeldWordClick` prop and ref.
+   - `src/reader/modes/focus/useModeBindings.ts`: bind `onHeldWordClick: runtime.onHeldWordClick` beside `onWordClick` (`:44`).
+   - `src/reader/modes/focus/ModeRuntime.ts`: the Focus-local `onHeldWordClick` and `KEEP_STORED_POSITION`, beside `onWordClick` (`:948`).
 8. **Narrate** (`src/reader/modes/narrate/FoliateView.tsx`):
    - add `uncertifiedDocsRef`;
    - wire the load wraps (`:799` incremental, `:826` first load) and the restamp wrap (`:1257`);
-   - in the click (`:839-885`) and selectionchange (`:888-935`) handlers, a held document returns at once, as the link return at `:842` does. Nothing is saved.
-   - `src/reader/modes/narrate/ModeRuntime.ts` is not edited: engine-cursor saves use the canonical table (row o6).
+   - in the click (`:839-885`) and selectionchange (`:888-935`) handlers, a held document returns at once, before any highlight is painted, as the link return at `:842` does. Nothing is saved, and no prop is added (Q3).
+   - `src/reader/modes/narrate/ModeRuntime.ts` and `useModeBindings.ts` are not edited: engine-cursor saves use the canonical table (row o6).
    - *Drift:* the contract's Narrate ":795" is the `sectionStart` line; the wrap call is at `:799`.
 9. **Unchanged:**
    - `bookStampedDocsRef` marking;
    - `pendingFirstText`;
    - `checkBookWords`;
-   - every start path and `onWordsReextracted` call;
+   - every start path, every soft and relocate anchor save, and every `onWordsReextracted` call (Q2: UNCERTIFIED-ANCHOR-HOLD-1);
    - `foliateParagraphStarts.ts`, `bookParagraphBreaks`, `src/utils/naturalChunks.ts`, `createChunkSourceWords` and Narrate `chunkBreaks` (D-4);
-   - `foliateWordOffsets.ts`, `useModeBindings.ts` (unless Q3 rules otherwise), `surface.ts`, `ReaderContainer.tsx`, `src/types.ts` and both `FlowScrollEngine.ts`.
+   - `foliateWordOffsets.ts`, Page's and Narrate's `useModeBindings.ts`, `surface.ts`, `ReaderContainer.tsx`, `src/types.ts` and both `FlowScrollEngine.ts`.
 
 - **Prerequisites:**
   - **FLOW-PARA-PAUSE-INDEX-1 and BLOCK-TAG-CASE-1** (In Flight, merged and held in the RC) are on `origin/main`: integration `f4becc3c`, "Integrate FLOW-PARA-PAUSE-INDEX-1, BLOCK-TAG-CASE-1 (RC window)", plus `2715c867`. Both are ancestors of `c5bb507f`. The base is therefore `c5bb507f` or later.
   - **NATIVE-PATH-ATTESTATION-1 no longer gates this item** (2026-10-30, R-2026-10-30-1). Native runs use the RodneySr substitute: scratch userData proved per LL-165, APPDATA and LOCALAPPDATA redirected, owned fixtures and public-domain books only.
-  - Blurby.Brain1 rules Q1–Q4 below before Wave B is dispatched. Wave A depends only on Q4, and only for (b12).
+  - Blurby.Brain1 has ruled Q1–Q4 (see the rulings section below). Wave A is dispatch-ready now.
+  - **R-Q5 (Wave B, Page click save only).** Blurby.Brain1 rules the route for Page's cfi-only click save before Wave B's Page task begins. The rest of Wave B (the Flow, Focus and Narrate tasks, B5 and the gates) does not wait on it. See "Blurby.Brain1 rulings Q1–Q4" for the source conflict.
 - **Execution host:**
   - RodneySr (x64), clone `C:\Users\estra\Projects\Blurby`, runs both waves: implementation, tests, the ICU checker, `npm test`/`typecheck`/`build`, and the `--dir --x64` packages.
   - Rodney (arm64) runs only the standing rule 53 native-arm64 25 s launch, at the merge go.
@@ -144,7 +174,10 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   The rows are exactly those of contract A.3, B.3, C.4 and D.3, with these changes:
   - (b5), (b6), (b9) and (b11) are each split into `…-dom` and `…-certified`;
   - (b11) per TQ-A1: the body is `<p>alpha<a epub:type="noteref" href="#t1">1</a> beta</p><p><a id="t1"/>gamma delta</p>`. It is written into the (b10) three-file EPUB and run through main `extractWords`, and the renderer parses the same XHTML as `application/xhtml+xml`. `(b11-certified)` expects `ok:false` with reason `extra-source-text` or `unmatched-source-word`. `(b11-dom)` expects `body.innerHTML` equal to the base golden;
-  - (b12) per TQ-B3, in the form Blurby.Brain1 sets under Q4.
+  - (b12) per TQ-B3 and Q4, `(b12) dom-changed stops stamping with no span at a stale offset`. Body `<p>alpha beta</p><p>gamma</p>`, canonical `["alpha","beta","gamma"]`.
+    - Call `wrapWordsInSpans(doc, 0, 100, words, canonical, onCertification, { __testBetweenNodes: (k) => { if (k === 0) nodeB.data = "gamma changed"; } })`. Here `nodeB` is the `"gamma"` text node, captured before the call.
+    - Expected: the reports are `{ok:true}` and then `{ok:false, reason:"dom-changed"}`; `"gamma changed"` holds no `[data-word-index]` span; and no span's text differs from the canonical word at its index.
+    - Red on base: the hook and the re-check do not exist.
 
   How the files are written:
   - New helper functions are reached through namespace imports (`import * as flowWrap from …`), so the controls still run on the base.
@@ -175,9 +208,15 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `tests/readerModes/blockTextOrderHold.narrate.test.tsx` (`tests/narrate/narrate.playFirstText.test.ts`).
 
   An uncertified document is made with a mismatched canonical slice (the (c2) body), which exists on the base too. The rows are:
-  - **(o1)** A click in an uncertified document commits no word. Page saves per Q1. Flow and Focus call `updateDocProgress(docId, -1, cfi)` once and commit no anchor. Narrate makes no persistence call. Red on base in every mode.
+  - **(o1)** A click in an uncertified document, after the book's words have arrived, paints no highlight and commits no word (Q3). The highlight and cursor classes on the document are unchanged, and no anchor, resume anchor or explicit selection changes. Red on base in every mode. Per mode:
+    - **Page:** the click saves cfi-only, once, through the R-Q5 route: `updateDocProgress(docId, -1, cfi)` with the clicked span's cfi.
+    - **Page turn:** a turn onto that document also saves cfi-only, once (`updateDocProgress(docId, -1, cfi)`), with nothing left in `pendingTurnRef`.
+    - **Page failure rule:** a lost save fails the row (Q1). That covers no save, a held save, or a `page-turn-lost` diagnostic.
+    - **Flow and Focus:** `onHeldWordClick` saves cfi-only, once, as `updateDocProgress(docId, -1, cfi)`; `onWordClick` is not called.
+    - **Narrate:** no persistence call is made, and `onWordClick` is not called.
   - **(o2)** A click in a certified document behaves as on base. This is a control and is green on base.
   - **(o3)** A restamp that certifies lifts the hold. A click before the restamp commits nothing, and a click after it commits the canonical index. Red on base, from the pre-restamp assertion.
+    - **Page adds (Q1):** a turn held before the words arrive is released with its word by a certified restamp, and as cfi-only by an uncertified restamp, which also moves the document into `uncertifiedDocsRef`.
   - **(o4)** The latest wrap is uncertified, and a superseded wrap's certified report arrives after it. A click still commits nothing. Red on base.
   - **(o5)** A section with no canonical slice while `sections` is non-empty is held. Red on base for Page, Flow and Focus (the TQ-C1 defect). Narrate's base status is recorded as observed.
   - **(o6)** Narrate only: engine-cursor saves during playback through an uncertified section still save the canonical index. Green on base.
@@ -206,7 +245,7 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - **Positive control first (standing rule 55):** `run.ps1 -packaged <exe> -control` drops the last canonical word of one named section. It must print that section with `extra-source-text` and exit 1.
   - **Live run:** then the run without `-control` exits 0.
   - **Any `ok:false` in the live run is a STOP** to Blurby.Brain1, with the failures JSON.
-  - Record `stampMs` in the memo. Over 16 ms, apply Q4's ruling.
+  - Record `stampMs` in the memo. It is recorded, not gated: the re-check is always present (Q4).
 - **B6. Sibling and shared-core gates.** A6 re-runs and passes. `git diff --exit-code c5bb507f -- src/components/ReaderContainer.tsx src/types.ts src/utils/FlowScrollEngine.ts src/reader/modes/flow/helpers/FlowScrollEngine.ts src/utils/foliateHelpers.ts src/utils/foliateWordWrapping.ts src/utils/naturalChunks.ts preload.js main/ipc` exits 0.
 - **B7. Standing rule 53 package pair, on RodneySr.**
   - `--dir --x64` packages of the tip with `origin/main` merged in, and of `origin/main`;
@@ -232,6 +271,8 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `M src/reader/modes/narrate/FoliateView.tsx`
   - `M src/reader/modes/flow/ModeRuntime.ts`
   - `M src/reader/modes/focus/ModeRuntime.ts`
+  - `M src/reader/modes/flow/useModeBindings.ts`
+  - `M src/reader/modes/focus/useModeBindings.ts`
   - `A tests/readerModes/blockTextOrder.test.ts`
   - `A tests/epubOrderedBlockRuns.test.js`
   - `A tests/readerModes/blockTextOrderHold.page.test.tsx`
@@ -243,22 +284,25 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `A scripts/block-text-order/icu-certify/run.ps1`
 
   Conditional additions, each recorded in the memo:
-  - `M src/reader/modes/flow/useModeBindings.ts` and `M src/reader/modes/focus/useModeBindings.ts`, only if Q3 rules the binding route;
+  - `M src/reader/modes/page/ModeRuntime.ts`, and/or `M src/reader/modes/page/useModeBindings.ts`, only if the R-Q5 ruling names that route;
   - `M docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json`, only if A4's `readerModeBoundaries`/`readerModeOwnership` tests fail mechanically. Record the failure first.
 
-  The ruling allows `page/ModeRuntime.ts` and `narrate/ModeRuntime.ts`, but neither is expected to change. Either one appearing is a fence failure unless Blurby.Brain1 approves it first.
+  `narrate/ModeRuntime.ts` and `narrate/useModeBindings.ts` must not appear. Any path outside this list, the conditional entries and the two close-out files is a fence failure.
+
+  The Wave A fence is the first nine `M` lines plus the two Wave A test files, the memo and the time log. Check it with `git diff --name-status c5bb507f..HEAD` at the Wave A tip.
 - **Owner checks:** the OQ2, OQ5 and OQ6 items are added to release gate (2)'s list. No separate smoke run is offered.
 
 - **Effort:** L. Technical effort: high.
 - **Owners:**
-  - planner (spec; Wave B amendment if Q1–Q4 change the shape);
-  - Blurby.Brain1 (Q1–Q4 rulings, STOPs, the rule 53 confirmation);
+  - planner (spec; registering UNCERTIFIED-ANCHOR-HOLD-1; amending the Page task once R-Q5 is ruled);
+  - Blurby.Brain1 (Q1–Q4 rulings given; R-Q5; STOPs; the rule 53 confirmation);
   - RodneySr implementation agents: cross-cutting for the Wave A certifier and runs; bounded for each Wave B view;
   - spec-compliance review, then quality review;
   - package verifier;
   - Blurby.Roadmap (merge go and close-out).
 - **Merge order:**
   - Build-and-hold, opting out of the rule 5b auto-merge (card: "Build-and-hold; opt out of auto-main merge").
+  - UNCERTIFIED-ANCHOR-HOLD-1 (Reader Engine, one commit per mode) follows directly after this item, inside each mode's ownership window (Q2).
   - WORD-INDEX-UNIFY-1 (Seq 88) waits on this item. FOOTNOTE-INLINE-READ-1 comes after it, and its specification goes back to Brain1, because OQ2 leaves note targets without spans.
   - FLOW-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1 edit the same restamp effects (Flow `:1352-1380`, Narrate `:1243-1266`). Whichever lands second re-greps (standing rule 36).
   - `modes/focus/FoliateView.tsx` is in the Focus ownership window of FOCUS-WORD-ONLY-1 and FOCUS-PAUSED-HANDOFF-1 Wave B. Wave B's Focus edit is sequenced by the planner against that window.
@@ -274,7 +318,7 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `src/reader/modes/*/helpers/foliateParagraphStarts.ts`;
   - `src/utils/`;
   - `preload.js`, `main/ipc/`;
-  - any other item editing the four `FoliateView.tsx` files.
+  - any other item editing the four `FoliateView.tsx` files, or the Flow or Focus `ModeRuntime.ts` or `useModeBindings.ts`.
 - **Shared-core touches:** none.
 - **Staging plan:**
   - only the exact B9 paths, staged by name;
@@ -284,38 +328,49 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - A2 or B1 base status differs from the lists: STOP to Brain1 before any source edit.
   - B5 shows any `ok:false` or exits 3: STOP to Brain1.
   - The live profile hash changes: STOP (LL-165).
-  - A Q1–Q4 ruling changes the edit sites: the planner amends this spec before Wave B continues.
+  - The R-Q5 ruling changes the Page edit sites or the fence: the planner amends this spec before the Page task begins.
+  - A Page (o1) save is lost (no save, a held save, or `page-turn-lost`): the row fails (Q1). There is no workaround.
   - Each failing gate gets at most one retry, and only for a harness fault.
 
-##### Open questions for Blurby.Brain1 (pre-dispatch for Wave B; Q4 also gates A1's (b12))
+##### Blurby.Brain1 rulings Q1–Q4 (2026-11-03)
 
-These are places where the ruling's text and the current source disagree. None is decided here.
+Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.held-items-TQ.2026-11-03.md`, section "BLOCK-TEXT-ORDER-1 Wave B: Q1–Q4 (spec at `c0f0bbed`)". These rulings are binding, and they are applied throughout The change, Done when, the fence and the Task list.
 
-- **Q1. Page's reused hold has no release once the words have arrived.**
-  - The ruling says Page's held turn and click paths "apply unchanged".
-  - At `c5bb507f`, a turn on a `rendererNumberedDocsRef` document is held when `!bookWordsFailedRef.current` (`:611-616`), and so is a click (`:627-636`, via `holdSave` `:729`/`:782`).
-  - The hold is released only by `fail()` (when `ensureBookWords` gives no sections, `:601`), by a restamp (`:1128`), or by that document's own section load (`:680`, which also requires the document to be absent from the set).
-  - For an uncertified document whose section map has already arrived, none of these fires again. The save is lost; it is not made cfi-only. This affects rows (o1) and (o5) for Page.
-  - **Candidates for Brain1:**
-    - (a) treat an uncertified document like `bookWordsFailedRef` in `reportTurn`, `holdWordClick` and `:680`, so it reports at once with `wordIndex: null`. This needs a way to tell an uncertified document from a pre-arrival one: a second Page-local set, or the `liveSections()` test, which would mis-handle the window between arrival and restamp;
-    - (b) another shape Brain1 prefers.
-- **Q2. Scope of "the first visible word".**
-  - The ruling's "what the hold covers" includes "the first visible word used for a save, a page turn, or Play from the first visible word".
-  - Its mechanism, its rows (o1)–(o6) and its fence ("the start paths stay unchanged") cover only clicks for Flow, Focus and Narrate.
-  - Are Flow, Focus and Narrate's Play-from-first-visible-word and their soft and relocate anchors inside this item? If they are, the start paths and new rows enter the fence.
-- **Q3. Wiring the Flow and Focus cfi-only save.**
-  - The port is reachable: `updateDocProgress(docId, -1, cfi)`, so there is no IPC or port change and no STOP under the ruling.
-  - But the view reaches its runtime only through props bound in each mode's `useModeBindings.ts` (Flow `:156`, Focus `:44`). That file is outside the ruling's fence.
-  - **Candidates:**
-    - (a) a new view prop, for example `onHeldWordClick(cfi)`, bound in the two `useModeBindings.ts` files (fence +2);
-    - (b) reuse `onWordClick` with the section offset and global index left undefined, so that `resolveClickedGlobalWordIndex` returns null (Flow `:1573`, Focus `:1181`) and `hardSelect` makes the cfi-only save on that branch. That overloads a parameter convention.
-  - Also confirm that a held click paints no highlight.
-- **Q4. Row (b12) assumes a yield exists.**
-  - (b12) "stubs the yield" between certify and stamp. If the measured stamping time is 16 ms or less, the certified branch has no yield to stub.
-  - **Candidates:**
-    - (a) the per-node `isConnected && data` re-check is always present, and (b12) drives it through a test-only seam (for example, an optional hook parameter invoked between nodes);
-    - (b) the re-check and (b12) apply only if B5's `stampMs` exceeds 16 ms, and otherwise (b12) is recorded as NOT RUN.
-  - The timing is measured in Wave B (B5), but the code shape is set in Wave A.
+- **Q1: Page gets a set of its own (candidate a). This revises the earlier Page mechanism.**
+  - Page owns `uncertifiedDocsRef: WeakSet<Document>`, as the other modes do. It never adds an uncertified document to `rendererNumberedDocsRef`, and `:671` stays unchanged.
+  - In `reportTurn`, `holdWordClick` and the section load at `:680`, a document in the set reports at once with `wordIndex: null` (cfi only). It is never held.
+  - **Restamp at `:1127-1128`:**
+    - a certified restamp removes the document from both sets and releases any held save with its word;
+    - an uncertified restamp moves it from `rendererNumberedDocsRef` into `uncertifiedDocsRef` and releases any held save as cfi-only.
+
+    The conditional delete is confirmed.
+  - Page (o1) asserts that the cfi-only save happens. A lost save fails it.
+- **Q2: the first-visible-word paths are out of this item and form a named follow-up.**
+  - This item covers clicks in all four modes, plus Page's turn and click saves.
+  - Flow, Focus and Narrate's soft and relocate anchor saves, and Play from the first visible word, become **UNCERTIFIED-ANCHOR-HOLD-1**: Reader Engine, one commit per mode, sequenced directly after this item inside each mode's ownership window.
+  - OQ4 is delivered here for clicks and Page, and for anchors in the follow-up. The owner is told so.
+- **Q3: an explicit prop (candidate a).**
+  - `onHeldWordClick(cfi)` is bound in Flow's and Focus's `useModeBindings.ts`. The fence grows by those two mode-local files.
+  - `onWordClick` is not overloaded. Narrate needs no prop.
+  - A held click paints no highlight and commits no word; the highlight and cursor stay where they were. This is asserted in (o1) for every mode.
+- **Q4: the re-check is always present (candidate a).**
+  - The per-node `isConnected && data` re-check runs whatever the measured time.
+  - Row (b12) drives it through the optional test-only hook `__testBetweenNodes`, which production call sites never pass. (b12) is in Wave A's red commit (A1).
+  - B5 still records `stampMs`.
+- **Noted as acceptable:**
+  - the ICU checker approach (`node_modules/electron`, version-proved against the packaged exe, with a positive control that must exit 1);
+  - census anchors that stay text-identical;
+  - whichever Focus-window or restamp-currency item lands second re-greps.
+
+**R-Q5. One conflict remains for Brain1. It gates only Wave B's Page click save.**
+- Q1 routes a held Page click through `holdWordClick` → `reportFirstWordOnPage(…, click = true)` → `onHeldClickSaveRef` (`FoliateView.tsx:577-581`). Q3 says a held click commits no word, so `onWordClickRef` is not called (`:730-737`).
+- But `page/ModeRuntime.ts` `onHeldClickSave` (`:611-614`) returns at once when `this.heldClickAnchor` is null ("review fr3: no resolved click is held"). Only `hardSelect` with `holdSave` sets that anchor (`:326-329`).
+- So on `c5bb507f` a Page click that commits no word reaches no save, and (o1) would fail as a lost save. The Q1 fence ("Page FoliateView only") contains no route that both commits no word and saves the cfi.
+- **Candidates:**
+  - (a) the Page view calls `onPageTurnedRef.current({ wordIndex: null, cfi })` for the held click. There is no runtime edit, but `onPageTurned` (`:579-598`) also clears `userExplicitSelection`, `explicitSelectionAnchor` and the held click anchor;
+  - (b) a Page-local `onHeldWordClick(cfi)` like Flow's, which adds `page/ModeRuntime.ts` and `page/useModeBindings.ts` to the fence;
+  - (c) keep today's pre-arrival click shape (`holdSave` sets a provisional in-memory anchor), which contradicts Q3's "commits no word".
+- Until Brain1 rules, the Page task does not start. The rest of Wave B proceeds.
 
 ##### Task list
 
@@ -325,12 +380,12 @@ These are places where the ruling's text and the current source disagree. None i
 | 2 | Main dormant `extractOrderedRuns`; four helper copies (MAIN_ACCEPT, runs, D-3) | calculable | implementation | cross-cutting | high | 40m | — | A |
 | 3 | Four wrapper copies: certifier, certified branch, `onCertification`; A3–A6 | calculable | implementation | cross-cutting | high | 35m | — | A |
 | 4 | B1 four runtime test files red | calculable | positive-control | bounded | medium | 40m | — | B |
-| 5 | Page, Flow, Focus and Narrate hold per the Q1–Q3 rulings; B2–B4, B6 | calculable | implementation | bounded | high | 50m | — | B |
+| 5 | Flow, Focus and Narrate hold (`uncertifiedDocsRef`, `onHeldWordClick` prop and bindings, Q3); Page `uncertifiedDocsRef`, report-at-once and restamp move (Q1), with the click save per R-Q5; B2–B4, B6 | calculable | implementation | bounded | high | 60m | — | B |
 | 6 | ICU checker with positive control and timing (B5) | calculable | verify | cross-cutting | medium | 35m | 50m | B |
 | 7 | Rule 53 package pair, asar, B5 on package; arm64 launch on Rodney (B7–B8) | calculable | packaging-verify | bounded | low | 30m | — | B |
 | 8 | Fence, memo and time log; push; Brain1 confirmation (B9) | calculable | docs | bounded | low | 15m | — | B |
 
-**Total:** chain 4h45m · sum 4h45m; 0 of 8 estimated tasks calibrated (planner estimates). These are planning prices, not execution allowances.
+**Total:** chain 4h55m · sum 4h55m; 0 of 8 estimated tasks calibrated (planner estimates). These are planning prices, not execution allowances.
 
 ##### Lessons applied
 
