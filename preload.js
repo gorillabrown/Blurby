@@ -103,6 +103,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Archive
   archiveDoc: (docId) => ipcRenderer.invoke("archive-doc", docId),
   unarchiveDoc: (docId) => ipcRenderer.invoke("unarchive-doc", docId),
+  setDocHome: (docId, home) => ipcRenderer.invoke("set-doc-home", docId, home),
 
   // READINGS-4A: Queue operations
   addToQueue: (docId) => ipcRenderer.invoke("add-to-queue", docId),

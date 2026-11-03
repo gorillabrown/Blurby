@@ -51,6 +51,7 @@ const SECTIONS: ShortcutSection[] = [
       { keys: ["L"], description: "Tag document" },
       { keys: ["V"], description: "Move to collection" },
       { keys: ["/"], description: "Focus search input" },
+      { keys: ["Ctrl", "1–4"], description: "Switch tab (Library, Newsroom, Podcasts, Marketplace)" },
       { keys: ["Tab"], description: "Cycle library tabs (All / Unread / Favorites / Archive)" },
       { keys: ["Z"], description: "Undo last action" },
       { keys: ["G", "G"], description: "Jump to top of list" },

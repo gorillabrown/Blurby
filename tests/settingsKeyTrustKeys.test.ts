@@ -22,7 +22,7 @@ const TYPE_KEYS = {
   syncIntervalMinutes: true, syncOnMeteredConnection: true, firstRunCompleted: true, defaultSort: true,
   defaultViewMode: true, libraryCardSize: true, libraryCardSpacing: true, useLegacyRenderer: true,
   ttsCacheEnabled: true, pronunciationOverrides: true, narrationProfiles: true, activeNarrationProfileId: true,
-  readingGoals: true, sortBy: true,
+  readingGoals: true, sortBy: true, libraryTab: true,
 } satisfies Record<keyof BlurbySettings, true>;
 const DEPRECATED_TYPE_KEYS = new Set(["flowZoneLines"]); // BAND-ALIGN-2 R8; removed with the field by NARRATE-BAND-SPACE-1
 
