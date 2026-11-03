@@ -153,6 +153,7 @@ These checks belong in the gate (2) smoke on the RC candidate: `eb/rc-integratio
   Sources: APP-TABS-1 and LIBRARY-COMPLETION-VISIBILITY-1 (BUG-230).
 - **(iv) E-ink settings survive the upgrade.** With E-ink on, the light theme and the band setting (on or off) are as they were before the upgrade. Source: the settings migration v13 → v15, R4.
 - **(v) PDF opens and reads on the arm64 install.** Open a PDF in the arm64 build. Its text appears and reads normally. Source: Findings F-012 (Blurby.Brain1 ruling, 2026-11-03).
+- **(vi) Narrate from a saved place.** Open a book at a saved place mid-book in Page, switch to Narrate, and press Play. Narrate starts at the saved word, not at the title page. From the book's cover or start, Play still starts at the first text. Sources: gate (1) run 5 RED on `c5bb507f` (PLAY-FIRST-TEXT-1 regression); owner design ruling 2026-11-03, "Saved place".
 
 Gate (1) on the merged main re-runs as standing: the full quiet suite, plus NARRATE-REBUILD-1 D3 and D6.
 
