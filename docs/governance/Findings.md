@@ -222,3 +222,18 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 ### F-011 — disposition (roadmap-review, 2026-11-03)
 
 **Disposition:** accepted, as a lesson. LL-172 governs: no `timing` run inside a dispatch worktree, and no historical backfill committed. The 24 and 10 uncommitted backfill lines stay preserved in their owning worktrees. The helper's path-fence and actor-permission repair belongs upstream in the Virtuoso plugin. Blurby keeps no local patched copy (owner: follow the plugin to the letter). Evidence: `docs/planning/roadmap-reviews/2026-11-03-assessment.md`.
+
+
+### F-012 — Windows arm64 package ships no native `@napi-rs/canvas` binary (RC merge, 2026-11-03)
+
+**Source:** Blurby.Brain1 asar comparison during rule-53 package verification of the RC integration merge (`origin/main` `c5bb507f`, 2026-11-03).
+
+**Severity:** medium (PDF reading on the arm64 install may run on the polyfill path; impact not yet measured)
+
+**Where:** `package-lock.json` (`@napi-rs/canvas` platform packages: only `@napi-rs/canvas-win32-x64-msvc` 0.1.80 is locked); `main/pdf-text.js` (fallback that logs "@napi-rs/canvas not available, using polyfills")
+
+**Finding:** The arm64 package carries no native `@napi-rs/canvas` binary, so PDF text extraction in the arm64 build falls back to polyfills. The gap predates the RC; the RC did not introduce it. Lane: Platform & Maintenance, against the Windows arm64 installer.
+
+**Accountable role / next action:** planner with Blurby.Brain1 (technical) — read-only diagnosis before any fix spec: (a) whether a `win32-arm64` build of `@napi-rs/canvas` exists for the locked version line; (b) whether the polyfill path degrades extraction, tested with a synthetic PDF only. Until then, release gate (2) carries "PDF opens and reads on the arm64 install" (`docs/governance/SMOKE_CHECKLIST_STAGE8.md`, RC integration window additions).
+
+**Disposition:** open

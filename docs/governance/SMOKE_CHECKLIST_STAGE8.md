@@ -141,7 +141,7 @@ These items merge after the freeze lifts, so their checks run on a later build:
 
 ## RC integration window additions (2026-11-03)
 
-These four checks belong in the gate (2) smoke on the RC candidate: `eb/rc-integration-20261103` at tip `70d64237`, or its merged-main successor. Blurby.Brain1 recorded them in its ruling on 2026-11-03. Checks (i) and (ii) were added by Blurby.Roadmap after its review of wave C.
+These checks belong in the gate (2) smoke on the RC candidate: `eb/rc-integration-20261103` at tip `70d64237`, or its merged-main successor. Blurby.Brain1 recorded them in its ruling on 2026-11-03. Checks (i) and (ii) were added by Blurby.Roadmap after its review of wave C.
 
 - **(i) Narrate, sentence-start Play.** Play Narrate in a section. It starts at the beginning of the sentence it is in, not mid-sentence. Sources: NARRATE-SENTENCE-RESUME-1, and wave C fix G3B, ec0d1424.
 - **(ii) Flow section-end pause.** In Flow, reach the end of a section. Flow pauses briefly before it moves to the next section. Source: wave C fix G3A, 2715c867.
@@ -152,6 +152,7 @@ These four checks belong in the gate (2) smoke on the RC candidate: `eb/rc-integ
 
   Sources: APP-TABS-1 and LIBRARY-COMPLETION-VISIBILITY-1 (BUG-230).
 - **(iv) E-ink settings survive the upgrade.** With E-ink on, the light theme and the band setting (on or off) are as they were before the upgrade. Source: the settings migration v13 → v15, R4.
+- **(v) PDF opens and reads on the arm64 install.** Open a PDF in the arm64 build. Its text appears and reads normally. Source: Findings F-012 (Blurby.Brain1 ruling, 2026-11-03).
 
 Gate (1) on the merged main re-runs as standing: the full quiet suite, plus NARRATE-REBUILD-1 D3 and D6.
 
