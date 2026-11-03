@@ -18,7 +18,7 @@ Every carried item is In Flight by design: this window is how they integrate (ow
 
 ## Baseline
 
-- Base: `origin/main` @ `b58b0117f1328fe76136c51adc092732667eeb70`. If main moves before launch, re-run the packet's read-only trial and return any new conflict to the planner.
+- Base: the `origin/main` merge commit that carries this specification onto main (named by SHA in the kickoff). Its only difference from `b58b0117f1328fe76136c51adc092732667eeb70`, the commit the trial integration ran on, is files under `docs/planning/`, so the trial results hold. If main has moved by launch, check `git diff --name-only b58b0117 <main>`: any path outside `docs/` means re-running the packet's read-only trial and returning any new conflict to the planner. Every `<base>` in the criteria means this base.
 - Tips (from `origin`, verify each SHA at launch; any moved tip returns to the planner):
 
 | Wave | Order | Tip branch | Carries |
@@ -87,7 +87,7 @@ Excluded: CHAPTER-STEP-CFI-1, BLURBY-BUSINESS-1, NARRATE-CPU-PROFILE-1, NARRATE-
 
 ## Repository plan
 
-- Branch `eb/rc-integration-20261103` from `b58b0117`, in `C:\Projects\Blurby\.worktrees\rc-integration-20261103` on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
+- Branch `eb/rc-integration-20261103` from the base above, in `C:\Projects\Blurby\.worktrees\rc-integration-20261103` on RodneySr. Push with `git push origin HEAD:refs/heads/eb/rc-integration-20261103`.
 - Merge commits take each tip whole. Each resolution commit stages only its named paths: R2 `main/ipc/library.js` and `main/ipc/misc.js`; R3 `src/reader/modes/narrate/ModeRuntime.ts` and `src/reader/modes/narrate/engine/narrateEngine.ts`; R4 `main/migrations.js`, the two named tests and the new `tests/settingsMigrationV15.test.js`; R5 `docs/governance/BUG_REPORT.md` and `CLAUDE.md`. Never `git add -A`.
 - Policy `push`: push after each green wave. The merge to `main` happens only after Brain1's package confirmation and Roadmap's merge go.
 
