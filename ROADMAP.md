@@ -1652,7 +1652,6 @@ These headings expose existing table/bullet items to the board parser; they do n
 
 #### FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter first word *(live Seq110; Queued; Full Spec 2026-11-03)*
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md](docs/planning/specs/2026-11-03/FLOW-TOC-JUMP-WORD-1.md). Flow's `completeLanding` (CHAPTER-STEP-CFI-1 amendment 1) calls `moveReadingWord`: paused, the chapter's first word gets Flow's paused cursor and Play starts there; playing, the engine jumps there and keeps playing. One file plus one test; after CHAPTER-STEP-CFI-1.
-
 #### TOC-FRAGMENT-WORD-1 — A contents entry that points inside a chapter lands on its own word *(live Seq110.5; Queued; Stub; Reader Engine; after CHAPTER-STEP-CFI-1; needs a `ReaderContainer.tsx` window)* <a id="toc-fragment-word-1"></a>
 - **Gist:** `resolveTocWordIndex` maps a contents entry by section only, so an entry whose href has a fragment lands on its section's first word. *Meditations* has 5 of 23 such entries (CHAPTER-STEP-CFI-1 control count, 2026-10-23); the owner's question-3 ruling makes this a follow-up (A).
 
@@ -1664,7 +1663,6 @@ These headings expose existing table/bullet items to the board parser; they do n
 
 #### PAGE-PARA-KEYS-1 — Page paragraph keys move the highlight to a real paragraph start *(live Seq115; Queued; Full Spec 2026-11-03; BUG-220)*
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/PAGE-PARA-KEYS-1.md](docs/planning/specs/2026-11-03/PAGE-PARA-KEYS-1.md). On an EPUB, Page's paragraph keys read an empty word list; a Page-owned copy of Focus's paragraph-start collector fixes it. Merges before PAGE-ENTRY-KEYS-1 (same section-load code).
-
 #### PAGE-SENTENCE-KEYS-1 — Page's sentence keys move to a real sentence start *(live Seq115.5; Queued; Full Spec 2026-11-03; after PAGE-PARA-KEYS-1)* <a id="page-sentence-keys-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/PAGE-SENTENCE-KEYS-1.md](docs/planning/specs/2026-11-03/PAGE-SENTENCE-KEYS-1.md). Ctrl+Up/Down read the book-wide word table instead of the empty EPUB token list; no-op until book words load (Brain1 R-B).
 ### Smoke findings intake — 2026-10-26
@@ -1956,6 +1954,8 @@ The owner requests larger library UI text; the warning banner and Retry screensh
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/NARRATE-BAND-SPACE-1.md](docs/planning/specs/2026-11-03/NARRATE-BAND-SPACE-1.md). Narrate's band takes R7/R8's paragraph band and space; Flow's Band switch also controls it (owner batch #25); the deprecated `flowZoneLines` and both its test exemptions go. Edits src/types.ts; runs after LIBRARY-CONTENT-DEDUP-1 in Seq order.
 - **Follow-up (LOW, from BAND-ALIGN-2 R8):** R8 replaces the line-count band with a paragraph band, and this item adopts it for Narrate. Once Narrate no longer reads the field, remove the deprecated `flowZoneLines?: number` from `src/types.ts`, along with `DEPRECATED_TYPE_KEYS` in the settings key-trust test.
 - **Follow-up from the RC integration window (wave C, Brain1 ruling, commit `bca86f96`, 2026-11-03):** the RC exempts `flowZoneLines` in the WS-TOKEN-REGEN parity test (`wsTokenRegen`) as well as in `settingsKeyTrustKeys`. The field's removal must drop both exemptions, plus the four `flowZoneLines: 5` fixture props at `bandAlign2.test.tsx:408` and `:419`, `bandAlign2Cover.test.tsx:88` and `bandAlign2R7.test.tsx:168`. Re-grep all of them at the post-RC base.
+#### FOOTNOTE-INLINE-READ-1 — Narrate can read a footnote where it is referenced *(live Seq141.5; Queued; Stub; TTS / Narration Engine; after BLOCK-TEXT-ORDER-1)* <a id="footnote-inline-read-1"></a>
+- **Gist (owner request 2026-11-03):** a Narrate setting, "Read footnotes where they're referenced", off by default. On reaching a note marker ("blah blah ¹"), Narrate says "Footnote 1:" and reads the note, then carries on from the word after the marker. The cursor stays exact-word (ruling #31). Source: [BLOCK-TEXT-ORDER-1 contracts, owner answers](docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md).
 #### SMOKE8-COVERAGE-RECHECK-1 — Close the remaining smoke coverage gaps on one candidate build *(Seq139; Queued; Full Spec 2026-11-03; Platform & Maintenance; proposed P1) <a id="smoke8-coverage-recheck-1"></a>
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/SMOKE8-COVERAGE-RECHECK-1.md](docs/planning/specs/2026-11-03/SMOKE8-COVERAGE-RECHECK-1.md). Runs inside release gate (2) on its one build: exact timed recipes for checks 31 (live add/remove, immediate quit), 32 (copy inside the `sync-progress` scan window), 33 (exactly one card leaves) and 35 (Drive-disconnected quit). Verdicts from state; a failure becomes a finding; input/handoff partials stay with their own items. No source change.
 

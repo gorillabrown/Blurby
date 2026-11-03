@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-03T23:00:00Z",
+  "takenAt": "2026-11-03T23:18:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -7929,6 +7929,45 @@
         "id": "40d7c96c-c31e-8116-8820-cf1cc54c8262",
         "url": "https://app.notion.com/40d7c96cc31e81168820cf1cc54c8262",
         "createdTime": "2026-11-03 22:56:15Z",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
+    },
+    {
+      "id": "FOOTNOTE-INLINE-READ-1",
+      "title": "Narrate can read a footnote where it is referenced",
+      "sequence": 141.5,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "effort": "M",
+      "workstream": "TTS / Narration Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#footnote-inline-read-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Owner request 2026-11-03: a Narrate setting, \"Read footnotes where they're referenced\", off by default. On reaching a note marker (\"blah blah 1\"), Narrate says \"Footnote 1:\" and reads the note text, then carries on from the word after the marker. The cursor stays exact-word (owner ruling #31).",
+      "notes": "origin: owner answer to BLOCK-TEXT-ORDER-1 OQ2, 2026-11-03 (docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md). Needs BLOCK-TEXT-ORDER-1's note-target identification. Stub; design and technical spec to follow.",
+      "revision": "204f24b5ca4ef22e39edb0002d10d3a516c8557a4599a705b2abe4cfa97a1300",
+      "extra": {
+        "id": "40d7c96c-c31e-811b-8f19-c047945bdba6",
+        "url": "https://app.notion.com/40d7c96cc31e811b8f19c047945bdba6",
+        "createdTime": "2026-11-03 23:17:09Z",
         "date:Completed:start": "",
         "date:Completed:end": "",
         "date:Completed:is_datetime": "",

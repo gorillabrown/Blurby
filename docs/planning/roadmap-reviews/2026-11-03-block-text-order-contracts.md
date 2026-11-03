@@ -273,3 +273,13 @@ They are **not yet dispatch-ready** (U7 still fails):
 - **Base reds:** every base red above is a static deduction. The real base reds (Done-when 1) and the LL-143 gate dry-runs have not been run.
 
 D2 (root-level ref markers) and the "empty extraction looks like success" behaviour are **new findings beyond the f61 trace**. The engine refresh ordering, and the persistence of a slice index on a mismatched section, are pre-existing static findings. All four are source deductions, not runtime receipts.
+
+## Owner answers (2026-11-03, to Blurby.Roadmap)
+
+- **OQ2: Accept.** A plain-ID footnote target has no word spans in canonical mode. The owner added a feature request, recorded as FOOTNOTE-INLINE-READ-1 (below).
+- **OQ5: No pause.** Text that continues after a nested block carries on without a paragraph pause.
+- **OQ6: Yes, true order.** Before full-book words arrive, Narrate speaks nested blocks in DOM order, and "Play from the first visible word" starts on the true first word.
+- **OQ1: Keep today.** Fallback words before arrival keep today's footnote handling.
+- **OQ3: Keep today.** An internal extractor failure still looks like an empty book. It is recorded as a finding for WORD-INDEX-UNIFY-1.
+- **OQ4: Change.** In a section whose stamping cannot be certified, clicks and saves hold to the cfi only, as Page does before words arrive, instead of risking a wrong word. This widens contract C-3: the `onCertification` report now gates selection and saves. Blurby.Brain1 rules the technical shape and the widened fence (the FoliateView and ModeRuntime files, never shared core).
+- **Footnote feature request, "Setting, off by default":** when Narrate reaches a note marker ("blah blah ¹"), it says "Footnote 1:" and reads the note text there ("Footnote 1: etc etc", in the owner's own example), then carries on from the word after the marker. This is a Narrate setting, "Read footnotes where they're referenced", off by default. It is registered as its own stub, FOOTNOTE-INLINE-READ-1, after BLOCK-TEXT-ORDER-1.
