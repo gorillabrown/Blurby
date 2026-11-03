@@ -1,0 +1,10 @@
+{"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "note": "launch gate, worktree, M0, base package, tools", "at": "2026-10-30T23:00:00Z"}
+{"event": "end", "row": 1, "evidence": "gate pass (hostname RodneySr accepted); M0 a68bc161 (BUG_REPORT resolved to main); ci/build/pkg 0; 195 files", "result": "done", "at": "2026-10-30T23:12:00Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "note": "base probes", "at": "2026-10-30T23:12:00Z"}
+{"event": "end", "row": 2, "evidence": "Flow FAIL no-cursor; Focus FAIL no-cursor; Narrate PASS on base under the word ruling", "result": "done", "at": "2026-10-30T23:25:00Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "note": "red and fix (implementation agent)", "at": "2026-10-30T23:13:00Z"}
+{"event": "end", "row": 3, "evidence": "C1 a39fac59 red exact; C2 c57a7b4f; Q2 gate 0; pinned 52 files 429 pass; count 23 amended", "result": "done", "at": "2026-10-30T23:22:00Z"}
+{"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "note": "gates, fence, packages, rule 53", "at": "2026-10-30T23:30:00Z"}
+{"event": "end", "row": 4, "evidence": "npm test 198 files 2641/1/0; typecheck 0; build 0; +3 files; fence exact; asar 06DF1209 x64=arm64, pair 0; dist 0 of 21; 25 s launch clean", "result": "done", "at": "2026-10-30T23:45:00Z"}
+{"event": "start", "row": 5, "model": "claude-opus-5-5", "host": "claude-code", "note": "live L1-L3, memo, push", "at": "2026-10-30T23:45:00Z"}
+{"event": "end", "row": 5, "evidence": "L1 Flow PASS 60 ms; L2 Focus PASS on re-run under the Focus ruling; L3 Narrate PASS 341 ms; memo; pushed and held", "result": "done", "at": "2026-10-31T00:05:00Z"}
