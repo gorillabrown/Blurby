@@ -135,9 +135,10 @@ function interfaceKeys(source, name) {
 describe("settings keys parity (WS-TOKEN-REGEN-1 fold-in)", () => {
   const typesSource = fs.readFileSync(path.join(ROOT, "src", "types.ts"), "utf8");
   const { SETTINGS_DEFAULTS } = require("../main/migrations.js");
+  const DEPRECATED_TYPE_KEYS = new Set(["flowZoneLines"]); // BAND-ALIGN-2 R8; removed with the field by NARRATE-BAND-SPACE-1
 
   it("every top-level BlurbySettings key is in SETTINGS_DEFAULTS, and every default is typed", () => {
-    const typed = interfaceKeys(typesSource, "BlurbySettings");
+    const typed = interfaceKeys(typesSource, "BlurbySettings").filter((k) => !DEPRECATED_TYPE_KEYS.has(k));
     const defaults = Object.keys(SETTINGS_DEFAULTS);
     expect(typed.length).toBeGreaterThan(0);
     expect(typed.filter((k) => !defaults.includes(k))).toEqual([]);
@@ -146,7 +147,7 @@ describe("settings keys parity (WS-TOKEN-REGEN-1 fold-in)", () => {
 
   it("control: a planted extra interface key is reported", () => {
     const planted = typesSource.replace("export interface BlurbySettings {", "export interface BlurbySettings {\n  plantedKey: string;");
-    const typed = interfaceKeys(planted, "BlurbySettings");
+    const typed = interfaceKeys(planted, "BlurbySettings").filter((k) => !DEPRECATED_TYPE_KEYS.has(k));
     expect(typed.filter((k) => !Object.keys(SETTINGS_DEFAULTS).includes(k))).toEqual(["plantedKey"]);
   });
 });
