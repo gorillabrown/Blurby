@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import * as K from "../../src/constants";
 import { NarrateEngine, type EngineFailure, type EngineState, type ProducerPort } from "../../src/reader/modes/narrate/engine/narrateEngine";
 import { FakeAudioOutput } from "./harness/fakeAudioOutput";
-import { FakeProducer } from "./harness/fakeProducer";
+import { FakeProducer, SAMPLE_RATE, SPF } from "./harness/fakeProducer";
+import { FIRST_CHUNK_MAX_WORDS } from "../../src/reader/modes/narrate/engine/chunkPlan";
 
 const WORDS = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned to be religious, and bountiful; not only to do, but to intend any evil. Of my great grandfather I have learned to be frugal."
   .split(" ");
@@ -14,7 +15,7 @@ const FRAMES = 8; // 200 ms per word at 1.00x in the fake
 
 // harness(), flush and run as tests/narrate/narrate.engine.test.ts:15-39, with one change: the port carries a
 // cancelQueued spy and is built without a ProducerPort annotation, so this file typechecks before the port has it.
-function harness(options: { hold?: boolean } = {}) {
+function harness(options: { hold?: boolean; words?: readonly string[] } = {}) {
   const output = new FakeAudioOutput();
   const producer = new FakeProducer({ hold: options.hold ?? false, framesPerWord: FRAMES, leadFrames: 2, tailFrames: 1 });
   const cursor: number[] = [];
@@ -26,7 +27,7 @@ function harness(options: { hold?: boolean } = {}) {
   const cancelQueued = vi.fn();
   const port = { generate: (r: Parameters<ProducerPort["generate"]>[0]) => { calls.push({ text: r.text, priority: r.priority, group: r.group }); return producer.generate(r); }, cancelQueued };
   const engine = new NarrateEngine({
-    words: WORDS, producer: port, output, voice: "af_bella", speed: 1.0, prefetch: 1, leadSeconds: 0.03,
+    words: options.words ?? WORDS, producer: port, output, voice: "af_bella", speed: 1.0, prefetch: 1, leadSeconds: 0.03,
     events: { onCursor: (w) => cursor.push(w), onState: (s) => states.push(s), onFailure: (f) => failures.push(f), onComplete: complete, onDiagnostic: (k, d) => diagnostics.push(`${k}: ${d}`) },
   });
   return { engine, output, producer, calls, cancelQueued, cursor, states, failures, diagnostics, complete };
@@ -49,7 +50,14 @@ async function pausedWithPrefetchHeld() {
   await flush();
   expect(h.producer.requests).toHaveLength(2);
   expect(h.calls[1].text.startsWith("Of my mother")).toBe(true);
-  run(h, 0.5);
+  // RC-INTEGRATION-WINDOW (standing rule 50): under sentence-start resume (NARRATE-SENTENCE-RESUME-1, owner 2026-10-14)
+  // only a pause on a sentence's first word resumes where it paused; chunk A is one sentence, so pause inside word 0,
+  // after the trim (mid-unit, not the leading silence).
+  run(h, 0.1);
+  const srcA = h.output.sources[0];
+  const pausedSample = Math.floor((h.output.playbackPosition() - srcA.startAt) * SAMPLE_RATE) + srcA.offset;
+  expect(pausedSample).toBeGreaterThan(srcA.offset);
+  expect(pausedSample).toBeLessThan(srcA.offset + FRAMES * SPF); // inside word 0
   h.engine.pause();
   return h;
 }
@@ -93,6 +101,34 @@ describe("pause cancels queued producer work (NARRATE-PAUSE-CANCEL-1)", () => {
     expect(h.calls.slice(2).some((c) => c.text.startsWith("Of my mother"))).toBe(false);
     expect(h.cursor).toContain(12);
     expect(contiguous(h.cursor)).toBe(true);
+  });
+
+  it("(e3m) a chunk that arrived while paused but begins mid-sentence replays the sentence from its first word (new epoch)", async () => {
+    // The first sentence is longer than the first chunk's cap, so chunk A is cut mid-sentence and chunk B continues it.
+    const LONG_SENTENCE_WORDS = FIRST_CHUNK_MAX_WORDS + 5;
+    const words = ["Of", ...Array.from({ length: LONG_SENTENCE_WORDS - 2 }, (_, i) => `word${i}`), "end.", ...WORDS.slice(12)];
+    const h = harness({ hold: true, words });
+    h.engine.play(0);
+    await flush();
+    h.producer.requests[0].release();
+    await flush();
+    const srcA = h.output.sources[0];
+    expect(srcA.samples / SPF).toBe(FIRST_CHUNK_MAX_WORDS * FRAMES + 3); // A holds the first FIRST_CHUNK_MAX_WORDS words
+    run(h, (srcA.samples - srcA.offset) / SAMPLE_RATE + 0.3); // A has played out; B is held: the pause is in the gap
+    h.engine.pause();
+    expect(h.calls[1].text.startsWith(words[FIRST_CHUNK_MAX_WORDS])).toBe(true); // B begins mid-sentence
+    h.producer.requests[1].release(); // B arrives while paused
+    await flush();
+    const callsBefore = h.calls.length;
+    const cursorBefore = h.cursor.length;
+    h.engine.resume();
+    await flush();
+    for (const r of h.producer.requests) if (!r.settled) { r.release(); await flush(); }
+    run(h, 1);
+    expect(h.calls[callsBefore].text.startsWith(words[0])).toBe(true); // regenerated from the sentence's first word
+    const after = h.cursor.slice(cursorBefore);
+    expect(after[0]).toBe(0);
+    expect(words[after[0]]).toBe("Of"); // by text (LL-161)
   });
 
   it("(e4) any other producer error is still F4", async () => {

@@ -111,9 +111,14 @@ describe("NARRATE-GAP-PAUSE-1: a pause in the gap before a scheduled chunk (BUG-
     h.producer.requests[0].release();
     await flush();
     const srcA = h.output.sources[0];
-    run(h, LATENCY + 0.5); // the heard sample is ~0.5 s into A
+    // RC-INTEGRATION-WINDOW (standing rule 50): under sentence-start resume (NARRATE-SENTENCE-RESUME-1, owner 2026-10-14)
+    // only a pause on a sentence's first word resumes at the exact sample, and chunk A is one sentence, so the pause lands
+    // inside word 0 (after the trim, so it is mid-unit, not the leading silence).
+    run(h, LATENCY + 0.1); // the heard sample is ~0.1 s into A
     const heard = h.output.playbackPosition();
     const pausedSample = Math.floor((heard - srcA.startAt) * SAMPLE_RATE) + srcA.offset;
+    expect(pausedSample).toBeGreaterThan(srcA.offset);
+    expect(pausedSample).toBeLessThan(srcA.offset + FRAMES * SPF); // inside word 0
     h.engine.pause();
     const sourcesBefore = h.output.sources.length;
     h.engine.resume();
