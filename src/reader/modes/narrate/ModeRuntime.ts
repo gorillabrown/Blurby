@@ -66,6 +66,7 @@ import { NarrateEngine, type EngineFailure, type EngineState, type ProducerPort,
 import { WebAudioOutput, type AudioOutput } from "./engine/playbackClock";
 import type { ChunkTable } from "./engine/wordTable";
 import { logNarrateStartError } from "./helpers/logStartError";
+import { sentenceStartAt } from "./engine/chunkPlan";
 
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const NARRATE_SURFACE_LOAD_DELAY_MS = 200;
@@ -282,6 +283,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       return;
     }
     const bookWordsTotalWords = this.document.bookWords?.totalWords;
+    const clickedWord = s.explicitSelectionAnchor != null; // the reader chose this word: it is not rewound
     const startSource = this.consumeModeStartAnchor();
     let startWord = this.document.useFoliate
       ? resolveFoliateStartWord(startSource, effectiveWords.length, () => this.surface.findFirstVisibleWordIndex(), bookWordsTotalWords)
@@ -291,6 +293,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       const firstVisible = this.surface.findFirstVisibleWordIndex();
       startWord = firstVisible >= 0 ? firstVisible : 0;
     }
+    // NARRATE-SENTENCE-RESUME-1: Play, Space, a reopened book and a page turn start at the sentence's first word.
+    if (!clickedWord) startWord = sentenceStartAt(effectiveWords, startWord, this.chunkBreaks(effectiveWords));
     if (startWord !== s.highlightedWordIndex) this.publishHighlight(startWord);
     this.anchorDeps.jumpDisplayToWord(startWord);
     if (this.document.useFoliate && this.surface.isReady()) this.surface.highlight(startWord, "narrate", { allowMotion: true });

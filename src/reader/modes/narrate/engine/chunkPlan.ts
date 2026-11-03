@@ -16,8 +16,20 @@ export const FIRST_CHUNK_MAX_WORDS = 15;
  * 400 itself, a chunk came out at 405 ids in the D6 warm run (2026-10-13) and failed closed (F4) on ordinary text.
  */
 export const PACK_TARGET_TOKENS = 360;
-/** Phoneme characters per text character measured on the Phase 0 smoke run (1.04), padded. */
-export const estimateTokens = (text: string): number => Math.ceil(text.length * 1.15) + 2;
+/**
+ * Input ids per digit. A digit is spoken as a whole word ("1974" → "nineteen seventy four", "e4" → "e four"), so it
+ * costs far more than a letter: 5.6–12.5 ids per digit on the owner library's class-E chunks (NARRATE-TOKEN-CAP-1 probe,
+ * 2026-10-23), padded to the top of that range so a digit-dense chunk is planned under the cap.
+ */
+export const DIGIT_TOKEN_WEIGHT = 13;
+/**
+ * Phoneme characters per text character measured on the Phase 0 smoke run (1.04), padded; each digit at its own weight (above).
+ * The estimate only packs; the producer enforces the exact cap.
+ */
+export const estimateTokens = (text: string): number => {
+  const digits = (text.match(/\d/g) || []).length;
+  return Math.ceil((text.length - digits) * 1.15 + digits * DIGIT_TOKEN_WEIGHT) + 2;
+};
 
 const SENTENCE_END = /[.!?]["'”’)\]]*$/;
 const PAUSE_MARK = /[,;:—]["'”’)\]]*$/;
@@ -36,6 +48,10 @@ const LETTER_PIECE = /^[A-Za-z](?:\.|$)/;
 const WEB_START = /^www\.$/i;
 const WEB_PIECE = /^[a-z0-9-]+\.$/i;
 const NEW_SENTENCE = /^["'“‘(\[]*[A-Z]/;
+/** An uppercase initial other than "I.": before a capitalised name it is a name's initial ("M. Annius"), not an end. */
+const NAME_INITIAL = /^[A-HJ-Z]\.$/;
+/** Words that open sentences, so "Section B. The next" and "B. C. He" still end at the letter (not a name after it). */
+const SENTENCE_OPENER = /^["'“‘(\[]*(?:the|a|an|this|that|these|those|it|its|he|she|they|we|you|i|his|her|their|our|my|but|and|or|so|then|there|here|in|on|at|if|when|as|after|before|for|with|what|who|how|why|no|not|yet)\b/i;
 
 function isAbbreviation(words: readonly string[], i: number): boolean {
   if (SINGLE_LETTER.test(words[i]) || ABBREVIATION.test(words[i])) return true;
@@ -50,7 +66,21 @@ function isSentenceEnd(words: readonly string[], i: number): boolean {
   if (TITLE.test(words[i])) return false;
   if (!isAbbreviation(words, i)) return true;
   if (SINGLE_LETTER.test(words[i]) && LETTER_PIECE.test(next)) return false;
+  // NARRATE-SENTENCE-INITIALS-1; the second piece of a dotted abbreviation ("B." "C.") keeps the rule below.
+  const completesAbbreviation = i > 0 && ABBREVIATION.test(words[i - 1] + words[i]);
+  if (NAME_INITIAL.test(words[i]) && !completesAbbreviation && NEW_SENTENCE.test(next) && !SENTENCE_OPENER.test(next)) return false;
   return NEW_SENTENCE.test(next);
+}
+
+/**
+ * The first word of the sentence holding word `i` (NARRATE-SENTENCE-RESUME-1): Narrate starts and resumes there. It
+ * never goes back across a chunk break, and an index outside the words is returned as it is.
+ */
+export function sentenceStartAt(words: readonly string[], i: number, breaks: ReadonlySet<number>): number {
+  if (i <= 0 || i >= words.length) return i;
+  let j = i;
+  while (j > 0 && !isSentenceEnd(words, j - 1) && !breaks.has(j - 1)) j--;
+  return j;
 }
 
 export interface ChunkPlanEntry {

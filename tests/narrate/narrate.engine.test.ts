@@ -131,7 +131,9 @@ describe("narrate engine (D5-engine)", () => {
     h.engine.resume();
     await flush();
     expect(h.calls).toHaveLength(3); // the resume asked for a chunk; it did not wait behind the stale prefetch
-    expect(h.calls[2].text).toBe("Verus I have"); // ramp step 0 from the first word not yet heard
+    // NARRATE-SENTENCE-RESUME-1: the first word not yet heard (3, "Verus") is mid-sentence, so speech restarts at the
+    // sentence's first word, "Of" (0): ramp step 0 from there.
+    expect(h.calls[2].text).toBe("Of my grandfather");
     expect(h.calls[2].priority).toBe("request");
     expect(h.calls[2].group).not.toBe(h.calls[1].group); // a new epoch, so the producer drops older queued prefetch
     expect(h.engine.getSnapshot().epoch).toBeGreaterThan(epoch);
@@ -142,9 +144,11 @@ describe("narrate engine (D5-engine)", () => {
     expect(h.diagnostics.some((d) => d.startsWith("narrate:stale-result"))).toBe(true);
     h.producer.requests[2].release();
     await flush();
-    expect(h.calls[3]).toMatchObject({ text: "learned to be gentle and", priority: "prefetch" }); // the ramp goes on from step 1
+    expect(h.calls[3]).toMatchObject({ text: "Verus I have learned to", priority: "prefetch" }); // the ramp goes on from step 1
     run(h, 0.5);
-    expect(h.cursor).toEqual([0, 1, 2, 3, 4, 5]); // speech continues at word 3: none skipped, none repeated
+    expect(h.cursor.slice(0, 3)).toEqual([0, 1, 2]); // heard before the pause
+    expect(h.cursor.slice(3)).toEqual([...Array(h.cursor.length - 3).keys()]); // then from the sentence's first word, in order
+    expect(h.cursor.length).toBeGreaterThan(3);
     expect(h.output.overlaps()).toEqual([]);
   });
 
@@ -164,8 +168,10 @@ describe("narrate engine (D5-engine)", () => {
     h.producer.requests[1].release(); // the prefetch arrives and follows the replayed audio
     await flush();
     run(h, 1.0);
-    expect(h.cursor).toEqual([...Array(h.cursor.length).keys()]);
-    expect(h.cursor.at(-1)).toBeGreaterThanOrEqual(5);
+    // NARRATE-SENTENCE-RESUME-1: paused in word 1, the replay starts at the sentence's first word (0) in the same chunk.
+    expect(h.cursor.slice(0, 2)).toEqual([0, 1]);
+    expect(h.cursor.slice(2)).toEqual([...Array(h.cursor.length - 2).keys()]);
+    expect(h.cursor.at(-1)).toBeGreaterThanOrEqual(4);
     expect(h.output.overlaps()).toEqual([]);
   });
 
@@ -250,12 +256,15 @@ describe("narrate engine (D5-engine)", () => {
     expect(h.output.overlaps()).toEqual([]);
   });
 
-  it("pause stops at the exact sample and resume continues from it: no word repeated, none dropped, no overlap", async () => {
+  // NARRATE-SENTENCE-RESUME-1 (s3): paused in a sentence's first word, the resume is exact. Paused mid-sentence, it starts
+  // at the sentence's first word (s1, s2 below).
+  it("sentence start (s3): paused at a sentence's first word, resume continues from the exact sample: no word repeated, none dropped, no overlap", async () => {
     const h = harness();
     h.engine.play(0);
     await flush();
-    run(h, 0.03 + WORD_S * 2.5); // mid-word 2
-    expect(h.cursor.at(-1)).toBe(2);
+    run(h, 0.03 + WORD_S * 0.5); // mid-word 0, "Of": the first word of its sentence
+    expect(h.cursor.at(-1)).toBe(0);
+    expect(WORDS[0]).toBe("Of");
     const pausedAt = h.output.now();
     h.engine.pause();
     expect(h.states.at(-1)).toBe("paused");
@@ -264,13 +273,13 @@ describe("narrate engine (D5-engine)", () => {
     const pausedSample = played[0].to;
     expect(pausedSample).toBeCloseTo(2 * SPF + Math.round((pausedAt - 0.03) * SAMPLE_RATE), -1);
     run(h, 1.0);
-    expect(h.cursor.at(-1)).toBe(2); // nothing moves while paused
+    expect(h.cursor.at(-1)).toBe(0); // nothing moves while paused
     h.engine.resume();
     expect(h.states.at(-1)).toBe("playing");
     const resumed = h.output.sources[h.output.sources.length - 2]; // chunk 1 rescheduled, then chunk 2
     expect(resumed.offset).toBe(pausedSample);
     run(h, 0.03 + 0.01);
-    expect(h.cursor.at(-1)).toBe(2); // the same word continues
+    expect(h.cursor.at(-1)).toBe(0); // the same word continues
     run(h, WORD_S * 10);
     expect(h.cursor).toEqual([...Array(h.cursor.length).keys()]); // strictly ascending by one: no repeat, no drop
     expect(h.output.overlaps()).toEqual([]);
@@ -278,6 +287,58 @@ describe("narrate engine (D5-engine)", () => {
     const ranges = h.output.playedSampleRanges().filter((r) => r.pcm === h.output.sources[0].pcm).sort((a, b) => a.from - b.from);
     expect(ranges[0].from).toBe(2 * SPF);
     expect(ranges[1].from).toBe(ranges[0].to);
+  });
+
+  /** Tick until the cursor reaches `word`, then go `fraction` of a word into it. */
+  function runInto(h: ReturnType<typeof harness>, word: number, fraction = 0.4): void {
+    for (let i = 0; i < 6000 && h.cursor.at(-1) !== word; i++) run(h, 1 / 60);
+    expect(h.cursor.at(-1)).toBe(word);
+    run(h, WORD_S * fraction);
+  }
+
+  it("sentence start (s1): paused mid-sentence inside a buffered chunk, the resume replays that chunk from the sentence's first word's unit", async () => {
+    const h = harness();
+    h.engine.play(0);
+    await flush();
+    expect(h.producer.requests[1].text).toBe(WORDS.slice(12).join(" ")); // chunk 2: two sentences, from word 12
+    runInto(h, 36); // "I", inside the sentence that begins at word 32
+    expect(WORDS[36]).toBe("I");
+    h.engine.pause();
+    const calls = h.calls.length;
+    const epoch = h.engine.getSnapshot().epoch;
+    const before = h.cursor.length;
+    h.engine.resume();
+    const unit = lawfulTable(WORDS.slice(12), 1.0, { framesPerWord: FRAMES, leadFrames: 2, tailFrames: 1 }).table.units[32 - 12];
+    expect(h.output.sources.at(-1)!.offset).toBe(unit.sampleStart); // scheduled from the unit holding word 32
+    run(h, 0.03 + 0.01);
+    expect(h.cursor[before]).toBe(32);
+    expect(WORDS[h.cursor[before]]).toBe("Of");
+    expect(h.calls).toHaveLength(calls); // replayed, not regenerated
+    expect(h.engine.getSnapshot().epoch).toBe(epoch);
+    run(h, WORD_S * 6);
+    expect(h.cursor.slice(before)).toEqual([32, 33, 34, 35, 36, 37, 38].slice(0, h.cursor.length - before));
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("sentence start (s2): when the sentence began in an earlier chunk, the resume plays from its first word as a new epoch", async () => {
+    const h = harness({ chunkRamp: [3, 5] });
+    h.engine.play(0);
+    await flush();
+    expect(h.calls[1].text).toBe("Verus I have learned to"); // chunk 2 starts mid-sentence, at word 3
+    runInto(h, 5); // "have", in chunk 2; its sentence begins at word 0, in chunk 1
+    expect(WORDS[5]).toBe("have");
+    h.engine.pause();
+    const calls = h.calls.length;
+    const epoch = h.engine.getSnapshot().epoch;
+    const before = h.cursor.length;
+    h.engine.resume();
+    await flush();
+    expect(h.engine.getSnapshot().epoch).toBeGreaterThan(epoch);
+    expect(h.calls[calls]).toMatchObject({ text: "Of my grandfather", priority: "request" });
+    run(h, 0.5);
+    expect(h.cursor[before]).toBe(0);
+    expect(WORDS[h.cursor[before]]).toBe("Of");
+    expect(h.output.overlaps()).toEqual([]);
   });
 
   it("a click mid-word restarts from the clicked word in a new epoch; the old chunk is stopped and a stale result is dropped", async () => {
