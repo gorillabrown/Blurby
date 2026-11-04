@@ -90,7 +90,8 @@ Source: `Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`, sections "Amendment 1" to
   - Narrate fix and sp6 at `98ce1e84`; trial.js hardening at `9c491553`.
   - `npm test`: 3,044 passed, 2 expected-fail (temporary), 1 skipped. Typecheck exits 0.
   - Not yet built or pushed at the time of the amendment.
-- **The fence (Done-when 8) is unchanged.** The corrected Focus and Flow rows stay in their two added test files.
+- **The fence (Done-when 8)** grows by one file under amendment 4: `M scripts/narrate-rebuild/p5-latency-e2e.mjs`. With it, the launcher fails any cell that contains a trial's own error. The corrected Focus and Flow rows stay in their two added test files.
+- **Merge go (Blurby.Roadmap, 2026-11-03).** Tip `48ac770d` on base `c5bb507f`. The diff is 6 files: the fence plus the launcher. Brain1 confirmed the x64 package (`Brain1.NARRATE-ARRIVAL-SYNC-1.package-confirmation.2026-11-03.md`). Still to come: the arm64 launch of the merge on Rodney, then gate (1) run 6. Its record states that the diagnostics flag was on and that click targets skip link spans.
 
 ##### Lessons applied
 - **LL-142:** the order is measured on the control, and the base RED is recorded, before the fix is trusted.
