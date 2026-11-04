@@ -11,7 +11,7 @@ Dispatch: Wave A (Done-when A1–A6), then Wave B (B1–B9). B8 (the native arm6
 | A1 red commit | `19e065d0` (the two test files alone) |
 | Implementation commit | `e870ef67` |
 | Ruling commit | `bc4b40ca`, the commit that added this row: Blurby.Brain1's ruling on deviation 1, option (a), a named rule-50 exception (fixture only), plus the (rr-c) control and the B6 supplementary gate. It touches `tests/readerModes/pagePositionSave.test.tsx` and this memo only. |
-| Wave B commits | `dcfb18ae` (B1, the four `blockTextOrderHold.*` test files alone); `81bef438` (items 4–8); `19771a47` ((rr3), named rule-50 exception); `4a0b2e28` (B5 checker, committed by the coordinator); then the records commit that adds this row |
+| Wave B commits | `dcfb18ae` (B1, the four `blockTextOrderHold.*` test files alone); `81bef438` (items 4–8); `19771a47` ((rr3), named rule-50 exception); `4a0b2e28` (B5 checker, committed by the coordinator); `1a1c3845` (records: Wave B, B5, B7 tip, fence); then the commit that adds the B7 main half |
 | Host | RodneySr; Node v24.14.1; Vitest 4.1.11; `npm ci` exit 0; `node node_modules/electron/install.js` exit 0 (`path.txt` = `electron.exe`) |
 | Shell | PowerShell 7 (`pwsh -NoProfile`) for every gate below |
 | Pushed | No (the coordinator pushes) |
@@ -513,13 +513,60 @@ Earlier runs, for the record:
   - The extracted asar's `dist\` equals the worktree's `dist\` (`diff -r`, no output). Its `main\` directory, `main.js` and `preload.js` are byte-identical to the worktree's, and its `epub-word-extractor.js` contains `extractOrderedRuns`.
 - **B5 on the package:** above (control exit 1, live exit 0).
 
-### origin/main `14ce3d24`, x64: NOT RUN (disk floor)
+### origin/main `14ce3d24`, x64
 
-The base package was not built. `C:\Users\estra\Projects\Blurby\.worktrees\gate1-run6-20261103` is at `14ce3d24`. It is clean and has no `node_modules` or `dist`.
+Built in `C:\Users\estra\Projects\Blurby\.worktrees\gate1-run6-20261103` (detached at `14ce3d24`, clean, no `node_modules` or `dist` at the start), with the tip's recipe. It ran after Blurby.Brain1's go for option (c): the floor was 0.3 GB for the build steps only, and the normal 1 GB floor applied to every launch. Outputs are in `B7\main\` (`build-steps.txt` holds the step lines below).
 
-Its `npm ci` needs about 1.4 GB, which is the size of the tip's `node_modules`; `package.json` and `package-lock.json` are identical at `14ce3d24` and the tip. The package needs about 1 GB, since the tip's `release\` is 980 MB. With 2.19 GB free, `npm ci` would leave about 0.8 GB, under the 1 GB floor, before the package build.
+| Step | Exit | Free on C: after |
+|---|---|---|
+| (start) | — | 2.74 GB |
+| `npm ci` | 0 | 1.79 GB |
+| `node node_modules/electron/install.js` (needed: no `path.txt` yet) | 0 | 1.44 GB |
+| `npm run build` | 0 | 1.44 GB |
+| `npx electron-builder --win --dir --x64 --publish never` | 0 | 0.47 GB |
 
-Nothing was run in that worktree, and no tracked file there changed. The base's 25 s launch and its B5 step 1 runtime proof are still owed.
+`git status --short` in gate1-run6 was empty before and after, and stayed empty through the launches. No tracked file changed, so nothing needed restoring.
+
+**Completeness, checked before any launch** (`B7\main\completeness.txt`); every check passed:
+- `release\win-unpacked\Blurby.exe`, `resources\app.asar`, `resources\app.asar.unpacked` and `resources\resources\sample-meditations.epub` exist.
+- `npx asar list` exits 0 with 11,587 entries, the same count as the tip (`B7\main\asar-list.txt`).
+- The sorted lists differ in exactly four entries, the content-hashed Vite bundles: `App` (`K-A4gbIe` at the tip, `C6zGHjar` on main), `epub` (`CEMTiQAD`, `C_nIHu2Z`), `index` (`DE94z9ko`, `CpEHdBJw`) and `view` (`Cfh8NArt`, `CW5RmoLH`). The BTO files are content changes at the same paths (`main\epub-word-extractor.js`; the mode code inside `App-*.js`), so they add no list entry. The script's hash-normalization step did not rewrite these names, so the comparison recorded is the raw sorted diff.
+- `ENOSPC` and "no space left" occur 0 times in the electron-builder output. Its log ends with the asar integrity update and signtool, as the tip's does.
+
+**Space.** gate1-run6's `node_modules` was then deleted, as authorized: 0.50 GB free before, 1.80 GB after. That cleared the normal 1 GB floor for the launches.
+
+**25 s launch** (same `B7\launch25.mjs`; result `B7\main\launch25-x64.json`):
+- `app.getPath('userData')`, read over the main-process inspector before any input, equals the scratch profile (LL-165);
+- the app is alive at 25 s, with no `error.log`, no crash dump and no flagged output line;
+- the output is the inspector's own lines, `[ws-server] Listening on ws://127.0.0.1:48924/blurby`, and the first-launch `Backup failed … ENOENT` (BUG-217), the same as the tip;
+- the live `library.json` and `settings.json` hashes are unchanged.
+
+**B5 step 1 runtime proof** (LL-152: one recipe on the base and the tip). The command is the one `run.ps1` step 1 runs (`ELECTRON_RUN_AS_NODE=1`, `-p` of `process.versions`), with APPDATA and LOCALAPPDATA redirected (`B7\step1.ps1`). Each exe was checked at 1.79 GB free:
+
+| Package | Exit | Versions |
+|---|---|---|
+| origin/main `14ce3d24` (`B7\main\b5-step1.txt`) | 0 | `{"electron":"42.11.18","icu":"78.2"}` |
+| tip `4a0b2e28` (`B7\tip\b5-step1.txt`) | 0 | `{"electron":"42.11.18","icu":"78.2"}` |
+
+They are the same.
+
+**Live profile.** The full `%APPDATA%\blurby` hash (4,088 files) taken before the main-half launches (`B7\main\live-profile-hash-before-main.txt`) and after them (`…-after-main.txt`) equals the baseline `live-profile-hash-before.txt`.
+
+### Evidence kept and scratch deleted (Blurby.Brain1 go, options (a) and (c))
+
+Kept in `C:\Projects\Blurby-artifacts\block-text-order-1\` before any deletion:
+- the B5 gate JSONs `B5-{control,live}-run{2,3}.json`, each checked with `cmp` against its scratch `result.json`;
+- the logs `B5-{control,live}-run{2,3}.txt`;
+- the stampMs record `B5-stampMs.json`;
+- `B7\tip\asar-list.txt`;
+- `B7\tip\asar-compare.txt`. It holds the byte-identity comparison: `diff -r` of `dist\` and `main\`, plus `cmp` of `main.js`, `preload.js` and `epub-word-extractor.js`, each exit 0, with the bundle string counts.
+
+Deleted, and nothing else:
+- the B5 scratch folders `bto-b5`, `bto-b5-run2` and `bto-b5-run3` under the session scratchpad, about 9 MB;
+- the asar extraction `scratchpad\b7\asar-tip`, 618 MB (2.15 GB free before these, 2.77 GB after);
+- `gate1-run6-20261103\node_modules`, about 1.3 GB, after the completeness check.
+
+The mechanics dry-run scratch (`bto-dry`), the worktrees, gate1-run6's `release\` and `dist\`, and every artifact were kept. At the end, C: has 1.79 GB free.
 
 ### B9 fence
 
@@ -528,7 +575,7 @@ Nothing was run in that worktree, and no tracked file there changed. The base's 
 - `M tests/readerModes/pagePositionSave.test.tsx` (the ruled rule-50 exceptions);
 - this memo and the time log.
 
-`narrate/ModeRuntime.ts` and `narrate/useModeBindings.ts` are absent. `c5bb507f..HEAD` adds exactly the six files `14ce3d24` merged in, which equal `git diff --name-status c5bb507f 14ce3d24`. There is no conditional addition: `boundary-policy.json` is not edited.
+The fence was re-run at the records commits and still matches; the second records commit touches only this memo and the time log. `narrate/ModeRuntime.ts` and `narrate/useModeBindings.ts` are absent. `c5bb507f..HEAD` adds exactly the six files `14ce3d24` merged in, which equal `git diff --name-status c5bb507f 14ce3d24`. There is no conditional addition: `boundary-policy.json` is not edited.
 
 ### Wave B test counts
 
