@@ -363,3 +363,17 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Input to WORD-INDEX-UNIFY-1, which owns how a missing map is handled.
 
 **Disposition:** open; input to WORD-INDEX-UNIFY-1
+
+### F-022 — Focus's relocate save can land after a newer pause save (CFI-POSITION-CONSISTENCY-1 C1–C3 fold-in, 2026-11-03)
+
+**Source:** Blurby.Brain1 ruling Q2 for Flow and Narrate (2026-11-03); the planner checked Focus while folding it into CFI-POSITION-CONSISTENCY-1.
+
+**Severity:** low
+
+**Where:** `src/reader/modes/focus/ModeRuntime.ts:903` (relocate save, at `14ce3d24`)
+
+**Finding:** Focus also schedules a relocate save, delayed 2 s by the shell. A pending one could overwrite a newer pause save, the race Q2 fixes for Flow and Narrate. Focus's view does not move while it plays, so the exposure is narrow, and CFI-POSITION-CONSISTENCY-1 leaves Focus unchanged here.
+
+**Accountable role / next action:** planner. Re-check after CFI-POSITION-CONSISTENCY-1 merges; specify a Q2-style re-save for Focus only if a probe shows the overwrite.
+
+**Disposition:** open; no item

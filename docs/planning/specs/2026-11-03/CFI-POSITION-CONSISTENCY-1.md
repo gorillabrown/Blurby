@@ -1,4 +1,4 @@
-#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; B1–B18 adopted by Blurby.Brain1 2026-11-03; C1–C3 open before Wave A; cited against `origin/main` `c5bb507f`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
+#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; B1–B18 adopted by Blurby.Brain1 2026-11-03; C1–C3 ruled 2026-11-03; dispatch-ready; cited against `origin/main` `c5bb507f`, with every file Waves A and C add for C1–C3 re-checked unchanged at `14ce3d24`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
 
 - **What:**
   - Every save that writes a word (the position) also writes the page of that word (the cfi), or clears the stored cfi.
@@ -89,7 +89,7 @@
   - LIBRARY-WRITE-RACE-3 is Seq 89, a Full Spec in `ROADMAP.md` (`:863`), with its post-RC amendment `docs/planning/specs/2026-11-03/LIBRARY-WRITE-RACE-3.post-rc-amendment.md`. It is not merged: `origin/main` carries only LIBRARY-WRITE-RACE-1 and 2 (`2b2b41a5`).
   - Its race is the renderer's library edits, which stamp fields the reader did not change (W2). Those edits can set only `RENDERER_FIELDS` (`main/ipc/library.js:44`: `unread`, `seenAt`, `tags`, `collection`; merged by `mergeRendererEdits`, `:57`, behind `save-library`, `:79`). `position` and `cfi` are main's alone, written only through `update-doc-progress` into the single in-memory library that one debounced writer saves.
   - **Chosen option: route O4 through the existing debounced path**, `update-doc-progress` and `saveLibrary`, with no LIBRARY-WRITE-RACE-3 prerequisite. A Focus save adds writes of fields no renderer library edit can carry, through the writer that already coalesces them, so it neither widens nor reopens that race. Making LIBRARY-WRITE-RACE-3 a prerequisite would hold this item behind the RC window for a race it does not touch. A new renderer-side debounce would add a second timer for what main already coalesces.
-- **Design decisions** (planner proposal for Blurby.Brain1 to confirm; questions B1–B5, B8–B13 and B14–B18; design 9 is Brain1's binding O4 ruling):
+- **Design decisions** (confirmed by Blurby.Brain1 through B1–B18 and C1–C3, 2026-11-03; design 9 is Brain1's binding O4 ruling):
   1. **One contract for the cfi argument, everywhere it travels** (`documents.js`, the port, `ElectronAPI`, the library copy, the stub):
      - `undefined`: keep the stored cfi. Unchanged, so every existing caller behaves as today.
      - `null`: "this save knows no cfi for its word". Main sets the position, then clears the stored cfi unless the position is unchanged. An unchanged position means the stored pair still stands.
@@ -121,14 +121,20 @@
      - `src/types.ts:298` types `ElectronAPI.updateDocProgress`'s cfi as `string`.
      - The bridge in `ReaderContainer.tsx` passes the port's cfi into it (`:312`), drops a falsy cfi before the library copy (`:313`), and owns the relocate ref (`:271`, `:330`).
      - There is no type-honest way to carry `null` without editing both. **An integration window is requested** for `src/types.ts` and `src/components/ReaderContainer.tsx` from the cut to the merge. `src/utils/FlowScrollEngine.ts` is untouched.
-  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). Focus's saves as you go live in `focus/ModeRuntime.ts` only (Wave C). No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page and Focus already import (`page/ModeRuntime.ts:13-16`, `focus/ModeRuntime.ts:16-23`).
+  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). Focus's saves as you go live in `focus/ModeRuntime.ts` only (Wave C). Wave C also adds two entries to the port broker's release list (`src/reader/ports/createReaderPorts.ts:46-49`), once for all three playback modes (C1). That file is not in the shared-core freeze set, but it is every mode's broker, so it is named in Wave C's steps and the fence. No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page and Focus already import (`page/ModeRuntime.ts:13-16`, `focus/ModeRuntime.ts:16-23`).
   9. **Focus saves as you go (O4; Brain1's binding O4 rulings).**
-     - **When:** at the first word advance at least `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5000 ms, `src/constants.ts:168`, never a literal) after the last save or the start of play; and once more on pause, on the pause branch of `togglePlay`, and on `stop()`, which covers a mode switch, Escape to Page, the end of the book and teardown. Each fires only if the word differs from the last word saved.
+     - **When:** at the first word advance at least `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5000 ms, `src/constants.ts:168`, never a literal) after the last save or the start of play; and once more on pause, on the pause branch of `togglePlay`, and on `stop()`, which covers a mode switch, Escape to Page, a cross-book open and the end of the book. Each fires only if the word differs from the last word saved.
+     - **The exit save runs inside the teardown window (C1).** The router stops the outgoing mode inside `broker.teardown` (`src/reader/useReaderModeOrchestrator.ts:303-307`; a cross-book open's `closeAll(true)` does the same, `:318-323`). Wave C adds `persistence.updateDocProgress` and `persistence.updateProgress` to `READER_PORT_RELEASE_CALLS`, so the exit save is accepted there.
+       - Brain1's condition: the exit save is made synchronously inside `stop()`, after every save timer is cleared. In Focus that is after `clearTimers()` and `stopEngine()` (the engine's word timer, `FocusMode.scheduleNext`, `focus/ModeRuntime.ts:204-208`, is what drives the timed save). Nothing asynchronous saves after release.
+       - The broker enforces the same, with no help from the mode. Its release allowance does not outlive the teardown frame: `teardown` sets `releasing` only around `run()` and, in `finally`, clears it and deletes the key (`createReaderPorts.ts:189-200`). A release call passes only while `state === "closing" && releasing === id` (`:109-110`). Any later call is rejected with a `port-rejected` diagnostic (`:111-117`). Row f10 still requires that no such call is even attempted.
+       - **Not on unmount.** `router.destroy()` (the shell's unmount, `useReaderModeOrchestrator.ts:87`, `:377-379`) runs `closeAll(false)`: `broker.closeAll()` closes every key with no release window, then `runtime.destroy()` calls `stop("teardown")` (`:325-326`). A save there would only be rejected. So `stop()` skips the exit save when its reason is `"teardown"`. That reason reaches the save only from `destroy()` without an earlier `stop()`: every transition passes `"mode-switch"` or `"user-stop"` (`:344`, `:352`, `:356`, `:361`, `:374`), and a cross-book open passes `"user-stop"` (`:321`). On unmount the last timed save bounds the loss to one interval, as for a kill (row f11).
      - **What:** `ports.persistence.updateDocProgress(documentId, word, null)` then `ports.persistence.updateProgress(documentId, word)`, from one private method. The cfi is an explicit `null`, never `state.cfi`. Under design 1 main then clears the stored cfi whenever the word changed, so B1's rule holds.
-     - **Which word:** at an advance, the advanced word. On pause and stop, the engine's current word, the one `captureCurrentAnchor` publishes, read before `stopEngine()`.
+     - **Which word:** at an advance, the advanced word. On pause, the engine's current word, the one `captureCurrentAnchor` publishes. On stop, the committed word, `state.currentWordIndex` (C3): a click while paused commits the clicked word there (`commitShared`, `focus/ModeRuntime.ts:1202-1211`) without moving a paused engine (`:735`), so the click wins over the engine's older word.
+     - **"The last word saved"** includes Focus's own persisted commits: `commitShared` (a click, an off-EPUB navigation, CHAPTER-STEP-CFI-1's landing) sets it too. So a stop right after a paused click finds the word unchanged and saves nothing, and the click's own save, with its cfi, stays the last write (row f9).
      - **Only after Play:** the last-saved word starts as the word Focus opened at, and nothing saves until the engine has run (Play marks engagement, `focus/ModeRuntime.ts:532`; LL-030). Selecting Focus and leaving without Play saves nothing.
      - **No timer:** the interval is checked against `Date.now()` on each advance. Nothing new needs clearing on `stop()` (LL-169).
-     - **Only in the book's index space:** on an EPUB, only while the word map is loaded (`document.bookWords`); off EPUB always (question B15).
+     - **Only in the book's index space (B15, aligned with FLOW- and NARRATE-SAVE-AS-YOU-GO-1's Q3 ruling):** saves happen only while the running engine was started on the book's words. `start()` copies `effectiveWords()` (`:542`): the map when loaded, else the view's own words (`surface.getWords()`), else `tokenWords` (`:1167-1174`). The delayed start hands that copy to the engine (`:583-587`). `adoptDocument` does not restart a running engine (`:484-497`), and `resume()` reuses it (`:605-610`). So "the map is loaded now" does not prove the engine's indices are the book's. A flag, `engineOnBookWords`, records at each `start()` whether its words came from the map, or the book is not an EPUB. An engine started on fallback words never saves, even after the map arrives, until a new `start()` on the map (row f12).
+     - **Focus and a pending relocate save (Q2 check).** Focus does have a relocate save: `onRelocate` (`:863-904`) schedules `scheduleRelocateSave` (`:903`). But Focus advances only its word display (`jumpDisplayToWord`, `:1225`), so its view does not relocate while it plays. A pause save can be overwritten only if a relocate from outside playback (a resize or a layout setting) came within 2 s before the pause. Brain1 ruled Q2's re-save for Flow and Narrate, whose views relocate as they play. Focus is unchanged here; the narrow case is a findings candidate for Blurby.Roadmap.
      - **Reopen:** a Focus save stores a word and no cfi, so the reopen goes through design 4's hold to a word target and opens on that word. Focus has no sentence-start rule (Why), so a Focus resume starts at that word, not its sentence. Narrate's sentence-start rule (O3) still applies if the reader switches to Narrate.
      - **Expected loss:** about 20–40 words at 250–480 words a minute, the interval's span, plus main's 500 ms debounce on a hard kill (B16).
      - **Furthest mark:** each save raises keep-at-furthest's mark through the bridge's `noteHighWater` (`ReaderContainer.tsx:315`) with a `null` cfi (question B17).
@@ -164,8 +170,15 @@
     9. **Pinned rows brought into scope (standing rule 50).** `tests/useProgressTracker.test.ts`, describe block "the exit save's cfi (PAGE-REOPEN-CFI-1)" at `:330-376`:
        - "with no relocate since the open, it sends the position with no cfi" and "a relocate recorded for another book is not sent": change only their expected third argument from `undefined` to `null` (both `updateDocProgress` and `onUpdateProgress` where asserted). This is Blurby.Brain1's named exception to standing rule 50 (B3 ruling): everything else in both rows stays byte-identical, and the memo quotes each row before and after.
        - "after a relocate, it sends that relocate's cfi" stays unedited and green: its ref has no `wordIndex`.
+    10. **The B0 replay baselines (C2; Blurby.Brain1's named exception to standing rule 50).** Under step 8 the hard-selection commit sends `null` where B0 recorded `"<undefined>"`. Each fixture records it twice, both `hardSelect` steps: `flow-core-start-7` and `flow-core-start-0` command 8, `focus-core-start-7` and `focus-core-start-0` command 9 (`["fixture-doc", 17, "<undefined>"]` and `["fixture-doc", 10, "<undefined>"]`). The fixtures under `docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/` stay byte-unchanged.
+       - In `tests/readerModes/flow.behavior.test.tsx` and `tests/readerModes/focus.behavior.test.tsx` only, add one test-local helper, `hardSelectionCfiAsRecorded(scripts)`. It returns a deep copy in which, for every step whose `command` is `"hardSelect"`, an effect with `channel === "persistence.updateDocProgress"`, three arguments and `args[2] === null` gets `args[2] = "<undefined>"`. Nothing else is touched, so every other argument and effect still compares exactly. Its comment names this item, C2 and the rule-50 exception.
+       - In the test "preserves the recorded mode baseline", take `const candidate = hardSelectionCfiAsRecorded(result.candidateScripts);`.
+         - Flow: `:54` `expect(result.diff).toBeNull();` becomes `expect(compareReplay(readFixtureText("flow"), candidate).diff).toBeNull();`. The four negative controls (`:88`, `:92`, `:96`, `:101`) pass `candidate` in place of `result.candidateScripts`, so they still fail for their own mutation and not for the cfi.
+         - Focus: the same at `:32` (with `"focus"`) and at `:72`, `:76`, `:80`.
+       - `result.errors`, `droppedEffects`, `droppedObservations` and the channel checks (Flow `:62-82`, Focus `:40-66`) are unchanged. Nothing in `tests/readerModes/harness/fixtureReplay.tsx` changes: `replayFixture` already returns `candidateScripts` (`:439-450`), and `compareReplay` takes any baseline text and candidate (`:372`).
+       - Both tests stay green on `<base>` (the candidate still emits `"<undefined>"`) and after step 8. The memo quotes each edited line before and after.
 
-       No other existing test is edited. If any other test pins the `state.cfi` fallback or `undefined` on a close, STOP to Blurby.Brain1 with its name before editing it.
+       No other existing test is edited in Wave A. If any other test pins the `state.cfi` fallback or `undefined` on a close, STOP to Blurby.Brain1 with its name before editing it.
   - **Wave B — the cold-open hold, Page only** (about 35 tool uses):
     1. `src/constants.ts`, beside `FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS` (`:172`): `export const PAGE_OPEN_HOLD_TIMEOUT_MS = 3000;`, with a comment naming this item and Brain1 question B9.
     2. `src/reader/modes/page/helpers/persistentReadingAnchor.ts`:
@@ -201,24 +214,48 @@
        - the `goToFraction` branch (`:884-894`) runs only when the target has neither a cfi nor a word;
        - just before `setLoading(false)` (`:1060`), for a word target: `await jumpFoliateToWordAnchor(viewApiRef.current, target.word); if (cancelled) return;`, imported from `./helpers/foliateAnchorNavigation`;
        - `initialCfi` stays a prop for the handover path; for Page it now only feeds the fallback target.
-  - **Wave C — Focus saves as you go, Focus only** (about 20 tool uses; needs Wave A's `null` contract):
+  - **Wave C — Focus saves as you go, and the broker's release list** (about 30 tool uses; needs Wave A's `null` contract):
     1. `src/constants.ts:167-168`: keep `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000` and its value. Change only its comment, once, to name all three playback modes' saves as you go (Focus here; Flow and Narrate under FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1, owner O5), this item and owner ruling O4 (Brain1 G2). `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`) is left as it is (question B14).
     2. `src/reader/modes/focus/ModeRuntime.ts`:
        - add `RSVP_PROGRESS_SAVE_INTERVAL_MS` to the `../../../constants` import (`:16-23`);
-       - **fields:** `private lastSavedWord: number` (the word Focus opened at: `handoff.canonicalWordIndex`, set beside `initialCfi` in the constructor, `:425`), `private lastSaveAt = 0`, and `private playedSinceSave = false`;
-       - **`private saveProgressWord(word: number): void`:** returns unless `playedSinceSave` is set, `word !== this.lastSavedWord`, the word is at least 0, and either `!this.document.useFoliate` or `this.document.bookWords` is set (B15). Otherwise it calls `this.ports.persistence.updateDocProgress(this.document.documentId, word, null)` and `this.ports.persistence.updateProgress(this.document.documentId, word)`, then sets `lastSavedWord = word` and `lastSaveAt = Date.now()`;
+       - **fields:** `private lastSavedWord: number` (the word Focus opened at: `handoff.canonicalWordIndex`, set beside `initialCfi` in the constructor, `:425`), `private lastSaveAt = 0`, `private playedSinceSave = false` and `private engineOnBookWords = false`;
+       - **`private saveProgressWord(word: number): void`:** returns unless `playedSinceSave` and `engineOnBookWords` are set, `word !== this.lastSavedWord`, and the word is at least 0 (B15, as aligned with Q3). Otherwise it calls `this.ports.persistence.updateDocProgress(this.document.documentId, word, null)` and `this.ports.persistence.updateProgress(this.document.documentId, word)`, then sets `lastSavedWord = word` and `lastSaveAt = Date.now()`;
+       - **`start()`** (`:519`): right after `const effectiveWords = [...this.effectiveWords()];` (`:542`), `const onBookWords = !this.document.useFoliate || this.document.bookWords != null;`. In the delayed-start callback, just before `this.startEngine(startWord, effectiveWords, paragraphBreaks);` (`:586`), `this.engineOnBookWords = onBookWords;`. The early returns (`:520`, `:522`, `:538`, `:550`, `:559`, `:584`) change nothing;
        - **`startEngine`** (`:1009`): on creating an engine, if `playedSinceSave` is false, set it and set `lastSaveAt = Date.now()`, so the first periodic save comes one interval after Play;
        - **`onEngineWordAdvance`** (`:1038`): after the existing `persist: false` commit (`:1053`), `if (Date.now() - this.lastSaveAt >= RSVP_PROGRESS_SAVE_INTERVAL_MS) this.saveProgressWord(idx);`. The commit itself stays `persist: false`;
        - **`pause()`** (`:591`) and **`togglePlay()`'s pause branch** (`:615-620`): right after `captureCurrentAnchor()`, `this.saveProgressWord(this.engine.getCurrentWord())`;
-       - **`stop()`** (`:629`): after `if (!this.alive) return;` and **before** `this.alive = false`, `if (this.engine) this.saveProgressWord(this.engine.getCurrentWord());`. `destroy()` reaches it through `stop("teardown")`, and a second `stop()` returns early, so nothing saves twice;
-       - a comment on `saveProgressWord` names this item, O4, `3dd4b504` as the regression and LL-030.
-    3. Nothing else in Focus changes: not its view, bindings, anchor helper (beyond Wave A) or engine. No other mode changes in Wave C.
+       - **`stop()`** (`:629`): the parameter `_reason` becomes `reason`. Immediately after `this.stopEngine();` (`:640`), which follows `this.clearTimers();` (`:634`), add `if (reason !== "teardown") this.saveProgressWord(this.state.currentWordIndex);` (C1 condition, C3). It runs after `this.alive = false` (`:631`), which `saveProgressWord` does not read. `destroy()` reaches `stop("teardown")` only when nothing stopped the runtime first, which is the unmount path with no release window. A second `stop()` returns early, so nothing saves twice;
+       - **`commitShared`** (`:1202-1211`): after the commit, `this.lastSavedWord = clamped;` (C3);
+       - a comment on `saveProgressWord` names this item, O4, C1–C3, `3dd4b504` as the regression and LL-030.
+    3. **`src/reader/ports/createReaderPorts.ts` (C1).** In `READER_PORT_RELEASE_CALLS` (`:46-49`), add `"persistence.updateDocProgress"` and `"persistence.updateProgress"` after `"diagnostics.*"`. Only the list changes:
+       - `releaseSignature` (`:76-81`) already returns the bare method name for these calls. Their argument count is 3 or 2, so neither the `settings.update{…}` rule nor the one-`null`-argument rule applies;
+       - `call`, `teardown` and `closeAll` are unchanged;
+       - the header comment (`:9`) is unchanged; it names the list, not its entries.
+
+       Under one list for all three modes, FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1 make no broker edit. The review-record design `docs/planning/roadmap-reviews/reader-mode-separation-2/design/waves-b-e-design.md:293`, which says persistence writes are rejected in the window, is superseded by C1 for these two calls. It is a review record, so it is not edited; the memo cites C1.
+    4. **The isolation rows that pin the list (C1; Blurby.Brain1's named exception to standing rule 50).** Only `tests/readerModeIsolation.test.ts` changes, and in it only what follows from the two new list entries. The memo quotes each line before and after.
+       - **"lets teardown run only release-class calls, then closes the key"** (`:101-131`). It makes `ports.persistence.updateProgress("doc-1", 3)` inside the window and expects it rejected.
+         - The comment `// Not release-class: rejected inside the window.` (`:111`) moves below that call (`:112`), above `setWpm` (`:113`).
+         - `:117` expects `["settings.update", "persistence.updateProgress"]`.
+         - `:119-123` drops the `"persistence.updateProgress": 1` entry.
+         - `:129` expects `toHaveLength(2)`.
+         - `setWpm` and `settings.update({ readingMode })` still prove that non-release calls are rejected, and the closed-key half (`:125-130`) is otherwise unchanged.
+       - **"transitions in order: export, invalidate, teardown(stop, destroy), issue, create, select"** (`:276-291`). The fake runtime's `stop` calls `updateProgress` (`:208`). `:289` reads `broker.stats.accepted["persistence.updateProgress"]` where it read `broker.stats.rejected[...]`, still `toBe(1)`.
+       - **"openDocument starts a new generation and releases the old session inside a teardown window"** (`:313-324`). Two fake stops now reach infrastructure: Page's at `router.select("flow")`, and Flow's in `openDocument`'s release window. `:321` expects `[{ method: "persistence.updateProgress", args: ["doc-1", 7] }, { method: "persistence.updateProgress", args: ["doc-1", 7] }]`.
+       - The fake module's comment at `:208` (`// not release-class: rejected`) becomes `// release-class since CFI-POSITION-CONSISTENCY-1 (C1)`.
+       - **Unchanged and still green:**
+         - "closeAll and openDocument close every key with no release window" (`:133-149`): no release window, so still rejected;
+         - the G3 rows over the real modes (`:497-629`): their document is an EPUB with `bookWords: null` (`tests/readerModes/harness/fakePorts.ts:29`, `:35`), so no mode saves. Their after-teardown check (`:541`) stays as written;
+         - `tests/readerModeOwnership.test.ts:221-236`: its teardown runs nothing, and its later calls are on closed keys.
+
+       If any other row fails on the list change, STOP to Blurby.Brain1 with its name before editing it.
+    5. Nothing else in Focus changes: not its view, bindings, anchor helper (beyond Wave A) or engine. No other mode changes in Wave C.
   - **Wave D — gates, package and close-out** (about 35 tool uses): Done-when 5–11.
 - **Prerequisites:**
   - NARRATE-ARRIVAL-SYNC-1 (Seq 88.5) merged, and gate (1) run 6 recorded.
   - CHAPTER-STEP-CFI-1 (Seq 97, amendment 1, `eb/chapter-step-cfi-1-r2`) merged. `<base>` is `origin/main` after that merge.
   - The `src/types.ts` and `src/components/ReaderContainer.tsx` integration window granted, with no other active sprint editing either file.
-  - Blurby.Brain1 confirms B1–B5 before Wave A, B8–B13 before Wave B, and B14–B18 before Wave C. Design 9 is already Brain1's binding ruling.
+  - Blurby.Brain1 confirmed B1–B18 and ruled C1–C3 (2026-11-03). Design 9 is Brain1's binding O4 ruling, with C1's and C3's conditions folded in. No question is open.
   - RodneySr has the canonical clone `C:\Users\estra\Projects\Blurby` with `node_modules`, the sample *Meditations*, and the `c5bb507f` x64 `--dir` package from `repro-base` (or rebuilds it with the same recipe). Rodney has its canonical clone for the arm64 build.
 - **Execution host:** RodneySr (x64) for the implementation, the tests, the packages and the probes. Rodney (arm64) only for the rule 53 arm64 launch.
 - **Branch:** `eb/cfi-position-consistency-1` at `C:\Users\estra\Projects\Blurby\.worktrees\cfi-position-consistency-1` on RodneySr. Create it with `git -C C:/Users/estra/Projects/Blurby worktree add -b eb/cfi-position-consistency-1 .worktrees/cfi-position-consistency-1 origin/main` after CHAPTER-STEP-CFI-1 merges. Push with `git push origin HEAD:refs/heads/eb/cfi-position-consistency-1`.
@@ -278,12 +315,25 @@
          - **(f6) no save without Play:** select Focus, wait 10,000 ms with no Play, then `router.select("page")`: no save from Focus (LL-030). Green control.
          - **(f7) no map, no save:** the same as f1 with `bookWords: null` and the section's words served by the fake surface: no save (B15). Green control.
          - **(f8) no sentence start in Focus:** open at word `f` of `a b c. d e f g.` with no cfi, `router.select("focus")`, Play: the engine's first word is `f`. Expected **green** on `<base>` by code reading (Why). If it is RED, STOP to Blurby.Brain1 with the trace.
+         - **(f9, C3) a click while paused wins:** play 3,000 ms, `pause()`, then `hardSelect` word X (any word the paused engine is not on) with the spine-4 cfi, then `router.select("page")`. The folded doc's position is X, and the last `updateDocProgress` is the click's own `("doc-1", X, spine-4)`: the stop made no save. Guard row: green on `<base>`, where the click's save is the last write.
+         - **(f10, C1) the exit save is accepted, and nothing saves after teardown:** this file builds the router over its own `createReaderPorts(fake.infra)`, so the broker's `stats` and the fake's `diagnostics` are readable.
+           - `READER_PORT_RELEASE_CALLS` contains `"persistence.updateDocProgress"` and `"persistence.updateProgress"`.
+           - Play 7,000 ms (one timed save), keep the Focus runtime as `old`, then `router.select("page")` with no pause. There is exactly one more save, of the word at the stop, with `null`. No `port-rejected` diagnostic names a `persistence.` method.
+           - Then advance 30,000 ms of fake time, and call `old`'s private `onEngineWordAdvance(w + 5)` through a cast, `w` being the stopped word. No `persistence.*` call is accepted or rejected after the switch: `broker.stats.rejected` has no `persistence.` key, and the effect count is unchanged.
+           - **RED** (no exit save, and the list lacks both entries).
+         - **(f11, C1) no save on unmount:** play 7,000 ms (one timed save), then `router.destroy()` with no pause. No `persistence.*` call is made: none is accepted, `broker.stats.rejected` has no `persistence.` key, and no `port-rejected` diagnostic names one. Guard row: green on `<base>`.
+         - **(f12, Q3 alignment) an engine started before the map never saves:** f7's setup (`bookWords: null`; the fake surface serves the section's words). Play, and at 2,000 ms publish the map through the fake document port.
+           - Play to 12,000 ms, `pause()`, `togglePlay()` (a resume of the same engine) and play 12,000 ms more: no save.
+           - Then `router.select("page")`, `router.select("focus")` and Play: a new `start()` on the map. f1's cadence holds from there.
+           - **RED** (the last part; the base never saves).
 
      Record every result in the memo. If a row named RED above is green on `<base>`, STOP: its guard cannot fail.
   2. **Wave A as specified.** Then:
      - `git grep -n -F 'options.cfi ?? state.cfi' -- src/reader/modes` exits 1. It exits 0 on `c5bb507f`, with 4 hits (Page `:100`; Focus, Flow and Narrate `:99`).
      - `git grep -c -F 'cfi === null' -- main/ipc/documents.js src/test-harness/electron-api-stub.ts` exits 0, with both paths listed. It exits 1 on `c5bb507f`.
      - `git diff --name-status <base> -- preload.js` prints nothing and exits 0.
+     - `git diff --name-status <base> -- docs/planning/roadmap-reviews/reader-mode-separation-2 tests/readerModes/harness` prints nothing and exits 0 (C2: the fixtures and the replay harness are byte-unchanged).
+     - `git grep -c -F 'hardSelectionCfiAsRecorded' -- tests/readerModes/flow.behavior.test.tsx tests/readerModes/focus.behavior.test.tsx` exits 0, with both paths listed. It exits 1 on `<base>`.
   3. **Wave B as specified.** Then:
      - `git grep -c -F 'PAGE_OPEN_HOLD_TIMEOUT_MS' -- src/constants.ts src/reader/modes/page/ModeRuntime.ts` exits 0, with both paths listed. It exits 1 on `c5bb507f`.
      - `git grep -c -F 'cfiSpineIndex' -- src/reader/modes/page/helpers/persistentReadingAnchor.ts` exits 0. It exits 1 on `c5bb507f`.
@@ -293,10 +343,14 @@
      - `git grep -c -F 'updateDocProgress' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `c5bb507f`.
      - `git grep -n -E '\b5000\b|5_000' -- src/reader/modes/focus/ModeRuntime.ts` exits 1 (no literal interval). It exits 1 on `c5bb507f` too.
      - `git diff --name-status <base> -- src/reader/modes/focus src/reader/modes/flow src/reader/modes/narrate` lists exactly the three `helpers/usePersistentReadingAnchor.ts` files and `src/reader/modes/focus/ModeRuntime.ts`, and exits 0.
+     - `git grep -c -E '"persistence\.update(DocProgress|Progress)"' -- src/reader/ports/createReaderPorts.ts` exits 0 and prints 2. It exits 1 on `<base>`.
+     - `git diff <base> -- src/reader/ports/createReaderPorts.ts` shows only the two added list lines (C1: only the list changes).
+     - `git grep -n -E 'reason !== "teardown"' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
   5. **Tests.**
      - `npx vitest run tests/cfiPositionConsistency.ipc.test.js tests/cfiPositionConsistency.shell.test.tsx tests/readerModes/cfiPositionConsistency.test.ts` exits 0.
-     - `npx vitest run tests/readerModes tests/readerModeIsolation.test.ts tests/useProgressTracker.test.ts tests/keepFurthest.test.tsx tests/pageReopenCfi.test.ts tests/updateDocProgressLastRead.test.js tests/persistentReadingAnchor.test.ts tests/useLibrary.test.ts tests/narrate` exits 0.
+     - `npx vitest run tests/readerModes tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/useProgressTracker.test.ts tests/keepFurthest.test.tsx tests/pageReopenCfi.test.ts tests/updateDocProgressLastRead.test.js tests/persistentReadingAnchor.test.ts tests/useLibrary.test.ts tests/narrate` exits 0.
      - `tests/readerModes/chapterStepLanding.test.ts` (CHAPTER-STEP-CFI-1), `tests/readerModes/pagePositionSave.test.tsx` and `tests/narrate/narrate.playSavedPosition.test.ts` (NARRATE-ARRIVAL-SYNC-1) are green and unedited.
+     - `tests/readerModes/flow.behavior.test.tsx` and `tests/readerModes/focus.behavior.test.tsx` (the B0 replays) are green, edited only as Wave A step 10 lists. `tests/readerModeIsolation.test.ts` is green, edited only as Wave C step 4 lists. `tests/readerModeOwnership.test.ts` is green and unedited.
   6. `npm test`, `npm run typecheck` and `npm run build` exit 0 on RodneySr (standing rules 47 and 48). Record the counts.
   7. **Packaged probes**, on RodneySr x64 `--dir` packages of `c5bb507f`, `<base>` and the tip, all with one recipe (LL-152):
      - Launch each with `--user-data-dir=<scratch>` and `BLURBY_USER_DATA_DIR=<scratch>`.
@@ -353,6 +407,7 @@
      - `M src/components/ReaderContainer.tsx`
      - `M src/constants.ts`
      - `M src/reader/ports/ReaderPorts.ts`
+     - `M src/reader/ports/createReaderPorts.ts` (Wave C, C1)
      - `M src/hooks/useLibrary.ts`
      - `M src/hooks/useProgressTracker.ts`
      - `M src/reader/modes/page/helpers/usePersistentReadingAnchor.ts`
@@ -365,11 +420,14 @@
      - `M src/reader/modes/page/useModeBindings.ts`
      - `M src/reader/modes/page/FoliateView.tsx`
      - `M tests/useProgressTracker.test.ts`
+     - `M tests/readerModes/flow.behavior.test.tsx` (Wave A, C2)
+     - `M tests/readerModes/focus.behavior.test.tsx` (Wave A, C2)
+     - `M tests/readerModeIsolation.test.ts` (Wave C, C1)
      - `A tests/cfiPositionConsistency.ipc.test.js`
      - `A tests/cfiPositionConsistency.shell.test.tsx`
      - `A tests/readerModes/cfiPositionConsistency.test.ts`
 
-     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's view or bindings, Flow's or Narrate's runtime, view or bindings, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx` or `src/hooks/useReader.ts`.
+     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's view or bindings, Flow's or Narrate's runtime, view or bindings, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx`, `src/hooks/useReader.ts`, `tests/readerModes/harness/` or `docs/planning/roadmap-reviews/reader-mode-separation-2/`.
   10. **Merge-tree check:** `git merge-tree` of the tip against `origin/main` is clean at the merge go. A conflict in a fenced file goes to Blurby.Roadmap before resolution.
   11. **Owner, added to gate (2)'s list:**
       - after a chapter jump, quit and reopen: the book opens in the jumped-to chapter;
@@ -379,14 +437,15 @@
       - pause in Focus and reopen: the book opens at the paused word.
 - **Effort:** M, in four waves (A, B, C, D; each about 40 tool uses or fewer, and each its own dispatch). Technical effort: medium for A, C and D, high for B.
 - **Owners:**
-  - Blurby.Brain1 confirms the contract (B1–B5) before Wave A, the hold (B8–B13) before Wave B and Focus's open details (B14–B18) before Wave C, and confirms the rule 53 pair;
+  - Blurby.Brain1 ruled B1–B18 and C1–C3, and confirms the rule 53 pair;
   - RodneySr implements, tests and probes; Rodney runs the arm64 launch;
   - spec-compliance, then quality review;
   - Blurby.Roadmap grants the integration window, gives the merge go and closes it out.
 - **Merge order:**
   - after NARRATE-ARRIVAL-SYNC-1, gate (1) run 6 and CHAPTER-STEP-CFI-1;
   - before FLOW-TOC-JUMP-WORD-1 (Seq 110), FURTHEST-PERSIST-1 (Seq 114; `main/ipc/documents.js`, `src/hooks/useLibrary.ts`, `src/types.ts`) and FOCUS-PAUSED-HANDOFF-1 (Seq 118). Each re-greps after this lands.
-  - Any later item that edits `src/reader/modes/page/FoliateView.tsx` or `page/ModeRuntime.ts` re-greps the hold's lines. Any later item that edits `focus/ModeRuntime.ts` (FOCUS-PAUSED-HANDOFF-1 among them) re-greps `saveProgressWord` and keeps its calls in `pause()`, `togglePlay()` and `stop()`.
+  - Any later item that edits `src/reader/modes/page/FoliateView.tsx` or `page/ModeRuntime.ts` re-greps the hold's lines. Any later item that edits `focus/ModeRuntime.ts` (FOCUS-PAUSED-HANDOFF-1 among them) re-greps `saveProgressWord` and keeps its calls in `pause()`, `togglePlay()`, `stop()` (after `stopEngine()`, not on `"teardown"`) and `commitShared`.
+  - FLOW-SAVE-AS-YOU-GO-1 (Seq 97.6) and NARRATE-SAVE-AS-YOU-GO-1 (Seq 97.7) rely on Wave C's release list and make no broker edit. Any later item that edits `src/reader/ports/createReaderPorts.ts` keeps both entries.
   - TOC-FRAGMENT-WORD-1's `ReaderContainer.tsx` window does not overlap this one.
   - The Focus, Flow and Narrate restamp items (Seq 111–112) edit only their own `FoliateView.tsx`, so they do not conflict.
 - **Path:** dispatch (four waves).
@@ -425,7 +484,20 @@ B14–B18 are also ruled as general rules G1–G8 for every playback mode. They 
 
 **Queue:** Waves A–D go behind BLOCK-TEXT-ORDER-1's Waves A and B, and after CHAPTER-STEP-CFI-1 merges.
 
-##### Open after the B-rulings (found 2026-11-03 while specifying FLOW- and NARRATE-SAVE-AS-YOU-GO-1; for Blurby.Brain1 before Wave A)
+##### Blurby.Brain1 rulings on C1–C3 (2026-11-03, binding)
+- **C1, accepted with one condition.** Wave C adds `persistence.updateDocProgress` and `persistence.updateProgress` to `READER_PORT_RELEASE_CALLS` (`src/reader/ports/createReaderPorts.ts:46-49`), once, for all three playback modes. The isolation rows that pin the list get a named exception to standing rule 50, and only the list entry changes.
+  - **Condition:** the exit save is made synchronously inside the mode's `stop()`, during `broker.teardown`, after every save timer has been cleared. Nothing asynchronous may save after release.
+  - **Required row:** a timed-save callback that fires after teardown makes no persistence call.
+  - **Broker check (done for this ruling).** The release allowance does not outlive the teardown frame. `teardown` sets `releasing` only around `run()`, and its `finally` clears it and deletes the key (`createReaderPorts.ts:189-200`). A release call passes only while `releasing === id` (`:109-110`). So the row passes for two reasons, the broker and the cleared timers, and it asserts that no call is even attempted. No STOP.
+  - **Applied in:** design 9 ("The exit save runs inside the teardown window"); Wave C steps 2 (`stop()`), 3 (the list) and 4 (the pinned rows: `tests/readerModeIsolation.test.ts`, "lets teardown run only release-class calls, then closes the key", "transitions in order: export, invalidate, teardown(stop, destroy), issue, create, select" and "openDocument starts a new generation and releases the old session inside a teardown window"); rows f5, f10 and f11; Done-when 4, 5 and 9.
+  - **Derived from the condition:** `router.destroy()` has no teardown window (`closeAll(false)`, `useReaderModeOrchestrator.ts:312-326`). So Focus's `stop()` skips the exit save when its reason is `"teardown"` rather than make a call the broker must reject (row f11).
+- **C2, accepted.** `tests/readerModes/flow.behavior.test.tsx` and `focus.behavior.test.tsx` treat `"<undefined>"` and `null` as equal for exactly one argument: the third argument of the hard-selection `persistence.updateDocProgress`. This is under a named rule-50 exception. The review-record fixtures under `docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/` stay byte-unchanged, and every other argument still compares exactly. Applied in Wave A step 10, Done-when 2, 5 and 9.
+- **C3, accepted.** Focus's stop save records the committed word (a click while paused wins over the engine's older word), and it is skipped when that word is unchanged. Applied in design 9 ("Which word", "The last word saved"), Wave C step 2 (`stop()`, `commitShared`) and row f9 (pause, click word X, stop: the stored word is X).
+- **Carried from FLOW- and NARRATE-SAVE-AS-YOU-GO-1's rulings:**
+  - **Q2 (re-save after a pending relocate save):** ruled for Flow and Narrate. Focus has a relocate save (`focus/ModeRuntime.ts:903`), but its view does not relocate while it plays, so the case is narrow and Focus is unchanged (design 9; a findings candidate).
+  - **Q3 (the engine's word space):** B15's guard is aligned to read the running engine's start, as `engineOnBookWords` (design 9, Wave C step 2, row f12).
+
+##### Open after the B-rulings (C1–C3; ruled 2026-11-03; kept as the record)
 - **C1. The mode-exit save is refused.** The router stops the outgoing mode inside `broker.teardown` (`src/reader/useReaderModeOrchestrator.ts:303-307` at `14ce3d24`). Only `READER_PORT_RELEASE_CALLS` pass there (`src/reader/ports/createReaderPorts.ts:46-49`): `settings.update{isNarrating}` and `diagnostics.*`. Wave C's mode-exit save (R-O4.1, row f5) is therefore rejected. Recommendation: Wave C adds `persistence.updateDocProgress` and `persistence.updateProgress` to the release calls, once for all three playback modes, with the isolation rows that pin the list named as a rule-50 exception. Fallback: no save on mode exit, and f5 is dropped.
 - **C2. Wave A changes the B0 replay baselines.** `docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/{flow,focus}.baseline.json` record the hard-selection commit's `persistence.updateDocProgress` third argument as `"<undefined>"`. Under B2 (`options.cfi || null`) it becomes `null`, so `tests/readerModes/{flow,focus}.behavior.test.tsx` fail byte-for-byte replay. Those fixtures sit in a review-record folder. Recommendation: do not rewrite the fixtures; the two replay tests normalize that one argument (`"<undefined>"` and `null` compare equal for `persistence.updateDocProgress` argument 3 only), named as a rule-50 exception. The alternative is a dated baseline copy under the item's own folder.
 - **C3. Focus's stop save can overwrite a paused click.** Wave C saves on stop when an engine exists. A click while paused commits the clicked word, and a later stop then saves the engine's older word. Recommendation: the stop save records the mode's current committed word, not the engine's last word, and is skipped when the word equals the last save (G2).
@@ -467,6 +539,7 @@ Questions B14–B18 are what O4 leaves open after Brain1's binding rulings. Each
 - **LL-143:** every gate names its shell and an exact exit code, and each was dry-run on `c5bb507f` (expected exit recorded beside it).
 - **LL-152:** one recipe for the probes on `c5bb507f`, `<base>` and the tip.
 - **LL-165:** the scratch profile is proved before the first input, and the live profile's hashes are unchanged.
-- **LL-169:** the hold's timer and promise end with the runtime (`stop()`, `destroy()`), and the view checks `cancelled` after each await, separately from the target's own settle-once guard. Focus's saves as you go add no timer: the interval is checked on each word advance, and `stop()` saves before it marks the runtime dead.
+- **LL-169:** the hold's timer and promise end with the runtime (`stop()`, `destroy()`), and the view checks `cancelled` after each await, separately from the target's own settle-once guard. Focus's saves as you go add no timer: the interval is checked on each word advance. `stop()` saves once, synchronously, after `clearTimers()` and `stopEngine()`, inside the teardown window (C1). Row f10 proves nothing it left behind saves afterwards.
+- **LL-109:** no continuation saves after release. The exit save is synchronous inside `broker.teardown`, and the broker rejects anything later (row f10).
 - **Standing rule 55 (promoted from LL-166):** verdicts come from saves, `library.json`, visible word indices and request words, not screenshots.
 - **Standing rule 53 (promoted from LL-167):** package verification, with Blurby.Brain1's confirmation before the merge go.
