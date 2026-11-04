@@ -607,6 +607,14 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** PAGE-SAVE-RESTAMP-2: the view asks this, on a held turn, whether the book's words can arrive. */
   ensureBookWords = () => this.ports.document.ensureBookWords();
 
+  /** BLOCK-TEXT-ORDER-1 (R-Q5): a word click in an uncertified section saves its cfi only (the stored word index is
+   *  kept). It commits no word and leaves the selection, the held click anchor and every other anchor as they are. */
+  onHeldWordClick = (cfi: string): void => {
+    if (!this.alive) return;
+    this.ports.persistence.recordCfi(cfi);
+    this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, cfi);
+  };
+
   /** PAGE-SAVE-RESTAMP-2 (ruling): a word click held on provisional numbering saves now; the click already set the anchor. */
   onHeldClickSave = (click: { readonly wordIndex: number | null; readonly cfi: string }): void => {
     const provisional = this.heldClickAnchor;

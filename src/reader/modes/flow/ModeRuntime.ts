@@ -442,6 +442,10 @@ export class FlowModeAdapter implements ReaderModeAdapter {
 
 // ── Flow runtime ──────────────────────────────────────────────────────────────
 
+/** BLOCK-TEXT-ORDER-1 (Q3): update-doc-progress keeps the stored word index for a negative position, a cfi-only save.
+ *  Flow's own copy of page/ModeRuntime.ts KEEP_STORED_POSITION (no sibling import). */
+const KEEP_STORED_POSITION = -1;
+
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const FLOW_SURFACE_LOAD_DELAY_MS = 200;
 /** Legacy useFoliateSync effect 3 goToSection throttle. */
@@ -1153,6 +1157,14 @@ export class FlowModeRuntime implements ReaderModeRuntime {
 
   onWordClick = (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number): void => {
     this.hardSelect({ cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex });
+  };
+
+  /** BLOCK-TEXT-ORDER-1 (Q3): a word click in an uncertified section saves its cfi only (the stored word index is kept).
+   *  It commits no word or anchor and changes no state other than the recorded cfi. */
+  onHeldWordClick = (cfi: string): void => {
+    if (!this.alive) return;
+    this.ports.persistence.recordCfi(cfi);
+    this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, cfi);
   };
 
   onTocReady = (toc: unknown[], sectionCount: number): void => {

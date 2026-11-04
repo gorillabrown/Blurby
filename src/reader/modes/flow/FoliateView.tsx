@@ -70,7 +70,7 @@ import {
   type FoliateWord,
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
-import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { unwrapWordSpans, wrapWordsInSpans, type CertificationResult } from "./helpers/foliateWordWrapping";
 import { collectParagraphStartWordIndexes } from "./helpers/foliateParagraphStarts";
 import { isFlowBrowseKey } from "./helpers/flowBrowseKey";
 
@@ -284,6 +284,8 @@ export interface FlowFoliateViewProps {
   onRelocate: (detail: { cfi: string; fraction: number }) => void;
   onTocReady: (toc: unknown[], sectionCount: number) => void;
   onWordClick: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
+  /** BLOCK-TEXT-ORDER-1 (Q3): a word click in an uncertified section saves this cfi only; no word is committed. */
+  onHeldWordClick?: (cfi: string) => void;
   onLoad: () => void;
   /** Legacy onWordsReextracted (after each full re-extraction or section append). */
   onWordsReextracted: () => void;
@@ -315,6 +317,7 @@ export default function FlowFoliateView({
   onRelocate,
   onTocReady,
   onWordClick,
+  onHeldWordClick,
   onLoad,
   onWordsReextracted,
   viewApiRef,
@@ -341,6 +344,11 @@ export default function FlowFoliateView({
   // FLOW-PARA-KEYS-1: section documents whose spans carry the book's numbering (wrapped, or re-stamped, against the
   // book's sections). A document wrapped before those arrived carries provisional numbering and is not in the set.
   const bookStampedDocsRef = useRef(new WeakSet<Document>());
+  // BLOCK-TEXT-ORDER-1 (OQ4): section documents whose spans could not be certified against the book's words, once those
+  // have arrived. Their spans are untrusted: a click on one commits no word.
+  const uncertifiedDocsRef = useRef(new WeakSet<Document>());
+  // BLOCK-TEXT-ORDER-1: the latest wrap of each document; a report from a superseded wrap is discarded.
+  const wrapGenerationRef = useRef(new WeakMap<Document, number>());
   const wordPositionIndexRef = useRef<WordPositionIndex>(new WordPositionIndex());
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
@@ -353,6 +361,8 @@ export default function FlowFoliateView({
 
   const onWordClickRef = useRef(onWordClick);
   onWordClickRef.current = onWordClick;
+  const onHeldWordClickRef = useRef(onHeldWordClick);
+  onHeldWordClickRef.current = onHeldWordClick;
   const onUserBrowseAwayRef = useRef(onUserBrowseAway);
   onUserBrowseAwayRef.current = onUserBrowseAway;
   const onLoadRef = useRef(onLoad);
@@ -374,6 +384,19 @@ export default function FlowFoliateView({
   const lastChunkTopScrollKeyRef = useRef<string | null>(null);
 
   const liveSections = () => bookWordSectionsRef.current as SectionBoundary[] | undefined;
+
+  /** BLOCK-TEXT-ORDER-1: starts a wrap of `doc` and returns the report handler for it. Only the latest wrap's report
+   *  applies, and only while `live()` holds; it marks the document uncertified iff the report fails while the book's
+   *  sections are known (read when the report arrives), and a certified report clears the hold. */
+  const certificationHandler = (doc: Document, live: () => boolean = () => true) => {
+    const generation = (wrapGenerationRef.current.get(doc) ?? 0) + 1;
+    wrapGenerationRef.current.set(doc, generation);
+    return (report: CertificationResult): void => {
+      if (wrapGenerationRef.current.get(doc) !== generation || !live()) return;
+      if (!report.ok && (liveSections()?.length ?? 0) > 0) uncertifiedDocsRef.current.add(doc);
+      else uncertifiedDocsRef.current.delete(doc);
+    };
+  };
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -902,7 +925,7 @@ export default function FlowFoliateView({
               // Wrap this section's words with correct indices (STAB-1A: now async)
               // FLOW-PARA-KEYS-1: book-stamped only when the wrap is against the book's section.
               bookStampedDocsRef.current.delete(doc);
-              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc));
               if (bookSection) bookStampedDocsRef.current.add(doc);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
@@ -930,7 +953,7 @@ export default function FlowFoliateView({
                 // FLOW-PARA-KEYS-1: book-stamped only once a wrap against the book's sections completes.
                 const stampsWithBook = Boolean(liveSections()?.some((section) => section.sectionIndex === index));
                 bookStampedDocsRef.current.delete(doc);
-                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc));
                 if (stampsWithBook) bookStampedDocsRef.current.add(doc);
               }
             }
@@ -940,6 +963,14 @@ export default function FlowFoliateView({
           lastLoadedSectionIndexRef.current = index;
           scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
+          // BLOCK-TEXT-ORDER-1 (Q3): a held word click in an uncertified section saves its cfi only.
+          const saveHeldWordClick = (range: Range): void => {
+            const v = viewRef.current;
+            const match = (v?.renderer?.getContents?.() ?? []).find((c: any) => c.doc === doc);
+            if (!v || !match) return;
+            onHeldWordClickRef.current?.(v.getCFI(match.index, range));
+          };
+
           // Delegated click handler on the injected word spans
           doc.body.addEventListener("click", (ev: MouseEvent) => {
             const target = (ev.target as HTMLElement)?.closest?.("[data-word-index]");
@@ -948,6 +979,14 @@ export default function FlowFoliateView({
 
             const resolvedToken = resolveRenderedToken(doc.body, target);
             if (!resolvedToken) return;
+            // BLOCK-TEXT-ORDER-1 (Q3): an uncertified section's span index is untrusted. Save the clicked span's cfi
+            // only; paint no highlight and commit no word (the highlight and cursor stay where they were).
+            if (uncertifiedDocsRef.current.has(doc)) {
+              const spanRange = doc.createRange();
+              spanRange.selectNodeContents(target);
+              saveHeldWordClick(spanRange);
+              return;
+            }
 
             const clickHighlightClass = resolveFoliateWordHighlightClass(FLOW_HIGHLIGHT_MODE);
             doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
@@ -1004,6 +1043,11 @@ export default function FlowFoliateView({
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match && resolvedToken) {
+                // BLOCK-TEXT-ORDER-1 (Q3): as the click handler, for a selected word in an uncertified section.
+                if (uncertifiedDocsRef.current.has(doc)) {
+                  saveHeldWordClick(range);
+                  return;
+                }
                 const selHighlightClass = resolveFoliateWordHighlightClass(FLOW_HIGHLIGHT_MODE);
                 doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
                   el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
@@ -1365,7 +1409,7 @@ export default function FlowFoliateView({
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
-        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc, () => !cancelled));
         if (stampsWithBook) bookStampedDocsRef.current.add(doc);
       }
       if (!cancelled) {

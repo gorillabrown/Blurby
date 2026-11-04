@@ -37,7 +37,7 @@ import {
   type FoliateWord,
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
-import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { unwrapWordSpans, wrapWordsInSpans, type CertificationResult } from "./helpers/foliateWordWrapping";
 import { isPageTurnKey } from "./helpers/pageTurnKey";
 
 const PAGE_HIGHLIGHT_MODE = "page";
@@ -259,6 +259,8 @@ export interface PageFoliateViewProps {
   ensureBookWords?: () => Promise<ReaderBookWordsValue | null>;
   /** PAGE-SAVE-RESTAMP-2: saves a word click held on provisional numbering (a null index keeps the stored one). */
   onHeldClickSave?: (click: { wordIndex: number | null; cfi: string }) => void;
+  /** BLOCK-TEXT-ORDER-1 (R-Q5): a word click in an uncertified section saves this cfi only; no word is committed. */
+  onHeldWordClick?: (cfi: string) => void;
 }
 
 export default function PageFoliateView({
@@ -284,6 +286,7 @@ export default function PageFoliateView({
   getCanonicalSectionWords,
   ensureBookWords,
   onHeldClickSave,
+  onHeldWordClick,
 }: PageFoliateViewProps) {
   // injectStyles only reads settings; the frozen snapshot is passed through its legacy parameter type.
   const settings = frozenSettings as BlurbySettings;
@@ -312,6 +315,11 @@ export default function PageFoliateView({
   // before the book's words arrived). A turn on one is held, latest only, until the re-stamp applies the book's.
   const rendererNumberedDocsRef = useRef(new WeakSet<Document>());
   const reportHeldTurnRef = useRef<(doc: Document) => void>(() => {});
+  // BLOCK-TEXT-ORDER-1 (OQ4, Q1): section documents whose spans could not be certified against the book's words, once
+  // those have arrived. Their spans are untrusted: a click or a turn on one saves the cfi only and commits no word.
+  const uncertifiedDocsRef = useRef(new WeakSet<Document>());
+  // BLOCK-TEXT-ORDER-1: the latest wrap of each document; a report from a superseded wrap is discarded.
+  const wrapGenerationRef = useRef(new WeakMap<Document, number>());
   // PAGE-SAVE-RESTAMP-2: set once the book's words cannot arrive (extraction rejected, or no or empty sections). A turn on a
   // renderer-numbered document is then not held: it saves its cfi and keeps the stored word index.
   const bookWordsFailedRef = useRef(false);
@@ -337,8 +345,23 @@ export default function PageFoliateView({
   ensureBookWordsRef.current = ensureBookWords;
   const onHeldClickSaveRef = useRef(onHeldClickSave);
   onHeldClickSaveRef.current = onHeldClickSave;
+  const onHeldWordClickRef = useRef(onHeldWordClick);
+  onHeldWordClickRef.current = onHeldWordClick;
 
   const liveSections = () => bookWordSectionsRef.current as SectionBoundary[] | undefined;
+
+  /** BLOCK-TEXT-ORDER-1: starts a wrap of `doc` and returns the report handler for it. Only the latest wrap's report
+   *  applies, and only while `live()` holds; it marks the document uncertified iff the report fails while the book's
+   *  sections are known (read when the report arrives), and a certified report clears the hold. */
+  const certificationHandler = (doc: Document, live: () => boolean = () => true) => {
+    const generation = (wrapGenerationRef.current.get(doc) ?? 0) + 1;
+    wrapGenerationRef.current.set(doc, generation);
+    return (report: CertificationResult): void => {
+      if (wrapGenerationRef.current.get(doc) !== generation || !live()) return;
+      if (!report.ok && (liveSections()?.length ?? 0) > 0) uncertifiedDocsRef.current.add(doc);
+      else uncertifiedDocsRef.current.delete(doc);
+    };
+  };
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -576,7 +599,8 @@ export default function PageFoliateView({
           wordRange.selectNodeContents(span);
           // PAGE-SAVE-RESTAMP-2: a held word click reports through onHeldClickSave (the click already set the anchor).
           (click ? onHeldClickSaveRef : onPageTurnedRef).current?.({
-            wordIndex: rendererNumberedDocsRef.current.has(doc)
+            // BLOCK-TEXT-ORDER-1 (Q1): nor an uncertified document's span index.
+            wordIndex: rendererNumberedDocsRef.current.has(doc) || uncertifiedDocsRef.current.has(doc)
               ? null // PAGE-SAVE-RESTAMP-2: never the renderer's provisional numbering; null keeps the stored index
               : resolveRenderedWordIndexToGlobal(match.index, rendered, foliateWordsRef.current, liveSections()),
             cfi: view.getCFI(match.index, wordRange),
@@ -669,7 +693,9 @@ export default function PageFoliateView({
               // the re-stamp effect replaces them (and removes the document). Added before the wrap, which yields
               // between batches, so a turn onto a page stamped mid-wrap is held too.
               if (!liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
-              const wrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              // BLOCK-TEXT-ORDER-1: the report arrives before the wrap first yields, so an uncertified document is held
+              // before any of its spans can be clicked or turned onto.
+              const wrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc));
               sectionWrapsRef.current.set(doc, wrap); // PAGE-SAVE-RESTAMP-3: the re-stamp waits for this wrap
               await wrap;
             }
@@ -688,6 +714,14 @@ export default function PageFoliateView({
           lastLoadedSectionIndexRef.current = index;
           scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
+          // BLOCK-TEXT-ORDER-1 (R-Q5): a held word click in an uncertified section saves its cfi only.
+          const saveHeldWordClick = (range: Range): void => {
+            const v = viewRef.current;
+            const match = (v?.renderer?.getContents?.() ?? []).find((c: any) => c.doc === doc);
+            if (!v || !match) return;
+            onHeldWordClickRef.current?.(v.getCFI(match.index, range));
+          };
+
           // Delegated click handler on the injected word spans
           doc.body.addEventListener("click", (ev: MouseEvent) => {
             const target = (ev.target as HTMLElement)?.closest?.("[data-word-index]");
@@ -696,6 +730,14 @@ export default function PageFoliateView({
 
             const resolvedToken = resolveRenderedToken(doc.body, target);
             if (!resolvedToken) return;
+            // BLOCK-TEXT-ORDER-1 (Q3, R-Q5): an uncertified section's span index is untrusted. Save the clicked span's
+            // cfi only; paint no highlight and commit no word.
+            if (uncertifiedDocsRef.current.has(doc)) {
+              const spanRange = doc.createRange();
+              spanRange.selectNodeContents(target);
+              saveHeldWordClick(spanRange);
+              return;
+            }
 
             const clickHighlightClass = resolveFoliateWordHighlightClass(PAGE_HIGHLIGHT_MODE);
             doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
@@ -756,6 +798,11 @@ export default function PageFoliateView({
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match && resolvedToken) {
+                // BLOCK-TEXT-ORDER-1 (Q3, R-Q5): as the click handler, for a selected word in an uncertified section.
+                if (uncertifiedDocsRef.current.has(doc)) {
+                  saveHeldWordClick(range);
+                  return;
+                }
                 const selHighlightClass = resolveFoliateWordHighlightClass(PAGE_HIGHLIGHT_MODE);
                 doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
                   el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
@@ -1119,11 +1166,13 @@ export default function PageFoliateView({
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
-        const rewrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        const rewrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc, () => !cancelled));
         sectionWrapsRef.current.set(doc, rewrap);
         await rewrap;
         if (cancelled) return;
         // PAGE-SAVE-RESTAMP-GUARD-1: the book's numbering now applies to this section; save the turn held on it.
+        // BLOCK-TEXT-ORDER-1 (Q1): a certified restamp leaves the document in neither set, and the held save carries its
+        // word; an uncertified one has moved it into uncertifiedDocsRef (its report), and the held save is cfi-only.
         rendererNumberedDocsRef.current.delete(doc);
         reportHeldTurnRef.current(doc);
       }

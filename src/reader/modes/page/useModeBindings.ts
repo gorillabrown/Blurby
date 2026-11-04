@@ -32,6 +32,7 @@ export function usePageModeBindings(runtime: PageModeRuntime): { readonly useFol
       onUserBrowseAway: runtime.onUserBrowseAway,
       onPageTurned: runtime.onPageTurned,
       onHeldClickSave: runtime.onHeldClickSave,
+      onHeldWordClick: runtime.onHeldWordClick,
       highlightedWordIndex: snapshot.highlightedWordIndex,
       bookWordSections: document.bookWords?.sections,
       renderVersion: runtime.getRenderVersion(),

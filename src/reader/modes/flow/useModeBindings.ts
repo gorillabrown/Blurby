@@ -154,6 +154,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
       onRelocate: runtime.onRelocate,
       onTocReady: runtime.onTocReady,
       onWordClick: runtime.onWordClick,
+      onHeldWordClick: runtime.onHeldWordClick,
       onLoad: runtime.onSurfaceLoad,
       onWordsReextracted: runtime.onWordsReextracted,
       viewApiRef: runtime.viewApiRef,

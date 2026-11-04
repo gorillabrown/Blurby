@@ -58,7 +58,7 @@ import {
   type FoliateWord,
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
-import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { unwrapWordSpans, wrapWordsInSpans, type CertificationResult } from "./helpers/foliateWordWrapping";
 import { logNarrateStartError } from "./helpers/logStartError";
 import { isNarrateBrowseKey } from "./helpers/narrateBrowseKey";
 
@@ -390,6 +390,24 @@ export default function NarrateFoliateView({
   const narrateScrollThrottleRef = useRef(0);
 
   const liveSections = () => bookWordSectionsRef.current as SectionBoundary[] | undefined;
+  // BLOCK-TEXT-ORDER-1 (OQ4): section documents whose spans could not be certified against the book's words, once those
+  // have arrived. Their spans are untrusted: a click on one commits no word.
+  const uncertifiedDocsRef = useRef(new WeakSet<Document>());
+  // BLOCK-TEXT-ORDER-1: the latest wrap of each document; a report from a superseded wrap is discarded.
+  const wrapGenerationRef = useRef(new WeakMap<Document, number>());
+
+  /** BLOCK-TEXT-ORDER-1: starts a wrap of `doc` and returns the report handler for it. Only the latest wrap's report
+   *  applies, and only while `live()` holds; it marks the document uncertified iff the report fails while the book's
+   *  sections are known (read when the report arrives), and a certified report clears the hold. */
+  const certificationHandler = (doc: Document, live: () => boolean = () => true) => {
+    const generation = (wrapGenerationRef.current.get(doc) ?? 0) + 1;
+    wrapGenerationRef.current.set(doc, generation);
+    return (report: CertificationResult): void => {
+      if (wrapGenerationRef.current.get(doc) !== generation || !live()) return;
+      if (!report.ok && (liveSections()?.length ?? 0) > 0) uncertifiedDocsRef.current.add(doc);
+      else uncertifiedDocsRef.current.delete(doc);
+    };
+  };
 
   const clearVisualWordClasses = useCallback((contents: Array<{ doc: Document }>) => {
     for (const { doc: d } of contents) {
@@ -796,7 +814,7 @@ export default function NarrateFoliateView({
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
               const wrapT0 = performance.now();
-              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc));
               tracedWrapMs = performance.now() - wrapT0;
               tracedWords = sectionWords.length;
               // Replace (not append) — deduped base + fresh section words
@@ -823,7 +841,7 @@ export default function NarrateFoliateView({
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
                 const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
                 const wrapT0 = performance.now();
-                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc));
                 tracedWrapMs = performance.now() - wrapT0;
                 tracedWords = sectionWords.length;
               }
@@ -843,6 +861,9 @@ export default function NarrateFoliateView({
 
             const resolvedToken = resolveRenderedToken(doc.body, target);
             if (!resolvedToken) return;
+            // BLOCK-TEXT-ORDER-1 (Q3): an uncertified section's span index is untrusted. Narrate ignores the click:
+            // no highlight, no word, no save.
+            if (uncertifiedDocsRef.current.has(doc)) return;
 
             const clickHighlightClass = resolveFoliateWordHighlightClass(NARRATE_HIGHLIGHT_MODE);
             doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
@@ -899,6 +920,8 @@ export default function NarrateFoliateView({
               const contents = v.renderer.getContents?.() ?? [];
               const match = contents.find((c: any) => c.doc === doc);
               if (match && resolvedToken) {
+                // BLOCK-TEXT-ORDER-1 (Q3): as the click handler, for a selected word in an uncertified section.
+                if (uncertifiedDocsRef.current.has(doc)) return;
                 const selHighlightClass = resolveFoliateWordHighlightClass(NARRATE_HIGHLIGHT_MODE);
                 doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
                   el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
@@ -1254,7 +1277,7 @@ export default function NarrateFoliateView({
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
-        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords, certificationHandler(doc, () => !cancelled));
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);
