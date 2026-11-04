@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-04T02:06:00Z",
+  "takenAt": "2026-11-04T02:31:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -8214,8 +8214,8 @@
       "sequence": 97.6,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "CFI-POSITION-CONSISTENCY-1"
       ],
@@ -8223,14 +8223,14 @@
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "ROADMAP.md#flow-save-as-you-go-1",
+      "spec_link": "docs/planning/specs/2026-11-03/FLOW-SAVE-AS-YOU-GO-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Flow saves progress during playback only when the page moves. Add a mode-local save on word advance at the same cadence as Focus (RSVP_PROGRESS_SAVE_INTERVAL_MS) plus pause and stop, with an explicit null cfi under CFI-POSITION-CONSISTENCY-1's contract.",
       "notes": "origin: owner ruling O5, 2026-11-03 (Findings F-016): Flow and Narrate save as they go, like Focus under O4. Sequenced after CFI-POSITION-CONSISTENCY-1, reusing its cadence and null-cfi rule. Stub; spec to follow.",
-      "revision": "b6c2dbaded1e15f66fc25f196c34e0004bc7f59c8edcdd2629bc1dcbabb7a390",
+      "revision": "e562c05bd75324b62d70de2ff4095cd3681db44fb7adb013d81c16d48d79461d",
       "extra": {
         "id": "40e7c96c-c31e-8149-b221-ede0d717123e",
         "url": "https://app.notion.com/40e7c96cc31e8149b221ede0d717123e",
@@ -8253,8 +8253,8 @@
       "sequence": 97.7,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "CFI-POSITION-CONSISTENCY-1"
       ],
@@ -8262,14 +8262,14 @@
       "workstream": "TTS / Narration Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "ROADMAP.md#narrate-save-as-you-go-1",
+      "spec_link": "docs/planning/specs/2026-11-03/NARRATE-SAVE-AS-YOU-GO-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Narrate saves progress during playback only when the page moves. Add a mode-local save on cursor-word advance at the same cadence as Focus (RSVP_PROGRESS_SAVE_INTERVAL_MS) plus pause and stop, with an explicit null cfi under CFI-POSITION-CONSISTENCY-1's contract. Restart still begins at the saved word's sentence (O3).",
       "notes": "origin: owner ruling O5, 2026-11-03 (Findings F-016): Flow and Narrate save as they go, like Focus under O4. Sequenced after CFI-POSITION-CONSISTENCY-1, reusing its cadence and null-cfi rule. Stub; spec to follow.",
-      "revision": "0de86f701b61a0c8623e4b182c95c5d889e56492d06607b93080a64119b165c8",
+      "revision": "1d8f74b76668293e2af6e78740ffa808ecc120860ab21d8a8d1f9871867d009c",
       "extra": {
         "id": "40e7c96c-c31e-81db-b2a9-c3fb976a92b9",
         "url": "https://app.notion.com/40e7c96cc31e81dbb2a9c3fb976a92b9",
