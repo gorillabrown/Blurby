@@ -444,3 +444,131 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Input to UNCERTIFIED-ANCHOR-HOLD-1, alongside F-025.
 
 **Disposition:** open; input to UNCERTIFIED-ANCHOR-HOLD-1
+
+### F-027 — `main/library-write.js` has its own uncapped error-log writer that bypasses the 10 MB cap (ERROR-LOG-CAP-1 close-out check, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 1, against `origin/main` `14ce3d24`), ERROR-LOG-CAP-1 Done-when 4.
+
+**Severity:** high (in-scope regression of the integrated tree; narrow and rare in practice, but it defeats the item's stated purpose, "error.log stops growing without bound")
+
+**Where:** `main/library-write.js:8-13` (a private `logToFile` whose line 12 is `await fsPromises.appendFile(errorLogPath, ...)`). `git grep -n "appendFile(errorLogPath" -- main` prints `main/error-log.js:18` and `main/library-write.js:12`, where ERROR-LOG-CAP-1's Done-when 4 requires only `main/error-log.js`.
+
+**Finding:** LIBRARY-WRITE-RACE-1 added `main/library-write.js` with its own appender. ERROR-LOG-CAP-1 was built before that file existed, so its branch-local Done-when 4 was green. The RC window's ruling R2 and its single-copy check (`git grep -n "async function logToFile" -- main/ipc`) searched only `main/ipc`, so the integration did not catch it. Effect: the log lines from `library-write.js` (a failed unlink of an orphaned converted file) skip the 10 MB cap and rotation. No other appender writes `error.log` (`main/sync-engine.js:463` writes the reconcile log, `main/ipc/reader.js:64` writes highlights).
+
+**Root cause (rule 6c):** the single-copy check was scoped to the directory that held the known copies, not to `main`, so a copy added by a later-merged branch was outside it.
+
+**Accountable role / next action:** Blurby.Brain1 rules; RodneySr builds. Fix: in `main/library-write.js` replace the local `logToFile` with `const { logToFile } = require("./error-log");` (the helper keeps the two-argument signature), then re-run Done-when 4 over all of `main` and add a standing grep for any later appender. Needs a build, so it waits for the halt to lift.
+
+**Disposition:** open
+
+### F-028 — PAGE-SAVE-RESTAMP-3 Wave B was never built (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 6, against `origin/main` `14ce3d24`).
+
+**Severity:** low (a rare edge case: a link that never lands still drops the held page turn; not a release gate)
+
+**Where:** `src/reader/modes/page/FoliateView.tsx:810-816`: `goToLanding` starts with `pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn`, and the `link` listener calls it at once. `git grep 'lc1\|lc2' origin/main -- tests` finds no `(lc1)` or `(lc2)` test.
+
+**Finding:** the branch `eb/page-save-restamp-3` (`c3510303`) carries Wave A only. After the 2026-10-25 re-scope the item ends at Wave B (B1: remove the `link` listener's cancel so a jump that never lands leaves the held turn; tests lc1, lc2; a rule 50 update of the (y) "internal link" row). JUMP-LANDING-SAVE-1 moved the cancel from the `link` event into `goToLanding` but did not remove it; its memo says Wave B "follows this item". No ruling was found that drops, splits or closes Wave B. The item stays open.
+
+**Accountable role / next action:** planner with Blurby.Brain1: build Wave B, split it into its own register item, or drop it with a ruling. A-6's owner smoke is also absent from the gate (2) list (added in `SMOKE_CHECKLIST_STAGE8.md` at this close-out).
+
+**Disposition:** open
+
+### F-029 — BLOCK-TAG-CASE-1 Done-when 7 has no performance evidence (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 5), BLOCK-TAG-CASE-1 Done-when 7.
+
+**Severity:** low (paperwork and an unevidenced row; no code defect found)
+
+**Where:** `docs/governance/close-outs/Memo.BLOCK-TAG-CASE-1.GovernanceStaging.2026-10-23.md`; the Wave B `npm run perf` row.
+
+**Finding:** the row asks that no `npm run perf` benchmark is worse than the baseline by more than 10%. No perf output exists in the BLOCK-TAG-CASE-1 or FLOW-PARA-PAUSE-INDEX-1 memos or in the artifact folders, and gate (1) run 6's record is not in the repo (see F-035). Done-when 8's bug entry was missing and is now BUG-241 (status: fixed in source, close-out pending this row). The item stays open.
+
+**Accountable role / next action:** Blurby.Brain1: an `npm run perf` run on RodneySr or a written waiver. The item's close-out then moves BUG-241 to resolved.
+
+**Disposition:** open
+
+### F-030 — Issue files for LIBRARY-COMPLETION-VISIBILITY-1 and RELEASE-RUNBOOK-1 have no `## Decision` block (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (groups 5 and 7).
+
+**Severity:** low (paperwork; the close-out process stops on an open issue without a Decision)
+
+**Where:** `docs/governance/bug-reports/Issue.LIBRARY-COMPLETION-VISIBILITY-1.2026-10-26.md` (has "Decision history", "Combined verification update" and "BUG-222 technical disposition - 2026-10-26", and no entry for the 2026-10-30 pass; says it stays open "until its named gates pass and Brain confirms") and `docs/governance/bug-reports/Issue.RELEASE-RUNBOOK-1.2026-10-22.md` (ends with a bolded "Acceptance" paragraph; Brain's reply "had not arrived when this record was committed").
+
+**Finding:** both items' code and mechanical rows pass, but neither issue file records a decision. They cannot close until Blurby.Brain1 appends one.
+
+**Accountable role / next action:** Blurby.Brain1 (decision blocks); then planner closes the items. RELEASE-RUNBOOK-1 also waits for gate (2) and one run of the runbook on the final build.
+
+**Disposition:** open
+
+### F-031 — PAGE-SAVE-RESTAMP-2 and PAGE-SAVE-RESTAMP-GUARD-1 count gates were changed by later authorized work (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 9), against `origin/main` `14ce3d24`.
+
+**Severity:** low (no behaviour test fails; the gates fail as written)
+
+**Where:** `src/reader/modes/page/FoliateView.tsx`. PAGE-SAVE-RESTAMP-2: DW3 `a jump cancels a held turn` prints 5, spec 6 (dropped by JUMP-LANDING-SAVE-1 `d031cc89`); DW6a `rendererNumberedDocsRef` prints 10, amended 8 (PAGE-SAVE-RESTAMP-3 A1, `5755124b`); DW6b `"page-turn-lost"` prints 4, spec 1 (`c33692da`, then `5755124b`). PAGE-SAVE-RESTAMP-GUARD-1: `rendererNumberedDocsRef` prints 10, spec 5; `reason=book-words` prints 3, spec 1.
+
+**Finding:** each later change was authorized, so these are superseded counts, not regressions. A count amendment cannot be made during a close-out. It goes through the owner and an independent review. Two further needs: a trace that the jump-cancel dropped at `d031cc89` is still done (PAGE-SAVE-RESTAMP-2's D6 says every jump cancels a held turn; F-028 is related), and Blurby.Brain1's recorded acceptance of GUARD-1's fix-round Deviation 3 (`5b0713fe`; the memo says merging needs it and no acceptance is recorded). Both items' owner checks (#8, #9) are on the gate (2) list.
+
+**Accountable role / next action:** planner with the owner and an independent reviewer: amendment restating these gates against a named sha; Blurby.Brain1: the trace and the Deviation 3 acceptance. Re-grep both counts after CFI-POSITION-CONSISTENCY-1.
+
+**Disposition:** open
+
+### F-032 — DEPS-AUDIT-1 Done-when 4 and 5 fail if re-run today (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 7): a scratch `npm audit` over the `origin/main` lockfile.
+
+**Severity:** medium (one production advisory is fixable; the Done-when rows are point-in-time by nature)
+
+**Where:** `package-lock.json`; `docs/governance/DEPENDENCY_ADVISORIES.md`; the DEPS-AUDIT-1 memo (merge-time result: `fixable=0`, five names).
+
+**Finding:** `npm audit --omit=dev` now exits 1 with `fixable=1` (a new `undici` advisory, 7.30.0 under cheerio; the package is an accepted row in the advisories document, so the advisory text changed after it). The all-dependency audit reports critical 0, high 8, moderate 13, `fixable=3`, adding `follow-redirects` (already bumped to 1.16.1 by CI-AUDIT-ALLOWLIST-1) and `joi`. The cause is advisory-database drift after the merge, not a change in the item. The advisories document still lists Electron 41.10.7 and dates its audit 2026-10-14. The item's Q3 ruling also needs the D3 and D6 re-run on final main, which gate (1) run 6 did not judge. The item stays open.
+
+**Accountable role / next action:** Blurby.Brain1 rules whether Done-when 4 and 5 are merge-time (point-in-time) checks; planner files a dependency-refresh item for `undici`, `follow-redirects` and `joi` or Brain runs the non-major fix; the advisories document is re-dated at that refresh.
+
+**Disposition:** open
+
+### F-033 — The 4.25:1 light-theme link accent is tracked nowhere, and BOOK-TEXT-COLOUR-1's contrast script is outside the repo (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (group 10), BOOK-TEXT-COLOUR-1's memo finding for Blurby.Roadmap.
+
+**Severity:** low (a design call at tier 3; BUG-208's fix itself passes 8 of 8)
+
+**Where:** the light-theme link accent `#8B6F47` on `rgb(245,243,239)` measures 4.25:1, below 4.5:1, on both the base and the fix (`C:\Projects\Blurby-artifacts\book-text-colour-1\contrast.mjs`, `contrast-base3.json`, `contrast-fix2.json`).
+
+**Finding:** the finding appears only in the memo (a search of `ROADMAP.md`, `docs/governance`, the roadmap reviews, the specs and the register snapshot finds nothing else). The contrast script, which is the item's Done-when 1 instrument, lives only in the artifacts folder on this machine, and no time log was kept. The item stays open: the owner's BUG-208 re-check is also owed.
+
+**Accountable role / next action:** planner and owner: decide whether to change the light-theme accent; move the contrast script into the repo (or archive a copy); add the time log. Owner BUG-208 re-check is on the gate (2) list.
+
+**Disposition:** open
+
+### F-034 — RESTAMP-RERUN-RACE-1's fold-in 2 (FIXED-LAYOUT-RESTAMP-1) is filed nowhere (close-out review, 2026-11-04)
+
+**Source:** `docs/governance/close-outs/Memo.RESTAMP-RERUN-RACE-1.GovernanceStaging.2026-10-23.md`, Fold-in 2; the evidence check for the 2026-11-04 close-out review (group 6).
+
+**Severity:** low (unmeasured; not a release gate)
+
+**Where:** foliate's fixed-layout renderer returns every iframe from `getContents()` with no `index` (`fixed-layout.js:308-312`); Page's re-stamp and the load then take the loaded-slice start for `undefined`, which is 0.
+
+**Finding:** the memo's proposed stub, FIXED-LAYOUT-RESTAMP-1, "Page re-stamp numbers every fixed-layout page from 0" (Reader Engine lane), was never added to ROADMAP, Findings or IDEAS. For a pre-paginated book, both pages of a spread could carry overlapping `data-word-index` values. Unmeasured: measure first with a pre-paginated fixture (LL-142). RESTAMP-RERUN-RACE-1 closed without it, so this entry is the only record.
+
+**Accountable role / next action:** planner: route to the next roadmap review, which decides whether to register FIXED-LAYOUT-RESTAMP-1 as a stub.
+
+**Disposition:** open
+
+### F-035 — The RC window's "Package verification" record and gate (1) run 6's record are not in the repo (close-out review, 2026-11-04)
+
+**Source:** the evidence check for the 2026-11-04 close-out review (groups 1, 4, 5 and 6).
+
+**Severity:** medium (custody: several closing items cite this evidence as their package or suite proof)
+
+**Where:** `docs/governance/close-outs/` holds only `Gate1.STAGE8-RUN4.2026-10-23.md`. The RC window's "Package verification" record (the arm64 and x64 pair for the merge `c5bb507f`) and gate (1) run 6's record (3,048 passed, 0 failed, typecheck 0; PARTIAL: D6 cold, D3 2.00x, Q3 session 2 and D6 warm 2.00x play not judged) are in Blurby.Brain1's messages and on RodneySr. On Rodney, `C:\Projects\Blurby-artifacts\rc-merge-20261103\` (`launch25-arm64.json`, `asar-list-arm64.txt`) corroborates the arm64 launch but was built from a later tree than `c5bb507f`.
+
+**Finding:** the close-outs cite Brain1's written verdict for run 6 and per-item memos for package evidence, because the RC pair's own record was not found in the repo. Several raw evidence folders (for example FOLIATE-DISPLAY-LIFETIME-1's, PLAY-FIRST-TEXT-1's, BAND-ALIGN-2 R8's) are on RodneySr only.
+
+**Accountable role / next action:** Blurby.Brain1: commit both records (run 6's table and the RC "Package verification" section) to `docs/governance/close-outs/`, or name their exact location for the close-outs to cite.
+
+**Disposition:** open

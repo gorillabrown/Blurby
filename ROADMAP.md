@@ -24,6 +24,8 @@ The line has no dated deadline. Blurby Business, server payments and server narr
 
 ### Held dispatch update - 2026-10-27
 
+**Update 2026-11-04:** FOLIATE-DISPLAY-LIFETIME-1 and FOLIATE-OBSERVER-LEAK-1 merged in the RC window (`c5bb507f`) and are closed (spec sections archived to `docs/planning/.Archive/ROADMAP_legacy.md`; Completed Work Summary). LIBRARY-COMPLETION-VISIBILITY-1, named in the merge stack below, stays open until Blurby.Brain1 adds its issue file's `## Decision` block (Findings F-030). The text below is the 2026-10-27 to 2026-10-30 record, kept as history.
+
 FOLIATE-DISPLAY-LIFETIME-1 is **PACKAGE-VERIFIED (x64, RodneySr) 2026-10-30, built and held** (Blurby.Brain1: native A/B passes; tip `ea02d903`, then `4ac4ff76` with the visibility record; package commit `2d5772d3` = `2df0f920` + origin/main `e29117b2`. Control `10332e5a` shows 1 style-null line, the candidate 0 across 9 runs with no `error.log`; ResizeObserver-loop lines 0 on both. Suite 2,523/1/0. x64/arm64 asar pair identical (`c58a2b3a…`); live profile unchanged. BUG-222 fixed in the candidate. Arm64 launch at merge. Memo: `docs/studies/investigations/FOLIATE-DISPLAY-LIFETIME-1.native.2026-10-30.md` on the branch). **Merge stack (one unit):** FOLIATE-OBSERVER-LEAK-1 (`51759276`) → LIBRARY-COMPLETION-VISIBILITY-1 (`0dd4d940`) → FOLIATE-DISPLAY-LIFETIME-1 (tip `4ac4ff76`), for the owner-approved integrated RC, subject to fresh current-main qualification. CPU profiling is not an integration prerequisite. Specify a narrow current-main candidate from the required app/test/harness blobs; preserve current plugin policy and exclude obsolete agent protocols/historical handoff payloads. Visibility branch tip is `a8e31b73` (implementation `0dd4d940`). No fresh package, ARM64, merge-go or release waiver: see [integration audit](docs/governance/bug-reports/Audit.DESKTOP-LIBRARY-INTEGRATION.2026-11-02.md) and [scope ruling](docs/governance/bug-reports/Brain.DESKTOP-LIBRARY-INTEGRATION-scope.2026-11-02.md). Earlier: unblocked to In Flight on 2026-10-30 by R-2026-10-30-1 (Seq68; NATIVE-PATH-ATTESTATION-1 no longer a prerequisite; native routes are RodneySr job 2, isolated by inspector-proved scratch userData, APPDATA/LOCALAPPDATA redirect and a profile-tree snapshot, which replaces the separately reviewed observation design below). Earlier record: Source e1c1c11c and held tip2df0f920 remain published on eb/foliate-display-lifetime-1; 51 portable lifecycle cases, the full2522-pass/two-skipped suite and static ARM64 package checks retain their bounded approvals. The data-only observation collector is NOT QUALIFIED after both permitted controlled runs; actual runtime controls and native Blurby routes were NOT RUN. Brain and independent review require a separately reviewed observation design and explicit new qualification budget/custody. No completion record, successor elevation, application merge or release. [Held-dispatch report](docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md); [open issue](docs/governance/bug-reports/Issue.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md). This note records status only; the full admitted spec remains on the held source branch.
 
 ## Work lanes
@@ -125,6 +127,27 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | [Close-out](docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md) |
 | FOLDER-SCAN-PERF-1 | 2026-10-14 | Native recursive `fs.watch` replaces chokidar; the folder scan drops per-file `realpath` and yields every 500 entries; startup folder work waits for the window. *Meditations* on Drive opens in ~2 s (was 140–150 s); BUG-193 resolved. Live sync on very large folders (Done-when 9(d)) waived by the owner and moved to [large-folder live-sync follow-up](https://app.notion.com/3f97c96cc31e814fbf38e0d61a0b90f1) (merge `534b43d2`) | [Close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md) |
 | QUIT-FLUSH-1 | 2026-10-14 | The quit saves run in the cancelled first `will-quit` under a 3 s cap, each guarded; the Narrate producer shutdown is awaited uncapped; review fixes W1 (the quit cloud sync's library merge is flushed), W2 (no step starts after the cap) and N1. BUG-192 resolved; owner smoke (a)–(e) pass on the production build (merge `d21009b3`) | [Close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md) |
+| LIBRARY-WRITE-RACE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Main-side library writers update the live record, never a copy (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.LIBRARY-WRITE-RACE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.LIBRARY-WRITE-RACE-1.2026-11-04.md) |
+| WS-PAIR-LOG-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Say why a pairing is not saved when OS encryption is unavailable (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.WS-PAIR-LOG-1.2026-11-04.md](docs/governance/close-outs/CloseOut.WS-PAIR-LOG-1.2026-11-04.md) |
+| WS-TOKEN-REGEN-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Regenerating the pairing code stores one encrypted token (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.WS-TOKEN-REGEN-1.2026-11-04.md](docs/governance/close-outs/CloseOut.WS-TOKEN-REGEN-1.2026-11-04.md) |
+| LARGE-FOLDER-SYNC-3 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Follow-ups from LARGE-FOLDER-SYNC-2 (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.LARGE-FOLDER-SYNC-3.2026-11-04.md](docs/governance/close-outs/CloseOut.LARGE-FOLDER-SYNC-3.2026-11-04.md) |
+| RENAME-TMP-RACE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. The sync-state and token saves use the serialized JSON writer (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.RENAME-TMP-RACE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.RENAME-TMP-RACE-1.2026-11-04.md) |
+| ZIP-READ-FOLLOWUPS-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Every EPUB archive is opened through one size-checked door (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.ZIP-READ-FOLLOWUPS-1.2026-11-04.md](docs/governance/close-outs/CloseOut.ZIP-READ-FOLLOWUPS-1.2026-11-04.md) |
+| ZIP-ASYNC-READ-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Read EPUB archives asynchronously (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.ZIP-ASYNC-READ-1.2026-11-04.md](docs/governance/close-outs/CloseOut.ZIP-ASYNC-READ-1.2026-11-04.md) |
+| WIN-TARGET-NSIS-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. package.json builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.WIN-TARGET-NSIS-1.2026-11-04.md](docs/governance/close-outs/CloseOut.WIN-TARGET-NSIS-1.2026-11-04.md) |
+| NARRATE-TRACE-LABELS-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.NARRATE-TRACE-LABELS-1.2026-11-04.md](docs/governance/close-outs/CloseOut.NARRATE-TRACE-LABELS-1.2026-11-04.md) |
+| NARRATE-KEY-REPEAT-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Narrate's key forwarder keeps a held key's repeat flag (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.NARRATE-KEY-REPEAT-1.2026-11-04.md](docs/governance/close-outs/CloseOut.NARRATE-KEY-REPEAT-1.2026-11-04.md) |
+| NARRATE-TOKEN-CAP-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Digit-dense passages are planned under the 400-id token cap (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.NARRATE-TOKEN-CAP-1.2026-11-04.md](docs/governance/close-outs/CloseOut.NARRATE-TOKEN-CAP-1.2026-11-04.md) |
+| NARRATE-SENTENCE-INITIALS-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. A single-letter initial does not end a sentence (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.NARRATE-SENTENCE-INITIALS-1.2026-11-04.md](docs/governance/close-outs/CloseOut.NARRATE-SENTENCE-INITIALS-1.2026-11-04.md) |
+| FOCUS-KEYS-FIX-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Focus's word, sentence and paragraph keys move the reading word (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.FOCUS-KEYS-FIX-1.2026-11-04.md](docs/governance/close-outs/CloseOut.FOCUS-KEYS-FIX-1.2026-11-04.md) |
+| FLOW-KEYS-FIX-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Flow's line, word, sentence and paragraph keys move both pacers (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.FLOW-KEYS-FIX-1.2026-11-04.md](docs/governance/close-outs/CloseOut.FLOW-KEYS-FIX-1.2026-11-04.md) |
+| FLOW-PARA-KEYS-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Flow's paragraph keys step over whole-book paragraph starts on an EPUB (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.FLOW-PARA-KEYS-1.2026-11-04.md](docs/governance/close-outs/CloseOut.FLOW-PARA-KEYS-1.2026-11-04.md) |
+| FOLIATE-DISPLAY-LIFETIME-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. EPUB display lifetime repair (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md](docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md) |
+| FOLIATE-OBSERVER-LEAK-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Leaked foliate View observers stop flooding error.log (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.FOLIATE-OBSERVER-LEAK-1.2026-11-04.md](docs/governance/close-outs/CloseOut.FOLIATE-OBSERVER-LEAK-1.2026-11-04.md) |
+| RESTAMP-RERUN-RACE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.RESTAMP-RERUN-RACE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.RESTAMP-RERUN-RACE-1.2026-11-04.md) |
+| JUMP-LANDING-SAVE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Link, footnote and chapter jumps in Page mode save the page they land on (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.JUMP-LANDING-SAVE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.JUMP-LANDING-SAVE-1.2026-11-04.md) |
+| PAGE-HELD-TURN-FAIL-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. A held page turn the word count cannot place is reported, not dropped (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.PAGE-HELD-TURN-FAIL-1.2026-11-04.md](docs/governance/close-outs/CloseOut.PAGE-HELD-TURN-FAIL-1.2026-11-04.md) |
+| TOC-JUMP-SAVE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. A contents-list jump in Page mode saves the page it lands on (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.TOC-JUMP-SAVE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.TOC-JUMP-SAVE-1.2026-11-04.md) |
 
 **Superseded work:**
 - `NARRATE-HEARD-CURSOR-1`, `NARRATE-APPLYRATECHANGE-COLLAPSE-1`, `NARRATE-SUBSCRIBER-CURSOR-1` — superseded 2026-10-11 by the Narrate rebuild (NARRATE-REBUILD-1; owner ruling #31). Stubs archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [review](docs/planning/roadmap-reviews/2026-10-11-plan.md).
@@ -470,86 +493,6 @@ Gate (1) also re-runs D3 and D5 on this sha (Blurby.Brain).
 - **State:** merged `3872c6e8` 2026-10-23, release gate (12) met; In Flight, close-out held for the smoke's arm64 row; the ARM64 installer fix (`ELECTRON_BUILDER_7Z_FILTER=BCJ`) was accepted by Blurby.Brain 2026-10-23; position 7 — Full Spec; authored 2026-10-22 on main @ `e257c08a`; RELEASE GATE (12); created on Blurby.Brain's ruling
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md#release-runbook-1) (moved by roadmap review 2026-10-23-2; byte-identical to `ROADMAP.md` @ `27efb3a0`). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
-<a id="toc-jump-save-1"></a>
-
-#### TOC-JUMP-SAVE-1 — A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `db03f2f5` on `eb/toc-jump-save-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts (ROADMAP Stage 8, *Gate (1) sequencing and freeze*). Independent of the other three items specified with it.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#toc-jump-save-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="ws-token-regen-1"></a>
-
-#### WS-TOKEN-REGEN-1 — Regenerating the pairing code stores one encrypted token *(built `48c311f6` on `eb/ws-token-regen-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `48c311f6` on `eb/ws-token-regen-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#ws-token-regen-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="narrate-key-repeat-1"></a>
-
-#### NARRATE-KEY-REPEAT-1 — Narrate's key forwarder keeps a held key's repeat flag *(built `8b5e9789` on `eb/narrate-key-repeat-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `8b5e9789` on `eb/narrate-key-repeat-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#narrate-key-repeat-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="rename-tmp-race-1"></a>
-
-#### RENAME-TMP-RACE-1 — The sync-state and token saves use the serialized JSON writer *(built `b37d199b` on `eb/rename-tmp-race-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `b37d199b` on `eb/rename-tmp-race-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts. If WS-TOKEN-REGEN-1 is open at the same time, the two share no file.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#rename-tmp-race-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="zip-read-followups-1"></a>
-
-#### ZIP-READ-FOLLOWUPS-1 — Every EPUB archive is opened through one size-checked door *(built `29b3e7e5` on `eb/zip-read-followups-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `29b3e7e5` on `eb/zip-read-followups-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts. No open branch shares its files. PDF-IMPORT-DIAG-1's `main/file-parsers.js` edits are already merged (`7c518a30`).
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#zip-read-followups-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="library-write-race-1"></a>
-
-#### LIBRARY-WRITE-RACE-1 — Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `3b7aaa6f` on `eb/library-write-race-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts, and after WS-TOKEN-REGEN-1 (`eb/ws-token-regen-1`, which edits `main/ws-server.js` from `:434` and `main/ipc/misc.js`'s regenerate handler) and WS-PAIR-LOG-1 (`main/ws-server.js:237-245`). Take `refs/remotes/origin/main` in and re-grep every cited line before merging.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#library-write-race-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="page-held-turn-fail-1"></a>
-
-#### PAGE-HELD-TURN-FAIL-1 — A held page turn the word count cannot place is reported, not dropped *(built `7ca5a4b7` on `eb/page-held-turn-fail-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `7ca5a4b7` on `eb/page-held-turn-fail-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts, and after TOC-JUMP-SAVE-1 (same file). Take `refs/remotes/origin/main` in and re-grep `:586-593`, `:634` and `:674` before editing.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#page-held-turn-fail-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="ws-pair-log-1"></a>
-
-#### WS-PAIR-LOG-1 — Say why a pairing is not saved when OS encryption is unavailable *(built `4944def6` on `eb/ws-pair-log-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `4944def6` on `eb/ws-pair-log-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts, after WS-TOKEN-REGEN-1, and before LIBRARY-WRITE-RACE-1 (which also edits `main/ws-server.js`, at `:405-419`).
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#ws-pair-log-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="narrate-token-cap-1"></a>
-
-#### NARRATE-TOKEN-CAP-1 — Digit-dense passages are planned under the 400-id token cap *(built `814ddc78` on `eb/narrate-token-cap-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `814ddc78` on `eb/narrate-token-cap-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts. It overlaps none of the held branches. It merges before NARRATE-SENTENCE-RESUME-1, which also edits `chunkPlan.ts`.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#narrate-token-cap-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="narrate-trace-labels-1"></a>
-
-#### NARRATE-TRACE-LABELS-1 — Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate *(built `08da0030` on `eb/narrate-trace-labels-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `08da0030` on `eb/narrate-trace-labels-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts. No overlap with any held branch: none touches `main.js:180-193` or the launcher.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#narrate-trace-labels-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
 <a id="narrate-sentence-resume-1"></a>
 
 #### NARRATE-SENTENCE-RESUME-1 — Narrate starts at the beginning of the current sentence *(built `35716c5f` on `eb/narrate-sentence-resume-1`; In Flight, merge held for the Stage 8 freeze)*
@@ -557,14 +500,6 @@ Gate (1) also re-runs D3 and D5 on this sha (Blurby.Brain).
 - **State:** built and pushed at `35716c5f` on `eb/narrate-sentence-resume-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
 - **Merge order:** after the Stage 8 freeze lifts. It comes after NARRATE-TOKEN-CAP-1 (`chunkPlan.ts`) and re-greps. It is independent of NARRATE-KEY-REPEAT-1, which edits a different file.
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#narrate-sentence-resume-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="large-folder-sync-3"></a>
-
-#### LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2 *(built `043ef79a` on `eb/large-folder-sync-3`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `043ef79a` on `eb/large-folder-sync-3`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#large-folder-sync-3) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="band-align-1"></a>
 
@@ -574,16 +509,6 @@ Gate (1) also re-runs D3 and D5 on this sha (Blurby.Brain).
 - **Owner OK, 2026-10-23 (tier 2):** yes, the band grows to the real line count. The Lines choice becomes 3, 5, 7 or Off (BAND-ALIGN-2, R5).
 - **Merge order:** after the Stage 8 freeze lifts (the owner's tier-2 OK is given). It overlaps two Narrate items:
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#band-align-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-
-<a id="foliate-observer-leak-1"></a>
-
-#### FOLIATE-OBSERVER-LEAK-1 — Leaked foliate View observers stop flooding error.log *(built `51759276` on `eb/foliate-observer-leak-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **Merge stack (2026-10-30, Blurby.Brain1):** `51759276` is contained in FOLIATE-DISPLAY-LIFETIME-1's package-verified candidate (`2d5772d3`, tip `4ac4ff76`). The three merge as one stack: this item, then LIBRARY-COMPLETION-VISIBILITY-1, then FOLIATE-DISPLAY-LIFETIME-1. The observer repair is proven on that package: 0 ResizeObserver-loop lines, against 264 on base `36ac7466`.
-
-- **State:** built and pushed at `51759276` on `eb/foliate-observer-leak-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts. No held or in-flight branch touches `patches/` or this test.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#foliate-observer-leak-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="narrate-years-1"></a>
 
@@ -623,29 +548,11 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#keep-furthest-fix-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
-<a id="focus-keys-fix-1"></a>
-
-#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **rebuilt 2026-10-23 at `3bfb016e`, all gates and the live check pass**; merge held for the Stage 8 freeze)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#focus-keys-fix-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
-
-<a id="flow-keys-fix-1"></a>
-
-#### FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, → and ← move the speed 300 → 325 → 300, Ctrl+↓ continues, PgDn still pauses and turns the page, against Ctrl+→ stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#flow-keys-fix-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
-
 <a id="band-align-2-spec"></a>
 
 #### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-11-03.md#band-align-2) (moved by roadmap review 2026-11-03 to keep ROADMAP.md under its length ceiling; byte-identical). Built and held; carried by the RC integration window, wave C ([spec](docs/planning/specs/2026-11-03/RC-INTEGRATION-WINDOW.md)).
-
-<a id="flow-para-keys-1"></a>
-
-#### FLOW-PARA-KEYS-1 — Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+→ paused 187 → 188 → 572 → 610 and back, playing 191 → 572 and keeps playing (572 to 579), Ctrl+→ and Ctrl+← keep playing, plain ←/→ change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e`: red first `16d2114f`, fix `5fb00ab5`, BUG-217; `npm test` 2,486 passed / 1 skipped / 0 failed, typecheck and build 0; live Shift+→ paused 187 → 188 → 572 → 610 and back, playing 191 → 572 with both pacers on 572, against 191 → 5290 on the base; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1**; Seq 84 — Full Spec; check settled red live 2026-10-23, amendment below; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#flow-para-keys-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
 <a id="block-tag-case-1"></a>
 
@@ -747,19 +654,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### READER-ARROW-GUARD-1`). The builder, the merge and the close-out read it there.
 - **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** `59cffaa7`, tip `51202c1c`. Built and held for the Stage 8 freeze. Its BUG_REPORT hunk files BUG-218, which keeps that number (see BUG_REPORT.md, "Numbers reserved by held branches"). **Follow-up:** NARRATE-ARROW-PAUSE-1 (owner ruling 2026-10-25: Narrate pauses on a modified arrow).
-
-<a id="win-target-nsis-1-spec"></a>
-
-#### WIN-TARGET-NSIS-1 — `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### WIN-TARGET-NSIS-1`). The builder, the merge and the close-out read it there.
-- **Package verified in full (standing rule 53; Blurby.Brain, 2026-10-25): tip `d96435a1`.** (a)–(c) passed on arm64. (d) passed on the x64 quiet machine:
-  - The NSIS installer's `app.asar` matches both the `--dir` build and the installed copy (sha256 `B8FE8246…`).
-  - The silent install exits 0, places a PE `0x8664` exe and creates the "Blurby 1.75.1" HKCU uninstall key.
-  - The 25 s scratch launch is clean. LL-165 was proved at +209 ms, and stderr holds only the BUG-217 line.
-  - The silent uninstall removes the folder, both keys and the Start-menu folder, and the live hashes are unchanged.
-  - Evidence: `C:\Projects\Blurby-artifacts\win-target-nsis-1\quiet-x64\` on the quiet machine.
-  - **Lesson:** LL-168, an install test must export both of an older Blurby's registry keys first.
 
 <a id="flow-para-pause-index-1-spec"></a>
 
@@ -966,8 +860,6 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-30.md) (moved by roadmap review 2026-10-30 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `e29117b2`; search for `#### NATIVE-PATH-ATTESTATION-1`). Its WIP candidate `9264c9b3` (also `refs/archive/rodney-unpushed/eb-native-path-attestation-1`), the Rodney worktree's 7 uncommitted harness edits and all receipts are kept untouched.
 - **Parked (R-2026-10-30-1, Blurby.Brain1 under the owner's 2026-10-30 mandate):** no longer a prerequisite of FOLIATE-DISPLAY-LIFETIME-1, WORD-INDEX-UNIFY-1 or BLOCK-TEXT-ORDER-1. On RodneySr the owner's data is absent, so native runs there use inspector-proved scratch userData (LL-165), APPDATA/LOCALAPPDATA redirected, a profile-tree snapshot/diff/restore-only-on-difference, and no other Blurby running — bounded to owned fixtures and public-domain books; reading the owner's library needs the owner's explicit OK. Seq 67.5 → 140.
-#### FOLIATE-DISPLAY-LIFETIME-1 — EPUB display lifetime repair (In Flight; built/held; Seq68) <a id="foliate-display-lifetime-1"></a>
-- **Held specification:** source branch `eb/foliate-display-lifetime-1`; package/tip `2d5772d3`/`4ac4ff76`. See the opening Held dispatch update and current readiness report. Observer -> visibility -> display-lifetime; ARM64 launch, integration and release gates remain. Status summary only, not a new implementation specification.
 <a id="block-text-order-1"></a>
 #### BLOCK-TEXT-ORDER-1 — Keep block text in DOM order in every reading mode *(Seq 87.5; Queued; Full Spec 2026-11-03; Reader Engine; two waves; build-and-hold; Q1–Q4 and R-Q5 ruled; both waves dispatch-ready)*
 - **Full specification (2026-11-03):** [docs/planning/specs/2026-11-03/BLOCK-TEXT-ORDER-1.md](docs/planning/specs/2026-11-03/BLOCK-TEXT-ORDER-1.md). Contracts G-A to G-D frozen ([contracts and owner answers OQ1–OQ6](docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md)); Blurby.Brain1 rulings TQ-A1 to TQ-D1 and the OQ4 hold applied. Wave A: red tests, the dormant main helper, ordered runs and the certifier in the four helper and wrapper copies. Wave B: the OQ4 hold per mode (uncertified sections save the cfi only; Narrate ignores the click), the Electron ICU checker on the sample book, rule 53 pair. Base `origin/main` ≥ `c5bb507f` (prerequisites merged; NATIVE-PATH-ATTESTATION-1 no longer gates). Follow-ups: FLOW-, FOCUS-, NARRATE-RESTAMP-CURRENT-1, BUG-239, Findings F-013/F-014; FOOTNOTE-INLINE-READ-1 after.
@@ -1279,13 +1171,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 #### NARRATE-SAVE-AS-YOU-GO-1 — Narrate saves your place every few seconds while playing, so a crash reopens within a few words *(Seq 97.7; Queued; Full Spec; TTS / Narration Engine; after CFI-POSITION-CONSISTENCY-1)* <a id="narrate-save-as-you-go-1"></a>
 - **Gist:** owner ruling O5 (2026-11-03, Findings F-016). Narrate saves during playback only when the page moves (`narrate/ModeRuntime.ts:528`; advances `:709`). Add a mode-local save on cursor-word advance at Focus's cadence plus pause and stop, with an explicit `null` cfi. Restart still begins at the saved word's sentence (O3). **Full specification (2026-11-03, cited against `14ce3d24`):** [docs/planning/specs/2026-11-03/NARRATE-SAVE-AS-YOU-GO-1.md](docs/planning/specs/2026-11-03/NARRATE-SAVE-AS-YOU-GO-1.md), to Brain1's general rules G1–G8; Q1–Q5 ruled 2026-11-03 (Q5 overruled: timer-driven saves while hidden); STOP-Q5a ruled (a), a read-only `wordAtPlaybackSample()` engine method; STOP-CLOSE ruled; dispatch-ready once CPC-1 merges.
 
-<a id="restamp-rerun-race-1-spec"></a>
-
-#### RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*
-
-- **Full specification:** [`docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md`](docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
-- **Package verified (standing rule 53; Blurby.Brain, 2026-10-25):** tip `79e1d9d0`. It is stacked on TOC-JUMP-SAVE-1, then PAGE-SAVE-RESTAMP-3 Wave A, then JUMP-LANDING-SAVE-1, and it touches `src/components/ReaderContainer.tsx` through that stack. **Merge order:** after JUMP-LANDING-SAVE-1.
-
 <a id="eink-controls-1"></a>
 
 #### EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*
@@ -1298,14 +1183,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 #### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#narrate-start-stack-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
-
-<a id="narrate-sentence-initials-1"></a>
-
-#### NARRATE-SENTENCE-INITIALS-1 — A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `c93f7c09` on `eb/narrate-sentence-initials-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#narrate-sentence-initials-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="ui-sweep-triage-1"></a>
 
@@ -1431,33 +1308,17 @@ Each stub needs investigation or an owner decision before it can be specified (R
 
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1** is now a full specification: [NARRATE-RECONCILE-RESIDUAL-1](#narrate-reconcile-residual-1-spec) (roadmap review 2026-10-23-5).
 
-<a id="jump-landing-save-1"></a>
-
-#### JUMP-LANDING-SAVE-1 — Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Focus chapter step all save the landing word and agree with `library.json`. Solon approved; Plato minor, none critical. **Roadmap ruling (tier 1):** (fr1n) in `pagePositionSave.test.tsx` now sets `explicitSelectionAnchor` directly instead of `runtime.navigateTo(4)`, which fix C makes a no-op on an EPUB; its assertion is unchanged and its mutation control stays red. Wave B note: fr1's negative branch is now only defensive on an EPUB. **Spec correction:** Done-when 3's third grep prints 4 lines, not 3: the base already had the chapter-label line (`:797`, now `:801`). Follow-ups in the memo: stub CHAPTER-STEP-CFI-1 (Focus's chapter step saves the entry's word with the old section's cfi); an attached CDP or `--inspect` client holds `app.quit()`, which answers PAGE-SAVE-RESTAMP-3's quit-flush risk. Merge order after the release: TOC-JUMP-SAVE-1 → PAGE-HELD-TURN-FAIL-1 → PAGE-SAVE-RESTAMP-3 → this branch, then PAGE-SAVE-RESTAMP-3 Wave B. Memo: `docs/governance/close-outs/Memo.JUMP-LANDING-SAVE-1.GovernanceStaging.2026-10-23.md` on the branch; position 63 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#jump-landing-save-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
-
-- <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1** is now a full specification: [WIN-TARGET-NSIS-1](#win-target-nsis-1-spec) (roadmap review 2026-10-23-4).
 - <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2** is now a full specification: [LIBRARY-WRITE-RACE-2](#library-write-race-2-spec) (roadmap review 2026-10-23-5).
-
-<a id="zip-async-read-1"></a>
-
-#### ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 — Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*
-
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#zip-async-read-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
-
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); L, amended by the owner 2026-10-23; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1** is now a full specification: [NARRATE-QUIT-LINGER-1](#narrate-quit-linger-1-spec) (roadmap review 2026-10-23-4).
 - <a id="reader-arrow-guard-1"></a>**READER-ARROW-GUARD-1** is now a full specification: [READER-ARROW-GUARD-1](#reader-arrow-guard-1-spec) (roadmap review 2026-10-23-4).
 - <a id="chapter-step-cfi-1"></a>**CHAPTER-STEP-CFI-1** is now a full specification: [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec) (roadmap review 2026-10-23-5).
-- <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1** is now a full specification: [RESTAMP-RERUN-RACE-1](#restamp-rerun-race-1-spec) (roadmap review 2026-10-23-5).
 - <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — SUPERSEDED (roadmap review 2026-10-23-5):** folded into [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec). Both edit Focus's `navigateTo`, the `go-to-href` case and `onRelocate`, and the owner's "first word of chapter" ruling needs the landing hook that fix adds. The ruling is carried there.
 - <a id="flow-toc-jump-word-1"></a>**FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter's first word** *(position 110 — stub; owner ruling 2026-10-23: "Yes, as a follow-up" to CHAPTER-STEP-CFI-1; after CHAPTER-STEP-CFI-1)*. Flow gets the same paused cursor on the jumped-to chapter's first word that CHAPTER-STEP-CFI-1 gives Focus, using that item's landing hook. Specify it after CHAPTER-STEP-CFI-1's Done-when 1 has recorded what Flow shows today. Lane: Reader Engine.
 - <a id="auto-archive-1"></a>**AUTO-ARCHIVE-1** requires a specification amendment: [confirmation-first owner direction](#auto-archive-1-spec), 2026-10-26. Queued, Stub; the earlier automatic-on-exit design is historical.
 - <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
-
 <a id="blurby-server-1"></a>
 
 #### BLURBY-SERVER-1 — One library on every device (blrby.app server) *(position 104 (97 until review 2026-10-23-4, then 100 until the owner moved Stage 9's tabs, feeds and extension ahead of it, 2026-10-23) — Path: epic; absorbed by roadmap review 2026-10-23-3 from held storyboard `2026-10-23-blurby-server`; after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9)*

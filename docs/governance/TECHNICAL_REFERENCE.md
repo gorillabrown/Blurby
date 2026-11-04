@@ -244,6 +244,16 @@ foliate-js renders EPUB content inside a shadow DOM containing an iframe per sec
 - DOM Ranges created in one section become invalid when another section loads
 - The `getContents()` API provides access to currently loaded sections
 
+### Patched foliate-js lifecycle (FOLIATE-OBSERVER-LEAK-1 and FOLIATE-DISPLAY-LIFETIME-1, merged in the RC window `c5bb507f`, closed 2026-11-04)
+
+foliate-js 1.0.1 is patched by `patches/foliate-js+1.0.1.patch` (applied by `patch-package` on `npm ci`). The patch owns, inside the dependency, the lifetimes that the four mode runtimes cannot own from outside:
+
+- **Observers.** `View.destroy()` and `Paginator.destroy()` each call `this.#observer.disconnect()`, so a torn-down view no longer leaves `ResizeObserver`s watching dead 0x0 section bodies (BUG-187).
+- **Per-instance display.** Each `display` operation has its own currentness (`#opCurrent`), separate from the retained View's liveness (`#viewLive`). A pending load can be cancelled (`#cancelLoad`) and a successful load outcome is never rewritten. A newer load on the same View adopts the pending one, and style, font and animation-frame work is owned by the instance that captured it. Disposal is idempotent and releases only what that instance captured (`#disposed`). A fast open and close no longer reaches a null `style` (BUG-222).
+- **Anchor-intent ownership.** Each Paginator keeps its own anchor-intent generation. A public anchor call issues it, display-owned anchor work captures it before a function anchor is evaluated, and a newer anchor on the same View cancels the obsolete publication, scroll and focus work while the native load, font and resize work continues. Ordinary next, prev and snap animations are unchanged.
+
+Page, Focus, Flow and Narrate stay four independent runtimes: the patch is dependency-level, adds no import between modes and no shared mode store, and changes no helper layout algorithm. Portable tests (`tests/foliateObserverPatch.test.js`, `tests/foliateDisplayLifetime.test.js`, `tests/foliateViewReadiness.test.js`) pin the patch text and behaviour, but they do not prove package acceptance: that rests on the native A/B on the packaged build (`docs/studies/investigations/FOLIATE-DISPLAY-LIFETIME-1.native.2026-10-30.md`) and the close-outs. After any foliate-js upgrade, regenerate the patch and re-run those tests.
+
 ### Word Extraction
 
 `extractWordsFromView()` in each mode's `FoliateView.tsx` (helpers in `src/reader/modes/<mode>/helpers/foliateHelpers.ts`):
@@ -590,6 +600,8 @@ Blurby hosts a localhost WebSocket server on port 48924 for the Chrome extension
 **Pairing flow:** 6-digit short code with 5-minute TTL. Long-lived token stored in safeStorage (server) and `chrome.storage.local` (extension). Token survives app restart. Extension reconnects with exponential backoff (1s→30s, ±25% jitter). Pending articles persisted in `chrome.storage.local` and replayed on reconnect with delivery confirmation (article-ack).
 
 **Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer or a library backup. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code, which the pairing banner fetches with `get-ws-short-code` after the `ws-connection-attempt` push. `export-library` writes only real user settings (no `_`-prefixed or main-owned key), and `import-library` restores no settings.
+
+**Token storage is encrypt-only (WS-TOKEN-REGEN-1 and WS-PAIR-LOG-1, merged in the RC window `c5bb507f`, 2026-11-04):** the pairing token is only ever written encrypted. `encodePairingToken` (`main/ws-server.js`) is the one place that encrypts it, and both the pair flow and `regenerate-ws-pairing-token` (`main/ipc/misc.js`) store what it returns; `startServer` never writes the token in plaintext. When OS encryption (`safeStorage`) is unavailable, `encodePairingToken` returns `null`, nothing is persisted, and the token is session-only: the extension must pair again after a restart. The pair flow then logs `pairing not saved:` with the reason (WS-PAIR-LOG-1). Tests: `tests/wsTokenRegen.test.js`, `tests/wsPairLog.test.js`, `tests/settingsKeyTrust.test.js` (o).
 
 **Push event channels (EXT-ENR-B, v1.43.0):** Server emits two push events to the renderer via `mainWindow.webContents.send()`:
 

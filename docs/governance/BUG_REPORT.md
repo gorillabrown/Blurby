@@ -2,11 +2,29 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-11-03 (BUG-239)
+**Last updated:** 2026-11-04 (close-out of 21 items: BUG-187, BUG-210, BUG-211, BUG-222 resolved; BUG-240 restored; BUG-241 filed)
 
 ---
 
 ## Incomplete
+
+### BUG-241 — The renderer finds no paragraph blocks on XHTML pages
+**Reported:** 2026-10-23 (BLOCK-TAG-CASE-1's base measurement, `docs/studies/investigations/BLOCK-TAG-CASE-1.base.2026-10-23.md`); entry filed 2026-11-04 at the close-out review, because BLOCK-TAG-CASE-1's Done-when 8 (this entry) was deferred to its Wave B and never written.
+**Severity:** MEDIUM (paragraph keys, paragraph rhythm pauses and every block lookup saw one block per section). Pre-existing; not a release gate.
+**Status:** FIXED in source (BLOCK-TAG-CASE-1, merged in the RC window, merge c5bb507f); close-out pending its Done-when 7 performance evidence (`npm run perf` shows no benchmark worse than baseline by more than 10%: no record exists) and the Brain1 waiver or run. Do not resolve before then. Lane: Reader Engine.
+**Location:** the `BLOCK_TAGS` sets in the five `foliateHelpers.ts` copies (Page, Focus, Flow, Narrate and `src/utils`) and the two `foliateParagraphStarts.ts` collectors (Flow, Focus).
+**Cause:** an EPUB section is `application/xhtml+xml`, so `Element.tagName` is lowercase (`p`, `div`); the sets held uppercase names and the checks used `BLOCK_TAGS.has(el.tagName)`, so no block matched and each section looked like one `body` block with one paragraph break.
+**Fix (BLOCK-TAG-CASE-1):** lowercase `BLOCK_TAGS` and `localName`-based, case-insensitive checks in all seven places. Measured on *Meditations*: blocks and paragraph breaks 18 → 1,185; section 0 breaks 2 → 62; wrapped words equal main's in every section before and after (the word-count hypothesis is not supported). Tests: `tests/readerModes/blockTagCase.test.ts` (t1, t2, t3). Lessons: LL-186.
+
+### BUG-240 — On an EPUB, Flow's paragraph keys jump thousands of words, to the book's last word or to 0
+**Reported:** 2026-10-23 (FLOW-PARA-KEYS-1's live check on `eb/flow-keys-fix-1` @ `60b86aff`, `C:\Projects\Blurby-artifacts\keys-fix\flow-60b86aff-para.*`). Filed as BUG-217 on the item's branch; the RC merge kept main's BUG-217 (a different bug), which dropped this entry. Restored 2026-11-04 from `git show origin/eb/flow-para-keys-1:docs/governance/BUG_REPORT.md` under this number. The memo and the archived spec still say BUG-217 for it.
+**Severity:** MEDIUM (listed reader keys land in the wrong place). Pre-existing; not a release gate.
+**Status:** RESOLVED 2026-11-04 (FLOW-PARA-KEYS-1, merged in the RC window, merge c5bb507f; close-out `CloseOut.FLOW-PARA-KEYS-1.2026-11-04.md`). Lane: Reader Engine.
+**Description:** on *Meditations* from INTRODUCTION (word 187), Flow's Shift+→ went 187 → 5290 → 80492 (the book's last word) paused, and 424 → 5290 → 80492 playing; Shift+↑ could land on 0.
+**Cause:**
+- `src/reader/modes/flow/ModeRuntime.ts`, the `paragraph` case: with full-book words, `effectiveWords()` is book-wide, but the breaks came from `surface.getParagraphBreaks()`, indices into the loaded slice.
+- The block lookup is case-sensitive: an EPUB section is XHTML, so `BLOCK_TAGS.has(el.tagName)` finds no lowercase block (the same cause as BUG-210's amendment; the shared `getBlockParent` is BLOCK-TAG-CASE-1, BUG-241).
+**Fix (FLOW-PARA-KEYS-1, Blurby.Brain ruling A, as Focus):** `paragraphTarget` uses `findBookParagraphStart` over the rendered block starts of book-stamped sections plus the book's section starts; Flow's own `helpers/foliateParagraphStarts.ts` collector matches blocks by `localName.toUpperCase()`. Tests: `tests/readerModes/flowParagraphStarts.test.ts`. Live on `5fb00ab5`: 187 → 188 → 572 → 610 and back, each the DOM's next or previous block start.
 
 ### BUG-239 — A damaged EPUB leaves Flow, Focus and Narrate with no words
 **Reported:** 2026-11-03, Blurby.Brain1 static finding (1) while ruling on BLOCK-TEXT-ORDER-1's contracts (`Brain1.held-items-TQ.2026-11-03.md`); traced in the contracts' §C.2 (`docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md`).
@@ -162,7 +180,7 @@
 ### BUG-222 — Foliate's paginator throws "Cannot destructure property 'style' of 'r' as it is null" during a fast reader open and close
 **Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
 **Severity:** LOW. It is error-log noise on a fast open and close, and the base has it too. Not a release gate.
-**Status:** OPEN; unscheduled. Lane: Reader Engine.
+**Status:** RESOLVED 2026-11-04 (FOLIATE-DISPLAY-LIFETIME-1, merged in the RC window, merge c5bb507f; close-out `CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md`). Native A/B on the packaged build (`docs/studies/investigations/FOLIATE-DISPLAY-LIFETIME-1.native.2026-10-30.md`): the control build logs 1 style-null line, the candidate 0 across 9 runs. Lane: Reader Engine.
 **Location:** foliate-js's paginator, reached while a book view is torn down before its first layout.
 **Description:** opening and closing a book quickly logs `Cannot destructure property 'style' of 'r' as it is null` from the paginator. No position or library data is affected. **Next step:** reproduce on a scratch profile with a driver that opens and closes within the first layout, then decide whether the teardown should wait for the first layout or swallow the error in that window.
 
@@ -242,14 +260,14 @@
 ### BUG-211 — Flow's line, sentence and paragraph keys move nothing
 **Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103; filed at its close-out)
 **Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
-**Status:** OPEN; fix specified as FLOW-KEYS-FIX-1 (`ROADMAP.md#flow-keys-fix-1`, position 77, after the Stage 8 release and after FOCUS-KEYS-FIX-1). Lane: Reader Engine.
+**Status:** RESOLVED 2026-11-04 (FLOW-KEYS-FIX-1, merged in the RC window, merge c5bb507f; close-out `CloseOut.FLOW-KEYS-FIX-1.2026-11-04.md`). Flow's paragraph case on an EPUB is BUG-240. Lane: Reader Engine.
 **Location:** `src/reader/modes/flow/ModeRuntime.ts:916-931` (only `flow-line` is routed, and only while running, `:921`; `sentence` and `paragraph` are dropped although `helpers/FlowScrollEngine.ts:373` has `jumpToParagraph`).
 **Description:** ArrowDown/Up, Ctrl+Up/Down and Shift+Up/Down do nothing (2 runs each); while playing, ArrowUp and ArrowDown never jump a line. Evidence: triage report, "DEFECTs", Flow group.
 
 ### BUG-210 — Focus's word, sentence and paragraph keys move nothing
 **Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95; filed at its close-out)
 **Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
-**Status:** OPEN; fix specified as FOCUS-KEYS-FIX-1 (`ROADMAP.md#focus-keys-fix-1`, position 76, after the Stage 8 release). Lane: Reader Engine.
+**Status:** RESOLVED 2026-11-04 (FOCUS-KEYS-FIX-1, merged in the RC window, merge c5bb507f; close-out `CloseOut.FOCUS-KEYS-FIX-1.2026-11-04.md`). Lane: Reader Engine.
 **Location:** `src/reader/modes/focus/ModeRuntime.ts:746-764`: the seek moves `displayWordIndex` only (`:749-753`), which the engine's next word overwrites, and `handleCommand` has no `sentence` or `paragraph` case.
 **Description:** Ctrl+Right/Left, Ctrl+Up/Down and Shift+Left/Right do nothing, paused or playing (2 runs each). Evidence: triage report, "DEFECTs", Focus groups.
 
@@ -459,7 +477,7 @@ No run hit the 30 s terminate, and every exit code was 0. Gate status and fix di
 ### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (log noise and possible render cost; no visible failure reported)
-**Status:** RESOLVED in source (FOLIATE-OBSERVER-LEAK-1): `patches/foliate-js+1.0.1.patch` makes `View.destroy()` and `Paginator.destroy()` disconnect their observers; the packaged-session count (0 `ResizeObserver loop` lines) is owed before it closes. Root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
+**Status:** RESOLVED 2026-11-04 (FOLIATE-OBSERVER-LEAK-1, merged in the RC window, merge c5bb507f; close-out `CloseOut.FOLIATE-OBSERVER-LEAK-1.2026-11-04.md`): `patches/foliate-js+1.0.1.patch` makes `View.destroy()` and `Paginator.destroy()` disconnect their observers. The packaged-session count that was owed is supplied: 0 `ResizeObserver loop` lines in the item's own packaged session (`s1-fix.json`) and on all R1-R5 runs of the combined candidate (2026-10-30 native memo), against 264 on base `36ac7466`. Root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
 **Location (corrected 2026-10-23):** not the app's `ResizeObserver`s. It is foliate-js 1.0.1's `View` observer (`node_modules/foliate-js/paginator.js:201`, observed on load `:265`), which `View.destroy()` (`:410-411`) fails to unobserve. Our mode views detach the book frame before the deferred `view.close()` runs (`src/reader/modes/focus/FoliateView.tsx:1086-1096`; Flow and Page are the same).
 **Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
 **Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):** after a mode switch, foliate `View` observers are left watching dead 0×0 section bodies, and Chromium reports "loop completed with undelivered notifications" every frame. Leaving Focus then entering Flow on the packaged build gave 60 errors a second for the rest of the session (14,428 in 328.7 s). Disconnecting the leaked `View` observers mid-loop dropped the rate from 60 to 0 a second; how they drive the loop is not established (their callbacks ran once each). The app's own observers write equal values and do not loop.

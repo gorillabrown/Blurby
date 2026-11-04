@@ -85,7 +85,7 @@ The executor quits every Blurby, copies `library.json` and `settings.json` into 
 ### B3. Drive disconnected
 - [ ] 35. Quit Google Drive for desktop (its tray icon → gear → Quit), then launch Blurby on the copy profile.
   - Every folder book is still in the library after launch and quit. The log has `source folder problem: root-unlistable`.
-  - The toast appears **once** and reads exactly: "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." The old "try re-selecting the folder" text never appears.
+  - The toast appears **once** and reads exactly: "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry." The old "try re-selecting the folder" text never appears.
 
   *(FOLDER-UNREACHABLE-GUARD-1 DW15 A, D; closes BUG-195)*
 - [ ] 36. With Drive still quit, the folder banner stays after the toast goes. Press **Retry** once: the log shows exactly one `Retry: one root check: null` line, still one after 60 s, with no second toast. *(FOLDER-NOTICE-1 DW18 A, B)*
@@ -162,6 +162,66 @@ These checks belong in the gate (2) smoke on the RC candidate: `eb/rc-integratio
 - **(vi) Narrate from a saved place.** Open a book at a saved place mid-book in Page, switch to Narrate, and press Play. Narrate starts at the saved word, not at the title page. From the book's cover or start, Play still starts at the first text. Sources: gate (1) run 5 RED on `c5bb507f` (PLAY-FIRST-TEXT-1 regression); owner design ruling 2026-11-03, "Saved place".
 
 Gate (1) on the merged main re-runs as standing: the full quiet suite, plus NARRATE-REBUILD-1 D3 and D6.
+
+## Owner checks added at the 2026-11-04 close-out review
+
+Blurby.Roadmap added these on 2026-11-04, after checking every In Flight item against `origin/main` `14ce3d24`. Each is a check that an item's memo or specification says belongs to gate (2) and that no row above carried. They run in the same sitting, on the same build. Items closed that day without an owner check (the 21 listed in the close-out plan) are not here. Not repeated here because it is already listed above: NARRATE-ARRIVAL-SYNC-1 (RC additions (vi)).
+
+**Narrate (by ear).**
+- **(a) NARRATE-YEARS-1.** Listen to Narrate read "1066" and "1974" (years) and "1,974 coins" (a count). Also "the 1060s" and "1914-1918". Source: the item's memo and BUG-191, which say it is on the next smoke list.
+- **(b) NARRATE-RECONCILE-RESIDUAL-1.** Narrate *Meditations* at word 12529: the two-word name ("La Jolla" class) is highlighted together, and no "couldn't be timed" notice appears. Source: the item's memo, Done-when 11. The executor also owes the item's `--check-tokenizer` run (exit 0, or Brain's acceptance of the hash check), which has no recorded result.
+- **(c) NARRATE-SENTENCE-RESUME-1.** Pause Narrate mid-sentence, then press Play: it starts at the beginning of that sentence. The relaunch variant (relaunch, then Play) is blocked by BUG-206 and stays open. Source: the item's memo, Done-when 4c and 5.
+- **(d) NARRATE-PAUSE-CANCEL-1.** Pause Narrate for 5 s in the middle of a paragraph, then resume: the speech picks up where it paused (by ear). Source: the item's memo, owner check (o1), which NARRATE-QUIT-LINGER-1's memo repeats.
+- **(e) NARRATE-GAP-PAUSE-1.** In Narrate at 2.00x, pause and resume about 15 times: each resume starts on the right word, with no silence or skip. Source: the item's memo, owner check (o1).
+- **(f) NARRATE-QUIT-LINGER-1.** Quit Narrate and relaunch Blurby within 2 s: exactly one Blurby window opens. Source: the item's specification, Done-when 10 (o2). It has no memo or time log of its own.
+- **(g) PLAY-FIRST-TEXT-1.** On *Meditations* at its cover, press Play in Flow, in Focus and in Narrate: each starts on "The" (the first line of the Gutenberg text). Source: the item's memo, (o-pft).
+- **(h) READER-ARROW-GUARD-1.** In Narrate, hold Shift+Right and then Ctrl+Right while playing: the voice does not stop. In Page, Ctrl+Right, Alt+Right and Shift+Right turn no page (Shift moves the highlight only). Source: the item's memo, Done-when 6; the owner's OK for the Page change (tier 2) is not recorded, so give it here.
+
+**Reading band, keys and display.**
+- **(i) BAND-ALIGN-2 (and BAND-ALIGN-1).** In Flow and in Focus, play a few paragraphs with the Band switch on: the band covers exactly the paragraph being read and moves with it, with no flicker to a short band at line changes. Turn Band off: no band and no dimming; turn it back on: the band returns. On a page with no words (for example the cover) there is no band. In Flow on *Meditations*, play from the start of the text through the end of the first section: it carries on into the next section without stopping, the cursor never disappears, and the band stays on. Accepted behaviour, not a failure: on E-ink the band steps a little early. Source: BAND-ALIGN-2's memo, R8 and R7a "Gate (2) owner row". The earlier "5 lines" and "Lines 3/5/7/Off" checks are obsolete (the paragraph band replaced them), so BAND-ALIGN-1 closes with this row; do not run them as written.
+- **(j) FLOW-PARA-PAUSE-INDEX-1.** In Flow and in Focus with rhythm pauses on, read the *Meditations* INTRODUCTION: the pauses fall at paragraph ends only. Source: the item's memo, Done-when 8.
+- **(k) EINK-CONTROLS-1.** There is one E-ink switch. On gives E-ink colours and behaviour; off gives your own theme back. The Dark theme's background is pure black. Source: the item's memo, Done-when 6.
+- **(l) OVERLAY-THEME-SWEEP-1.** In the Light theme and in E-ink, the highlights panel and the two pickers are readable, and the mode-button hover is readable. Pressing Escape on `;` closes only the overlay and stays in the book. (Quick settings has no working route, BUG-215, and the go-to badge never shows on `g`, so only these can be checked.) Source: the item's memo, Done-when 8.
+- **(m) BOOK-TEXT-COLOUR-1 (BUG-208).** With E-ink on, in the Dark theme and in the Blurby theme, the reader, the library and the menu are readable, and the Narrate highlight is visible. Source: the item's specification and the 2026-10-24 re-check list. The 4.25:1 light-theme link accent is a separate finding (F-033).
+- **(n) BOOK-TYPE-SCALE-1.** Book headings and body text in Page, Focus, Flow and Narrate, with your usual book at your usual text size and the Narrate highlight on the spoken word, look even. Source: the item's specification and the re-check list. BUG-224 (uneven type) was reported on the release build, so this check waits for the owner's decision on BOOK-TYPE-SCALE-2.
+
+**Library and tabs.**
+- **(o) APP-TABS-1.** Four checks. (1) Hover over a tab: its menu opens and stays open. (2) On an E-ink screen, tapping a tab works. (3) The tab bar looks right in each theme. (4) The Newsroom header is identical to the Library's. Source: the item's memo (owner checks); the RC addition (iii) carries only pasted text, per-tab filters and finished items.
+- **(p) LIBRARY-WRITE-RACE-2.** Edit a file book's title and author, then a manual document's title. Each saves and closes, and survives a restart. Source: the item's memo, Done-when 9.
+- **(q) FOLDER-SWITCH-HEADER-1 (BUG-202).** Folder button, then a recent folder: the library header shows the new folder's name at once, as well as the books. This is the BUG-202 wording that #28 does not state. Source: the item's card and the re-check list ("#28 to #30").
+- **(r) LARGE-FOLDER-SYNC-2, real folder.** On the real Drive folder, a full sync completes with no `root-unlistable` line and no skipped-subfolder line in the log. If a `root-unlistable` line ever appears it goes to Blurby.Brain; the constant is not raised blind. Source: the item's memo, the owner batched-smoke line added on Blurby.Brain's ruling. #32 to #34 ran on a copy folder.
+
+**Page position.**
+- **(s) PAGE-REOPEN-CFI-1 (BUG-201).** Repeat #8 on the release build (turn three pages, close, reopen: it opens on the page you left). This is the row that failed on 2026-10-23; the item's own coverage is this repeat. Source: the item's card and BUG-201.
+- **(t) KEEP-FURTHEST-FIX-1 (BUG-209).** Turn ahead several pages, go back, choose "Keep at furthest" when asked, close and reopen: the book opens on the furthest page. Source: the item's card and the re-check list ("Backtrack, Keep at furthest").
+- **(u) PAGE-SAVE-RESTAMP-3, Wave A.** In Page, open a book and click two different words in quick succession, close, and reopen: the book reopens at the second click's page. Source: the item's memo (owner smoke deferred to this list). The quit-flush part was not proven live (see LL-192) and is not asked of you.
+- **(v) PAGE-SAVE-RESTAMP-3, Wave B** is unbuilt (Findings F-028). Its check is not on this list yet.
+
+**Coverage of this section.**
+
+| Item | Row |
+|---|---|
+| NARRATE-YEARS-1 | (a) |
+| NARRATE-RECONCILE-RESIDUAL-1 | (b) |
+| NARRATE-SENTENCE-RESUME-1 | (c) |
+| NARRATE-PAUSE-CANCEL-1 | (d) |
+| NARRATE-GAP-PAUSE-1 | (e) |
+| NARRATE-QUIT-LINGER-1 | (f) |
+| PLAY-FIRST-TEXT-1 | (g) |
+| READER-ARROW-GUARD-1 | (h) |
+| BAND-ALIGN-2, BAND-ALIGN-1 | (i) |
+| FLOW-PARA-PAUSE-INDEX-1 | (j) |
+| EINK-CONTROLS-1 | (k) |
+| OVERLAY-THEME-SWEEP-1 | (l) |
+| BOOK-TEXT-COLOUR-1 | (m) |
+| BOOK-TYPE-SCALE-1 | (n) |
+| APP-TABS-1 | (o) |
+| LIBRARY-WRITE-RACE-2 | (p) |
+| FOLDER-SWITCH-HEADER-1 | (q) |
+| LARGE-FOLDER-SYNC-2 | (r) |
+| PAGE-REOPEN-CFI-1 | (s) |
+| KEEP-FURTHEST-FIX-1 | (t) |
+| PAGE-SAVE-RESTAMP-3 | (u) |
 
 ## Planner notes (Blurby.Roadmap, 2026-10-22)
 

@@ -3198,3 +3198,99 @@ Related: LL-139, LL-143.
 **Applies to:** every service (Claude, Codex, cloud) and every `eb/` worktree on this clone.
 **Status:** Rule
 Related: standing rule 10.
+
+### LL-182 — A size-based no-regression argument must use what the code reads, not what the file contains (ZIP-READ-FOLLOWUPS-1, 2026-11-04)
+**Verdict:** "Larger than the read cap, so it cannot be read today" assumed every archive entry is read. No parser reads every entry, so large archives with unread media open today, and a cap set from file size alone would have refused files that work.
+**Evidence:** ZIP-READ-FOLLOWUPS-1's memo (S1): extractWords reads the container, the OPF and the spine, not the cover or the media. Testing the no-regression claim by reading the parsers, instead of accepting the specification's argument, found it. Blurby.Brain ruled the cap `ZIP_FILE_MAX_BYTES = 2 GiB - 1` (tier 1, 2026-10-23), where Node's whole-file read already fails, so the cap only turns that throw into an early, clean refusal. Test (r) admits a 700 MiB archive (size stubbed through `fs/promises.stat`) and refuses cap + 1; with the cap back at 512 MiB, (r) fails. The memory bounds are the 64 MiB entry cap and the 512 MiB operation cap.
+**Recommendation:** Before a spec calls a limit a "no-regression bound", read the code to learn which parts of the input it consumes, and add a test with an input above the limit that the code still reads today. State the bound in terms of what is read.
+**Applies to:** size, count and time caps on file, archive and network inputs.
+**Status:** Observation
+Related: LL-142.
+
+### LL-183 — A test of error text must keep the input out of the text it checks (ZIP-READ-FOLLOWUPS-1, 2026-11-04)
+**Verdict:** When a test matches an error message, any part of the test's own input that the message echoes can satisfy the match, so the test passes on the broken code.
+**Evidence:** ZIP-READ-FOLLOWUPS-1's memo: the first missing-path test used a temp folder named `zip-entry-cap-…`. An error message that contained the path matched "zip", and the test passed on the broken code. The positive-control run (red first) is what exposed it.
+**Recommendation:** Name test paths and inputs so that no fragment of them can match the asserted text (or assert the error's type or exact full text), and see the test fail on the base before trusting it.
+**Applies to:** tests that match on error messages, log lines or toasts, especially with paths, file names or user text in the message.
+**Status:** Observation
+Related: LL-151.
+
+### LL-184 — Module-level breaker state shared across tests in one file needs a clearing path (LARGE-FOLDER-SYNC-3, 2026-11-04)
+**Verdict:** A circuit breaker held in module scope persists from one test to the next in the same file, so a breaker tripped by one test changes the next test's result. It needs a way to clear that production code also uses.
+**Evidence:** LARGE-FOLDER-SYNC-3's memo: the per-folder breaker (`FOLDER_ROOT_BREAKER_MS`) is module state. A listing that answers clears it, which keeps the tests isolated without a test-only API; each breaker test's `finally` clears it with a forced listing (W3c asserts the constant instead of a `?? 60000` default).
+**Recommendation:** Give breaker, cache and timer state a clearing path that real use takes (a successful answer resets it), and have each test that trips it clear it in a `finally`. Do not add a test-only reset export when production already has one.
+**Applies to:** module-level state in `main/` (folder watcher, sync, retry and backoff state) and the tests that exercise it.
+**Status:** Observation
+Related: standing rule 50.
+
+### LL-185 — A chunk-bound diff with a "diverged region must contain a flipped verdict" check explains every moved bound mechanically (NARRATE-SENTENCE-INITIALS-1, 2026-11-04)
+**Verdict:** Comparing the chunk bounds before and after a sentence-rule change, and requiring every diverged region to contain at least one flipped sentence-end verdict, accounts for each moved bound by mechanism. It found the "B. C." regression that the fail-closed counts could not show.
+**Evidence:** NARRATE-SENTENCE-INITIALS-1's memo: the fail-closed counts were 3 of 11,318 against 3 of 11,258 on the base, with the same classes (0 class E, 3 ruled residual, 0 other), so they showed no change. The bound diff found 158 diverged regions, 0 without a flipped verdict, and exposed the "B. C." era regression, which got a red test. 47 of the 65 flips in *Meditations* are Roman numerals (a resume inside a numbered paragraph now starts at its numeral).
+**Recommendation:** For any change to sentence or chunk boundary rules, publish a per-book table of moved bounds, assert that each diverged region holds a flipped verdict, and read a sample of the flips by hand. Do not rely on fail-closed counts alone.
+**Applies to:** `chunkPlan.ts` and any rule that decides where chunks or sentences start; the reconcile sweep.
+**Status:** Observation
+Related: LL-142, LL-162.
+
+### LL-186 — XHTML pages report lowercase tagName; match with localName (FOCUS-KEYS-FIX-1, 2026-11-04)
+**Verdict:** An EPUB section is `application/xhtml+xml`, so its elements report lowercase `tagName` (`p`, `div`). An uppercase set checked with `tagName`, or `localName.toUpperCase()`, is the wrong test; match `localName` case-insensitively.
+**Evidence:** FOCUS-KEYS-FIX-1's memo (amendment): the first probe used a CSS selector (`querySelectorAll("p, h1, …")`), which matches case-insensitively, and so found the blocks that the code missed. BLOCK-TAG-CASE-1 later measured the effect of the same cause across five copies of `BLOCK_TAGS`: *Meditations* blocks and paragraph breaks went 18 → 1,185 after the fix. The same cause was BUG-240 in Flow (FLOW-PARA-KEYS-1) and is BUG-241.
+**Recommendation:** Compare tag names through `localName` with one case, in a single shared form; when a probe finds elements the code does not, check the probe's selector for case-insensitivity before trusting it. Add a test with an `application/xhtml+xml` document and a `text/html` control.
+**Applies to:** every tag check on foliate section documents in Page, Focus, Flow and Narrate.
+**Status:** Observation
+Related: LL-166.
+
+### LL-187 — A renderer's paragraph breaks are indices into what is loaded; map them from what is rendered (FOCUS-KEYS-FIX-1, 2026-11-04)
+**Verdict:** The paragraph breaks a surface reports are indices into the words it has loaded, not into the book. Mapping them to book-wide words by matching word counts per section is wrong, because the counts can differ.
+**Evidence:** FOCUS-KEYS-FIX-1's live run: Shift+Right from word 187 went to 5290. Flow showed the same jump (187 → 5290 → 80492, BUG-240). The fix (Blurby.Brain ruling A, `findBookParagraphStart` in `src/utils/text.ts`) maps the rendered block starts of book-stamped sections, plus the book's section starts, to book-wide words; live, 187 → 188 → 572 → 610 and back, each the DOM's next or previous block start. LL-081 covers "do not mix slice and global indices" but not this mapping rule.
+**Recommendation:** Derive book-wide paragraph targets from the rendered blocks (their stamped word indices), never from per-section word counts or from the loaded-slice breaks. Test with a book whose loaded slice does not start at word 0.
+**Applies to:** paragraph and sentence key handling and paragraph pauses in Focus, Flow and Page.
+**Status:** Observation
+Related: LL-081.
+
+### LL-188 — A mode with two pacers needs navigation to move both, and a test must read each pacer's own position (FLOW-KEYS-FIX-1, 2026-11-04)
+**Verdict:** Flow has a word timer and a line pacer. A navigation command that moves only one is overwritten by the other; the published word cannot tell which pacer moved.
+**Evidence:** FLOW-KEYS-FIX-1's memo: the playing failure was the word timer overwriting the line pacer. The fix moves both. Live k2, while playing: the arrows keep playing and change speed by 25, Ctrl+Down continues, PageDown pauses and turns the page; the control build stops at 192.
+**Recommendation:** A navigation command in a mode with more than one pacer moves every pacer. Tests read each pacer's own position, not only the published word.
+**Applies to:** Flow (word timer and line pacer) and any mode that gains a second clock; BAND-ALIGN-2's single Flow clock.
+**Status:** Observation
+Related: LL-142.
+
+### LL-189 — CDP Page.reload no longer re-runs addScriptToEvaluateOnNewDocument scripts on the packaged build (FOLIATE-OBSERVER-LEAK-1, 2026-11-04)
+**Verdict:** On this packaged build, CDP `Page.reload` does not re-run scripts registered with `addScriptToEvaluateOnNewDocument`. A wrapper installed that way is missing after a reload.
+**Evidence:** FOLIATE-OBSERVER-LEAK-1's memo: the observer wrapper was evaluated in the running page instead, because `Page.reload` no longer re-injected it on this build. With the wrapper in place the packaged session logged 0 `ResizeObserver loop` lines (the base logged 14,428).
+**Recommendation:** In a live driver, inject instrumentation by evaluating it in the running page after load, and confirm it is present before taking a measurement; do not rely on re-injection across a reload.
+**Applies to:** CDP drivers and probes for live checks on packaged builds.
+**Status:** Observation
+Related: LL-166.
+
+### LL-190 — A decision rule's clauses are applied as written; reachability arguments go to the planner (RESTAMP-RERUN-RACE-1, 2026-11-04)
+**Verdict:** The builder took "not reachable" for a red rr4 by arguing that its fixture shape cannot occur, and replaced the red fixture with a green variant. The spec's rule tied branch (A) to two checkable clauses, and both held. Spec review sent it back, and the rebuild cost one extra commit cycle.
+**Evidence:** RESTAMP-RERUN-RACE-1's memo (Deviation 1) and Solon's review: rr4 red on the base (`o7 section 1 start: expected +0 to be 5`), rr2 red; red first `dd0b8524`, fix `b1f7097c`, decision taken: branch (A), fix.
+**Recommendation:** When a spec's decision rule names observable conditions, apply them literally. Put a reachability argument in the evidence file and the report for the planner to rule on. Never use it to swap a red fixture for a green one.
+**Applies to:** reproduce-then-decide items (repro harnesses, "fix or close as not reachable").
+**Status:** Observation
+Related: LL-142, standing rule 43.
+
+### LL-191 — Under React StrictMode in vitest, a concurrent first dynamic import can miss vi.mock (RESTAMP-RERUN-RACE-1, 2026-11-04)
+**Verdict:** StrictMode's second open effect imported `foliate-js/view.js` while the first import was pending. That import evaluated the real module despite `vi.mock`, and its `customElements.define` threw. Warming the import from the test did not help.
+**Evidence:** RESTAMP-RERUN-RACE-1's evidence file, harness note (rr5): the double run was proved by counting a side effect; the `mount({strict})` option and the neutralised side effect (restored in `finally`) made rr5 stable.
+**Recommendation:** Prove the double run (count a side effect), and neutralise the real module's side effect for the mount, restoring it in `finally`. Do not read the failure as app behaviour.
+**Applies to:** StrictMode mounts of views that dynamically import ESM side-effect modules in tests.
+**Status:** Observation
+Related: LL-152.
+
+### LL-192 — An attached debugger holds Electron's quit; detach before quitting in a live driver (JUMP-LANDING-SAVE-1, 2026-11-04)
+**Verdict:** With CDP and `--inspect` clients attached, `app.quit()` evaluated over the inspector never exited within 20 s, so every driver killed the app and could not prove the quit flush.
+**Evidence:** JUMP-LANDING-SAVE-1's memo, live finding 1 (`rec-control-1`, `rec-fixed-1` against `rec-fixed-2..8`); PAGE-SAVE-RESTAMP-3's A-6. Scheduling the quit (`setTimeout(() => app.quit(), 2000)`) and then closing both sockets exited cleanly in 2.2-3.1 s on 7 of 7 runs.
+**Recommendation:** A driver that checks quit or reopen behaviour schedules the quit, detaches every debugger client, then waits for the process exit and reads its code. Never count a kill as a quit.
+**Applies to:** CDP and inspector drivers for live checks, UI sweeps and release smoke harnesses.
+**Status:** Observation
+Related: LL-165, NARRATE-QUIT-LINGER-1.
+
+### LL-193 — In foliate's paginated view, read the page from lastLocation.range, not from screen geometry (JUMP-LANDING-SAVE-1, 2026-11-04)
+**Verdict:** In the paginated view, a rectangle test on word spans picks the wrong page: with the iframe's column layout, off-page spans pass it.
+**Evidence:** JUMP-LANDING-SAVE-1's memo (live-check probe note; `rec-control-1`, both probes): a probe that took the first word span whose centre fell inside the view's rectangle read word 18 while the page shown started at word 136. The probe that took the first span intersecting `foliate-view.lastLocation.range` matched the app's own saves exactly.
+**Recommendation:** Probes and drivers read the page from `lastLocation.range` (and its document), and compute a word's cfi with `getCFI(index, selectNodeContents(span))`, as `reportFirstWordOnPage` does.
+**Applies to:** CDP probes of Page, Focus or Flow foliate views.
+**Status:** Observation
+Related: LL-166.
