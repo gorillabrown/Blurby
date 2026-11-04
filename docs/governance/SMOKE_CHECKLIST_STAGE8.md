@@ -138,6 +138,12 @@ These items merge after the freeze lifts, so their checks run on a later build:
 - **TOC-JUMP-SAVE-1:** in Page mode, jump from the contents list to a later chapter, quit and reopen. It reopens on that chapter's page.
 - **READER-VISUAL-DIAG-1:** an owner-observed look at the reading band against the word cursor, in Focus and Flow (standing rule 45).
 - Any owner checks from WS-TOKEN-REGEN-1, RENAME-TMP-RACE-1 and NARRATE-KEY-REPEAT-1, if their close-outs add any.
+- **CFI-POSITION-CONSISTENCY-1 and the save-as-you-go items (added by Blurby.Roadmap, 2026-11-03).** These run on the first build that carries CFI-POSITION-CONSISTENCY-1 Wave C, FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1:
+  - **Escape lands where you stopped (owner O6).** Read for a while in Focus, then press Escape. Page shows the word you stopped on, not the word you started from. Repeat in Flow and in Narrate.
+  - **Reopen at the last word read (O6).** Read in Focus, press Escape twice to close the book, then reopen it. It opens at the last word read.
+  - **Focus saves as you read (O4).** Read in Focus for at least 15 s without pausing, then quit the app without pausing. On reopen the book is within a few words of where you were.
+  - **Flow and Narrate save as you go (O5).** Do the same in Flow and in Narrate. Each reopens near where you were, not at the place you started.
+  - **Narrate resumes at a sentence start (O3).** After the Narrate check above, press Play. Narrate starts at the beginning of the sentence holding the saved word.
 
 ## RC integration window additions (2026-11-03)
 
