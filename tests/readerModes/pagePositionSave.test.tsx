@@ -890,7 +890,11 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       return doc;
     };
     const S1 = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: LONG }];
-    const getCanonicalSectionWords = (i: number) => (i === 3 ? longWords : undefined);
+    // BLOCK-TEXT-ORDER-1 (Brain1 ruling, rule-50 exception, fixture only): main's slice carries one word the section's
+    // DOM lacks (contract A.1 D2: main emits a noteref's "1" that the renderer does not render), so the certifier
+    // fails closed with canonical-exhausted-dom and these rows keep exercising the legacy wrap, which yields.
+    const getCanonicalSectionWords = (i: number) => (i === 3 ? [...longWords, "1"] : undefined);
+    const certifyingSectionWords = (i: number) => (i === 3 ? longWords : undefined);
     const spansOf = (doc: Document) => Array.from(doc.querySelectorAll("span.page-word")) as HTMLElement[];
     const indexOf = (span: Element) => Number(span.getAttribute("data-word-index"));
     const fakeTimeouts = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
@@ -1009,6 +1013,48 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       expect.soft(saves(fake).map((e) => e.args), "o5 saved once").toEqual([["doc-1", 22, "cfi:3:Word2"]]);
       expect.soft(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost"), "o5 no loss").toEqual([]);
       expectNoIndexDuplicates(fake);
+    });
+
+    it("(rr-c) control: on a certifying slice the rerun during the wrap stamps each run's 160 spans once, in turn, and saves once", async () => {
+      const mounted = await mount();
+      const { fake, view, renderer, render } = mounted;
+      const doc = longDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3);
+      await settle();
+      expect(spansOf(doc).map(indexOf).slice(0, 3)).toEqual([0, 1, 2]); // the renderer's numbering
+      renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+      await click("Next page");
+      expect(saves(fake)).toEqual([]); // held: the section carries the renderer's numbering
+      // Every span stamped from here on, in the order the DOM receives it.
+      const stamped: number[] = [];
+      const collect = (records: MutationRecord[]) => {
+        for (const record of records) {
+          for (const node of Array.from(record.addedNodes)) {
+            if (node.nodeType !== 1) continue;
+            const element = node as Element;
+            if (element.matches("span.page-word")) stamped.push(indexOf(element));
+            for (const inner of Array.from(element.querySelectorAll("span.page-word"))) stamped.push(indexOf(inner));
+          }
+        }
+      };
+      const observer = new MutationObserver(collect);
+      observer.observe(doc.body, { childList: true, subtree: true });
+      fakeTimeouts();
+      await render({ bookWordSections: S1, getCanonicalSectionWords: certifyingSectionWords });
+      expect(spansOf(doc).length, "run 1 is not parked: the certified wrap makes no yield").toBe(LONG);
+      spansOf(doc)[0].setAttribute("data-rr-probe", "run-1");
+      await render({ bookWordSections: structuredClone(S1), getCanonicalSectionWords: certifyingSectionWords });
+      await drain();
+      expect(doc.querySelector("[data-rr-probe]"), "run 2 ran on the document").toBeNull();
+      collect(observer.takeRecords());
+      observer.disconnect();
+      const run = Array.from({ length: LONG }, (_, i) => 20 + i);
+      expect(stamped, "each run stamps its 160 spans exactly once, one run after the other").toEqual([...run, ...run]);
+      expectBookNumbering(doc, 20);
+      expectNoIndexDuplicates(fake);
+      expect.soft(saves(fake).map((e) => e.args), "saved once, with the word index").toEqual([["doc-1", 22, "cfi:3:Word2"]]);
+      expect.soft(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost"), "no loss").toEqual([]);
     });
 
     it("(rr4) W2: a section missing from the set is stamped from the words present when it wraps", async () => {

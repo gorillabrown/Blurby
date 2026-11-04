@@ -10,6 +10,7 @@ Dispatch: Wave A only (Done-when A1–A6). Wave B was not started.
 | Base | `14ce3d24` (first parent `c5bb507f`, the spec's base; second parent brings NARRATE-ARRIVAL-SYNC-1) |
 | A1 red commit | `19e065d0` (the two test files alone) |
 | Implementation commit | `e870ef67` |
+| Ruling commit | The commit that adds this row: Blurby.Brain1's ruling on deviation 1, option (a), a named rule-50 exception (fixture only), plus the (rr-c) control and the B6 supplementary gate. It touches `tests/readerModes/pagePositionSave.test.tsx` and this memo only. |
 | Host | RodneySr; Node v24.14.1; Vitest 4.1.11; `npm ci` exit 0; `node node_modules/electron/install.js` exit 0 (`path.txt` = `electron.exe`) |
 | Shell | PowerShell 7 (`pwsh -NoProfile`) for every gate below |
 | Pushed | No (dispatch said do not push) |
@@ -31,10 +32,13 @@ Dispatch: Wave A only (Done-when A1–A6). Wave B was not started.
 | A6 dry-run, pathspec control | `git grep -c "foliateHelpers" -- "src/reader/modes/*/helpers/*.ts"` | 0 | 14 files: the pathspec matches |
 | A6 dry-run, wrong variant 1 | tip plus `import … from "../../../../reader/modes/page/helpers/foliateHelpers";` appended to flow `foliateWordWrapping.ts` | 0 | the line is printed (the gate fails, as it must) |
 | A6 dry-run, wrong variant 2 | tip plus `import … from "../../page/helpers/foliateHelpers";` appended instead | **1** | **not caught** (see deviation 4) |
-| A6 supplementary | `git grep -nP "from \x22\.\./\.\./(page\|focus\|flow\|narrate)/" -- "src/reader/modes/*/helpers/*.ts"` | 1 at tip, 1 on base, **0** on wrong variant 2 | catches the relative sibling spelling |
+| A6 supplementary (first form) | `git grep -nP "from \x22\.\./\.\./(page\|focus\|flow\|narrate)/" -- "src/reader/modes/*/helpers/*.ts"` | 1 at tip, 1 on base, **0** on wrong variant 2 | catches the relative sibling spelling (double quotes only); superseded by the B6 gate below |
+| **B6 supplementary gate** (named, per the ruling) | `git grep -nP "from [\x22\x27]\.\./\.\./(page\|focus\|flow\|narrate)/" -- "src/reader/modes/*/helpers/*.ts"` | **1** at tip, **1** on `c5bb507f`, **0** on each plant | see "B6 supplementary gate" below; plants removed, blob identical |
 | Census | `readerModeBoundaries` and `readerModeOwnership` (in A4) | 0 | pass mechanically; `boundary-policy.json` not edited |
-| Typecheck | `npm run typecheck` | **0** | after the type-only change in deviation 2 |
-| Suite | `npm test` | **1** | 3,203 passed / 3 failed / 1 skipped (3,207) in 234 files (233 passed, 1 failed). Base: 3,048 passed / 1 skipped; +158 new rows. **The 3 failures are inherited Page rows (rr1)–(rr3); see deviation 1.** |
+| Typecheck (Wave A) | `npm run typecheck` | **0** | after the type-only change in deviation 2 |
+| Suite (Wave A, before the ruling) | `npm test` | **1** | 3,203 passed / 3 failed / 1 skipped (3,207) in 234 files (233 passed, 1 failed). Base: 3,048 passed / 1 skipped; +158 new rows. The 3 failures were inherited Page rows (rr1)–(rr3); see deviation 1. |
+| **Typecheck (ruling)** | `npm run typecheck` | **0** | on the ruling tree |
+| **Suite (ruling)** | `npm test` | **0** | **3,207 passed / 1 skipped (3,208) in 234 files (234 passed)**: (rr1)–(rr3) pass again, plus the new (rr-c) row |
 
 Each wrong variant was restored by copying the saved file back; `git hash-object` matched the pre-edit blob.
 
@@ -45,7 +49,8 @@ Saved outputs, all in `C:\Projects\Blurby-artifacts\block-text-order-1\`:
 - `A3-green.txt`;
 - `A4-inherited.txt`;
 - `npm-test-waveA.txt`;
-- `base-goldens-capture-c5bb507f.json` (the base goldens, captured before any source edit).
+- `base-goldens-capture-c5bb507f.json` (the base goldens, captured before any source edit);
+- ruling: `npm-test-waveA-rr-ruling.txt`, `typecheck-waveA-rr-ruling.txt`, `perf-baseline-results.waveA-rr-ruling.json` (the perf file was restored from HEAD afterwards; clean), `B6-supplementary-gate-dryrun.txt`, and `rr-certifier-reason-probe.test.ts` with its output `rr-certifier-reason-probe.txt` (the probe ran once as an uncommitted scratch test and was then deleted from the worktree).
 
 ## A2 output (on `19e065d0`, no source change)
 
@@ -278,7 +283,7 @@ These are the first nine `M` lines of B9 plus the two Wave A test files: the Wav
 
 ## Deviations and findings
 
-1. **Inherited Page rows (rr1)–(rr3) fail on the Wave A tip: for Blurby.Brain1 before Wave B.**
+1. **Inherited Page rows (rr1)–(rr3) failed on the Wave A tip. Resolved by Blurby.Brain1's ruling, option (a); see "Rule-50 exception (rr1)–(rr3)" below.**
    - **The rows.** `tests/readerModes/pagePositionSave.test.tsx`, RESTAMP-RERUN-RACE-1 (rr1), (rr2) and (rr3), assert the precondition `k1: run 1 is parked at its first yield` (`spansOf(doc).length === 50`, from 160 one-word paragraphs, `WRAP_BATCH_SIZE` 50).
    - **The conflict.** Their fixture certifies, and TQ-B3/Q4 rule that the certified branch never yields. Run 1 therefore stamps all 160 spans before the second identity arrives, and k1 reads 160.
    - **Evidence that only the precondition fails.** On an uncommitted scratch copy with k1 made soft (deleted afterwards), the only failing checks were k1 and the rows' own `expect(window).toBe(50)`. The numbering (o1–o4), (o6), "run 2 ran on the document" and (rr3)'s single save with no `page-turn-lost` all passed.
@@ -296,7 +301,7 @@ These are the first nine `M` lines of B9 plus the two Wave A test files: the Wav
 4. **The A6 pattern misses the relative sibling spelling.**
    - `modes/(page|focus|flow|narrate)/` catches only an import spelled through `modes/`. A sibling import written `"../../page/helpers/…"` (wrong variant 2) exits 1, the same as a pass.
    - The supplementary `-P` gate above catches it and finds nothing at the tip or on the base.
-   - Recommend that Wave B's B6 add it.
+   - Per the ruling it is now the named B6 supplementary gate (below), widened to single quotes as well.
 5. **Main extraction in a child Node process.**
    - Under Vitest's jsdom environment, adm-zip reads no entries from a Buffer, so main `extractWords` returned an empty book in-process.
    - (b10) and (b11) therefore run main's `extractWords` in a child `node` process. It writes the three-file EPUB (container.xml, OPF, XHTML) with adm-zip to `os.tmpdir()`/`mkdtemp` and returns the JSON.
@@ -309,7 +314,76 @@ These are the first nine `M` lines of B9 plus the two Wave A test files: the Wav
    - With no emitted run at all, its `runOrdinal` is -1.
 8. **(m1)–(m5) compare with literals.** They use the D.3 renderer expectations as literals. The live main/renderer comparison is (p1), over (a1)–(a6), in all four copies.
 
-No STOP was triggered: A2's base status matched exactly. Deviation 1 is reported for a ruling, not resolved here.
+No STOP was triggered: A2's base status matched exactly. Deviation 1 was reported for a ruling and is resolved by the ruling commit.
+
+## Rule-50 exception (rr1)–(rr3) (Blurby.Brain1 ruling, option (a), fixture only)
+
+**The exception.** Standing rule 50 (inherited rows run unedited) is waived for one line in `tests/readerModes/pagePositionSave.test.tsx`, RESTAMP-RERUN-RACE-1: the (rr) fixture's canonical words. The rows' actions and assertions, (rr1)–(rr3) and the shared `rerun` helper, are byte-identical. `git diff -U0` shows one removed line, and that line is the fixture.
+
+**Before** (`14ce3d24`, line 893):
+
+```ts
+    const getCanonicalSectionWords = (i: number) => (i === 3 ? longWords : undefined);
+```
+
+**After:**
+
+```ts
+    // BLOCK-TEXT-ORDER-1 (Brain1 ruling, rule-50 exception, fixture only): main's slice carries one word the section's
+    // DOM lacks (contract A.1 D2: main emits a noteref's "1" that the renderer does not render), so the certifier
+    // fails closed with canonical-exhausted-dom and these rows keep exercising the legacy wrap, which yields.
+    const getCanonicalSectionWords = (i: number) => (i === 3 ? [...longWords, "1"] : undefined);
+    const certifyingSectionWords = (i: number) => (i === 3 ? longWords : undefined);
+```
+
+(`certifyingSectionWords` is the old fixture under a new name. Only the new (rr-c) row uses it.)
+
+**The certifier's reason: `canonical-exhausted-dom`.** The probe ran `wrapWordsInSpans(doc, 3, 20, [], canonical, report)` on the rows' DOM (160 `<p>Word{i}</p>`). It reported:
+- (rr) fixture: `[{"ok":false,"reason":"canonical-exhausted-dom","canonicalIndex":160,"nodeIndex":160}]`, then the legacy wrap stamped 160 spans, indices 20…179, return 180;
+- (rr-c) fixture: `[{"ok":true}]`, 160 spans, 20…179, return 180.
+
+**Why this class, and not D1 or `extra-source-text`.** The ruling preferred D1 or an extra-source-text case, but neither can be reached by changing the canonical words alone, with the assertions unchanged.
+- Both need a slice that lacks text the DOM has. For example, D1 is a plain-ID footnote target that main suppresses.
+- The DOM is fixed at 160 one-word paragraphs. Legacy `contentAlignWords` numbers each span `globalOffset + canonicalCursor`, and it stamps nothing for DOM text it cannot match.
+- So a word missing from the slice either drops a span or shifts every later index. Either way, o1 (160 spans) or o3 (`[start + i, Word{i}]`) fails.
+- Any word inserted before position 160 shifts the indices too. So the only slice that keeps o1–o4 and fails certification adds words after `Word159`. The certifier reports exactly that case as `canonical-exhausted-dom`.
+- The added word `"1"` is a real divergence: D2 in contract A.1. Main's `walk()` emits a noteref's digit (`Lead <a epub:type="noteref" …>1</a> tail` gives the word `1`) that the section's DOM does not carry as an accepted word.
+- The legacy return value (`globalOffset + canonicalCursor` = 180) is the same as before. Page's `FoliateView` does not read it; it awaits the wrap only.
+
+**Other users of the fixture.**
+- (rr4) asks only for section 1, so it gets `undefined` and is unaffected.
+- (rr5) now takes the legacy wrap for section 3. That is the path every Page load took on the base, and the row passes unchanged (`expectBookNumbering(doc, 20)`).
+
+**The (rr-c) control** (new row, same file): `(rr-c) control: on a certifying slice the rerun during the wrap stamps each run's 160 spans once, in turn, and saves once`.
+- The sequence is the same as `rerun(structuredClone(S1), true)`:
+  1. mount, load section 3 and settle (renderer numbering 0, 1, 2);
+  2. hold a turn on span 2 and click "Next page" (no save);
+  3. fake the timeouts and render S1, then set the probe and render `structuredClone(S1)`;
+  4. drain, and check the probe is gone ("run 2 ran on the document").
+- It passes `certifyingSectionWords` explicitly. It has no k1 check: it asserts that run 1 is not parked (`spansOf(doc).length === 160` right after the first render), because the certified wrap makes no yield.
+- A `MutationObserver` on `body` records every `span.page-word` added after the load. It must equal `[20…179, 20…179]`: each run stamps its 160 spans exactly once, in order, and the two runs do not interleave.
+- Then it checks `expectBookNumbering(doc, 20)` (o1–o4), `expectNoIndexDuplicates` (o6), exactly one save `[["doc-1", 22, "cfi:3:Word2"]]`, and no `page-turn-lost`.
+- **Sensitivity.** With (rr-c) temporarily pointed at the uncertified fixture, it failed on `expected 50 to be 160`, as it must. The file was restored, and its SHA-256 was unchanged (`b28fd347…`).
+
+## B6 supplementary gate (named; recorded now for Wave B)
+
+```
+git grep -nP "from [\x22\x27]\.\./\.\./(page|focus|flow|narrate)/" -- "src/reader/modes/*/helpers/*.ts"
+```
+
+It runs beside B6's `modes/(page|focus|flow|narrate)/` pattern and catches the relative sibling spelling `"../../<mode>/"` or `'../../<mode>/'`, which that pattern misses (deviation 4). Exit 1 with no line is a pass.
+
+Dry runs (pwsh 7, `git grep` from the worktree root; script output in `B6-supplementary-gate-dryrun.txt`):
+
+| Run | Exit | Lines |
+|---|---|---|
+| Tip (working tree) | 1 | none |
+| Base `c5bb507f` | 1 | none |
+| Plant: `import { BLOCK_TAGS as PAGE_BLOCK_TAGS } from "../../page/helpers/foliateHelpers";` appended to `src/reader/modes/flow/helpers/foliateWordWrapping.ts` | **0** | `src/reader/modes/flow/helpers/foliateWordWrapping.ts:283:import { BLOCK_TAGS as PAGE_BLOCK_TAGS } from "../../page/helpers/foliateHelpers";` |
+| Plant: the same import with single quotes | **0** | `…foliateWordWrapping.ts:283:import { BLOCK_TAGS as PAGE_BLOCK_TAGS } from '../../page/helpers/foliateHelpers';` |
+| Tip after the plant was removed | 1 | none |
+
+The plant was removed by writing the saved bytes back. `git hash-object` gave `543482dd7f82f950f498dfac4731b7818ce3f229` before and after, and `git status --short` showed only the ruling's test edit.
 
 ## Test counts
 
@@ -317,5 +391,7 @@ No STOP was triggered: A2's base status matched exactly. Deviation 1 is reported
 |---|---|---|---|---|
 | Base (spec) | 3,048 | 0 | 1 | — |
 | Wave A tip `npm test` | 3,203 | 3 ((rr1)–(rr3)) | 1 | 234 (1 failed) |
+| Ruling tree `npm test` | 3,207 | 0 | 1 | 234 (0 failed) |
+| RESTAMP-RERUN-RACE-1 block alone (ruling tree) | 7 ((rc0), (rr1)–(rr3), (rr-c), (rr4), (rr5)) | 0 | — | 1 |
 | A3 | 158 | 0 | 0 | 2 |
 | A4 | 155 | 0 | 0 | 15 |
