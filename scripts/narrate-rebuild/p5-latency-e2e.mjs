@@ -152,11 +152,30 @@ const report = { generatedAt: new Date().toISOString(), host: { platform: os.pla
 
 const want = (k) => !ONLY || ONLY === k;
 
+// NARRATE-ARRIVAL-SYNC-1 (Brain1 ruling 4): a trial that ends with its own error (main/narrate/trial.js logs
+// "[narrate-trial] error: ..." and exits 1) is a failed trial, whatever its trace says. Read from the launch's exit code
+// and its log, so --analyze-only sees the same errors. Every error trial is listed in latency-e2e.json.
+report.trialErrors = [];
+function trialError(label, run) {
+  let message = null;
+  try {
+    const log = fs.readFileSync(path.join(OUT, "logs", `${slug(label)}.log`), "utf8");
+    const m = log.match(/\[narrate-trial\] error: (.*)/);
+    if (m) message = m[1].trim();
+  } catch { /* no log */ }
+  if (!message && run && run.code !== 0 && run.code != null) message = `the app exited with code ${run.code}`;
+  if (message) report.trialErrors.push({ label, message });
+  return message;
+}
+
 // ── D3 sessions ───────────────────────────────────────────────────────────────────────────────────────────
 if (want("session")) {
   for (const rate of RATES) {
     const label = `session-${rateLabel(rate)}`;
-    if (!ANALYZE_ONLY) report.runs.push(await launch(label, { kind: "session", rate, minutes: MINUTES }));
+    const run = ANALYZE_ONLY ? null : await launch(label, { kind: "session", rate, minutes: MINUTES });
+    if (run) report.runs.push(run);
+    const sessionError = trialError(label, run);
+    if (sessionError) failures.push(`session ${rateLabel(rate)}: trial error: ${sessionError}`);
     const tp = tracePathFor(label);
     const r = fs.existsSync(tp) ? analyze(readTraceEvents(tp), { minMinutes: MINUTES }) : { verdict: "INCONCLUSIVE", failures: [], holds: ["no trace written"], stats: {} };
     report.sessions[rateLabel(rate)] = { tracePath: tp, ...r };
@@ -191,6 +210,8 @@ if (want("warm")) {
         report.runs.push({ ...(await launch(label, { kind: "warm", rate, repeat })), cycles: repeat });
         cycles += repeat;
       }
+      const warmError = trialError(label, ANALYZE_ONLY ? null : report.runs[report.runs.length - 1]);
+      if (warmError) failures.push(`warm ${r} ${label}: trial error: ${warmError}`);
       all.push(...firstVoiced(tracePathFor(label)).map((x) => ({ ...x, run: label })));
       if (!ANALYZE_ONLY && (need() <= 0 || cycles >= CYCLE_CAP)) break;
     }
@@ -229,10 +250,12 @@ if (want("cold")) {
         else { run = await launch(label, { kind: "cold", rate, type }); report.runs.push(run); }
         const first = firstVoiced(tracePathFor(label))[0] ?? null;
         const row = { trial: i, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, cpu: first ? first.cpu : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null };
+        row.error = trialError(label, run);
+        if (row.error) failures.push(`cold ${type} ${r} trial ${i}: trial error: ${row.error}`);
         if (!first) failures.push(`cold ${type} ${r} trial ${i}: no first voiced sample recorded`);
         else if (first.latencyMs === null) failures.push(`cold ${type} ${r} trial ${i}: no output-timestamp pair`);
         else if (type === "click" && first.cause !== "click") failures.push(`cold click ${r} trial ${i}: the first voiced sample answered ${first.cause}, not the click`);
-        row.counts = Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
+        row.counts = !row.error && Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
         if (row.counts && row.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${r} trial ${i}: ${row.latencyMs} ms >= ${COLD_BUDGET_MS}`);
         rows.push(row);
       }

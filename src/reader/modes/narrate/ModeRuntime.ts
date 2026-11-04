@@ -162,6 +162,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** PLAY-FIRST-TEXT-1 (Brain1 Q2): a Play made on a section with no words before the section map exists. */
   private pendingFirstText: { sectionIndex: number; request: ReaderModeStartRequestV1 } | null = null;
   private arrivalCursorPending: boolean;
+  /** NARRATE-ARRIVAL-SYNC-1: a mode handover arrived at a saved word and the view has not yet been moved to its section. */
+  private arrivalSyncOwed = false;
+  /** NARRATE-ARRIVAL-SYNC-1: the section the arrival sync is moving the view to, while that move is in flight. */
+  private arrivalSyncInFlight: number | null = null;
 
   constructor(input: ReaderModeCreateInput, deps: NarrateRuntimeDeps = defaultNarrateDeps()) {
     this.key = input.key;
@@ -247,10 +251,12 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (next === this.documentSnapshot) return;
     this.documentSnapshot = next;
     this.state.notify();
+    if (next.bookWords) this.settleArrivalSync();
     const pending = this.pendingFirstText;
     if (pending && next.bookWords) {
       this.pendingFirstText = null; // exactly once
-      if (this.surface.getDisplayedSectionIndex() === pending.sectionIndex) this.start(pending.request);
+      // The arrival sync moved the view off the wordless section the Play saw: that Play starts at the saved word.
+      if (this.surface.getDisplayedSectionIndex() === pending.sectionIndex || this.arrivalSyncInFlight != null) this.start(pending.request);
     }
   };
 
@@ -265,6 +271,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       this.anchor.syncVisualToPersistentWord({ navigate: false });
       this.state.isBrowsedAway = false;
       this.ports.settings.update({ readingMode: "narrate", lastReadingMode: "narrate", isNarrating: false });
+      this.arrivalSyncOwed = true;
+      this.ports.diagnostics.transition("arrivalSync:owed", () => ({ word: this.state.canonicalWordIndex }));
+      if (this.document.useFoliate && !this.document.bookWords) void this.ports.document.ensureBookWords().catch(() => {});
       this.queuePostModeAnchorSync();
     }
     this.state.notify();
@@ -307,6 +316,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       s.notify();
       return;
     }
+    this.clearArrivalSync("start"); // a start is under way: it consumes the arrival
     const bookWordsTotalWords = this.document.bookWords?.totalWords;
     const clickedWord = s.explicitSelectionAnchor != null; // the reader chose this word: it is not rewound
     const startSource = this.consumeModeStartAnchor();
@@ -366,6 +376,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.clearTimers();
     this.firstTextToken = null;
     this.pendingFirstText = null;
+    this.clearArrivalSync("stop");
+    this.arrivalSyncInFlight = null;
     this.engine?.stop();
     this.engine = null;
     this.output?.close();
@@ -393,6 +405,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   jumpToWord(wordIndex: number, _cause: ReaderModeJumpCause): void {
     if (!this.alive) return;
     this.pendingFirstText = null;
+    this.clearArrivalSync("jumpToWord");
     if (this.state.playing && this.engine) { this.engine.play(wordIndex, "navigate"); return; }
     this.state.currentWordIndex = wordIndex;
     this.state.notify();
@@ -446,6 +459,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   hardSelect(input: ReaderHardSelectInput): void {
     if (!this.alive) return;
     this.pendingFirstText = null;
+    this.clearArrivalSync("hardSelect");
     const s = this.state;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
@@ -476,6 +490,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   navigateTo(wordIndex: number): void {
     if (!this.alive) return;
+    this.clearArrivalSync("navigateTo");
     this.commitShared(wordIndex, "explicit-navigation", undefined);
     if (this.state.playing && this.engine) this.engine.play(this.state.currentWordIndex, "navigate");
     this.state.notify();
@@ -484,6 +499,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   jumpBack(): void {
     if (!this.alive) return;
     this.pendingFirstText = null;
+    this.clearArrivalSync("jumpBack");
     const anchor = this.state.canonicalWordIndex;
     this.anchor.syncVisualToPersistentWord({ navigate: true });
     if (this.document.useFoliate) {
@@ -498,6 +514,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   handleCommand(command: ReaderModeCommand): void {
     if (!this.alive) return;
     this.pendingFirstText = null;
+    this.clearArrivalSync("handleCommand");
     if (command.kind !== "go-to-href") return;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
@@ -531,8 +548,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   onSurfaceLoad = (): void => {
     if (!this.alive) return;
     this.paintArrivalCursor();
+    this.settleArrivalSync(); // the arrival frames may have run before the view could map a word to its section
     this.setTimer(() => {
       this.paintArrivalCursor();
+      this.settleArrivalSync();
       this.state.renderVersion += 1;
       this.state.notify();
       if (this.state.pendingStartOnLoad) {
@@ -578,6 +597,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Browsing away never stops narration (legacy: the jump-back button returns to the spoken word). */
   onUserBrowseAway = (): void => {
     if (!this.alive || this.state.isBrowsedAway) return;
+    this.clearArrivalSync("onUserBrowseAway");
     this.state.isBrowsedAway = true;
     this.state.notify();
   };
@@ -608,7 +628,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.ports.diagnostics.trace({ kind: "transition", transition: "section", from: shown ?? -1, to: target, context: `word ${word}` });
     this.traceSectionNav(caller, word, target, shown ?? -1);
     // foliate drops a goTo while a page turn holds its lock and resolves anyway: clearing in-flight lets the next cursor retry.
-    this.surface.goToSection(target).catch(() => {}).finally(() => { if (this.state.sectionNavInFlight === target) this.state.sectionNavInFlight = null; });
+    this.surface.goToSection(target).catch(() => {}).finally(() => {
+      if (this.state.sectionNavInFlight === target) this.state.sectionNavInFlight = null;
+      if (this.arrivalSyncInFlight === target) this.arrivalSyncInFlight = null;
+    });
   }
 
   /** One display frame: the engine publishes the unit at the current playback sample. */
@@ -755,6 +778,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
    */
   private startAtFirstText(request: ReaderModeStartRequestV1): boolean {
     if (this.firstTextReentry || !this.document.useFoliate) return false;
+    // NARRATE-ARRIVAL-SYNC-1 (spec item 3): never judge a view the arrival sync has not yet moved, or is moving. While it
+    // is owed, Play starts at the handed-over word and the cursor-miss path takes the view to that word's section.
+    if (this.arrivalSyncOwed || this.arrivalSyncInFlight != null) return false;
     const bookWords = this.document.bookWords;
     const shown = this.surface.getDisplayedSectionIndex();
     if (!bookWords || shown == null) return false; // Brain1 Q2: no map yet; the empty-words path sets pendingFirstText
@@ -811,9 +837,36 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
         this.anchor.syncVisualToPersistentWord({ navigate: true });
         this.surface.clearUserBrowsing();
         this.state.isBrowsedAway = false;
+        this.settleArrivalSync();
         this.state.notify();
       });
     });
+  }
+
+  /**
+   * NARRATE-ARRIVAL-SYNC-1: once the section map exists, move the view to the section of the word the handover
+   * arrived at, so the view (and PLAY-FIRST-TEXT-1, which judges it) shows the saved place, not the cover.
+   */
+  private settleArrivalSync(): void {
+    const s = this.state;
+    if (!this.arrivalSyncOwed || !this.alive || !this.document.useFoliate || !this.document.bookWords) return;
+    if (s.playing || this.firstTextToken != null) return;
+    const word = s.canonicalWordIndex;
+    const target = this.surface.getSectionForWordIndex(word);
+    if (target == null) return;
+    this.arrivalSyncOwed = false;
+    this.ports.diagnostics.transition("arrivalSync:settled", () => ({ word, section: target }));
+    if (target === this.surface.getDisplayedSectionIndex()) return;
+    this.arrivalSyncInFlight = target;
+    this.followSpokenSection(word, "arrival-sync");
+    if (s.sectionNavInFlight !== target && this.arrivalSyncInFlight === target) this.arrivalSyncInFlight = null; // nothing moved
+  }
+
+  /** NARRATE-ARRIVAL-SYNC-1: an intent consumed the arrival before the settle; recorded so the order is observable. */
+  private clearArrivalSync(reason: string): void {
+    if (!this.arrivalSyncOwed) return;
+    this.arrivalSyncOwed = false;
+    this.ports.diagnostics.transition("arrivalSync:cleared", () => ({ reason }));
   }
 
   private totalWordCount(): number {
