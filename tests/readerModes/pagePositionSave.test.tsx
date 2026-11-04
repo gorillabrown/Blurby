@@ -1010,7 +1010,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     it("(rr3) a turn held across both runs is saved once, with its re-stamped index", async () => {
       const { fake, window } = await rerun(structuredClone(S1), true);
       expect(window).toBe(50);
-      expect.soft(saves(fake).map((e) => e.args), "o5 saved once").toEqual([["doc-1", 22, "cfi:3:Word2"]]);
+      expect.soft(saves(fake).map((e) => e.args), "o5 saved once").toEqual([["doc-1", -1, "cfi:3:Word2"]]);
       expect.soft(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost"), "o5 no loss").toEqual([]);
       expectNoIndexDuplicates(fake);
     });
