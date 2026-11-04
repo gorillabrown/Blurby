@@ -1,0 +1,35 @@
+{
+  "id": "20261104T014500Z-external-set-status-NARRATE-ARRIVAL-SYNC-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-ARRIVAL-SYNC-1",
+  "created": "2026-11-04T01:45:00Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "deliverable": "Merged to main 14ce3d24 (2026-11-03, Brain1; Roadmap merge go). x64 package confirmed by Brain1; arm64 launch clean at merge. Awaiting gate (1) run 6 on RodneySr; close-out after run 6."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-ARRIVAL-SYNC-1:[('deliverable', 'Merged to main 14ce3d24 (2026-11-03, Brain1; Roadmap merge go). x64 package confirmed by Brain1; arm64 launch clean at merge. Awaiting gate (1) run 6 on RodneySr; close-out after run 6.'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-ARRIVAL-SYNC-1",
+      "idempotencyKey": "set-status:NARRATE-ARRIVAL-SYNC-1:[('deliverable', 'Merged to main 14ce3d24 (2026-11-03, Brain1; Roadmap merge go). x64 package confirmed by Brain1; arm64 launch clean at merge. Awaiting gate (1) run 6 on RodneySr; close-out after run 6.'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T014500Z-external-set-status-NARRATE-ARRIVAL-SYNC-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T01:45:30Z",
+  "outcome": "succeeded"
+}
