@@ -144,11 +144,14 @@ async function run(ctx) {
     wc.on("console-message", (event, a, b, c, d) => {
       const m = a && typeof a === "object" ? a : { level: a, message: b, lineNumber: c, sourceId: d };
       const level = typeof m.level === "number" ? m.level : ({ info: 1, warning: 2, error: 3 })[m.level] ?? 1;
-      if (level >= 1) console.log(`[renderer:${m.level}] ${String(m.message).slice(0, 400)} (${String(m.sourceId || "").slice(-50)}:${m.lineNumber})`);
+      // The anchor and arrival-sync transitions (console.debug) are forwarded too: they say which word each mode handed over.
+      if (level >= 1 || String(m.message).includes("[DUAL-SOURCE-DIAG]")) console.log(`[renderer:${m.level}] ${String(m.message).slice(0, 400)} (${String(m.sourceId || "").slice(-50)}:${m.lineNumber})`);
     });
     await waitFor(() => !wc.isLoading() && wc.getURL(), { what: "the main window's load" });
     const js = (code) => wc.executeJavaScript(code, true);
     await js(HELPERS);
+    // Scratch profile only: turn on the renderer's anchor transitions (read after the reload below).
+    await js('try { localStorage.setItem("BLURBY_DUAL_SOURCE_DIAG", "1"); } catch (e) {} true');
     await waitFor(() => js('!!document.querySelector(\'[data-doc-id="sample-meditations"]\')'), { what: "the library card", timeoutMs: 120000 });
     if (typeof cfg.position === "number") {
       // Open at a chosen book word (the reader resumes at the document's saved position): past the Gutenberg
