@@ -1,0 +1,103 @@
+// Scratch (FLOW-PARA-PAUSE-INDEX-1 Done-when 1 and 4): where do the Flow and Focus engines' paragraph pauses fall?
+// Extends BLOCK-TAG-CASE-1's pause-probe.mjs (same sweep.mjs Session, React-fiber walk to the mode runtime,
+// Session.profilePreflight before the first input, live-profile hashes before and after). It reads the set the
+// running word engine holds (runtime.engine.paragraphBreaks, the set its scheduleNext tests), not the surface set,
+// so the base and the fix are read the same way.
+// node para-pause-probe.mjs <sweep.mjs dir> <exe> <fresh empty profile dir> <port> <out.json> <g0-converted-chapters.epub>
+// Routes, per mode (flow, focus):
+//  M:  Meditations, Page, contents jump to INTRODUCTION, then the mode (BLOCK-TAG-CASE-1's route B).
+//  G0: g0-converted-chapters, opened at the start, then the mode (section 0).
+//  G1: g0-converted-chapters, Page, contents jump to the second entry, then the mode (section 1).
+// Each pause g is classified: "block end" if g is the last stamped word of a block in a loaded section document
+// (blocks grouped by nearest block ancestor, any case); "section end" if g + 1 starts a book section or g is the
+// book's last word; else "MID" (not a paragraph end). Per loaded section: pauses inside it vs its block count.
+import fs from "node:fs";
+import path from "node:path";
+const [sweepDir, exe, profile, portArg, outJson, g0] = process.argv.slice(2);
+const { Session, blurbyPlan, home, runSteps, sleep, hashLive } = await import("file:///" + path.join(sweepDir, "sweep.mjs").replace(/\\/g, "/"));
+const live = path.join(process.env.APPDATA, "blurby", "blurby-data");
+const liveBefore = hashLive(live);
+fs.mkdirSync(profile, { recursive: true });
+const plan = blurbyPlan({});
+// Launch 1 creates the profile (sample book only); the g0 book is then added to library.json as a file-backed EPUB.
+{ const s0 = new Session({ exe, profile, port: Number(portArg), liveProfile: live }); await s0.start(); console.log("launch 1 preflight OK:", s0.userData);
+  await plan.seed(s0, { seed: [] }); await s0.stop(); }
+const libPath = path.join(profile, "blurby-data", "library.json");
+const lib = JSON.parse(fs.readFileSync(libPath, "utf8"));
+const g0Copy = path.join(profile, "books", "g0-converted-chapters.epub"); fs.mkdirSync(path.dirname(g0Copy), { recursive: true }); fs.copyFileSync(g0, g0Copy);
+const st = fs.statSync(g0Copy);
+if (!lib.docs.some((d) => d.id === "g0-converted-chapters")) lib.docs.unshift({ id: "g0-converted-chapters", title: "g0-converted-chapters", filepath: g0Copy, filename: path.basename(g0Copy), ext: ".epub", size: st.size, modified: st.mtimeMs, wordCount: 0, position: 0, created: Date.now(), source: "manual", lastReadAt: null });
+fs.writeFileSync(libPath, JSON.stringify(lib, null, 2));
+const s = new Session({ exe, profile, port: Number(portArg) + 1, liveProfile: live });
+await s.start(); console.log("launch 2 preflight OK:", s.userData);
+const out = { exe, userData: s.userData, preflight: "passed twice (Session.profilePreflight, launches 1 and 2)", liveBefore, runs: [] };
+for (let i = 0; i < 240; i++) { if (await s.sw('has(".library-container")')) break; await sleep(250); }
+
+const FIND_RT = (mode) => `(() => {
+  const host = document.getElementById("root") || document.body.firstElementChild; const ck = host && Object.keys(host).find((x) => x.startsWith("__reactContainer$"));
+  const stack = ck ? [host[ck]] : []; let n = 0, rt = null;
+  while (stack.length && !rt && n++ < 400000) { const f = stack.pop(); if (!f) continue; const p = f.memoizedProps;
+    if (p && p.runtime && typeof p.runtime.getSnapshot === "function" && p.runtime.mode === ${JSON.stringify(mode)}) rt = p.runtime;
+    if (f.sibling) stack.push(f.sibling); if (f.child) stack.push(f.child); }
+  window.__rt = rt; return rt ? { ok: true, playing: rt.getSnapshot().playing, engine: !!rt.engine } : { ok: false };
+})()`;
+
+const READ = `(() => {
+  const rt = window.__rt; const bw = rt.document.bookWords; const eng = rt.engine;
+  if (!eng) return { err: "no engine" };
+  const pause = [...eng.paragraphBreaks].sort((a, b) => a - b);
+  const BT = new Set(["p","div","h1","h2","h3","h4","h5","h6","blockquote","li","td","section","article"]);
+  const fv = document.querySelector("foliate-view"); const loaded = []; const ends = new Set(); const blocksPer = {};
+  for (const { doc, index } of fv.renderer.getContents()) { if (!doc || !doc.body) continue; loaded.push(index);
+    const last = new Map(); for (const sp of doc.querySelectorAll("[data-word-index]")) { let el = sp.parentElement; while (el && el !== doc.body && !BT.has(el.localName.toLowerCase())) el = el.parentElement; if (el) last.set(el, Number(sp.getAttribute("data-word-index"))); }
+    for (const g of last.values()) ends.add(g); blocksPer[index] = last.size; }
+  const secStarts = new Set(bw.sections.map((x) => x.startWordIdx)); const lastIdx = bw.words.length - 1;
+  const sec = (g) => bw.sections.find((x) => g >= x.startWordIdx && g < x.endWordIdx)?.sectionIndex;
+  const cls = (g) => ends.has(g) ? "block end" : (secStarts.has(g + 1) || g === lastIdx) ? "section end" : "MID";
+  const all = pause.map((g) => ({ g, sec: sec(g), word: bw.words[g], next: bw.words[g + 1] ?? null, kind: cls(g) }));
+  const perSection = loaded.map((i) => { const x = bw.sections.find((y) => y.sectionIndex === i);
+    return { sectionIndex: i, start: x?.startWordIdx, end: x?.endWordIdx, blocks: blocksPer[i], pausesInside: x ? pause.filter((g) => g >= x.startWordIdx && g < x.endWordIdx).length : null,
+      pausesOnBlockEnd: x ? pause.filter((g) => g >= x.startWordIdx && g < x.endWordIdx && ends.has(g)).length : null }; });
+  const counts = { total: all.length, blockEnd: all.filter((p) => p.kind === "block end").length, sectionEnd: all.filter((p) => p.kind === "section end").length, mid: all.filter((p) => p.kind === "MID").length };
+  return { playing: rt.getSnapshot().playing, cur: rt.getSnapshot().highlightedWordIndex, totalWords: bw.words.length, sections: bw.sections.length,
+    surfaceSetSize: rt.surface.getParagraphBreaks().length, loadedSections: loaded, perSection, counts, pauses: all };
+})()`;
+
+async function openBook(id) {
+  await home(s, plan);
+  await runSteps(s, [{ click: `.doc-card[data-doc-id="${id}"]`, sleep: 300 }, { wait: ".reader-layout", waitMs: 45000, sleep: 2500 }]);
+}
+async function tocJump(pick) {
+  await runSteps(s, [{ click: '[aria-label="Page mode"]', sleep: 2500 }, { click: ".rbb-chapter-name", sleep: 600 }]);
+  const r = await s.cdp.eval(`(() => { const os = [...document.querySelectorAll("li.rbb-chapter-option")]; const o = ${pick}; if (o) o.click(); return { picked: o ? o.textContent.trim() : null, options: os.map((x) => x.textContent.trim()).slice(0, 12) }; })()`);
+  await sleep(3000); return r;
+}
+async function enterMode(mode) {
+  const label = mode === "flow" ? "Flow mode" : "Focus mode";
+  await runSteps(s, [{ click: `[aria-label="${label}"]`, sleep: 1500 }, { wait: `.rm-${mode}-root`, waitMs: 45000, sleep: 5000 }]);
+  let f = await s.cdp.eval(FIND_RT(mode));
+  if (f.ok && !f.engine) { await s.key("Space"); await sleep(2000); f = await s.cdp.eval(FIND_RT(mode)); }
+  if (f.ok && f.playing) { await s.key("Space"); await sleep(1500); f = await s.cdp.eval(FIND_RT(mode)); }
+  return f;
+}
+const ROUTES = [
+  { route: "M", book: "sample-meditations", toc: `os.find((x) => x.textContent.trim() === "INTRODUCTION")` },
+  { route: "G0", book: "g0-converted-chapters", toc: null },
+  { route: "G1", book: "g0-converted-chapters", toc: `os[1]` },
+];
+const modes = (process.env.MODES || "flow,focus").split(",");
+for (const mode of modes) for (const r of ROUTES) {
+  const run = { mode, route: r.route, book: r.book };
+  try {
+    await openBook(r.book);
+    if (r.toc) run.toc = await tocJump(r.toc);
+    run.runtime = await enterMode(mode);
+    Object.assign(run, await s.cdp.eval(READ, 30000));
+    console.log(mode, r.route, JSON.stringify({ loaded: run.loadedSections, perSection: run.perSection, counts: run.counts, toc: run.toc?.picked, err: run.err }));
+  } catch (e) { run.err = String(e); console.log(mode, r.route, "ERR", e.message); }
+  out.runs.push(run);
+}
+out.errors = s.errors.slice(0, 20);
+await s.stop();
+out.liveAfter = hashLive(live); out.liveUnchanged = JSON.stringify(out.liveBefore) === JSON.stringify(out.liveAfter);
+fs.writeFileSync(outJson, JSON.stringify(out, null, 2)); console.log("liveUnchanged", out.liveUnchanged); process.exit(0);

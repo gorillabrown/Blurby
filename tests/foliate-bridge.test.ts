@@ -41,4 +41,9 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   it.each(READER_MODES)("%s FoliateView forwards the iframe keydown's repeat flag (UX-POLISH-2)", (mode) => {
     expect(readModeFile(mode, "FoliateView.tsx")).toContain("repeat: ke.repeat");
   });
+
+  // Narrate is not in READER_MODES: the tests above that iterate it do not apply to Narrate.
+  it("narrate FoliateView forwards the iframe keydown's repeat flag (NARRATE-KEY-REPEAT-1)", () => {
+    expect(readModeFile("narrate", "FoliateView.tsx")).toContain("repeat: ke.repeat");
+  });
 });

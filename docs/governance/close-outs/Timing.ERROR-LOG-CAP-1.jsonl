@@ -1,0 +1,7 @@
+{"event": "open", "rows": [{"id": 1, "title": "Re-grep on the base; red test with controls committed", "class": "calculable", "item": "ERROR-LOG-CAP-1", "tier": "bounded", "effort": "low", "kind": "positive-control", "group": "Wave A"}, {"id": 2, "title": "Shared error-log helper with rotation; constant; both appenders replaced", "class": "calculable", "item": "ERROR-LOG-CAP-1", "tier": "bounded", "effort": "low", "kind": "platform-fix", "group": "Wave A"}, {"id": 3, "title": "npm test, typecheck, build; memo", "class": "calculable", "item": "ERROR-LOG-CAP-1", "tier": "mechanical", "effort": "low", "kind": "merge-and-verify", "group": "Wave B"}], "note": "Row 1's start is the worktree creation; the npm ci install is inside it.", "at": "2026-10-23T07:31:30Z"}
+{"event": "start", "row": 1, "host": "claude-code", "at": "2026-10-23T07:31:30Z"}
+{"event": "end", "row": 1, "evidence": "base grep printed library.js:20 and misc.js:21; commit e7f5c8bb; 3 of 5 fail on the base", "result": "done", "at": "2026-10-23T07:32:50Z"}
+{"event": "start", "row": 2, "host": "claude-code", "at": "2026-10-23T07:32:51Z"}
+{"event": "end", "row": 2, "evidence": "errorLogCap 5/5 pass; grep prints only main/error-log.js:18", "result": "done", "at": "2026-10-23T07:33:05Z"}
+{"event": "start", "row": 3, "host": "claude-code", "at": "2026-10-23T07:33:09Z"}
+{"event": "end", "row": 3, "evidence": "npm test 181 files, 2,453 passed / 1 skipped / 0 failed; typecheck exit 0; build exit 0", "result": "done", "at": "2026-10-23T07:33:59Z"}

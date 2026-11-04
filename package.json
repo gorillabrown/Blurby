@@ -30,7 +30,9 @@
     "productName": "Blurby",
     "publish": [
       {
-        "provider": "github"
+        "provider": "github",
+        "owner": "gorillabrown",
+        "repo": "Blurby"
       }
     ],
     "files": [
@@ -53,9 +55,9 @@
       "output": "release"
     },
     "win": {
-      "target": "nsis-web",
+      "target": "nsis",
       "icon": "assets/icon.ico",
-      "artifactName": "${productName}-Web-Setup-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-Setup-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": true,
@@ -66,7 +68,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Blurby",
       "menuCategory": true,
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "buildUniversalInstaller": false
     },
     "mac": {
       "target": "dmg",

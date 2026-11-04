@@ -14,6 +14,10 @@ import CloudSyncIndicator from "./CloudSyncIndicator";
 import blurbyIcon from "../assets/blurby-icon.png";
 import GoalProgressWidget from "./GoalProgressWidget";
 import FolderNoticeBanner from "./FolderNoticeBanner";
+import AppTabBar from "./AppTabBar";
+import FilterMenu, { type FilterMenuItem } from "./FilterMenu";
+import { PodcastsPanel, MarketplacePanel } from "./TabPlaceholder";
+import { homeOf, APP_TAB_LABELS, type AppTab } from "../utils/libraryHome";
 
 const api = window.electronAPI;
 
@@ -25,8 +29,12 @@ interface LibraryViewProps {
   folderName: string;
   loadingContent: boolean;
   toast: ToastState | null;
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
+  onMoveDocHome?: (id: string, home: "library" | "newsroom") => void;
+  onShowToast?: (message: string) => void;
   onOpenDoc: (doc: BlurbyDoc, mode?: string) => void;
-  onAddDoc: (title: string, content: string, editingId?: string | null) => void;
+  onAddDoc: (title: string, content: string, editingId?: string | null) => Promise<boolean> | void;
   onAddDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
   onDeleteDoc: (id: string) => void;
   onResetProgress: (id: string) => void;
@@ -48,14 +56,13 @@ interface LibraryViewProps {
 }
 
 export default function LibraryView({
-  library, settings, wpm, isMac, folderName, loadingContent, toast,
+  library, settings, wpm, isMac, folderName, loadingContent, toast, activeTab, onTabChange, onMoveDocHome, onShowToast,
   onOpenDoc, onAddDoc, onAddDocFromUrl, onDeleteDoc, onResetProgress,
   onSelectFolder, onSwitchFolder, onSetWpm, onSetFolderName,
   onToggleFavorite, onArchiveDoc, onUnarchiveDoc, onToggleFlap, onOpenSettings, onSettingsChange,
   focusedDocId, selectedIds, selectionMode, onToggleSelect, onMarkDocsSeen,
 }: LibraryViewProps) {
   const { theme, setTheme, setEinkMode } = useTheme();
-  const [tab, setTab] = useState("all"); // "all" | "new" | "favorites" | "archived"
   const NEW_DAYS = NEW_LIBRARY_DAYS;
   const [showAdd, setShowAdd] = useState(false);
   const [showUrl, setShowUrl] = useState(false);
@@ -94,7 +101,6 @@ export default function LibraryView({
     const timer = setTimeout(() => setDebouncedSearchQuery(searchQuery), EINK_SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchQuery, isEinkDisplay]);
-  const [typeFilter, setTypeFilter] = useState<"all" | "articles" | "books" | "pdfs">("all");
   const [updateReady, setUpdateReady] = useState<string | null>(null);
   const [launchAtLogin, setLaunchAtLogin] = useState(false);
 
@@ -125,12 +131,48 @@ export default function LibraryView({
   }, [focusedDocId]);
 
   const isPdf = (d: BlurbyDoc) => d.ext === ".pdf";
-  const isArticle = (d: BlurbyDoc) => d.source === "url" || d.source === "manual";
-  const isBook = (d: BlurbyDoc) => !isArticle(d) && !isPdf(d);
+  const isBook = (d: BlurbyDoc) => !isPdf(d); // within the Library tab, a book is any non-PDF item
+
+  // APP-TABS-1: Library and Newsroom each list only the items whose home they are; the other two tabs hold none yet
+  const isDocTab = activeTab === "library" || activeTab === "newsroom";
+  const tabLibrary = useMemo(() => library.filter((d) => homeOf(d) === activeTab), [library, activeTab]);
+
+  // Each document tab keeps its own filters; they reset when this view unmounts, as before.
+  type TabFilters = { status: string; type: string }; // status: all | new | favorites | archived; type: all | books | pdfs
+  const [filters, setFilters] = useState<Record<"library" | "newsroom", TabFilters>>({
+    library: { status: "all", type: "all" },
+    newsroom: { status: "all", type: "all" },
+  });
+  const tab = isDocTab ? filters[activeTab as "library" | "newsroom"].status : "all";
+  const typeFilter = isDocTab ? filters[activeTab as "library" | "newsroom"].type : "all";
+  const setFilter = (patch: Partial<TabFilters>) => {
+    if (!isDocTab) return;
+    const key = activeTab as "library" | "newsroom";
+    setFilters((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
+  };
+  const filterItems: FilterMenuItem[] = [
+    { value: "status:all", label: "All" },
+    { value: "status:new", label: "New" },
+    { value: "status:favorites", label: "Favorites" },
+    { value: "status:archived", label: "Archived" },
+    ...(activeTab === "library" ? [
+      { value: "type:all", label: "All types", separatorBefore: true },
+      { value: "type:books", label: "Books" },
+      { value: "type:pdfs", label: "PDFs" },
+    ] : []),
+  ];
+  const filterChecked = (item: FilterMenuItem) => {
+    const [kind, val] = item.value.split(":");
+    return (kind === "status" ? tab : typeFilter) === val;
+  };
+  const filterSelect = (item: FilterMenuItem) => {
+    const [kind, val] = item.value.split(":");
+    setFilter(kind === "status" ? { status: val } : { type: val });
+  };
 
   // Filter and sort library
   const filteredLibrary = useMemo(() => {
-    let docs = library;
+    let docs = tabLibrary;
     if (tab === "favorites") docs = docs.filter((d) => d.favorite);
     else if (tab === "archived") docs = docs.filter((d) => d.archived);
     else if (tab === "new") {
@@ -138,14 +180,13 @@ export default function LibraryView({
       docs = docs.filter((d) => !d.archived && (d.created || 0) >= cutoff);
     }
     else docs = docs.filter((d) => !d.archived);
-    if (typeFilter === "articles") docs = docs.filter(isArticle);
-    else if (typeFilter === "books") docs = docs.filter(isBook);
+    if (typeFilter === "books") docs = docs.filter(isBook);
     else if (typeFilter === "pdfs") docs = docs.filter(isPdf);
     const effectiveSearch = isEinkDisplay ? debouncedSearchQuery : searchQuery;
     if (effectiveSearch) docs = docs.filter((d) => d.title.toLowerCase().includes(effectiveSearch.toLowerCase()));
 
     return [...docs];
-  }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
+  }, [tabLibrary, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
 
   // BUG-067 + READINGS-4A: IntersectionObserver to track "new" cards seen in viewport
   // LIBRARY-SETTINGS-FIX-1: cards seen for LIBRARY_SEEN_DWELL_MS are saved in a batch shortly after,
@@ -212,24 +253,18 @@ export default function LibraryView({
     onToggleFlap();
   }, [flushSeenDocs, onOpenSettings, onToggleFlap]);
 
-  const { activeLibrary, totalWords, newCount, favCount, archivedCount, articleCount, bookCount, pdfCount } = useMemo(() => {
-    const active = library.filter((d) => !d.archived);
-    const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
+  const { activeLibrary, totalWords } = useMemo(() => {
+    const active = tabLibrary.filter((d) => !d.archived);
     return {
       activeLibrary: active,
       totalWords: active.reduce((a, d) => a + (d.wordCount || 0), 0),
-      newCount: active.filter((d) => (d.created || 0) >= cutoff).length,
-      favCount: library.filter((d) => d.favorite).length,
-      archivedCount: library.filter((d) => d.archived).length,
-      articleCount: active.filter(isArticle).length,
-      bookCount: active.filter(isBook).length,
-      pdfCount: active.filter(isPdf).length,
     };
-  }, [library]);
+  }, [tabLibrary]);
 
   // Live search results (limited to 8 for the dropdown)
   const searchResults = useMemo(() => searchQuery
     ? library.filter((d) => {
+        if (d.deleted) return false;
         const q = searchQuery.toLowerCase();
         return d.title.toLowerCase().includes(q) || (d.author || "").toLowerCase().includes(q);
       }).slice(0, 8)
@@ -242,7 +277,7 @@ export default function LibraryView({
   const { readingNow, notStarted } = useMemo(() => {
     // "Reading Now" always sorted by closest-to-finished (highest progress % first)
     const rn = filteredLibrary
-      .filter((d) => (d.position || 0) >= FOLIATE_MIN_ENGAGEMENT_POSITION && (d.wordCount ? (d.position || 0) < d.wordCount : true))
+      .filter((d) => (d.position || 0) >= FOLIATE_MIN_ENGAGEMENT_POSITION)
       .sort((a, b) => {
         const pctA = a.wordCount > 0 ? (a.position || 0) / a.wordCount : 0;
         const pctB = b.wordCount > 0 ? (b.position || 0) / b.wordCount : 0;
@@ -284,20 +319,46 @@ export default function LibraryView({
   const gridClassName = `doc-grid doc-grid-size-${cardSize} doc-grid-spacing-${cardSpacing}`;
   const listClassName = `doc-list doc-list-spacing-${cardSpacing}`;
 
+  // An edit waits for main's answer. On failure the form stays open with the typed values and shows the inline retry;
+  // the record changes only when main has saved it and broadcast the library (LIBRARY-WRITE-RACE-2, owner ruling 2026-10-23)
   const handleAddDoc = async () => {
+    if (saving) return;
     if (editMetaMode && editingId) {
       // Metadata-only save (file-based docs — update title + author)
       const doc = library.find(d => d.id === editingId);
       if (doc) {
-        doc.title = newTitle.trim() || doc.title;
-        doc.author = newAuthor.trim() || doc.author;
-        void api.applyMetadataUpdates?.([{ docId: doc.id, updates: { title: doc.title, author: doc.author } }]);
+        const title = newTitle.trim() || doc.title;
+        const author = newAuthor.trim() || doc.author;
+        setSaveFailed(false); setSaving(true);
+        let ok = false;
+        try {
+          const result = api.applyMetadataUpdates
+            ? await api.applyMetadataUpdates([{ docId: doc.id, updates: { title, author } }])
+            : null;
+          ok = !!result && !result.error && (result.updated ?? 0) >= 1;
+        } catch (err) {
+          api.logError?.(`applyMetadataUpdates error: ${err}`);
+        }
+        setSaving(false);
+        if (!ok) { setSaveFailed(true); return; }
       }
       setNewTitle(""); setNewAuthor(""); setShowAdd(false); setEditingId(null); setEditMetaMode(false);
       return;
     }
     if (!newTitle.trim()) return;
-    await onAddDoc(newTitle.trim(), newText.trim(), editingId);
+    setSaveFailed(false); setSaving(true);
+    let ok: boolean | void = false;
+    let threw = false;
+    try {
+      ok = await onAddDoc(newTitle.trim(), newText.trim(), editingId);
+    } catch (err) {
+      threw = true; // addDoc's own failure path can throw (its getState refresh); Save must not stay disabled
+      api.logError?.(`addDoc error: ${err}`);
+    } finally {
+      setSaving(false);
+    }
+    if (editingId && (threw || ok === false)) { setSaveFailed(true); return; }
+    if (threw) return;
     setNewTitle(""); setNewText(""); setShowAdd(false); setEditingId(null);
   };
 
@@ -308,13 +369,20 @@ export default function LibraryView({
     setUrlError("");
     const result = await onAddDocFromUrl(url);
     if (result?.error) { setUrlError(result.error); }
-    else { setUrlInput(""); setShowUrl(false); setUrlError(""); }
+    else {
+      setUrlInput(""); setShowUrl(false); setUrlError("");
+      // Owner question 3: an article lands in Newsroom out of sight, so say where it went
+      if (result?.doc && homeOf(result.doc) !== activeTab) onShowToast?.(`Saved to ${APP_TAB_LABELS[homeOf(result.doc)]}`);
+    }
   };
 
   const [newAuthor, setNewAuthor] = useState("");
   const [editMetaMode, setEditMetaMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   const startEdit = useCallback((doc: BlurbyDoc) => {
+    setSaveFailed(false);
     setEditingId(doc.id);
     setNewTitle(doc.title);
     setNewAuthor(doc.author || "");
@@ -353,6 +421,25 @@ export default function LibraryView({
   return (
     <div className="library-container" id="main-content" role="main" aria-label="Library">
       <div className={`library-titlebar ${isMac ? "library-titlebar--mac" : "library-titlebar--win"}`} />
+      <AppTabBar activeTab={activeTab} onTabChange={onTabChange}>
+        <FilterMenu items={filterItems} value={filterChecked} onSelect={filterSelect} disabled={!isDocTab} />
+        <button
+          type="button"
+          className="btn"
+          onClick={() => { triggerCoachHint("search"); setSearchFocused(true); }}
+          aria-label="Search"
+          title="Search (/ key)"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button type="button" className="btn" onClick={() => onOpenSettings?.("settings")} aria-label="Settings" title="Settings">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </AppTabBar>
 
       {loadingContent && (
         <div className="library-loading" role="status">
@@ -382,6 +469,7 @@ export default function LibraryView({
 
       <div className="library-scroll">
         {/* Sticky top section: header + filter tabs + divider line */}
+        {isDocTab && (
         <div className="library-sticky-top">
         <div className="library-header">
           <div className="library-header-left">
@@ -417,16 +505,6 @@ export default function LibraryView({
           </div>
           <div className="library-actions">
             <CloudSyncIndicator onOpenSettings={() => onToggleFlap()} />
-            <button
-              className="btn"
-              onClick={() => { triggerCoachHint("search"); setSearchFocused(true); }}
-              aria-label="Search library"
-              title="Search (/ key)"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-            </button>
             <button
               className="view-toggle-btn btn"
               title={settings.viewMode === "grid" ? "Switch to list view" : "Switch to grid view"}
@@ -489,62 +567,8 @@ export default function LibraryView({
 
         <GoalProgressWidget goals={settings.readingGoals || []} onOpenGoals={handleOpenGoalsSettings} />
 
-        {/* Tabs + Sort row */}
-        <div className="library-tabs-row">
-        <div className="library-tabs" role="tablist">
-          <button
-            className={`library-tab${tab === "all" ? " library-tab-active" : ""}`}
-            onClick={() => setTab("all")}
-            role="tab"
-            aria-selected={tab === "all"}
-          >all ({activeLibrary.length})</button>
-          <button
-            className={`library-tab${tab === "new" ? " library-tab-active" : ""}`}
-            onClick={() => setTab("new")}
-            role="tab"
-            aria-selected={tab === "new"}
-          >new ({newCount})</button>
-          <button
-            className={`library-tab${tab === "favorites" ? " library-tab-active" : ""}`}
-            onClick={() => setTab("favorites")}
-            role="tab"
-            aria-selected={tab === "favorites"}
-          >favorites ({favCount})</button>
-          <button
-            className={`library-tab${tab === "archived" ? " library-tab-active" : ""}`}
-            onClick={() => setTab("archived")}
-            role="tab"
-            aria-selected={tab === "archived"}
-          >archived ({archivedCount})</button>
-          <span className="library-tab-divider" aria-hidden="true" />
-          <button
-            className={`library-tab${typeFilter === "all" ? " library-tab-active" : ""}`}
-            onClick={() => setTypeFilter("all")}
-            role="tab"
-            aria-selected={typeFilter === "all"}
-          >all types</button>
-          <button
-            className={`library-tab${typeFilter === "articles" ? " library-tab-active" : ""}`}
-            onClick={() => setTypeFilter("articles")}
-            role="tab"
-            aria-selected={typeFilter === "articles"}
-          >articles ({articleCount})</button>
-          <button
-            className={`library-tab${typeFilter === "books" ? " library-tab-active" : ""}`}
-            onClick={() => setTypeFilter("books")}
-            role="tab"
-            aria-selected={typeFilter === "books"}
-          >books ({bookCount})</button>
-          <button
-            className={`library-tab${typeFilter === "pdfs" ? " library-tab-active" : ""}`}
-            onClick={() => setTypeFilter("pdfs")}
-            role="tab"
-            aria-selected={typeFilter === "pdfs"}
-          >PDFs ({pdfCount})</button>
         </div>
-        {/* Sort dropdown removed from tabs row — now inline with "Not Started" section label */}
-        </div>{/* close library-tabs-row */}
-        </div>{/* close library-sticky-top */}
+        )}{/* close library-sticky-top */}
 
         {showStats && <StatsPanel wpm={wpm} onClose={() => setShowStats(false)} />}
 
@@ -573,6 +597,7 @@ export default function LibraryView({
                   setSearchIndex((prev) => Math.max(prev - 1, -1));
                 } else if (e.key === "Enter" && searchIndex >= 0) {
                   e.preventDefault();
+                  onTabChange(homeOf(searchResults[searchIndex]));
                   handleOpenDocWithSeen(searchResults[searchIndex]);
                   setSearchQuery("");
                   setSearchIndex(-1);
@@ -589,11 +614,12 @@ export default function LibraryView({
                     <div
                       key={doc.id}
                       className={`search-result-item${idx === searchIndex ? " search-result-active" : ""}`}
-                      onMouseDown={() => { handleOpenDocWithSeen(doc); setSearchQuery(""); setSearchIndex(-1); setSearchFocused(false); }}
+                      onMouseDown={() => { onTabChange(homeOf(doc)); handleOpenDocWithSeen(doc); setSearchQuery(""); setSearchIndex(-1); setSearchFocused(false); }}
                     >
                       <span className="search-result-title">{formatDisplayTitle(doc.title)}</span>
                       {doc.author && <span className="search-result-author">{doc.author}</span>}
                       <span className="search-result-meta">{doc.ext?.slice(1) || doc.source}</span>
+                      <span className="search-result-tab">{APP_TAB_LABELS[homeOf(doc)]}</span>
                     </div>
                   ))
                 ) : (
@@ -632,13 +658,23 @@ export default function LibraryView({
             newTitle={newTitle} newText={newText} editingId={editingId}
             onTitleChange={setNewTitle} onTextChange={setNewText}
             onSave={handleAddDoc}
-            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); }}
+            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); setSaveFailed(false); }}
             metaMode={editMetaMode}
             newAuthor={newAuthor}
             onAuthorChange={setNewAuthor}
+            saving={saving}
+            saveFailed={saveFailed}
           />
         )}
 
+        {!isDocTab && (
+          <section className="app-tabpanel" role="tabpanel" id={`app-tabpanel-${activeTab}`} aria-labelledby={`app-tab-${activeTab}`}>
+            {activeTab === "podcasts" ? <PodcastsPanel /> : <MarketplacePanel />}
+          </section>
+        )}
+
+        {isDocTab && (
+        <section className="app-tabpanel" role="tabpanel" id={`app-tabpanel-${activeTab}`} aria-labelledby={`app-tab-${activeTab}`}>
         {/* Empty states per tab */}
         {filteredLibrary.length === 0 && !showAdd && (
           <div className="library-empty">
@@ -664,7 +700,7 @@ export default function LibraryView({
                 <div className="library-section-label">Reading Now</div>
                 <div className={gridClassName} role="list">
                   {readingNow.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                    <DocGridCard key={doc.id} doc={doc} onMoveHome={onMoveDocHome} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
                       onResetProgress={onResetProgress}
                       onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
@@ -696,7 +732,7 @@ export default function LibraryView({
                 </div>
                 <div className={gridClassName} role="list">
                   {notStarted.map((doc) => (
-                    <DocGridCard key={doc.id} doc={doc} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
+                    <DocGridCard key={doc.id} doc={doc} onMoveHome={onMoveDocHome} onOpen={handleOpenDocWithSeen} onToggleFavorite={onToggleFavorite} onArchive={onArchiveDoc} onDelete={onDeleteDoc}
                       onResetProgress={onResetProgress}
                       onEditMetadata={startEdit}
                       focused={focusedDocId === doc.id}
@@ -727,6 +763,7 @@ export default function LibraryView({
                       onUnarchive={onUnarchiveDoc}
                       onOpenScroll={handleOpenScroll}
                       onOpenNewWindow={handleOpenNewWindow}
+                      onMoveHome={onMoveDocHome}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
@@ -767,6 +804,7 @@ export default function LibraryView({
                       onUnarchive={onUnarchiveDoc}
                       onOpenScroll={handleOpenScroll}
                       onOpenNewWindow={handleOpenNewWindow}
+                      onMoveHome={onMoveDocHome}
                       focused={focusedDocId === doc.id}
                       selected={selectedIds?.has(doc.id) || false}
                       selectionMode={selectionMode}
@@ -778,8 +816,11 @@ export default function LibraryView({
             )}
           </>
         )}
+        </section>
+        )}
 
         {/* Footer */}
+        {isDocTab && (
         <div className="library-footer">
           <div className="library-speed">
             <span>speed</span>
@@ -807,6 +848,7 @@ export default function LibraryView({
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

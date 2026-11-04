@@ -1,0 +1,81 @@
+{
+  "inFlow20s": {
+    "roErrors": 1,
+    "observerCallbacks": {
+      "new It (file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/paginator-sOM65Gn3.js:1:8376)": {
+        "calls": 3,
+        "sizes": {
+          "div. 0x0": 1,
+          "div. 1002x630": 1,
+          "div. 987x630": 1
+        }
+      },
+      "new ee (file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/paginator-sOM65Gn3.js:1:3734)": {
+        "calls": 1,
+        "sizes": {
+          "body.x-ebookmaker 720x9819": 1
+        }
+      },
+      "file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/App-zEyVC33j.js:111:30135": {
+        "calls": 1,
+        "sizes": {
+          "div.rm-flow-view 1002x630": 1
+        }
+      },
+      "file:///C:/Projects/Blurby/.worktrees/reader-visual-diag-1/release/win-unpacked/resources/app.asar/dist/assets/App-zEyVC33j.js:111:30417": {
+        "calls": 1,
+        "sizes": {
+          "div.rm-flow-view 1002x630": 1
+        }
+      }
+    },
+    "attr": {
+      "margin": {
+        "writes": 2,
+        "changed": 2,
+        "values": {
+          "24px": 2
+        }
+      },
+      "max-block-size": {
+        "writes": 2,
+        "changed": 2,
+        "values": {
+          "609px": 1,
+          "610px": 1
+        }
+      },
+      "max-column-count": {
+        "writes": 2,
+        "changed": 2,
+        "values": {
+          "1": 2
+        }
+      }
+    },
+    "props": {
+      "--flow-zone-top": {
+        "writes": 2,
+        "changed": 1,
+        "values": {
+          "15%": 2
+        }
+      },
+      "--flow-zone-bottom": {
+        "writes": 2,
+        "changed": 1,
+        "values": {
+          "34.04761904761905%": 2
+        }
+      }
+    }
+  },
+  "geometry": {
+    "legend": "viewClientW|viewScrollH|viewScrollTop|foliateViewH|max-block-size|paginatorDivs",
+    "frames": 181,
+    "changes": 0,
+    "states": {
+      "1002|630|0|629.8|610px|": 181
+    }
+  }
+}

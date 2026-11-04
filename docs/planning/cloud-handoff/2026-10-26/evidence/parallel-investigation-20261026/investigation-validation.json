@@ -1,0 +1,63 @@
+{
+  "observedAt": "2026-10-26T20:41:21.188779+00:00",
+  "sourceBaseline": "d8a65cb41f4095a93eb7a198bd91939833c5ea0d",
+  "sourceHashes": {
+    "main/folder-sync.js": "81f2cdcb8f5c56391fd2dca4334ef7ad34eed5784cde0242efedb17dc1501f46",
+    "main/folder-watcher.js": "d4ab0e4e413646f10b9fe43d3c354e9746dc64f16d7e271fd0c7860a4a1a8c79",
+    "main/sync-queue.js": "4837b6408eabfa4d34e009fc047655704f0b5c3813d860186542d260b87eabbd",
+    "main/ipc/state.js": "f61a02f5aae10800caa0f1de2813ff19d10aab1f7555eec60615add0268689d1",
+    "main/json-store.js": "7267157d1e6b21046a43a19e4d881b0f94a1cf3e85957e94d9be4322db4b7e58",
+    "main.js": "ae989d990786c87a0ced9ded8dd78c4f8f01776a5963bf8113e5e4386a227f8f",
+    "src/hooks/useLibrary.ts": "ca4d1f45e8179929d2bca07bfefc308d74a7f60b0cea4643dfea2c7ed5745953"
+  },
+  "probes": {
+    "folder-phase-probe": {
+      "scriptHash": "d962ba2b4211bea9a440a43ad6b4c5abdb66d1e55e0cbcc79bd7f17f13d3932c",
+      "resultHash": "7e34ec84db0f322d6026629352da07599b56ee2f322836899b024100ad11d479",
+      "assertionsPassed": true
+    },
+    "folder-hook-probe": {
+      "scriptHash": "d682919ba9f06f80575a7b2c53b922726f0b5c95498cd2bf1abc7491fc095391",
+      "resultHash": "e07c9108fc6c6f59eb5356d9ac96c8ca95ac786b8ceb7b764bc3f52aab853d74",
+      "assertionsPassed": true
+    },
+    "queue-path-probe": {
+      "scriptHash": "19a7c575b7e0e683d73be984f1e1e3950b3380814e2f551c8c358065b8ee9ce4",
+      "resultHash": "79c7268b22768efff9516dbb7c1ee02cc879f10d3e8fcd4a367baf11fee12cd7",
+      "assertionsPassed": true
+    }
+  },
+  "reports": {
+    "FOLDER-SWITCH-CONTENT-1": {
+      "path": "C:\\Projects\\Blurby\\docs\\studies\\investigations\\FOLDER-SWITCH-CONTENT-1.2026-10-26.md",
+      "sha256": "b75c00301ff64be8bf77159a8e2c783306f996f8bfce908a419ff10a366b3611",
+      "utf8": true,
+      "sourceLinksResolve": true
+    },
+    "PROFILE-QUEUE-ISOLATION-1": {
+      "path": "C:\\Projects\\Blurby\\docs\\studies\\investigations\\PROFILE-QUEUE-ISOLATION-1.2026-10-26.md",
+      "sha256": "ab46b655c0ed6c2485a9bc8e20af0186d1764840f48c76a9d19ac53b0bbf6272",
+      "utf8": true,
+      "sourceLinksResolve": true
+    }
+  },
+  "normalProfileMetadata": {
+    "library.json": {
+      "sha256": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+      "bytes": 92869,
+      "lastModifiedUtc": "2026-10-26T18:02:21.504338+00:00"
+    },
+    "settings.json": {
+      "sha256": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec",
+      "bytes": 1516,
+      "lastModifiedUtc": "2026-10-26T18:02:22.762519+00:00"
+    },
+    "sync-queue.json": {
+      "sha256": "f5dc9fa6121ee01200c802d4b69fe8823bfb2cdca415a434a3cde15573c237c2",
+      "bytes": 2668,
+      "lastModifiedUtc": "2026-10-26T18:02:22.761451+00:00"
+    }
+  },
+  "scope": "No desktop/app launch; no production data writes; no primary branch/stage/commit/provider/status mutations.",
+  "primaryApplicationDiff": []
+}

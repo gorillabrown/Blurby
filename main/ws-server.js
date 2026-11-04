@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { safeStorage } = require("electron");
 const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS, WS_PAIRING_TIMEOUT_MS, WS_CONNECTION_ATTEMPT_CHANNEL, WS_PAIRING_SUCCESS_CHANNEL } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
+const { writeConversionResult } = require("./library-write");
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const WS_PATH = "/blurby";
@@ -241,7 +242,12 @@ async function handleMessage(client, text) {
           const settings = _ctx.getSettings();
           settings._wsPairingToken = encrypted;
           _ctx.saveSettings();
-        } catch { /* best-effort persist */ }
+        } catch (err) {
+          console.warn(`[ws-server] pairing not saved: ${err && err.message}`);
+        }
+      } else if (_ctx) {
+        // Session-only pairing: never written in plaintext (Blurby.Brain, 2026-10-22); say why it won't survive a restart.
+        console.warn("[ws-server] pairing not saved: OS encryption unavailable");
       }
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
@@ -403,20 +409,22 @@ async function handleAddArticle(client, article, messageId) {
       });
       await fsPromises.unlink(tempHtmlPath).catch(() => {});
 
-      doc.convertedEpubPath = convResult.epubPath;
-      doc.filepath = convResult.epubPath;
-      doc.ext = ".epub";
-      doc.originalSourceUrl = article.sourceUrl || null;
-
-      // Update doc in library
-      const docs = _ctx.getLibrary();
-      _ctx.setLibrary(docs.map((d) => (d.id === doc.id ? doc : d)));
-      _ctx.saveLibrary();
+      // LIBRARY-WRITE-RACE-1: write to the live record; an article deleted during the conversion is not put back
+      const written = await writeConversionResult(_ctx, docId, {
+        convertedEpubPath: convResult.epubPath,
+        filepath: convResult.epubPath,
+        ext: ".epub",
+        originalSourceUrl: article.sourceUrl || null,
+      }, convResult.epubPath);
+      if (written) _ctx.saveLibrary();
     } catch (convErr) {
       console.error("[ws-server] EPUB conversion failed:", convErr.message);
       // Keep doc without EPUB — will be converted on-demand by load-doc-content
-      doc.content = article.textContent;
-      _ctx.saveLibrary();
+      const live = _ctx.getLibrary().find((d) => d.id === docId);
+      if (live && !live.deleted) {
+        live.content = article.textContent;
+        _ctx.saveLibrary();
+      }
     }
 
     _ctx.broadcastLibrary();
@@ -434,41 +442,63 @@ function generatePairingToken() {
   return crypto.randomBytes(16).toString("hex");
 }
 
-function startServer(ctx) {
+// The plaintext form generatePairingToken returns; a stored value of this shape is a legacy plaintext token.
+const PLAINTEXT_PAIRING_TOKEN = /^[0-9a-f]{32}$/;
+
+/**
+ * The pairing token's stored form in settings: safeStorage ciphertext (base64). Never plaintext: when
+ * safeStorage is unavailable there is no stored form (null), and the token lives for the session only.
+ */
+function encodePairingToken(token) {
+  return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString("base64") : null;
+}
+
+/** Reads the stored ciphertext back; throws when the stored value is not safeStorage ciphertext. */
+function decodePairingToken(stored) {
+  return safeStorage.decryptString(Buffer.from(stored, "base64"));
+}
+
+/**
+ * Generate or restore the session's pairing token; returns it. A credential is never written in plaintext
+ * (Blurby.Brain, 2026-10-22): a legacy plaintext token is re-encrypted in place when safeStorage is available,
+ * and deleted (kept in memory for this session) when it is not. `token` seeds a fresh token (regenerate).
+ */
+function loadPairingToken(ctx, { token } = {}) {
+  const settings = ctx.getSettings();
+  const stored = settings._wsPairingToken;
+  if (!safeStorage.isEncryptionAvailable()) {
+    const sessionToken = token || (stored && PLAINTEXT_PAIRING_TOKEN.test(stored) ? stored : generatePairingToken());
+    if ("_wsPairingToken" in settings) {
+      delete settings._wsPairingToken;
+      ctx.saveSettings();
+    }
+    return sessionToken;
+  }
+  if (stored && !token) {
+    try {
+      return decodePairingToken(stored);
+    } catch {
+      if (PLAINTEXT_PAIRING_TOKEN.test(stored)) {
+        // Legacy plaintext: re-encrypt in place so the existing pairing survives.
+        settings._wsPairingToken = encodePairingToken(stored);
+        ctx.saveSettings();
+        return stored;
+      }
+      // Corrupted ciphertext — regenerate
+      console.warn("[ws-server] Pairing token decryption failed — regenerating");
+    }
+  }
+  const fresh = token || generatePairingToken();
+  settings._wsPairingToken = encodePairingToken(fresh);
+  ctx.saveSettings();
+  return fresh;
+}
+
+function startServer(ctx, options = {}) {
   if (_server) return { port: WS_PORT, token: _pairingToken };
 
   _ctx = ctx;
-
-  // Generate or restore pairing token (encrypted via safeStorage)
-  const settings = ctx.getSettings();
-  if (settings._wsPairingToken) {
-    try {
-      if (safeStorage.isEncryptionAvailable()) {
-        const buffer = Buffer.from(settings._wsPairingToken, "base64");
-        _pairingToken = safeStorage.decryptString(buffer);
-      } else {
-        _pairingToken = settings._wsPairingToken;
-      }
-    } catch {
-      // Decryption failed (corrupted or was stored in plaintext) — regenerate
-      console.warn("[ws-server] Pairing token decryption failed — regenerating");
-      _pairingToken = generatePairingToken();
-      if (safeStorage.isEncryptionAvailable()) {
-        settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
-      } else {
-        settings._wsPairingToken = _pairingToken;
-      }
-      ctx.saveSettings();
-    }
-  } else {
-    _pairingToken = generatePairingToken();
-    if (safeStorage.isEncryptionAvailable()) {
-      settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
-    } else {
-      settings._wsPairingToken = _pairingToken;
-    }
-    ctx.saveSettings();
-  }
+  _pairingToken = loadPairingToken(ctx, options);
 
   _server = http.createServer((_req, res) => {
     // Reject non-WebSocket HTTP requests
@@ -497,7 +527,7 @@ function startServer(ctx) {
       console.error(`[ws-server] Port ${WS_PORT} is in use. Retry ${_retryCount}/${WS_MAX_RETRY_COUNT} in ${WS_RETRY_DELAY_MS}ms.`);
       setTimeout(() => {
         _server = null;
-        startServer(ctx);
+        startServer(ctx, { token: _pairingToken }); // keep this session's token (it may exist in memory only)
       }, WS_RETRY_DELAY_MS);
     }
   });
@@ -572,6 +602,9 @@ module.exports = {
   decodeFrame,
   encodeFrame,
   generatePairingToken,
+  encodePairingToken,
+  decodePairingToken,
+  loadPairingToken,
   generateShortCode,
   getShortCode,
   handleConnection,

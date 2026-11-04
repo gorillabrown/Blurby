@@ -1,5 +1,7 @@
 // main/quit-sequence.js — The will-quit flush. Electron does not await an async quit listener (LL-157), so the
-// first quit is cancelled, the work is awaited, then the app quits again.
+// first quit is cancelled, the work is awaited, then the app quits again. A relaunch made during the flush (the new
+// process lost the single-instance lock, so it arrives here as "second-instance") is taken over: app.relaunch() once,
+// after the flush and before the final quit (NARRATE-QUIT-LINGER-1, BUG-207).
 // CommonJS only — Electron main process
 "use strict";
 const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
@@ -26,6 +28,9 @@ async function runQuitSteps(steps) {
 
 function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
   let state = "idle"; // idle → flushing → done
+  let relaunch = false;
+  // The window is already gone during the flush, so main.js's own second-instance handler does nothing then.
+  app.on?.("second-instance", () => { if (state === "flushing") relaunch = true; });
   return async function onWillQuit(event) {
     if (state === "done") return; // the handler's own final quit: everything already ran
     event.preventDefault();
@@ -41,6 +46,9 @@ function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
     } finally {
       await producer; // never rejects: awaited on every path, uncapped
       state = "done";
+      if (relaunch) {
+        try { app.relaunch(); } catch (err) { console.error("[quit] relaunch failed:", err && err.message); }
+      }
       app.quit();
     }
   };

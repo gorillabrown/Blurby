@@ -11,7 +11,7 @@ import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Usage (pwsh, in the phase worktree, after `npm run build`; never while npm test or npm run build runs):
 //   node scripts/narrate-rebuild/p5-latency-e2e.mjs [--only session|warm|cold] [--warm 20] [--cold 5] [--rates 1.0,2.0]
 //        [--minutes 5] [--out C:\Projects\Blurby-artifacts\narrate-rebuild-1\p5] [--analyze-only]
-// Writes docs/studies/narrate-rebuild-1/phase5/latency-e2e.json (D6) and recorded-output.json (D3 and D5 in the app,
+// Writes latency-e2e.json (D6) into --out, and docs/studies/narrate-rebuild-1/phase5/recorded-output.json (D3 and D5 in the app,
 // through p5-recorded-output-check.mjs's analysis). Exit 0 only when every warm trial < 2,000 ms, every cold trial
 // < 8,000 ms and every session analysis is PASS; 1 otherwise. --analyze-only re-reads the traces already in --out.
 import fs from "node:fs";
@@ -21,6 +21,7 @@ import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { analyze, readTraceEvents } from "./p5-recorded-output-check.mjs";
+import { parseRates } from "./lib/rates.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -29,7 +30,14 @@ const arg = (name, dflt) => { const i = process.argv.indexOf(name); return i > 0
 const ONLY = arg("--only", null);
 const WARM = Number(arg("--warm", 20));
 const COLD = Number(arg("--cold", 5));
-const RATES = String(arg("--rates", "1.0,2.0")).split(",").map(Number);
+// NARRATE-TRACE-LABELS-1: a rate off Narrate's grid stops the run before anything launches ("1.0 2.0" was NaN, a false PASS).
+let RATES;
+try {
+  RATES = parseRates(String(arg("--rates", "1.0,2.0")));
+} catch (err) {
+  console.error(err.message);
+  process.exit(2);
+}
 const MINUTES = Number(arg("--minutes", 5));
 const OUT = path.resolve(arg("--out", "C:/Projects/Blurby-artifacts/narrate-rebuild-1/p5"));
 const ANALYZE_ONLY = process.argv.includes("--analyze-only");
@@ -144,11 +152,30 @@ const report = { generatedAt: new Date().toISOString(), host: { platform: os.pla
 
 const want = (k) => !ONLY || ONLY === k;
 
+// NARRATE-ARRIVAL-SYNC-1 (Brain1 ruling 4): a trial that ends with its own error (main/narrate/trial.js logs
+// "[narrate-trial] error: ..." and exits 1) is a failed trial, whatever its trace says. Read from the launch's exit code
+// and its log, so --analyze-only sees the same errors. Every error trial is listed in latency-e2e.json.
+report.trialErrors = [];
+function trialError(label, run) {
+  let message = null;
+  try {
+    const log = fs.readFileSync(path.join(OUT, "logs", `${slug(label)}.log`), "utf8");
+    const m = log.match(/\[narrate-trial\] error: (.*)/);
+    if (m) message = m[1].trim();
+  } catch { /* no log */ }
+  if (!message && run && run.code !== 0 && run.code != null) message = `the app exited with code ${run.code}`;
+  if (message) report.trialErrors.push({ label, message });
+  return message;
+}
+
 // ── D3 sessions ───────────────────────────────────────────────────────────────────────────────────────────
 if (want("session")) {
   for (const rate of RATES) {
     const label = `session-${rateLabel(rate)}`;
-    if (!ANALYZE_ONLY) report.runs.push(await launch(label, { kind: "session", rate, minutes: MINUTES }));
+    const run = ANALYZE_ONLY ? null : await launch(label, { kind: "session", rate, minutes: MINUTES });
+    if (run) report.runs.push(run);
+    const sessionError = trialError(label, run);
+    if (sessionError) failures.push(`session ${rateLabel(rate)}: trial error: ${sessionError}`);
     const tp = tracePathFor(label);
     const r = fs.existsSync(tp) ? analyze(readTraceEvents(tp), { minMinutes: MINUTES }) : { verdict: "INCONCLUSIVE", failures: [], holds: ["no trace written"], stats: {} };
     report.sessions[rateLabel(rate)] = { tracePath: tp, ...r };
@@ -183,6 +210,8 @@ if (want("warm")) {
         report.runs.push({ ...(await launch(label, { kind: "warm", rate, repeat })), cycles: repeat });
         cycles += repeat;
       }
+      const warmError = trialError(label, ANALYZE_ONLY ? null : report.runs[report.runs.length - 1]);
+      if (warmError) failures.push(`warm ${r} ${label}: trial error: ${warmError}`);
       all.push(...firstVoiced(tracePathFor(label)).map((x) => ({ ...x, run: label })));
       if (!ANALYZE_ONLY && (need() <= 0 || cycles >= CYCLE_CAP)) break;
     }
@@ -221,10 +250,12 @@ if (want("cold")) {
         else { run = await launch(label, { kind: "cold", rate, type }); report.runs.push(run); }
         const first = firstVoiced(tracePathFor(label))[0] ?? null;
         const row = { trial: i, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, cpu: first ? first.cpu : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null };
+        row.error = trialError(label, run);
+        if (row.error) failures.push(`cold ${type} ${r} trial ${i}: trial error: ${row.error}`);
         if (!first) failures.push(`cold ${type} ${r} trial ${i}: no first voiced sample recorded`);
         else if (first.latencyMs === null) failures.push(`cold ${type} ${r} trial ${i}: no output-timestamp pair`);
         else if (type === "click" && first.cause !== "click") failures.push(`cold click ${r} trial ${i}: the first voiced sample answered ${first.cause}, not the click`);
-        row.counts = Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
+        row.counts = !row.error && Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
         if (row.counts && row.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${r} trial ${i}: ${row.latencyMs} ms >= ${COLD_BUDGET_MS}`);
         rows.push(row);
       }
@@ -242,7 +273,8 @@ if (want("cold")) {
 report.verdict = failures.length ? "FAIL" : "PASS";
 report.failures = failures;
 fs.mkdirSync(RECORDS_DIR, { recursive: true });
-if (want("warm") || want("cold")) fs.writeFileSync(path.join(RECORDS_DIR, "latency-e2e.json"), JSON.stringify(report, null, 2));
+fs.mkdirSync(OUT, { recursive: true });
+if (want("warm") || want("cold")) fs.writeFileSync(path.join(OUT, "latency-e2e.json"), JSON.stringify(report, null, 2));
 if (want("session")) fs.writeFileSync(path.join(RECORDS_DIR, "recorded-output.json"), JSON.stringify({ generatedAt: report.generatedAt, host: report.host, minutes: MINUTES, sessions: report.sessions, runs: report.runs.filter((r) => r.label.startsWith("session")) }, null, 2));
 console.log(JSON.stringify({ verdict: report.verdict, failures, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
 process.exit(failures.length ? 1 : 0);

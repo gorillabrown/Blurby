@@ -18,7 +18,8 @@ import { FakeAudioOutput } from "./harness/fakeAudioOutput";
 import { FakeProducer, SAMPLE_RATE, SPF } from "./harness/fakeProducer";
 
 // Section A ends without terminal punctuation (a heading or epigraph line), so only the section end can stop a chunk there.
-const SECTION_A = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned to be religious".split(" ");
+// NARRATE-SENTENCE-RESUME-1: "To be religious" is its own sentence, so the start three words before the section end is not rewound.
+const SECTION_A = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned. To be religious".split(" ");
 const SECTION_B = "HIS FIRST BOOK concerning himself. Wherein Antoninus recordeth what and of whom he learned.".split(" ");
 const WORDS = [...SECTION_A, ...SECTION_B];
 const BOUNDARY = SECTION_A.length;

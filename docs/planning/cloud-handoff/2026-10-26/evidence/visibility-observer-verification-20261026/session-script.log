@@ -1,0 +1,12 @@
+start {"errorLogLines":0,"url":"file:///C:/Projects/Blurby/.worktrees/visibility-observer-verification-20261026/release/win-arm64-unpacked/resources/app.asar/dist/index.html"}
+open-book true
+page-probe true
+toc-open true
+toc-jump true
+focus true
+focus-probe {"mode":"rm-focus-view","outerLineHeightCss":"normal","viewTop":0,"viewHeight":629,"zoneTopPct":0.15,"zoneBottomPct":0.3407790143084261,"bandTop":94.3,"bandBottom":214.4,"zoneHeightPx":120,"epub":{"lineHeightCss":"33.8px","fontSizeCss":"26px","frameZoom":1.25},"cursor":{"cls":"page-word page-word--flow-cursor","text":"INTRODUCTION","wordIndex":187,"top":225.6,"bottom":258.6,"lineStep":60.2},"cursorInBand":false,"linesInBand":1.99,"visible":"visible"}
+flow true
+flow-probe-paused {"mode":"rm-flow-view","outerLineHeightCss":"normal","viewTop":0,"viewHeight":629,"zoneTopPct":0.15,"zoneBottomPct":0.3407790143084261,"bandTop":94.3,"bandBottom":214.4,"zoneHeightPx":120,"epub":{"lineHeightCss":"33.8px","fontSizeCss":"26px","frameZoom":1.25},"cursor":{"cls":"page-word page-word--flow-cursor","text":"INTRODUCTION","wordIndex":187,"top":225.6,"bottom":258.6,"lineStep":60.2},"cursorInBand":false,"linesInBand":1.99,"visible":"visible"}
+play true
+pause true
+done {"errorLog":{"before":0,"after":0,"added":0,"resizeObserverLines":0,"perMinute":0,"sample":[]},"flowSummary":{"samples":178,"withCursor":178,"outsideBand":178,"hiddenSamples":0}}

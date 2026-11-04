@@ -46,6 +46,31 @@ function normalize(e) {
     .trim();
 }
 
+/** A bare four-digit number, not part of an amount, a decimal or a thousands-separated count. */
+const BARE = String.raw`(?<![\d$£.,])\b`;
+const EN_DASH_YEARS = new RegExp(`${BARE}(\\d{4})–(\\d{4})\\b(?![.,]\\d)`, "g");
+const TEN_HUNDREDS = new RegExp(`${BARE}10(\\d\\d)(s?)\\b(?![.,]\\d)`, "g");
+const isYearRange = (n) => n >= 1000 && n <= 2099;
+
+/**
+ * NARRATE-YEARS-1 (BUG-191), the owner's rules of 2026-10-22 and 2026-10-23, applied before kokoro's normalizer (which
+ * reads 1100-2099 as years itself, `yearOrTime`):
+ * - a bare 1001-1099 is a year, in kokoro's own form: "1066" → "10 66", "1005" → "10 oh 5"; "1000" stays a cardinal;
+ * - so are its decades: "1060s" → "10 60s", "1000s" → "10 hundreds";
+ * - an en dash between two years reads "to", as kokoro reads a hyphen: "1914–1918" → "1914-1918";
+ * - a comma marks a count ("1,066" is left to kokoro, which strips the comma and reads a cardinal).
+ * The producer speaks the text after this step and maps it back onto the original words through spokenWordsOf.
+ */
+function preNormalize(e) {
+  return e
+    .replace(EN_DASH_YEARS, (m, a, b) => (isYearRange(Number(a)) && isYearRange(Number(b)) ? `${a}-${b}` : m))
+    .replace(TEN_HUNDREDS, (m, d, s) => {
+      if (d === "00") return s ? "10 hundreds" : m;
+      const n = Number(d);
+      return n < 10 ? `10 oh ${n}${s}` : `10 ${n}${s}`;
+    });
+}
+
 /** kokoro's segmentation of a normalized text: the pieces between punctuation runs, in order (what phonemize gets). */
 function segments(normalized) {
   const out = [];
@@ -62,7 +87,7 @@ function segments(normalized) {
 // not in its punctuation set, so a closing quote after a stop ("heart.'") reaches espeak as a word of its own (P6b F1).
 const isSilentToken = (w) => /^'+$/.test(w);
 const wordsOf = (pieces) => pieces.flatMap((s) => s.trim().split(/\s+/).filter((w) => w && !isSilentToken(w)));
-const spokenWordsOf = (text) => wordsOf(segments(normalize(text)));
+const spokenWordsOf = (text) => wordsOf(segments(normalize(preNormalize(text))));
 
 /**
  * How many spoken (normalized, punctuation-free) words each source word becomes, each normalized on its own: none for
@@ -134,4 +159,4 @@ function mapUnitsToSourceWords(text, capturedSegments, units) {
   }));
 }
 
-module.exports = { normalize, segments, spokenWordsOf, spokenCounts, mapUnitsToSourceWords, isSilentToken, PUNCT };
+module.exports = { normalize, preNormalize, segments, spokenWordsOf, spokenCounts, mapUnitsToSourceWords, isSilentToken, PUNCT };

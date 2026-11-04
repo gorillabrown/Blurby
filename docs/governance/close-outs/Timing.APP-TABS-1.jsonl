@@ -1,0 +1,15 @@
+{"event": "open", "rows": [{"id": 1, "title": "Wave A red files committed alone, failures recorded", "class": "calculable", "item": "APP-TABS-1"}, {"id": 2, "title": "Home field and tab setting", "class": "calculable", "item": "APP-TABS-1"}, {"id": 3, "title": "Tab bar shell", "class": "calculable", "item": "APP-TABS-1"}, {"id": 4, "title": "Wave A gates, memo, push", "class": "calculable", "item": "APP-TABS-1"}, {"id": 5, "title": "Wave B red files committed alone", "class": "calculable", "item": "APP-TABS-1"}, {"id": 6, "title": "Search, filters, moves, panels (rows 6-9 built together)", "class": "calculable", "item": "APP-TABS-1"}, {"id": 10, "title": "Wave B gates, arm64 package, live frames, owner-library check, memo, push", "class": "calculable", "item": "APP-TABS-1"}], "at": "2026-10-24T05:10:33Z"}
+{"event": "start", "row": 1, "at": "2026-10-24T05:10:33Z"}
+{"event": "end", "row": 1, "evidence": "red commit 0456e566; 17 red by assertion, 5 controls pass; typecheck exit 2", "result": "done", "at": "2026-10-24T05:15:31Z"}
+{"event": "start", "row": 2, "at": "2026-10-24T05:15:31Z"}
+{"event": "end", "row": 2, "evidence": "types.ts, migrations.js, libraryHome.ts (times from the session clock, rounded)", "result": "done", "at": "2026-10-24T05:22:00Z"}
+{"event": "start", "row": 3, "at": "2026-10-24T05:22:00Z"}
+{"event": "end", "row": 3, "evidence": "AppTabBar, LibraryContainer, LibraryView, hook, stylesheet, help rows", "result": "done", "at": "2026-10-24T05:50:00Z"}
+{"event": "start", "row": 4, "at": "2026-10-24T05:50:00Z"}
+{"event": "end", "row": 4, "evidence": "54c0348c pushed; wall clock includes a wait of about a day for Blurby.Brain's ruling on settingsKeyTrust.test.js:375 (messaging was paused)", "result": "done", "at": "2026-10-26T01:08:00Z"}
+{"event": "start", "row": 5, "at": "2026-10-26T01:08:00Z"}
+{"event": "end", "row": 5, "evidence": "e0d75ef1; 15 red by assertion, 13 pass (b13 and m4-m7 controls)", "result": "done", "at": "2026-10-26T01:10:42Z"}
+{"event": "start", "row": 6, "at": "2026-10-26T01:10:42Z"}
+{"event": "end", "row": 6, "evidence": "83aaa7a8; suite, typecheck, build green", "result": "done", "at": "2026-10-26T01:14:09Z"}
+{"event": "start", "row": 10, "at": "2026-10-26T01:14:09Z"}
+{"event": "end", "row": 10, "evidence": "rule 53 (a)-(e); live L1-L8 pass on the packaged exe", "result": "done", "at": "2026-10-26T01:30:00Z"}

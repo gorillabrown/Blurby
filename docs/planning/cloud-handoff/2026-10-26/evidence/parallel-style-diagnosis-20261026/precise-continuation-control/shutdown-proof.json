@@ -1,0 +1,8 @@
+{
+  "pid": 43532,
+  "checkedAtUtc": "2026-10-26T21:37:54.4983290Z",
+  "running": false,
+  "executable": null,
+  "method": "Get-Process -Id 43532 -ErrorAction SilentlyContinue",
+  "scope": "Owned scratch process only"
+}

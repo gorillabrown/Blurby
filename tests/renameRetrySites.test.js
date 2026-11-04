@@ -14,12 +14,17 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const cjsFs = createRequire(import.meta.url)("fs/promises");
 
 const SITES = [
-  "main/sync-engine.js",
-  "main/auth.js",
   "main/ipc/reader.js",
   "main/ipc/stats.js",
   "main/tts-cache.js",
   "main/narrate/expose-durations.js",
+];
+
+// RENAME-TMP-RACE-1: these saves go through json-store's serialized writeJSON, which owns the temp name and the
+// retried rename, so two overlapping saves never share one fixed .tmp file.
+const WRITE_JSON_SITES = [
+  "main/sync-engine.js",
+  "main/auth.js",
 ];
 
 describe("RENAME-RETRY-1: atomic renames in the main process", () => {
@@ -35,6 +40,23 @@ describe("RENAME-RETRY-1: atomic renames in the main process", () => {
         problems.push(`${rel}: does not import renameWithRetry from json-store`);
       }
       if (!/\brenameWithRetry\(/.test(text)) problems.push(`${rel}: never calls renameWithRetry`);
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it("the sync-state and token saves write through json-store's writeJSON and build no temp file of their own", async () => {
+    const problems = [];
+    for (const rel of WRITE_JSON_SITES) {
+      const lines = (await fs.readFile(path.join(ROOT, rel), "utf-8")).split(/\r?\n/);
+      lines.forEach((line, i) => {
+        if (/\.rename\(/.test(line)) problems.push(`${rel}:${i + 1}: raw rename: ${line.trim()}`);
+        if (/\+ "\.tmp"/.test(line)) problems.push(`${rel}:${i + 1}: own temp file: ${line.trim()}`);
+      });
+      const text = lines.join("\n");
+      if (!/const \{[^}]*\bwriteJSON\b[^}]*\} = require\("\.{1,2}\/(?:\.\.\/)?json-store"\)/.test(text)) {
+        problems.push(`${rel}: does not import writeJSON from json-store`);
+      }
+      if (!/\bwriteJSON\(/.test(text)) problems.push(`${rel}: never calls writeJSON`);
     }
     expect(problems).toEqual([]);
   });

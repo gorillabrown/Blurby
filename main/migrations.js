@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 13;
+const CURRENT_SETTINGS_SCHEMA = 15;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -178,6 +178,25 @@ const settingsMigrations = [
   },
   // v12 → v13: Narrate removed (NARRATE-REMOVE-1) — a saved narrate mode becomes flow
   (data) => { normalizeReaderModes(data); data.schemaVersion = 13; return data; },
+  // v13 → v14: BAND-ALIGN-2 R8 — the band covers the cursor's paragraph; the Lines count is dropped. Stored Off (0)
+  // stays off; any line count is on; a file without flowZoneLines gets no new key (absent = on).
+  (data) => {
+    if (Object.hasOwn(data, "flowZoneLines")) {
+      data.flowBandEnabled = data.flowZoneLines !== 0;
+      delete data.flowZoneLines;
+    }
+    data.schemaVersion = 14;
+    return data;
+  },
+  // v14 → v15: EINK-CONTROLS-1 — the E-ink theme is folded into the E-ink switch (light underneath)
+  (data) => {
+    if (data.theme === "eink") {
+      data.theme = "light";
+      data.einkMode = true;
+    }
+    data.schemaVersion = 15;
+    return data;
+  },
 ];
 
 const libraryMigrations = [
@@ -311,20 +330,21 @@ const SETTINGS_DEFAULTS = {
   readingGoals: [],
   // Absent until set: the rest of BlurbySettings (src/types.ts).
   focusWpm: undefined, flowWpm: undefined, justifiedText: undefined,
-  flowWordSpan: undefined, flowCursorStyle: undefined, flowZonePosition: undefined, flowZoneLines: undefined,
+  flowWordSpan: undefined, flowCursorStyle: undefined, flowZonePosition: undefined, flowBandEnabled: undefined,
   ttsPauseCommaMs: undefined, ttsPauseClauseMs: undefined, ttsPauseSentenceMs: undefined,
   ttsPauseParagraphMs: undefined, ttsDialogueSentenceThreshold: undefined, ttsFootnoteMode: undefined,
   lastReadingMode: undefined, isNarrating: undefined, firstRunCompleted: undefined,
   defaultSort: undefined, defaultViewMode: undefined, libraryCardSize: undefined, libraryCardSpacing: undefined,
   useLegacyRenderer: undefined, ttsCacheEnabled: undefined, pronunciationOverrides: undefined,
-  narrationProfiles: undefined, activeNarrationProfileId: undefined, sortBy: undefined,
+  narrationProfiles: undefined, activeNarrationProfileId: undefined, sortBy: undefined, libraryTab: undefined,
 };
 
 // Never taken from the renderer or the cloud, nor sent to the cloud: main's own keys (migrations set schemaVersion;
 // select-folder and switch-folder set the folder, IPC-PATH-TRUST-1) and the object-prototype names.
 const MAIN_OWNED_SETTINGS = new Set(["schemaVersion", "sourceFolder", "recentFolders", "__proto__", "constructor", "prototype"]);
-// Meaningful only on this device (the OS login item), so never sent to or taken from another device.
-const DEVICE_LOCAL_SETTINGS = new Set(["launchAtLogin"]);
+// Meaningful only on this device (the OS login item; the last-used library tab, APP-TABS-1), so never sent to or
+// taken from another device.
+const DEVICE_LOCAL_SETTINGS = new Set(["launchAtLogin", "libraryTab"]);
 
 /**
  * The real user settings in `input`: its own enumerable keys that are keys of SETTINGS_DEFAULTS, never an

@@ -1,0 +1,36 @@
+{
+  "id": "20261027T144128Z-external-set-status-FOLIATE-DISPLAY-LIFETIME-1",
+  "operation": "external-set-status",
+  "item_id": "FOLIATE-DISPLAY-LIFETIME-1",
+  "created": "2026-10-27T14:41:28Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-27",
+      "notes": "Owner authorized independent parallel work, then separate visible cloud chats and upload before launch. Brain approved immutable v3 SHA2565407201dae92574bb0655e7b9ec2f89334d4d1967edfc8532c81e277b15ded1d; independent reviewer PASS e00d0bae3281b0ecd7cf048789dedddbcb669d8d38365197a852665a2e87b823. Named execution owner: FOLIATE-DISPLAY-LIFETIME-1 — cloud implementation; record actual thread ID before code. Base4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7 includes approved docs main85e6e5aa. Only existing foliate-js patch, tests/foliateViewReadiness.test.js, tests/foliateDisplayLifetime.test.js and item-owned docs. Source execution conditional on published full ROADMAP/admission, provider/owner/readback and fresh lane/capability checks. Cloud portable tests do not waive local owner-machine/native Windows ARM64 and package/defaults checks. No main merge/release/terminal completion. Seq68 confirmed free in193-item refresh; no existing reorder.\n\nLocal return 2026-10-27 authorized by owner. Exclusive implementation owner is local chat01a17dcd-3e4d-7161-bb2f-d8c273de5afb; worktree C:/Projects/Blurby/.worktrees/foliate-display-lifetime-20261027, branch eb/foliate-display-lifetime-1 from cloud report161172823c1c0840ac3ada4bf4873582f00d6f68 plus approved docs/protocol f299675dd8251e550f06ab47abb7c4b6ff1889f2. Current main/origin85e6e5aaedccb0501c529dbc9f739e50a0689fd7 unchanged. Immutable v3/independent PASS and exact source/test fence remain; local npm registry PONG verified, normal clean install/postinstall and actual baseline/red controls still required before corrective implementation. Independent local reviewer01a17dce-1533-7d32-9532-c6a5b0123fb0. Parent serializes live register, planning and desktop custody. Preserve normal library/settings AND sync-queue read-only hash/metadata/custody; owned91-WORD route. No main merge, release, installation, terminal completion or package waiver."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "localresume20261027-FOLIATE-DISPLAY-LIFETIME-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLIATE-DISPLAY-LIFETIME-1",
+      "idempotencyKey": "localresume20261027-FOLIATE-DISPLAY-LIFETIME-1",
+      "actualRevision": "4f7447a3a886db221d7835945617e2acc91e6bcf012ad405c7be165a9040b3b8",
+      "recoveryId": "20261027T144128Z-external-set-status-FOLIATE-DISPLAY-LIFETIME-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-27T14:42:16Z",
+  "outcome": "succeeded"
+}

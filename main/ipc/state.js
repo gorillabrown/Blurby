@@ -9,6 +9,7 @@ const {
 const { pickUserSettings } = require("../migrations");
 const fsPromises = require("fs/promises");
 const { pathKey } = require("../folder-sync");
+const { timeLimit } = require("../folder-watcher");
 
 let saveSettingsTimeout = null;
 let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it
@@ -34,7 +35,7 @@ function register(ctx) {
     const safe = pickUserSettings(newSettings);
     // Update in-memory state immediately so all readers see the new value
     Object.assign(settings, safe);
-    if (safe.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+    if (safe.theme !== undefined || safe.einkMode !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
 
     // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write
     clearTimeout(saveSettingsTimeout);
@@ -90,7 +91,7 @@ function register(ctx) {
     if (typeof folder !== "string" || !(settings.recentFolders || []).includes(folder)) {
       return { error: "That folder is not in your recent folders. Use Browse for folder to choose it." };
     }
-    try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
+    try { await timeLimit(fsPromises.access(folder)); } catch { return { error: "Folder no longer exists." }; } // a hung mount answers in FOLDER_LIST_TIMEOUT_MS (LARGE-FOLDER-SYNC-3)
     if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice(); // a different folder: the banner was the old one's
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);

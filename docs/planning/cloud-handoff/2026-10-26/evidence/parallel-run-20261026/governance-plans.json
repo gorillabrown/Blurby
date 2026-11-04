@@ -1,0 +1,729 @@
+[
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-REOPEN-CFI-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-reopen-cfi-1 at 910296ca09fd2fbbc10b90c96800e3b97e7591a3; ancestor of planning baseline=True; ROADMAP heading: PAGE-REOPEN-CFI-1 \u2014 Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/page-reopen-cfi-1 at 910296ca09fd2fbbc10b90c96800e3b97e7591a3; ancestor of planning baseline=True; ROADMAP heading: PAGE-REOPEN-CFI-1 \u2014 Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "f2b106ec6dbce3f88d1a69c47eb7827b23a9e88b0ed26e179f9ab95948fc4c5f",
+    "idempotencyKey": "parallelgov20261026-PAGE-REOPEN-CFI-1",
+    "recoveryId": "20261026T204050Z-external-set-status-PAGE-REOPEN-CFI-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "BOOK-TEXT-COLOUR-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/book-text-colour-1 at 0ccba7308589454a270a75f5406a465fb16f23c1; ancestor of planning baseline=True; ROADMAP heading: BOOK-TEXT-COLOUR-1 \u2014 Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/book-text-colour-1 at 0ccba7308589454a270a75f5406a465fb16f23c1; ancestor of planning baseline=True; ROADMAP heading: BOOK-TEXT-COLOUR-1 \u2014 Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "0b7c5e37b711cb6ac4118f3b6f687a6077c936b63fe024f7d573c58d70d15c79",
+    "idempotencyKey": "parallelgov20261026-BOOK-TEXT-COLOUR-1",
+    "recoveryId": "20261026T204051Z-external-set-status-BOOK-TEXT-COLOUR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLDER-SWITCH-HEADER-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/folder-switch-header-1 at 82fde6bdddb87027d9b666ec14fa72ef121d2873; ancestor of planning baseline=True; ROADMAP heading: FOLDER-SWITCH-HEADER-1 \u2014 The header follows the folder switch at once *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/folder-switch-header-1 at 82fde6bdddb87027d9b666ec14fa72ef121d2873; ancestor of planning baseline=True; ROADMAP heading: FOLDER-SWITCH-HEADER-1 \u2014 The header follows the folder switch at once *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "6d9725c13099d3cbae513bb5c13afcd9ec6f786eda4049ba52d1be027eaf6194",
+    "idempotencyKey": "parallelgov20261026-FOLDER-SWITCH-HEADER-1",
+    "recoveryId": "20261026T204052Z-external-set-status-FOLDER-SWITCH-HEADER-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-START-STACK-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/narrate-start-stack-1 at 0acf256869a3977bffba7f673299dc87ea739b98; ancestor of planning baseline=True; ROADMAP heading: NARRATE-START-STACK-1 \u2014 Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/narrate-start-stack-1 at 0acf256869a3977bffba7f673299dc87ea739b98; ancestor of planning baseline=True; ROADMAP heading: NARRATE-START-STACK-1 \u2014 Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "d01394532b222dad8532a502eace354d98ff60ac1d094d145956ef497f0faf4e",
+    "idempotencyKey": "parallelgov20261026-NARRATE-START-STACK-1",
+    "recoveryId": "20261026T204053Z-external-set-status-NARRATE-START-STACK-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "BOOK-TYPE-SCALE-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/book-type-scale-1 at 7194a9095999fc8746fb83c99e879ea2a2c0fa19; ancestor of planning baseline=True; ROADMAP heading: BOOK-TYPE-SCALE-1 \u2014 Books use one type scale for headers, sub-headers and body text *(merged; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/book-type-scale-1 at 7194a9095999fc8746fb83c99e879ea2a2c0fa19; ancestor of planning baseline=True; ROADMAP heading: BOOK-TYPE-SCALE-1 \u2014 Books use one type scale for headers, sub-headers and body text *(merged; In Flight, close-out held by the Stage 8 release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "11c1ced0c173d1d006b68d9a42dbafc81ea91c5ba0e5edbb9f2371e7d7925a88",
+    "idempotencyKey": "parallelgov20261026-BOOK-TYPE-SCALE-1",
+    "recoveryId": "20261026T204054Z-external-set-status-BOOK-TYPE-SCALE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "KEEP-FURTHEST-FIX-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/keep-furthest-fix-1 at 9acbfb610013237fc7d8b9b717527ea8331bb1a4; ancestor of planning baseline=True; ROADMAP heading: KEEP-FURTHEST-FIX-1 \u2014 \"Keep at furthest\" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/keep-furthest-fix-1 at 9acbfb610013237fc7d8b9b717527ea8331bb1a4; ancestor of planning baseline=True; ROADMAP heading: KEEP-FURTHEST-FIX-1 \u2014 \"Keep at furthest\" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for the owner's smoke re-check (gate (1) passed 2026-10-23))*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "9570a9089d4f770224c0f77b9fefe764d73b98188c0bad6b90c482c4272d2fb0",
+    "idempotencyKey": "parallelgov20261026-KEEP-FURTHEST-FIX-1",
+    "recoveryId": "20261026T204055Z-external-set-status-KEEP-FURTHEST-FIX-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "RELEASE-RUNBOOK-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/release-runbook-1 at c02e930eeebeabc0e8a1890f88511d48b3a72974; ancestor of planning baseline=True; ROADMAP heading: RELEASE-RUNBOOK-1 \u2014 Write the release runbook: build, sign, upload and verify the installers by hand *(merged `3872c6e8` 2026-10-23, release gate (12; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "af4cc2826a47661e1cedb73cb8cd981d8769696456569bb1af1c800784508e2c",
+    "idempotencyKey": "parallelgov20261026-RELEASE-RUNBOOK-1",
+    "recoveryId": "20261026T204056Z-external-set-status-RELEASE-RUNBOOK-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "ELECTRON-42-UPGRADE-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/electron-42-upgrade-1 at f9bcd7a1abdedcb5cbd11f8412a188ab4177189b; ancestor of planning baseline=True; ROADMAP heading: ELECTRON-42-UPGRADE-1 \u2014 Upgrade Electron to 42 so a normal quit does not crash on x64 *(merged `331fb81b` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8. Resumed 2026-10-22 from Blurby.Roadmap's kickoff by an implementation agent: main taken in (8186776c), C2 done (Electron resolves 42.11.18, 4a6b128d), gates in progress.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/electron-42-upgrade-1 at f9bcd7a1abdedcb5cbd11f8412a188ab4177189b; ancestor of planning baseline=True; ROADMAP heading: ELECTRON-42-UPGRADE-1 \u2014 Upgrade Electron to 42 so a normal quit does not crash on x64 *(merged `331fb81b` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "ebfb8be6370f5d5253961a988520f68fcd945c16751c7d1e8be34dc4270d1f30",
+    "idempotencyKey": "parallelgov20261026-ELECTRON-42-UPGRADE-1",
+    "recoveryId": "20261026T204057Z-external-set-status-ELECTRON-42-UPGRADE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PDF-IMPORT-DIAG-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/pdf-import-diag-1 at 4fd16c5451e075af9f0bd795399e3f80f3e14f32; ancestor of planning baseline=True; ROADMAP heading: PDF-IMPORT-DIAG-1 \u2014 PDFs convert again: the EPUB converter uses pdf-parse 2's API *(merged `7c518a30` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "3135300012c9b0ccaf8e21df47ae6580ede373ae551c7b7494231229d915bca6",
+    "idempotencyKey": "parallelgov20261026-PDF-IMPORT-DIAG-1",
+    "recoveryId": "20261026T204057Z-external-set-status-PDF-IMPORT-DIAG-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PACKAGING-FIX-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/packaging-fix-1 at a40f283389a504c1615b06e9f7d5bcb4ba1c7a4b; ancestor of planning baseline=True; ROADMAP heading: PACKAGING-FIX-1 \u2014 Ship the app's icons, quiet the updater in unpacked builds, and relink stale sample books *(merged `e476aed1` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "61b50fcceea853d9c53ef4961383c8efab1b57a5e63c0939eb6797b85e0a256e",
+    "idempotencyKey": "parallelgov20261026-PACKAGING-FIX-1",
+    "recoveryId": "20261026T204058Z-external-set-status-PACKAGING-FIX-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "UX-POLISH-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/ux-polish-1 at 871f3c1802d08136efd183ea73819f04bc6f220f; ancestor of planning baseline=True; ROADMAP heading: UX-POLISH-1 \u2014 Space resumes the last-used reading mode *(merged `e942e3fd` 2026-10-13; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/ux-polish-1 at 871f3c1802d08136efd183ea73819f04bc6f220f; ancestor of planning baseline=True; ROADMAP heading: UX-POLISH-1 \u2014 Space resumes the last-used reading mode *(merged `e942e3fd` 2026-10-13; In Flight, close-out held by the Stage 8 release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "7eda22dbc6123fd134453fdbda400fc0b75458f918c14d6ec0cc76f69c442c13",
+    "idempotencyKey": "parallelgov20261026-UX-POLISH-1",
+    "recoveryId": "20261026T204059Z-external-set-status-UX-POLISH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "UX-POLISH-2",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/ux-polish-2 at 099660428bbde18fd4f96e4060a887ef0589a08a; ancestor of planning baseline=True; ROADMAP heading: UX-POLISH-2 \u2014 Keyboard and help-surface follow-ups after UX-POLISH-1 *(merged `77929621` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "20201a5cf1de3f758448db64b8da14afb1017e0ead074cfdcfc936fce0ad7bfe",
+    "idempotencyKey": "parallelgov20261026-UX-POLISH-2",
+    "recoveryId": "20261026T204100Z-external-set-status-UX-POLISH-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LARGE-FOLDER-SYNC-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/large-folder-sync-1 at 6d98975adad2d69a98e10e7a80fdbe88e096e881; ancestor of planning baseline=True; ROADMAP heading: LARGE-FOLDER-SYNC-1 \u2014 Live folder sync that scales to very large folders (technical half) *(merged `0eb46e33` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "bf17212fa936e6ddd37c543af0302b6737668c5bd03fe6a19d2cd3cb3e0e5503",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-1",
+    "recoveryId": "20261026T204101Z-external-set-status-LARGE-FOLDER-SYNC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LIBRARY-READ-ALLOW-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/library-read-allow-1 at 91958bc13e7c76c26354a5fc704c21754525dad1; ancestor of planning baseline=True; ROADMAP heading: LIBRARY-READ-ALLOW-1 \u2014 Let a library book open from its own file wherever it lives *(merged `037472c9` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "e2a0bccbdf4a66ffe16285efd7fa97a34e2c5fd15b81393c1a76ea87b4032873",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-READ-ALLOW-1",
+    "recoveryId": "20261026T204102Z-external-set-status-LIBRARY-READ-ALLOW-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-POSITION-SAVE-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-position-save-1 at 0d33bdd8cc5cc4c6e9adfb51f4a31c7e5bb36d20; ancestor of planning baseline=True; ROADMAP heading: PAGE-POSITION-SAVE-1 \u2014 Page turns in Page mode save the first word of the page *(merged `309f2390` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "878acd0cae1ec648e587fc0068c39f79dfc7bd0910a178f6d99da79b81305387",
+    "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-1",
+    "recoveryId": "20261026T204103Z-external-set-status-PAGE-POSITION-SAVE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "DEPS-AUDIT-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/deps-audit-1 at 2dfc9a9a67548331a499193643d707e4ed3e7094; ancestor of planning baseline=True; ROADMAP heading: DEPS-AUDIT-1 \u2014 Fix or account for every production dependency advisory *(merged `5d12e19a` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "eeb52536a996f5eeace94897f435fb3d6ac011abfdee2298bf40dbf1f4e8ff90",
+    "idempotencyKey": "parallelgov20261026-DEPS-AUDIT-1",
+    "recoveryId": "20261026T204104Z-external-set-status-DEPS-AUDIT-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "SAVE-LIBRARY-TRUST-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/save-library-trust-1 at 546b66aff6808eb73cc8ed985067e500de6409bd; ancestor of planning baseline=True; ROADMAP heading: SAVE-LIBRARY-TRUST-1 \u2014 The renderer cannot change where a library book's file is *(merged `fd1d266d` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "35ab95cad32e74b295e53611034d28f87a5a93ce292781563a698b971356d17b",
+    "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-TRUST-1",
+    "recoveryId": "20261026T204105Z-external-set-status-SAVE-LIBRARY-TRUST-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "IPC-PATH-TRUST-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/ipc-path-trust-1 at 1f59181f5a1e63db087dca352ed4ffe60735ab1b; ancestor of planning baseline=True; ROADMAP heading: IPC-PATH-TRUST-1 \u2014 Main decides which files and folders the renderer can reach *(merged `9b68ce38` 2026-10-14; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "8f146c94abdaa2f5001565035b9cd7b7d7eb88e9e9e215100208616763ffabaa",
+    "idempotencyKey": "parallelgov20261026-IPC-PATH-TRUST-1",
+    "recoveryId": "20261026T204106Z-external-set-status-IPC-PATH-TRUST-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "SAVE-LIBRARY-MERGE-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/save-library-merge-1 at 4c4697fd93ef1cb82ff4f1c9f60e3742d4ba4102; ancestor of planning baseline=True; ROADMAP heading: SAVE-LIBRARY-MERGE-1 \u2014 A library save merges instead of replacing *(merged `682676b1` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "1d0ddbd0d17fff2b2da0f11401b06e02bf55fcdd392e2c8075bca5dfdd32ed93",
+    "idempotencyKey": "parallelgov20261026-SAVE-LIBRARY-MERGE-1",
+    "recoveryId": "20261026T204107Z-external-set-status-SAVE-LIBRARY-MERGE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "SETTINGS-KEY-TRUST-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/settings-key-trust-1 at 6e6ae795910629ae3fe76d0c849a27782b4d3e26; ancestor of planning baseline=True; ROADMAP heading: SETTINGS-KEY-TRUST-1 \u2014 The renderer and cloud sync can only set real user settings *(merged `051d004c` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "fa4a3d99bde26461138d3162ea909cc343af0294e0a78ffe772b4f7723b361d0",
+    "idempotencyKey": "parallelgov20261026-SETTINGS-KEY-TRUST-1",
+    "recoveryId": "20261026T204108Z-external-set-status-SETTINGS-KEY-TRUST-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/folder-unreachable-guard-1 at 0605fb41ae52db86dd3cab63cb7331d7ba39a3a6; ancestor of planning baseline=True; ROADMAP heading: FOLDER-UNREACHABLE-GUARD-1 \u2014 Keep folder books when the source folder cannot be reached *(merged `89a5a95c` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "75fb53ec3f04255cf011a02a2b1a15d0baabd46d8bbe822317017db662cf799b",
+    "idempotencyKey": "parallelgov20261026-FOLDER-UNREACHABLE-GUARD-1",
+    "recoveryId": "20261026T204109Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "GET-STATE-SECRET-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/get-state-secret-1 at 8f27fe704ebe765c7a750c6c4c75ab166344e0fc; ancestor of planning baseline=True; ROADMAP heading: GET-STATE-SECRET-1 \u2014 No secret reaches the renderer through state or settings reads *(merged `f4a2822d` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "035420858fe7a57a29e76fdff86b1e59765e4952f3ae6b6172d935b1603be8c0",
+    "idempotencyKey": "parallelgov20261026-GET-STATE-SECRET-1",
+    "recoveryId": "20261026T204110Z-external-set-status-GET-STATE-SECRET-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LARGE-FOLDER-SYNC-2",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/large-folder-sync-2 at c25cb84c4e56ecf33041ea6284797bb2c7f77f12; ancestor of planning baseline=True; ROADMAP heading: LARGE-FOLDER-SYNC-2 \u2014 Follow-ups from LARGE-FOLDER-SYNC-1 *(merged `1f573bc2` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "dbc4839a945bbd963f29b199b3569118021bbf0f29c08bd01a437cc7b97eba0b",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-2",
+    "recoveryId": "20261026T204111Z-external-set-status-LARGE-FOLDER-SYNC-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-SAVE-RESTAMP-GUARD-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-save-restamp-guard-1 at 880289cdc29b92b94af4a3639b254f982a69bf6c; ancestor of planning baseline=True; ROADMAP heading: PAGE-SAVE-RESTAMP-GUARD-1 \u2014 A page turn never saves a position before the book's word numbers apply *(merged `813ff38a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "c5a856727c4bd6a07324b429cef4c99523a0e3763a3dfb69545940f6a64d50a9",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-GUARD-1",
+    "recoveryId": "20261026T204111Z-external-set-status-PAGE-SAVE-RESTAMP-GUARD-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-SAVE-RESTAMP-2",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-save-restamp-2 at c345c584b09f0e7cfdd7ab75be47176878775f06; ancestor of planning baseline=True; ROADMAP heading: PAGE-SAVE-RESTAMP-2 \u2014 A failed word count or a jump never loses or overwrites the reader's page *(merged `55a39a35` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "be1c250c7a26f42c938fa8ea129f10f479598cadfa5dda48c4733bf270a82fdd",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-2",
+    "recoveryId": "20261026T204112Z-external-set-status-PAGE-SAVE-RESTAMP-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-POSITION-SAVE-2",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-position-save-2 at 3c92e0e278ef26f4bb812e14a950f367a4702f9b; ancestor of planning baseline=True; ROADMAP heading: PAGE-POSITION-SAVE-2 \u2014 Follow-ups from PAGE-POSITION-SAVE-1 *(merged `82b05269` 2026-10-22; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "c0b2abae2838a5f9c8bd6b6154f528b5f67701e86724217216481325f25a3254",
+    "idempotencyKey": "parallelgov20261026-PAGE-POSITION-SAVE-2",
+    "recoveryId": "20261026T204113Z-external-set-status-PAGE-POSITION-SAVE-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLDER-NOTICE-1",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/folder-notice-1 at b45b6b812bef12757c3b99cf25e14862f8bc32b3; ancestor of planning baseline=True; ROADMAP heading: FOLDER-NOTICE-1 \u2014 Show when the source folder cannot be reached, with a one-press Retry *(merged `6ef5363a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "bee3503ff7c84e11391d459f8aa934b1c71df2a97387e4926f8cd94f281a2c1c",
+    "idempotencyKey": "parallelgov20261026-FOLDER-NOTICE-1",
+    "recoveryId": "20261026T204114Z-external-set-status-FOLDER-NOTICE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "ZIP-READ-FOLLOWUPS-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/zip-read-followups-1 at 29b3e7e53e23e990e5038e2fbd1d27f8ba52edaf; ancestor of planning baseline=False; ROADMAP heading: ZIP-READ-FOLLOWUPS-1 \u2014 Every EPUB archive is opened through one size-checked door *(built `29b3e7e5` on `eb/zip-read-followups-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "afdf5256a580c6152ad0caa3f434173a99b8913a86f74bd61b8550428a51d66a",
+    "idempotencyKey": "parallelgov20261026-ZIP-READ-FOLLOWUPS-1",
+    "recoveryId": "20261026T204115Z-external-set-status-ZIP-READ-FOLLOWUPS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LIBRARY-WRITE-RACE-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/library-write-race-1 at 3b7aaa6f1e4a65b07eaf81316e4f26621f62e5e6; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-1 \u2014 Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub. Full Spec 2026-10-22 (U9/U10 pass; pre-dispatch amendment: no ROADMAP.md edit). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/library-write-race-1 stacked on eb/ws-pair-log-1), built during the Stage 8 freeze and merged after WS-PAIR-LOG-1.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/library-write-race-1 at 3b7aaa6f1e4a65b07eaf81316e4f26621f62e5e6; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-1 \u2014 Main-side library writers update the live record, never a copy *(built `3b7aaa6f` on `eb/library-write-race-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "cdb1f928129fe34bf20b8b8b5c49338a95a4d48b7b2eecb4692a444b354e8707",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-1",
+    "recoveryId": "20261026T204116Z-external-set-status-LIBRARY-WRITE-RACE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-YEARS-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-years-1 at 7b36b8366415ea4fc91ae158887cf20de993c148; ancestor of planning baseline=False; ROADMAP heading: NARRATE-YEARS-1 \u2014 Narrate reads 1000\u20131099 as years too, and keeps comma numbers as counts *(built `7b36b836` on `eb/narrate-years-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "a1355c8356243ad50c12739038b46d3d8c2b363c7b6ec114cee74517aa2a5003",
+    "idempotencyKey": "parallelgov20261026-NARRATE-YEARS-1",
+    "recoveryId": "20261026T204117Z-external-set-status-NARRATE-YEARS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-SENTENCE-RESUME-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-sentence-resume-1 at 35716c5fa8a494322766bb307b99002ec66e5f79; ancestor of planning baseline=False; ROADMAP heading: NARRATE-SENTENCE-RESUME-1 \u2014 Narrate starts at the beginning of the current sentence *(built `35716c5f` on `eb/narrate-sentence-resume-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "a44f6f5ce264346b4819546b925dca543742545820afacf309f4c98add741151",
+    "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-RESUME-1",
+    "recoveryId": "20261026T204118Z-external-set-status-NARRATE-SENTENCE-RESUME-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-TOKEN-CAP-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-token-cap-1 at 814ddc78a8d04615dbef33b499e45c88fde69abd; ancestor of planning baseline=False; ROADMAP heading: NARRATE-TOKEN-CAP-1 \u2014 Digit-dense passages are planned under the 400-id token cap *(built `814ddc78` on `eb/narrate-token-cap-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "339343dbad255bed2283c93d7a767db964d84e7cd213980d62eefa01988cfcdf",
+    "idempotencyKey": "parallelgov20261026-NARRATE-TOKEN-CAP-1",
+    "recoveryId": "20261026T204119Z-external-set-status-NARRATE-TOKEN-CAP-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "WS-TOKEN-REGEN-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/ws-token-regen-1 at 48c311f632335e540f9fed752e6fc5625ff206a6; ancestor of planning baseline=False; ROADMAP heading: WS-TOKEN-REGEN-1 \u2014 Regenerating the pairing code stores one encrypted token *(built `48c311f6` on `eb/ws-token-regen-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "07ba1d4cf33fc5f5882f5a7d6e925e97b0e9104dff372b070ab1cbc2158030e6",
+    "idempotencyKey": "parallelgov20261026-WS-TOKEN-REGEN-1",
+    "recoveryId": "20261026T204120Z-external-set-status-WS-TOKEN-REGEN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LARGE-FOLDER-SYNC-3",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/large-folder-sync-3 at 043ef79aba28c664ec154f3b0b3eeb7deff21239; ancestor of planning baseline=False; ROADMAP heading: LARGE-FOLDER-SYNC-3 \u2014 Follow-ups from LARGE-FOLDER-SYNC-2 *(built `043ef79a` on `eb/large-folder-sync-3`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "66bc96ae2504c2167dff4e5a87184687bcad6a8a75d2658c90c40d40732af7b2",
+    "idempotencyKey": "parallelgov20261026-LARGE-FOLDER-SYNC-3",
+    "recoveryId": "20261026T204121Z-external-set-status-LARGE-FOLDER-SYNC-3"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-TRACE-LABELS-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-trace-labels-1 at 08da0030079d760c90cbedd32187895db51f914c; ancestor of planning baseline=False; ROADMAP heading: NARRATE-TRACE-LABELS-1 \u2014 Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate *(built `08da0030` on `eb/narrate-trace-labels-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "ba003e4f3fad6c525615c06fa9e5886d1337ed62e57644a3f70d4d8935645b3e",
+    "idempotencyKey": "parallelgov20261026-NARRATE-TRACE-LABELS-1",
+    "recoveryId": "20261026T204122Z-external-set-status-NARRATE-TRACE-LABELS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "TOC-JUMP-SAVE-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/toc-jump-save-1 at db03f2f5d7c22419e76405ead34e1c414102f25d; ancestor of planning baseline=False; ROADMAP heading: TOC-JUMP-SAVE-1 \u2014 A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from PAGE-SAVE-RESTAMP-2's live check (Blurby.Brain ruling: pre-existing, stub). Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/toc-jump-save-1 from main), built during the Stage 8 freeze and merged after it lifts.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/toc-jump-save-1 at db03f2f5d7c22419e76405ead34e1c414102f25d; ancestor of planning baseline=False; ROADMAP heading: TOC-JUMP-SAVE-1 \u2014 A contents-list jump in Page mode saves the page it lands on *(built `db03f2f5` on `eb/toc-jump-save-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "dc3516455bb83a863d940648b3e31be61aca7be443e61ea2653fb0a171547597",
+    "idempotencyKey": "parallelgov20261026-TOC-JUMP-SAVE-1",
+    "recoveryId": "20261026T204123Z-external-set-status-TOC-JUMP-SAVE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-KEY-REPEAT-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-key-repeat-1 at 8b5e9789036395c0c8c002ccf9fdd3b0aebe3f39; ancestor of planning baseline=False; ROADMAP heading: NARRATE-KEY-REPEAT-1 \u2014 Narrate's key forwarder keeps a held key's repeat flag *(built `8b5e9789` on `eb/narrate-key-repeat-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "f8268f5b8fbef413725fe523b784e997d545e046728ad46d65f67edb75cb0834",
+    "idempotencyKey": "parallelgov20261026-NARRATE-KEY-REPEAT-1",
+    "recoveryId": "20261026T204124Z-external-set-status-NARRATE-KEY-REPEAT-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "RENAME-TMP-RACE-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/rename-tmp-race-1 at b37d199b03409d34e48fc7da160fb88686a15313; ancestor of planning baseline=False; ROADMAP heading: RENAME-TMP-RACE-1 \u2014 The sync-state and token saves use the serialized JSON writer *(built `b37d199b` on `eb/rename-tmp-race-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "afb201777bea3edadf8b2c54825bffaf4511a9b4ec3fca75eec42ae721e15616",
+    "idempotencyKey": "parallelgov20261026-RENAME-TMP-RACE-1",
+    "recoveryId": "20261026T204125Z-external-set-status-RENAME-TMP-RACE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-HELD-TURN-FAIL-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/page-held-turn-fail-1 at 7ca5a4b75b903367194ade15e66ff5c934cc9b50; ancestor of planning baseline=False; ROADMAP heading: PAGE-HELD-TURN-FAIL-1 \u2014 A held page turn the word count cannot place is reported, not dropped *(built `7ca5a4b7` on `eb/page-held-turn-fail-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/page-held-turn-fail-1). Stacked on eb/toc-jump-save-1; merges after TOC-JUMP-SAVE-1 once the freeze lifts.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/page-held-turn-fail-1 at 7ca5a4b75b903367194ade15e66ff5c934cc9b50; ancestor of planning baseline=False; ROADMAP heading: PAGE-HELD-TURN-FAIL-1 \u2014 A held page turn the word count cannot place is reported, not dropped *(built `7ca5a4b7` on `eb/page-held-turn-fail-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "29fd55e6835cd293fc0e8214630635cab65d9cf05e7a6f65a5c533eb41a2a84d",
+    "idempotencyKey": "parallelgov20261026-PAGE-HELD-TURN-FAIL-1",
+    "recoveryId": "20261026T204126Z-external-set-status-PAGE-HELD-TURN-FAIL-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "WS-PAIR-LOG-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/ws-pair-log-1 at 4944def692ea3275aeb0f9365b5af8734b0044c0; ancestor of planning baseline=False; ROADMAP heading: WS-PAIR-LOG-1 \u2014 Say why a pairing is not saved when OS encryption is unavailable *(built `4944def6` on `eb/ws-pair-log-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "14503662a2a23ed1c58575260ef14ff75c7c3bbadee36bf25f6a14382db10b0e",
+    "idempotencyKey": "parallelgov20261026-WS-PAIR-LOG-1",
+    "recoveryId": "20261026T204127Z-external-set-status-WS-PAIR-LOG-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "BAND-ALIGN-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/band-align-1 at 105a07c190b232caf40afdb42a6d23cc003add4c; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-1 \u2014 The Focus/Flow reading band is sized from the real line step (Part A) *(built `105a07c1` on `eb/band-align-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "9c236d1a34dfd8ff1de12172d986da2dc75b39ea43e777c3611316bd9a6d421e",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-1",
+    "recoveryId": "20261026T204127Z-external-set-status-BAND-ALIGN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOLIATE-OBSERVER-LEAK-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/foliate-observer-leak-1 at 5175927659228e2cf9c87cc74210e6d943371b41; ancestor of planning baseline=False; ROADMAP heading: FOLIATE-OBSERVER-LEAK-1 \u2014 Leaked foliate View observers stop flooding error.log *(built `51759276` on `eb/foliate-observer-leak-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "85d4a94b07c3df46dd4bd3c9456f654429ba3e5fff0ff786581b2f8f3be102ed",
+    "idempotencyKey": "parallelgov20261026-FOLIATE-OBSERVER-LEAK-1",
+    "recoveryId": "20261026T204128Z-external-set-status-FOLIATE-OBSERVER-LEAK-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-SENTENCE-INITIALS-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-sentence-initials-1 at c93f7c09186187b98ac6af83a7abce782e555517; ancestor of planning baseline=False; ROADMAP heading: NARRATE-SENTENCE-INITIALS-1 \u2014 A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from NARRATE-SENTENCE-RESUME-1's live check. Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/narrate-sentence-initials-1 at c93f7c09186187b98ac6af83a7abce782e555517; ancestor of planning baseline=False; ROADMAP heading: NARRATE-SENTENCE-INITIALS-1 \u2014 A single-letter initial does not end a sentence *(built `c93f7c09` on `eb/narrate-sentence-initials-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "695fa1af50da20be42482757f26bfb412d4bd07a1cd6bea61fb1c5a00f6bd79c",
+    "idempotencyKey": "parallelgov20261026-NARRATE-SENTENCE-INITIALS-1",
+    "recoveryId": "20261026T204129Z-external-set-status-NARRATE-SENTENCE-INITIALS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "ERROR-LOG-CAP-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/error-log-cap-1 at ae17d903bd84653ca28e57c8c6f1d9828579e907; ancestor of planning baseline=False; ROADMAP heading: ERROR-LOG-CAP-1 \u2014 error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/error-log-cap-1 at ae17d903bd84653ca28e57c8c6f1d9828579e907; ancestor of planning baseline=False; ROADMAP heading: ERROR-LOG-CAP-1 \u2014 error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "d209383181e24aa17930f7f2d708951d56506892e967db004f4cea6b8cd28508",
+    "idempotencyKey": "parallelgov20261026-ERROR-LOG-CAP-1",
+    "recoveryId": "20261026T204130Z-external-set-status-ERROR-LOG-CAP-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FOCUS-KEYS-FIX-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/focus-keys-fix-1 at 3bfb016e1da91542fcd61bfe978d1c2c4492d35f; ancestor of planning baseline=False; ROADMAP heading: FOCUS-KEYS-FIX-1 \u2014 Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **rebuilt 2026-10-23 at `3bfb016e`, all gates and the live check pass**; merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "fdf45fa2afa117a1228491a7d2539288a51ba39aec5a250b6c820dc658e26419",
+    "idempotencyKey": "parallelgov20261026-FOCUS-KEYS-FIX-1",
+    "recoveryId": "20261026T204131Z-external-set-status-FOCUS-KEYS-FIX-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FLOW-KEYS-FIX-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/flow-keys-fix-1 at 60b86aff59e39df3c4883729e2c5d7c5785f9377; ancestor of planning baseline=False; ROADMAP heading: FLOW-KEYS-FIX-1 \u2014 Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, \u2192 and \u2190 move the speed 300 \u2192 325 \u2192 300, Ctrl+\u2193 continues, PgDn still pauses and turns the page, against Ctrl+\u2192 stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "359e3d1c9344b5e804741cb7a0725fa922112980e09c6291c388d933b77530c4",
+    "idempotencyKey": "parallelgov20261026-FLOW-KEYS-FIX-1",
+    "recoveryId": "20261026T204132Z-external-set-status-FLOW-KEYS-FIX-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "PAGE-SAVE-RESTAMP-3",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/page-save-restamp-3 at 81db39cda02ae899ad1953adaa3a72e3942d7bfa; ancestor of planning baseline=False; ROADMAP heading: PAGE-SAVE-RESTAMP-3 \u2014 Rare page-save edge cases after the restamp guard, and \"Keep at furthest\" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C re-scoped by roadmap review 2026-10-25 into PAGE-PAGES-READ-1 (Seq 113) and FURTHEST-PERSIST-1 (Seq 114, stub), so this item ends at Wave B. KEEP-FURTHEST-FIX-1 did most of it; left over are page turns not adding to the pages-read count, and the furthest page's cfi not saved to `library.json`. The memo stages a follow-up stub, RESTAMP-RERUN-RACE-1, for the quality review's unreproduced races W1 and W2. Spec corrections: A-5's grep count is 3, not 4; A-6's pass mark is \"both clicks saved, in order\"**; Seq 80 \u2014 Full Spec; authored 2026-10-23 on main @ `48ce4db9`; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "7af1af2123e81eb755737af826332c99f46027a4dd81b910c4b6b2b84a71fa45",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-3",
+    "recoveryId": "20261026T204133Z-external-set-status-PAGE-SAVE-RESTAMP-3"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "JUMP-LANDING-SAVE-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/jump-landing-save-1 at c903d3b673b3d14e83226683e4e4bad1d991dd59; ancestor of planning baseline=False; ROADMAP heading: JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Focus chapter step all save the landing word and agree with `library.json`. Solon approved; Plato minor, none critical. **Roadmap ruling (tier 1):** (fr1n) in `pagePositionSave.test.tsx` now sets `explicitSelectionAnchor` directly instead of `runtime.navigateTo(4)`, which fix C makes a no-op on an EPUB; its assertion is unchanged and its mutation control stays red. Wave B note: fr1's negative branch is now only defensive on an EPUB. **Spec correction:** Done-when 3's third grep prints 4 lines, not 3: the base already had the chapter-label line (`:797`, now `:801`). Follow-ups in the memo: stub CHAPTER-STEP-CFI-1 (Focus's chapter step saves the entry's word with the old section's cfi); an attached CDP or `--inspect` client holds `app.quit()`, which answers PAGE-SAVE-RESTAMP-3's quit-flush risk. Merge order after the release: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 PAGE-SAVE-RESTAMP-3 \u2192 this branch, then PAGE-SAVE-RESTAMP-3 Wave B. Memo: `docs/governance/close-outs/Memo.JUMP-LANDING-SAVE-1.GovernanceStaging.2026-10-23.md` on the branch; position 63 \u2014 Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from TOC-JUMP-SAVE-1's run (notes 3 and 4). Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/jump-landing-save-1 at c903d3b673b3d14e83226683e4e4bad1d991dd59; ancestor of planning baseline=False; ROADMAP heading: JUMP-LANDING-SAVE-1 \u2014 Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Focus chapter step all save the landing word and agree with `library.json`. Solon approved; Plato minor, none critical. **Roadmap ruling (tier 1):** (fr1n) in `pagePositionSave.test.tsx` now sets `explicitSelectionAnchor` directly instead of `runtime.navigateTo(4)`, which fix C makes a no-op on an EPUB; its assertion is unchanged and its mutation control stays red. Wave B note: fr1's negative branch is now only defensive on an EPUB. **Spec correction:** Done-when 3's third grep prints 4 lines, not 3: the base already had the chapter-label line (`:797`, now `:801`). Follow-ups in the memo: stub CHAPTER-STEP-CFI-1 (Focus's chapter step saves the entry's word with the old section's cfi); an attached CDP or `--inspect` client holds `app.quit()`, which answers PAGE-SAVE-RESTAMP-3's quit-flush risk. Merge order after the release: TOC-JUMP-SAVE-1 \u2192 PAGE-HELD-TURN-FAIL-1 \u2192 PAGE-SAVE-RESTAMP-3 \u2192 this branch, then PAGE-SAVE-RESTAMP-3 Wave B. Memo: `docs/governance/close-outs/Memo.JUMP-LANDING-SAVE-1.GovernanceStaging.2026-10-23.md` on the branch; position 63 \u2014 Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "cf4d5f62684d48ed4b6c3af0ae40d7c8d296871300ce1c42c0b584b8b62c6cdc",
+    "idempotencyKey": "parallelgov20261026-JUMP-LANDING-SAVE-1",
+    "recoveryId": "20261026T204134Z-external-set-status-JUMP-LANDING-SAVE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "ZIP-ASYNC-READ-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/zip-async-read-1 at a089ace6e41177a845aee9645d643b3bd3acd079; ancestor of planning baseline=False; ROADMAP heading: ZIP-ASYNC-READ-1 \u2014 Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 \u2014 Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/zip-async-read-1 at a089ace6e41177a845aee9645d643b3bd3acd079; ancestor of planning baseline=False; ROADMAP heading: ZIP-ASYNC-READ-1 \u2014 Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 \u2014 Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "f7b9e487bab538e4097664ae969220bdf8a7972726b3fc2d80b894bbcc323e33",
+    "idempotencyKey": "parallelgov20261026-ZIP-ASYNC-READ-1",
+    "recoveryId": "20261026T204135Z-external-set-status-ZIP-ASYNC-READ-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "BAND-ALIGN-2",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 \u2014 The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base \u2192 tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/band-align-2 at 72f84bd76d1083e3534b693b7e6bcec3ad6b2636; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-2 \u2014 The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base \u2192 tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "3ea57d6369e02d3ca5f435cef80e261ec792719a5171d81b00a29c4525bffd17",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-2",
+    "recoveryId": "20261026T204136Z-external-set-status-BAND-ALIGN-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FLOW-PARA-KEYS-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/flow-para-keys-1 at 2d7a028cf45c5f3daa3d1a2723c06156ea42fc2b; ancestor of planning baseline=False; ROADMAP heading: FLOW-PARA-KEYS-1 \u2014 Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 and keeps playing (572 to 579), Ctrl+\u2192 and Ctrl+\u2190 keep playing, plain \u2190/\u2192 change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 \u2192 this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e`: red first `16d2114f`, fix `5fb00ab5`, BUG-217; `npm test` 2,486 passed / 1 skipped / 0 failed, typecheck and build 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 with both pacers on 572, against 191 \u2192 5290 on the base; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1**; Seq 84 \u2014 Full Spec; check settled red live 2026-10-23, amendment below; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/flow-para-keys-1 at 2d7a028cf45c5f3daa3d1a2723c06156ea42fc2b; ancestor of planning baseline=False; ROADMAP heading: FLOW-PARA-KEYS-1 \u2014 Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 and keeps playing (572 to 579), Ctrl+\u2192 and Ctrl+\u2190 keep playing, plain \u2190/\u2192 change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 \u2192 this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e`: red first `16d2114f`, fix `5fb00ab5`, BUG-217; `npm test` 2,486 passed / 1 skipped / 0 failed, typecheck and build 0; live Shift+\u2192 paused 187 \u2192 188 \u2192 572 \u2192 610 and back, playing 191 \u2192 572 with both pacers on 572, against 191 \u2192 5290 on the base; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1**; Seq 84 \u2014 Full Spec; check settled red live 2026-10-23, amendment below; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 \u2192 FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "939effe99f5060fad344cc077dc1adcc4c913ad9ebaebecdf3be706b84e24853",
+    "idempotencyKey": "parallelgov20261026-FLOW-PARA-KEYS-1",
+    "recoveryId": "20261026T204137Z-external-set-status-FLOW-PARA-KEYS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "BLOCK-TAG-CASE-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/block-tag-case-1 at 61cbbf7e1d55430288446e721aebca7ae536ae21; ancestor of planning baseline=False; ROADMAP heading: BLOCK-TAG-CASE-1 \u2014 The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. branch eb/block-tag-case-1 at 61cbbf7e1d55430288446e721aebca7ae536ae21; ancestor of planning baseline=False; ROADMAP heading: BLOCK-TAG-CASE-1 \u2014 The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "4cb1adcfea3df77a34383c2e8f4c30b9fd84fe7ccf6fc2d2832fca426c31b759",
+    "idempotencyKey": "parallelgov20261026-BLOCK-TAG-CASE-1",
+    "recoveryId": "20261026T204137Z-external-set-status-BLOCK-TAG-CASE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-QUIT-LINGER-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/narrate-quit-linger-1 at f107a761a54bbaaf2617005bfddbe42cb1edeb48; ancestor of planning baseline=False; ROADMAP heading: NARRATE-QUIT-LINGER-1 \u2014 Pause stops new Kokoro work, and a relaunch during the quit linger reopens Blurby *(position 86 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "06b04f6b031dc0b8251485d3ec9f2d020633ed841bcdc450e81b4cd6e035d2be",
+    "idempotencyKey": "parallelgov20261026-NARRATE-QUIT-LINGER-1",
+    "recoveryId": "20261026T204138Z-external-set-status-NARRATE-QUIT-LINGER-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "LIBRARY-WRITE-RACE-2",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/library-write-race-2 at c46e9332dbaa2cd2dac87b7b29b5a88bb5f28d64; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-2 \u2014 Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap when LIBRARY-WRITE-RACE-1 was specified. Stub; needs an owner decision (Edit-form failure UX) and a Brain ruling (modified bump). Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/library-write-race-2 at c46e9332dbaa2cd2dac87b7b29b5a88bb5f28d64; ancestor of planning baseline=False; ROADMAP heading: LIBRARY-WRITE-RACE-2 \u2014 Library writes: the renderer-side and policy follow-ups *(built and held `c46e9332` on `eb/library-write-race-2`, stacked on LIBRARY-WRITE-RACE-1 `3b7aaa6f`; Seq 87, In Flight, merge held for the Stage 8 freeze; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "df6480fef0a37b7bfc79fc7548b37e487330e4b48428c07090a154fe020fe06d",
+    "idempotencyKey": "parallelgov20261026-LIBRARY-WRITE-RACE-2",
+    "recoveryId": "20261026T204139Z-external-set-status-LIBRARY-WRITE-RACE-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "OVERLAY-THEME-SWEEP-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/overlay-theme-sweep-1 at ec73f3529343fb44c913261868a148db5beb9d28; ancestor of planning baseline=False; ROADMAP heading: OVERLAY-THEME-SWEEP-1 \u2014 Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "99ca15e081d899e063aaebedf597e79fc6c407030988671209d1df26560a5934",
+    "idempotencyKey": "parallelgov20261026-OVERLAY-THEME-SWEEP-1",
+    "recoveryId": "20261026T204140Z-external-set-status-OVERLAY-THEME-SWEEP-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "READER-ARROW-GUARD-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/reader-arrow-guard-1 at 51202c1cf81bc6b7349222193e2b5f8e3aebfa52; ancestor of planning baseline=False; ROADMAP heading: READER-ARROW-GUARD-1 \u2014 Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+\u2190/\u2192 (see Prerequisites); no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Governance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. branch eb/reader-arrow-guard-1 at 51202c1cf81bc6b7349222193e2b5f8e3aebfa52; ancestor of planning baseline=False; ROADMAP heading: READER-ARROW-GUARD-1 \u2014 Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+\u2190/\u2192 (see Prerequisites); no shared-core touch)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "2d6cf314b614d1b4176f6bfbfc57a6607def16beb21928a3a67b93863bb909e9",
+    "idempotencyKey": "parallelgov20261026-READER-ARROW-GUARD-1",
+    "recoveryId": "20261026T204141Z-external-set-status-READER-ARROW-GUARD-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "WIN-TARGET-NSIS-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/win-target-nsis-1 at d96435a182f2f54de19d5d30b9e5caf4ebf493af; ancestor of planning baseline=False; ROADMAP heading: WIN-TARGET-NSIS-1 \u2014 `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 \u2014 Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "9b2e972ae8ea9bb05e426ae33822b904dde8cf35bdcb899e6823f8cf73cad05b",
+    "idempotencyKey": "parallelgov20261026-WIN-TARGET-NSIS-1",
+    "recoveryId": "20261026T204142Z-external-set-status-WIN-TARGET-NSIS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-RECONCILE-RESIDUAL-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/narrate-reconcile-residual-1 at 5000a60dc19e50f0d1895a9bad4910364dbb22a2; ancestor of planning baseline=False; ROADMAP heading: NARRATE-RECONCILE-RESIDUAL-1 \u2014 A two-word name that espeak reads differently on its own is identified by reading the two words together *(built and held `5000a60d` on `eb/narrate-reconcile-residual-1`, package verified; Seq 93, In Flight, merge held for the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "3dbfa9e3a902c6bc0e369660382412289ef2105df87fbbbedb14fa72dc234f16",
+    "idempotencyKey": "parallelgov20261026-NARRATE-RECONCILE-RESIDUAL-1",
+    "recoveryId": "20261026T204143Z-external-set-status-NARRATE-RECONCILE-RESIDUAL-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+    "fields": {
+      "deliverable": "built/held source atc90d9e08; reference smoke incomplete/stopped and measurement acceptance outstanding. Evidence: branch eb/narrate-harness-coldclick-1 at c90d9e08acfc356ca76941df063a0941ab488a94; ancestor of planning baseline=False; ROADMAP heading: NARRATE-HARNESS-COLDCLICK-1 \u2014 Cold click is measured on mainstream hardware *(built and held `c90d9e08` on `eb/narrate-harness-coldclick-1`; its reference smoke ran short and was stopped and reported (see the branch's staging memo); Seq 94, In Flight, merge held for the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "f39466d2f177aebb9bbf4a0b3b662a62db10efccc30403a89d8207ead6711710",
+    "idempotencyKey": "parallelgov20261026-NARRATE-HARNESS-COLDCLICK-1",
+    "recoveryId": "20261026T204144Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "EINK-CONTROLS-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/eink-controls-1 at e6bf358cccb1d9cde17655abd2c68b30def085f8; ancestor of planning baseline=False; ROADMAP heading: EINK-CONTROLS-1 \u2014 One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "6090cffa08cbddb1bcf5243e09dc08c533d519a0b87c710b5160c5647e175263",
+    "idempotencyKey": "parallelgov20261026-EINK-CONTROLS-1",
+    "recoveryId": "20261026T204146Z-external-set-status-EINK-CONTROLS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "CHAPTER-STEP-CFI-1",
+    "fields": {
+      "deliverable": "stopped at Done-when1 on796282c2; current control failure awaits the recorded mid-dispatch decision. Evidence: branch eb/chapter-step-cfi-1 at 796282c298fdd3c001f1e4df99267cd425e85acc; ancestor of planning baseline=False; ROADMAP heading: CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): \"First word of chapter\"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from JUMP-LANDING-SAVE-1's live check (e). Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. stopped at Done-when1 on796282c2; current control failure awaits the recorded mid-dispatch decision. branch eb/chapter-step-cfi-1 at 796282c298fdd3c001f1e4df99267cd425e85acc; ancestor of planning baseline=False; ROADMAP heading: CHAPTER-STEP-CFI-1 \u2014 Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(**In Flight; stopped 2026-10-23 at Done-when 1 (`796282c2` on `eb/chapter-step-cfi-1`): design 2's resolve order fails on the control. Awaits the dispatching session's mid-dispatch decision**; position 97 \u2014 Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): \"First word of chapter\"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "b608d034e0968f5e8af13116ca211c37b546eb2f787506dcae7137af6fd711a4",
+    "idempotencyKey": "parallelgov20261026-CHAPTER-STEP-CFI-1",
+    "recoveryId": "20261026T204147Z-external-set-status-CHAPTER-STEP-CFI-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "RESTAMP-RERUN-RACE-1",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/restamp-rerun-race-1 at 79e1d9d0f738d7db47a18a67a056161f47287303; ancestor of planning baseline=False; ROADMAP heading: RESTAMP-RERUN-RACE-1 \u2014 Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from PAGE-SAVE-RESTAMP-3's staging memo (fold-in 5). Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/restamp-rerun-race-1 at 79e1d9d0f738d7db47a18a67a056161f47287303; ancestor of planning baseline=False; ROADMAP heading: RESTAMP-RERUN-RACE-1 \u2014 Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(**built and held `79e1d9d0` on `eb/restamp-rerun-race-1`: red first `dd0b8524`, fix `b1f7097c` (W1, W2); In Flight, merge held for the Stage 8 freeze**; position 98 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "0775bb4431ef18efeda30b1fb3f1c2af8d6c38fbdcf1c16124d7e34c5c980948",
+    "idempotencyKey": "parallelgov20261026-RESTAMP-RERUN-RACE-1",
+    "recoveryId": "20261026T204148Z-external-set-status-RESTAMP-RERUN-RACE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "APP-TABS-1",
+    "fields": {
+      "deliverable": "built/held per current package memo and live Notes;8539ec4c stays unmerged and waits on the visibility source window. Evidence: branch eb/app-tabs-1 at 8539ec4c55c5359cdafbd3dfa146de5881f062c9; ancestor of planning baseline=False; ROADMAP heading: APP-TABS-1 \u2014 Four tabs: Library, Newsroom, Podcasts, Marketplace *(live Seq100; In Flight; Full Spec)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "55ffaa9ea47b85d2e520db6ef12f6b765828e9f89604854ae3640d0df0c846f6",
+    "idempotencyKey": "parallelgov20261026-APP-TABS-1",
+    "recoveryId": "20261026T204149Z-external-set-status-APP-TABS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "itemId": "FLOW-PARA-PAUSE-INDEX-1",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/flow-para-pause-index-1 at f61ae02ddf16a023314369685d4dbfcab1ac9a36; ancestor of planning baseline=False; ROADMAP heading: FLOW-PARA-PAUSE-INDEX-1 \u2014 Flow and Focus paragraph pauses land at real paragraph ends *(position 108 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from BLOCK-TAG-CASE-1 Wave A; owner tier-2 decision: hold BLOCK-TAG-CASE-1 merge until this lands, merge together. Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. branch eb/flow-para-pause-index-1 at f61ae02ddf16a023314369685d4dbfcab1ac9a36; ancestor of planning baseline=False; ROADMAP heading: FLOW-PARA-PAUSE-INDEX-1 \u2014 Flow and Focus paragraph pauses land at real paragraph ends *(position 108 \u2014 Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "13a977f8034ce38a64c94ed254b33bc147d9d3e49f00948b996c342faf075e0b",
+    "idempotencyKey": "parallelgov20261026-FLOW-PARA-PAUSE-INDEX-1",
+    "recoveryId": "20261026T204150Z-external-set-status-FLOW-PARA-PAUSE-INDEX-1"
+  }
+]

@@ -3,6 +3,7 @@ import { BlurbyDoc } from "../types";
 import { formatDisplayTitle } from "../utils/text";
 import { triggerCoachHint } from "./HotkeyCoach";
 import { formatBookDataLine } from "../utils/bookData";
+import { homeOf, APP_TAB_LABELS } from "../utils/libraryHome";
 
 interface DocGridCardProps {
   doc: BlurbyDoc;
@@ -12,6 +13,7 @@ interface DocGridCardProps {
   onDelete?: (id: string) => void;
   onResetProgress?: (id: string) => void;
   onEditMetadata?: (doc: BlurbyDoc) => void;
+  onMoveHome?: (id: string, home: "library" | "newsroom") => void;
   focused?: boolean;
   selected?: boolean;
   selectionMode?: boolean;
@@ -41,7 +43,7 @@ function formatApaSubtext(doc: BlurbyDoc): string | null {
   return parts.length > 0 ? parts.join(" ") : null;
 }
 
-const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocGridCardProps) {
+const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, onArchive, onDelete, onResetProgress, onEditMetadata, onMoveHome, focused, selected, selectionMode, onToggleSelect, onAddToQueue, onRemoveFromQueue, ttsCached }: DocGridCardProps) {
   const [coverSrc, setCoverSrc] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -105,6 +107,14 @@ const DocGridCard = memo(function DocGridCard({ doc, onOpen, onToggleFavorite, o
               Edit Metadata
             </button>
           )}
+          {onMoveHome && (() => {
+            const other = homeOf(doc) === "newsroom" ? "library" : "newsroom";
+            return (
+              <button onClick={() => { onMoveHome(doc.id, other); setContextMenu(null); }}>
+                Move to {APP_TAB_LABELS[other]}
+              </button>
+            );
+          })()}
           {doc.queuePosition !== undefined ? (
             <button onClick={() => { if (onRemoveFromQueue) onRemoveFromQueue(doc.id); setContextMenu(null); }}>
               Remove from Queue

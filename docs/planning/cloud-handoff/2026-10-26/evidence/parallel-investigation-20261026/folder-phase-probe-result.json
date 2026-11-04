@@ -1,0 +1,311 @@
+{
+  "at": "2026-10-26T20:36:35.755Z",
+  "pid": 66348,
+  "sourcePath": "main/folder-sync.js",
+  "sourceSHA256": "81f2cdcb8f5c56391fd2dca4334ef7ad34eed5784cde0242efedb17dc1501f46",
+  "constants": {
+    "batch": 4,
+    "cancelWait": 30000,
+    "saveInterval": 30000
+  },
+  "virtualTime": true,
+  "productionModuleUnmodified": true,
+  "results": [
+    {
+      "condition": "hung-old-scan",
+      "events": [
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 0,
+          "event": "scan",
+          "folder": "A"
+        },
+        {
+          "at": 30000,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 30000,
+          "event": "scan",
+          "folder": "B"
+        },
+        {
+          "at": 30000,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "extracting"
+        },
+        {
+          "at": 30000,
+          "event": "prune",
+          "ids": []
+        },
+        {
+          "at": 30000,
+          "event": "save-debounced"
+        },
+        {
+          "at": 30000,
+          "event": "broadcast-request",
+          "ids": []
+        },
+        {
+          "at": 30000,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "done"
+        }
+      ],
+      "newScanAt": 30000
+    },
+    {
+      "condition": "old-scan-settles",
+      "events": [
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 0,
+          "event": "scan",
+          "folder": "A"
+        },
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 0,
+          "event": "scan",
+          "folder": "B"
+        },
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "extracting"
+        },
+        {
+          "at": 0,
+          "event": "prune",
+          "ids": []
+        },
+        {
+          "at": 0,
+          "event": "save-debounced"
+        },
+        {
+          "at": 0,
+          "event": "broadcast-request",
+          "ids": []
+        },
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "done"
+        }
+      ],
+      "newScanAt": 0
+    },
+    {
+      "condition": "slow-final-batch",
+      "events": [
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 5,
+          "phase": "extracting"
+        },
+        {
+          "at": 100,
+          "event": "add",
+          "id": "B0.epub"
+        },
+        {
+          "at": 100,
+          "event": "add",
+          "id": "B1.epub"
+        },
+        {
+          "at": 100,
+          "event": "add",
+          "id": "B2.epub"
+        },
+        {
+          "at": 100,
+          "event": "add",
+          "id": "B3.epub"
+        },
+        {
+          "at": 100,
+          "event": "progress",
+          "current": 4,
+          "total": 5,
+          "phase": "extracting"
+        },
+        {
+          "at": 30100,
+          "event": "add",
+          "id": "B4.epub"
+        },
+        {
+          "at": 30100,
+          "event": "progress",
+          "current": 5,
+          "total": 5,
+          "phase": "extracting"
+        },
+        {
+          "at": 30100,
+          "event": "save-now",
+          "ids": [
+            "B4.epub",
+            "B3.epub",
+            "B2.epub",
+            "B1.epub",
+            "B0.epub",
+            "old-A",
+            "manual"
+          ]
+        },
+        {
+          "at": 30100,
+          "event": "broadcast-request",
+          "ids": [
+            "B4.epub",
+            "B3.epub",
+            "B2.epub",
+            "B1.epub",
+            "B0.epub",
+            "old-A",
+            "manual"
+          ]
+        },
+        {
+          "at": 30100,
+          "event": "prune",
+          "ids": [
+            "B4.epub",
+            "B3.epub",
+            "B2.epub",
+            "B1.epub",
+            "B0.epub",
+            "manual"
+          ]
+        },
+        {
+          "at": 30100,
+          "event": "save-debounced"
+        },
+        {
+          "at": 30100,
+          "event": "broadcast-request",
+          "ids": [
+            "B4.epub",
+            "B3.epub",
+            "B2.epub",
+            "B1.epub",
+            "B0.epub",
+            "manual"
+          ]
+        },
+        {
+          "at": 30100,
+          "event": "progress",
+          "current": 5,
+          "total": 5,
+          "phase": "done"
+        }
+      ],
+      "firstBroadcastAt": 30100
+    },
+    {
+      "condition": "fast-one-file-control",
+      "events": [
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 0,
+          "phase": "scanning"
+        },
+        {
+          "at": 0,
+          "event": "progress",
+          "current": 0,
+          "total": 1,
+          "phase": "extracting"
+        },
+        {
+          "at": 100,
+          "event": "add",
+          "id": "B0.epub"
+        },
+        {
+          "at": 100,
+          "event": "progress",
+          "current": 1,
+          "total": 1,
+          "phase": "extracting"
+        },
+        {
+          "at": 100,
+          "event": "prune",
+          "ids": [
+            "B0.epub",
+            "manual"
+          ]
+        },
+        {
+          "at": 100,
+          "event": "save-debounced"
+        },
+        {
+          "at": 100,
+          "event": "broadcast-request",
+          "ids": [
+            "B0.epub",
+            "manual"
+          ]
+        },
+        {
+          "at": 100,
+          "event": "progress",
+          "current": 1,
+          "total": 1,
+          "phase": "done"
+        }
+      ],
+      "firstBroadcastAt": 100
+    }
+  ],
+  "assertionsPassed": true
+}

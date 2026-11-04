@@ -1,0 +1,42 @@
+[
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1",
+    "idempotencyKey": "parallelrun20261026-start-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "actualRevision": "6254aa106d5b3c2da47b2f8bfd0a73b6853f94a9428380d8dc8f3d38891df199",
+    "recoveryId": "20261026T203311Z-external-set-status-GOV-SWEEP-FOLLOWTHROUGH-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+    "idempotencyKey": "parallelrun20261026-start-LIBRARY-COMPLETION-VISIBILITY-1",
+    "actualRevision": "f99eebfe5586f996e8828ec59b90273cba04dd9295459c9685c47326adad57a3",
+    "recoveryId": "20261026T203312Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "FOLDER-SWITCH-CONTENT-1",
+    "idempotencyKey": "parallelrun20261026-start-FOLDER-SWITCH-CONTENT-1",
+    "actualRevision": "f6e64499318b43e5c05e47a2f14d096e4016565109492c049b24996bef4d603e",
+    "recoveryId": "20261026T203313Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+    "detail": {}
+  },
+  {
+    "succeeded": true,
+    "outcome": "succeeded",
+    "operation": "set-status",
+    "itemId": "PROFILE-QUEUE-ISOLATION-1",
+    "idempotencyKey": "parallelrun20261026-start-PROFILE-QUEUE-ISOLATION-1",
+    "actualRevision": "b5fa6bdcae4d1d4bf9cf1dfb63bf4ec04d95a2a996f55a16b040de09fe550b18",
+    "recoveryId": "20261026T203314Z-external-set-status-PROFILE-QUEUE-ISOLATION-1",
+    "detail": {}
+  }
+]

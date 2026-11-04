@@ -6,7 +6,7 @@ const { TOKEN_EXPIRY_FALLBACK_MS, AUTH_WINDOW_WIDTH, AUTH_WINDOW_HEIGHT, TOKEN_R
 const { BrowserWindow, safeStorage } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
-const { renameWithRetry } = require("./json-store");
+const { writeJSON } = require("./json-store");
 const crypto = require("crypto");
 
 // ── Configuration ─────────────────────────────────────────────────────────
@@ -106,9 +106,7 @@ async function saveTokens(tokens) {
       data[provider] = encrypted.toString("base64");
     }
   }
-  const tmp = tokensPath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(data, null, 2), "utf-8");
-  await renameWithRetry(tmp, tokensPath);
+  await writeJSON(tokensPath, data); // serialized per path: overlapping saves never share a .tmp (RENAME-TMP-RACE-1)
 }
 
 async function clearTokens(provider) {

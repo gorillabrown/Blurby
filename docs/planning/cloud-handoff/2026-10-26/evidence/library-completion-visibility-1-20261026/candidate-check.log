@@ -1,0 +1,36 @@
+{
+  "label": "candidate",
+  "exe": "C:/Projects/Blurby/.worktrees/library-completion-visibility-1/release/win-arm64-unpacked/Blurby.exe",
+  "profile": "C:\\Projects\\Blurby-artifacts\\library-completion-visibility-1-20261026\\candidate-profile",
+  "sourceCommit": "0dd4d94026f2574f735031b2b1569aee09d17120",
+  "before": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  },
+  "steps": [
+    {
+      "check": "initial-grid-all",
+      "ids": [
+        "owned-complete",
+        "owned-control"
+      ]
+    },
+    {
+      "check": "render-does-not-change-progress-or-archive",
+      "passed": true
+    }
+  ],
+  "identity": {
+    "userData": "C:\\Projects\\Blurby-artifacts\\library-completion-visibility-1-20261026\\candidate-profile",
+    "exe": "C:\\Projects\\Blurby\\.worktrees\\library-completion-visibility-1\\release\\win-arm64-unpacked\\Blurby.exe",
+    "pid": 9988,
+    "arch": "arm64",
+    "packaged": true
+  },
+  "passed": false,
+  "failure": "Error: Timed out: !!document.querySelector('.rm-page-root')\n    at waitFor (file:///C:/Projects/Blurby-artifacts/library-completion-visibility-1-20261026/package-check.mjs:41:149)\n    at async file:///C:/Projects/Blurby-artifacts/library-completion-visibility-1-20261026/package-check.mjs:69:5",
+  "afterStop": {
+    "library.json": "1921551191807bb646f3567ffef07a0bec4487aecfdb6bc224ece9fb70573d1f",
+    "settings.json": "64483188e030adf062b7516389f69f5c0835649fc6f12bcf48c1b20042badfec"
+  }
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "id": 0,
+    "at": "2026-10-26T21:18:22.040Z",
+    "body": false,
+    "readyState": "loading",
+    "connected": true,
+    "action": "skip-loading-without-body"
+  },
+  {
+    "id": 0,
+    "action": "paired-control",
+    "positive": {
+      "error": "Cannot destructure property 'style' of 'r' as it is null."
+    },
+    "opposite": {
+      "error": null
+    }
+  },
+  {
+    "id": 0,
+    "at": "2026-10-26T21:18:22.178Z",
+    "body": true,
+    "readyState": "complete",
+    "connected": true,
+    "action": "forward-original",
+    "words": 5293
+  },
+  {
+    "id": 0,
+    "at": "2026-10-26T21:18:22.198Z",
+    "body": true,
+    "readyState": "complete",
+    "connected": true,
+    "action": "forward-original",
+    "words": 5293
+  },
+  {
+    "id": 4,
+    "at": "2026-10-26T21:18:28.106Z",
+    "body": false,
+    "readyState": "loading",
+    "connected": true,
+    "action": "skip-loading-without-body"
+  },
+  {
+    "id": 4,
+    "action": "paired-control",
+    "positive": {
+      "error": "Cannot destructure property 'style' of 'r' as it is null."
+    },
+    "opposite": {
+      "error": null
+    }
+  },
+  {
+    "id": 4,
+    "at": "2026-10-26T21:18:28.240Z",
+    "body": true,
+    "readyState": "complete",
+    "connected": true,
+    "action": "forward-original",
+    "words": 5293
+  },
+  {
+    "id": 4,
+    "at": "2026-10-26T21:18:28.258Z",
+    "body": true,
+    "readyState": "complete",
+    "connected": true,
+    "action": "forward-original",
+    "words": 5293
+  },
+  {
+    "id": 4,
+    "at": "2026-10-26T21:18:29.587Z",
+    "body": true,
+    "readyState": "complete",
+    "connected": true,
+    "action": "forward-original",
+    "words": 5293
+  }
+]

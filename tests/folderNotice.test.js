@@ -422,7 +422,7 @@ describe("clear sites, wiring and the review fixes (FOLDER-NOTICE-1)", () => {
       'const { createFolderNotice } = require("./main/folder-notice");',
       'mainWindow.webContents.send("folder-problem", code)',
       "getFolder: () => settings.sourceFolder,",
-      "checkRoot: rootHasContent,",
+      "checkRoot: (dir) => rootHasContent(dir, { force: true }),", // Retry checks outside the hung-mount breaker (LARGE-FOLDER-SYNC-3)
       "function reportFolderOk() { folderNotice.set(null); }",
       "function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); }",
       "  resetFolderNotice,",
