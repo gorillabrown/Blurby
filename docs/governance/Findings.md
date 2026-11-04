@@ -428,3 +428,19 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Input to WORD-INDEX-UNIFY-1. Re-check after XHTML-PARSE-MEASURE-1 reports how often sections stay uncertified.
 
 **Disposition:** open; input to WORD-INDEX-UNIFY-1
+
+### F-026 — Page paints the handed-over highlight by span index in an unverified section (CFI-POSITION-CONSISTENCY-1 STOP-LAND-focus condition, 2026-11-04)
+
+**Source:** Blurby.Brain1's reply on CPC-1 Wave C's landing gate (`Brain1.ESCAPE-LANDS-AT-PLAYBACK-1.2026-11-03.md`, "Planner applications", 2026-11-04), ruled pre-existing and out of Wave C's scope.
+
+**Severity:** low (rare sections; the same as today)
+
+**Where:** `paintArrivalCursor` (`page/ModeRuntime.ts:547-552` at `14ce3d24`) calls the view's `highlightWordByIndex`, which finds the span by its `data-word-index` (`applyVisualHighlightByIndex` and `resolveWordState`, `page/FoliateView.tsx`). BLOCK-TEXT-ORDER-1 (tip `d3184d0b`) holds an uncertified document's clicks and turns (`uncertifiedDocsRef`, `page/FoliateView.tsx:320`), but not this paint.
+
+**Finding:** arriving in Page from another mode, in a section held as uncertified, the highlight can be painted on whichever span carries the handed-over index, which may be a different word. CPC-1 Wave C step 7 holds its new landing jump there (Brain1's condition), so the view stays on the handed cfi's page; the paint itself is unchanged.
+
+**Root cause (rule 6c):** the two independent word numberings (main's extractor vs the renderer's spans), which BLOCK-TEXT-ORDER-1, WORD-INDEX-UNIFY-1 and XHTML-PARSE-MEASURE-1 address.
+
+**Accountable role / next action:** planner. Input to UNCERTIFIED-ANCHOR-HOLD-1, alongside F-025.
+
+**Disposition:** open; input to UNCERTIFIED-ANCHOR-HOLD-1
