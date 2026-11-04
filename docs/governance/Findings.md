@@ -293,3 +293,31 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Ask the owner whether O4 extends to Flow and Narrate. If it does, specify one mode-local item per mode after CFI-POSITION-CONSISTENCY-1, reusing its cadence and the null-cfi rule.
 
 **Disposition:** open
+
+### F-017 — The Focus word-delta save constant has no user (CFI-POSITION-CONSISTENCY-1 investigation, 2026-11-03)
+
+**Source:** CFI-POSITION-CONSISTENCY-1 question B14, at `origin/main` `c5bb507f`.
+
+**Severity:** low (dead configuration)
+
+**Where:** `src/constants.ts:170`, `RSVP_PROGRESS_SAVE_WORD_DELTA = 50`
+
+**Finding:** nothing reads the constant since `3dd4b504` dropped Focus's periodic save. CFI-POSITION-CONSISTENCY-1 Wave C restores a time-only save (`RSVP_PROGRESS_SAVE_INTERVAL_MS`), so the word delta stays unused. It is left in place there rather than removed as a drive-by edit.
+
+**Accountable role / next action:** planner. Remove it in the next item that edits the Progress Tracking block of `src/constants.ts`, after CFI-POSITION-CONSISTENCY-1 merges.
+
+**Disposition:** open; no item
+
+### F-018 — Each progress save rewrites the whole sync queue (CFI-POSITION-CONSISTENCY-1 investigation, 2026-11-03)
+
+**Source:** CFI-POSITION-CONSISTENCY-1 question B18, at `origin/main` `c5bb507f`.
+
+**Severity:** low today (sync is off); medium once sync is on
+
+**Where:** `main/sync-queue.js:53-56` (`saveQueue`) and `:169-182` (enqueue)
+
+**Finding:** every save that carries a position enqueues `update-progress`, and `saveQueue` rewrites all of `sync-queue.json` with no debounce. Focus's restored 5 s save makes that 12 rewrites a minute while Focus plays, and the queue keeps every entry rather than the newest per document.
+
+**Accountable role / next action:** planner. BLURBY-SERVER-1's specification coalesces `update-progress` per document (newest wins) before sync is on for anyone.
+
+**Disposition:** open; input to BLURBY-SERVER-1
