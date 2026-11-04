@@ -1,6 +1,6 @@
-# Memo — BLOCK-TEXT-ORDER-1, Wave A (2026-11-03)
+# Memo — BLOCK-TEXT-ORDER-1, Waves A and B (2026-11-03)
 
-Dispatch: Wave A only (Done-when A1–A6). Wave B was not started.
+Dispatch: Wave A (Done-when A1–A6), then Wave B (B1–B9). B8 (the native arm64 launch on Rodney) is not part of this run. Wave B is recorded from "Wave B" below.
 
 | Field | Value |
 |---|---|
@@ -10,10 +10,11 @@ Dispatch: Wave A only (Done-when A1–A6). Wave B was not started.
 | Base | `14ce3d24` (first parent `c5bb507f`, the spec's base; second parent brings NARRATE-ARRIVAL-SYNC-1) |
 | A1 red commit | `19e065d0` (the two test files alone) |
 | Implementation commit | `e870ef67` |
-| Ruling commit | The commit that adds this row: Blurby.Brain1's ruling on deviation 1, option (a), a named rule-50 exception (fixture only), plus the (rr-c) control and the B6 supplementary gate. It touches `tests/readerModes/pagePositionSave.test.tsx` and this memo only. |
+| Ruling commit | `bc4b40ca`, the commit that added this row: Blurby.Brain1's ruling on deviation 1, option (a), a named rule-50 exception (fixture only), plus the (rr-c) control and the B6 supplementary gate. It touches `tests/readerModes/pagePositionSave.test.tsx` and this memo only. |
+| Wave B commits | `dcfb18ae` (B1, the four `blockTextOrderHold.*` test files alone); `81bef438` (items 4–8); `19771a47` ((rr3), named rule-50 exception); `4a0b2e28` (B5 checker, committed by the coordinator); then the records commit that adds this row |
 | Host | RodneySr; Node v24.14.1; Vitest 4.1.11; `npm ci` exit 0; `node node_modules/electron/install.js` exit 0 (`path.txt` = `electron.exe`) |
 | Shell | PowerShell 7 (`pwsh -NoProfile`) for every gate below |
-| Pushed | No (dispatch said do not push) |
+| Pushed | No (the coordinator pushes) |
 
 ## Gates
 
@@ -395,3 +396,145 @@ The plant was removed by writing the saved bytes back. `git hash-object` gave `5
 | RESTAMP-RERUN-RACE-1 block alone (ruling tree) | 7 ((rc0), (rr1)–(rr3), (rr-c), (rr4), (rr5)) | 0 | — | 1 |
 | A3 | 158 | 0 | 0 | 2 |
 | A4 | 155 | 0 | 0 | 15 |
+
+## Wave B
+
+Host and shell as for Wave A (RodneySr x64, `pwsh -NoProfile`). Saved outputs are in `C:\Projects\Blurby-artifacts\block-text-order-1\`.
+
+### B1 base reds (on `dcfb18ae`, the four test files alone)
+
+`npx vitest run` on the four `tests/readerModes/blockTextOrderHold.*.test.tsx` files exits **1**: 18 failed, 5 passed (23). Output: `B1-base-reds.txt`.
+
+| Row | Page | Flow | Focus | Narrate |
+|---|---|---|---|---|
+| (o1) click | red | red | red | red |
+| (o1) turn | red | — | — | — |
+| (o2) certified control | green | green | green | green |
+| (o3) restamp lifts the hold | red | red | red | red |
+| (o3) turn | red | — | — | — |
+| (o4) late superseded report | red | red | red | red |
+| (o5) no slice | red | red | red | red (observed) |
+| (o6) engine-cursor save | — | — | — | green |
+
+This matches the spec's list. In the Page (o3) turn row, the certified half is green on the base and the uncertified half is red. No STOP.
+
+### Implementation (`81bef438`, items 4–8)
+
+The four `FoliateView.tsx` views, the Page, Flow and Focus `ModeRuntime.ts`, and the Page, Flow and Focus `useModeBindings.ts`. Narrate's `ModeRuntime.ts` and `useModeBindings.ts` are not edited: no commit of this item touches them, and `narrate/ModeRuntime.ts` appears in `c5bb507f..HEAD` only through the `14ce3d24` merge.
+
+### (rr3) under the named rule-50 exception (`19771a47`)
+
+With the hold in place, (rr3) failed only on its saved word index, which became -1 (a cfi-only save), as anticipated. No other (rr) row failed. Only the expected value changed:
+
+- before: `[["doc-1", 22, "cfi:3:Word2"]]`
+- after: `[["doc-1", -1, "cfi:3:Word2"]]`
+
+The row's title still says "with its re-stamped index", because only the value could change.
+
+### Gates
+
+| Gate | Command (pwsh 7, worktree root) | Exit | Result |
+|---|---|---|---|
+| B1 | the four hold files on `dcfb18ae` | **1** (required 1) | 18 failed / 5 passed (23), exactly the list above |
+| B2 | the same command on the tip | **0** | 23 passed (`B2-green.txt`) |
+| B3 tests | the eight B3 paths | **0** | 8 files, 150 passed |
+| B3 diff | `git diff --exit-code c5bb507f -- <B3 paths>` | **1** | only `tests/readerModes/pagePositionSave.test.tsx` differs, from the two named rule-50 exceptions ((rr) fixture, (rr3) value) and the (rr-c) row; each of the other seven paths exits 0 (`B3-diff.txt`) |
+| A4 again | the 15 A4 paths | **0** | 155 passed; its `git diff --exit-code` exits 0 |
+| B4 | `npm test` | **0** | 3,230 passed / 1 skipped in 238 files (base 3,048) (`npm-test-waveB.txt`) |
+| B4 | `npm run typecheck` | **0** | `typecheck-waveB.txt` |
+| B4 | `npm run build` | **0** | `build-waveB.txt` |
+| B6 | A6 pattern | **1** | no line (pass) |
+| B6 | supplementary `-P` gate | **1** | no line (pass) |
+| B6 | shared-core `git diff --exit-code c5bb507f -- <B6 paths>` | **0** | unedited |
+
+Every cited line was re-grepped on `c5bb507f` and matched. `npm test` rewrote `tests/perf-baseline-results.json`; its output was saved as `perf-baseline-results.waveB.json`, and the file was restored from HEAD.
+
+### Wave B deviations
+
+1. **The fixture slice.** The (c2) body `<p>a b</p>` with its own slice `["x","y"]` stamps no spans, so there is nothing to click. The rows use the (c2) body with the slice `["a","x","b"]` instead. It fails certification as `unmatched-source-word`, and the legacy wrap still stamps "b" as 22, the wrong index.
+2. **(o4).** Certification reports arrive synchronously, so a superseded wrap cannot report late on its own. The rows capture each `onCertification` callback through a pass-through `vi.mock` of the mode's wrapper, then call the stale one late.
+3. **(o6).** It drives the Narrate runtime with the play-first-text fake view API, because playback cannot run in jsdom with the real view. The real view is mounted for (o1)–(o5).
+4. **Binding check.** Each binding's `onHeldWordClick` is checked inside (o1) with a stub runtime, so no row the spec does not list was added.
+
+## B5. Electron ICU checker
+
+Command: `pwsh -NoProfile -File scripts/block-text-order/icu-certify/run.ps1 -packaged <exe> [-control] -out <scratch>`, against the rebuilt tip package `release\win-unpacked\Blurby.exe` (see "Package verification"). APPDATA and LOCALAPPDATA pointed into the scratch folder for every launch, and the checker sets its own `userData` there too. Free space on C: was checked before each launch (2.82 GB).
+
+**Control first** (standing rule 55): exit **1**. Section 17 (the largest; the control drops its last canonical word) fails with `extra-source-text` in all four copies (`B5-control-run3.json`):
+
+```json
+{"electron":"42.11.18","icu":"78.2","control":true,"controlSection":17,
+ "packaged":{"electron":"42.11.18","icu":"78.2"},"renderer":{"electron":"42.11.18","icu":"78.2"},
+ "mainLocale":"en-US","rendererLocale":"en-US","sections":19,"withSlice":18,
+ "certified":{"page":17,"focus":17,"flow":17,"narrate":17},
+ "failures":[{"mode":"page","sectionIndex":17,"reason":"extra-source-text","canonicalIndex":7170,"nodeIndex":2004},
+             {"mode":"focus","sectionIndex":17,"reason":"extra-source-text","canonicalIndex":7170,"nodeIndex":2004},
+             {"mode":"flow","sectionIndex":17,"reason":"extra-source-text","canonicalIndex":7170,"nodeIndex":2004},
+             {"mode":"narrate","sectionIndex":17,"reason":"extra-source-text","canonicalIndex":7170,"nodeIndex":2004}],
+ "largest":{"sectionIndex":17,"words":7170,"stampMs":{"page":32.7,"focus":32.7,"flow":28.4,"narrate":29.4},
+            "stampedSpans":{"page":747,"focus":747,"flow":747,"narrate":747}}}
+```
+
+**Live run:** exit **0** (`B5-live-run3.json`). Every copy certifies all 18 sections that have a slice. There is no `ok:false` and no exit 3:
+
+```json
+{"electron":"42.11.18","icu":"78.2","control":false,
+ "packaged":{"electron":"42.11.18","icu":"78.2"},"renderer":{"electron":"42.11.18","icu":"78.2"},
+ "mainLocale":"en-US","rendererLocale":"en-US","sections":19,"withSlice":18,
+ "certified":{"page":18,"focus":18,"flow":18,"narrate":18},"failures":[],
+ "largest":{"sectionIndex":17,"words":7171,"stampMs":{"page":48.9,"focus":47.7,"flow":46.9,"narrate":44.7},
+            "stampedSpans":{"page":7171,"focus":7171,"flow":7171,"narrate":7171}}}
+```
+
+**stampMs** (a certified `wrapWordsInSpans` of section 17, 7,171 words; recorded, not gated): Page 48.9, Focus 47.7, Flow 46.9, Narrate 44.7 ms. Each copy reports `[{"ok":true}]` and stamps 7,171 spans.
+
+Observation (control): the uncertified wrap of section 17 still stamps 747 spans in each copy. That is the legacy path the hold covers. It is recorded here, not judged.
+
+Earlier runs, for the record:
+- The first control and live runs, before the coordinator freed space, failed to write their output on ENOSPC. No verdict was taken from them (`B5-control.txt`, `B5-live.txt`).
+- A second pair ran against the first tip package before it was found incomplete (below). Control exited 1 with the same four `extra-source-text` failures; live exited 0 with 18 of 18 in each copy, stampMs Page 49, Focus 92.8, Flow 49.7, Narrate 58.4 (`B5-control-run2.*`, `B5-live-run2.*`). Step 1 there read the stock `electron.exe`, which has the same versions. The gate is the run against the rebuilt package above.
+
+**Live profile.** `%APPDATA%\blurby` (4,088 files) was hashed with SHA-256 before the first launch (`live-profile-hash-before.txt`). The re-hash after each B5 pair is identical (`live-profile-hash-after-B5.txt`), and the B7 launch left the live `library.json` and `settings.json` hashes unchanged.
+
+## Package verification (standing rule 53, B7)
+
+### Tip, x64
+
+- **Package.** The first `--dir --x64` package, built at `19771a47` as the disk filled, was incomplete. Its exe was still `electron.exe`, it had no `resources\resources\` (the `extraResources`), and its log stops before "updating asar integrity" and signing. Its earlier "exit 0" did not mean a complete package. A 25 s launch of it failed the profile proof (exit 4; `B7\tip\launch25-electronexe-incomplete.*`).
+- **Rebuild.** It was rebuilt in place at `4a0b2e28`. The source is identical to `19771a47`: `4a0b2e28` adds only the checker under `scripts/`, outside `build.files`. `npm run build` exited 0, then `npx electron-builder --win --dir --x64 --publish never` exited **0** (`B7\tip\package-x64-build.txt`). The log now ends with the asar integrity update and signtool. The output is `release\win-unpacked\Blurby.exe`, with `resources\app.asar`, `app.asar.unpacked` and `resources\resources\` (`sample-meditations.epub`, `Reading_Log_Blurby_Template.xlsx`). `origin/main` (`14ce3d24`) is already an ancestor of the tip, so nothing needed merging in.
+- **25 s launch** (`B7\launch25.mjs`, copied from narrate-quit-linger-1's rule 53 driver with APPDATA and LOCALAPPDATA redirected; result `B7\tip\launch25-x64.json`):
+  - `app.getPath('userData')`, read over the main-process inspector before any input, equals the scratch profile (LL-165);
+  - the app is alive at 25 s, with no `error.log`, no crash dump and no flagged output line;
+  - the output is the inspector's own lines, `[ws-server] Listening on ws://127.0.0.1:48924/blurby`, and the known first-launch `Backup failed for …library.json: ENOENT` (BUG-217);
+  - the live `library.json` and `settings.json` hashes are unchanged.
+- **asar.** `npx asar list` exits 0 with 11,587 entries (`B7\tip\asar-list.txt`):
+  - It lists `\main\epub-word-extractor.js`, `\main.js`, `\preload.js`, `\dist\index.html` and all 19 `\dist\assets\` files.
+  - Vite bundles the renderer helpers, wrappers and views into `\dist\assets\App-K-A4gbIe.js`. It carries each copy's reason strings (`extra-source-text`, `canonical-exhausted-dom`, `dom-changed` and `unmatched-source-word`, 4 each) and `onHeldWordClick` (12).
+  - The extracted asar's `dist\` equals the worktree's `dist\` (`diff -r`, no output). Its `main\` directory, `main.js` and `preload.js` are byte-identical to the worktree's, and its `epub-word-extractor.js` contains `extractOrderedRuns`.
+- **B5 on the package:** above (control exit 1, live exit 0).
+
+### origin/main `14ce3d24`, x64: NOT RUN (disk floor)
+
+The base package was not built. `C:\Users\estra\Projects\Blurby\.worktrees\gate1-run6-20261103` is at `14ce3d24`. It is clean and has no `node_modules` or `dist`.
+
+Its `npm ci` needs about 1.4 GB, which is the size of the tip's `node_modules`; `package.json` and `package-lock.json` are identical at `14ce3d24` and the tip. The package needs about 1 GB, since the tip's `release\` is 980 MB. With 2.19 GB free, `npm ci` would leave about 0.8 GB, under the 1 GB floor, before the package build.
+
+Nothing was run in that worktree, and no tracked file there changed. The base's 25 s launch and its B5 step 1 runtime proof are still owed.
+
+### B9 fence
+
+`git diff --name-status 14ce3d24..HEAD` (exit 0) lists 31 paths:
+- exactly the 28 B9 paths;
+- `M tests/readerModes/pagePositionSave.test.tsx` (the ruled rule-50 exceptions);
+- this memo and the time log.
+
+`narrate/ModeRuntime.ts` and `narrate/useModeBindings.ts` are absent. `c5bb507f..HEAD` adds exactly the six files `14ce3d24` merged in, which equal `git diff --name-status c5bb507f 14ce3d24`. There is no conditional addition: `boundary-policy.json` is not edited.
+
+### Wave B test counts
+
+| Run | Passed | Failed | Skipped | Files |
+|---|---|---|---|---|
+| B1 on `dcfb18ae` | 5 | 18 | 0 | 4 |
+| B2 tip | 23 | 0 | 0 | 4 |
+| B3 | 150 | 0 | 0 | 8 |
+| B4 `npm test` tip | 3,230 | 0 | 1 | 238 |
