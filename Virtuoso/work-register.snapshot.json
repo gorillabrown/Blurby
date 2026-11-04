@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-04T04:55:00Z",
+  "takenAt": "2026-11-04T05:01:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -8292,8 +8292,8 @@
       "sequence": 87.9,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "BLOCK-TEXT-ORDER-1"
       ],
@@ -8301,14 +8301,14 @@
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "ROADMAP.md#xhtml-parse-measure-1",
+      "spec_link": "docs/planning/specs/2026-11-03/XHTML-PARSE-MEASURE-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Investigation first (Blurby.Brain1 D4 ruling, 2026-11-03). Run BLOCK-TEXT-ORDER-1's B5 certify checker over 20 named Project Gutenberg EPUBs (owner approved the download, 2026-11-03) and count uncertified sections by reason (D1, D2, D4, other), before and after a scratch-branch prototype where main parses section XHTML in xmlMode. Answer the traps: lenient htmlparser2 xmlMode, HTML entities without a DTD, tag-name case vs BLOCK_TAGS, and the self-closing anchor and table cases on real files. Decision rule: a meaningful D4 share ships in the same renumbering event as WORD-INDEX-UNIFY-1 with one position migration; a negligible share is rejected with the numbers.",
       "notes": "origin: owner rule 6c (fix the cause) and Blurby.Brain1 ruling Brain1.UNCERTIFIED-ANCHOR-HOLD-1.and-D4.2026-11-03.md. Corpus: 20 Project Gutenberg EPUBs, named in the spec, downloaded to RodneySr only for this measurement; the owner's library is never read. Stub; spec to follow.",
-      "revision": "7d2f63150d75e2d47fe053f843a8d58c33dd3f18f5aa0642f8a15658cf29e3fc",
+      "revision": "d1d95952569639b214ee17f90ecbf82dfe5e1503884a93a86ef3f00c6b324a0d",
       "extra": {
         "id": "40e7c96c-c31e-8174-bf6f-ca6f49ff27a4",
         "url": "https://app.notion.com/40e7c96cc31e8174bf6fca6f49ff27a4",
