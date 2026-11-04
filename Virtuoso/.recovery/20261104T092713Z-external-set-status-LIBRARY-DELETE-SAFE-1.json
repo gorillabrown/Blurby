@@ -1,0 +1,35 @@
+{
+  "id": "20261104T092713Z-external-set-status-LIBRARY-DELETE-SAFE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-DELETE-SAFE-1",
+  "created": "2026-11-04T09:27:13Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "Queued",
+      "notes": "origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: shell.trashItem only, never unlink. Exclusion mechanism ruled by Brain1 TQ1 (`Brain1.held-items-TQ.2026-11-03.md`, Batch 4 Q1): device-local main-only list keyed by folder-sync pathKey of the original path. Dispatch-ready; queued with Brain1 for RodneySr. Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:LIBRARY-DELETE-SAFE-1:[('notes', 'origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: shell.trashItem only, never unlink. Exclusion mechanism ruled by Brain1 TQ1 (`Brain1.held-items-TQ.2026-11-03.md`, Batch 4 Q1): device-local main-only list keyed by folder-sync pathKey of the original path. Dispatch-ready; queued with Brain1 for RodneySr. Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B.'), ('status', 'Queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-DELETE-SAFE-1",
+      "idempotencyKey": "set-status:LIBRARY-DELETE-SAFE-1:[('notes', 'origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: shell.trashItem only, never unlink. Exclusion mechanism ruled by Brain1 TQ1 (`Brain1.held-items-TQ.2026-11-03.md`, Batch 4 Q1): device-local main-only list keyed by folder-sync pathKey of the original path. Dispatch-ready; queued with Brain1 for RodneySr. Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B.'), ('status', 'Queued')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T092713Z-external-set-status-LIBRARY-DELETE-SAFE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T09:27:42Z",
+  "outcome": "succeeded"
+}

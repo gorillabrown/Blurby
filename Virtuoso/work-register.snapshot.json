@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-04T06:15:41Z",
+  "takenAt": "2026-11-04T09:27:44Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -7504,8 +7504,8 @@
       "completed": "",
       "evidence": "docs/planning/roadmap-reviews/2026-10-27-group-source-trace.md; docs/governance/bug-reports/Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md",
       "description": "",
-      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built at tip 1a1c3845 (base 14ce3d24). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the B7 origin/main half (disk space) and the D3 1.00x boundary session (quiet window). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main.",
-      "revision": "96900150001a322f60442444dad96131e5f71a3932be2348e2b5a267699ed3e5",
+      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main.",
+      "revision": "7cdaf59eec1f1d2a161b1428cde1dd4665eeed8c3dde023e1ea7f4142835964d",
       "extra": {
         "id": "4067c96c-c31e-81a6-8f0a-e776b050f662",
         "url": "https://app.notion.com/4067c96cc31e81a68f0ae776b050f662",
@@ -7846,8 +7846,8 @@
       "completed": "",
       "evidence": "",
       "description": "Fixes BUG-238 (HIGH): delete-doc hard-unlinks the user's own file. Delete never unlinks: Blurby sends to the Recycle Bin only files it owns in its own data directory, and a book whose file lives in the user's folder loses its library entry only, with the file untouched (owner ruling #31, 2026-11-03). A removed folder book stays removed across rescans and tombstone purge.",
-      "notes": "origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: shell.trashItem only, never unlink. Open for Brain1: the persisted-exclusion mechanism (spec recommends a device-local main-only settings key). Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B.",
-      "revision": "2ad3db62e469800402124dbef830266187e848c595e41999957da71beacc19bf",
+      "notes": "origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: shell.trashItem only, never unlink. Exclusion mechanism ruled by Brain1 TQ1 (Brain1.held-items-TQ.2026-11-03.md, Batch 4 Q1): device-local main-only list keyed by folder-sync pathKey of the original path. Dispatch-ready; queued with Brain1 for RodneySr. Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B.",
+      "revision": "74d17b1a8af4c050c8183732025e31acd452d1a2010fc55155b8854f3dd7500c",
       "extra": {
         "id": "40d7c96c-c31e-817b-8d8d-c961f17741eb",
         "url": "https://app.notion.com/40d7c96cc31e817b8d8dc961f17741eb",
