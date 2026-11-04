@@ -1,4 +1,4 @@
-#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; cited against `origin/main` `c5bb507f`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
+#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; dispatch-ready 2026-11-03 after Blurby.Brain1 adopted B1–B18; cited against `origin/main` `c5bb507f`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
 
 - **What:**
   - Every save that writes a word (the position) also writes the page of that word (the cfi), or clears the stored cfi.
@@ -162,7 +162,7 @@
        - `:255-256`: the relocate's cfi is used only if `relocated.docId === activeDoc.id` and (`relocated.wordIndex == null` or `relocated.wordIndex === savePos`). Otherwise `null`. `cfiOverride` still wins.
     8. Each mode's `helpers/usePersistentReadingAnchor.ts` (Page `:100`; Focus, Flow and Narrate `:99`): `const cfi = options.cfi || null;`, with a comment naming this item.
     9. **Pinned rows brought into scope (standing rule 50).** `tests/useProgressTracker.test.ts`, describe block "the exit save's cfi (PAGE-REOPEN-CFI-1)" at `:330-376`:
-       - "with no relocate since the open, it sends the position with no cfi" and "a relocate recorded for another book is not sent": change only their expected third argument from `undefined` to `null` (both `updateDocProgress` and `onUpdateProgress` where asserted).
+       - "with no relocate since the open, it sends the position with no cfi" and "a relocate recorded for another book is not sent": change only their expected third argument from `undefined` to `null` (both `updateDocProgress` and `onUpdateProgress` where asserted). This is Blurby.Brain1's named exception to standing rule 50 (B3 ruling): everything else in both rows stays byte-identical, and the memo quotes each row before and after.
        - "after a relocate, it sends that relocate's cfi" stays unedited and green: its ref has no `wordIndex`.
 
        No other existing test is edited. If any other test pins the `state.cfi` fallback or `undefined` on a close, STOP to Blurby.Brain1 with its name before editing it.
@@ -202,7 +202,7 @@
        - just before `setLoading(false)` (`:1060`), for a word target: `await jumpFoliateToWordAnchor(viewApiRef.current, target.word); if (cancelled) return;`, imported from `./helpers/foliateAnchorNavigation`;
        - `initialCfi` stays a prop for the handover path; for Page it now only feeds the fallback target.
   - **Wave C — Focus saves as you go, Focus only** (about 20 tool uses; needs Wave A's `null` contract):
-    1. `src/constants.ts:167-168`: keep `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000` and its value. Change only its comment to name Focus's saves as you go, this item and owner ruling O4. `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`) is left as it is (question B14).
+    1. `src/constants.ts:167-168`: keep `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000` and its value. Change only its comment, once, to name all three playback modes' saves as you go (Focus here; Flow and Narrate under FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1, owner O5), this item and owner ruling O4 (Brain1 G2). `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`) is left as it is (question B14).
     2. `src/reader/modes/focus/ModeRuntime.ts`:
        - add `RSVP_PROGRESS_SAVE_INTERVAL_MS` to the `../../../constants` import (`:16-23`);
        - **fields:** `private lastSavedWord: number` (the word Focus opened at: `handoff.canonicalWordIndex`, set beside `initialCfi` in the constructor, `:425`), `private lastSaveAt = 0`, and `private playedSinceSave = false`;
@@ -405,7 +405,27 @@ Brain1's RodneySr idle checks (Update of 2026-11-03 to `Brain1.CFI-POSITION-CONS
 - **R-O4.4, rows.** Play about 12 s, kill with no graceful quit, reopen within one interval of the last word read (row f1, probe P7). Pause, then reopen at the paused word (row f2, probe P8). No save while paused with the word unchanged, with writes counted (row f3, probe P8). The stored cfi is null after a Focus save (row f4, probe P7).
 - **R-O4.5, Flow and Narrate.** A finding only, not changed here (Flow and Narrate finding).
 
-##### Questions for Blurby.Brain1
+##### Blurby.Brain1 rulings on B1–B18 (2026-11-03, binding)
+Blurby.Brain1 adopted B1–B18 as recommended (on spec `e0512b0f`), with three conditions:
+- **B3, pinned rows.** The two `tests/useProgressTracker.test.ts` rows change from `undefined` to `null` as a named exception to standing rule 50. Only the expected cfi value changes; the rest of each row stays byte-identical, and the memo quotes before and after (Wave A step 9).
+- **B5, integration window.** `src/types.ts` (one line) and `src/components/ReaderContainer.tsx` (the bridge and the relocate ref) are granted from Wave A's cut to its merge, only if no other active item holds the shared-core freeze set at the cut.
+  - On 2026-11-03 none does. BLOCK-TEXT-ORDER-1, NARRATE-ARRIVAL-SYNC-1 and the restamp items stay out of it.
+  - TOC-FRAGMENT-WORD-1 needs its own later window and must not overlap.
+  - Blurby.Roadmap records the window in ROADMAP.md's integration-window line when Wave A is dispatched.
+- **B11, mode switch during the hold.** Accepted. A switch during the open hold carries the stored cfi into Focus or Flow, and neither corrects the section the way Narrate's arrival sync does. After Wave A no new stale pairs are written, so this matters only for pairs stored before the fix. Logged as Findings F-019.
+
+Everything else stands as recommended:
+- B6 and B13 are findings: F-020, and F-021 for WORD-INDEX-UNIFY-1.
+- B7 keeps Seq 97.5.
+- B9's `PAGE_OPEN_HOLD_TIMEOUT_MS = 3000` is revisited only if P5's tip maximum exceeds 2000 ms.
+- B12's extraction cache follow-up is registered only if P5's median exceeds 1000 ms.
+- B17: `tests/keepFurthest.test.tsx` stays green and unedited, or STOP to Blurby.Brain1.
+
+B14–B18 are also ruled as general rules G1–G8 for every playback mode. They apply here to Focus, and to FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1.
+
+**Queue:** Waves A–D go behind BLOCK-TEXT-ORDER-1's Waves A and B, and after CHAPTER-STEP-CFI-1 merges.
+
+##### Questions for Blurby.Brain1 (ruled 2026-11-03; kept as the record)
 - **B1. The `null` meaning.** Main clears the stored cfi on `null` only when the position changes; an unchanged position keeps the pair. `undefined` keeps, a string sets, and `-1` ignores `null`. Recommendation: confirm. A plain clear would also drop Page's correct turn cfi on every close with no matching relocate.
 - **B2. The anchor rule.** A persisted commit sends `options.cfi || null` in all four copies, never `state.cfi`, and an empty string counts as unknown. Recommendation: confirm.
 - **B3. The R1 rule.** The close save uses the last relocate's cfi only when it is in this book and its recorded word is unknown or equal to the saved word; otherwise `null`. This changes two pinned rows in `tests/useProgressTracker.test.ts` from `undefined` to `null`, named here under standing rule 50. Recommendation: confirm.

@@ -321,3 +321,45 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. BLURBY-SERVER-1's specification coalesces `update-progress` per document (newest wins) before sync is on for anyone.
 
 **Disposition:** open; input to BLURBY-SERVER-1
+
+### F-019 — A mode switch during the open hold carries a stale stored cfi into Focus or Flow (CFI-POSITION-CONSISTENCY-1 B11, 2026-11-03)
+
+**Source:** Blurby.Brain1 ruling B11 on CFI-POSITION-CONSISTENCY-1 (2026-11-03).
+
+**Severity:** low (affects only position pairs stored before CFI-POSITION-CONSISTENCY-1 Wave A)
+
+**Where:** the Page-only open hold (CFI-POSITION-CONSISTENCY-1 Wave B); Focus and Flow mode handover
+
+**Finding:** a mode switch during the open hold ends the hold with today's fallback. The receiving mode's handover can carry a stored cfi from the wrong section. Narrate's arrival sync corrects the section; Focus and Flow do not. After Wave A no new stale pairs are written.
+
+**Accountable role / next action:** planner. Re-check after CFI-POSITION-CONSISTENCY-1 merges; open an item only if an owner smoke or bug report shows a stale pair surviving.
+
+**Disposition:** open; no item
+
+### F-020 — The standalone reader window saves a position with no cfi from its own numbering (CFI-POSITION-CONSISTENCY-1 B6, 2026-11-03)
+
+**Source:** CFI-POSITION-CONSISTENCY-1 question B6, adopted by Blurby.Brain1 (2026-11-03).
+
+**Severity:** low to medium
+
+**Where:** `src/App.tsx:76`, `src/hooks/useReader.ts:180` (at `c5bb507f`)
+
+**Finding:** the standalone reader window saves a word position from tokenized text whose numbering may not match the EPUB's word numbering, and it sends no cfi. It is outside CFI-POSITION-CONSISTENCY-1.
+
+**Accountable role / next action:** planner. Input to WORD-INDEX-UNIFY-1, which owns one word numbering in every runtime.
+
+**Disposition:** open; input to WORD-INDEX-UNIFY-1
+
+### F-021 — Narrate Play without the word map starts at the first visible word, not the sentence start (CFI-POSITION-CONSISTENCY-1 B13, 2026-11-03)
+
+**Source:** CFI-POSITION-CONSISTENCY-1 question B13, adopted by Blurby.Brain1 (2026-11-03); owner ruling O3.
+
+**Severity:** low
+
+**Where:** `src/reader/modes/narrate/ModeRuntime.ts:316-320` (at `c5bb507f`)
+
+**Finding:** after an open hold that failed or timed out, or a mode switch during the hold, Narrate's Play has no word map and starts at the first visible word instead of the saved word's sentence start (O3). A BUG-239 book has no sentence data at all.
+
+**Accountable role / next action:** planner. Input to WORD-INDEX-UNIFY-1, which owns how a missing map is handled.
+
+**Disposition:** open; input to WORD-INDEX-UNIFY-1
