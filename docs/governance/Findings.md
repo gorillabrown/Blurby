@@ -290,9 +290,9 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Finding:** both modes persist progress during playback only when the page moves (a relocate), and then only past their resume-anchor, engagement and browsing checks. Focus had the same gap; the owner ruled "Save as you go" (O4) for Focus only, which CFI-POSITION-CONSISTENCY-1 Wave C restores. Flow and Narrate were deliberately left out of that item.
 
-**Accountable role / next action:** planner. Ask the owner whether O4 extends to Flow and Narrate. If it does, specify one mode-local item per mode after CFI-POSITION-CONSISTENCY-1, reusing its cadence and the null-cfi rule.
+**Accountable role / next action:** planner. The owner ruled O5 (2026-11-03): Flow and Narrate also save as they go. Registered as FLOW-SAVE-AS-YOU-GO-1 (Seq 97.6) and NARRATE-SAVE-AS-YOU-GO-1 (Seq 97.7), one mode-local item per mode after CFI-POSITION-CONSISTENCY-1.
 
-**Disposition:** open
+**Disposition:** open; scheduled
 
 ### F-017 — The Focus word-delta save constant has no user (CFI-POSITION-CONSISTENCY-1 investigation, 2026-11-03)
 
