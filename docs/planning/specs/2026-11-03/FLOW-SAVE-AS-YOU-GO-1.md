@@ -1,4 +1,4 @@
-#### FLOW-SAVE-AS-YOU-GO-1 — Flow saves your place every few seconds while it plays, so a quit or crash reopens within a few words *(Seq 97.6; Full Spec 2026-11-03, cited against `origin/main` `14ce3d24`; Reader Engine; owner ruling O5 and Blurby.Brain1's general rules G1–G8 of 2026-11-03; Q1–Q3 ruled 2026-11-03; dispatch-ready; after CFI-POSITION-CONSISTENCY-1; no shared-core edit; not a release gate)*
+#### FLOW-SAVE-AS-YOU-GO-1 — Flow saves your place every few seconds while it plays, so a quit or crash reopens within a few words *(Seq 97.6; Full Spec 2026-11-03, cited against `origin/main` `14ce3d24`; Reader Engine; owner ruling O5 and Blurby.Brain1's general rules G1–G8 of 2026-11-03; Q1–Q3 ruled 2026-11-03; close row added 2026-11-03; not dispatch-ready: STOP-CLOSE-flow (the reader's close save writes the word Flow was entered at, not the cursor) is open with Blurby.Brain1; after CFI-POSITION-CONSISTENCY-1; no shared-core edit; not a release gate)*
 
 - **What:**
   - Flow saves its reading cursor (the word timer's word) while it plays: every `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5,000 ms), and once more when playback pauses or stops, each time only if the word has changed since Flow's last save.
@@ -16,6 +16,7 @@
     - On *Meditations*, Flow plays at 300 words a minute for 20 s, then the app is killed with no graceful quit. The reopen shows a word at most 29 words behind the last cursor word (39 if a relocate save landed last; see G5), and the stored cfi is absent unless a relocate save landed last.
     - Flow plays, pauses, and the app is killed. The reopen opens at the paused word, with no stored cfi.
     - Flow plays and the reader scrolls away. Flow pauses, and the saved word is the cursor word, not the word on screen.
+    - Flow plays for about 12 s, then the reader closes the book the normal way (Escape twice). The stored word is not older than the last timed save. **Held:** at `14ce3d24` the close save writes an older word (STOP-CLOSE-flow).
 - **Why** (owner ruling O5, 2026-11-03; Findings F-016; Blurby.Brain1 G1–G8, 2026-11-03). All lines are at `origin/main` `14ce3d24`:
   - **Flow saves during play only when the view moves.**
     - Every word advance commits with `persist: false` (`src/reader/modes/flow/ModeRuntime.ts:1316-1321`, in `onEngineWordAdvance`, `:1302`).
@@ -33,6 +34,13 @@
     2. **A pending relocate save can land after a newer pause save.** The shell's relocate timer writes the word it was scheduled with, up to 2,000 ms later. If the reader pauses within 2 s of the last relocate, that older word, with its viewport cfi, overwrites the pause save. While Flow plays, its scrolled view relocates as lines scroll, so a pending relocate save is the normal case at a pause (Q2).
     3. **An engine started before the word map keeps slice indices** (above; Q3).
   - **The B0 baseline replay is unaffected.** `tests/readerModes/flow.behavior.test.tsx:52-55` replays `docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json` byte for byte, and `:82` pins core-0 step 11's effects (a stop while playing). Its document has `useFoliate: true` and `bookWords: null` (`tests/readerModes/harness/fixtureReplay.tsx:264-266`), so under G4 Flow's engine runs on slice words and never saves there. The test stays green and unedited. If it goes red, STOP to Blurby.Brain1 with the diff: it means the G4 guard is wrong.
+  - **The reader's close save does not follow the reading cursor** (traced at `14ce3d24`; STOP-CLOSE-flow, below; row fl15). The normal close is Escape twice:
+    - The first Escape reaches `handleExitReader` (`src/components/ReaderContainer.tsx:614-630`). Outside Page it calls `handleExitToPage()` (`:627-629`), which is `router.exitToPage()` (`src/reader/useReaderModeOrchestrator.ts:133`, `:354-357`). That stops Flow with `"user-stop"`, so this item's exit save writes the cursor word (design 12).
+    - The handover to Page is `exportHandoff("persistent")` (`flow/ModeRuntime.ts:827-845`), with `highlightedWordIndex` replaced by `publishedWordIndex` (`useReaderModeOrchestrator.ts:356`). Page copies `publishedWordIndex` from it (`page/ModeState.ts:33`).
+    - The second Escape, now in Page, runs `finishReading(exitAnchor)` (`ReaderContainer.tsx:625-626`). `exitAnchor` is `canonicalWordAnchor` (`:615`), the router snapshot's `currentWordIndex` (`:437`), which is the active runtime's `publishedWordIndex` (`useReaderModeOrchestrator.ts:258`).
+    - `finishReading` calls `_persistAndLog(finalPos)` (`src/hooks/useProgressTracker.ts:296-299`), which writes `savePos` through `onUpdateProgress` and `api.updateDocProgress` (`:258-259`). Main sets the position with no forward-only check (`main/ipc/documents.js:22-23`).
+    - **Flow's cursor does not move `publishedWordIndex`.** Each advance commits with `persist: false, publishState: false` (`flow/ModeRuntime.ts:1316-1321`), and the anchor helper writes `publishedWordIndex` only when `publishState` is true (`flow/helpers/usePersistentReadingAnchor.ts:85-88`). `pausePlayback()` publishes nothing (`:1464-1470`).
+    - So `finalPos` is the word Flow was entered at (`syncVisualToPersistentWord` on select, `:684`, and two frames later, `:1546`), or the last click, navigation or jump back. After 12 s of reading, the close save overwrites the last timed save W with that older word. The backtrack prompt does not catch it: it shows only when the word trails the furthest mark by about two pages (`useProgressTracker.ts:308-324`; `APPROX_WORDS_PER_PAGE = 250`, `src/constants.ts:164`).
   - **Users see:** read in Flow for a minute without the page moving much, close the app hard, and the book reopens where Flow started.
 - **Design decision:** technical (Blurby.Brain1 G1–G8); the behaviour is owner ruling O5 ("save as you go", like Focus under O4).
 - **The design** (mirrors CPC-1 design 9; every line in `src/reader/modes/flow/ModeRuntime.ts` only):
@@ -105,7 +113,7 @@
   - **Wave B — package, probes and close-out** (about 35 tool uses): Done-when 5–8.
 - **Prerequisites:**
   - CFI-POSITION-CONSISTENCY-1 merged (Waves A–D). Wave A gives the `null` contract (`ReaderPorts.ts`, the bridge, main and the library copy); Wave B gives the open hold, so a reopen at a word with no cfi opens on that word.
-  - Blurby.Brain1 ruled Q1–Q3 on 2026-11-03 (below). Q1's broker change lands in CPC-1 Wave C, which must be merged. No question is open.
+  - Blurby.Brain1 ruled Q1–Q3 on 2026-11-03 (below). Q1's broker change lands in CPC-1 Wave C, which must be merged. **STOP-CLOSE-flow is open: Blurby.Brain1 rules it before Wave A.**
   - RodneySr has the canonical clone `C:\Users\estra\Projects\Blurby` with `node_modules`, the sample *Meditations* and the recipe for x64 `--dir` packages. Rodney has its canonical clone for the arm64 build.
 - **Execution host:** RodneySr (x64) for the implementation, the tests, the packages, the probes and the rule 53 pair. Rodney (arm64) only for the rule 53 arm64 launch.
 - **Branch:** `eb/flow-save-as-you-go-1` at `C:\Users\estra\Projects\Blurby\.worktrees\flow-save-as-you-go-1` on RodneySr. Create it after CFI-POSITION-CONSISTENCY-1 merges, with `git -C C:/Users/estra/Projects/Blurby worktree add -b eb/flow-save-as-you-go-1 .worktrees/flow-save-as-you-go-1 origin/main`. `<base>` is that `origin/main`. Push with `git push origin HEAD:refs/heads/eb/flow-save-as-you-go-1` (LL-181).
@@ -148,6 +156,11 @@
        - A second run, in which the relocate comes while the engine is already on the pause word, makes no pause save (G8) and no re-save. The stored position is still the pause word, from the relocate save.
        - **RED** (the stored position is the relocate's `W1`).
      - **(fl14, no save on unmount):** play 7,000 ms (one save), then `router.destroy()` with no pause. No `persistence.*` call is made: none is accepted, `broker.stats.rejected` has no `persistence.` key, and no `port-rejected` diagnostic names one (design 12). Guard row: green on `<base>`.
+     - **(fl15, the close row: the close save keeps the last timed save):**
+       - **The close path**, composed test-locally as the shell runs it: `router.exitToPage()` (the first Escape, `ReaderContainer.tsx:627-629`), then the second Escape in Page: `checkBacktrack(a, total, true)` and, when it returns `false`, `finishReading(a)` from `renderHook(() => useProgressTracker({...}))`, where `a` is `router.getSnapshot().currentWordIndex` (`ReaderContainer.tsx:437`, `:615`, `:625-626`). `window.electronAPI.updateDocProgress` is the stub pattern of `tests/useProgressTracker.test.ts`, and its calls are folded into the stored doc with the rest.
+       - Play 12,000 ms, so a timed save writes `W`. Then the close path.
+       - The stored position is not older than `W` (`>= W`).
+       - **RED** on `<base>` (no timed save). **Held:** by the trace under STOP-CLOSE-flow it stays RED after Wave A as written, because the close save writes Flow's `publishedWordIndex`, the word 20. Wave A does not start until Blurby.Brain1 rules STOP-CLOSE-flow.
   2. **Wave A as specified.** Then:
      - `git grep -c -F 'RSVP_PROGRESS_SAVE_INTERVAL_MS' -- src/reader/modes/flow/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
      - `git grep -n -F 'updateDocProgress(this.document.documentId' -- src/reader/modes/flow/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
@@ -199,7 +212,7 @@
   9. **Owner, added to release gate (2)'s list:** read in Flow for a while, then close the app any way at all: the book reopens within a few seconds' reading of the Flow cursor. Pause Flow and reopen: the book opens at the paused word.
 - **Effort:** M, in two waves (A: red rows, the change and the tests; B: package, probes and close-out), each about 35 tool uses and its own dispatch. Technical effort: medium.
 - **Owners:**
-  - Blurby.Brain1 ruled Q1–Q3; it coordinates and confirms the package (rule 53);
+  - Blurby.Brain1 ruled Q1–Q3 and rules STOP-CLOSE-flow; it coordinates and confirms the package (rule 53);
   - RodneySr implements, tests and probes; Rodney runs the arm64 launch;
   - spec-compliance review, then quality review;
   - Blurby.Roadmap gives the merge go and closes it out.
@@ -235,6 +248,30 @@ General rules for every playback mode, 2026-11-03:
 - **Q3, accepted.** The guard checks the word space the running engine started on, and saves only if that start used the map's words. An engine that started on fallback words never saves, even after the map arrives, until it restarts on the map. Applied in design 7, Wave A step 5 and row fl8 (b).
 - **Worst-case losses stand:** 29 words, or 39 if a relocate save landed last (Crash window).
 - **Q5 (ruled for Narrate only)** is not applied here. Flow's timed save is not frame-driven (design 2).
+
+##### Blurby.Brain1 rulings on STOP-Q5a and the close row (2026-11-03, binding)
+- **STOP-Q5a** (the Narrate engine's word-at-sample query) is Narrate's alone. Flow is unchanged by it.
+- **Unmount-skip is confirmed.** On stop reason `"teardown"`, Flow skips the exit save and makes no call the broker would reject. Already in design 12, Wave A step 9 and row fl14; no change.
+- **The close row is added as fl15:** play about 12 s so a timed save writes W, then close the reader by the normal close path; the stored word is not older than W.
+- **The investigation found it fails** (Why, "The reader's close save does not follow the reading cursor"). Per the ruling, no fix is designed here. STOP-CLOSE-flow below goes to Blurby.Brain1, and this spec stays not dispatch-ready until it is ruled.
+
+##### STOP-CLOSE-flow (open; for Blurby.Brain1 before Wave A)
+- **Question.** On the normal close path (Escape twice), the close save writes Flow's `publishedWordIndex`, which the reading cursor never moves. After a timed save of W, the close overwrites W with the word Flow was entered at, or the last click or navigation. How should the close save treat a session that left a playback mode? Row fl15 cannot pass until this is ruled. The planner designs no fix here, per Brain1's instruction.
+- **The lines** (all at `14ce3d24`):
+  - `src/components/ReaderContainer.tsx:437`: `const canonicalWordAnchor = toolbar?.currentWordIndex ?? (activeDoc.position || 0);`
+  - `src/reader/useReaderModeOrchestrator.ts:258` (the router snapshot): `currentWordIndex: s.publishedWordIndex,`
+  - `ReaderContainer.tsx:614-630`, `handleExitReader`: `const exitAnchor = canonicalWordAnchor;` … `if (readingMode === "page") { … if (checkBacktrack(exitAnchor, totalWords, useFoliate)) return; finishReading(exitAnchor); } else { handleExitToPage(); }`
+  - `useReaderModeOrchestrator.ts:354-357`, `exitToPage`: `transition("page", "silent", "persistent", "user-stop", (h) => ({ ...h, highlightedWordIndex: h.publishedWordIndex }));`
+  - `src/reader/modes/flow/ModeRuntime.ts:827-845`, `exportHandoff`: `publishedWordIndex: s.publishedWordIndex,`; `src/reader/modes/page/ModeState.ts:33`: `this.publishedWordIndex = handoff.publishedWordIndex;`
+  - `flow/ModeRuntime.ts:1316-1321`, `onEngineWordAdvance`: `this.anchor.commitPersistentWordIndex(idx, "mode-advance", { persist: false, publishState: false, navigate: false, syncVisual: false });`
+  - `flow/helpers/usePersistentReadingAnchor.ts:85-88`: `const shouldPublishState = options.publishState ?? cause !== "mode-advance"; if (shouldPublishState) { state.publishedWordIndex = clamped; }`
+  - `src/hooks/useProgressTracker.ts:296-299` and `:243-259`: `finishReading` → `_persistAndLog(finalPos)` → `onUpdateProgress(activeDoc.id, savePos, cfi); api.updateDocProgress(activeDoc.id, savePos, cfi);`
+  - `main/ipc/documents.js:22-23`: `if (hasPosition) doc.position = position;` (no forward-only check).
+- **What else it touches:**
+  - The same path writes Focus's and Narrate's pre-play word (STOP-CLOSE-focus in CFI-POSITION-CONSISTENCY-1, STOP-CLOSE-narrate in NARRATE-SAVE-AS-YOU-GO-1), so one ruling may serve all three.
+  - Page's arrival seeds its resume anchor from the handed-over highlight, which `exitToPage` sets to the published word (`page/ModeState.ts:40`), so Page's own relocate saves stay suppressed after the exit.
+  - `tests/readerModeIsolation.test.ts:348` pins "exitToPage hands off the published word as the highlight". `src/components/ReaderContainer.tsx` is shared core.
+  - Probe P2 ("pause, then reopen") kills the app rather than closing it, so it does not exercise this path.
 
 ##### Questions for Blurby.Brain1 (ruled 2026-11-03; kept as the record)
 - **Q1. The mode-exit save meets the port broker's teardown window (STOP before Wave A).** The router stops the outgoing mode inside `broker.teardown` (`useReaderModeOrchestrator.ts:303-307`), which accepts only `settings.update{isNarrating}` and `diagnostics.*` (`createReaderPorts.ts:46-49`, `:108-110`). G2's stop and mode-exit save is therefore rejected, with a `port-rejected` diagnostic. CPC-1 Wave C's Focus `stop()` save and its row f5 meet the same wall first. Options:
