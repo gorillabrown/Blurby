@@ -1,16 +1,19 @@
-#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; B1–B18 adopted by Blurby.Brain1 2026-11-03; C1–C3 ruled 2026-11-03; close row added 2026-11-03; not dispatch-ready: STOP-CLOSE-focus (the reader's close save writes the word Focus was entered at, not the displayed word; it blocks Wave C's row f13 and probe P4, not Waves A and B) is open with Blurby.Brain1; cited against `origin/main` `c5bb507f`, with every file Waves A and C add for C1–C3 re-checked unchanged at `14ce3d24`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
+#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; B1–B18 adopted by Blurby.Brain1 2026-11-03; C1–C3 ruled 2026-11-03; close row added 2026-11-03; STOP-CLOSE ruled (A) 2026-11-03 with owner ruling O6, folded into Wave C for all three playback modes; not dispatch-ready: STOP-LAND-focus and STOP-PAGE-BUTTON (new 2026-11-03, below) are open with Blurby.Brain1 and hold Wave C only, not Waves A and B; cited against `origin/main` `c5bb507f`, with every file Waves A and C add for C1–C3 re-checked unchanged at `14ce3d24`, and O6's lines cited at `14ce3d24`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
 
 - **What:**
   - Every save that writes a word (the position) also writes the page of that word (the cfi), or clears the stored cfi.
   - A cold open of an EPUB at a saved word waits, behind the existing "Loading book..." state, until the book's word map is ready. It then opens straight on the saved page if that page holds the saved word, and otherwise on the saved word itself. There is no visible jump afterwards.
   - Narrate, reopened at a saved word, starts Play at the first word of that word's sentence.
   - Focus saves the word as you read (O4): every 5 s while it plays, and once more on pause, stop and mode exit, each time only if the word has changed since its last save. Each Focus save sends an explicit `null` cfi, so the stored page is cleared and the pair never disagrees. Focus has no sentence-start rule: it resumes at the saved word itself.
+  - **"Where I stopped" (O6).** Leaving Focus, Flow or Narrate with Escape hands Page the mode's committed playback word, so Page's close save writes it and the book reopens there. Each runtime's `exportHandoff("persistent")` reports that word (Blurby.Brain1 option (A)): Focus its displayed word, Flow its reading cursor, Narrate its last published cursor. All three are the runtime's `canonicalWordIndex` (design 10).
   - **Out of scope:**
     - CHAPTER-STEP-CFI-1's landing save itself (Seq 97). This item builds on it.
     - Contents entries that point inside a section (TOC-FRAGMENT-WORD-1) and Flow's cursor after a jump (FLOW-TOC-JUMP-WORD-1).
     - Mode handovers (`handoff.source != null`), including Narrate's `arrivalSyncOwed` (NARRATE-ARRIVAL-SYNC-1). They are unchanged. The hold is cold-open only.
-    - Focus, Flow and Narrate views. A cold open always mounts Page (`src/reader/useReaderModeOrchestrator.ts:336-341`), so only Page's view holds. Focus's runtime is in scope for O4 only (Wave C).
-    - Flow's and Narrate's saves during play. They are a finding only (Flow and Narrate finding below), not changed here.
+    - Focus, Flow and Narrate views. A cold open always mounts Page (`src/reader/useReaderModeOrchestrator.ts:336-341`), so only Page's view holds. Focus's runtime is in scope for O4 and O6 (Wave C). Flow's and Narrate's runtimes are in scope for O6's one export line only (Wave C step 6).
+    - Flow's and Narrate's saves during play. They are FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1, not changed here.
+    - The router (`src/reader/useReaderModeOrchestrator.ts`), including `exitToPage`'s highlight adjust (`:354-357`). Ruling (A) needs no router, orchestrator or shared-core edit.
+    - The `"capture-current"` export behind the bottom bar's Page button (STOP-PAGE-BUTTON) and the page Page's view opens on after a handover (STOP-LAND-focus), pending Blurby.Brain1.
     - The orphaned `RSVP_PROGRESS_SAVE_WORD_DELTA` (`src/constants.ts:170`). O4's save is time-only, so it stays unused and is a finding (question B14).
     - Repairing stale pairs already in a user's `library.json`. The hold corrects what the reader sees; the stored pair is fixed by the reader's next real save (LL-030: no save without engagement).
     - A main-process cache of the word map (question B12).
@@ -24,7 +27,9 @@
     - Reopened at a word in the middle of a sentence, then Narrate and Play: the first word requested is that sentence's first word.
     - Focus Play for about 12 s, then the app is killed with no graceful quit. The reopen shows a word within one save interval of the last word read, and the stored cfi is absent.
     - Focus Play, then pause, then reopen: the book opens at the paused word.
-    - Focus Play for about 12 s, then the reader closes the book the normal way (Escape twice). The stored word is not older than the last timed save. **Held:** at `14ce3d24` the close save writes an older word (STOP-CLOSE-focus).
+    - Focus Play for about 12 s, then the reader closes the book the normal way (Escape twice). The stored word is not older than the last timed save. At `14ce3d24` the close save writes an older word; Wave C step 6 fixes it (STOP-CLOSE ruled (A)).
+    - **O6:** start Focus, Flow or Narrate at word 8723, read on, and press Escape. Page holds the word reading stopped at, and the second Escape stores it, so the book reopens there. With no reading since the mode was entered, the entry word is handed over, as today. A click while paused hands over the clicked word.
+    - **Held for Focus (STOP-LAND-focus):** after the first Escape, Page's view opens on the page Focus was entered at, not the stopped word's page.
 - **Why** (Blurby.Brain1 ruling, `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`; Amendment 3 of `Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`; RodneySr repro on the `c5bb507f` x64 package, evidence `C:\Projects\Blurby-artifacts\narrate-arrival-sync-1\repro-base\` on RodneySr):
   - **R2, confirmed live.** Page at 8723, one turn (saved 9758 with a spine-4 cfi), Flow, "Next chapter" (view on spine 5, words 11652–11733), quit. `library.json` then holds 11652 with the spine-4 cfi. The reopen shows 9758–9870, a chapter behind.
   - **Cause, at `c5bb507f`:**
@@ -39,12 +44,22 @@
       - Both reach `handleExitReader` (`ReaderContainer.tsx:614-630`, wired at `:742-745`). Outside Page it calls `handleExitToPage()` (`:627-629`, `router.exitToPage()`, `src/reader/useReaderModeOrchestrator.ts:133`) and saves nothing.
       - A second Escape, now in Page, runs `checkBacktrack` (`:624`, which can show the backtrack prompt when the reader is behind the furthest mark) and then `finishReading(exitAnchor)` (`:625`). That is the close save, `_persistAndLog`, R1's path.
       - So R1's route is Escape twice. Probe P4 drives it with native Escape key events (`windowsVirtualKeyCode` 27), never a synthetic DOM event.
-    - **The close save's word does not follow Focus's displayed word** (traced at `14ce3d24`, 2026-11-03; STOP-CLOSE-focus, below; row f13):
+    - **The close save's word does not follow Focus's displayed word** (traced at `14ce3d24`, 2026-11-03; STOP-CLOSE-focus, ruled (A) below; rows f13 and f14):
       - `finishReading(exitAnchor)` in Page writes `exitAnchor = canonicalWordAnchor` (`ReaderContainer.tsx:615`, `:625-626`), the router snapshot's `currentWordIndex` (`:437`), which is the active runtime's `publishedWordIndex` (`useReaderModeOrchestrator.ts:258`). `_persistAndLog` writes it (`useProgressTracker.ts:243-259`, `:296-299`), and main sets it with no forward-only check (`main/ipc/documents.js:22-23`).
       - The first Escape's `router.exitToPage()` hands Page `exportHandoff("persistent")` (`focus/ModeRuntime.ts:663-681`) with `highlightedWordIndex` replaced by `publishedWordIndex` (`useReaderModeOrchestrator.ts:354-357`). Page copies `publishedWordIndex` (`page/ModeState.ts:33`).
       - Focus's displayed word never moves `publishedWordIndex`. Each advance commits with `persist: false, publishState: false` (`focus/ModeRuntime.ts:1053-1058`), and the anchor helper writes `publishedWordIndex` only when `publishState` is true (`focus/helpers/usePersistentReadingAnchor.ts:85-88`). `pause()` and `togglePlay()`'s pause branch only publish the highlight (`captureCurrentAnchor`, `:1140-1142`; `publishHighlight`, `:1214-1217`).
       - So `finalPos` is the word Focus was entered at (`syncVisualToPersistentWord` on select, `:510`, and two frames later, `:1152`), or the last click, navigation or jump back. Wave C's timed save writes W, and the close then overwrites it with that older word. The useProgressTracker parameter `wordIndex` (`ReaderContainer.tsx:443`, Focus's `currentWordIndex`) feeds only the non-EPUB save and "Save at current" (`useProgressTracker.ts:114`, `:224-240`, `:326-330`), not the close.
       - This also bears on probe P4's tip expectation ("the stored position is the paused word"): by this trace the close writes the select-time word 8723, unless the backtrack prompt shows.
+      - Flow and Narrate share the defect. Their advances commit with `publishState: false` too (Flow `flow/ModeRuntime.ts:1316-1321`; Narrate `narrate/ModeRuntime.ts:732`), and their `exportHandoff` hands over `s.publishedWordIndex` (Flow `:836`, in `:827-845`; Narrate `:422`, in `:414-430`). It exists today, without any save as you go.
+    - **Each runtime's committed playback word is its `canonicalWordIndex`** (traced at `14ce3d24`; design 10):
+      - In Focus, Flow and Narrate, only the anchor helper writes `canonicalWordIndex` after construction (`writeRefs`, `helpers/usePersistentReadingAnchor.ts:60` in each). No runtime assigns it directly.
+      - Every helper path that writes it also writes `publishedWordIndex`: a commit with `publishState` (`:85-88`) and `syncVisualToPersistentWord` (`:107-110`). The one exception is the mode-advance commit, which each runtime makes with `publishState: false`: Focus `focus/ModeRuntime.ts:1053-1058`, Flow `flow/ModeRuntime.ts:1316-1321`, Narrate `narrate/ModeRuntime.ts:732`.
+      - So `canonicalWordIndex` equals `publishedWordIndex` until playback advances, and after that it is the last advanced word. Today's handover already carries it as `canonicalWordIndex` (Focus `:671`, Flow `:835`, Narrate `:421`), and Page selects it (`useReaderModeOrchestrator.ts:289`; `page/ModeState.ts:43`). Only `publishedWordIndex`, the word the close save writes, lags.
+      - **Focus:** the advance commits the word it has just displayed (`jumpDisplayToWord(idx)`, `:1041`, then the commit). A paused engine's `getCurrentWord()` is that word (`FocusMode`, `:121-123`; its timer advances the word and then calls `onWordAdvance`, `:204-208`).
+      - **Flow:** the advance commits the word timer's word, the reading cursor, including the held word during a section hand-off or page-turn wait (FLOW-SAVE-AS-YOU-GO-1, Why).
+      - **Narrate:** `onEngineCursor` commits each word the engine publishes (`:722-734`). The engine publishes only from `tick()`, at the heard sample, through the exact word table (`narrateEngine.ts:333-348`). So the word is the last published cursor, never a timer read: it holds through silence (R6) and a pause, and a restart (`play()` drops every chunk, `narrateEngine.ts:534-537`) publishes nothing until the new audio sounds.
+      - **A click while paused** commits through `commitShared` with `publishState: true` (Focus `:1202-1211`, Flow `:1594-1603`, Narrate `:899-903`), and no paused engine moves (Focus `:735`, Flow `:905-908`, Narrate `:475-477`). So the reported word is the clicked word.
+      - **Why not `currentWordIndex`:** before an engine exists, Focus's key moves (`moveReadingWord`, `:847-859`) and each mode's `jumpToWord` when it does not reach the engine (Focus `:652-661`, Flow `:816-825`, Narrate `:405-412`) move `currentWordIndex` without a commit. Reporting it would hand over an uncommitted word with no playback since entry.
   - **Focus saves nothing while it plays or is paused (O4).**
     - Every Focus word advance commits with `persist: false` (`focus/ModeRuntime.ts:1053`, in `onEngineWordAdvance`, `:1038`). `pause()` (`:591`) and the pause branch of `togglePlay()` (`:613`) only publish the highlight (`captureCurrentAnchor`, `:1140`). `stop()` (`:629`) saves nothing. Focus moves the word display only (`jumpDisplayToWord`, `:1225`), so its view does not relocate and the relocate save never fires.
     - So a Focus session reaches `library.json` only through the close save in Page, and a crash or kill loses all of it.
@@ -128,7 +143,7 @@
      - `src/types.ts:298` types `ElectronAPI.updateDocProgress`'s cfi as `string`.
      - The bridge in `ReaderContainer.tsx` passes the port's cfi into it (`:312`), drops a falsy cfi before the library copy (`:313`), and owns the relocate ref (`:271`, `:330`).
      - There is no type-honest way to carry `null` without editing both. **An integration window is requested** for `src/types.ts` and `src/components/ReaderContainer.tsx` from the cut to the merge. `src/utils/FlowScrollEngine.ts` is untouched.
-  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). Focus's saves as you go live in `focus/ModeRuntime.ts` only (Wave C). Wave C also adds two entries to the port broker's release list (`src/reader/ports/createReaderPorts.ts:46-49`), once for all three playback modes (C1). That file is not in the shared-core freeze set, but it is every mode's broker, so it is named in Wave C's steps and the fence. No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page and Focus already import (`page/ModeRuntime.ts:13-16`, `focus/ModeRuntime.ts:16-23`).
+  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). Focus's saves as you go live in `focus/ModeRuntime.ts` only (Wave C). O6's hand-off changes one line in each playback runtime's own `exportHandoff`, one runtime per commit (Wave C step 6). Wave C also adds two entries to the port broker's release list (`src/reader/ports/createReaderPorts.ts:46-49`), once for all three playback modes (C1). That file is not in the shared-core freeze set, but it is every mode's broker, so it is named in Wave C's steps and the fence. No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page and Focus already import (`page/ModeRuntime.ts:13-16`, `focus/ModeRuntime.ts:16-23`).
   9. **Focus saves as you go (O4; Brain1's binding O4 rulings).**
      - **When:** at the first word advance at least `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5000 ms, `src/constants.ts:168`, never a literal) after the last save or the start of play; and once more on pause, on the pause branch of `togglePlay`, and on `stop()`, which covers a mode switch, Escape to Page, a cross-book open and the end of the book. Each fires only if the word differs from the last word saved.
      - **The exit save runs inside the teardown window (C1).** The router stops the outgoing mode inside `broker.teardown` (`src/reader/useReaderModeOrchestrator.ts:303-307`; a cross-book open's `closeAll(true)` does the same, `:318-323`). Wave C adds `persistence.updateDocProgress` and `persistence.updateProgress` to `READER_PORT_RELEASE_CALLS`, so the exit save is accepted there.
@@ -145,6 +160,14 @@
      - **Reopen:** a Focus save stores a word and no cfi, so the reopen goes through design 4's hold to a word target and opens on that word. Focus has no sentence-start rule (Why), so a Focus resume starts at that word, not its sentence. Narrate's sentence-start rule (O3) still applies if the reader switches to Narrate.
      - **Expected loss:** about 20–40 words at 250–480 words a minute, the interval's span, plus main's 500 ms debounce on a hard kill (B16).
      - **Furthest mark:** each save raises keep-at-furthest's mark through the bridge's `noteHighWater` (`ReaderContainer.tsx:315`) with a `null` cfi (question B17).
+  10. **The persistent hand-off reports the committed playback word (O6; Blurby.Brain1 option (A)).**
+      - In Focus, Flow and Narrate, `exportHandoff("persistent")` sets `publishedWordIndex` to `s.canonicalWordIndex` instead of `s.publishedWordIndex`. `"capture-current"` is unchanged (STOP-PAGE-BUTTON). Nothing else in the export changes.
+      - **Which word** (Why, "Each runtime's committed playback word"; source `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.ESCAPE-LANDS-AT-PLAYBACK-1.2026-11-03.md`): Focus's displayed word, Flow's reading cursor and Narrate's last published cursor. "Committed" is the latest of the playback word and any user-intent commit since then. `canonicalWordIndex` is that word: each advance and each user-intent commit (`commitShared`) writes it, and the later write stands. So an exit with no playback since entry hands over the entry word, and a click while paused hands over the clicked word.
+      - **Narrate hands over the word itself,** never its sentence's first word. The sentence-start rule (O3) applies when playback restarts, not when Page lands.
+      - **Narrate and rule #31:** the word is the last cursor the engine published at the heard sample. It is never `wordAtPlaybackSample()` or another timer read, never `getSnapshot().cursor` (stale after a restart) and never a chunk start. After a restart it stays the click's or navigation's word until the new audio publishes.
+      - **Where it takes effect:** `exitToPage` (`useReaderModeOrchestrator.ts:354-357`) copies the export's `publishedWordIndex` into the highlight. Page copies both (`page/ModeState.ts:33-35`), seeds its resume anchor from the highlight (`:40`, so its relocates save nothing, LL-030), and the router snapshot then reads that word (`useReaderModeOrchestrator.ts:258`). The second Escape's `finishReading(canonicalWordAnchor)` writes it (`ReaderContainer.tsx:437`, `:615`, `:625-626`).
+      - **Mode switches** also export `"persistent"` (`router.select`, `:342-345`). There the receiving playback mode's first `select()` already republishes its canonical word (`syncVisualToPersistentWord`: Focus `:510`, Flow `:684`, Narrate `:271`; helper `:107-110`), so nothing a reader sees changes. `resumeFlowAfterBookOpen` exports from Page (`:372-376`), which is unchanged.
+      - **Isolation:** each runtime edits its own `exportHandoff`, one commit per mode, with no sibling import, no shared helper, and no router, orchestrator or shared-core edit.
 - **The change.** Line numbers are at `c5bb507f`. CHAPTER-STEP-CFI-1 and NARRATE-ARRIVAL-SYNC-1 move some lines, so the implementer re-greps every cited line at the cut (standing rule 36):
 
   ```
@@ -157,6 +180,7 @@
   git grep -n -E 'const clickedWord|sentenceStartAt\(|private effectiveWords' -- src/reader/modes/narrate/ModeRuntime.ts
   git grep -n -E 'private onEngineWordAdvance|^  pause\(\)|^  togglePlay\(\)|^  stop\(|private captureCurrentAnchor|private stopEngine|private markEngaged|\} from "\.\./\.\./\.\./constants"' -- src/reader/modes/focus/ModeRuntime.ts
   git grep -n -E 'RSVP_PROGRESS_SAVE_(INTERVAL_MS|WORD_DELTA)' -- src
+  git grep -n -E '^  exportHandoff\(|publishedWordIndex: s\.publishedWordIndex' -- src/reader/modes/focus/ModeRuntime.ts src/reader/modes/flow/ModeRuntime.ts src/reader/modes/narrate/ModeRuntime.ts
   ```
 
   - **Wave A — contract and writers** (about 35 tool uses):
@@ -221,7 +245,7 @@
        - the `goToFraction` branch (`:884-894`) runs only when the target has neither a cfi nor a word;
        - just before `setLoading(false)` (`:1060`), for a word target: `await jumpFoliateToWordAnchor(viewApiRef.current, target.word); if (cancelled) return;`, imported from `./helpers/foliateAnchorNavigation`;
        - `initialCfi` stays a prop for the handover path; for Page it now only feeds the fallback target.
-  - **Wave C — Focus saves as you go, and the broker's release list** (about 30 tool uses; needs Wave A's `null` contract):
+  - **Wave C — Focus saves as you go, the broker's release list, and O6's hand-off in all three playback modes** (about 36 tool uses; needs Wave A's `null` contract; runs after BLOCK-TEXT-ORDER-1's merge, because BLOCK-TEXT-ORDER-1's Wave B holds the Focus window; not before Blurby.Brain1 rules STOP-LAND-focus and STOP-PAGE-BUTTON):
     1. `src/constants.ts:167-168`: keep `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000` and its value. Change only its comment, once, to name all three playback modes' saves as you go (Focus here; Flow and Narrate under FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1, owner O5), this item and owner ruling O4 (Brain1 G2). `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`) is left as it is (question B14).
     2. `src/reader/modes/focus/ModeRuntime.ts`:
        - add `RSVP_PROGRESS_SAVE_INTERVAL_MS` to the `../../../constants` import (`:16-23`);
@@ -256,13 +280,27 @@
          - `tests/readerModeOwnership.test.ts:221-236`: its teardown runs nothing, and its later calls are on closed keys.
 
        If any other row fails on the list change, STOP to Blurby.Brain1 with its name before editing it.
-    5. Nothing else in Focus changes: not its view, bindings, anchor helper (beyond Wave A) or engine. No other mode changes in Wave C.
+    5. Nothing else in Focus changes: not its view, bindings, anchor helper (beyond Wave A) or engine. Flow and Narrate change only in step 6.
+    6. **O6, the persistent hand-off (design 10; Blurby.Brain1 option (A)).** Three commits, one runtime each, in this order. Each commit touches only its own `ModeRuntime.ts`, and none imports from a sibling mode. The ruling's fence is the three `ModeRuntime.ts` files plus the tests: if Page's landing needs anything outside them, STOP to Blurby.Brain1 with the lines (it does for Focus today: STOP-LAND-focus).
+       - `src/reader/modes/focus/ModeRuntime.ts`, `exportHandoff` (`:663-681`): `:672` becomes `publishedWordIndex: capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex,`.
+       - `src/reader/modes/flow/ModeRuntime.ts`, `exportHandoff` (`:827-845`): the same at `:836`.
+       - `src/reader/modes/narrate/ModeRuntime.ts`, `exportHandoff` (`:414-430`): the same at `:422`.
+       - Each gets a one-line comment above it that names this item, owner ruling O6 and Brain1's option (A): "the committed playback word (canonical), so an Escape to Page stores where reading stopped".
+       - `highlightedWordIndex`, `canonicalWordIndex`, `cfi` and every other field stay as they are. The `"capture-current"` branch is unchanged.
+       - **Pinned rows.** No existing row pins the persistent hand-off's word after playback, so no rule-50 exception is needed:
+         - the B0 replays (`tests/readerModes/{flow,focus}.behavior.test.tsx`) never export `"persistent"` from a playing mode. Their `selectMode` of `page` is `router.pauseToPage()`, a `"capture-current"` export (`tests/readerModes/harness/fixtureReplay.tsx:316`), and a `selectMode` of the active mode returns at once (`useReaderModeOrchestrator.ts:343`). Their completion observations (`focus.behavior.test.tsx:63-65`, `flow.behavior.test.tsx:68-70`) come from `requestCompletionToPage`, also `"capture-current"` (`useReaderModeOrchestrator.ts:358-363`);
+         - Narrate has no behaviour replay (`tests/readerModes/narrate.contract.test.ts` runs the shared contract only);
+         - `tests/readerModeIsolation.test.ts`, "exitToPage hands off the published word as the highlight" (`:348-355`), runs over the file's own fake runtimes (`fakeModule`, `:186-245`) and the unchanged router, so it stays green and unedited;
+         - `assertNoLeak` (`tests/readerModes/harness/contractAssertions.ts:173-180`) compares two persistent exports with no playback between them.
+
+         If any other row fails on step 6, STOP to Blurby.Brain1 with its name before editing it.
   - **Wave D — gates, package and close-out** (about 35 tool uses): Done-when 5–11.
 - **Prerequisites:**
   - NARRATE-ARRIVAL-SYNC-1 (Seq 88.5) merged, and gate (1) run 6 recorded.
   - CHAPTER-STEP-CFI-1 (Seq 97, amendment 1, `eb/chapter-step-cfi-1-r2`) merged. `<base>` is `origin/main` after that merge.
+  - For Wave C: BLOCK-TEXT-ORDER-1 merged (its Wave B holds the Focus window). Wave C re-greps `exportHandoff` in all three runtimes at its cut.
   - The `src/types.ts` and `src/components/ReaderContainer.tsx` integration window granted, with no other active sprint editing either file.
-  - Blurby.Brain1 confirmed B1–B18 and ruled C1–C3 (2026-11-03). Design 9 is Brain1's binding O4 ruling, with C1's and C3's conditions folded in. **STOP-CLOSE-focus is open: Blurby.Brain1 rules it before Wave C** (row f13, probe P4).
+  - Blurby.Brain1 confirmed B1–B18 and ruled C1–C3 (2026-11-03). Design 9 is Brain1's binding O4 ruling, with C1's and C3's conditions folded in. STOP-CLOSE-focus was ruled (A) on 2026-11-03, with owner ruling O6 (design 10, Wave C step 6). **STOP-LAND-focus and STOP-PAGE-BUTTON are open: Blurby.Brain1 rules them before Wave C.** Waves A and B do not depend on them.
   - RodneySr has the canonical clone `C:\Users\estra\Projects\Blurby` with `node_modules`, the sample *Meditations*, and the `c5bb507f` x64 `--dir` package from `repro-base` (or rebuilds it with the same recipe). Rodney has its canonical clone for the arm64 build.
 - **Execution host:** RodneySr (x64) for the implementation, the tests, the packages and the probes. Rodney (arm64) only for the rule 53 arm64 launch.
 - **Branch:** `eb/cfi-position-consistency-1` at `C:\Users\estra\Projects\Blurby\.worktrees\cfi-position-consistency-1` on RodneySr. Create it with `git -C C:/Users/estra/Projects/Blurby worktree add -b eb/cfi-position-consistency-1 .worktrees/cfi-position-consistency-1 origin/main` after CHAPTER-STEP-CFI-1 merges. Push with `git push origin HEAD:refs/heads/eb/cfi-position-consistency-1`.
@@ -337,7 +375,21 @@
            - **The close path**, composed test-locally as the shell runs it: `router.exitToPage()` (the first Escape, `ReaderContainer.tsx:627-629`), then the second Escape in Page: `checkBacktrack(a, total, true)` and, when it returns `false`, `finishReading(a)` from `renderHook(() => useProgressTracker({...}))`, where `a` is `router.getSnapshot().currentWordIndex` (`ReaderContainer.tsx:437`, `:615`, `:625-626`). `window.electronAPI.updateDocProgress` is the stub pattern of `tests/useProgressTracker.test.ts`, and its calls are folded into the stored doc with the rest.
            - Play about 12,000 ms, so a timed save writes `W`. Then the close path.
            - The stored position is not older than `W` (`>= W`).
-           - **RED** on `<base>` (no timed save). **Held:** by the trace under STOP-CLOSE-focus it stays RED after Wave C as written, because the close save writes Focus's `publishedWordIndex`, 8723. Wave C does not start until Blurby.Brain1 rules STOP-CLOSE-focus.
+           - **RED** on `<base>` (no timed save). Green after Wave C step 6 (STOP-CLOSE ruled (A)): the close save writes the hand-off's word, Focus's canonical word, which is not older than `W` (rows f14 and f15).
+       - **O6, the persistent hand-off (Wave C step 6; Blurby.Brain1 option (A); rows 1–6 of `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.ESCAPE-LANDS-AT-PLAYBACK-1.2026-11-03.md`).** Sixteen rows: Brain1's rows 1–5 for each playback mode, and row 6 for Narrate. They run over the real router with the f-rows' open (8723 stands for Brain1's word 100; the spine-4 cfi; the map loaded) and fake timers.
+         - **Focus and Flow** play at 300 words a minute with rhythm pauses off. **Narrate** runs through the module map of `tests/readerModes/bandAlign2.test.tsx:71-72`, with `createNarrateRuntime(input, { producer, createOutput })` (`narrate/ModeRuntime.ts:936`), `FakeProducer` at its default 200 ms a word and `FakeAudioOutput`. A test-local `run(ms)` advances, in 50 ms steps, fake time, the output and then `runtime.tick()`.
+         - **"The playback word" `p`** is read on the mode's runtime just before the exit. Focus and Flow: `exportHandoff("capture-current").highlightedWordIndex`, the engine's word (`focus/ModeRuntime.ts:666-668`, `flow/ModeRuntime.ts:830-832`). Narrate: `getSnapshot().highlightedWordIndex`, the last published cursor (`onEngineCursor`, `narrate/ModeRuntime.ts:731-733`).
+         - **"The close path"** is f13's: `router.exitToPage()`, then `checkBacktrack` and `finishReading(a)` with `a = router.getSnapshot().currentWordIndex`, folded into the stored doc.
+         - **(f14 Focus, f19 Flow, f24 Narrate; Brain1 row 1) enter at 100, play to about 500, then Escape: Page shows 500's page, and the highlight is on 500.** Play for 12,000 ms with no input; `p` is not 8723. After `router.exitToPage()`, Page's `highlightedWordIndex` and `router.getSnapshot().currentWordIndex` are both `p`, and Page's view lands on `p`'s page. **RED** on `<base>` (8723). **Held:** the landing half needs Page's lines (STOP-LAND-focus). Its assertion is the landing Brain1 rules; probe P4 checks the first shown range.
+         - **(f15 Focus, f20 Flow, f25 Narrate; Brain1 row 2) Escape again: the stored word is 500 (it reopens there).** After row 1, the second half of the close path. The stored position is `p`. **RED** on `<base>` (8723).
+         - **(f16 Focus, f21 Flow, f26 Narrate; Brain1 row 3) enter at 100, no playback, then Escape: Page lands at 100 (control).** Select the mode and wait 3,000 ms with no Play, then the close path. The snapshot's `currentWordIndex` and Page's highlight after `exitToPage()`, and the stored position, are all 8723. Green on `<base>` and after.
+         - **(f17 Focus, f22 Flow, f27 Narrate; Brain1 row 4) pause, click X, then Escape: Page lands at X.** Play for 3,000 ms, pause with `router.togglePlay()`, then `hardSelect` word X (a word the paused engine is not on) with the spine-4 cfi, then the close path. The snapshot's `currentWordIndex` and Page's highlight after `exitToPage()`, and the stored position, are all X. Guard row: green on `<base>` (the click publishes through `commitShared`) and after; it fails if the export reports the engine's older word.
+         - **(f18 Focus, f23 Flow, f28 Narrate; Brain1 row 5) the pause-to-page row runs unchanged (control).** Play for 12,000 ms, then `router.pauseToPage()` (the `"capture-current"` export; the bottom bar's Page button, STOP-PAGE-BUTTON). Page's `highlightedWordIndex` is `p`, and Page's whole hand-off equals what `<base>` hands over for the same steps, field by field (`publishedWordIndex` is 8723 on both). Green on `<base>` and after; it fails if step 6 touches the `"capture-current"` branch.
+         - **(f29, Narrate only; Brain1 row 6) an Escape during leading silence or an epoch switch hands over the last published cursor, never a word ahead of the sample.** Each part reads `c`, the last published cursor (`getSnapshot().highlightedWordIndex`), then calls `router.exitToPage()` with no tick between:
+           - (a) leading silence: Play with `producer.setHold(true)`, release it, and `run` until the first chunk is scheduled but its sample is before the first unit (`wordAtPlaybackSample()` returns `null`, and nothing is published). The hand-off's word is 8723, the entry word, not the sentence start the engine started from.
+           - (b) an epoch switch with no commit: `run(6_000)`, `producer.setHold(true)`, then `runtime.jumpToWord(c + 40, "navigation")`, which restarts the engine (`narrate/ModeRuntime.ts:409`) without a commit. The hand-off's word is `c`, not `c + 40`.
+           - (c) an epoch switch after a click: `run(6_000)`, `producer.setHold(true)`, then `hardSelect` word X while playing. The hand-off's word is X, the click's commit (rule 1 of the ruling: the latest user-intent commit wins).
+           - In every part the hand-off's word is at or behind the word at the heard sample, or is the latest commit. **RED** on `<base>` for (b) (8723); (a) and (c) are guard rows, green on `<base>` and after.
 
      Record every result in the memo. If a row named RED above is green on `<base>`, STOP: its guard cannot fail.
   2. **Wave A as specified.** Then:
@@ -354,7 +406,11 @@
      - `git grep -c -F 'RSVP_PROGRESS_SAVE_INTERVAL_MS' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `c5bb507f`.
      - `git grep -c -F 'updateDocProgress' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `c5bb507f`.
      - `git grep -n -E '\b5000\b|5_000' -- src/reader/modes/focus/ModeRuntime.ts` exits 1 (no literal interval). It exits 1 on `c5bb507f` too.
-     - `git diff --name-status <base> -- src/reader/modes/focus src/reader/modes/flow src/reader/modes/narrate` lists exactly the three `helpers/usePersistentReadingAnchor.ts` files and `src/reader/modes/focus/ModeRuntime.ts`, and exits 0.
+     - `git diff --name-status <base> -- src/reader/modes/focus src/reader/modes/flow src/reader/modes/narrate` lists exactly the three `helpers/usePersistentReadingAnchor.ts` files and the three `ModeRuntime.ts` files (Focus, Flow and Narrate), and exits 0.
+     - `git grep -c -F 'capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex' -- src/reader/modes/focus/ModeRuntime.ts src/reader/modes/flow/ModeRuntime.ts src/reader/modes/narrate/ModeRuntime.ts` exits 0 and lists all three paths, each with `1`. It exits 1 on `<base>`.
+     - `git diff --numstat <base> -- src/reader/modes/flow/ModeRuntime.ts src/reader/modes/narrate/ModeRuntime.ts` shows 2 added and 1 deleted line for each path: the comment and the changed line.
+     - **One runtime per commit:** for every commit in `git rev-list <base>..HEAD`, `git show --name-only --format= <sha> -- src/reader/modes/focus/ModeRuntime.ts src/reader/modes/flow/ModeRuntime.ts src/reader/modes/narrate/ModeRuntime.ts` prints at most one path. Record the three step 6 commits in the memo.
+     - `git diff --name-status <base> -- src/reader/useReaderModeOrchestrator.ts src/reader/modes/page/ModeState.ts` prints nothing and exits 0 (no router edit).
      - `git grep -c -E '"persistence\.update(DocProgress|Progress)"' -- src/reader/ports/createReaderPorts.ts` exits 0 and prints 2. It exits 1 on `<base>`.
      - `git diff <base> -- src/reader/ports/createReaderPorts.ts` shows only the two added list lines (C1: only the list changes).
      - `git grep -n -E 'reason !== "teardown"' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
@@ -362,7 +418,8 @@
      - `npx vitest run tests/cfiPositionConsistency.ipc.test.js tests/cfiPositionConsistency.shell.test.tsx tests/readerModes/cfiPositionConsistency.test.ts` exits 0.
      - `npx vitest run tests/readerModes tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/useProgressTracker.test.ts tests/keepFurthest.test.tsx tests/pageReopenCfi.test.ts tests/updateDocProgressLastRead.test.js tests/persistentReadingAnchor.test.ts tests/useLibrary.test.ts tests/narrate` exits 0.
      - `tests/readerModes/chapterStepLanding.test.ts` (CHAPTER-STEP-CFI-1), `tests/readerModes/pagePositionSave.test.tsx` and `tests/narrate/narrate.playSavedPosition.test.ts` (NARRATE-ARRIVAL-SYNC-1) are green and unedited.
-     - `tests/readerModes/flow.behavior.test.tsx` and `tests/readerModes/focus.behavior.test.tsx` (the B0 replays) are green, edited only as Wave A step 10 lists. `tests/readerModeIsolation.test.ts` is green, edited only as Wave C step 4 lists. `tests/readerModeOwnership.test.ts` is green and unedited.
+     - `tests/readerModes/flow.behavior.test.tsx` and `tests/readerModes/focus.behavior.test.tsx` (the B0 replays) are green, edited only as Wave A step 10 lists. `tests/readerModeIsolation.test.ts` is green, edited only as Wave C step 4 lists; its "exitToPage hands off the published word as the highlight" (`:348-355`) is unedited. `tests/readerModeOwnership.test.ts` is green and unedited.
+     - Wave C step 6 edits no existing test. `tests/readerModes/focus.contract.test.ts`, `flow.contract.test.ts` and `narrate.contract.test.ts` are green and unedited.
   6. `npm test`, `npm run typecheck` and `npm run build` exit 0 on RodneySr (standing rules 47 and 48). Record the counts.
   7. **Packaged probes**, on RodneySr x64 `--dir` packages of `c5bb507f`, `<base>` and the tip, all with one recipe (LL-152):
      - Launch each with `--user-data-dir=<scratch>` and `BLURBY_USER_DATA_DIR=<scratch>`.
@@ -389,8 +446,10 @@
          - The tip: the first shown range contains 8723, and there is no save.
        - **(P4, R1, the real close route):** open at 8723 in Page, switch to Focus, Play for 30 s with no page turn, pause, then press Escape twice as native key events (Why: the first returns to Page, the second runs the close save). Wait 4 s, read `library.json`, reopen.
          - Record whether the backtrack prompt appeared; P4 reads forward, so it should not. If it does, record it and dismiss it with "stay".
-         - The tip: the stored pair agrees (no cfi, or a cfi in the stored position's section), the stored position is the paused word, and the first shown range contains it.
-         - `<base>`: the control, recorded. There, the close save is Focus's only save (Why).
+         - The tip (rows f13, f14 and f15): after the first Escape, the router snapshot's `currentWordIndex`, read over the inspector, is the paused word. After the second, the stored pair agrees (no cfi, or a cfi in the stored position's section), the stored position is the paused word, and the reopen's first shown range contains it.
+         - Also record the first and last visible word indices in Page after the first Escape. That is evidence for STOP-LAND-focus, not a verdict, until Brain1 rules it.
+         - `<base>`: the control, recorded. There, the close save is Focus's only save (Why), and it writes 8723.
+         - **P4 from Flow and from Narrate (O6):** the same steps with Flow, then with Narrate at 1.00x, sampling the cursor word as FLOW- and NARRATE-SAVE-AS-YOU-GO-1's probes do. On the tip, the snapshot after the first Escape and the stored position are the last sampled cursor word before the pause (for Narrate, it or the next word). `<base>`: 8723, recorded.
        - **(P7, O4, kill while playing):** open at 8723, switch to Focus, Play at 300 words a minute for about 12 s with no input, then kill. Read `library.json` 4 s later and reopen.
          - The tip: the stored position is at or behind the last word read, by no more than `ceil(300 / 10)` (30) words: one interval, main's 500 ms debounce and one word. There is no stored cfi. The save hook saw two saves, each with a `null` cfi. The reopen's first shown range contains the stored position.
          - `<base>`: the control. The stored pair is still 8723 and its cfi, and the hook saw no save. Recorded.
@@ -427,6 +486,8 @@
      - `M src/reader/modes/flow/helpers/usePersistentReadingAnchor.ts`
      - `M src/reader/modes/narrate/helpers/usePersistentReadingAnchor.ts`
      - `M src/reader/modes/focus/ModeRuntime.ts`
+     - `M src/reader/modes/flow/ModeRuntime.ts` (Wave C step 6, one export line)
+     - `M src/reader/modes/narrate/ModeRuntime.ts` (Wave C step 6, one export line)
      - `M src/reader/modes/page/helpers/persistentReadingAnchor.ts`
      - `M src/reader/modes/page/ModeRuntime.ts`
      - `M src/reader/modes/page/useModeBindings.ts`
@@ -439,25 +500,27 @@
      - `A tests/cfiPositionConsistency.shell.test.tsx`
      - `A tests/readerModes/cfiPositionConsistency.test.ts`
 
-     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's view or bindings, Flow's or Narrate's runtime, view or bindings, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx`, `src/hooks/useReader.ts`, `tests/readerModes/harness/` or `docs/planning/roadmap-reviews/reader-mode-separation-2/`.
+     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's view or bindings, Flow's or Narrate's runtime beyond step 6's export line, their views, bindings, engines or helpers beyond Wave A, `page/ModeState.ts`, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx`, `src/hooks/useReader.ts`, `tests/readerModes/harness/` or `docs/planning/roadmap-reviews/reader-mode-separation-2/`.
   10. **Merge-tree check:** `git merge-tree` of the tip against `origin/main` is clean at the merge go. A conflict in a fenced file goes to Blurby.Roadmap before resolution.
   11. **Owner, added to gate (2)'s list:**
       - after a chapter jump, quit and reopen: the book opens in the jumped-to chapter;
       - a book that had only a saved word opens at that word, after "Loading book..." and with no jump;
       - Narrate after a reopen starts at the saved word's sentence;
       - read in Focus for a while, then close the app any way at all: the book reopens within a few seconds' reading of where Focus was;
-      - pause in Focus and reopen: the book opens at the paused word.
+      - pause in Focus and reopen: the book opens at the paused word;
+      - "Escape from Focus, Flow or Narrate lands where I stopped." (O6; Brain1's gate (2) row.)
 - **Effort:** M, in four waves (A, B, C, D; each about 40 tool uses or fewer, and each its own dispatch). Technical effort: medium for A, C and D, high for B.
 - **Owners:**
-  - Blurby.Brain1 ruled B1–B18 and C1–C3, rules STOP-CLOSE-focus, and confirms the rule 53 pair;
+  - Blurby.Brain1 ruled B1–B18, C1–C3 and STOP-CLOSE (option (A)), rules STOP-LAND-focus and STOP-PAGE-BUTTON, and confirms the rule 53 pair;
   - RodneySr implements, tests and probes; Rodney runs the arm64 launch;
   - spec-compliance, then quality review;
   - Blurby.Roadmap grants the integration window, gives the merge go and closes it out.
 - **Merge order:**
-  - after NARRATE-ARRIVAL-SYNC-1, gate (1) run 6 and CHAPTER-STEP-CFI-1;
+  - after NARRATE-ARRIVAL-SYNC-1, gate (1) run 6 and CHAPTER-STEP-CFI-1; Wave C also after BLOCK-TEXT-ORDER-1's merge (Brain1's O6 ruling);
   - before FLOW-TOC-JUMP-WORD-1 (Seq 110), FURTHEST-PERSIST-1 (Seq 114; `main/ipc/documents.js`, `src/hooks/useLibrary.ts`, `src/types.ts`) and FOCUS-PAUSED-HANDOFF-1 (Seq 118). Each re-greps after this lands.
   - Any later item that edits `src/reader/modes/page/FoliateView.tsx` or `page/ModeRuntime.ts` re-greps the hold's lines. Any later item that edits `focus/ModeRuntime.ts` (FOCUS-PAUSED-HANDOFF-1 among them) re-greps `saveProgressWord` and keeps its calls in `pause()`, `togglePlay()`, `stop()` (after `stopEngine()`, not on `"teardown"`) and `commitShared`.
   - FLOW-SAVE-AS-YOU-GO-1 (Seq 97.6) and NARRATE-SAVE-AS-YOU-GO-1 (Seq 97.7) rely on Wave C's release list and make no broker edit. Any later item that edits `src/reader/ports/createReaderPorts.ts` keeps both entries.
+  - Both also rely on Wave C step 6's export line and make no `exportHandoff` edit. They edit `flow/ModeRuntime.ts` and `narrate/ModeRuntime.ts` after this merges, in Seq order, so each re-greps the line and keeps it. Any later item that edits a playback mode's `exportHandoff` keeps `"persistent"` reporting `s.canonicalWordIndex`.
   - TOC-FRAGMENT-WORD-1's `ReaderContainer.tsx` window does not overlap this one.
   - The Focus, Flow and Narrate restamp items (Seq 111–112) edit only their own `FoliateView.tsx`, so they do not conflict.
 - **Path:** dispatch (four waves).
@@ -494,7 +557,7 @@ Everything else stands as recommended:
 
 B14–B18 are also ruled as general rules G1–G8 for every playback mode. They apply here to Focus, and to FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1.
 
-**Queue:** Waves A–D go behind BLOCK-TEXT-ORDER-1's Waves A and B, and after CHAPTER-STEP-CFI-1 merges.
+**Queue:** Waves A–D go behind BLOCK-TEXT-ORDER-1's Waves A and B, and after CHAPTER-STEP-CFI-1 merges. Wave C runs after BLOCK-TEXT-ORDER-1's merge (Brain1's O6 ruling: BLOCK-TEXT-ORDER-1's Wave B holds the Focus window).
 
 ##### Blurby.Brain1 rulings on C1–C3 (2026-11-03, binding)
 - **C1, accepted with one condition.** Wave C adds `persistence.updateDocProgress` and `persistence.updateProgress` to `READER_PORT_RELEASE_CALLS` (`src/reader/ports/createReaderPorts.ts:46-49`), once, for all three playback modes. The isolation rows that pin the list get a named exception to standing rule 50, and only the list entry changes.
@@ -513,9 +576,57 @@ B14–B18 are also ruled as general rules G1–G8 for every playback mode. They 
 - **STOP-Q5a** (the Narrate engine's word-at-sample query) is Narrate's alone. Focus is unchanged by it.
 - **Unmount-skip is confirmed.** On stop reason `"teardown"`, Focus skips the exit save and makes no call the broker would reject. Already in design 9 ("Not on unmount"), Wave C step 2 (`stop()`) and row f11; no change.
 - **The close row is added to Wave C as f13:** play about 12 s so a timed save writes W, then close the reader by the normal close path; the stored word is not older than W.
-- **The investigation found it fails** (Why, "The close save's word does not follow Focus's displayed word"). Per the ruling, no fix is designed here. STOP-CLOSE-focus below goes to Blurby.Brain1, and this spec stays not dispatch-ready until it is ruled. Waves A and B do not depend on the answer; whether they may run before it is Blurby.Roadmap's call.
+- **The investigation found it fails** (Why, "The close save's word does not follow Focus's displayed word"). Per the ruling, no fix is designed here. STOP-CLOSE-focus below goes to Blurby.Brain1, and this spec stays not dispatch-ready until it is ruled. Waves A and B do not depend on the answer; whether they may run before it is Blurby.Roadmap's call. (Ruled (A) on 2026-11-03; see the next section.)
 
-##### STOP-CLOSE-focus (open; for Blurby.Brain1 before Wave C)
+##### Blurby.Brain1 ruling on STOP-CLOSE and owner ruling O6 (2026-11-03, binding)
+Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.ESCAPE-LANDS-AT-PLAYBACK-1.2026-11-03.md`, including its "Superseded on placement" section.
+- **Owner ruling O6, "Where I stopped".** You start Focus, Flow or Narrate at word 100, read to 500 and press Escape. Page shows 500's page, and the book reopens there.
+- **Blurby.Brain1, technical option (A).** Each mode's `exportHandoff("persistent")` reports its committed playback word as `publishedWordIndex`. It is mode-local in each runtime: one commit per runtime, and nothing in the router, the orchestrator or shared core, and no sibling import. Narrate: the exact engine cursor word. Focus: the displayed word. Flow: the reading cursor.
+  - **"Committed"** means the latest of the playback word and any user-intent commit since then. A click while paused wins. `canonicalWordIndex` is exactly that: each advance and each user-intent commit writes it, and the later write stands (design 10).
+  - **Narrate hands over the word itself.** The sentence-start rule (O3) applies when playback restarts, not when Page lands. Design 10 hands over the cursor word, never `sentenceStartAt`'s word.
+  - **Rejected (B):** it hides a wrong landing behind the save, and O6 rules it out.
+  - **Rejected (C):** it churns the router snapshot every 5 s.
+- **Placement.** Brain1 accepts the fold into CPC-1 Wave C, so no separate item (ESCAPE-LANDS-AT-PLAYBACK-1) is registered. Wave C makes the export change in all three runtimes, one commit per mode (step 6). FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1 build on it, make no `exportHandoff` edit, and keep their close rows (fl15, n19) as regression rows.
+- **Fence and STOP condition.** The fence is the three `ModeRuntime.ts` files plus the tests. If Page's landing needs anything outside them, STOP to Brain1 with the lines. It does for Focus: that is STOP-LAND-focus, below.
+- **Order.** Wave C runs after BLOCK-TEXT-ORDER-1's merge, because BLOCK-TEXT-ORDER-1's Wave B holds the Focus window. Waves A and B are independent of this ruling.
+- **Rule 53:** the package pair (Done-when 8).
+- **Owner gate (2) row:** "Escape from Focus, Flow or Narrate lands where I stopped." (Done-when 11.)
+- **The field** (design 10; Why, "Each runtime's committed playback word"): `s.canonicalWordIndex` in each runtime, at Focus `focus/ModeRuntime.ts:672`, Flow `flow/ModeRuntime.ts:836` and Narrate `narrate/ModeRuntime.ts:422`.
+  - Focus: the word the last advance displayed and committed (`:1041`, `:1053-1058`).
+  - Flow: the word timer's word, committed at each advance (`:1316-1321`).
+  - Narrate: the last cursor the engine published at the heard sample (`onEngineCursor`, `:732`; `tick()`, `narrateEngine.ts:333-348`). That is rule #31's exact cursor word. `getSnapshot().cursor` is stale after a restart (FLOW- and NARRATE-SAVE-AS-YOU-GO-1, Q4), and `wordAtPlaybackSample()` is a timer read, so neither is used.
+  - A click while paused commits through `commitShared` with `publishState: true`, which writes the same field, so the reported word is the clicked word.
+- **Rows:** f14–f29: Brain1's rows 1–5 for each mode (Focus f14–f18, Flow f19–f23, Narrate f24–f28) and row 6 for Narrate (f29). Rows 1 and 2 are split with Brain1's wording. Rows 1 and 2 are probe P4's route, and P4's text is aligned to them. Row f13 now passes through row 2's mechanism.
+- **Pinned rows:** none (Wave C step 6). No rule-50 exception is named.
+- **Not covered by (A), found while folding it (2026-11-03):** STOP-LAND-focus (Page's view after Escape from Focus) and STOP-PAGE-BUTTON (the bottom bar's Page button), both below. They hold Wave C.
+
+##### STOP-LAND-focus (new 2026-11-03; open; for Blurby.Brain1 before Wave C)
+- **Question.** This is the ruling's own STOP condition: Page's landing needs lines outside the three `ModeRuntime.ts` files. O6 and Brain1's row 1 say Page shows 500's page. Option (A) fixes the word Page holds and stores, but not the page Page's view opens on. After Focus, that page is the one Focus was entered at. How should Page land after an Escape from Focus?
+- **The lines** (all at `14ce3d24`):
+  - A handover opens Page's view at the handed-over cfi: `initialCfi` from `handoff.cfi` (`page/ModeRuntime.ts:167`), then `view.init({ lastLocation: initialCfi })` (`page/FoliateView.tsx:881-882`). Wave B's hold settles a handover at once with this same choice (design 4).
+  - Page paints the handed-over highlight with `allowMotion: false` (`paintArrivalCursor`, `page/ModeRuntime.ts:547-552`). The view scrolls to a word only when motion is allowed (`page/FoliateView.tsx:490`). Page's resume anchor, seeded from the highlight (`page/ModeState.ts:40`), then skips its load-time word jump (`page/ModeRuntime.ts:505-510`).
+  - Focus's `cfi` changes only on a relocate (`focus/ModeRuntime.ts:870-873`). Its view moves only to follow a section (`syncSection`, `:975-987`), because Focus advances its word display alone (`jumpDisplayToWord`, `:1225-1228`).
+  - So after Focus reads from 100 to 500 in one section, Page opens on the page of word 100 (or the section's first page after a section crossing), with 500 highlighted off screen. The stored word and the reopen are right (row f15); the page shown in between is not, so row f14 cannot pass for Focus. A page turn there would then save that page's first word (`onPageTurned`, `page/ModeRuntime.ts:579-599`).
+- **Flow and Narrate.** Their views follow the cursor, so their `cfi` is their view's last relocate. Narrate turns the page to the spoken word (`narrate/ModeRuntime.ts:735-739`, `followSpokenSection`) and records each relocate's cfi unless browsing (`:532-535`). Flow's scrolled view relocates as lines scroll (`flow/ModeRuntime.ts:1049-1052`), so Page opens on the page holding the view's top, which is the cursor's page or the one before it. Probe P4's Flow and Narrate runs record it.
+- **Options:**
+  - **(a)** Page's arrival by `exitToPage` lands on the handed-over word with `jumpFoliateToWordAnchor`, as `jumpBack` does (`page/ModeRuntime.ts:362-368`), when the opened page does not show it. The relocate it causes falls under the resume anchor, so it saves nothing (LL-030). This is a Page change, outside (A)'s "mode-local in each runtime", and it serves all three modes.
+  - **(b)** Focus's persistent export also sends `cfi: null` when it reports a word its `cfi` was not recorded with, and Wave B's open target treats a handover with no cfi and a loaded map as a word target (design 5's landing). Focus and Page change; Flow's and Narrate's cfi stay.
+  - **(c)** Accept it. Page shows the old page, and the stored word and the reopen are right. It becomes a finding.
+- **Recommendation: (a).** It reuses the jump-back helper Page already has, adds no export field, and also closes Flow's one-page gap. Its lines would join Wave C's fence (`page/ModeRuntime.ts`, which Wave B already edits).
+
+##### STOP-PAGE-BUTTON (new 2026-11-03; open; for Blurby.Brain1 before Wave C)
+- **Question.** The ruling's Defect section says the pause-to-page exit, `"capture-current"`, "already hands over the playback word", and its row 5 keeps that exit unchanged as a control. It hands the word over as the highlight only. The route is the bottom bar's Page button, not Space. Knowing that, should row 5 stand (option (b)), or should (A) also apply to `"capture-current"` (option (a))?
+- **The lines** (all at `14ce3d24`):
+  - The bottom bar's Page button (`src/components/ReaderBottomBar.tsx:336`; `ReaderContainer.tsx:643-645`) calls `router.pauseToPage()`, a `"capture-current"` transition (`useReaderModeOrchestrator.ts:346-353`). Space is `togglePlay` (`src/hooks/useKeyboardShortcuts.ts:269`), not this route.
+  - `"capture-current"` sets the highlight to the engine's word (Focus `:666-668`, Flow `:830-832`, Narrate `:416-418`) but still hands over `s.publishedWordIndex` (Focus `:672`, Flow `:836`, Narrate `:422`). Page copies it (`page/ModeState.ts:33`), and the router snapshot reads it (`useReaderModeOrchestrator.ts:258`).
+  - So read to 500, press the Page button, then Escape: the close save writes the entry word (`ReaderContainer.tsx:615`, `:625-626`). With Wave C, Focus's stop save writes 500 first (`"mode-switch"`), and the close then overwrites it. Flow's and Narrate's saves as you go meet the same.
+- **Pinned rows.** Extending (A) to `"capture-current"` changes recorded values in both B0 replays: their completion observations (`publishedWordIndex: 7`, `focus.behavior.test.tsx:63-65`, `flow.behavior.test.tsx:68-70`) and each `selectMode` `page` observation (`fixtureReplay.tsx:316`). That is more than one value per replay, so the planner cannot fold it under a rule-50 exception.
+- **Options:**
+  - **(a)** Report `s.canonicalWordIndex` for both captures, with a Brain1-named rule-50 exception for the replay observations, and Brain1's row 5 (f18, f23, f28) turned into a Page-button-then-Escape row that hands over the playback word.
+  - **(b)** `"persistent"` only, as ruled, with row 5 (f18, f23, f28) as written. The Page-button route becomes a finding.
+- **Recommendation: (a).** Where the reader stopped should not depend on which control left the mode, and under (b) this route undoes every save as you go.
+
+##### STOP-CLOSE-focus (ruled (A) 2026-11-03; kept as the record)
 - **Question.** On the normal close path (Escape twice; Why, "The reader's real close route from Focus"), the close save writes Focus's `publishedWordIndex`, which the displayed word never moves. After Wave C's timed save of W, the close overwrites W with the word Focus was entered at, or the last click or navigation. How should the close save treat a session that left a playback mode? Row f13 cannot pass until this is ruled, and probe P4's tip expectation (the paused word) conflicts with the same trace. The planner designs no fix here, per Brain1's instruction.
 - **The lines** (all at `14ce3d24`):
   - `src/components/ReaderContainer.tsx:437`: `const canonicalWordAnchor = toolbar?.currentWordIndex ?? (activeDoc.position || 0);`
@@ -577,5 +688,6 @@ Questions B14–B18 are what O4 leaves open after Brain1's binding rulings. Each
 - **LL-165:** the scratch profile is proved before the first input, and the live profile's hashes are unchanged.
 - **LL-169:** the hold's timer and promise end with the runtime (`stop()`, `destroy()`), and the view checks `cancelled` after each await, separately from the target's own settle-once guard. Focus's saves as you go add no timer: the interval is checked on each word advance. `stop()` saves once, synchronously, after `clearTimers()` and `stopEngine()`, inside the teardown window (C1). Row f10 proves nothing it left behind saves afterwards.
 - **LL-109:** no continuation saves after release. The exit save is synchronous inside `broker.teardown`, and the broker rejects anything later (row f10).
+- **LL-108:** the hand-off word comes from each mode's own playback truth, its committed canonical word, never the view's page or a fraction (design 10). For Narrate it is the last published cursor, never a timer read (rule #31).
 - **Standing rule 55 (promoted from LL-166):** verdicts come from saves, `library.json`, visible word indices and request words, not screenshots.
 - **Standing rule 53 (promoted from LL-167):** package verification, with Blurby.Brain1's confirmation before the merge go.

@@ -395,3 +395,17 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. CFI-POSITION-CONSISTENCY-1 Wave C fixes it: each mode's `exportHandoff("persistent")` reports its committed playback word, one mode-local commit per runtime. FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1 build on it. Owner smoke for gate (2): read in Focus, press Escape twice, reopen, and check it opens at the last word read.
 
 **Disposition:** open; scheduled (CFI-POSITION-CONSISTENCY-1 Wave C)
+
+### F-024 — A Narrate passage that fails while the window is hidden hands over a stale word (NARRATE-SAVE-AS-YOU-GO-1 fold-in, 2026-11-03)
+
+**Source:** planner, folding Blurby.Brain1's STOP-CLOSE ruling into NARRATE-SAVE-AS-YOU-GO-1 (2026-11-03).
+
+**Severity:** low
+
+**Where:** `src/reader/modes/narrate/ModeRuntime.ts` (`onEngineState` failure path; the persistent export at `:422`, at `14ce3d24`)
+
+**Finding:** while hidden, the cursor is published only on animation frames, which a hidden window doesn't get. The timed saves read the sample, but the committed cursor word lags. If a passage fails while hidden, the hand-off and the close carry that last painted word, behind the timed saves.
+
+**Accountable role / next action:** planner. Re-check after NARRATE-SAVE-AS-YOU-GO-1 merges; specify a fix only if a probe shows the close landing behind the last timed save.
+
+**Disposition:** open; no item
