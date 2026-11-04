@@ -279,3 +279,17 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Read NARRATE-ARRIVAL-SYNC-1's memo for the clamp's source line once it is pushed. Then either specify a Reader Engine item or close the finding as the intended sentence-start rule.
 
 **Disposition:** open
+
+### F-016 — Flow and Narrate save nothing while the cursor stays on one page during playback (CFI-POSITION-CONSISTENCY-1 investigation, 2026-11-03)
+
+**Source:** CFI-POSITION-CONSISTENCY-1 specification investigation at `origin/main` `c5bb507f`, on Blurby.Brain1's request (O4, Focus "save as you go").
+
+**Severity:** low to medium (a quit or crash mid-page loses the words read on that page)
+
+**Where:** Flow's relocate-driven save (`src/reader/modes/flow/ModeRuntime.ts:1078`, 2 s debounce; word advances commit without saving at `:1316`; save guards `:1054-1069`); Narrate's (`src/reader/modes/narrate/ModeRuntime.ts:528`; advances `:709`; guards `:519-520`)
+
+**Finding:** both modes persist progress during playback only when the page moves (a relocate), and then only past their resume-anchor, engagement and browsing checks. Focus had the same gap; the owner ruled "Save as you go" (O4) for Focus only, which CFI-POSITION-CONSISTENCY-1 Wave C restores. Flow and Narrate were deliberately left out of that item.
+
+**Accountable role / next action:** planner. Ask the owner whether O4 extends to Flow and Narrate. If it does, specify one mode-local item per mode after CFI-POSITION-CONSISTENCY-1, reusing its cadence and the null-cfi rule.
+
+**Disposition:** open

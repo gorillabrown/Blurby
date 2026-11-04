@@ -1,25 +1,29 @@
-#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O3; cited against `origin/main` `c5bb507f`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
+#### CFI-POSITION-CONSISTENCY-1 — A saved word and its saved page never disagree, so a book reopens where you left it *(Seq 97.5; Full Spec 2026-11-03, revised the same day for the owner's rulings O1–O4 and Blurby.Brain1's O4 rulings; cited against `origin/main` `c5bb507f`; Reader Engine; Blurby.Brain1 finding and ruling of 2026-11-03; serialized after CHAPTER-STEP-CFI-1 (Seq 97); needs a shared-core integration window; not a release gate)*
 
 - **What:**
   - Every save that writes a word (the position) also writes the page of that word (the cfi), or clears the stored cfi.
   - A cold open of an EPUB at a saved word waits, behind the existing "Loading book..." state, until the book's word map is ready. It then opens straight on the saved page if that page holds the saved word, and otherwise on the saved word itself. There is no visible jump afterwards.
   - Narrate, reopened at a saved word, starts Play at the first word of that word's sentence.
+  - Focus saves the word as you read (O4): every 5 s while it plays, and once more on pause, stop and mode exit, each time only if the word has changed since its last save. Each Focus save sends an explicit `null` cfi, so the stored page is cleared and the pair never disagrees. Focus has no sentence-start rule: it resumes at the saved word itself.
   - **Out of scope:**
     - CHAPTER-STEP-CFI-1's landing save itself (Seq 97). This item builds on it.
     - Contents entries that point inside a section (TOC-FRAGMENT-WORD-1) and Flow's cursor after a jump (FLOW-TOC-JUMP-WORD-1).
     - Mode handovers (`handoff.source != null`), including Narrate's `arrivalSyncOwed` (NARRATE-ARRIVAL-SYNC-1). They are unchanged. The hold is cold-open only.
-    - Focus, Flow and Narrate views. A cold open always mounts Page (`src/reader/useReaderModeOrchestrator.ts:336-341`), so only Page's view holds.
+    - Focus, Flow and Narrate views. A cold open always mounts Page (`src/reader/useReaderModeOrchestrator.ts:336-341`), so only Page's view holds. Focus's runtime is in scope for O4 only (Wave C).
+    - Flow's and Narrate's saves during play. They are a finding only (Flow and Narrate finding below), not changed here.
+    - The orphaned `RSVP_PROGRESS_SAVE_WORD_DELTA` (`src/constants.ts:170`). O4's save is time-only, so it stays unused and is a finding (question B14).
     - Repairing stale pairs already in a user's `library.json`. The hold corrects what the reader sees; the stored pair is fixed by the reader's next real save (LL-030: no save without engagement).
     - A main-process cache of the word map (question B12).
     - The standalone reader window (`src/App.tsx:76`, `src/hooks/useReader.ts:180`), pending question B6.
     - The legacy, test-only copies `src/hooks/usePersistentReadingAnchor.ts` and `src/utils/persistentReadingAnchor.ts`. The live app does not import them.
-    - Focus Play under CDP input in the package. Brain1 owes that check separately.
     - `preload.js`. Its `updateDocProgress` already forwards a `null` third argument unchanged.
   - **Outcome:**
     - On *Meditations*: Page at word 8723, one page turn, then Flow, then "Next chapter", then quit. `library.json` holds a position and either no cfi or a cfi in that position's section. The reopen's first shown range contains the saved position.
     - A library seeded with the old stale pair (11652 with a spine-4 cfi) reopens with 11652's section as the first thing shown.
     - A library seeded with position 8723 and no cfi reopens with a range containing 8723 as the first thing shown.
     - Reopened at a word in the middle of a sentence, then Narrate and Play: the first word requested is that sentence's first word.
+    - Focus Play for about 12 s, then the app is killed with no graceful quit. The reopen shows a word within one save interval of the last word read, and the stored cfi is absent.
+    - Focus Play, then pause, then reopen: the book opens at the paused word.
 - **Why** (Blurby.Brain1 ruling, `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`; Amendment 3 of `Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md`; RodneySr repro on the `c5bb507f` x64 package, evidence `C:\Projects\Blurby-artifacts\narrate-arrival-sync-1\repro-base\` on RodneySr):
   - **R2, confirmed live.** Page at 8723, one turn (saved 9758 with a spine-4 cfi), Flow, "Next chapter" (view on spine 5, words 11652–11733), quit. `library.json` then holds 11652 with the spine-4 cfi. The reopen shows 9758–9870, a chapter behind.
   - **Cause, at `c5bb507f`:**
@@ -27,7 +31,18 @@
     - The commit saves `options.cfi ?? state.cfi ?? undefined` (`helpers/usePersistentReadingAnchor.ts:99` in Focus, Flow and Narrate; `:100` in Page). `state.cfi` is the previous page's cfi.
     - `main/ipc/documents.js:22-24` sets the position, and sets `doc.cfi` only when a cfi is given (`if (cfi) doc.cfi = cfi`). There is no way to clear it. The library copy does the same (`src/hooks/useLibrary.ts:162-167`), and the port bridge forwards a cfi to it only when truthy (`src/components/ReaderContainer.tsx:313`).
     - Reopen prefers the cfi: `resolveBookOpenInitialCfi` returns `cfi || null` and ignores the word (`page/helpers/persistentReadingAnchor.ts:64-71`, called at `page/ModeRuntime.ts:167`). `page/FoliateView.tsx:881-894` then calls `view.init({ lastLocation })`.
-  - **R1, unproven candidate.** On close or finish, `_persistAndLog` (`src/hooks/useProgressTracker.ts:243-259`) pairs the final word with `lastRelocateCfiRef`. That ref is set only by the relocate save (`ReaderContainer.tsx:330`), with no record of its word. Focus advancing words with no relocate, a suppressed relocate save, or a quit inside the debounce would save a new word with an old cfi. With no relocate at all it sends no cfi, and main keeps the stored one.
+  - **R1, unproven candidate, not yet exercised.** On close or finish, `_persistAndLog` (`src/hooks/useProgressTracker.ts:243-259`) pairs the final word with `lastRelocateCfiRef`. That ref is set only by the relocate save (`ReaderContainer.tsx:330`), with no record of its word. Focus advancing words with no relocate, a suppressed relocate save, or a quit inside the debounce would save a new word with an old cfi. With no relocate at all it sends no cfi, and main keeps the stored one.
+    - Brain1's RodneySr idle checks (Update of 2026-11-03 to the CFI ruling) found that Focus Play works in the package, so it is not a regression and no longer blocks probe P4. R1 itself has still not been exercised.
+    - **The reader's real close route from Focus**, at `c5bb507f`:
+      - Escape, from the keyboard handler `src/hooks/useKeyboardShortcuts.ts:242` (`s.exitReader()`; keys pressed in the book's frame reach it through `focus/FoliateView.tsx:931-933`), or the "ESC" button (aria-label "Exit reader", `focus/ModeView.tsx:228-232`). That button sits in Focus's overlay, which renders only while Focus plays on an EPUB (`focus/ModeView.tsx:304`). Paused, only the key remains.
+      - Both reach `handleExitReader` (`ReaderContainer.tsx:614-630`, wired at `:742-745`). Outside Page it calls `handleExitToPage()` (`:627-629`, `router.exitToPage()`, `src/reader/useReaderModeOrchestrator.ts:133`) and saves nothing.
+      - A second Escape, now in Page, runs `checkBacktrack` (`:624`, which can show the backtrack prompt when the reader is behind the furthest mark) and then `finishReading(exitAnchor)` (`:625`). That is the close save, `_persistAndLog`, R1's path.
+      - So R1's route is Escape twice. Probe P4 drives it with native Escape key events (`windowsVirtualKeyCode` 27), never a synthetic DOM event.
+  - **Focus saves nothing while it plays or is paused (O4).**
+    - Every Focus word advance commits with `persist: false` (`focus/ModeRuntime.ts:1053`, in `onEngineWordAdvance`, `:1038`). `pause()` (`:591`) and the pause branch of `togglePlay()` (`:613`) only publish the highlight (`captureCurrentAnchor`, `:1140`). `stop()` (`:629`) saves nothing. Focus moves the word display only (`jumpDisplayToWord`, `:1225`), so its view does not relocate and the relocate save never fires.
+    - So a Focus session reaches `library.json` only through the close save in Page, and a crash or kill loses all of it.
+    - **This is a regression, not a design.** The legacy hook `src/hooks/useDocumentLifecycle.ts` saved every `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5000 ms) or `RSVP_PROGRESS_SAVE_WORD_DELTA` (50 words) while Focus played. The shell cutover of READER-MODE-SEPARATION-2 (`3dd4b504`) copied only that hook's shell half, and NARRATE-REMOVE-1 deleted the dead file (`0c89dd79`). Both constants remain in `src/constants.ts:168` and `:170`, with no user.
+    - Focus has no sentence-start rule. Nothing in `focus/ModeRuntime.ts` calls `sentenceStartAt`; "sentence" appears only as the sentence-step key command (`:788-789`). A Focus resume starts at the saved word itself.
   - **Position-only open.** With no cfi, `page/FoliateView.tsx:884-894` calls `goToFraction(position / wordCount)`. On the repro this landed about 830 words late (8723 → 9552–9698). Page never moves to the word afterwards: it skips its word jump while the book-open `resumeAnchor` is set (`page/ModeRuntime.ts:505-510`).
   - **The word map is never ready at a cold open today.** That is why every check must wait for it.
     - `ReaderContainer` is mounted only while a book is open (`src/components/LibraryContainer.tsx:558-563`). Its map cache is per instance (`ReaderContainer.tsx:196-200`; the module-level cache was removed, Q-D).
@@ -41,6 +56,7 @@
   - Close and finish: `src/hooks/useProgressTracker.ts:255-259` (R1).
   - Consistent, no change needed: hard selections with the click's cfi (Page `:327-328`, Focus `:733`, Flow `:903`, Narrate `:461`); Page's turn save (`page/ModeRuntime.ts:590-595`) and held-click save (`:615`); the relocate save (`ReaderContainer.tsx:323-336`). An empty click cfi falls through the anchor fallback above.
   - Position-only, off-EPUB only: `useProgressTracker.ts:235`.
+  - New with O4 (Wave C), consistent by construction: Focus's saves as you go send an explicit `null` cfi.
   - Standalone reader window, position only: `src/App.tsx:76`, `src/hooks/useReader.ts:180` (question B6).
 - **What CHAPTER-STEP-CFI-1 already fixes, and what stays here.** CHAPTER-STEP-CFI-1 (amendment 1; full specification `docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md`):
   - **Covers:** in Focus, Flow and Narrate on an EPUB, `navigateTo` only records `pendingJumpWord`. The landing commits the entry's word with the landed cfi (`completeLanding`), and a jump that never lands saves nothing. That covers every contents jump and every Previous/Next chapter step, the path R2 took (`handleJumpToChapter`, `ReaderContainer.tsx:648-667`, the only `navigateTo` caller). After it, R2's exact steps save a consistent pair.
@@ -59,7 +75,21 @@
     - The saved word's global index then lies past its end, so the start becomes the first visible word (`:316-320`).
     - `sentenceStartAt` returns an out-of-range index unchanged (`chunkPlan.ts:80`).
   - With O2's hold, the map is loaded before the book is shown, so a reader can't reach Narrate without it on the normal path. The two remaining edges are a hold that ended by failure or timeout, and a mode switch during the hold. They are question B13.
-- **Design decisions** (planner proposal for Blurby.Brain1 to confirm; questions B1–B5 and B8–B13):
+- **Flow and Narrate finding (finding only; no change in this item).**
+  - Flow and Narrate save during play only through the relocate save: Flow `flow/ModeRuntime.ts:1078`, Narrate `narrate/ModeRuntime.ts:528`, both `scheduleRelocateSave`, debounced by `FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS` (2000 ms). Their word advances commit with `persist: false` (Flow `:1316`, Narrate `:709`).
+  - So their saves follow page movement, not time. While the cursor moves within one page, or while the relocate handler returns before its save (its resume-anchor, engagement and browsing guards: Flow `:1054-1069`, Narrate `:519-520`), nothing is saved, and a kill loses that span. It is the same gap as Focus's, narrower because their views move.
+  - Blurby.Roadmap registers it as a finding in `docs/governance/Findings.md`, for an item that applies O4's rule to Flow and Narrate if the owner wants it there too.
+- **Write cost of a save, traced at `c5bb507f`.**
+  - The renderer's `updateDocProgress` reaches `ipcMain.handle("update-doc-progress")` (`main/ipc/documents.js:15-31`). It mutates the in-memory doc (`:23-27`), then calls `ctx.saveLibrary()` (`:28`) and, with a position, `syncQueue.enqueue("update-progress")` (`:31`).
+  - `saveLibrary` (`main.js:120-131`) only marks the library dirty and arms a single timer of `LIBRARY_SAVE_DEBOUNCE_MS` (500 ms, `main/constants.js:155`). When it fires, the whole `library.json` is written once from memory. Saves inside one window coalesce into one write. `saveLibraryNow` (`main.js:132-136`) is the immediate form; the quit flush calls it (`main.js:643`, `:648`).
+  - `enqueue` (`main/sync-queue.js:169-182`) pushes an entry and calls `saveQueue` (`:53-56`), which rewrites the whole `sync-queue.json` with no debounce, compacting above 200 entries.
+  - **At O4's cadence**, a Focus session adds at most one `library.json` write and one `sync-queue.json` write per 5 s: 12 of each a minute. That is the legacy rate before `3dd4b504`, below the relocate save's 2 s debounce in Flow and Narrate, and far below the debounce's own ceiling of two writes a second.
+  - **Crash window:** a kill within 500 ms of a save loses that save, so the stored word can trail the word read by up to one interval plus 500 ms plus one word (question B16).
+- **LIBRARY-WRITE-RACE-3 and O4.**
+  - LIBRARY-WRITE-RACE-3 is Seq 89, a Full Spec in `ROADMAP.md` (`:863`), with its post-RC amendment `docs/planning/specs/2026-11-03/LIBRARY-WRITE-RACE-3.post-rc-amendment.md`. It is not merged: `origin/main` carries only LIBRARY-WRITE-RACE-1 and 2 (`2b2b41a5`).
+  - Its race is the renderer's library edits, which stamp fields the reader did not change (W2). Those edits can set only `RENDERER_FIELDS` (`main/ipc/library.js:44`: `unread`, `seenAt`, `tags`, `collection`; merged by `mergeRendererEdits`, `:57`, behind `save-library`, `:79`). `position` and `cfi` are main's alone, written only through `update-doc-progress` into the single in-memory library that one debounced writer saves.
+  - **Chosen option: route O4 through the existing debounced path**, `update-doc-progress` and `saveLibrary`, with no LIBRARY-WRITE-RACE-3 prerequisite. A Focus save adds writes of fields no renderer library edit can carry, through the writer that already coalesces them, so it neither widens nor reopens that race. Making LIBRARY-WRITE-RACE-3 a prerequisite would hold this item behind the RC window for a race it does not touch. A new renderer-side debounce would add a second timer for what main already coalesces.
+- **Design decisions** (planner proposal for Blurby.Brain1 to confirm; questions B1–B5, B8–B13 and B14–B18; design 9 is Brain1's binding O4 ruling):
   1. **One contract for the cfi argument, everywhere it travels** (`documents.js`, the port, `ElectronAPI`, the library copy, the stub):
      - `undefined`: keep the stored cfi. Unchanged, so every existing caller behaves as today.
      - `null`: "this save knows no cfi for its word". Main sets the position, then clears the stored cfi unless the position is unchanged. An unchanged position means the stored pair still stands.
@@ -91,7 +121,17 @@
      - `src/types.ts:298` types `ElectronAPI.updateDocProgress`'s cfi as `string`.
      - The bridge in `ReaderContainer.tsx` passes the port's cfi into it (`:312`), drops a falsy cfi before the library copy (`:313`), and owns the relocate ref (`:271`, `:330`).
      - There is no type-honest way to carry `null` without editing both. **An integration window is requested** for `src/types.ts` and `src/components/ReaderContainer.tsx` from the cut to the merge. `src/utils/FlowScrollEngine.ts` is untouched.
-  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page already imports (`page/ModeRuntime.ts:13-16`).
+  8. **Mode isolation.** Each mode's anchor helper is edited in its own copy (Wave A). The hold lives in Page's own files only (Wave B). Focus's saves as you go live in `focus/ModeRuntime.ts` only (Wave C). No sibling import, no shared mutable store, no new shared module. `src/constants.ts` is the shared constants file Page and Focus already import (`page/ModeRuntime.ts:13-16`, `focus/ModeRuntime.ts:16-23`).
+  9. **Focus saves as you go (O4; Brain1's binding O4 rulings).**
+     - **When:** at the first word advance at least `RSVP_PROGRESS_SAVE_INTERVAL_MS` (5000 ms, `src/constants.ts:168`, never a literal) after the last save or the start of play; and once more on pause, on the pause branch of `togglePlay`, and on `stop()`, which covers a mode switch, Escape to Page, the end of the book and teardown. Each fires only if the word differs from the last word saved.
+     - **What:** `ports.persistence.updateDocProgress(documentId, word, null)` then `ports.persistence.updateProgress(documentId, word)`, from one private method. The cfi is an explicit `null`, never `state.cfi`. Under design 1 main then clears the stored cfi whenever the word changed, so B1's rule holds.
+     - **Which word:** at an advance, the advanced word. On pause and stop, the engine's current word, the one `captureCurrentAnchor` publishes, read before `stopEngine()`.
+     - **Only after Play:** the last-saved word starts as the word Focus opened at, and nothing saves until the engine has run (Play marks engagement, `focus/ModeRuntime.ts:532`; LL-030). Selecting Focus and leaving without Play saves nothing.
+     - **No timer:** the interval is checked against `Date.now()` on each advance. Nothing new needs clearing on `stop()` (LL-169).
+     - **Only in the book's index space:** on an EPUB, only while the word map is loaded (`document.bookWords`); off EPUB always (question B15).
+     - **Reopen:** a Focus save stores a word and no cfi, so the reopen goes through design 4's hold to a word target and opens on that word. Focus has no sentence-start rule (Why), so a Focus resume starts at that word, not its sentence. Narrate's sentence-start rule (O3) still applies if the reader switches to Narrate.
+     - **Expected loss:** about 20–40 words at 250–480 words a minute, the interval's span, plus main's 500 ms debounce on a hard kill (B16).
+     - **Furthest mark:** each save raises keep-at-furthest's mark through the bridge's `noteHighWater` (`ReaderContainer.tsx:315`) with a `null` cfi (question B17).
 - **The change.** Line numbers are at `c5bb507f`. CHAPTER-STEP-CFI-1 and NARRATE-ARRIVAL-SYNC-1 move some lines, so the implementer re-greps every cited line at the cut (standing rule 36):
 
   ```
@@ -102,6 +142,8 @@
   git grep -n -E 'initialCfi|setLoading\(false\)|view\.init\(|goToFraction\(fraction\)|let cancelled' -- src/reader/modes/page/FoliateView.tsx src/reader/modes/page/useModeBindings.ts
   git grep -n -E 'private adoptDocument|select\(wordIndex|handleCommand\(command|jumpBack\(\): void|stop\(|FOLIATE_MIN_ENGAGEMENT_POSITION' -- src/reader/modes/page/ModeRuntime.ts
   git grep -n -E 'const clickedWord|sentenceStartAt\(|private effectiveWords' -- src/reader/modes/narrate/ModeRuntime.ts
+  git grep -n -E 'private onEngineWordAdvance|^  pause\(\)|^  togglePlay\(\)|^  stop\(|private captureCurrentAnchor|private stopEngine|private markEngaged|\} from "\.\./\.\./\.\./constants"' -- src/reader/modes/focus/ModeRuntime.ts
+  git grep -n -E 'RSVP_PROGRESS_SAVE_(INTERVAL_MS|WORD_DELTA)' -- src
   ```
 
   - **Wave A — contract and writers** (about 35 tool uses):
@@ -159,17 +201,29 @@
        - the `goToFraction` branch (`:884-894`) runs only when the target has neither a cfi nor a word;
        - just before `setLoading(false)` (`:1060`), for a word target: `await jumpFoliateToWordAnchor(viewApiRef.current, target.word); if (cancelled) return;`, imported from `./helpers/foliateAnchorNavigation`;
        - `initialCfi` stays a prop for the handover path; for Page it now only feeds the fallback target.
-  - **Wave C — gates, package and close-out** (about 35 tool uses): Done-when 4–10.
+  - **Wave C — Focus saves as you go, Focus only** (about 20 tool uses; needs Wave A's `null` contract):
+    1. `src/constants.ts:167-168`: keep `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000` and its value. Change only its comment to name Focus's saves as you go, this item and owner ruling O4. `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`) is left as it is (question B14).
+    2. `src/reader/modes/focus/ModeRuntime.ts`:
+       - add `RSVP_PROGRESS_SAVE_INTERVAL_MS` to the `../../../constants` import (`:16-23`);
+       - **fields:** `private lastSavedWord: number` (the word Focus opened at: `handoff.canonicalWordIndex`, set beside `initialCfi` in the constructor, `:425`), `private lastSaveAt = 0`, and `private playedSinceSave = false`;
+       - **`private saveProgressWord(word: number): void`:** returns unless `playedSinceSave` is set, `word !== this.lastSavedWord`, the word is at least 0, and either `!this.document.useFoliate` or `this.document.bookWords` is set (B15). Otherwise it calls `this.ports.persistence.updateDocProgress(this.document.documentId, word, null)` and `this.ports.persistence.updateProgress(this.document.documentId, word)`, then sets `lastSavedWord = word` and `lastSaveAt = Date.now()`;
+       - **`startEngine`** (`:1009`): on creating an engine, if `playedSinceSave` is false, set it and set `lastSaveAt = Date.now()`, so the first periodic save comes one interval after Play;
+       - **`onEngineWordAdvance`** (`:1038`): after the existing `persist: false` commit (`:1053`), `if (Date.now() - this.lastSaveAt >= RSVP_PROGRESS_SAVE_INTERVAL_MS) this.saveProgressWord(idx);`. The commit itself stays `persist: false`;
+       - **`pause()`** (`:591`) and **`togglePlay()`'s pause branch** (`:615-620`): right after `captureCurrentAnchor()`, `this.saveProgressWord(this.engine.getCurrentWord())`;
+       - **`stop()`** (`:629`): after `if (!this.alive) return;` and **before** `this.alive = false`, `if (this.engine) this.saveProgressWord(this.engine.getCurrentWord());`. `destroy()` reaches it through `stop("teardown")`, and a second `stop()` returns early, so nothing saves twice;
+       - a comment on `saveProgressWord` names this item, O4, `3dd4b504` as the regression and LL-030.
+    3. Nothing else in Focus changes: not its view, bindings, anchor helper (beyond Wave A) or engine. No other mode changes in Wave C.
+  - **Wave D — gates, package and close-out** (about 35 tool uses): Done-when 5–11.
 - **Prerequisites:**
   - NARRATE-ARRIVAL-SYNC-1 (Seq 88.5) merged, and gate (1) run 6 recorded.
   - CHAPTER-STEP-CFI-1 (Seq 97, amendment 1, `eb/chapter-step-cfi-1-r2`) merged. `<base>` is `origin/main` after that merge.
   - The `src/types.ts` and `src/components/ReaderContainer.tsx` integration window granted, with no other active sprint editing either file.
-  - Blurby.Brain1 confirms B1–B5 before Wave A, and B8–B13 before Wave B.
+  - Blurby.Brain1 confirms B1–B5 before Wave A, B8–B13 before Wave B, and B14–B18 before Wave C. Design 9 is already Brain1's binding ruling.
   - RodneySr has the canonical clone `C:\Users\estra\Projects\Blurby` with `node_modules`, the sample *Meditations*, and the `c5bb507f` x64 `--dir` package from `repro-base` (or rebuilds it with the same recipe). Rodney has its canonical clone for the arm64 build.
 - **Execution host:** RodneySr (x64) for the implementation, the tests, the packages and the probes. Rodney (arm64) only for the rule 53 arm64 launch.
 - **Branch:** `eb/cfi-position-consistency-1` at `C:\Users\estra\Projects\Blurby\.worktrees\cfi-position-consistency-1` on RodneySr. Create it with `git -C C:/Users/estra/Projects/Blurby worktree add -b eb/cfi-position-consistency-1 .worktrees/cfi-position-consistency-1 origin/main` after CHAPTER-STEP-CFI-1 merges. Push with `git push origin HEAD:refs/heads/eb/cfi-position-consistency-1`.
 - **Done when** (every command in `pwsh` from the worktree root):
-  1. **Red first (standing rule 43).** Commit these three files alone, before any source edit. Reach new names only through behaviour, so each file runs on `<base>`. The red commit need not typecheck; step 5 does.
+  1. **Red first (standing rule 43).** Commit these three files alone, before any source edit, with every row below, Wave C's included. Reach new names only through behaviour, so each file runs on `<base>`. The red commit need not typecheck; step 6 does.
 
      In the mode file, a helper `openTargetOf(runtime)` returns `runtime.resolveOpenTarget()` when that exists. Otherwise it returns `Promise.resolve({ cfi: runtime.initialCfi, word: null })`, which is what the base's view opens with. A missing name then fails by assertion.
      - `tests/cfiPositionConsistency.ipc.test.js`, over `main/ipc/documents.js` with the harness pattern of `tests/updateDocProgressLastRead.test.js` (copied, not imported or edited):
@@ -215,6 +269,15 @@
 
          Expected **green** on `<base>` by code reading (O3 finding). If it is RED, STOP to Blurby.Brain1 with the trace before any Narrate edit.
        - **(o3b) control:** the same, but with a click on `f` in Page before the switch. Play starts at `f`.
+       - **Focus saves as you go (O4; Wave C).** Each row opens a book with the map loaded through `openDocument` at word 8723 with the spine-4 cfi, publishes the sections and words, switches with `router.select("focus")`, and plays at 300 words a minute with rhythm pauses off, under `vi.useFakeTimers({ now: 0 })`. Every `persistence.updateDocProgress` is counted and folded into a fake stored doc (`{ position: 8723, cfi: spine-4 }`) with ip1's rules.
+         - **(f1) play about 12 s:** after 12,000 ms of fake time there are exactly two saves. Each is `("doc-1", w, null)`, the first at the first advance at least 5,000 ms after the engine started (after `FOCUS_MODE_START_DELAY_MS`) and the second at least 5,000 ms after the first. The last saved word trails the engine's current word at 12,000 ms by no more than `ceil(300 × 5000 / 60000) + 1` (26) words. **RED** (no save).
+         - **(f2) pause:** after f1, `pause()` makes exactly one more save, of the engine's current word, with `null`. A second run uses `togglePlay()` for the pause: the same. **RED**.
+         - **(f3) paused with the word unchanged:** after f2, 30,000 ms more of fake time, a second `pause()`, then `router.select("page")`: the count stays as it was after f2. Green on `<base>`, where nothing ever saves; it is the guard against repeat saves once f2 is green.
+         - **(f4) the stored cfi is null:** after f1, the folded doc has the last saved position and no `cfi`. **RED** (spine-4 kept).
+         - **(f5) mode exit while playing:** play 7,000 ms (one save, near 5,000 ms), then `router.select("page")` with no pause: exactly one more save, of the word at the stop, with `null`. Then `router.destroy()`: no further save. **RED**.
+         - **(f6) no save without Play:** select Focus, wait 10,000 ms with no Play, then `router.select("page")`: no save from Focus (LL-030). Green control.
+         - **(f7) no map, no save:** the same as f1 with `bookWords: null` and the section's words served by the fake surface: no save (B15). Green control.
+         - **(f8) no sentence start in Focus:** open at word `f` of `a b c. d e f g.` with no cfi, `router.select("focus")`, Play: the engine's first word is `f`. Expected **green** on `<base>` by code reading (Why). If it is RED, STOP to Blurby.Brain1 with the trace.
 
      Record every result in the memo. If a row named RED above is green on `<base>`, STOP: its guard cannot fail.
   2. **Wave A as specified.** Then:
@@ -225,12 +288,17 @@
      - `git grep -c -F 'PAGE_OPEN_HOLD_TIMEOUT_MS' -- src/constants.ts src/reader/modes/page/ModeRuntime.ts` exits 0, with both paths listed. It exits 1 on `c5bb507f`.
      - `git grep -c -F 'cfiSpineIndex' -- src/reader/modes/page/helpers/persistentReadingAnchor.ts` exits 0. It exits 1 on `c5bb507f`.
      - `git diff --name-status <base> -- src/reader/modes/focus src/reader/modes/flow src/reader/modes/narrate` lists exactly the three `helpers/usePersistentReadingAnchor.ts` files and exits 0.
-  4. **Tests.**
+  4. **Wave C as specified.** Then:
+     - `git grep -c -F 'RSVP_PROGRESS_SAVE_INTERVAL_MS' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `c5bb507f`.
+     - `git grep -c -F 'updateDocProgress' -- src/reader/modes/focus/ModeRuntime.ts` exits 0. It exits 1 on `c5bb507f`.
+     - `git grep -n -E '\b5000\b|5_000' -- src/reader/modes/focus/ModeRuntime.ts` exits 1 (no literal interval). It exits 1 on `c5bb507f` too.
+     - `git diff --name-status <base> -- src/reader/modes/focus src/reader/modes/flow src/reader/modes/narrate` lists exactly the three `helpers/usePersistentReadingAnchor.ts` files and `src/reader/modes/focus/ModeRuntime.ts`, and exits 0.
+  5. **Tests.**
      - `npx vitest run tests/cfiPositionConsistency.ipc.test.js tests/cfiPositionConsistency.shell.test.tsx tests/readerModes/cfiPositionConsistency.test.ts` exits 0.
      - `npx vitest run tests/readerModes tests/readerModeIsolation.test.ts tests/useProgressTracker.test.ts tests/keepFurthest.test.tsx tests/pageReopenCfi.test.ts tests/updateDocProgressLastRead.test.js tests/persistentReadingAnchor.test.ts tests/useLibrary.test.ts tests/narrate` exits 0.
      - `tests/readerModes/chapterStepLanding.test.ts` (CHAPTER-STEP-CFI-1), `tests/readerModes/pagePositionSave.test.tsx` and `tests/narrate/narrate.playSavedPosition.test.ts` (NARRATE-ARRIVAL-SYNC-1) are green and unedited.
-  5. `npm test`, `npm run typecheck` and `npm run build` exit 0 on RodneySr (standing rules 47 and 48). Record the counts.
-  6. **Packaged probes**, on RodneySr x64 `--dir` packages of `c5bb507f`, `<base>` and the tip, all with one recipe (LL-152):
+  6. `npm test`, `npm run typecheck` and `npm run build` exit 0 on RodneySr (standing rules 47 and 48). Record the counts.
+  7. **Packaged probes**, on RodneySr x64 `--dir` packages of `c5bb507f`, `<base>` and the tip, all with one recipe (LL-152):
      - Launch each with `--user-data-dir=<scratch>` and `BLURBY_USER_DATA_DIR=<scratch>`.
      - Prove `app.getPath('userData')` over the inspector before the first input, and refuse an inspector port that already answers (LL-165).
      - Hash the live profile's `library.json` and `settings.json` before and after the session: unchanged.
@@ -239,7 +307,9 @@
        - the saves seen through an `update-doc-progress` hook;
        - the first and last visible word indices at the moment `.rm-page-loading` leaves the DOM (the first thing shown);
        - every `relocate` from launch to 10 s after that moment.
-     - Quit through `app.quit()` after detaching every debugger client.
+     - Quit through `app.quit()` after detaching every debugger client, except where a probe says to kill.
+     - **A kill** is `Stop-Process -Id <the app's main process id> -Force`, with no graceful quit, so the quit flush (`main.js:643`) does not run.
+     - **The last word read in Focus** is the `data-word-index` of the word span Focus highlights in the book's frame, sampled every 250 ms over the inspector; the last sample before the kill counts.
      - Save the driver as `docs/studies/investigations/CFI-POSITION-CONSISTENCY-1.driver.mjs.txt` (standing rule 52).
      - **Probes:**
        - **(P1, R2 live):** Page at 8723, one page turn, Flow, "Next chapter", quit within 1 s, read `library.json` after 4 s, reopen.
@@ -251,7 +321,17 @@
        - **(P3, position only):** seed position 8723 with no cfi, reopen, and give no input for 10 s.
          - `<base>`: about 9552–9698. **RED**, recorded.
          - The tip: the first shown range contains 8723, and there is no save.
-       - **(P4, R1), conditional:** run only after Brain1's Focus-Play-under-CDP check passes. Open at 8723 in Page, switch to Focus, Play for 30 s with no page turn, pause, exit to the library, read `library.json`, reopen. On the tip the stored pair agrees and the first shown range contains the stored position; record `<base>` as the control. If the check has not passed by Wave C, record P4 as NOT RUN with the reason. It is then added to gate (2)'s list and does not hold the merge.
+       - **(P4, R1, the real close route):** open at 8723 in Page, switch to Focus, Play for 30 s with no page turn, pause, then press Escape twice as native key events (Why: the first returns to Page, the second runs the close save). Wait 4 s, read `library.json`, reopen.
+         - Record whether the backtrack prompt appeared; P4 reads forward, so it should not. If it does, record it and dismiss it with "stay".
+         - The tip: the stored pair agrees (no cfi, or a cfi in the stored position's section), the stored position is the paused word, and the first shown range contains it.
+         - `<base>`: the control, recorded. There, the close save is Focus's only save (Why).
+       - **(P7, O4, kill while playing):** open at 8723, switch to Focus, Play at 300 words a minute for about 12 s with no input, then kill. Read `library.json` 4 s later and reopen.
+         - The tip: the stored position is at or behind the last word read, by no more than `ceil(300 / 10)` (30) words: one interval, main's 500 ms debounce and one word. There is no stored cfi. The save hook saw two saves, each with a `null` cfi. The reopen's first shown range contains the stored position.
+         - `<base>`: the control. The stored pair is still 8723 and its cfi, and the hook saw no save. Recorded.
+       - **(P8, O4, pause, then reopen):** open at 8723, switch to Focus, Play for about 8 s, pause, wait 10 s with no input, then kill and reopen.
+         - The tip: the hook saw exactly one save after the pause, of the paused word, and none in the 10 s after it. The stored position is the paused word, with no cfi. The reopen's first shown range contains it.
+         - Then switch to Focus and Play: the first word Focus shows is the paused word itself, not its sentence's first word (row f8).
+         - `<base>`: the control, recorded.
        - **(P5, the hold's cost):** five cold opens of *Meditations* at 8723 with its cfi, on `<base>` and on the tip, each a fresh launch on the same scratch profile. For each open record:
          - the time from the open IPC to `.rm-page-loading` leaving the DOM;
          - the time from the `extract-epub-words` request to its reply;
@@ -259,14 +339,14 @@
 
          Report the median and maximum per build and the tip's added wait (tip median minus base median). A timeout on the tip goes to Blurby.Brain1 with the numbers (question B9).
        - **(P6, O3):** pick a word in *Meditations* that is not the first word of its sentence. Use the extracted words and `sentenceStartAt`'s rule, and record both indices. Seed it with no cfi, reopen, switch to Narrate as soon as `.rm-page-loading` is gone, and press Play. The first request word is the sentence's first word on the tip. Record `<base>`'s result too, as the control for the hold's effect.
-  7. **Rule 53 pair:**
+  8. **Rule 53 pair:**
      - on RodneySr, the tip's x64 `--dir` package with `origin/main` merged in;
      - on Rodney, an `--arm64 --dir` package of the same commit and a 25 s native-arm64 scratch-profile launch with no error or crash;
      - `npx asar list` checked against `dist/` on both;
-     - P1–P3, P5 and P6 re-run on the packaged exe;
+     - P1–P8 re-run on the packaged exe;
      - a "Package verification" section in the close-out;
      - Blurby.Brain1's confirmation before the merge go.
-  8. **Fence (standing rule 41).** `git diff --name-status <base>` lists exactly the following, plus `docs/studies/investigations/CFI-POSITION-CONSISTENCY-1.*`, the governance staging memo and the time log:
+  9. **Fence (standing rule 41).** `git diff --name-status <base>` lists exactly the following, plus `docs/studies/investigations/CFI-POSITION-CONSISTENCY-1.*`, the governance staging memo and the time log:
      - `M main/ipc/documents.js`
      - `M src/test-harness/electron-api-stub.ts`
      - `M src/types.ts`
@@ -279,6 +359,7 @@
      - `M src/reader/modes/focus/helpers/usePersistentReadingAnchor.ts`
      - `M src/reader/modes/flow/helpers/usePersistentReadingAnchor.ts`
      - `M src/reader/modes/narrate/helpers/usePersistentReadingAnchor.ts`
+     - `M src/reader/modes/focus/ModeRuntime.ts`
      - `M src/reader/modes/page/helpers/persistentReadingAnchor.ts`
      - `M src/reader/modes/page/ModeRuntime.ts`
      - `M src/reader/modes/page/useModeBindings.ts`
@@ -288,31 +369,41 @@
      - `A tests/cfiPositionConsistency.shell.test.tsx`
      - `A tests/readerModes/cfiPositionConsistency.test.ts`
 
-     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's, Flow's or Narrate's runtime, view or bindings, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx` or `src/hooks/useReader.ts`.
-  9. **Merge-tree check:** `git merge-tree` of the tip against `origin/main` is clean at the merge go. A conflict in a fenced file goes to Blurby.Roadmap before resolution.
-  10. **Owner, added to gate (2)'s list:**
+     Nothing in `preload.js`, `src/utils/FlowScrollEngine.ts`, `src/styles/`, any `mode.css`, Focus's view or bindings, Flow's or Narrate's runtime, view or bindings, `surface.ts`, `ReaderModeAdapter.ts`, `src/reader/useReaderModeOrchestrator.ts`, `src/App.tsx` or `src/hooks/useReader.ts`.
+  10. **Merge-tree check:** `git merge-tree` of the tip against `origin/main` is clean at the merge go. A conflict in a fenced file goes to Blurby.Roadmap before resolution.
+  11. **Owner, added to gate (2)'s list:**
       - after a chapter jump, quit and reopen: the book opens in the jumped-to chapter;
       - a book that had only a saved word opens at that word, after "Loading book..." and with no jump;
       - Narrate after a reopen starts at the saved word's sentence;
-      - P4, if it was not run.
-- **Effort:** M, in three waves (A, B, C; each about 40 tool uses or fewer, and each its own dispatch). Technical effort: medium for A and C, high for B.
+      - read in Focus for a while, then close the app any way at all: the book reopens within a few seconds' reading of where Focus was;
+      - pause in Focus and reopen: the book opens at the paused word.
+- **Effort:** M, in four waves (A, B, C, D; each about 40 tool uses or fewer, and each its own dispatch). Technical effort: medium for A, C and D, high for B.
 - **Owners:**
-  - Blurby.Brain1 confirms the contract (B1–B5) before Wave A and the hold (B8–B13) before Wave B, owns the Focus-Play check that gates P4, and confirms the rule 53 pair;
+  - Blurby.Brain1 confirms the contract (B1–B5) before Wave A, the hold (B8–B13) before Wave B and Focus's open details (B14–B18) before Wave C, and confirms the rule 53 pair;
   - RodneySr implements, tests and probes; Rodney runs the arm64 launch;
   - spec-compliance, then quality review;
   - Blurby.Roadmap grants the integration window, gives the merge go and closes it out.
 - **Merge order:**
   - after NARRATE-ARRIVAL-SYNC-1, gate (1) run 6 and CHAPTER-STEP-CFI-1;
   - before FLOW-TOC-JUMP-WORD-1 (Seq 110), FURTHEST-PERSIST-1 (Seq 114; `main/ipc/documents.js`, `src/hooks/useLibrary.ts`, `src/types.ts`) and FOCUS-PAUSED-HANDOFF-1 (Seq 118). Each re-greps after this lands.
-  - Any later item that edits `src/reader/modes/page/FoliateView.tsx` or `page/ModeRuntime.ts` re-greps the hold's lines.
+  - Any later item that edits `src/reader/modes/page/FoliateView.tsx` or `page/ModeRuntime.ts` re-greps the hold's lines. Any later item that edits `focus/ModeRuntime.ts` (FOCUS-PAUSED-HANDOFF-1 among them) re-greps `saveProgressWord` and keeps its calls in `pause()`, `togglePlay()` and `stop()`.
   - TOC-FRAGMENT-WORD-1's `ReaderContainer.tsx` window does not overlap this one.
   - The Focus, Flow and Narrate restamp items (Seq 111–112) edit only their own `FoliateView.tsx`, so they do not conflict.
-- **Path:** dispatch (three waves).
+- **Path:** dispatch (four waves).
 
 ##### Owner rulings (2026-11-03)
 - **O1 — "At the saved word" (option A).** When the stored page does not hold the saved word, or there is no stored page, the book opens on the saved word, where "jump back to my place" lands in Page. In this spec that is design 5: Page's view opens the word's section and lands with `jumpFoliateToWordAnchor`, the jump-back helper.
 - **O2 — "Wait before showing" (option B).** The cold open shows the existing "Loading book..." state until the word map is ready, then opens right on the word, with no visible jump, at the cost of a wait of about 1–2 s on a cold open. In this spec that is design 4, the hold in Page. The late "open settle" of the first draft is removed. After a failure or a timeout the book opens with today's choice, and a map that arrives later moves nothing.
 - **O3 — "Also, on narrate, the start should be the start of the sentence from the saved word on restart".** When Narrate is reached after a reopen or restart at a saved word, the view is on that word (O1, after O2's hold), and Play starts at the first word of the sentence that holds it, not at the word itself. In this spec it is already met on the normal path (O3 finding); rows o3a and o3b and probe P6 pin it, and question B13 covers the edges.
+- **O4 — "Save as you go".** Focus saves the current word every few seconds while it plays, and when it is paused. In this spec that is design 9 and Wave C, shaped by Blurby.Brain1's binding rulings below.
+
+##### Blurby.Brain1 rulings on O4 (2026-11-03, binding)
+Brain1's RodneySr idle checks (Update of 2026-11-03 to `Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`) established three facts. Focus Play is not a regression and no longer blocks P4. R1 is still unexercised, so the spec names the reader's real close route from Focus before R1 counts as a red row (Why: Escape twice; probe P4). And Focus saves nothing while it plays or is paused (Why). Brain1 then ruled the shape of O4:
+- **R-O4.1, cadence.** Save every 5 s while Focus plays, and once more on pause, stop and mode exit; only when the word has changed since the last save. The 5 s is a named constant in `src/constants.ts`, never a literal. That bounds a reopen to about 20–40 words behind at typical speeds. Sentence-start resume does not apply in Focus: Focus resumes at the saved word. Applied in design 9, Wave C, rows f1–f3, f5 and f8, probes P7 and P8, and the Done-when 4 gate on literals.
+- **R-O4.2, cfi.** Focus saves send an explicit `null`, never `state.cfi`. A Focus save on a changed word therefore clears the stored cfi, and B1's rule stays consistent. Applied in design 9 and rows f1 and f4.
+- **R-O4.3, write cost.** Trace `updateDocProgress` in main and decide between making LIBRARY-WRITE-RACE-3 a prerequisite or routing through an existing debounced path; the 5 s cadence must not reopen the library write race. Traced under "Write cost of a save"; decided under "LIBRARY-WRITE-RACE-3 and O4": route through the existing debounced `update-doc-progress` and `saveLibrary` path, with no prerequisite.
+- **R-O4.4, rows.** Play about 12 s, kill with no graceful quit, reopen within one interval of the last word read (row f1, probe P7). Pause, then reopen at the paused word (row f2, probe P8). No save while paused with the word unchanged, with writes counted (row f3, probe P8). The stored cfi is null after a Focus save (row f4, probe P7).
+- **R-O4.5, Flow and Narrate.** A finding only, not changed here (Flow and Narrate finding).
 
 ##### Questions for Blurby.Brain1
 - **B1. The `null` meaning.** Main clears the stored cfi on `null` only when the position changes; an unchanged position keeps the pair. `undefined` keeps, a string sets, and `-1` ignores `null`. Recommendation: confirm. A plain clear would also drop Page's correct turn cfi on every close with no matching relocate.
@@ -337,13 +428,20 @@
 - **B12. Skipping the hold.** The map is never ready at a cold open today: there is no cache in main, and the renderer's cache is per shell. A main-process extraction cache, keyed by file and modification time, would remove most of the wait. Recommendation: not in this item. Register it as a follow-up only if P5's tip median exceeds 1000 ms.
 - **B13. O3's edges.** Narrate's Play without the map (after a hold that failed or timed out, or a mode switch during the hold) starts at the first visible word (`narrate/ModeRuntime.ts:316-320`), not the sentence start. A BUG-239 book has no sentence data at all. Recommendation: no Narrate change here; record it as a finding and fold it into WORD-INDEX-UNIFY-1, which already owns how a missing map is handled.
 
+Questions B14–B18 are what O4 leaves open after Brain1's binding rulings. Each needs Brain1's confirmation before Wave C.
+- **B14. Which constant.** `src/constants.ts:168` already holds `RSVP_PROGRESS_SAVE_INTERVAL_MS = 5000`, commented "How often to save progress during RSVP/Focus mode playback", with no user since `3dd4b504`. Wave C reuses it and only rewrites its comment, rather than adding a second constant with the same meaning. `RSVP_PROGRESS_SAVE_WORD_DELTA` (`:170`, 50 words) stays unused, because R-O4.1 is time-only. Recommendation: reuse it, and register the unused word-delta constant as a finding for removal, not a drive-by edit here.
+- **B15. Saves without the word map.** On an EPUB without the map, Focus plays the loaded section's own word list (`effectiveWords`, `focus/ModeRuntime.ts`, falling back to `surface.getWords()`), whose indices this spec has not proven to be the book's. Wave C saves only while `document.bookWords` is loaded, or off EPUB. With O2's hold the map is normally loaded before Focus can be reached, so this skips only the failure and timeout edges (row f7). Recommendation: confirm. Saving an index from the wrong space would write a wrong position, which is worse than saving nothing.
+- **B16. The crash window.** Main coalesces library writes over 500 ms (`LIBRARY_SAVE_DEBOUNCE_MS`). A kill inside that window loses the newest save, so the stored word can trail the word read by up to one interval plus 500 ms plus one word: 30 words at 300 words a minute, which is P7's bound. Recommendation: accept. Calling `saveLibraryNow` on each Focus save would bypass the coalescing that keeps the write rate bounded, for half a second of reading.
+- **B17. The furthest mark.** Each Focus save goes through the bridge's `noteHighWater` (`ReaderContainer.tsx:315`), so it raises keep-at-furthest's mark, with a `null` furthest cfi. Today Focus never raises it. Recommendation: accept. The mark should be the furthest word read, and a `null` furthest cfi means "unknown" under design 1, so it cannot pair the furthest word with a stale page. Wave D's `tests/keepFurthest.test.tsx` run (Done-when 5) must stay green and unedited; a failure there is a STOP to Blurby.Brain1.
+- **B18. The sync queue.** Each save with a position also enqueues `update-progress`, and `saveQueue` rewrites the whole `sync-queue.json` with no debounce (`main/sync-queue.js:53-56`, `:169-182`): 12 writes a minute while Focus plays. Sync is off until BLURBY-SERVER-1. Recommendation: accept here, and register a finding that BLURBY-SERVER-1 coalesce `update-progress` per document before sync is on for anyone.
+
 ##### Lessons applied
 - **LL-029:** the open check compares section and word indices, never live ranges.
-- **LL-030:** the hold and its word landing never save; nothing saves without engagement.
+- **LL-030:** the hold and its word landing never save; nothing saves without engagement. Focus saves only after Play has run the engine (row f6).
 - **LL-142:** the stale pair is measured on the `c5bb507f` control before the fix is trusted, and P2, P3 and P5 record the base.
 - **LL-143:** every gate names its shell and an exact exit code, and each was dry-run on `c5bb507f` (expected exit recorded beside it).
 - **LL-152:** one recipe for the probes on `c5bb507f`, `<base>` and the tip.
 - **LL-165:** the scratch profile is proved before the first input, and the live profile's hashes are unchanged.
-- **LL-169:** the hold's timer and promise end with the runtime (`stop()`, `destroy()`), and the view checks `cancelled` after each await, separately from the target's own settle-once guard.
+- **LL-169:** the hold's timer and promise end with the runtime (`stop()`, `destroy()`), and the view checks `cancelled` after each await, separately from the target's own settle-once guard. Focus's saves as you go add no timer: the interval is checked on each word advance, and `stop()` saves before it marks the runtime dead.
 - **Standing rule 55 (promoted from LL-166):** verdicts come from saves, `library.json`, visible word indices and request words, not screenshots.
 - **Standing rule 53 (promoted from LL-167):** package verification, with Blurby.Brain1's confirmation before the merge go.
