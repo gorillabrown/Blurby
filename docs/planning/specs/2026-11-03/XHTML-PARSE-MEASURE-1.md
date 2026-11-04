@@ -1,4 +1,4 @@
-#### XHTML-PARSE-MEASURE-1 — Measure whether parsing chapters as strict XHTML removes unverified chapters *(Seq 87.9; Full Spec 2026-11-03, traced at `origin/main` `14ce3d24` and built on BLOCK-TEXT-ORDER-1's specified checker, which is not merged yet; Reader Engine; investigation first (Blurby.Brain1 D4 ruling); dispatch-ready once BLOCK-TEXT-ORDER-1 merges and Brain1 answers Q1; effort M; execution host RodneySr)*
+#### XHTML-PARSE-MEASURE-1 — Measure whether parsing chapters as strict XHTML removes unverified chapters *(Seq 87.9; Full Spec 2026-11-03, traced at `origin/main` `14ce3d24` and built on BLOCK-TEXT-ORDER-1's specified checker, which is not merged yet; Reader Engine; investigation first (Blurby.Brain1 D4 ruling); Q1 ruled by Blurby.Brain1 2026-11-03; dispatch-ready once BLOCK-TEXT-ORDER-1 merges and Brain1 confirms the host's inputs; effort M; execution host RodneySr)*
 
 - **What:** measure how many of the sections BLOCK-TEXT-ORDER-1 (BTO) cannot certify are caused by main and the reader parsing the same chapter file differently. The measurement runs over 20 named Project Gutenberg EPUBs, first as main parses today and then with a prototype that parses as XML. It ends in a memo with the numbers and a recommendation that Brain1 rules on. No product code ships from this item.
   - **Outcome:** one table that says, per book and in total, how many sections certify today, how many certify under the prototype, how many get worse, and what the remaining failures are. Plus a yes/no recommendation under the decision rule below, which is fixed before the run (Q1).
@@ -26,7 +26,7 @@
   - The sections that fail on both runs are labelled mechanically from the failure detail (M2): `anchor` when the failing node is inside an `<a>` whose `href` starts with `#` (the footnote classes D1/D2); `blank` when the canonical word or node text is empty or whitespace (D3); `other` otherwise. The memo lists up to five `other` examples with book, section and snippets.
 - **One checker, one runtime (LL-152, LL-160).** The measurement reuses BTO's Electron ICU checker (B5) under the same packaged Electron for both runs. The base and the prototype differ only in the one parse call.
 - **Scratch prototype, never merged.** The prototype is one commit on `eb/xhtml-parse-measure-1-proto`, branched from the item branch. It changes `:230` to `cheerio.load(readEntry(entry).toString("utf-8"), { xmlMode: true })`, the idiom of `:183` and `:197`. Nothing else changes, so the traps show in the numbers instead of being fixed in advance. The branch is pushed for the record and never merged.
-- **Decision rule fixed before the run (Q1).** The threshold for "meaningful" is set before any number exists, so it cannot be fitted to the result.
+- **Decision rule fixed before the run (Q1, ruled).** The threshold for "meaningful" was set by Brain1 before any number exists, so it cannot be fitted to the result. `summarize.mjs` computes the verdict.
 - **Text in the output.** The corpus is public domain, so `-detail` snippets are allowed in the checker's output. They are capped at 40 characters, and `-detail` is off by default. The checker never runs `-detail` on a book outside the corpus manifest.
 
 ##### Corpus (owner approved 2026-11-03)
@@ -61,9 +61,20 @@ Twenty Project Gutenberg EPUBs, chosen for markup variety: plain prose, letters 
 - **Polite fetch.** One request at a time, 5 s apart, with the User-Agent `Blurby-measurement/1 (single run, 20 files)`. A file whose SHA-256 already matches the manifest is not fetched again.
 - **Known limit.** All 20 books come from one generator (Gutenberg's ebookmaker), so they may be cleaner than publisher or converted EPUBs. The memo says so. A negligible D4 share on this corpus is "rejected for now", and the memo says whether a second corpus is worth asking the owner for.
 
-##### Questions
+##### Blurby.Brain1 ruling on Q1, the "meaningful" threshold (2026-11-03, binding; fixed before any corpus number exists)
 
-- **Q1 (Blurby.Brain1, before dispatch): the threshold for "meaningful".** Recommended: D4 is meaningful when the prototype certifies at least 1 in 10 of the base-uncertified sections after subtracting regressions, or when it clears every uncertified section of at least one book. If the base run has no uncertified section at all, D4 is negligible by definition. The memo then records that BTO's shared acceptance rule (G-A) already removed the failures on this corpus.
+Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.XHTML-PARSE-MEASURE-1.Q1.2026-11-03.md`.
+
+- **Counted section:** a section with at least one word on the main side or the renderer side in either run. A section with no words on either side in both runs (a cover image, for example) is left out of every count. The memo states how many were left out.
+- **B** = counted sections uncertified on base. **Up** = counted sections uncertified on base and certified on xml. **Down** = counted sections certified on base and uncertified on xml, including sections that lose their slice under the prototype.
+- **D4 is meaningful** when either holds:
+  1. `Up − Down ≥ 3` and `(Up − Down) / B ≥ 0.10`;
+  2. one book with at least 3 base-uncertified sections has every one of them certified on xml, with `Down = 0` in that book.
+- **D4 is negligible** otherwise, including when `B = 0`. With `B = 0`, the memo records that BTO's shared acceptance rule (G-A) already removed the failures on this corpus.
+- **Every down flip is root-caused (rule 6c).** The memo names each with its cause (entity, lost slice, parse error or other) and the evidence. A "yes" carries each cause as a requirement on the shipped parse change in WORD-INDEX-UNIFY-1. The prototype is never shipped as is while any down flip has no fix.
+- **Renumbering reach (memo only, not part of the threshold).** Per book, the number of sections that certify on both runs but whose canonical word count differs between base and xml. They would be renumbered with no certification gain, so the count sizes WORD-INDEX-UNIFY-1's migration.
+
+The planner's earlier recommendation (1 in 10 net, or one whole book) is superseded by this ruling.
 
 ##### Execution host (rule 6b)
 
@@ -86,13 +97,14 @@ Twenty Project Gutenberg EPUBs, chosen for markup variety: plain prose, letters 
 - **M1. Corpus fetch.** New `scripts/xhtml-parse-measure/fetch-corpus.ps1`. It downloads the 20 books in the table to the corpus folder and writes `corpus.manifest.json` beside them, with one entry per book: `{ebook, expectedTitle, url, bytes, sha256, opfTitle}`. It applies the match rule and exits 2 on a mismatch, naming the book and its OPF title. It exits 0 when all 20 are present and match. A copy of the manifest, without the EPUBs, is committed as `scripts/xhtml-parse-measure/corpus.manifest.json`.
 - **M2. Checker corpus mode.** Two additions to BTO's checker (`scripts/block-text-order/icu-certify/main.js` and `run.ps1`). Both are off by default, so a run without them is unchanged:
   - `-epub <path>`: the book to check. The default stays `resources/sample-meditations.epub`.
-  - `-detail`: each failure also carries `canonicalWord`, `nodeSnippet` (the failing node's text, at most 40 characters), `inFragmentAnchor` (the failing node is inside an `<a>` whose `href` starts with `#`) and `rendererParseError` (the section's XHTML parse produced a `parsererror` element). Each section entry also carries `namedEntities`: the count of entity references in the raw section source other than `amp`, `lt`, `gt`, `quot`, `apos` and numeric ones.
+  - `-detail`: each section entry carries `mainWords` (the section's canonical word count) and `rendererWords` (the number of text words the renderer side found), so the summary can apply the counted-section rule and the renumbering reach. Each failure also carries `canonicalWord`, `nodeSnippet` (the failing node's text, at most 40 characters), `inFragmentAnchor` (the failing node is inside an `<a>` whose `href` starts with `#`) and `rendererParseError` (the section's XHTML parse produced a `parsererror` element). Each section entry also carries `namedEntities`: the count of entity references in the raw section source other than `amp`, `lt`, `gt`, `quot`, `apos` and numeric ones.
   - `-detail` is refused (exit 6) unless `-epub` names a file whose SHA-256 is in `scripts/xhtml-parse-measure/corpus.manifest.json`.
 - **M3. Runner.** New `scripts/xhtml-parse-measure/run-corpus.ps1 -variant base|xml -packaged <exe>`. For each manifest book it runs the checker with `-epub` and `-detail` and writes `C:\Projects\Blurby-artifacts\xhtml-parse-measure-1\results\<variant>\<ebook>.json`. It records each run's exit code. Exit 1 (uncertified sections) is an expected result here, not a failure. Exits 3, 4, 5 and 6 stop the runner.
 - **M4. Prototype.** On `eb/xhtml-parse-measure-1-proto` (branched from the item branch after M3), one commit changes `main/epub-word-extractor.js:230` as in Design decisions and nothing else. Run M3 with `-variant xml` from that branch, using the same packaged exe. Push the branch with `git push origin HEAD:refs/heads/eb/xhtml-parse-measure-1-proto`, and never merge it.
 - **M5. Summary.** New `scripts/xhtml-parse-measure/summarize.mjs <resultsDir>`. It prints and writes `summary.json` and `summary.md` beside the results:
-  - per book: sections, sections with a slice, certified on base, certified on xml, flips up, flips down, sections with `rendererParseError`, sections with `namedEntities > 0`;
-  - totals, the D4 share and the regression count;
+  - per book: sections, counted sections, sections with a slice, certified on base, certified on xml, Up, Down, sections with `rendererParseError`, sections with `namedEntities > 0`, and the renumbering reach (certified on both runs, `mainWords` differs between them);
+  - totals: excluded sections, B, Up, Down, `Up − Down`, `(Up − Down) / B`, and which clause of the Q1 rule holds, if any (the verdict `meaningful` or `negligible`, computed, never typed by hand);
+  - every down flip listed with book, section, reason and the trap columns, for the memo's root cause;
   - base-uncertified sections by label: `d4` (flipped up), `anchor`, `blank`, `other`;
   - a check that the four mode copies report the same failures for every section. A disagreement is printed and exits 1.
 - **M6. Traps (from Brain1's ruling), each answered from the corpus:**
@@ -116,7 +128,7 @@ Twenty Project Gutenberg EPUBs, chosen for markup variety: plain prose, letters 
 - **x3.** `results/base/` and `results/xml/` each hold 20 files, and no run exited 3, 4, 5 or 6.
 - **x4.** `summarize.mjs` exits 0. Every per-book row is present, and the four mode copies agree on every section.
 - **x5.** The memo answers all four traps, each with a count or an example and the search used.
-- **x6.** The memo states the D4 share, the regressions and the recommendation under the Q1 threshold. Brain1's ruling is recorded under it.
+- **x6.** The memo states B, Up, Down, the computed Q1 verdict and the renumbering reach, and names every down flip with its cause and evidence. Brain1's ruling is recorded under it.
 - **x7 (fence).** `git diff --name-status origin/main...eb/xhtml-parse-measure-1` lists only:
   - `A scripts/xhtml-parse-measure/fetch-corpus.ps1`
   - `A scripts/xhtml-parse-measure/run-corpus.ps1`
