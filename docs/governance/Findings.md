@@ -377,3 +377,21 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Re-check after CFI-POSITION-CONSISTENCY-1 merges; specify a Q2-style re-save for Focus only if a probe shows the overwrite.
 
 **Disposition:** open; no item
+
+### F-023 — Escape from Focus, Flow or Narrate hands Page the entry word, so the close saves where you started (CFI-POSITION-CONSISTENCY-1 STOP-CLOSE, 2026-11-03)
+
+**Source:** STOP-CLOSE, found while specifying the save-as-you-go items. Blurby.Brain1 ruled option (A); owner ruling O6, "Where I stopped" (2026-11-03).
+
+**Severity:** medium. The reader's place is lost on every Escape exit after reading in a playback mode.
+
+**Where:** at `14ce3d24`:
+- playback commits with `publishState: false` (`focus/ModeRuntime.ts:1053-1058`, `flow/ModeRuntime.ts:1316-1321`, `narrate/ModeRuntime.ts:732`);
+- `exitToPage` with capture "persistent" (`src/reader/useReaderModeOrchestrator.ts:354-357`);
+- `exportHandoff("persistent")` (`focus/ModeRuntime.ts:663-680`);
+- the close save (`src/hooks/useProgressTracker.ts:243-259`).
+
+**Finding:** playback never moves `publishedWordIndex`. The Escape exit hands Page that entry word, and the second Escape's close writes it back over anything saved during play. Space (pause-to-page) already hands over the playback word, so the two exits disagree.
+
+**Accountable role / next action:** planner. CFI-POSITION-CONSISTENCY-1 Wave C fixes it: each mode's `exportHandoff("persistent")` reports its committed playback word, one mode-local commit per runtime. FLOW-SAVE-AS-YOU-GO-1 and NARRATE-SAVE-AS-YOU-GO-1 build on it. Owner smoke for gate (2): read in Focus, press Escape twice, reopen, and check it opens at the last word read.
+
+**Disposition:** open; scheduled (CFI-POSITION-CONSISTENCY-1 Wave C)
