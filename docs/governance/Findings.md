@@ -409,3 +409,22 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** planner. Re-check after NARRATE-SAVE-AS-YOU-GO-1 merges; specify a fix only if a probe shows the close landing behind the last timed save.
 
 **Disposition:** open; no item
+
+### F-025 — Flow and Focus paragraph starts in an unverified section come from span indices (UNCERTIFIED-ANCHOR-HOLD-1 Q3, 2026-11-03)
+
+**Source:** UNCERTIFIED-ANCHOR-HOLD-1 question Q3, ruled a finding by Blurby.Brain1 (2026-11-03).
+
+**Severity:** low (rare sections; nothing worse than today)
+
+**Where:** at `14ce3d24`:
+- Flow `FoliateView.tsx:1225` and Focus `FoliateView.tsx:1115` (paragraph starts);
+- `flow/ModeRuntime.ts:1012-1035` (paragraph keys);
+- Flow `:1003` and Focus `:824` (paragraph pauses).
+
+**Finding:** paragraph starts are read from book-stamped documents' spans. Under BLOCK-TEXT-ORDER-1, a held (uncertified) document stays book-stamped, so span-derived indices can drive the paragraph keys and pauses there. Excluding held documents would remove that section's paragraph pauses, which the owner would notice.
+
+**Root cause (rule 6c):** the two independent word numberings, which BLOCK-TEXT-ORDER-1, WORD-INDEX-UNIFY-1 and XHTML-PARSE-MEASURE-1 address.
+
+**Accountable role / next action:** planner. Input to WORD-INDEX-UNIFY-1. Re-check after XHTML-PARSE-MEASURE-1 reports how often sections stay uncertified.
+
+**Disposition:** open; input to WORD-INDEX-UNIFY-1

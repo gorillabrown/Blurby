@@ -54,7 +54,7 @@
   - **One choke point per mode.** Each runtime gets a private `firstVisibleStartWord()`. Both first-visible reads in `start()` go through it, including the block that the map makes unreachable, so no span read on a start path bypasses the hold.
   - **The canonical start** is the book word map's `startWordIdx` for the held section, from `bookWords.sections`:
     - if that section has no slice, which BTO reports as `no-canonical-slice`, use the first later section with words. That is PLAY-FIRST-TEXT-1's rule, as `startAtFirstText` applies it (Flow `:1490`);
-    - with neither, return -1, which is today's last resort, word 0 (Q2).
+    - with neither, keep the committed canonical word and do not move: `this.state.canonicalWordIndex`, clamped to the map's last word (`bookWords.totalWords - 1`). It is never word 0, because jumping to the book's first word from a late chapter would surprise the reader (Brain1 Q2 ruling).
 
     No cfi-to-word map exists, so a finer target would be new design. This item invents none.
   - **The view reports, and the runtime decides.**
@@ -92,7 +92,8 @@
        const sections = this.document.bookWords?.sections ?? [];
        const own = held.sectionIndex == null ? undefined : sections.find((s) => s.sectionIndex === held.sectionIndex);
        const later = own ?? (held.sectionIndex == null ? undefined : sections.find((s) => s.sectionIndex > held.sectionIndex!));
-       const word = later ? later.startWordIdx : -1;
+       const total = this.document.bookWords?.totalWords ?? 0;
+       const word = later ? later.startWordIdx : Math.max(0, Math.min(this.state.canonicalWordIndex, total - 1));
        this.ports.diagnostics.record("uncertified-anchor-hold", `first visible word in section ${held.sectionIndex} is held: start ${word}`);
        return word;
        ```
@@ -273,7 +274,24 @@ PowerShell 7, run from the worktree root. A gate passes only on its stated exit 
   - The live profile hash changes: STOP (LL-165).
   - Each failing gate gets at most one retry, and only for a harness fault.
 
-##### Questions for Blurby.Brain1
+##### Blurby.Brain1 rulings on Q1–Q3 (2026-11-03, binding)
+Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.UNCERTIFIED-ANCHOR-HOLD-1.and-D4.2026-11-03.md`.
+- **Q1: yes.** The scope is Play from the first visible word only, at the six sites (Flow `:742/:748`, Focus `:567/:573`, Narrate `:324/:328`). Relocate saves stay unchanged, because they already save the committed word.
+- **Q2: yes, with one change to the last fallback.** The order is:
+  1. the map's first word of the held section;
+  2. otherwise the first later section with words;
+  3. otherwise keep the committed canonical word (no move), never 0.
+
+  Design step 3 is updated. The planner clamps that word to the map's last word, because this path is reached exactly when the start anchor lies past it. This is the technical default under owner question U1; if the owner answers U1 differently, the shape follows the owner.
+- **Q3: a finding** (Findings F-025), as recommended.
+- **Root cause (CLAUDE.md rule 6c).** This item is a stated safety net, not the cause fix. A section fails certification because Blurby numbers words twice: main's extractor and the page's span stamping. Their known divergences are fixed by:
+  - BLOCK-TEXT-ORDER-1: nested-block order, and footnote acceptance D1 and D2;
+  - WORD-INDEX-UNIFY-1: segmentation;
+  - XHTML-PARSE-MEASURE-1, registered 2026-11-03 for D4 parser divergence (Brain1: measure first).
+
+  This item's start path is reached only when the stored position lies past the map's end, a library-count versus extractor-total mismatch that WORD-INDEX-UNIFY-1 owns.
+
+##### Questions for Blurby.Brain1 (ruled 2026-11-03; kept as the record)
 
 - **Q1. Narrow the scope to the start path.**
   - At `14ce3d24`, Flow, Focus and Narrate have no soft anchor save (`soft-visible` is never dispatched), and their relocate saves write the committed anchor, not a span's index (Why, paths 1 and 2). The only span read is Play's first-visible fallback.
@@ -285,7 +303,7 @@ PowerShell 7, run from the worktree root. A gate passes only on its stated exit 
 - **Q2. The canonical start word.** The order is:
   1. the held section's `startWordIdx` from `bookWords.sections`;
   2. if that section has no slice, the first later section with words (PLAY-FIRST-TEXT-1's rule);
-  3. otherwise -1, which is today's last resort, word 0.
+  3. otherwise -1, which is today's last resort, word 0. *(Ruled: keep the committed canonical word instead; see the rulings above.)*
 
   No cfi-to-word mapping exists, so anything finer, such as counting words up to the visible span, would be new design and would repeat the certifier's failed job. **Recommendation: confirm.** The owner rules the visible part (U1).
 - **Q3. Paragraph starts in held documents are a finding, not this item.**
