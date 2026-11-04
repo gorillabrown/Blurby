@@ -548,8 +548,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   onSurfaceLoad = (): void => {
     if (!this.alive) return;
     this.paintArrivalCursor();
+    this.settleArrivalSync(); // the arrival frames may have run before the view could map a word to its section
     this.setTimer(() => {
       this.paintArrivalCursor();
+      this.settleArrivalSync();
       this.state.renderVersion += 1;
       this.state.notify();
       if (this.state.pendingStartOnLoad) {
@@ -776,7 +778,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
    */
   private startAtFirstText(request: ReaderModeStartRequestV1): boolean {
     if (this.firstTextReentry || !this.document.useFoliate) return false;
-    if (this.arrivalSyncInFlight != null) return false; // NARRATE-ARRIVAL-SYNC-1: never judge a view still being moved
+    // NARRATE-ARRIVAL-SYNC-1 (spec item 3): never judge a view the arrival sync has not yet moved, or is moving. While it
+    // is owed, Play starts at the handed-over word and the cursor-miss path takes the view to that word's section.
+    if (this.arrivalSyncOwed || this.arrivalSyncInFlight != null) return false;
     const bookWords = this.document.bookWords;
     const shown = this.surface.getDisplayedSectionIndex();
     if (!bookWords || shown == null) return false; // Brain1 Q2: no map yet; the empty-words path sets pendingFirstText

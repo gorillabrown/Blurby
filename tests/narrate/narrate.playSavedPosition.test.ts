@@ -129,6 +129,35 @@ describe("Narrate: arriving at a saved place shows it, so Play starts there (NAR
     expect(firstRequestWord(o)).not.toBe(10);
   });
 
+  it("(sp7) the view is not attached when the arrival frames run: Play starts in 12's sentence, with no play-first-text move", async () => {
+    // Gate (1) run 5 recipe (trial log 2026-11-03: arrivalSync:owed 8723, never settled, then play-first-text on the cover).
+    const o = open({ shown: 0, position: SAVED, fromPage: true });
+    opened.push(o.runtime);
+    const api = o.runtime.viewApiRef.current;
+    o.runtime.viewApiRef.current = null; // the frames find no view, so the settle cannot map the word
+    await wait(FRAMES_MS);
+    o.runtime.viewApiRef.current = api;
+    expect(o.api.goToSection).not.toHaveBeenCalled();
+    o.runtime.togglePlay();
+    await flush(); await flush();
+    expect(firstTextNavs(o)).toEqual([]);
+    expect(o.producer.requests.length).toBeGreaterThan(0);
+    expect(inSaved(firstRequestWord(o))).toBe(true);
+  });
+
+  it("(sp8) the view loads after the arrival frames: its load settles the arrival, moving the view to section 3", async () => {
+    const o = open({ shown: 0, position: SAVED, fromPage: true });
+    opened.push(o.runtime);
+    const api = o.runtime.viewApiRef.current;
+    o.runtime.viewApiRef.current = null;
+    await wait(FRAMES_MS);
+    o.runtime.viewApiRef.current = api;
+    o.runtime.onSurfaceLoad();
+    await wait(300);
+    expect(o.api.goToSection).toHaveBeenCalledTimes(1);
+    expect(o.api.goToSection).toHaveBeenCalledWith(3);
+  });
+
   it("(sp4) control: after the sync the reader pages back to the cover; Play starts at MEDITATIONS via play-first-text", async () => {
     const o = open({ shown: 0, position: SAVED, fromPage: true });
     opened.push(o.runtime);
