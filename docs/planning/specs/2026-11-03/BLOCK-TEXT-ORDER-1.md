@@ -1,4 +1,4 @@
-#### BLOCK-TEXT-ORDER-1 — Keep block text in DOM order in every reading mode *(Seq 87.5; Full Spec 2026-11-03, cited against `origin/main` `c5bb507f`; Reader Engine; contracts G-A to G-D frozen, owner answers OQ1–OQ6 and Blurby.Brain1 rulings TQ-A1 to TQ-D1, OQ4 and Q1–Q4 applied; two waves; build-and-hold; both waves dispatch-ready subject to the stated prerequisites, with Wave B's Page click save subject to prerequisite R-Q5)*
+#### BLOCK-TEXT-ORDER-1 — Keep block text in DOM order in every reading mode *(Seq 87.5; Full Spec 2026-11-03, cited against `origin/main` `c5bb507f`; Reader Engine; contracts G-A to G-D frozen, owner answers OQ1–OQ6 and Blurby.Brain1 rulings TQ-A1 to TQ-D1, OQ4, Q1–Q4 and R-Q5 applied; two waves; build-and-hold; both waves dispatch-ready subject to the stated prerequisites)*
 
 - **What:** text inside nested blocks reads in true document order in Page, Focus, Flow and Narrate. Today, text that comes after a nested block is read before that block. Word spans are also stamped only where the renderer's text provably matches main's word list (a "certified" section). Where it doesn't match, clicks and saves fall back to the cfi only, instead of risking the wrong word.
   - **Wave A** (tests red, then the certifier): ordered runs (G-D), one shared acceptance rule (G-A), and the fail-closed certifier with its certified stamping branch (G-B). The edits are in the four helper copies, the four wrapper copies and one dormant main helper. No view or runtime edits.
@@ -63,7 +63,7 @@
         - A held click paints no highlight and commits no word in any mode (Q3).
         - Page, Flow and Focus save the cfi only. Narrate ignores the click.
       - **Lifecycle.** A later restamp's result replaces the hold. A report from a superseded wrap is discarded.
-      - **Fence.** The four helpers, the four wrappers, the main helper, the four `FoliateView.tsx`, the Flow and Focus `ModeRuntime.ts` and the Flow and Focus `useModeBindings.ts` (Q3), plus the tests. Never shared core.
+      - **Fence.** The four helpers, the four wrappers, the main helper, the four `FoliateView.tsx`, the Page, Flow and Focus `ModeRuntime.ts` and the Page, Flow and Focus `useModeBindings.ts` (Q3, R-Q5), plus the tests. Never shared core.
       - **Runtime rows** (o1)–(o6) are mandatory per mode.
 
 ##### The change
@@ -95,7 +95,7 @@ Every line below was re-grepped on `origin/main` `c5bb507f` on 2026-11-03. The c
    - Keep the yield statement `await new Promise<void>((resolve) => setTimeout(resolve, 0));` (`:144`) text-identical in the legacy path. The census anchors it (`boundary-policy.json:783` and siblings).
    - The certified branch never yields. B5 records the certified stamping time (`stampMs`) for the memo (TQ-B3, Pike rule 1). The time changes no code shape (Q4).
 
-**Wave B: the OQ4 hold (views, plus the Flow and Focus runtimes and bindings)**
+**Wave B: the OQ4 hold (views, plus the Page, Flow and Focus runtimes and bindings)**
 
 4. **Report handling, the same shape in each view.**
    - Each view keeps a mode-local `wrapGenerationRef: WeakMap<Document, number>`.
@@ -107,9 +107,17 @@ Every line below was re-grepped on `origin/main` `c5bb507f` on 2026-11-03. The c
    - **`:671` stays unchanged.** An uncertified document is never added to `rendererNumberedDocsRef`. The load wrap's `onCertification` (call at `:672`) adds the document to `uncertifiedDocsRef` when it is uncertified, and removes it when the wrap is certified. The report is synchronous, so the document is marked before the wrap first yields.
    - **Report at once, cfi only.** `reportFirstWordOnPage` (`:579-581`) reports `wordIndex: null` when the document is in either set. With that, a document in `uncertifiedDocsRef` reports at once and is never held:
      - in `reportTurn` (`:604-620`): the held branch at `:611` tests `rendererNumberedDocsRef` only, so the turn falls through to the immediate `reportFirstWordOnPage`, which now gives `wordIndex: null`;
-     - in `holdWordClick` (`:626-637`): an uncertified document reports at once through `reportFirstWordOnPage(doc, start, end, true)` with `wordIndex: null`. It is never put in `pendingTurnRef`;
+     - in `holdWordClick` (`:626-637`): a held click never reaches it for an uncertified document, because the click handlers return first and save through `onHeldWordClick` (R-Q5). Its code is unchanged, so it never puts an uncertified document in `pendingTurnRef`;
      - at the section load (`:680`): a pending turn on an uncertified document reports at once with `wordIndex: null`.
-   - **Click handlers** (click `:692-741`, selectionchange `:745-795`; `holdSave` at `:729` and `:782`). In an uncertified document, return before the highlight is painted (`:700-707` and `:759-…`) and before `onWordClickRef` is called, then make the cfi-only click save (Q3: no highlight, no word). How that save reaches the runtime is prerequisite **R-Q5** below.
+   - **Click handlers** (click `:692-741`, selectionchange `:745-795`; `holdSave` at `:729` and `:782`). In an uncertified document, return before the highlight is painted (`:700-707` and `:759-…`), before `onWordClickRef` is called (`:730`) and before `holdWordClick` (`:739`). Then call `onHeldWordClickRef.current?.(cfi)`, where `cfi` is `v.getCFI(match.index, range)` of the clicked span (Q3: no highlight, no word).
+   - **New prop (R-Q5, ruling (b)).**
+     - `onHeldWordClick?: (cfi: string) => void` on the Page `FoliateView` props interface, beside `onHeldClickSave?` (`:261`). Destructure it beside `onHeldClickSave` (`:286`), and hold it in a ref beside `onHeldClickSaveRef` (`:338-339`).
+     - It is not routed through `onPageTurned`, `onHeldClickSave` or `holdWordClick`.
+   - `src/reader/modes/page/useModeBindings.ts`: bind `onHeldWordClick: runtime.onHeldWordClick` beside `onHeldClickSave` (`:34`).
+   - `src/reader/modes/page/ModeRuntime.ts`: a public `onHeldWordClick = (cfi: string): void => …` beside `onHeldClickSave` (`:611`).
+     - If `!this.alive`, it returns.
+     - Otherwise it calls `this.ports.persistence.recordCfi(cfi)`, then `this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, cfi)`. This is the same call shape as the held-turn save in `onPageTurned` (`:588-590`), with the existing `KEEP_STORED_POSITION` (`:117`).
+     - It commits no word. It does not touch `heldClickAnchor` (`:145`), `userExplicitSelection`, `explicitSelectionAnchor` or `resumeAnchor`. It calls neither `hardSelect` (`:305`) nor `onPageTurned` (`:579`).
    - **Restamp** (effect `:1102-1137`, lines `:1127-1128`):
      - **Certified:** remove the document from both sets, then `reportHeldTurnRef.current(doc)`, which releases a held save with its word, as today.
      - **Uncertified:** move the document from `rendererNumberedDocsRef` into `uncertifiedDocsRef`, then `reportHeldTurnRef.current(doc)`, which releases a held save as cfi-only.
@@ -144,13 +152,13 @@ Every line below was re-grepped on `origin/main` `c5bb507f` on 2026-11-03. The c
    - `checkBookWords`;
    - every start path, every soft and relocate anchor save, and every `onWordsReextracted` call (Q2: UNCERTIFIED-ANCHOR-HOLD-1);
    - `foliateParagraphStarts.ts`, `bookParagraphBreaks`, `src/utils/naturalChunks.ts`, `createChunkSourceWords` and Narrate `chunkBreaks` (D-4);
-   - `foliateWordOffsets.ts`, Page's and Narrate's `useModeBindings.ts`, `surface.ts`, `ReaderContainer.tsx`, `src/types.ts` and both `FlowScrollEngine.ts`.
+   - `foliateWordOffsets.ts`, Narrate's `ModeRuntime.ts` and `useModeBindings.ts`, `surface.ts`, `ReaderContainer.tsx`, `src/types.ts` and both `FlowScrollEngine.ts`.
 
 - **Prerequisites:**
   - **FLOW-PARA-PAUSE-INDEX-1 and BLOCK-TAG-CASE-1** (In Flight, merged and held in the RC) are on `origin/main`: integration `f4becc3c`, "Integrate FLOW-PARA-PAUSE-INDEX-1, BLOCK-TAG-CASE-1 (RC window)", plus `2715c867`. Both are ancestors of `c5bb507f`. The base is therefore `c5bb507f` or later.
   - **NATIVE-PATH-ATTESTATION-1 no longer gates this item** (2026-10-30, R-2026-10-30-1). Native runs use the RodneySr substitute: scratch userData proved per LL-165, APPDATA and LOCALAPPDATA redirected, owned fixtures and public-domain books only.
   - Blurby.Brain1 has ruled Q1–Q4 (see the rulings section below). Wave A is dispatch-ready now.
-  - **R-Q5 (Wave B, Page click save only).** Blurby.Brain1 rules the route for Page's cfi-only click save before Wave B's Page task begins. The rest of Wave B (the Flow, Focus and Narrate tasks, B5 and the gates) does not wait on it. See "Blurby.Brain1 rulings Q1–Q4" for the source conflict.
+  - Blurby.Brain1 has also ruled R-Q5, the Page held-click save route: (b), a Page-local `onHeldWordClick`. Nothing in either wave waits on a ruling.
 - **Execution host:**
   - RodneySr (x64), clone `C:\Users\estra\Projects\Blurby`, runs both waves: implementation, tests, the ICU checker, `npm test`/`typecheck`/`build`, and the `--dir --x64` packages.
   - Rodney (arm64) runs only the standing rule 53 native-arm64 25 s launch, at the merge go.
@@ -209,7 +217,10 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
 
   An uncertified document is made with a mismatched canonical slice (the (c2) body), which exists on the base too. The rows are:
   - **(o1)** A click in an uncertified document, after the book's words have arrived, paints no highlight and commits no word (Q3). The highlight and cursor classes on the document are unchanged, and no anchor, resume anchor or explicit selection changes. Red on base in every mode. Per mode:
-    - **Page:** the click saves cfi-only, once, through the R-Q5 route: `updateDocProgress(docId, -1, cfi)` with the clicked span's cfi.
+    - **Page (R-Q5):** the click makes exactly one cfi-only save, `updateDocProgress(docId, -1, cfi)` with the clicked span's cfi, through `onHeldWordClick`. In addition:
+      - the highlight classes are unchanged;
+      - `explicitSelectionAnchor`, `userExplicitSelection` and `heldClickAnchor` are unchanged;
+      - `onWordClick`, `onHeldClickSave` and `onPageTurned` are not called.
     - **Page turn:** a turn onto that document also saves cfi-only, once (`updateDocProgress(docId, -1, cfi)`), with nothing left in `pendingTurnRef`.
     - **Page failure rule:** a lost save fails the row (Q1). That covers no save, a held save, or a `page-turn-lost` diagnostic.
     - **Flow and Focus:** `onHeldWordClick` saves cfi-only, once, as `updateDocProgress(docId, -1, cfi)`; `onWordClick` is not called.
@@ -273,6 +284,8 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `M src/reader/modes/focus/ModeRuntime.ts`
   - `M src/reader/modes/flow/useModeBindings.ts`
   - `M src/reader/modes/focus/useModeBindings.ts`
+  - `M src/reader/modes/page/ModeRuntime.ts`
+  - `M src/reader/modes/page/useModeBindings.ts`
   - `A tests/readerModes/blockTextOrder.test.ts`
   - `A tests/epubOrderedBlockRuns.test.js`
   - `A tests/readerModes/blockTextOrderHold.page.test.tsx`
@@ -284,7 +297,6 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `A scripts/block-text-order/icu-certify/run.ps1`
 
   Conditional additions, each recorded in the memo:
-  - `M src/reader/modes/page/ModeRuntime.ts`, and/or `M src/reader/modes/page/useModeBindings.ts`, only if the R-Q5 ruling names that route;
   - `M docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json`, only if A4's `readerModeBoundaries`/`readerModeOwnership` tests fail mechanically. Record the failure first.
 
   `narrate/ModeRuntime.ts` and `narrate/useModeBindings.ts` must not appear. Any path outside this list, the conditional entries and the two close-out files is a fence failure.
@@ -294,8 +306,8 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
 
 - **Effort:** L. Technical effort: high.
 - **Owners:**
-  - planner (spec; registering UNCERTIFIED-ANCHOR-HOLD-1; amending the Page task once R-Q5 is ruled);
-  - Blurby.Brain1 (Q1–Q4 rulings given; R-Q5; STOPs; the rule 53 confirmation);
+  - planner (spec; registering UNCERTIFIED-ANCHOR-HOLD-1);
+  - Blurby.Brain1 (Q1–Q4 and R-Q5 rulings given; STOPs; the rule 53 confirmation);
   - RodneySr implementation agents: cross-cutting for the Wave A certifier and runs; bounded for each Wave B view;
   - spec-compliance review, then quality review;
   - package verifier;
@@ -318,7 +330,7 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - `src/reader/modes/*/helpers/foliateParagraphStarts.ts`;
   - `src/utils/`;
   - `preload.js`, `main/ipc/`;
-  - any other item editing the four `FoliateView.tsx` files, or the Flow or Focus `ModeRuntime.ts` or `useModeBindings.ts`.
+  - any other item editing the four `FoliateView.tsx` files, or the Page, Flow or Focus `ModeRuntime.ts` or `useModeBindings.ts`.
 - **Shared-core touches:** none.
 - **Staging plan:**
   - only the exact B9 paths, staged by name;
@@ -328,7 +340,6 @@ PowerShell 7, run from the worktree root. A gate passes only on the exact exit c
   - A2 or B1 base status differs from the lists: STOP to Brain1 before any source edit.
   - B5 shows any `ok:false` or exits 3: STOP to Brain1.
   - The live profile hash changes: STOP (LL-165).
-  - The R-Q5 ruling changes the Page edit sites or the fence: the planner amends this spec before the Page task begins.
   - A Page (o1) save is lost (no save, a held save, or `page-turn-lost`): the row fails (Q1). There is no workaround.
   - Each failing gate gets at most one retry, and only for a harness fault.
 
@@ -362,15 +373,15 @@ Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.held-items-TQ.2026-1
   - census anchors that stay text-identical;
   - whichever Focus-window or restamp-currency item lands second re-greps.
 
-**R-Q5. One conflict remains for Brain1. It gates only Wave B's Page click save.**
-- Q1 routes a held Page click through `holdWordClick` → `reportFirstWordOnPage(…, click = true)` → `onHeldClickSaveRef` (`FoliateView.tsx:577-581`). Q3 says a held click commits no word, so `onWordClickRef` is not called (`:730-737`).
-- But `page/ModeRuntime.ts` `onHeldClickSave` (`:611-614`) returns at once when `this.heldClickAnchor` is null ("review fr3: no resolved click is held"). Only `hardSelect` with `holdSave` sets that anchor (`:326-329`).
-- So on `c5bb507f` a Page click that commits no word reaches no save, and (o1) would fail as a lost save. The Q1 fence ("Page FoliateView only") contains no route that both commits no word and saves the cfi.
-- **Candidates:**
-  - (a) the Page view calls `onPageTurnedRef.current({ wordIndex: null, cfi })` for the held click. There is no runtime edit, but `onPageTurned` (`:579-598`) also clears `userExplicitSelection`, `explicitSelectionAnchor` and the held click anchor;
-  - (b) a Page-local `onHeldWordClick(cfi)` like Flow's, which adds `page/ModeRuntime.ts` and `page/useModeBindings.ts` to the fence;
-  - (c) keep today's pre-arrival click shape (`holdSave` sets a provisional in-memory anchor), which contradicts Q3's "commits no word".
-- Until Brain1 rules, the Page task does not start. The rest of Wave B proceeds.
+**R-Q5: the Page held-click save gets its own prop (ruling (b), 2026-11-03).** Source: the same file, section "BLOCK-TEXT-ORDER-1 R-Q5 (Page held-click save)".
+- **The conflict it settles.** Q1 sent a held Page click through `holdWordClick` to `onHeldClickSaveRef` (`FoliateView.tsx:577-581`). But `page/ModeRuntime.ts` `onHeldClickSave` (`:611-614`) returns at once when `heldClickAnchor` is null, and only `hardSelect` with `holdSave` sets that anchor (`:326-329`). Q3's "commits no word" therefore left no save.
+- **Ruling.** Page gets its own `onHeldWordClick(cfi)` prop, bound in `page/useModeBindings.ts` and handled in `page/ModeRuntime.ts`. The fence grows by those two mode-local files.
+  - The handler saves the cfi only (word index null), through the same persistence call shape as Page's held-turn save.
+  - It commits no word, paints no highlight, and leaves the explicit selection and `heldClickAnchor` untouched.
+- **Not (a):** routing the click through `onPageTurned` overloads the turn path and clears the selection.
+- **Not (c):** it contradicts Q3.
+- **Page row (o1)** asserts exactly one cfi-only save, no highlight change, and the explicit selection unchanged.
+- **Noted:** UNCERTIFIED-ANCHOR-HOLD-1 sits at Seq 87.75, directly after this item, and depends on its `onCertification` gate.
 
 ##### Task list
 
@@ -380,12 +391,12 @@ Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.held-items-TQ.2026-1
 | 2 | Main dormant `extractOrderedRuns`; four helper copies (MAIN_ACCEPT, runs, D-3) | calculable | implementation | cross-cutting | high | 40m | — | A |
 | 3 | Four wrapper copies: certifier, certified branch, `onCertification`; A3–A6 | calculable | implementation | cross-cutting | high | 35m | — | A |
 | 4 | B1 four runtime test files red | calculable | positive-control | bounded | medium | 40m | — | B |
-| 5 | Flow, Focus and Narrate hold (`uncertifiedDocsRef`, `onHeldWordClick` prop and bindings, Q3); Page `uncertifiedDocsRef`, report-at-once and restamp move (Q1), with the click save per R-Q5; B2–B4, B6 | calculable | implementation | bounded | high | 60m | — | B |
+| 5 | Flow, Focus and Narrate hold (`uncertifiedDocsRef`, `onHeldWordClick` prop and bindings, Q3); Page `uncertifiedDocsRef`, report-at-once and restamp move (Q1), and Page `onHeldWordClick` prop, binding and runtime handler (R-Q5); B2–B4, B6 | calculable | implementation | bounded | high | 65m | — | B |
 | 6 | ICU checker with positive control and timing (B5) | calculable | verify | cross-cutting | medium | 35m | 50m | B |
 | 7 | Rule 53 package pair, asar, B5 on package; arm64 launch on Rodney (B7–B8) | calculable | packaging-verify | bounded | low | 30m | — | B |
 | 8 | Fence, memo and time log; push; Brain1 confirmation (B9) | calculable | docs | bounded | low | 15m | — | B |
 
-**Total:** chain 4h55m · sum 4h55m; 0 of 8 estimated tasks calibrated (planner estimates). These are planning prices, not execution allowances.
+**Total:** chain 5h00m · sum 5h00m; 0 of 8 estimated tasks calibrated (planner estimates). These are planning prices, not execution allowances.
 
 ##### Lessons applied
 
