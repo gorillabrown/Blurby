@@ -144,7 +144,7 @@
   git grep -n -E 'cfi\?: string' -- src/reader/ports/ReaderPorts.ts
   ```
 
-  git grep -n -F 'capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex' -- src/reader/modes/narrate/ModeRuntime.ts
+  git grep -n -F 'publishedWordIndex: s.canonicalWordIndex,' -- src/reader/modes/narrate/ModeRuntime.ts
   ```
 
   If `ReaderPorts.ts` still types the cfi as `string` only, CPC-1 Wave A has not merged: STOP. If `READER_PORT_RELEASE_CALLS` lacks `"persistence.updateDocProgress"` or `"persistence.updateProgress"`, or Narrate's `exportHandoff` lacks CPC-1 Wave C step 6's line, CPC-1 Wave C has not merged: STOP.
@@ -299,7 +299,7 @@
      - `git grep -c -F 'armSaveTimer' -- src/reader/modes/narrate/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
      - `git grep -c -F 'wordAtPlaybackSample' -- src/reader/modes/narrate/engine/narrateEngine.ts src/reader/modes/narrate/ModeRuntime.ts` exits 0, with both paths listed. It exits 1 on `<base>`.
      - `git grep -c -F 'heardEpoch' -- src/reader/modes/narrate/ModeRuntime.ts` exits 0. It exits 1 on `<base>` (Q4).
-     - `git grep -c -F 'capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex' -- src/reader/modes/narrate/ModeRuntime.ts` prints 1 and exits 0, on `<base>` and on the tip: CPC-1 Wave C step 6's export line is kept, and this item makes no `exportHandoff` edit.
+     - `git grep -c -F 'publishedWordIndex: s.canonicalWordIndex,' -- src/reader/modes/narrate/ModeRuntime.ts` prints 1 and exits 0, on `<base>` and on the tip: CPC-1 Wave C step 6's export line is kept, and this item makes no `exportHandoff` edit.
      - `git grep -n -E '\.tick\(' -- src/reader/modes/narrate/ModeRuntime.ts` prints only the runtime's existing forward to `engine.tick()` (`:638-641` at `14ce3d24`): the timer never ticks (STOP-Q5a option (b) rejected).
      - `git diff --name-status <base> -- src/reader/modes/narrate/engine` prints exactly `M src/reader/modes/narrate/engine/narrateEngine.ts` and exits 0.
      - `git diff --numstat <base> -- src/reader/modes/narrate/engine/narrateEngine.ts` prints `0` deleted lines: the method is added and no engine line is changed.
@@ -437,7 +437,7 @@ Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.ESCAPE-LANDS-AT-PLAY
 - **F4, stated exactly:** if the engine pauses after its audio drains, the pause save records the last heard word, the last published cursor (R6). Applied in design 1 (F4), Wave A step 8 and row n10.
 - **Q4, stated exactly:** the runtime re-reads the epoch after its own resume() and setSpeed() until the restarted audio has sounded. A read whose epoch predates the latest restart, resume or speed change never saves. Applied in design 2 (`heardEpoch`, `freshHeard()`), Wave A steps 2, 5, 8, 9 and 12, and rows n9, n18, n21 and n23.
 - **Not covered by (A), and not a STOP for this item:**
-  - CPC-1's STOP-LAND-focus and STOP-PAGE-BUTTON hold CPC-1 Wave C; any ruling lands there. Narrate's Page landing is its last relocated cfi (`page/ModeRuntime.ts:167`), the page Narrate's view follows to the spoken word (`followSpokenSection`, `narrate/ModeRuntime.ts:738`).
+  - CPC-1's STOP-LAND-focus and STOP-PAGE-BUTTON were ruled (a) on 2026-11-03 and land in CPC-1 Wave C steps 6 and 7, which merge before this item: the bottom bar's Page button hands over the same cursor word, and Page's view jumps to the handed-over word on arrival. Narrate's view already follows the spoken word (`followSpokenSection`, `narrate/ModeRuntime.ts:738`), so the jump rarely moves it.
   - **For Findings (planner's note):** an F4 pause while the window is hidden leaves the published cursor where it was painted before the window hid, since a paused engine publishes nothing (`tick`, `narrateEngine.ts:333-336`). When the reader then shows the window and closes with Escape twice, the hand-off and the close save carry that older painted word, behind this item's timed and pause saves. Brain1's (A) names the engine cursor for the hand-off, so this item does not change it. Its reach is a failed passage while minimized.
 
 ##### STOP-CLOSE-narrate (ruled (A) 2026-11-03; kept as the record)

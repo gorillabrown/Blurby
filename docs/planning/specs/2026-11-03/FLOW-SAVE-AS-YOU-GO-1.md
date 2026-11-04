@@ -75,7 +75,7 @@
   git grep -n -E 'RSVP_PROGRESS_SAVE_INTERVAL_MS|FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS' -- src/constants.ts src/reader/modes
   git grep -n -E 'READER_PORT_RELEASE_CALLS = |persistence\.updateDocProgress' -- src/reader/ports/createReaderPorts.ts
   git grep -n -E 'cfi\?: string' -- src/reader/ports/ReaderPorts.ts
-  git grep -n -F 'capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex' -- src/reader/modes/flow/ModeRuntime.ts
+  git grep -n -F 'publishedWordIndex: s.canonicalWordIndex,' -- src/reader/modes/flow/ModeRuntime.ts
   ```
 
   If `ReaderPorts.ts` still types the cfi as `string` only, CPC-1 Wave A has not merged: STOP. If `READER_PORT_RELEASE_CALLS` lacks `"persistence.updateDocProgress"` or `"persistence.updateProgress"`, or Flow's `exportHandoff` lacks CPC-1 Wave C step 6's line, CPC-1 Wave C has not merged: STOP.
@@ -167,7 +167,7 @@
      - `git grep -n -F 'updateDocProgress(this.document.documentId' -- src/reader/modes/flow/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
      - `git grep -n -E '\b5000\b|5_000|\b2000\b' -- src/reader/modes/flow/ModeRuntime.ts` exits 1 (no literal interval or debounce).
      - `git grep -n -E 'reason !== "teardown"' -- src/reader/modes/flow/ModeRuntime.ts` exits 0. It exits 1 on `<base>`.
-     - `git grep -c -F 'capture === "persistent" ? s.canonicalWordIndex : s.publishedWordIndex' -- src/reader/modes/flow/ModeRuntime.ts` prints 1 and exits 0, on `<base>` and on the tip: CPC-1 Wave C step 6's export line is kept, and this item makes no `exportHandoff` edit.
+     - `git grep -c -F 'publishedWordIndex: s.canonicalWordIndex,' -- src/reader/modes/flow/ModeRuntime.ts` prints 1 and exits 0, on `<base>` and on the tip: CPC-1 Wave C step 6's export line is kept, and this item makes no `exportHandoff` edit.
      - `git diff --name-status <base> -- src/constants.ts src/components src/types.ts src/utils src/reader/ports src/reader/modes/page src/reader/modes/focus src/reader/modes/narrate main preload.js` prints nothing and exits 0.
   3. **Tests.**
      - `npx vitest run tests/readerModes/flowSaveAsYouGo.test.ts` exits 0.
@@ -266,9 +266,9 @@ Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.ESCAPE-LANDS-AT-PLAY
 - **In this item:** no `exportHandoff` edit. Row fl15 stays as a regression row (Done-when 1). Done-when 2 checks that CPC-1's line is kept.
 - **The two exits agree:** this item's exit save (design 12) and the hand-off both name the cursor at the exit. The router exports before it stops Flow (`useReaderModeOrchestrator.ts:302-307`), so both read the same word.
 - **Not covered by (A):**
-  - Page's view opens at Flow's last relocated cfi (`page/ModeRuntime.ts:167`). Flow's scrolled view keeps the cursor near its top, so Page shows the cursor's page or the one before it. CPC-1's STOP-LAND-focus records this and holds CPC-1 Wave C; any ruling lands there.
-  - The bottom bar's Page button exports `"capture-current"`, whose `publishedWordIndex` is unchanged, so Page's close save after it writes the entry word over this item's saves. CPC-1's STOP-PAGE-BUTTON holds that question; any ruling lands in CPC-1 Wave C.
-  - Neither changes this item's steps or rows.
+  - Page's view opens at Flow's last relocated cfi (`page/ModeRuntime.ts:167`), which can be one page short of the cursor. CPC-1 Wave C step 7 (STOP-LAND-focus (a), ruled 2026-11-03) jumps Page's view to the handed-over word on every arrival, so Page shows the cursor's page.
+  - The bottom bar's Page button exports `"capture-current"`. CPC-1 Wave C step 6 (STOP-PAGE-BUTTON (a)) makes it report `s.canonicalWordIndex` too, so Page's close save after it keeps this item's saves.
+  - Neither changes this item's steps or rows; both arrive with CPC-1, which merges first.
 
 ##### STOP-CLOSE-flow (ruled (A) 2026-11-03; kept as the record)
 - **Question.** On the normal close path (Escape twice), the close save writes Flow's `publishedWordIndex`, which the reading cursor never moves. After a timed save of W, the close overwrites W with the word Flow was entered at, or the last click or navigation. How should the close save treat a session that left a playback mode? Row fl15 cannot pass until this is ruled. The planner designs no fix here, per Brain1's instruction.

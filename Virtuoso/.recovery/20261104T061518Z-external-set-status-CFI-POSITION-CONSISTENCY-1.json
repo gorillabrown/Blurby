@@ -1,0 +1,35 @@
+{
+  "id": "20261104T061518Z-external-set-status-CFI-POSITION-CONSISTENCY-1",
+  "operation": "external-set-status",
+  "item_id": "CFI-POSITION-CONSISTENCY-1",
+  "created": "2026-11-04T06:15:18Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "Queued",
+      "notes": "origin: Blurby.Brain1 finding and ruling 2026-11-03 (`Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`; RodneySr repro R2 on c5bb507f). Full Spec: owner O1-O6 and Brain1 B1-B18, C1-C3, STOP-CLOSE (A), STOP-LAND-focus (a) and STOP-PAGE-BUTTON (a) folded (last 2026-11-04). Five dispatches: A, B, C-a, C-b, D. Serialized after CHAPTER-STEP-CFI-1; Wave C after BLOCK-TEXT-ORDER-1 merges. Not a release gate."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:CFI-POSITION-CONSISTENCY-1:[('notes', 'origin: Blurby.Brain1 finding and ruling 2026-11-03 (`Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`; RodneySr repro R2 on c5bb507f). Full Spec: owner O1-O6 and Brain1 B1-B18, C1-C3, STOP-CLOSE (A), STOP-LAND-focus (a) and STOP-PAGE-BUTTON (a) folded (last 2026-11-04). Five dispatches: A, B, C-a, C-b, D. Serialized after CHAPTER-STEP-CFI-1; Wave C after BLOCK-TEXT-ORDER-1 merges. Not a release gate.'), ('status', 'Queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CFI-POSITION-CONSISTENCY-1",
+      "idempotencyKey": "set-status:CFI-POSITION-CONSISTENCY-1:[('notes', 'origin: Blurby.Brain1 finding and ruling 2026-11-03 (`Brain1.CFI-POSITION-CONSISTENCY-1.2026-11-03.md`; RodneySr repro R2 on c5bb507f). Full Spec: owner O1-O6 and Brain1 B1-B18, C1-C3, STOP-CLOSE (A), STOP-LAND-focus (a) and STOP-PAGE-BUTTON (a) folded (last 2026-11-04). Five dispatches: A, B, C-a, C-b, D. Serialized after CHAPTER-STEP-CFI-1; Wave C after BLOCK-TEXT-ORDER-1 merges. Not a release gate.'), ('status', 'Queued')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T061518Z-external-set-status-CFI-POSITION-CONSISTENCY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T06:15:41Z",
+  "outcome": "succeeded"
+}
