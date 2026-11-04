@@ -70,7 +70,7 @@ describe("BLOCK-TEXT-ORDER-1 — main extractOrderedRuns", () => {
       { runOrdinal: 1, blockTag: "p", text: "mid", start: 4 },
       { runOrdinal: 2, blockTag: "body", text: "tail", start: 7 },
     ]);
-    expect(runShape(`\n${FIXTURES.d5}\n`).map((r) => r.text)).toEqual(["lead", "mid", "tail"]);
+    expect(runShape("\n<p>mid</p>\n")).toEqual([{ runOrdinal: 0, blockTag: "p", text: "mid", start: 0 }]);
   });
 
   it("(m6) cue offset", () => {

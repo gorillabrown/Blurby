@@ -155,6 +155,121 @@ function extractBlockPlans($, $root) {
 }
 
 /**
+ * BLOCK-TEXT-ORDER-1 (contracts D-1 and A-1, MAIN_ACCEPT): the section's accepted text as raw runs in DOM order.
+ * Acceptance is exactly extractBlockPlans' (walk above the outermost block, walkInline below it, the same footnote
+ * predicates), but a run ends at the entry or exit of any BLOCK_TAGS element, including an empty or suppressed one;
+ * a suppressed inline element does not end a run. Runs whose text is all whitespace are not emitted. Each run is
+ * { runOrdinal, blockTag, text, start }: text is the exact concatenation of its text nodes and start is its stream
+ * offset (the sum of the earlier runs' lengths). Each cue is { runOrdinal, offset, text }, offset being the UTF-16
+ * offset within that run where the skipped reference stood; a cue met in a run that is not emitted goes to the end
+ * of the previous emitted run, or to the start of the next one when none came before (runOrdinal -1 when the
+ * section emits no run at all). script and style are skipped.
+ * Dormant: production never calls it (WORD-INDEX-UNIFY-1 may).
+ */
+function extractOrderedRuns($, $root) {
+  const { targetIds, footnoteTexts } = buildFootnoteTargetTextMap($, $root);
+  const runs = [];
+  const cues = [];
+  let parts = [];
+  let runCues = [];
+  let carriedCues = [];
+  let runBlockTag = "";
+  let streamOffset = 0;
+  const blockTags = [];
+
+  const tagOf = (node) => (node.name || "").toLowerCase();
+  const isBlock = (node) => node && node.type === "tag" && BLOCK_TAGS.has(tagOf(node));
+  const containsBlock = (node) => isBlock(node) || (node && node.type === "tag" && (node.children || []).some(containsBlock));
+  const isScriptOrStyle = (node) => tagOf(node) === "script" || tagOf(node) === "style";
+
+  function closeRun() {
+    const text = parts.join("");
+    if (text.trim()) {
+      const runOrdinal = runs.length;
+      runs.push({ runOrdinal, blockTag: runBlockTag, text, start: streamOffset });
+      streamOffset += text.length;
+      for (const cue of carriedCues) cues.push({ runOrdinal, offset: 0, text: cue.text });
+      for (const cue of runCues) cues.push({ runOrdinal, offset: cue.offset, text: cue.text });
+      carriedCues = [];
+    } else if (runs.length > 0) {
+      const last = runs[runs.length - 1];
+      for (const cue of runCues) cues.push({ runOrdinal: last.runOrdinal, offset: last.text.length, text: cue.text });
+    } else {
+      carriedCues.push(...runCues);
+    }
+    parts = [];
+    runCues = [];
+  }
+
+  function acceptText(text) {
+    if (parts.length === 0) runBlockTag = blockTags[blockTags.length - 1];
+    parts.push(text);
+  }
+
+  function skip(node) {
+    if (containsBlock(node)) closeRun();
+  }
+
+  function enterBlock(node, visitChildren) {
+    closeRun();
+    blockTags.push(tagOf(node));
+    visitChildren();
+    blockTags.pop();
+    closeRun();
+  }
+
+  function walkInline(node, parent) {
+    if (!node) return;
+    if (node.type === "text") {
+      const text = node.data || "";
+      if (text) acceptText(text);
+      return;
+    }
+    if (node.type !== "tag") return;
+    if (isScriptOrStyle(node) || isFootnoteBodyNode(node, targetIds)) return skip(node);
+    if (isLikelyFootnoteRef(node, parent)) {
+      const hrefId = normalizeHash(attr(node, "href"));
+      const text = hrefId ? footnoteTexts.get(hrefId) : "";
+      if (text) runCues.push({ offset: parts.join("").length, text });
+      return skip(node);
+    }
+    const visitChildren = () => {
+      for (const child of node.children || []) walkInline(child, node);
+    };
+    if (isBlock(node)) enterBlock(node, visitChildren);
+    else visitChildren();
+  }
+
+  function walk(node) {
+    if (!node || node.type !== "tag") return;
+    if (isScriptOrStyle(node) || isFootnoteBodyNode(node, targetIds)) return skip(node);
+    if (isBlock(node)) {
+      enterBlock(node, () => {
+        for (const child of node.children || []) walkInline(child, node);
+      });
+      return;
+    }
+    for (const child of node.children || []) {
+      if (child.type === "text") {
+        const text = child.data || "";
+        if (text.trim()) acceptText(text);
+      } else if (child.type === "tag") {
+        walk(child);
+      }
+    }
+  }
+
+  $root.each((_, el) => {
+    blockTags.length = 0;
+    blockTags.push(tagOf(el));
+    walk(el);
+    closeRun();
+  });
+  for (const cue of carriedCues) cues.push({ runOrdinal: -1, offset: 0, text: cue.text });
+  return { runs, cues };
+}
+
+/**
  * Extract all words from an EPUB file, ordered by spine reading order.
  *
  * @param {string} epubPath - Absolute path to the EPUB file
@@ -306,6 +421,7 @@ module.exports = {
   extractWords,
   extractBlockTexts,
   extractBlockPlans,
+  extractOrderedRuns,
   isLikelyFootnoteRef,
   isFootnoteBodyNode,
 };

@@ -15,6 +15,9 @@ export interface FoliateWord {
   blockId?: string;
   paragraphBreakAfter?: boolean;
   sourceLineBreakAfter?: boolean;
+  /** BLOCK-TEXT-ORDER-1 (D-6): the raw run (D-1) the word came from, 0-based per section, and its `section:rOrdinal` id. */
+  runOrdinal?: number;
+  runId?: string;
 }
 
 /**
@@ -83,42 +86,157 @@ export function getBlockParent(node: Node): Element | null {
   return el;
 }
 
-export function collectBlockTextNodes(root: ParentNode, sectionIndex = 0): Array<{ block: Element; nodes: Text[]; blockTag: string; blockOrdinal: number; blockId: string }> {
-  const groups = new Map<Element, Text[]>();
-  const order: Element[] = [];
-      const walker = root.ownerDocument?.createTreeWalker?.(root, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node: Node) => {
-      const parent = node.parentElement;
-      const parentName = parent?.localName.toLowerCase();
-      if (parentName === "script" || parentName === "style") return NodeFilter.FILTER_REJECT;
-      if (!node.textContent) return NodeFilter.FILTER_REJECT;
-      if (isSuppressedNarrationTextNode(node)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-  if (!walker) return [];
+/**
+ * BLOCK-TEXT-ORDER-1 (contract A-1): the `#`-href targets of every footnote reference below `body`, exactly main's
+ * `targetIds` (`buildFootnoteTargetTextMap`, main/epub-word-extractor.js).
+ */
+export function collectFootnoteTargetIds(body: Element): Set<string> {
+  const ids = new Set<string>();
+  for (const el of Array.from(body.querySelectorAll("*"))) {
+    if (!isFootnoteRefElement(el)) continue;
+    const href = el.getAttribute("href") || "";
+    if (!href.startsWith("#")) continue;
+    const id = href.slice(1).trim();
+    if (id) ids.add(id);
+  }
+  return ids;
+}
 
-  let node: Text | null;
-  while ((node = walker.nextNode() as Text | null)) {
-    const block = getBlockParent(node) || (root instanceof Element ? root : root.ownerDocument?.body);
-    if (!block) continue;
-    if (!groups.has(block)) {
-      groups.set(block, []);
-      order.push(block);
-    }
-    groups.get(block)!.push(node);
+/**
+ * MAIN_ACCEPT (contract A-1): main's acceptance of a text node under `root` (the section body). It is rejected when
+ * an element on the path root…parent is script or style, or a footnote body (main's predicate, with its plain-ID
+ * target clause); when an element strictly below its outermost block is a footnote reference; and, outside any
+ * block, when it is blank.
+ */
+function isMainAcceptedTextNode(node: Text, root: Element, targetIds: Set<string>): boolean {
+  if (!node.data) return false;
+  const path: Element[] = [];
+  for (let el = node.parentElement; el; el = el.parentElement) {
+    path.push(el);
+    if (el === root) break;
+  }
+  let outermostBlock = -1;
+  for (let i = 0; i < path.length; i++) {
+    const el = path[i];
+    const name = el.localName.toLowerCase();
+    if (name === "script" || name === "style") return false;
+    const id = el.getAttribute("id") || "";
+    if ((id && targetIds.has(id)) || isFootnoteBodyElement(el)) return false;
+    if (BLOCK_TAGS.has(name)) outermostBlock = i;
+  }
+  if (outermostBlock < 0) return node.data.trim() !== "";
+  for (let i = 0; i < outermostBlock; i++) {
+    if (isFootnoteRefElement(path[i])) return false;
+  }
+  return true;
+}
+
+/** BLOCK-TEXT-ORDER-1 (contract A-2): the section body's main-accepted text nodes, in DOM order. */
+export function collectMainAcceptedTextNodes(body: Element | null | undefined): Text[] {
+  const doc = body?.ownerDocument;
+  if (!body || !doc?.createTreeWalker) return [];
+  const targetIds = collectFootnoteTargetIds(body);
+  const nodes: Text[] = [];
+  const walker = doc.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
+    if (isMainAcceptedTextNode(node, body, targetIds)) nodes.push(node);
+  }
+  return nodes;
+}
+
+function isLegacyAcceptedTextNode(node: Text): boolean {
+  const parentName = node.parentElement?.localName.toLowerCase();
+  if (parentName === "script" || parentName === "style") return false;
+  if (!node.textContent) return false;
+  return !isSuppressedNarrationTextNode(node);
+}
+
+/**
+ * One raw run (D-1). `runOrdinal` and `runId` are always set here; they are typed optional only so the unchanged
+ * legacy `src/utils/foliateHelpers.ts` collector stays assignable where tests type the copies alike (blockTagCase).
+ */
+export interface BlockTextRun {
+  block: Element;
+  nodes: Text[];
+  blockTag: string;
+  blockOrdinal: number;
+  blockId: string;
+  runOrdinal?: number;
+  runId?: string;
+}
+
+/**
+ * BLOCK-TEXT-ORDER-1 (contract D-1): the raw runs of accepted text in DOM order. A run is a maximal sequence of accepted
+ * text nodes not separated by the entry or exit of any BLOCK_TAGS element (an empty or suppressed block included; a
+ * suppressed inline element is not a separator); runs whose text is all whitespace are not emitted. `block`,
+ * `blockTag`, `blockOrdinal` and `blockId` keep today's formula (D-2): the nearest block, or the root; blocks numbered
+ * in first-encounter order of their accepted text, so a resumed parent run shares its parent's `blockId`. The fallback
+ * acceptance is the legacy predicate (A-3); `"main"` uses MAIN_ACCEPT (A-1).
+ */
+export function collectBlockTextNodes(
+  root: ParentNode,
+  sectionIndex = 0,
+  acceptance: "fallback" | "main" = "fallback",
+): BlockTextRun[] {
+  const doc = root.ownerDocument;
+  if (!doc?.createTreeWalker) return [];
+  const rootBlock = root instanceof Element ? root : doc.body;
+  let accept = isLegacyAcceptedTextNode;
+  if (acceptance === "main") {
+    if (!rootBlock) return [];
+    const targetIds = collectFootnoteTargetIds(rootBlock);
+    accept = (node: Text) => isMainAcceptedTextNode(node, rootBlock, targetIds);
   }
 
-  return order.map((block, blockOrdinal) => {
+  const rawRuns: Text[][] = [];
+  let current: Text[] = [];
+  const endRun = () => {
+    if (current.length > 0) rawRuns.push(current);
+    current = [];
+  };
+  const visit = (parent: Node) => {
+    for (let child = parent.firstChild; child; child = child.nextSibling) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        if (accept(child as Text)) current.push(child as Text);
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const isBlock = BLOCK_TAGS.has((child as Element).localName.toLowerCase());
+        if (isBlock) endRun();
+        visit(child);
+        if (isBlock) endRun();
+      }
+    }
+  };
+  visit(root);
+  endRun();
+
+  const blockOf = (node: Text) => getBlockParent(node) || rootBlock;
+  const blockOrdinals = new Map<Element, number>();
+  for (const nodes of rawRuns) {
+    for (const node of nodes) {
+      const block = blockOf(node);
+      if (block && !blockOrdinals.has(block)) blockOrdinals.set(block, blockOrdinals.size);
+    }
+  }
+
+  const runs: BlockTextRun[] = [];
+  for (const nodes of rawRuns) {
+    const block = blockOf(nodes[0]);
+    if (!block) continue;
+    if (!nodes.some((node) => (node.textContent || "").trim() !== "")) continue;
     const blockTag = block.tagName.toLowerCase();
-    return {
+    const blockOrdinal = blockOrdinals.get(block)!;
+    const runOrdinal = runs.length;
+    runs.push({
       block,
-      nodes: groups.get(block) || [],
+      nodes,
       blockTag,
       blockOrdinal,
       blockId: `${sectionIndex}:${blockOrdinal}:${blockTag}`,
-    };
-  });
+      runOrdinal,
+      runId: `${sectionIndex}:r${runOrdinal}`,
+    });
+  }
+  return runs;
 }
 
 export function locateTextOffset(nodes: Text[], absoluteOffset: number): { node: Text; offset: number } | null {
@@ -153,7 +271,7 @@ export function buildWordsFromTextNodes(
   nodes: Text[],
   sectionIndex: number,
   tokenOffset = 0,
-  metadata: { blockTag?: string; blockOrdinal?: number; blockId?: string } = {},
+  metadata: { blockTag?: string; blockOrdinal?: number; blockId?: string; runOrdinal?: number; runId?: string } = {},
 ): FoliateWord[] {
   if (nodes.length === 0) return [];
   const combined = nodes.map((node) => node.textContent || "").join("");
@@ -176,6 +294,8 @@ export function buildWordsFromTextNodes(
       blockTag: metadata.blockTag,
       blockOrdinal: metadata.blockOrdinal,
       blockId: metadata.blockId,
+      runOrdinal: metadata.runOrdinal,
+      runId: metadata.runId,
       sourceLineBreakAfter: hasPunctuatedSourceLineBreakAfter(combined, end) || undefined,
     });
   }
@@ -230,6 +350,31 @@ export function buildWrappedFragmentForNode(
   return frag;
 }
 
+/**
+ * BLOCK-TEXT-ORDER-1 (contract D-3): one section's fallback words from its runs, in DOM order. A word is a paragraph
+ * start when it is the first word of its block; `paragraphBreakAfter` holds when the next word is a paragraph start or
+ * the word is the section's last, so a continuation run of a started block adds no break (OQ5).
+ */
+function buildSectionWords(
+  runs: ReturnType<typeof collectBlockTextNodes>,
+  sectionIndex: number,
+  tokenOffset: number,
+): FoliateWord[] {
+  const words: FoliateWord[] = [];
+  const startedBlocks = new Set<Element>();
+  for (const { block, nodes, blockTag, blockOrdinal, blockId, runOrdinal, runId } of runs) {
+    const runWords = buildWordsFromTextNodes(nodes, sectionIndex, tokenOffset + words.length, { blockTag, blockOrdinal, blockId, runOrdinal, runId });
+    if (runWords.length === 0) continue;
+    if (!startedBlocks.has(block)) {
+      startedBlocks.add(block);
+      if (words.length > 0) words[words.length - 1].paragraphBreakAfter = true;
+    }
+    words.push(...runWords);
+  }
+  if (words.length > 0) words[words.length - 1].paragraphBreakAfter = true;
+  return words;
+}
+
 export function extractWordsFromView(view: any): { words: FoliateWord[]; paragraphBreaks: Set<number> } {
   const words: FoliateWord[] = [];
   const paragraphBreaks = new Set<number>();
@@ -239,33 +384,19 @@ export function extractWordsFromView(view: any): { words: FoliateWord[]; paragra
   for (const { doc, index } of view.renderer.getContents()) {
     if (!doc?.body) continue;
 
-    const blockGroups = collectBlockTextNodes(doc.body, index);
-    for (const { nodes, blockTag, blockOrdinal, blockId } of blockGroups) {
-      const tokenOffset = sectionTokenOffsets.get(index) || 0;
-      const blockWords = buildWordsFromTextNodes(nodes, index, tokenOffset, { blockTag, blockOrdinal, blockId });
-      if (blockWords.length === 0) continue;
-      blockWords[blockWords.length - 1].paragraphBreakAfter = true;
-      words.push(...blockWords);
-      sectionTokenOffsets.set(index, tokenOffset + blockWords.length);
-      paragraphBreaks.add(words.length - 1);
+    const tokenOffset = sectionTokenOffsets.get(index) || 0;
+    const sectionWords = buildSectionWords(collectBlockTextNodes(doc.body, index), index, tokenOffset);
+    for (const word of sectionWords) {
+      if (word.paragraphBreakAfter) paragraphBreaks.add(words.length);
+      words.push(word);
     }
+    sectionTokenOffsets.set(index, tokenOffset + sectionWords.length);
   }
   return { words, paragraphBreaks };
 }
 
 /** Extract words from a single section's document (for incremental updates during narration) */
 export function extractWordsFromSection(doc: Document, sectionIndex: number): FoliateWord[] {
-  const words: FoliateWord[] = [];
-  if (!doc?.body) return words;
-  const groups = collectBlockTextNodes(doc.body, sectionIndex);
-  let tokenOffset = 0;
-  for (const { nodes, blockTag, blockOrdinal, blockId } of groups) {
-    const blockWords = buildWordsFromTextNodes(nodes, sectionIndex, tokenOffset, { blockTag, blockOrdinal, blockId });
-    if (blockWords.length > 0) {
-      blockWords[blockWords.length - 1].paragraphBreakAfter = true;
-    }
-    words.push(...blockWords);
-    tokenOffset += blockWords.length;
-  }
-  return words;
+  if (!doc?.body) return [];
+  return buildSectionWords(collectBlockTextNodes(doc.body, sectionIndex), sectionIndex, 0);
 }
