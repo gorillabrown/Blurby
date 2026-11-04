@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-04T02:31:00Z",
+  "takenAt": "2026-11-04T04:51:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -8135,8 +8135,8 @@
       "sequence": 87.75,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "BLOCK-TEXT-ORDER-1"
       ],
@@ -8144,14 +8144,14 @@
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "ROADMAP.md#uncertified-anchor-hold-1",
+      "spec_link": "docs/planning/specs/2026-11-03/UNCERTIFIED-ANCHOR-HOLD-1.md",
       "branch": "",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Completes the owner's OQ4 ruling for anchors: in a section whose spans BLOCK-TEXT-ORDER-1 could not certify, the first-visible-word paths (soft and relocate anchor saves, and Play from the first visible word) in Flow, Focus and Narrate save the cfi only, or start from canonical words, instead of trusting a span index. One commit per mode, inside each mode's ownership window.",
       "notes": "origin: Blurby.Brain1 ruling Q2 on BLOCK-TEXT-ORDER-1 Wave B, 2026-11-03 (Brain1.held-items-TQ.2026-11-03.md). Sequenced directly after BLOCK-TEXT-ORDER-1. Stub; spec to follow.",
-      "revision": "71c7d4186313d0a2f61aa50a1f64c22902585322e50aadf79cab8acdf8d34722",
+      "revision": "33ebc2fe56991b7a45cea89aec40d1248c134060e7a6433b3287a94e0ec8a9fc",
       "extra": {
         "id": "40d7c96c-c31e-81db-852d-c590c1226444",
         "url": "https://app.notion.com/40d7c96cc31e81db852dc590c1226444",
