@@ -1,0 +1,37 @@
+{
+  "id": "20261104T213840Z-external-record-completion-FOLIATE-DISPLAY-LIFETIME-1",
+  "operation": "external-record-completion",
+  "item_id": "FOLIATE-DISPLAY-LIFETIME-1",
+  "created": "2026-11-04T21:38:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-11-04",
+      "evidence": "docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md; docs/studies/investigations/FOLIATE-STYLE-NULL.2026-10-26.md; docs/planning/cloud-handoff/2026-10-26/README.md; docs/governance/close-outs/Memo.FOLIATE-DISPLAY-LIFETIME-1.NativeHold.2026-10-27.md; docs/governance/close-outs/Receipt.FOLIATE-DISPLAY-LIFETIME-1.Portable.2026-10-27.json; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-final-source-review.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-package-static-review.md; docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/bug-reports/Issue.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/LESSONS_LEARNED.md (LL-169, LL-165 status); C:/Projects/Blurby-artifacts/foliate-display-lifetime-20261027/attestation-final-disposition.2026-10-27.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/attestation-run2-evidence-review.md",
+      "sequence": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "record-completion:FOLIATE-DISPLAY-LIFETIME-1:[('completed', '2026-11-04'), ('evidence', 'docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md; docs/studies/investigations/FOLIATE-STYLE-NULL.2026-10-26.md; docs/planning/cloud-handoff/2026-10-26/README.md; docs/governance/close-outs/Memo.FOLIATE-DISPLAY-LIFETIME-1.NativeHold.2026-10-27.md; docs/governance/close-outs/Receipt.FOLIATE-DISPLAY-LIFETIME-1.Portable.2026-10-27.json; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-final-source-review.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-package-static-review.md; docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/bug-reports/Issue.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/LESSONS_LEARNED.md (LL-169, LL-165 status); C:/Projects/Blurby-artifacts/foliate-display-lifetime-20261027/attestation-final-disposition.2026-10-27.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/attestation-run2-evidence-review.md'), ('sequence', ''), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "FOLIATE-DISPLAY-LIFETIME-1",
+      "idempotencyKey": "record-completion:FOLIATE-DISPLAY-LIFETIME-1:[('completed', '2026-11-04'), ('evidence', 'docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-11-04.md; docs/studies/investigations/FOLIATE-STYLE-NULL.2026-10-26.md; docs/planning/cloud-handoff/2026-10-26/README.md; docs/governance/close-outs/Memo.FOLIATE-DISPLAY-LIFETIME-1.NativeHold.2026-10-27.md; docs/governance/close-outs/Receipt.FOLIATE-DISPLAY-LIFETIME-1.Portable.2026-10-27.json; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-final-source-review.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/foliate-package-static-review.md; docs/governance/close-outs/CloseOut.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/bug-reports/Issue.FOLIATE-DISPLAY-LIFETIME-1.2026-10-27.md; docs/governance/LESSONS_LEARNED.md (LL-169, LL-165 status); C:/Projects/Blurby-artifacts/foliate-display-lifetime-20261027/attestation-final-disposition.2026-10-27.md; C:/Projects/Blurby-artifacts/local-resume-20261027/review/attestation-run2-evidence-review.md'), ('sequence', ''), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T213840Z-external-record-completion-FOLIATE-DISPLAY-LIFETIME-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T21:40:24Z",
+  "outcome": "succeeded"
+}

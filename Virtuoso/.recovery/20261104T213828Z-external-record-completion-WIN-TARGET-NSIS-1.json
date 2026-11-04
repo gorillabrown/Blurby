@@ -1,0 +1,37 @@
+{
+  "id": "20261104T213828Z-external-record-completion-WIN-TARGET-NSIS-1",
+  "operation": "external-record-completion",
+  "item_id": "WIN-TARGET-NSIS-1",
+  "created": "2026-11-04T21:38:28Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-11-04",
+      "evidence": "docs/governance/close-outs/CloseOut.WIN-TARGET-NSIS-1.2026-11-04.md; Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)",
+      "sequence": ""
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "record-completion:WIN-TARGET-NSIS-1:[('completed', '2026-11-04'), ('evidence', 'docs/governance/close-outs/CloseOut.WIN-TARGET-NSIS-1.2026-11-04.md; Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('sequence', ''), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "WIN-TARGET-NSIS-1",
+      "idempotencyKey": "record-completion:WIN-TARGET-NSIS-1:[('completed', '2026-11-04'), ('evidence', 'docs/governance/close-outs/CloseOut.WIN-TARGET-NSIS-1.2026-11-04.md; Quiet machine: C:/Projects/Blurby-artifacts/win-target-nsis-1/quiet-x64/ (recorded on the ROADMAP card, review 2026-10-25)'), ('sequence', ''), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T213828Z-external-record-completion-WIN-TARGET-NSIS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T21:40:13Z",
+  "outcome": "succeeded"
+}
