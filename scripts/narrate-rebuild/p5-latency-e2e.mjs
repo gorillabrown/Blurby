@@ -108,7 +108,7 @@ async function displayProbe(file, breakIt = false) {
   try { fs.rmSync(file, { force: true }); } catch { /* none */ }
   const { ELECTRON_RUN_AS_NODE: _asNode, ...env } = process.env; // as launch(): the probe must run as Electron, not Node
   const code = await new Promise((resolve) => {
-    const p = spawn(ELECTRON, [PROBE_SCRIPT, "--out", file, ...(breakIt ? ["--break"] : [])], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    const p = spawn(ELECTRON, [PROBE_SCRIPT, "--out", file, ...(breakIt ? ["--break"] : [])], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: false });
     const timer = setTimeout(() => p.kill(), 60000);
     p.on("exit", (c) => { clearTimeout(timer); resolve(c); });
   });
@@ -118,7 +118,13 @@ async function displayProbe(file, breakIt = false) {
   return { ...rec, exitCode: code, file };
 }
 const probeOk = (p) => Boolean(p && p.valid === true);
-const probeReason = (when, p) => `${when} display probe invalid (${p ? `visibility ${p.visibilityState ?? "?"}, p90 ${p.p90 ?? "?"} ms, limit ${p.limitMs ?? "?"} ms${p.error ? `, ${String(p.error).slice(0, 120)}` : ""}` : "missing"})`;
+const probeReason = (when, p) => `${when} display probe invalid (${p ? `${(p.invalidReasons ?? []).join(",") || "no reasons"}; visibility ${p.visibilityState ?? "?"}, p90 ${p.p90 ?? "?"} ms, limit ${p.limitMs ?? "?"} ms${p.error ? `, ${String(p.error).slice(0, 120)}` : ""}` : "missing"})`;
+// NARRATE-FRAME-GATE-1: the reason a label's recorded probe pair does not count (null when both are valid).
+const readProbeFile = (label, when) => { try { return JSON.parse(fs.readFileSync(displayPathFor(label, when), "utf8")); } catch { return null; } };
+function probeFilesReason(label) {
+  const b = readProbeFile(label, "before"), a = readProbeFile(label, "after");
+  return !probeOk(b) ? probeReason("before", b) : !probeOk(a) ? probeReason("after", a) : null;
+}
 /** Host-wide 3D engine use, every 5 s, from one pwsh loop; stop() returns { meanPct, maxPct, samples } or null. */
 function startGpuSampler() {
   const xs = [];
@@ -248,9 +254,8 @@ if (want("session")) {
     const run = ANALYZE_ONLY ? null : await launch(label, { kind: "session", rate, minutes: MINUTES });
     if (run) report.runs.push(run);
     // NARRATE-FRAME-GATE-1: a session counts only with both probe files valid (re-read here, so --analyze-only agrees).
-    const readProbe = (when) => { try { return JSON.parse(fs.readFileSync(displayPathFor(label, when), "utf8")); } catch { return null; } };
-    const pBefore = readProbe("before"), pAfter = readProbe("after");
-    const why = !probeOk(pBefore) ? probeReason("before", pBefore) : !probeOk(pAfter) ? probeReason("after", pAfter) : null;
+    const pBefore = readProbeFile(label, "before"), pAfter = readProbeFile(label, "after");
+    const why = probeFilesReason(label);
     if (why) {
       invalid.push({ label, reason: why });
       report.sessions[rateLabel(rate)] = { tracePath: tracePathFor(label), verdict: "INVALID", invalid: why, displayBefore: pBefore, displayAfter: pAfter };
@@ -280,18 +285,21 @@ if (want("warm")) {
     const r = rateLabel(rate);
     const all = [];
     let cycles = 0;
+    let rateInvalid = null;
     // Cycles still needed for every type to reach WARM counting trials (a speed cycle makes two speed requests).
     const need = () => Math.max(...TYPES.map((t) => Math.ceil(Math.max(0, WARM - all.filter((x) => x.cause === t && counts(x)).length) / (t === "speed" ? 2 : 1))));
     for (let part = 1; ; part++) {
       const label = part === 1 ? `warm-${r}` : `warm-${r}-${part}`;
       if (ANALYZE_ONLY) {
         if (!fs.existsSync(tracePathFor(label))) break;
+        const why = probeFilesReason(label);
+        if (why) { rateInvalid = `${label}: ${why}`; invalid.push({ label, reason: why }); break; }
       } else {
         const repeat = part === 1 ? WARM : Math.min(need(), CYCLE_CAP - cycles);
         if (repeat <= 0) break;
         const run = await launch(label, { kind: "warm", rate, repeat });
         report.runs.push({ ...run, cycles: repeat });
-        if (run.invalid) { invalid.push({ label, reason: run.invalid }); break; } // NARRATE-FRAME-GATE-1: not counted
+        if (run.invalid) { rateInvalid = `${label}: ${run.invalid}`; invalid.push({ label, reason: run.invalid }); break; } // NARRATE-FRAME-GATE-1: not counted
         cycles += repeat;
       }
       const warmError = trialError(label, ANALYZE_ONLY ? null : report.runs[report.runs.length - 1]);
@@ -299,6 +307,8 @@ if (want("warm")) {
       all.push(...firstVoiced(tracePathFor(label)).map((x) => ({ ...x, run: label })));
       if (!ANALYZE_ONLY && (need() <= 0 || cycles >= CYCLE_CAP)) break;
     }
+    // NARRATE-FRAME-GATE-1: an invalid part makes the whole rate INVALID; no per-type checks run on it.
+    if (rateInvalid) { report.warm[r] = { verdict: "INVALID", reason: rateInvalid }; continue; }
     const byCause = {};
     for (const t of TYPES) {
       const own = all.filter((x) => x.cause === t);
@@ -326,7 +336,12 @@ if (want("cold") && !ANALYZE_ONLY) {
   coldBefore = await displayProbe(displayPathFor("cold-block", "before"), BREAK_DISPLAY === "before");
   if (!probeOk(coldBefore)) invalid.push({ label: "cold-block", reason: probeReason("before", coldBefore) });
 }
-if (want("cold") && (ANALYZE_ONLY || probeOk(coldBefore))) {
+if (want("cold") && ANALYZE_ONLY) {
+  const why = probeFilesReason("cold-block");
+  if (why) invalid.push({ label: "cold-block", reason: why });
+}
+const coldFailuresMark = failures.length;
+if (want("cold") && (ANALYZE_ONLY ? !invalid.some((x) => x.label === "cold-block") : probeOk(coldBefore))) {
   for (const rate of RATES) {
     const r = rateLabel(rate);
     report.cold[r] = {};
@@ -363,7 +378,10 @@ if (want("cold") && (ANALYZE_ONLY || probeOk(coldBefore))) {
 if (want("cold") && !ANALYZE_ONLY && probeOk(coldBefore)) {
   const coldAfter = await displayProbe(displayPathFor("cold-block", "after"), BREAK_DISPLAY === "after");
   report.coldDisplay = { before: coldBefore, after: coldAfter };
-  if (!probeOk(coldAfter)) invalid.push({ label: "cold-block", reason: probeReason("after", coldAfter) });
+  if (!probeOk(coldAfter)) {
+    invalid.push({ label: "cold-block", reason: probeReason("after", coldAfter) });
+    failures.length = coldFailuresMark; // NARRATE-FRAME-GATE-1: an invalid pair counts no cold failure
+  }
 }
 
 report.verdict = failures.length ? "FAIL" : invalid.length ? "INVALID" : "PASS";
