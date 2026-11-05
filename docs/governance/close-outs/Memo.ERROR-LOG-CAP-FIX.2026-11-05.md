@@ -17,7 +17,7 @@ ERROR-LOG-CAP-1 made `main/error-log.js` the one error.log appender, with a 10 M
 - `tests/perf-baseline-results.json` was rewritten by the suite and is not committed.
 
 ## Package verification (rule 53, x64 pair; arm64 half not run here)
-Evidence: C:\Projects\Blurby-artifacts\error-log-cap-fixule53\.
+Evidence: `C:ProjectsBlurby-artifactserror-log-cap-fixule53`.
 - Tip: `electron-builder --dir --x64` of `fa383bbe` (`build-tip.txt`, exit 0). Base: the `14ce3d24` x64 package already built in `.worktrees/gate1-run6-20261103` (gate (1) run 6).
 - asar: 11,587 entries each, no entry only on one side; the only content difference is `/main/library-write.js` (`asar-compare.txt`).
 - 25 s scratch launch, APPDATA and LOCALAPPDATA redirected, LL-165 profile proof (userData is the scratch profile) before input: both alive at 25 s, no error.log lines, no crash dumps, live library.json and settings.json hashes unchanged. Both print the same fresh-profile "Backup failed ... library.json ENOENT" line (`tip/`, `main/`).
