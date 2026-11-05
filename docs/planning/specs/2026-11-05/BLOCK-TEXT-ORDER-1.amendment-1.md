@@ -2,7 +2,7 @@
 
 *Planner: Blurby.Roadmap, 2026-11-05. This amends [the full specification](../2026-11-03/BLOCK-TEXT-ORDER-1.md). It supersedes TQ-B3's "no yield" and the sentences of The change that repeat it; everything else in the specification stands. Ruling: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.BLOCK-TEXT-ORDER-1.amendment-1.2026-11-05.md` (Blurby.Brain1, CLAUDE.md rule 11). Evidence, on RodneySr: `C:\Projects\Blurby-artifacts\block-text-order-1\` (`D3-boundary`, `J1c`, `J1d`, `J1e`).*
 
-**State: dispatch-ready.** Blurby.Brain1's addendum (2026-11-05) ruled the rerun question the planner raised, and it is folded in below.
+**State: dispatch-ready.** Blurby.Brain1's two addenda (2026-11-05) ruled the rerun question and the book-stamped window the planner raised, and both are folded in below.
 
 ## What the evidence proved
 
@@ -28,7 +28,8 @@ In all four `src/reader/modes/<mode>/helpers/foliateWordWrapping.ts` copies, whi
 7. **A superseded run stops (addendum).** Only Page waits for a running wrap (`sectionWrapsRef`), and the three other restamp effects unwrap without waiting. Once the certified stamp yields, a stale run can stamp an untouched node with the old numbering between the live run's slices, and the live run then reports `dom-changed`. So each helper copy keeps a private `WeakMap<Document, object>` token, which `wrapWordsInSpans` and `unwrapWordSpans(doc)` each replace.
    - **Certified run:** it checks the token before each node, ahead of the re-check. If the token was replaced, it stops with no report.
    - **Legacy run:** it checks the token after each `await` and stops when replaced, with no report and no other change. The commoner case is a load wrap on the legacy path that the book's words overtake. With no superseding run it behaves exactly as before. The yield statement stays text-identical, because the census anchors it.
-   - **Return value:** a superseded run's return value is not used for numbering. The live run's completion is what counts.
+   - **Settling (addendum 2):** a superseded run's promise settles only when the live run does, so every caller's code after its `await` still runs on a finished document, with no view edit. The token holds the run's promise (for example `{ settled: Promise<number> | null }`), and `wrapWordsInSpans` registers its own run. A run that finds itself replaced returns the current token's `settled`. `unwrapWordSpans(doc)` installs a token with `settled: null`, so a run superseded by an unwrap with no new wrap returns at once. Runs only ever wait on newer runs, so there is no cycle.
+   - **Return value:** a superseded run's return value is not used for numbering. The live run's completion is what counts. The memo confirms that the callers in the four views ignore it.
 
 **Rejected:** hoisting the Segmenter (not in the profile), and stamping a detached clone or replacing a parent's subtree (it replaces nodes foliate holds, just before release).
 
@@ -43,6 +44,7 @@ New rows are red first on `d3184d0b`.
 | C3 | **Rerun during a yielding wrap, in Page, Flow, Focus and Narrate.** Two cases: (a) a certified run superseded mid-yield, and (b) a legacy load wrap superseded mid-yield by a certified restamp. Both end with spans 1 to 1 with the slice, none duplicated, and the document certified | Each mode's runtime test |
 | C4 | **Page turn and word click during a yield.** A turn onto an unstamped page holds and then saves the right word; a click on unstamped text does nothing | Page runtime test |
 | C4a | A superseded run makes no report, of either kind | Test in each helper copy's suite |
+| C4b | **Book-stamped window, in Flow and Focus.** With a superseded load wrap, the document is not in `bookStampedDocsRef` until the live run ends, and its paragraph starts are complete afterwards | Each mode's runtime test |
 | C5 | `(rr-c)` is the named rule 50 exception. Only its observations that change because of the yield change | The memo quotes each observation before and after |
 | C6 | B5 passes: 18 of 18 in all four copies, under the Electron ICU runtime | B5 exits 0 on the amended tip |
 | C7 | **No long task.** With the poller off, at the 16 to 17 crossing and on arrival into section 17, in Narrate and Page: no wrap task over 50 ms, and section 17 stamps 7,171 spans, 1 to 1 with the slice | Trace in the evidence folder |
@@ -60,7 +62,7 @@ New rows are red first on `d3184d0b`.
 
 - **Fence:** the specification's fence stands. The constant and the token live in the helper files already in it. No new sibling import and no shared core. If a view needs an edit, STOP to Blurby.Brain1 with the lines.
 - **Census:** the policy allows a module singleton in a mode directory only when `allowedModuleSingletons` lists it, and the new `setTimeout` sits in a new function. Expect `tests/readerModeOwnership.test.ts` to fail on the four tokens and the four `setTimeout` sites. That is the fence's conditional `boundary-policy.json` path: record the failure first, then add exactly those entries, and list them in the memo.
-- **Review focus:** a superseded run now returns early, so the lines after its `await` run sooner. Check Flow's and Focus's `bookStampedDocsRef.current.add(doc)`, which can mark a document book-stamped while the live run is still stamping. If that changes behaviour, STOP to Blurby.Brain1 with the lines, as for any caller that depends on the run having finished.
+- **Review focus:** Flow's and Focus's `bookStampedDocsRef.current.add(doc)` follow the `await` directly (on `d3184d0b`: Flow lines 927-929, 955-957 and 1408-1413; Focus lines 846-848 and 1296-1301), and `collectParagraphStartWordIndexes` reads that set. The settling rule keeps those lines on a finished document, and C4b pins it. Any other caller that depends on the run having finished is a STOP to Blurby.Brain1 with the lines.
 - **After this lands:** the planner re-reads FLOW-RESTAMP-CURRENT-1, FOCUS-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1, because the token closes part of their race. All three stay registered.
 - **Host:** RodneySr, in its `.worktrees\block-text-order-1`; arm64 B8 on Rodney (rule 6b). Its disk was freed on the owner's approval, and Blurby.Brain1 confirms the free space before launch.
 - **Order:** after Job 2b and ahead of Jobs 3 and 4 (Blurby.Brain1, 2026-11-05).
@@ -78,7 +80,7 @@ New rows are red first on `d3184d0b`.
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Red rows C1 to C4a, committed alone | calculable | positive-control | bounded | medium | 30m | — | C |
+| 1 | Red rows C1 to C4b, committed alone | calculable | positive-control | bounded | medium | 30m | — | C |
 | 2 | Yielding stamp and supersede token in the four helper copies; `(rr-c)` and census entries updated | calculable | implementation | cross-cutting | high | 30m | — | C |
 | 3 | Suite, typecheck, build, B5 | calculable | verify | bounded | low | 20m | — | C |
 | 4 | Trace C7 in Narrate and Page | calculable | live-check | bounded | medium | 30m | — | C |
