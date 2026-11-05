@@ -588,6 +588,10 @@
   - The Focus, Flow and Narrate restamp items (Seq 111–112) edit only their own `FoliateView.tsx`, so they do not conflict.
 - **Path:** dispatch (four waves, five dispatches).
 
+##### Design note: the first-section race with no cfi (Blurby.Brain1, 2026-11-05)
+
+Found by BLOCK-TEXT-ORDER-1's Job 1e, on both `d3184d0b` and `14ce3d24`, and not a BLOCK-TEXT-ORDER-1 defect. With no cfi seeded, Narrate's first section depends on when Page's relocate lands: it opens at the cover, or at the fraction overshoot in section 17 (1 run in 3 on each build). With a real section 16 cfi, both builds open straight at section 16, with no section 17 load. The overshoot is already this item's, so no new item is opened. A saved word that always carries its page removes the race's input.
+
 ##### Owner rulings (2026-11-03)
 - **O1 — "At the saved word" (option A).** When the stored page does not hold the saved word, or there is no stored page, the book opens on the saved word, where "jump back to my place" lands in Page. In this spec that is design 5: Page's view opens the word's section and lands with `jumpFoliateToWordAnchor`, the jump-back helper.
 - **O2 — "Wait before showing" (option B).** The cold open shows the existing "Loading book..." state until the word map is ready, then opens right on the word, with no visible jump, at the cost of a wait of about 1–2 s on a cold open. In this spec that is design 4, the hold in Page. The late "open settle" of the first draft is removed. After a failure or a timeout the book opens with today's choice, and a map that arrives later moves nothing.

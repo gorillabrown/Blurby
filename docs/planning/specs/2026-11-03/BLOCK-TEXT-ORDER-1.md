@@ -44,7 +44,7 @@
     - **TQ-B1.** The `Intl.Segmenter` `isWordLike` gap test is verify-only, not a new tokenizer. It is constructed as `new Intl.Segmenter(undefined, { granularity: "word" })`, exactly as main does (`main/epub-word-extractor.js:211`). It is private to each `foliateWordWrapping.ts` copy, beside `certifyCanonicalAlignment`, and never exported. A future caller that numbers words from it needs a new ruling.
     - **TQ-B2.** Silent at runtime: no diagnostic, and no fence change for it. Before close, the Electron ICU checker below must certify every section of `resources/sample-meditations.epub` that has a canonical slice. Any `ok:false` is a STOP to Brain1, with the reasons.
     - **TQ-B3 (inside this item):**
-      - no yield between `certifyCanonicalAlignment` and the last wrap of that section;
+      - no yield between `certifyCanonicalAlignment` and the last wrap of that section *(superseded 2026-11-05 by [amendment 1](../2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md))*;
       - record the stamping time of the sample's largest section in the memo;
       - re-check `node.isConnected && node.data === capturedText[k]` before each node is wrapped. On a mismatch, stop stamping that section and report `reason: "dom-changed"`. Per Q4, this re-check is **always present**, whatever the measured time;
       - add row (b12), driven through the test-only hook `__testBetweenNodes` (Q4).
@@ -93,7 +93,7 @@ Every line below was re-grepped on `origin/main` `c5bb507f` on 2026-11-03. The c
          - **Test-only hook (Q4).** An optional `__testBetweenNodes?: (k: number) => void` is invoked between nodes. It sits in an options position after `onCertification`, and production call sites never pass it.
        - **Not certified:** report the failure, then run the legacy `contentAlignWords` path. `contentAlignWords` (`:19-66`) stays byte-unchanged.
    - Keep the yield statement `await new Promise<void>((resolve) => setTimeout(resolve, 0));` (`:144`) text-identical in the legacy path. The census anchors it (`boundary-policy.json:783` and siblings).
-   - The certified branch never yields. B5 records the certified stamping time (`stampMs`) for the memo (TQ-B3, Pike rule 1). The time changes no code shape (Q4).
+   - *Superseded 2026-11-05: the certified stamp yields on a time budget ([amendment 1](../2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md)).* The certified branch never yields. B5 records the certified stamping time (`stampMs`) for the memo (TQ-B3, Pike rule 1). The time changes no code shape (Q4).
 
 **Wave B: the OQ4 hold (views, plus the Page, Flow and Focus runtimes and bindings)**
 
