@@ -459,7 +459,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1 rules; RodneySr builds. Fix: in `main/library-write.js` replace the local `logToFile` with `const { logToFile } = require("./error-log");` (the helper keeps the two-argument signature), then re-run Done-when 4 over all of `main` and add a standing grep for any later appender. Needs a build, so it waits for the halt to lift.
 
-**Disposition:** open
+**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1a). RodneySr builds the fix plus a guard test on `eb/error-log-cap-fix`; closes when that merges and ERROR-LOG-CAP-1 re-verifies.
 
 ### F-028 — PAGE-SAVE-RESTAMP-3 Wave B was never built (close-out review, 2026-11-04)
 
@@ -473,7 +473,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** planner with Blurby.Brain1: build Wave B, split it into its own register item, or drop it with a ruling. A-6's owner smoke is also absent from the gate (2) list (added in `SMOKE_CHECKLIST_STAGE8.md` at this close-out).
 
-**Disposition:** open
+**Disposition:** resolved 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1b). Split: PAGE-SAVE-RESTAMP-3 closes on Wave A once its A-6 owner smoke passes at gate (2); Wave B is PAGE-LINK-HELD-TURN-1, with a corrected design.
 
 ### F-029 — BLOCK-TAG-CASE-1 Done-when 7 has no performance evidence (close-out review, 2026-11-04)
 
@@ -487,7 +487,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1: an `npm run perf` run on RodneySr or a written waiver. The item's close-out then moves BUG-241 to resolved.
 
-**Disposition:** open
+**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1d). No waiver: RodneySr runs a same-host A/B on `f4becc3c^1` and `f4becc3c`, three runs each, and any benchmark more than 10% worse is a STOP. Done-when 8 is BUG-241.
 
 ### F-030 — Issue files for LIBRARY-COMPLETION-VISIBILITY-1 and RELEASE-RUNBOOK-1 have no `## Decision` block (close-out review, 2026-11-04)
 
@@ -501,7 +501,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1 (decision blocks); then planner closes the items. RELEASE-RUNBOOK-1 also waits for gate (2) and one run of the runbook on the final build.
 
-**Disposition:** open
+**Disposition:** resolved 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1e). Both issue files carry Blurby.Brain1's `## Decision` block. LIBRARY-COMPLETION-VISIBILITY-1 waits on gate (2) row (iii); RELEASE-RUNBOOK-1 waits on gate (2) and one runbook run.
 
 ### F-031 — PAGE-SAVE-RESTAMP-2 and PAGE-SAVE-RESTAMP-GUARD-1 count gates were changed by later authorized work (close-out review, 2026-11-04)
 
@@ -515,7 +515,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** planner with the owner and an independent reviewer: amendment restating these gates against a named sha; Blurby.Brain1: the trace and the Deviation 3 acceptance. Re-grep both counts after CFI-POSITION-CONSISTENCY-1.
 
-**Disposition:** open
+**Disposition:** open; the two Brain1 needs are answered (`Brain1.post-halt-rulings.2026-11-05.md`): the trace holds on `14ce3d24` and GUARD-1's deviation 3 is accepted. The count amendment stays with the planner, the owner and an independent reviewer.
 
 ### F-032 — DEPS-AUDIT-1 Done-when 4 and 5 fail if re-run today (close-out review, 2026-11-04)
 
@@ -529,7 +529,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1 rules whether Done-when 4 and 5 are merge-time (point-in-time) checks; planner files a dependency-refresh item for `undici`, `follow-redirects` and `joi` or Brain runs the non-major fix; the advisories document is re-dated at that refresh.
 
-**Disposition:** open
+**Disposition:** resolved 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c). Done-when 4 and 5 are merge-time checks. The drift moves to DEPS-REFRESH-1; DEPS-AUDIT-1 stays open for its Q3.
 
 ### F-033 — The 4.25:1 light-theme link accent is tracked nowhere, and BOOK-TEXT-COLOUR-1's contrast script is outside the repo (close-out review, 2026-11-04)
 
@@ -571,4 +571,4 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1: commit both records (run 6's table and the RC "Package verification" section) to `docs/governance/close-outs/`, or name their exact location for the close-outs to cite.
 
-**Disposition:** open
+**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md`). Blurby.Brain1 owns it: RodneySr drafts both records on `eb/gov-rc-evidence-records`.

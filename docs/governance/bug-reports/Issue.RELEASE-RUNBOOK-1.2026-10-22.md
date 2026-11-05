@@ -43,3 +43,12 @@
 - Blurby.Roadmap gave the merge go on 2026-10-22, having checked `5a279805` (fence, 11 sections, the BCJ step in Build ARM64), and admitted this record to the fence.
 
 **6. Confidence in cause and solution identification (1–10):** 9 (after resolution; 5 at filing). The loss is located precisely (installer extraction, ARM64 PE only, reproduced three times, with a clean x64 control and a clean 7-Zip control), but whether it is this machine (Windhawk) or the toolchain is untested, and that decides the remedy.
+
+## Decision
+
+**Blurby.Brain1, 2026-11-05: accepted.**
+
+- The root cause is proven: `7z l -slt` shows exactly the 17 lost entries under `ARM64 LZMA2:20`, a filter the installer's Nsis7z plugin can't decode. Polling shows the loss is at extraction, and a control rules out an OS filter. Windhawk is not implicated.
+- The fix, `ELECTRON_BUILDER_7Z_FILTER=BCJ` for the ARM64 build, meets every point of Blurby.Brain's pass bar: 681 of 681 files by path, exe `0xAA64`, a native launch with Narrate voicing, a clean uninstall, and the over-the-top migration with the profile kept.
+
+Close the issue. The item itself closes only after gate (2) and one run of the runbook on the final build.
