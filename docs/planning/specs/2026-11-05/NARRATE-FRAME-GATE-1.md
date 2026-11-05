@@ -2,7 +2,7 @@
 
 - **What:** make the Narrate timing checks refuse evidence taken with no live display, and fail a session full of long frames.
   - A 5-second blank-window probe runs before and after every frame-sensitive session. A failed probe makes the session **invalid**, not failed: it is re-run and never counted.
-  - The D5 check gains a long-frame row: at most 1 commit over 100 ms per minute of session.
+  - The D5 check gains a long-frame row: at most 1 distinct frame over 100 ms per minute of session.
   - Each session records both probes, the Modern Standby state, and foreign CPU and host GPU.
   - The launcher holds the display on for its run, with a process-level request.
   - **Outcome:** a pass on a timed row means the frames were real. A session on a sleeping panel cannot pass and cannot fail.
@@ -18,10 +18,10 @@
 
 ##### Design decisions
 
-- **Row threshold:** at most 1 commit over 100 ms per minute of session, set before any display-on number exists (Blurby.Brain1). Run 5's 1 in a session meets it, and the display-off sessions' 13.5 to 28.9 a minute do not.
+- **Row threshold:** at most 1 frame over 100 ms per minute of session, set before any display-on number exists (Blurby.Brain1). The threshold did not move when the unit changed (below). Run 5's 1 long commit in a session meets it. The display-off sessions were 13.5 to 28.9 commits a minute; rows 1 and 2 re-read both controls in frames, because the unit changed after the data was seen.
 - **Allowed count:** `Math.max(1, Math.floor(stats.minutes))`. `analyze` already holds a session shorter than `minMinutes`, so a counted 5-minute session allows 5.
 - **Count every long commit, with no upper filter.** The filter `x < 1000` at the refresh median exists for that median. A 1,200 ms frame must count here. A pause cannot inflate the count, because the engine clears `lastTickPerf` on pause and stop (`narrateEngine.ts:218`, `:542`), so the first commit after one has `frameDt` null.
-- **Commits, as ruled, not distinct frames.** A long frame that commits two words counts twice (`narrateEngine.ts:346`).
+- **Distinct frames, not commits (Blurby.Brain1, `Brain1.long-frame-row.count-frames.2026-11-05.md`).** This replaces "commits, not distinct frames". A stall is one event. Counting its commits made the row depend on speed and chunk shape: in run 6's 2.00x session, one 761.5 ms frame committed six words and counted six times, so that session read 7 when it had 2 long frames. A frame's commits share one `t`: the tick passes the same `t` and `frameDt` to every `commitUnit` call (`narrateEngine.ts:339`, `:346`). So the count is the distinct values of `t` among commits with `frameDt` over 100 ms. The limit is unchanged, and `stats.longCommits` stays as a recorded figure.
 - **Precondition:** three predicates, and any one failing makes the probe invalid:
   - `visibilityState` "visible";
   - p90 of the frame intervals within 1.5 times the display's refresh, taken from `screen.getPrimaryDisplay().displayFrequency`;
@@ -45,8 +45,8 @@
   - `--break` shows the window as the real probe does, then forces it non-visible with `w.minimize()`, awaiting its event, before measuring, and records `break: "minimized"`. If that reads "visible" with the panel on, it uses `w.hide()` and records `break: "hidden"`. It must exit 7 (standing rule 55).
 - `scripts/narrate-rebuild/display-hold.ps1` (new): `Add-Type` a P/Invoke of `kernel32!SetThreadExecutionState`, call it with `ES_CONTINUOUS | ES_DISPLAY_REQUIRED`, then sleep in a loop until killed. It changes no setting, and the request ends with the process.
 - `scripts/narrate-rebuild/p5-recorded-output-check.mjs`:
-  - new exports `LONG_COMMIT_MS = 100` and `LONG_COMMITS_PER_MINUTE = 1`, beside `MIN_COMMITS`;
-  - in `analyze`, `stats.longCommits` and `stats.longCommitLimit`, then a `failures` entry reading `${n} commits over 100 ms (limit ${allowed} in ${minutes} min)`;
+  - new exports `LONG_FRAME_MS = 100` and `LONG_FRAMES_PER_MINUTE = 1`, beside `MIN_COMMITS`;
+  - in `analyze`, `stats.longFrames` (distinct `t` among commits with `frameDt` over `LONG_FRAME_MS`), `stats.longFrameLimit` and `stats.longCommits`, then a `failures` entry reading `${n} frames over 100 ms (limit ${allowed} in ${minutes} min)`;
   - the header comment gains the row. `--break` and `:84-100` do not change.
 - `scripts/narrate-rebuild/p5-latency-e2e.mjs`:
   - a `displayProbe(path)` helper, spawned with `windowsHide: false`. It must drop `ELECTRON_RUN_AS_NODE` from the child's environment, as `launch()` does at `:98`, or the probe runs as Node;
@@ -76,8 +76,9 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 | # | Criterion | Verify |
 |---|---|---|
-| 1 | **Row, positive control.** The checker fails a display-off session on the new row | `p5-recorded-output-check.mjs <Job 2b arm A trace> --min-minutes 0` under `app-node.ps1` exits 1, and its output has `commits over 100 ms`, with `longCommits` at 13.5 or more per minute |
-| 2 | **Row, negative.** A session with few long commits passes the row | Run 5's trace, if still held. If not, the memo says so and Blurby.Brain1 reads the first display-on session |
+| 1 | **Row, positive control, re-read in frames.** The checker fails every display-off session on the new row | `p5-recorded-output-check.mjs <trace> --min-minutes 0` under `app-node.ps1`, on the Job 2b arm A trace and on each of the three Job 1 sessions: exits 1, and the output has `frames over 100 ms`, with `longFrames` over `longFrameLimit` |
+| 2 | **Row, negative, re-read in frames.** A session with few long frames passes the row | Run 5's two traces, if still held: no `frames over 100 ms` entry. If not, the memo says so and Blurby.Brain1 reads the first display-on session |
+| 2a | **Standby and awake sessions apart.** Run 6's traces read as the host's state says | `session-1-00` fails on frames. `session-2-00` reads 2 frames, within its limit, and `longCommits` still reads 7 |
 | 3 | **Allowance unchanged.** Only the row changes a verdict | `git diff` of `p5-recorded-output-check.mjs` shows no change at `:84-100`, and `--break` still exits 1 |
 | 4 | **Probe, positive control, panel on** | `display-probe.cjs --out x --break` exits 7, with `valid` false and `invalidReasons` exactly `["not-visible"]` |
 | 4a | **Third predicate, positive control, panel off, before the new `--break` is made** | Row 6's recipe with the old never-shown `--break`: invalid, with `invalidReasons` exactly `["modern-standby"]`. It can only be taken while the panel is off. Rows 4 and 6 are also run once each with the panel off, which is not proof of the break |
