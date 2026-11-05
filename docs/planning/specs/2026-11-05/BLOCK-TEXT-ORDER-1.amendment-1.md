@@ -2,7 +2,7 @@
 
 *Planner: Blurby.Roadmap, 2026-11-05. This amends [the full specification](../2026-11-03/BLOCK-TEXT-ORDER-1.md). It supersedes TQ-B3's "no yield" and the sentences of The change that repeat it; everything else in the specification stands. Ruling: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.BLOCK-TEXT-ORDER-1.amendment-1.2026-11-05.md` (Blurby.Brain1, CLAUDE.md rule 11). Evidence, on RodneySr: `C:\Projects\Blurby-artifacts\block-text-order-1\` (`D3-boundary`, `J1c`, `J1d`, `J1e`).*
 
-**State: dispatch-ready.** Blurby.Brain1's three addenda (2026-11-05) ruled the rerun question, the book-stamped window and the stale restamp loop the planner raised, and all three are folded in below.
+**State: dispatch-ready.** Blurby.Brain1's four addenda (2026-11-05) ruled the rerun question, the book-stamped window, the stale restamp loop and the B5 checker, and all four are folded in below.
 
 ## What the evidence proved
 
@@ -48,10 +48,10 @@ New rows are red first on `d3184d0b`.
 | C4a | A superseded run makes no report, of either kind | Test in each helper copy's suite |
 | C4b | **Book-stamped window, in Flow and Focus.** With a superseded load wrap, the document is not in `bookStampedDocsRef` until the live run ends, and its paragraph starts are complete afterwards | Each mode's runtime test |
 | C5 | `(rr-c)` is the named rule 50 exception. Only its observations that change because of the yield change | The memo quotes each observation before and after |
-| C6 | B5 passes: 18 of 18 in all four copies, under the Electron ICU runtime | B5 exits 0 on the amended tip |
+| C6 | B5 passes: 18 of 18 in all four copies, under the Electron ICU runtime, and the stamp finishes: in every copy `stampedSpans` equals the largest section's word count and `reports` is exactly `[{ok:true}]` | B5 exits 0 on the amended tip, live and control. Red first: the exit change alone fails, with spans short of 7,171 |
 | C7 | **No long task.** With the poller off, at the 16 to 17 crossing and on arrival into section 17, in Narrate and Page: no wrap task over 50 ms, and section 17 stamps 7,171 spans, 1 to 1 with the slice. Display on, with both NARRATE-FRAME-GATE-1 probes filed beside the trace | Trace in the evidence folder |
 | C8 | The three D3 1.00x boundary sessions pass again, with the display on and under NARRATE-FRAME-GATE-1 | D3 on the amended tip, after merging `origin/main` with that item in it. The earlier sessions are not evidence (F-036) |
-| C9 | Package: the rule 53 x64 pair on RodneySr, with `origin/main` at `c630f9a4` or later as its base, and arm64 B8 on Rodney, which Blurby.Brain1 runs | Blurby.Brain1's confirmation |
+| C9 | Package: the rule 53 x64 pair on RodneySr, run on the tip with `origin/main` merged in, because that merge brings `library-write.js` and changes the package. A pair from before the merge does not count. Arm64 B8 on Rodney on the final merged tip, which Blurby.Brain1 runs at the merge go | Blurby.Brain1's confirmation |
 | C10 | `npm test`, `npm run typecheck` and `npm run build` exit 0 | Gate output in the memo |
 | C11 | The four helper copies stay blob-identical | `git rev-parse` of each copy prints one hash |
 
@@ -62,7 +62,12 @@ New rows are red first on `d3184d0b`.
 
 ## Fence, host and order
 
-- **Fence:** the specification's fence stands. The constant and the token live in the helper files already in it. No new sibling import and no shared core. The fence gains three named lines, the loop guard in `flow`, `focus` and `narrate` `FoliateView.tsx` (design item 8). Any other view edit is a STOP to Blurby.Brain1 with the lines.
+- **Fence:** the specification's fence stands. The constant and the token live in the helper files already in it. No new sibling import and no shared core. The fence gains three named lines, the loop guard in `flow`, `focus` and `narrate` `FoliateView.tsx` (design item 8), and `scripts/block-text-order/icu-certify/main.js` (below). Any other view edit is a STOP to Blurby.Brain1 with the lines.
+- **B5 checker (addendum 4):** the amendment made the stamp async, and `icu-certify/main.js:100` does not await the wrap, so B5 reads spans after the first slice (2,986 to 3,649 of 7,171) and its exit never gated the stamp. Certification's 18 of 18 stands; B5 no longer says the stamp finishes. Three changes in that file:
+  1. `rendererCheck` (`:75`) becomes `async`, and `:100` awaits the wrap.
+  2. The exit at `:147` also requires C6's two stamp conditions.
+  3. The `stampMs` label says it is elapsed time including yields, so nobody compares it with the old 44.7 ms.
+  `scripts/` is outside `build.files`, so this commit is recorded as "package unchanged", with the diff.
 - **Census:** the policy allows a module singleton in a mode directory only when `allowedModuleSingletons` lists it, and the new `setTimeout` sits in a new function. Expect `tests/readerModeOwnership.test.ts` to fail on the four tokens and the four `setTimeout` sites. That is the fence's conditional `boundary-policy.json` path: record the failure first, then add exactly those entries, and list them in the memo.
 - **Review focus:** Flow's and Focus's `bookStampedDocsRef.current.add(doc)` follow the `await` directly (on `d3184d0b`: Flow lines 927-929, 955-957 and 1408-1413; Focus lines 846-848 and 1296-1301), and `collectParagraphStartWordIndexes` reads that set. The settling rule keeps those lines on a finished document, and C4b pins it. Any other caller that depends on the run having finished is a STOP to Blurby.Brain1 with the lines.
 - **After this lands:** the planner re-reads FLOW-RESTAMP-CURRENT-1, FOCUS-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1, because the token and the loop guard close part of their race. All three stay registered.

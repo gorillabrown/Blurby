@@ -18,7 +18,7 @@
 
 ##### Design decisions
 
-- **Row threshold:** at most 1 commit over 100 ms per minute of session, set before any display-on number exists (Blurby.Brain1). Run 5's 1 in a session meets it, and the display-off sessions' 20 or more a minute do not.
+- **Row threshold:** at most 1 commit over 100 ms per minute of session, set before any display-on number exists (Blurby.Brain1). Run 5's 1 in a session meets it, and the display-off sessions' 13.5 to 28.9 a minute do not.
 - **Allowed count:** `Math.max(1, Math.floor(stats.minutes))`. `analyze` already holds a session shorter than `minMinutes`, so a counted 5-minute session allows 5.
 - **Count every long commit, with no upper filter.** The filter `x < 1000` at the refresh median exists for that median. A 1,200 ms frame must count here. A pause cannot inflate the count, because the engine clears `lastTickPerf` on pause and stop (`narrateEngine.ts:218`, `:542`), so the first commit after one has `frameDt` null.
 - **Commits, as ruled, not distinct frames.** A long frame that commits two words counts twice (`narrateEngine.ts:346`).
@@ -68,7 +68,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 | # | Criterion | Verify |
 |---|---|---|
-| 1 | **Row, positive control.** The checker fails a display-off session on the new row | `p5-recorded-output-check.mjs <Job 2b trace> --min-minutes 0` under `app-node.ps1` exits 1, and its output has `commits over 100 ms` and `longCommits` of 20 or more per minute |
+| 1 | **Row, positive control.** The checker fails a display-off session on the new row | `p5-recorded-output-check.mjs <Job 2b arm A trace> --min-minutes 0` under `app-node.ps1` exits 1, and its output has `commits over 100 ms`, with `longCommits` at 13.5 or more per minute |
 | 2 | **Row, negative.** A session with few long commits passes the row | Run 5's trace, if still held. If not, the memo says so and Blurby.Brain1 reads the first display-on session |
 | 3 | **Allowance unchanged.** Only the row changes a verdict | `git diff` of `p5-recorded-output-check.mjs` shows no change at `:84-100`, and `--break` still exits 1 |
 | 4 | **Probe, positive control** | `display-probe.cjs --out x --break` exits 7, with `visibilityState` "hidden" and `valid` false |
@@ -100,7 +100,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 ##### Repository plan and host (rule 6b)
 
-- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, and rows 5, 9 and 10 need its panel on (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
+- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, and rows 5, 7, 9 and 10 need its panel on (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
 - **Branch:** `eb/narrate-frame-gate-1` from `refs/remotes/origin/main` at `c630f9a4` or later. Push with `HEAD:refs/heads/eb/narrate-frame-gate-1`.
 - **Staging:** exact paths: the four scripts, `docs/governance/close-outs/Memo.NARRATE-FRAME-GATE-1.GovernanceStaging.<date>.md` and `docs/governance/close-outs/Timing.NARRATE-FRAME-GATE-1.jsonl`. Never stage `tests/perf-baseline-results.json`.
 - **Merge:** `--no-ff`, on Blurby.Brain1's confirmation and Blurby.Roadmap's merge go.
