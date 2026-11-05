@@ -197,6 +197,9 @@ Blurby.Roadmap added these on 2026-11-04, after checking every In Flight item ag
 - **(u) PAGE-SAVE-RESTAMP-3, Wave A.** In Page, open a book and click two different words in quick succession, close, and reopen: the book reopens at the second click's page. Source: the item's memo (owner smoke deferred to this list). The quit-flush part was not proven live (see LL-192) and is not asked of you.
 - **(v) PAGE-SAVE-RESTAMP-3, Wave B** is unbuilt (Findings F-028). Its check is not on this list yet.
 
+**Narrate paragraphs.**
+- **(w) BLOCK-TAG-CASE-1.** In Narrate on *Meditations*, listen across a few paragraph ends: does each paragraph start after a pause? The item's memo found Narrate breaks only at section ends, so you may hear none. Say what you hear; either answer is a result, and it settles the row. Source: the item's Done-when 6 and Findings F-037.
+
 **Coverage of this section.**
 
 | Item | Row |
@@ -211,6 +214,7 @@ Blurby.Roadmap added these on 2026-11-04, after checking every In Flight item ag
 | READER-ARROW-GUARD-1 | (h) |
 | BAND-ALIGN-2, BAND-ALIGN-1 | (i) |
 | FLOW-PARA-PAUSE-INDEX-1 | (j) |
+| BLOCK-TAG-CASE-1 | (w) |
 | EINK-CONTROLS-1 | (k) |
 | OVERLAY-THEME-SWEEP-1 | (l) |
 | BOOK-TEXT-COLOUR-1 | (m) |

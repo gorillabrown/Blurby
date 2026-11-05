@@ -487,7 +487,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1: an `npm run perf` run on RodneySr or a written waiver. The item's close-out then moves BUG-241 to resolved.
 
-**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1d). No waiver: RodneySr runs a same-host A/B on `f4becc3c^1` and `f4becc3c`, three runs each, and any benchmark more than 10% worse is a STOP. Done-when 8 is BUG-241.
+**Disposition:** resolved 2026-11-05 (the performance row only; the item stays open, see F-037). Ruled the same day (`Brain1.post-halt-rulings.2026-11-05.md` 1d): no waiver, and RodneySr ran a same-host A/B on `f4becc3c^1` and `f4becc3c`, three runs each. Blurby.Brain1 ruled it passed (`Brain1.rodneysr-dispatch-status.2026-11-05.md`): no benchmark in B is more than 10% worse than A in either order. The worst reverse-order row is `tokenizeWithMeta_50k` at +8.3%, inside its spread. The rows covering changed code favour B in both orders, and that is not a claimed speed-up. **Limit:** the runs are about 5 s with sub-millisecond timings, so the suite can't resolve 10% on most rows, and no benchmark covers the tag-case check. The row means no regression was seen, not a measured cost. Evidence: RodneySr `C:\Projects\Blurby-artifacts\perf-block-tag-case-1\` and `rev\`. Done-when 8 is BUG-241.
 
 ### F-030 — Issue files for LIBRARY-COMPLETION-VISIBILITY-1 and RELEASE-RUNBOOK-1 have no `## Decision` block (close-out review, 2026-11-04)
 
@@ -592,3 +592,20 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Consequences:** gate (1) run 6's D3 1.00x PASS is withdrawn as evidence, and any frame column with it. So are the three BLOCK-TEXT-ORDER-1 D3 boundary sessions and the frame columns of Jobs 1c to 2b. Tests, typecheck, B5, rule 53 launches, asar checks, CPU attribution and Q1 stand. The gate (1) rerun list gains D3 1.00x, and D6 warm is rerun with the display on.
 
 **Fix:** NARRATE-FRAME-GATE-1 (`docs/planning/specs/2026-11-05/NARRATE-FRAME-GATE-1.md`): a display precondition around every frame-sensitive session, and a long-frame row in the D5 check. This finding resolves when it merges.
+
+### F-037 — BLOCK-TAG-CASE-1 Done-when 6 has no live evidence, and its Narrate check has nothing to observe (close-out review, 2026-11-05)
+
+**Source:** the close-out check after F-029 resolved, reading the specification's rows 5 to 8 (`docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md`).
+
+**Severity:** low (an unevidenced row; no code defect found)
+
+**Where:** `docs/governance/close-outs/Memo.BLOCK-TAG-CASE-1.GovernanceStaging.2026-10-23.md`, rows 5 to 7 ("Not run", Wave B) and finding 2.
+
+**Finding:** Wave B's live checks were never recorded, on two counts:
+
+- **Shift+Right on both books, in Focus and Flow, with the anchor word's index before and after.** FLOW-PARA-KEYS-1's live run on `5fb00ab5` predates the block fix, and FLOW-PARA-PAUSE-INDEX-1's measurement covers pauses, not keys. That pause measurement does cover "Flow pauses at paragraph ends": 0 of 216 off a paragraph end, in both books and both modes. It did not cover the pause's length at the rhythm setting. Gate (2) row (j) covers Meditations INTRODUCTION only.
+- **Narrate starts each paragraph after its pause, by ear.** The memo's finding 2 says Narrate's plan breaks only at section ends, so these books have no paragraph pause to observe. The row can't be met as written, and close-out does not amend acceptance criteria.
+
+**Accountable role / next action:** Blurby.Brain1 places the Shift+Right and pause-length checks in the gate (1) rerun, on the merged release tip. The Narrate row goes to gate (2) as the check it is, row (w). Whether it stands, or is amended through the planner, the owner and an independent reviewer, follows that sitting.
+
+**Disposition:** open. BLOCK-TAG-CASE-1 stays In Flight, and BUG-241 stays Incomplete, until the row is settled.
