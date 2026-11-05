@@ -16,5 +16,10 @@ ERROR-LOG-CAP-1 made `main/error-log.js` the one error.log appender, with a 10 M
 - Green: targeted 2/2 (`green-targeted.txt`); `npm test` 233 files, 3,050 passed / 1 skipped / 0 failed (`npm-test.txt`); `npm run typecheck` exit 0; `npm run build` exit 0.
 - `tests/perf-baseline-results.json` was rewritten by the suite and is not committed.
 
-## Package verification
-See the rule 53 x64 pair section below (added after the package run).
+## Package verification (rule 53, x64 pair; arm64 half not run here)
+Evidence: C:\Projects\Blurby-artifacts\error-log-cap-fixule53\.
+- Tip: `electron-builder --dir --x64` of `fa383bbe` (`build-tip.txt`, exit 0). Base: the `14ce3d24` x64 package already built in `.worktrees/gate1-run6-20261103` (gate (1) run 6).
+- asar: 11,587 entries each, no entry only on one side; the only content difference is `/main/library-write.js` (`asar-compare.txt`).
+- 25 s scratch launch, APPDATA and LOCALAPPDATA redirected, LL-165 profile proof (userData is the scratch profile) before input: both alive at 25 s, no error.log lines, no crash dumps, live library.json and settings.json hashes unchanged. Both print the same fresh-profile "Backup failed ... library.json ENOENT" line (`tip/`, `main/`).
+- Done-when row (b) on each packaged exe's own asar (ELECTRON_RUN_AS_NODE, Electron 42.11.18): tip rotates to `error.log.1` (pass); base does not (fails, the control) (`done-when-tip.txt`, `done-when-main.txt`).
+- Package confirmation and merge go are Blurby.Brain1's.
