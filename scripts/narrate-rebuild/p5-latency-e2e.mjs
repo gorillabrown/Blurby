@@ -14,6 +14,12 @@ import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Writes latency-e2e.json (D6) into --out, and docs/studies/narrate-rebuild-1/phase5/recorded-output.json (D3 and D5 in the app,
 // through p5-recorded-output-check.mjs's analysis). Exit 0 only when every warm trial < 2,000 ms, every cold trial
 // < 8,000 ms and every session analysis is PASS; 1 otherwise. --analyze-only re-reads the traces already in --out.
+// NARRATE-FRAME-GATE-1 (F-036): a frame measurement counts only when the display was on. A 5 s display probe
+// (display-probe.cjs, same Electron) runs before and after every session and warm launch, and once around the cold block.
+// A failed before probe launches nothing; a failed probe makes the run INVALID (listed in `invalid`, never counted, never
+// in `failures`). Exit 7 when runs are invalid and nothing failed; exit 1 wins when both hold. The display is held on
+// for the run (display-hold.ps1, a process-level request). --break-display before|after breaks that probe (rule 55).
+// --analyze-only treats a session with either probe file missing or invalid as INVALID.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -43,6 +49,8 @@ const OUT = path.resolve(arg("--out", "C:/Projects/Blurby-artifacts/narrate-rebu
 const ANALYZE_ONLY = process.argv.includes("--analyze-only");
 const TRIAL_TIMEOUT_MS = Number(arg("--trial-timeout", 120000));
 const DIAG = process.argv.includes("--diag");
+const BREAK_DISPLAY = arg("--break-display", null); // NARRATE-FRAME-GATE-1: "before" | "after" (standing rule 55)
+if (BREAK_DISPLAY !== null && !["before", "after"].includes(BREAK_DISPLAY)) { console.error("--break-display takes before|after"); process.exit(2); }
 // --break plants 2.5 s on the first trial read (the positive control, LL-151): any run must then exit 1.
 const BREAK = process.argv.includes("--break");
 let breakPlanted = false;
@@ -89,8 +97,64 @@ export function cpuShare(series, t0, t1) {
 const traceDir = path.join(OUT, "traces");
 const tracePathFor = (label) => path.join(traceDir, `${slug(label)}.trace.json`);
 
+// ── NARRATE-FRAME-GATE-1: display probe, host GPU, display hold ─────────────────────────────────────────────
+const PROBE_SCRIPT = path.join(ROOT, "scripts", "narrate-rebuild", "display-probe.cjs");
+const HOLD_SCRIPT = path.join(ROOT, "scripts", "narrate-rebuild", "display-hold.ps1");
+const displayDir = path.join(OUT, "display");
+const displayPathFor = (label, when) => path.join(displayDir, `${slug(label)}.${when}.json`);
+/** Runs display-probe.cjs with the session's own Electron; returns the probe record (valid false when it could not run). */
+async function displayProbe(file, breakIt = false) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  try { fs.rmSync(file, { force: true }); } catch { /* none */ }
+  const { ELECTRON_RUN_AS_NODE: _asNode, ...env } = process.env; // as launch(): the probe must run as Electron, not Node
+  const code = await new Promise((resolve) => {
+    const p = spawn(ELECTRON, [PROBE_SCRIPT, "--out", file, ...(breakIt ? ["--break"] : [])], { cwd: ROOT, env, stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+    const timer = setTimeout(() => p.kill(), 60000);
+    p.on("exit", (c) => { clearTimeout(timer); resolve(c); });
+  });
+  let rec = null;
+  try { rec = JSON.parse(fs.readFileSync(file, "utf8")); } catch { /* not written */ }
+  if (!rec) { rec = { valid: false, error: `probe exited ${code} without writing ${file}` }; fs.writeFileSync(file, JSON.stringify(rec, null, 2)); }
+  return { ...rec, exitCode: code, file };
+}
+const probeOk = (p) => Boolean(p && p.valid === true);
+const probeReason = (when, p) => `${when} display probe invalid (${p ? `visibility ${p.visibilityState ?? "?"}, p90 ${p.p90 ?? "?"} ms, limit ${p.limitMs ?? "?"} ms${p.error ? `, ${String(p.error).slice(0, 120)}` : ""}` : "missing"})`;
+/** Host-wide 3D engine use, every 5 s, from one pwsh loop; stop() returns { meanPct, maxPct, samples } or null. */
+function startGpuSampler() {
+  const xs = [];
+  const ps = "while ($true) { $s = (Get-Counter '\\GPU Engine(*engtype_3D)\\Utilization Percentage' -ErrorAction SilentlyContinue).CounterSamples | Measure-Object CookedValue -Sum; [Console]::Out.WriteLine(([double]$s.Sum).ToString([Globalization.CultureInfo]::InvariantCulture)); Start-Sleep -Seconds 5 }";
+  const child = spawn("pwsh", ["-NoProfile", "-NonInteractive", "-Command", ps], { stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
+  let buf = "";
+  child.stdout.on("data", (d) => { buf += d; let i; while ((i = buf.indexOf("\n")) >= 0) { const v = Number(buf.slice(0, i).trim()); buf = buf.slice(i + 1); if (Number.isFinite(v)) xs.push(v); } });
+  return { stop() { child.kill(); return xs.length ? { meanPct: +(xs.reduce((a, b) => a + b, 0) / xs.length).toFixed(1), maxPct: +Math.max(...xs).toFixed(1), samples: xs.length } : null; } };
+}
+let hold = null;
+/** Holds the display on for this run (display-hold.ps1); killed on exit, a signal or a thrown error. */
+function startDisplayHold() {
+  if (hold) return;
+  hold = spawn("pwsh", ["-NoProfile", "-NonInteractive", "-File", HOLD_SCRIPT], { stdio: "ignore", windowsHide: true });
+  const stop = () => { try { hold?.kill(); } catch { /* gone */ } };
+  process.on("exit", stop); // the request lasts as long as the hold's process
+  for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => { stop(); process.exit(130); });
+  process.on("uncaughtException", (err) => { stop(); console.error(err); process.exit(1); });
+  process.on("unhandledRejection", (err) => { stop(); console.error(err); process.exit(1); });
+}
+
 async function launch(label, trial) {
   if (!fs.existsSync(path.join(ROOT, "dist", "index.html"))) throw new Error("dist/index.html is missing: run npm run build first");
+  // NARRATE-FRAME-GATE-1: session and warm launches are frame-sensitive, each with its own probe pair. A failed before
+  // probe launches nothing.
+  const probed = trial.kind === "session" || trial.kind === "warm";
+  let displayBefore = null;
+  if (probed) {
+    displayBefore = await displayProbe(displayPathFor(label, "before"), BREAK_DISPLAY === "before");
+    if (!probeOk(displayBefore)) {
+      try { fs.rmSync(tracePathFor(label), { force: true }); } catch { /* none */ }
+      const result = { label, code: null, launched: false, invalid: probeReason("before", displayBefore), displayBefore, displayAfter: null, foreignCpuPct: null, gpuHost3dPct: null, tracePath: tracePathFor(label), traceExists: false };
+      console.log(JSON.stringify(result));
+      return result;
+    }
+  }
   // A fresh scratch profile per launch: a reused one carries the last run's reading anchor and rate into the next.
   const profile = path.join(OUT, "profiles", `${label}-${Date.now()}`);
   for (const d of [traceDir, path.join(OUT, "logs"), path.join(OUT, "summaries"), profile]) fs.mkdirSync(d, { recursive: true });
@@ -107,6 +171,7 @@ async function launch(label, trial) {
   };
   const before = cpuSnapshot();
   const sampler = startCpuSampler();
+  const gpu = startGpuSampler();
   const t0 = Date.now();
   const limitMs = ((trial.minutes ?? 0) + 15) * 60000;
   const code = await new Promise((resolve) => {
@@ -118,9 +183,14 @@ async function launch(label, trial) {
     p.on("exit", (c) => { clearTimeout(timer); fs.writeFileSync(path.join(OUT, "logs", `${slug(label)}.log`), out); resolve(c); });
   });
   const cpu = sampler.stop();
+  const gpuHost3dPct = gpu.stop();
   fs.writeFileSync(path.join(OUT, "logs", `${slug(label)}.cpu.json`), JSON.stringify(cpu));
   const share = cpuShare(cpu, t0, Date.now());
-  const result = { label, code, wallMs: Date.now() - t0, hostBusyPct: busyPct(before, cpuSnapshot()), appCpuPct: share?.appPct ?? null, foreignCpuPct: share?.foreignPct ?? null, tracePath: tracePathFor(label), traceExists: fs.existsSync(tracePathFor(label)) };
+  const wallMs = Date.now() - t0;
+  const hostBusyPct = busyPct(before, cpuSnapshot());
+  const displayAfter = probed ? await displayProbe(displayPathFor(label, "after"), BREAK_DISPLAY === "after") : null;
+  const invalid = probed && !probeOk(displayAfter) ? probeReason("after", displayAfter) : null;
+  const result = { label, code, wallMs, hostBusyPct, appCpuPct: share?.appPct ?? null, foreignCpuPct: share?.foreignPct ?? null, gpuHost3dPct, displayBefore, displayAfter, ...(invalid ? { invalid } : {}), tracePath: tracePathFor(label), traceExists: fs.existsSync(tracePathFor(label)) };
   console.log(JSON.stringify(result));
   return result;
 }
@@ -148,6 +218,7 @@ function firstVoiced(tracePath) {
 }
 
 const failures = [];
+const invalid = []; // NARRATE-FRAME-GATE-1: runs not counted because a display probe failed; never in failures
 const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS, foreignCeilingPct: 25, cycleCap: 40 }, rates: RATES, runs: [], warm: {}, cold: {}, sessions: {} };
 
 const want = (k) => !ONLY || ONLY === k;
@@ -156,6 +227,8 @@ const want = (k) => !ONLY || ONLY === k;
 // "[narrate-trial] error: ..." and exits 1) is a failed trial, whatever its trace says. Read from the launch's exit code
 // and its log, so --analyze-only sees the same errors. Every error trial is listed in latency-e2e.json.
 report.trialErrors = [];
+report.invalid = invalid;
+if (!ANALYZE_ONLY) startDisplayHold();
 function trialError(label, run) {
   let message = null;
   try {
@@ -174,11 +247,20 @@ if (want("session")) {
     const label = `session-${rateLabel(rate)}`;
     const run = ANALYZE_ONLY ? null : await launch(label, { kind: "session", rate, minutes: MINUTES });
     if (run) report.runs.push(run);
+    // NARRATE-FRAME-GATE-1: a session counts only with both probe files valid (re-read here, so --analyze-only agrees).
+    const readProbe = (when) => { try { return JSON.parse(fs.readFileSync(displayPathFor(label, when), "utf8")); } catch { return null; } };
+    const pBefore = readProbe("before"), pAfter = readProbe("after");
+    const why = !probeOk(pBefore) ? probeReason("before", pBefore) : !probeOk(pAfter) ? probeReason("after", pAfter) : null;
+    if (why) {
+      invalid.push({ label, reason: why });
+      report.sessions[rateLabel(rate)] = { tracePath: tracePathFor(label), verdict: "INVALID", invalid: why, displayBefore: pBefore, displayAfter: pAfter };
+      continue;
+    }
     const sessionError = trialError(label, run);
     if (sessionError) failures.push(`session ${rateLabel(rate)}: trial error: ${sessionError}`);
     const tp = tracePathFor(label);
     const r = fs.existsSync(tp) ? analyze(readTraceEvents(tp), { minMinutes: MINUTES }) : { verdict: "INCONCLUSIVE", failures: [], holds: ["no trace written"], stats: {} };
-    report.sessions[rateLabel(rate)] = { tracePath: tp, ...r };
+    report.sessions[rateLabel(rate)] = { tracePath: tp, ...r, displayBefore: pBefore, displayAfter: pAfter };
     if (r.verdict !== "PASS") failures.push(`session ${rateLabel(rate)}: ${r.verdict} ${[...r.failures, ...r.holds].join("; ")}`);
   }
 }
@@ -207,7 +289,9 @@ if (want("warm")) {
       } else {
         const repeat = part === 1 ? WARM : Math.min(need(), CYCLE_CAP - cycles);
         if (repeat <= 0) break;
-        report.runs.push({ ...(await launch(label, { kind: "warm", rate, repeat })), cycles: repeat });
+        const run = await launch(label, { kind: "warm", rate, repeat });
+        report.runs.push({ ...run, cycles: repeat });
+        if (run.invalid) { invalid.push({ label, reason: run.invalid }); break; } // NARRATE-FRAME-GATE-1: not counted
         cycles += repeat;
       }
       const warmError = trialError(label, ANALYZE_ONLY ? null : report.runs[report.runs.length - 1]);
@@ -236,7 +320,13 @@ if (want("warm")) {
 }
 
 // ── D6 cold ───────────────────────────────────────────────────────────────────────────────────────────────
-if (want("cold")) {
+// NARRATE-FRAME-GATE-1: one probe pair around the whole cold block (its figures are on the playback clock).
+let coldBefore = null;
+if (want("cold") && !ANALYZE_ONLY) {
+  coldBefore = await displayProbe(displayPathFor("cold-block", "before"), BREAK_DISPLAY === "before");
+  if (!probeOk(coldBefore)) invalid.push({ label: "cold-block", reason: probeReason("before", coldBefore) });
+}
+if (want("cold") && (ANALYZE_ONLY || probeOk(coldBefore))) {
   for (const rate of RATES) {
     const r = rateLabel(rate);
     report.cold[r] = {};
@@ -270,11 +360,17 @@ if (want("cold")) {
   }
 }
 
-report.verdict = failures.length ? "FAIL" : "PASS";
+if (want("cold") && !ANALYZE_ONLY && probeOk(coldBefore)) {
+  const coldAfter = await displayProbe(displayPathFor("cold-block", "after"), BREAK_DISPLAY === "after");
+  report.coldDisplay = { before: coldBefore, after: coldAfter };
+  if (!probeOk(coldAfter)) invalid.push({ label: "cold-block", reason: probeReason("after", coldAfter) });
+}
+
+report.verdict = failures.length ? "FAIL" : invalid.length ? "INVALID" : "PASS";
 report.failures = failures;
 fs.mkdirSync(RECORDS_DIR, { recursive: true });
 fs.mkdirSync(OUT, { recursive: true });
 if (want("warm") || want("cold")) fs.writeFileSync(path.join(OUT, "latency-e2e.json"), JSON.stringify(report, null, 2));
 if (want("session")) fs.writeFileSync(path.join(RECORDS_DIR, "recorded-output.json"), JSON.stringify({ generatedAt: report.generatedAt, host: report.host, minutes: MINUTES, sessions: report.sessions, runs: report.runs.filter((r) => r.label.startsWith("session")) }, null, 2));
-console.log(JSON.stringify({ verdict: report.verdict, failures, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
-process.exit(failures.length ? 1 : 0);
+console.log(JSON.stringify({ verdict: report.verdict, failures, invalid, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
+process.exit(failures.length ? 1 : invalid.length ? 7 : 0);
