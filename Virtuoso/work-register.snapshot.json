@@ -8441,6 +8441,43 @@
         "date:Started:end": "",
         "date:Started:is_datetime": ""
       }
+    },
+    {
+      "id": "NARRATE-FRAME-GATE-1",
+      "title": "A frame measurement counts only when the display was on",
+      "sequence": 87.4,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#narrate-frame-gate-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Scripts only, package unchanged. A blank-window probe before and after every frame-sensitive session makes a sleeping panel invalid rather than failed, and the D5 check gains a long-frame row. Lands before the next frame-sensitive session counts.",
+      "notes": "origin: Blurby.Brain1 2026-11-05 (Brain1.F-036.D5-ruling.2026-11-05.md; Findings F-036). Root cause: RodneySr's display was off. Merges ahead of BLOCK-TEXT-ORDER-1, whose C7 and C8 sessions count only under this item. Spec: docs/planning/specs/2026-11-05/NARRATE-FRAME-GATE-1.md.",
+      "revision": "f848631eda8f871c196df36c0672d682b12b1d73868d9071395fe4eb152357d3",
+      "extra": {
+        "id": "40f7c96c-c31e-81c8-bccf-c8d58c16e9af",
+        "url": "https://app.notion.com/40f7c96cc31e81c8bccfc8d58c16e9af",
+        "createdTime": "",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
     }
   ],
   "headers": {

@@ -49,8 +49,8 @@ New rows are red first on `d3184d0b`.
 | C4b | **Book-stamped window, in Flow and Focus.** With a superseded load wrap, the document is not in `bookStampedDocsRef` until the live run ends, and its paragraph starts are complete afterwards | Each mode's runtime test |
 | C5 | `(rr-c)` is the named rule 50 exception. Only its observations that change because of the yield change | The memo quotes each observation before and after |
 | C6 | B5 passes: 18 of 18 in all four copies, under the Electron ICU runtime | B5 exits 0 on the amended tip |
-| C7 | **No long task.** With the poller off, at the 16 to 17 crossing and on arrival into section 17, in Narrate and Page: no wrap task over 50 ms, and section 17 stamps 7,171 spans, 1 to 1 with the slice | Trace in the evidence folder |
-| C8 | The three D3 1.00x boundary sessions pass again | D3 on the amended tip, read knowing F-036 is open |
+| C7 | **No long task.** With the poller off, at the 16 to 17 crossing and on arrival into section 17, in Narrate and Page: no wrap task over 50 ms, and section 17 stamps 7,171 spans, 1 to 1 with the slice. Display on, with both NARRATE-FRAME-GATE-1 probes filed beside the trace | Trace in the evidence folder |
+| C8 | The three D3 1.00x boundary sessions pass again, with the display on and under NARRATE-FRAME-GATE-1 | D3 on the amended tip, after merging `origin/main` with that item in it. The earlier sessions are not evidence (F-036) |
 | C9 | Package: the rule 53 x64 pair on RodneySr, with `origin/main` at `c630f9a4` or later as its base, and arm64 B8 on Rodney, which Blurby.Brain1 runs | Blurby.Brain1's confirmation |
 | C10 | `npm test`, `npm run typecheck` and `npm run build` exit 0 | Gate output in the memo |
 | C11 | The four helper copies stay blob-identical | `git rev-parse` of each copy prints one hash |
@@ -67,7 +67,7 @@ New rows are red first on `d3184d0b`.
 - **Review focus:** Flow's and Focus's `bookStampedDocsRef.current.add(doc)` follow the `await` directly (on `d3184d0b`: Flow lines 927-929, 955-957 and 1408-1413; Focus lines 846-848 and 1296-1301), and `collectParagraphStartWordIndexes` reads that set. The settling rule keeps those lines on a finished document, and C4b pins it. Any other caller that depends on the run having finished is a STOP to Blurby.Brain1 with the lines.
 - **After this lands:** the planner re-reads FLOW-RESTAMP-CURRENT-1, FOCUS-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1, because the token and the loop guard close part of their race. All three stay registered.
 - **Host:** RodneySr, in its `.worktrees\block-text-order-1`; arm64 B8 on Rodney (rule 6b). Its disk was freed on the owner's approval, and Blurby.Brain1 confirms the free space before launch.
-- **Order:** after Job 2b and ahead of Jobs 3 and 4 (Blurby.Brain1, 2026-11-05).
+- **Order:** after Job 2b and ahead of Jobs 3 and 4 (Blurby.Brain1, 2026-11-05). C7 and C8 wait for RodneySr's panel and NARRATE-FRAME-GATE-1. B5, the rule 53 launches and the push do not.
 - **Branch:** `eb/block-text-order-1`. Push with `HEAD:refs/heads/eb/block-text-order-1`.
 - **Merge:** on Blurby.Brain1's package confirmation and Blurby.Roadmap's merge go. It stays second in the release merge set, after the ERROR-LOG fix, which merged as `c630f9a4`.
 
