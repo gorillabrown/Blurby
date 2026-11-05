@@ -1,0 +1,35 @@
+{
+  "id": "20261105T180621Z-external-set-status-DEPS-REFRESH-1",
+  "operation": "external-set-status",
+  "item_id": "DEPS-REFRESH-1",
+  "created": "2026-11-05T18:06:21Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "notes": "origin: Blurby.Brain1 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c and its reply section; Findings F-032). Scoped to `npm update undici follow-redirects joi`; the build chain moves later in BUILD-CHAIN-REFRESH-1. Release-gate rider."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:DEPS-REFRESH-1:[('notes', 'origin: Blurby.Brain1 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c and its reply section; Findings F-032). Scoped to `npm update undici follow-redirects joi`; the build chain moves later in BUILD-CHAIN-REFRESH-1. Release-gate rider.'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "DEPS-REFRESH-1",
+      "idempotencyKey": "set-status:DEPS-REFRESH-1:[('notes', 'origin: Blurby.Brain1 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c and its reply section; Findings F-032). Scoped to `npm update undici follow-redirects joi`; the build chain moves later in BUILD-CHAIN-REFRESH-1. Release-gate rider.'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261105T180621Z-external-set-status-DEPS-REFRESH-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-05T18:07:04Z",
+  "outcome": "succeeded"
+}
