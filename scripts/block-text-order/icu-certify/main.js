@@ -71,8 +71,9 @@ function bundleMode(mode) {
   return fs.readFileSync(outfile, "utf-8");
 }
 
-/** Runs in the hidden window: certify each section with each copy, and time a certified wrap of the largest section. */
-function rendererCheck(input) {
+/** Runs in the hidden window: certify each section with each copy, and time a certified wrap of the largest section.
+ *  BLOCK-TEXT-ORDER-1 amendment 1 (addendum 4): the wrap yields, so it is awaited; stampMs is elapsed time including yields. */
+async function rendererCheck(input) {
   const out = {
     versions: { electron: process.versions.electron, icu: process.versions.icu },
     locale: Intl.DateTimeFormat().resolvedOptions().locale,
@@ -97,7 +98,7 @@ function rendererCheck(input) {
     const doc = parse(largest.xhtml);
     const reports = [];
     const t0 = performance.now();
-    lib.wrapWordsInSpans(doc, largest.sectionIndex, largest.start, [], largest.slice, (r) => reports.push(r));
+    await lib.wrapWordsInSpans(doc, largest.sectionIndex, largest.start, [], largest.slice, (r) => reports.push(r));
     out.stampMs[mode] = Number((performance.now() - t0).toFixed(3));
     out.stampedSpans[mode] = doc.querySelectorAll("[data-word-index]").length;
     out.stampReports[mode] = reports;
@@ -140,7 +141,7 @@ app.whenReady().then(async () => {
       withSlice: sections.length,
       certified: r.certified,
       failures: r.failures,
-      largest: { sectionIndex: largest.sectionIndex, words: largest.slice.length, stampMs: r.stampMs, stampedSpans: r.stampedSpans, reports: r.stampReports },
+      largest: { sectionIndex: largest.sectionIndex, words: largest.slice.length, stampMsElapsedIncludingYields: r.stampMs, stampedSpans: r.stampedSpans, reports: r.stampReports },
     });
     const same = (v) => v && v.electron === result.electron && v.icu === result.icu;
     if (!same(packaged) || !same(r.versions)) return emit({ ...result, versionMismatch: true }, 3);
