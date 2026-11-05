@@ -8324,6 +8324,84 @@
         "date:Started:end": "",
         "date:Started:is_datetime": ""
       }
+    },
+    {
+      "id": "PAGE-LINK-HELD-TURN-1",
+      "title": "A link that never lands keeps the page the reader turned to",
+      "sequence": 97.8,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#page-link-held-turn-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Page reading only. The held-turn cancel moves from the start of a jump to its landing: a jump that never lands leaves the held turn to save, a jump that lands saves the landing, and a blank edge landing never saves the older turn.",
+      "notes": "origin: PAGE-SAVE-RESTAMP-3 Wave B, split by Blurby.Brain1 2026-11-05 (Brain1.post-halt-rulings.2026-11-05.md 1b; Findings F-028). After BLOCK-TEXT-ORDER-1, which edits the same file. Not a release gate.",
+      "revision": "e550aca0fede8a76b935355b9a64c69448df8afd06ae7a0c7cd7ae1cdef38197",
+      "extra": {
+        "id": "40f7c96c-c31e-8108-9ab7-fcf157b26626",
+        "url": "https://app.notion.com/40f7c96cc31e81089ab7fcf157b26626",
+        "createdTime": "",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
+    },
+    {
+      "id": "DEPS-REFRESH-1",
+      "title": "Refresh the dependency advisories before the final test pass",
+      "sequence": 87.6,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#deps-refresh-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Release-gate rider, merges before gate (1). Take the advisory fixes that need no force flag, leave the Kokoro pins alone, and re-date and correct the advisories document. Rule 53 applies, because the lockfile ships.",
+      "notes": "origin: Blurby.Brain1 2026-11-05 (Brain1.post-halt-rulings.2026-11-05.md 1c; Findings F-032). Spec written; one Blurby.Brain1 question open, because npm audit fix also moves electron-builder 26.15.3 to 26.18.1.",
+      "revision": "f994c3ec4f4e11cc1cd438c3d0369c8cc62924848e9c5365f9cb0d78718f0e6a",
+      "extra": {
+        "id": "40f7c96c-c31e-8183-a6be-f5986e9258ea",
+        "url": "https://app.notion.com/40f7c96cc31e8183a6bef5986e9258ea",
+        "createdTime": "",
+        "date:Completed:start": "",
+        "date:Completed:end": "",
+        "date:Completed:is_datetime": "",
+        "Monday Item ID": "",
+        "Board Group": "",
+        "Workstream": "",
+        "Phase page": "",
+        "date:Started:start": "",
+        "date:Started:end": "",
+        "date:Started:is_datetime": ""
+      }
     }
   ],
   "headers": {
