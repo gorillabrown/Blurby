@@ -1,0 +1,36 @@
+{
+  "id": "20261103T173556Z-external-set-status-CAR-AUDIO-1",
+  "operation": "external-set-status",
+  "item_id": "CAR-AUDIO-1",
+  "created": "2026-11-03T17:35:56Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Apple CarPlay compatibility",
+      "prerequisites": "IOS-APP-1",
+      "description": "Narrated books (and podcasts) play through Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates). Android Auto moved into ANDROID-APP-1 by owner direction 2026-11-03 (roadmap review 2026-11-03-2)."
+    },
+    "expectedRevision": "a204865ea54372fe5dd6e9731e0ddf85724fb03f5bfed570fd474ad914af70c1",
+    "idempotencyKey": "set-status:CAR-AUDIO-1:[('description', 'Narrated books (and podcasts) play through Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates). Android Auto moved into ANDROID-APP-1 by owner direction 2026-11-03 (roadmap review 2026-11-03-2).'), ('prerequisites', 'IOS-APP-1'), ('title', 'Apple CarPlay compatibility')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CAR-AUDIO-1",
+      "idempotencyKey": "set-status:CAR-AUDIO-1:[('description', 'Narrated books (and podcasts) play through Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates). Android Auto moved into ANDROID-APP-1 by owner direction 2026-11-03 (roadmap review 2026-11-03-2).'), ('prerequisites', 'IOS-APP-1'), ('title', 'Apple CarPlay compatibility')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T173556Z-external-set-status-CAR-AUDIO-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:36:28Z",
+  "outcome": "succeeded"
+}

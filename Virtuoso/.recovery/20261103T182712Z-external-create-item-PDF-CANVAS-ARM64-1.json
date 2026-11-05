@@ -1,0 +1,49 @@
+{
+  "id": "20261103T182712Z-external-create-item-PDF-CANVAS-ARM64-1",
+  "operation": "external-create-item",
+  "item_id": "PDF-CANVAS-ARM64-1",
+  "created": "2026-11-03T18:27:12Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "PDF-CANVAS-ARM64-1",
+      "title": "PDF text reads natively on Windows arm64",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "docs/planning/specs/2026-11-03/PDF-CANVAS-ARM64-1.md",
+      "branch": "eb/pdf-canvas-arm64-1",
+      "description": "The Windows arm64 install reads PDFs with the native `@napi-rs/canvas` binding instead of polyfills. An npm override pins `@napi-rs/canvas` to 0.1.100, the first 0.1.x line with a win32-arm64 package, and the lockfile is regenerated. A pdfkit-generated fixture extracts the same text natively inside both packaged builds. The release runbook's native checks then require each architecture's binding.",
+      "notes": "origin: Findings F-012 (Blurby.Brain1 asar comparison, RC merge `c5bb507f`, 2026-11-03); fix ruling by Blurby.Brain1 2026-11-03. Touches `package.json`, `package-lock.json`, one new test and `RELEASE_RUNBOOK.md` only; no shared core. Built on RodneySr (x64), arm64 package and launch on Rodney. Gate (2) item (v) stays until release.",
+      "sequence": 123.5,
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T17:36:38Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PDF-CANVAS-ARM64-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PDF-CANVAS-ARM64-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PDF-CANVAS-ARM64-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T182712Z-external-create-item-PDF-CANVAS-ARM64-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-815a-8479-c9ba00d9e410",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T18:27:47Z",
+  "outcome": "succeeded"
+}

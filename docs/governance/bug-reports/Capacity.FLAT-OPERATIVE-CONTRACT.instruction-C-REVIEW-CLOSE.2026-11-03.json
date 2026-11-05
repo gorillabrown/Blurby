@@ -1,0 +1,742 @@
+{
+  "schemaVersion": "blurby.instruction-C.capacity.planning.v1",
+  "status": "PLANNING_NOT_READY_FULL_DYNAMIC_ROUTE_NOT_MEASURED_NO_ADMISSION",
+  "domain": "ROOT_LOCAL_DATA_MEASUREMENT_NOT_QUIET_EXECUTION_OR_MODEL_SEMANTIC_READ",
+  "recipe": {
+    "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+    "bytes": 34882,
+    "sha256": "7b18909cb4f1562812bfa120b2e29de002076777040d4df3329b18827b3b080f",
+    "ownHashExternalOnly": true
+  },
+  "bReadRecipeObservation": {
+    "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ.2026-11-03.md",
+    "bytes": 23996,
+    "sha256": "1e37c9944c82e227f1e87819cc3433494c595ef45ef7e22c25c2f275f1791b5b",
+    "status": "CURRENT_B_RECIPE_OBSERVATION_NOT_FUTURE_COMPACT_SCHEMA_QUALIFICATION",
+    "futureVersionPinRequired": true,
+    "rejectedCoverageV1LowerBoundCharacters": 11966
+  },
+  "authorities": [
+    {
+      "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.three-deliverable-route.2026-11-03.md",
+      "bytes": 5275,
+      "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+      "bytes": 3542,
+      "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.A-observation-clock-correction.2026-11-03.md",
+      "bytes": 2000,
+      "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.B-READ-compact-references.2026-11-03.md",
+      "bytes": 3352,
+      "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a",
+      "readScope": "FULL_ACTUAL_RULING"
+    }
+  ],
+  "localDisplay": {
+    "tool": "functions.exec/tools.exec_command",
+    "maxOutputTokensRequested": 30000,
+    "maxTOTALUTF8BytesIncludingFraming": 20000,
+    "maxFramingUTF8Bytes": 1024,
+    "prefix": "C_LOCAL_READ_V1 <frame>\\n",
+    "partHeaderOrderedKeys": [
+      "id",
+      "offset",
+      "end",
+      "sha256"
+    ],
+    "headerEncoding": "ASCII compact json then LF; exact raw UTF8 body then LF",
+    "sourceOrder": [
+      "role",
+      "overlay",
+      "C",
+      "B",
+      "r1",
+      "r2",
+      "r3",
+      "r4"
+    ],
+    "completeActualLocalToolRequestAndReturnedOutputQualification": "PENDING; clipping/token-cap/field gap is HOLD, no inherited quiet10000 or direct65536 task cap"
+  },
+  "subjects": [
+    {
+      "role": "MarcusAurelius",
+      "sourceManifest": [
+        {
+          "id": "role",
+          "path": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 13714,
+          "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+          "requiredRange": [
+            0,
+            13714
+          ]
+        },
+        {
+          "id": "overlay",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\agents\\MarcusAurelius.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 997,
+          "sha256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+          "requiredRange": [
+            0,
+            997
+          ]
+        },
+        {
+          "id": "C",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 34882,
+          "sha256": "7b18909cb4f1562812bfa120b2e29de002076777040d4df3329b18827b3b080f",
+          "requiredRange": [
+            0,
+            34882
+          ]
+        },
+        {
+          "id": "B",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 23996,
+          "sha256": "1e37c9944c82e227f1e87819cc3433494c595ef45ef7e22c25c2f275f1791b5b",
+          "requiredRange": [
+            0,
+            23996
+          ]
+        },
+        {
+          "id": "r1",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.three-deliverable-route.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 5275,
+          "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c",
+          "requiredRange": [
+            0,
+            5275
+          ]
+        },
+        {
+          "id": "r2",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 3542,
+          "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+          "requiredRange": [
+            0,
+            3542
+          ]
+        },
+        {
+          "id": "r3",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.A-observation-clock-correction.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 2000,
+          "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d",
+          "requiredRange": [
+            0,
+            2000
+          ]
+        },
+        {
+          "id": "r4",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.B-READ-compact-references.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 3352,
+          "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a",
+          "requiredRange": [
+            0,
+            3352
+          ]
+        }
+      ],
+      "staticRawSemanticBytes": 87758,
+      "staticFramingBytes": 1436,
+      "staticOutputBytes": 89194,
+      "actualStaticReadFrames": 5,
+      "frames": [
+        {
+          "frame": 1,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 357,
+          "payloadUTF8Bytes": 19643,
+          "sha256": "74a2dcc7f937c5f7e8271d8b598b681c450d5657703b7ae94dcf2e682312f83d",
+          "parts": [
+            {
+              "id": "role",
+              "offset": 0,
+              "end": 13714,
+              "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d"
+            },
+            {
+              "id": "overlay",
+              "offset": 0,
+              "end": 997,
+              "sha256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b"
+            },
+            {
+              "id": "C",
+              "offset": 0,
+              "end": 4932,
+              "sha256": "ad41f3ffef782c43fa298c39376655f55d52c91b9f1f7dd3eb4b0a6969e88f8b"
+            }
+          ]
+        },
+        {
+          "frame": 2,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 132,
+          "payloadUTF8Bytes": 19868,
+          "sha256": "efc96e289436fa2b7494cf401e6b3e21fd386923e61ecd0dbdd1d55957d2f1df",
+          "parts": [
+            {
+              "id": "C",
+              "offset": 4932,
+              "end": 24800,
+              "sha256": "1ab0ee06e5e6df4f85ff8621a4d0bb6141d7894ed044cc68085960ceca52ee42"
+            }
+          ]
+        },
+        {
+          "frame": 3,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 243,
+          "payloadUTF8Bytes": 19757,
+          "sha256": "a85d153f8fd8217175019656a4c229c6716b23ae974cbccd38ff57280579196a",
+          "parts": [
+            {
+              "id": "C",
+              "offset": 24800,
+              "end": 34882,
+              "sha256": "42b30cfff06ecca3334d392ff41b3ee34d0472ce7754f8407fc65a822bd7c5fb"
+            },
+            {
+              "id": "B",
+              "offset": 0,
+              "end": 9675,
+              "sha256": "4f3d64ec7c1ff319f5775d1f6e1c5c00c5d1ccabb30b5d66e0275c960859ea0b"
+            }
+          ]
+        },
+        {
+          "frame": 4,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 352,
+          "payloadUTF8Bytes": 19648,
+          "sha256": "8a16d80886de749aa9f139f67c62d93346b4d43d6dfabe0dce63780617d5b1cf",
+          "parts": [
+            {
+              "id": "B",
+              "offset": 9675,
+              "end": 23996,
+              "sha256": "6a6d56986f2f8a0f29c23a95e9996e3768510be85d861ad835a10eb615eee635"
+            },
+            {
+              "id": "r1",
+              "offset": 0,
+              "end": 5275,
+              "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c"
+            },
+            {
+              "id": "r2",
+              "offset": 0,
+              "end": 52,
+              "sha256": "1cd7576fbd06125311f6eaa3a5983398fc78e21b9653144fff9ebf7c5d4cae6c"
+            }
+          ]
+        },
+        {
+          "frame": 5,
+          "totalUTF8Bytes": 9194,
+          "framingUTF8Bytes": 352,
+          "payloadUTF8Bytes": 8842,
+          "sha256": "118643b79577194d13ec93ce4585cbc4d58b4f444f8d82d36a0f8a3dcf4c4160",
+          "parts": [
+            {
+              "id": "r2",
+              "offset": 52,
+              "end": 3542,
+              "sha256": "670e26f4a1a96408cdd67dacae6ad3d162a4276c2668faf46585d65dc891ed65"
+            },
+            {
+              "id": "r3",
+              "offset": 0,
+              "end": 2000,
+              "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d"
+            },
+            {
+              "id": "r4",
+              "offset": 0,
+              "end": 3352,
+              "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a"
+            }
+          ]
+        }
+      ],
+      "completeStaticByteEquality": true,
+      "originalRoleCorrespondenceQuietPins": true,
+      "dynamicRequiredBytes": null,
+      "wholeFutureSubjectMeasured": false,
+      "headroomAtReadCounts": [
+        {
+          "readCalls": 5,
+          "totalOutputByteSlots": 100000,
+          "remainingDynamicPayloadAndAdditionalFramingBytes": 10806,
+          "meaning": "UPPER_HEADROOM_AFTER_ACTUAL_STATIC_FRAMING; every dynamic header/field boundary and complete required proof still costs; must reserialize whole future subject"
+        },
+        {
+          "readCalls": 6,
+          "totalOutputByteSlots": 120000,
+          "remainingDynamicPayloadAndAdditionalFramingBytes": 30806,
+          "meaning": "UPPER_HEADROOM_AFTER_ACTUAL_STATIC_FRAMING; every dynamic header/field boundary and complete required proof still costs; must reserialize whole future subject"
+        }
+      ],
+      "semanticSubjectStopBytes": 140000
+    },
+    {
+      "role": "Plato",
+      "sourceManifest": [
+        {
+          "id": "role",
+          "path": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 13843,
+          "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+          "requiredRange": [
+            0,
+            13843
+          ]
+        },
+        {
+          "id": "overlay",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\agents\\Plato.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 629,
+          "sha256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+          "requiredRange": [
+            0,
+            629
+          ]
+        },
+        {
+          "id": "C",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 34882,
+          "sha256": "7b18909cb4f1562812bfa120b2e29de002076777040d4df3329b18827b3b080f",
+          "requiredRange": [
+            0,
+            34882
+          ]
+        },
+        {
+          "id": "B",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 23996,
+          "sha256": "1e37c9944c82e227f1e87819cc3433494c595ef45ef7e22c25c2f275f1791b5b",
+          "requiredRange": [
+            0,
+            23996
+          ]
+        },
+        {
+          "id": "r1",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.three-deliverable-route.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 5275,
+          "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c",
+          "requiredRange": [
+            0,
+            5275
+          ]
+        },
+        {
+          "id": "r2",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 3542,
+          "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+          "requiredRange": [
+            0,
+            3542
+          ]
+        },
+        {
+          "id": "r3",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.A-observation-clock-correction.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 2000,
+          "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d",
+          "requiredRange": [
+            0,
+            2000
+          ]
+        },
+        {
+          "id": "r4",
+          "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Brain.FLAT-OPERATIVE-CONTRACT.B-READ-compact-references.2026-11-03.md",
+          "sourceKind": "ORIGINAL_ROOT_ORDINARY_FILE_LOCAL_MEASUREMENT",
+          "bytes": 3352,
+          "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a",
+          "requiredRange": [
+            0,
+            3352
+          ]
+        }
+      ],
+      "staticRawSemanticBytes": 87519,
+      "staticFramingBytes": 1438,
+      "staticOutputBytes": 88957,
+      "actualStaticReadFrames": 5,
+      "frames": [
+        {
+          "frame": 1,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 357,
+          "payloadUTF8Bytes": 19643,
+          "sha256": "c01db0a77c9136fa7e465c2210ff728733f393b0d752b104eea94ef95f1d522c",
+          "parts": [
+            {
+              "id": "role",
+              "offset": 0,
+              "end": 13843,
+              "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77"
+            },
+            {
+              "id": "overlay",
+              "offset": 0,
+              "end": 629,
+              "sha256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b"
+            },
+            {
+              "id": "C",
+              "offset": 0,
+              "end": 5171,
+              "sha256": "395ab4ca1dc677475774c888c80162a6cd23aac12c32382d7e16c7c21499b742"
+            }
+          ]
+        },
+        {
+          "frame": 2,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 132,
+          "payloadUTF8Bytes": 19868,
+          "sha256": "994b6ba10657b8c251fa5605aad2ec97123b249327edc3836262b3df7f6fe8e6",
+          "parts": [
+            {
+              "id": "C",
+              "offset": 5171,
+              "end": 25039,
+              "sha256": "d653b09c7129a7406f5e8deb57ef1412c9c39e62fb2d5fdfcb045b761572b5a9"
+            }
+          ]
+        },
+        {
+          "frame": 3,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 243,
+          "payloadUTF8Bytes": 19757,
+          "sha256": "4ec69256ebd53c913f47633f93fb9dd0307c54b1f8e94a4501987d3ad0b24e47",
+          "parts": [
+            {
+              "id": "C",
+              "offset": 25039,
+              "end": 34882,
+              "sha256": "5986e7fd6fa2d7d9b0e1bb34a060ad755d4d93765c453b9837f7daefe2d42fc6"
+            },
+            {
+              "id": "B",
+              "offset": 0,
+              "end": 9914,
+              "sha256": "43c77e59471a0e3d6322081f7c430a524a9933ce9f06c4b07f398c95ce2a3e4b"
+            }
+          ]
+        },
+        {
+          "frame": 4,
+          "totalUTF8Bytes": 20000,
+          "framingUTF8Bytes": 353,
+          "payloadUTF8Bytes": 19647,
+          "sha256": "5b46655dedf7dbf783d6c54745ecccf0d0ca55cf988116703334a95f54ed1bb0",
+          "parts": [
+            {
+              "id": "B",
+              "offset": 9914,
+              "end": 23996,
+              "sha256": "7b73c3f80fe7cb0ff312380af8213260362269ea3d49ff32664ac9213ce6f696"
+            },
+            {
+              "id": "r1",
+              "offset": 0,
+              "end": 5275,
+              "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c"
+            },
+            {
+              "id": "r2",
+              "offset": 0,
+              "end": 290,
+              "sha256": "3e08200bb78e412e838a066ffaa67d2b46f12797ad4d247625c60c71495a9bde"
+            }
+          ]
+        },
+        {
+          "frame": 5,
+          "totalUTF8Bytes": 8957,
+          "framingUTF8Bytes": 353,
+          "payloadUTF8Bytes": 8604,
+          "sha256": "838816f5b6720d25c47180114f5c0863333cfe7523185aa66c9777e5537ea509",
+          "parts": [
+            {
+              "id": "r2",
+              "offset": 290,
+              "end": 3542,
+              "sha256": "b6aa49001f158d5b69dfc56a5cfa361a8e26932d734105dce90a134770659bb2"
+            },
+            {
+              "id": "r3",
+              "offset": 0,
+              "end": 2000,
+              "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d"
+            },
+            {
+              "id": "r4",
+              "offset": 0,
+              "end": 3352,
+              "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a"
+            }
+          ]
+        }
+      ],
+      "completeStaticByteEquality": true,
+      "originalRoleCorrespondenceQuietPins": true,
+      "dynamicRequiredBytes": null,
+      "wholeFutureSubjectMeasured": false,
+      "headroomAtReadCounts": [
+        {
+          "readCalls": 5,
+          "totalOutputByteSlots": 100000,
+          "remainingDynamicPayloadAndAdditionalFramingBytes": 11043,
+          "meaning": "UPPER_HEADROOM_AFTER_ACTUAL_STATIC_FRAMING; every dynamic header/field boundary and complete required proof still costs; must reserialize whole future subject"
+        },
+        {
+          "readCalls": 6,
+          "totalOutputByteSlots": 120000,
+          "remainingDynamicPayloadAndAdditionalFramingBytes": 31043,
+          "meaning": "UPPER_HEADROOM_AFTER_ACTUAL_STATIC_FRAMING; every dynamic header/field boundary and complete required proof still costs; must reserialize whole future subject"
+        }
+      ],
+      "semanticSubjectStopBytes": 140000
+    }
+  ],
+  "dynamicRequiredSemanticTerms": [
+    {
+      "id": "A_SUCCESS",
+      "complete": true,
+      "maximumProducerASCIIRecordCharacters": 10000,
+      "actualUTF8Bytes": null,
+      "actualBinding": "FUTURE_ACTUAL_ONLY"
+    },
+    {
+      "id": "A_ROOT_BINDING_ACK",
+      "complete": true,
+      "actualUTF8Bytes": null
+    },
+    {
+      "id": "B_ENTRY_INTAKE_CLOSURE_AND_UNIQUE_OBSERVATIONS",
+      "complete": true,
+      "actualUTF8Bytes": null,
+      "perProducerOutputBoundCharacters": 10000,
+      "compactReferencesResolveAllActualFrames": true
+    },
+    {
+      "id": "C_MANIFEST_AND_ACCEPTED_APPLICABILITY",
+      "complete": true,
+      "actualUTF8Bytes": null
+    },
+    {
+      "id": "ACTUAL_COMPARISON_MATERIALIZATION_AND_FINALIZER_SOURCE_EFFECTS",
+      "complete": true,
+      "actualUTF8Bytes": null,
+      "sourceImplemented": false,
+      "noGuessedTemplateOrSemanticTransform": true
+    },
+    {
+      "id": "ANY_DISTINCT_APPLICABLE_SAFETY_CLAUSE",
+      "complete": true,
+      "actualUTF8Bytes": null
+    }
+  ],
+  "mechanicalCorpus": {
+    "BQuietOperations": 30,
+    "semanticFrames": 23,
+    "capsuleMaxUTF8Bytes": 2097152,
+    "sourceKind": "EXACT_RETURNED_TOOL_HISTORY_TEXT_AND_FULL_ACTUAL_COMMANDS_NOT_RAW_NATIVE_STREAM_CLAIM",
+    "independentMechanicalComparisonRequired": true,
+    "notEachReviewerCold211573ByteSemanticReview": true,
+    "historyAPI": "mcp__codex_app__read_thread",
+    "options": {
+      "turnLimit": 1,
+      "includeOutputs": true,
+      "maxOutputCharsPerItem": 20000
+    },
+    "actualBChatId": "01a19d76-0837-7a43-a18d-8a40494879b8",
+    "actualBTurnId": null,
+    "historicalSixCompleteRecordReplyProvesMultirecordSupportOnly": true,
+    "futureThirtyRecordAggregateCapacity": null,
+    "actualPatchRequestCapacity": null,
+    "actualAAbsoluteCapsuleBinding": null,
+    "RootCurrentSameWorkerFunctionsStateNotReviewerInheritance": true
+  },
+  "RootEvidenceFence": {
+    "root": "C:/Projects/Blurby-artifacts/shared-instruction-C-review-20261103/",
+    "files": [
+      "B-READ.capsule.json",
+      "C.entry.json",
+      "C.manifest.json",
+      "C.compliance.json",
+      "C.quality.json",
+      "C.review-acceptance.json",
+      "C.finalization.json"
+    ],
+    "BInitialCaptureUpstreamOwned": true,
+    "CRequiresExistingSameRootOwnershipNotAbsenceAgain": true,
+    "allNewCFilesExclusiveNoTmpNoOverwrite": true,
+    "noCopiedProtocolBodies": true,
+    "planningRootAbsenceObservationOnly": true
+  },
+  "quietFence": {
+    "root": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+    "allFiles": [
+      "CLAUDE.md",
+      "ROADMAP.md",
+      "docs/governance/LESSONS_LEARNED.md",
+      "Virtuoso/workspace-layout.json",
+      "Virtuoso/work-register.snapshot.json",
+      "receipt.json"
+    ],
+    "AWrites": 5,
+    "BReadWrites": 0,
+    "CWrites": [
+      "receipt.json"
+    ],
+    "freshSameCPU15ConservationRequired": true,
+    "receiptMaximumUTF8Bytes": 65536,
+    "nativePython": {
+      "path": "C:/Python314/python.exe",
+      "bytes": 106328,
+      "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b"
+    },
+    "finalizerSourceAndOutputSizing": null,
+    "postPublicationHashAndActualEndOutsideReceipt": true,
+    "noClockTimestampOrSelfHashCycle": true,
+    "separateBrainAdmissionRequired": true
+  },
+  "reviewerEligibility": {
+    "complianceCandidate": "b_read_independent_review",
+    "actualStableTaskId": null,
+    "qualityExistingNonAuthor": null,
+    "authorshipIndependenceActualAccessAndAvailability": "PENDING_ROOT_BINDING",
+    "BauthorCPUAndAauthorPhaseDNotAutomaticallyIndependent": true,
+    "newUserChatOrNewWorkerSelected": false
+  },
+  "accounting": {
+    "fixedWrapperAllocations": {
+      "RootEntry": 1,
+      "RootEntryManifestWriterAndReadback": 2,
+      "existingReviewerDispatches": 2,
+      "independentMechanicalComparisons": 2,
+      "twoReportWritersAndReadbacks": 4,
+      "waitAndRootFullReportsRead": 2,
+      "orderedAcceptanceWriterAndReadback": 2,
+      "separateAdmissionAndDeliveryMinimum": 2,
+      "quietActualPairIntakeFresh15WriteReadback": 3,
+      "RootFinalHistoryWriterReadback": 3,
+      "reserve": 3
+    },
+    "fixedWrapperTotal": 26,
+    "variableCompleteReviewerReadCalls": {
+      "R_M": null,
+      "R_P": null
+    },
+    "quietCompleteApplicableBootstrapCallsK": null,
+    "RootOwnRecipeBootstrapIfNoActualSameActorCompleteReceipt": null,
+    "extraActualNativeWrappersWaitsRoutingAndSourceReads": null,
+    "allActualNestedNativeAndWrapperCostsRecordedNoExemption": true,
+    "formula": "26+R_M+R_P+K+RootBootstrapIfRequired+allActualExtraNativeWrapperRoutingWaitReadCalls",
+    "conditionalArithmeticOnly": [
+      {
+        "R_M": 5,
+        "R_P": 5,
+        "K": 2,
+        "beforeOtherUnknowns": 38
+      },
+      {
+        "R_M": 6,
+        "R_P": 6,
+        "K": 2,
+        "beforeOtherUnknowns": 40,
+        "zeroExtraHeadroom": true
+      },
+      {
+        "R_M": 7,
+        "R_P": 7,
+        "K": 3,
+        "beforeOtherUnknowns": 43,
+        "fits40": false
+      }
+    ],
+    "completeRouteMeasured": false,
+    "currentFit": null,
+    "noInfeasibilityFromUnmeasuredFileRouteAssumed": true,
+    "notFeasibleClaimFromStaticOnly": true,
+    "capCallsMaximum": 40,
+    "capMinutesMaximum": 60,
+    "prospectiveRequestMinutes": 50,
+    "workCutoffMinutes": 40,
+    "closureReviewReserveMinutes": 10,
+    "quietFinalSubwindowMaxMinutes": 8,
+    "plannerSerialTaskMinutes": [
+      10,
+      12,
+      12,
+      8
+    ],
+    "plannerSerialSumMinutes": 42,
+    "calibratedTasks": 0,
+    "admitted": false,
+    "upstreamBCaptureConstructionReadbackACKCostsRetainedButNotRepeatedOrBorrowed": true
+  },
+  "pendingConcreteGaps": [
+    "Final new compact B-READ recipe/schema/program/success-and-failure output pin; rejected v1 is not qualified",
+    "Actual accepted A capsule/ACK and B full thirty-operation history/capsule/ACK; no future hashes",
+    "Future whole-turn API/reply/command/aggregate and complete patch-request capacity under actual bounded interface",
+    "Exact complete local comparator/materialization/finalizer sources, effect permissions, controls and raw command/output receipts",
+    "Complete dynamic A/B/code/applicability subject and exact per-actor whole output packing/read counts; all residual includes additional framing",
+    "Actual existing nonauthor reviewers stable IDs/access/availability/fullread receipts and ordered same-byte acceptance",
+    "Root own operative-read closure, all underlying native/wrapper/review/admission/routing/closure cost and justified fifty-minute route",
+    "Separate actual same-CPU finalization admission/fresh fifteen inputs/output absence/full final record/readback and external actual end proof",
+    "Root independent recipe/capacity review and final protected U9/U10/current register facts"
+  ],
+  "noActions": {
+    "quietQueryOrExecution": false,
+    "providerOrGitMutation": false,
+    "sourceTestsHelpersRuntimeImports": false,
+    "newAgentOrUserChat": false,
+    "existingOriginalABDocsModified": false
+  },
+  "onlyAuthoredPlanningFiles": [
+    "Draft.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.md",
+    "Capacity.FLAT-OPERATIVE-CONTRACT.instruction-C-REVIEW-CLOSE.2026-11-03.json"
+  ]
+}

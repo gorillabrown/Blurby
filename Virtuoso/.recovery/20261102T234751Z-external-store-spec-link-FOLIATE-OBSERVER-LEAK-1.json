@@ -1,0 +1,34 @@
+{
+  "id": "20261102T234751Z-external-store-spec-link-FOLIATE-OBSERVER-LEAK-1",
+  "operation": "external-store-spec-link",
+  "item_id": "FOLIATE-OBSERVER-LEAK-1",
+  "created": "2026-11-02T23:47:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#foliate-observer-leak-1"
+    },
+    "expectedRevision": "db95a2077720e604c95175e05a4d89aba241521c1a8930530cf21d5a814cc616",
+    "idempotencyKey": "store-spec-link:FOLIATE-OBSERVER-LEAK-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#foliate-observer-leak-1')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "FOLIATE-OBSERVER-LEAK-1",
+      "idempotencyKey": "store-spec-link:FOLIATE-OBSERVER-LEAK-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#foliate-observer-leak-1')]",
+      "actualRevision": "",
+      "recoveryId": "20261102T234751Z-external-store-spec-link-FOLIATE-OBSERVER-LEAK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-02T23:48:16Z",
+  "outcome": "succeeded"
+}

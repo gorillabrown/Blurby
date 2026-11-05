@@ -1,0 +1,18 @@
+{
+  "approved": "Phase A owner confirmation 2026-11-02",
+  "base": "88e82ba59ccb93281c6c0b949e3ed4a826195897",
+  "roadmapBeforeSha256": "ebbbd0025700de3201b59f92ac408eef001812efceb4ef164fa01b7779782b48",
+  "roadmapAfterSha256": "9880f3283d0e620f41513643f2ee4e10aa3f78a3ed4b8f9cd9633eb6b3c86f3c",
+  "beforeLines": 2011,
+  "afterLines": 1996,
+  "archivedSectionBytes": 3320,
+  "archivedSectionSha256": "b825af19390347feab75416ac5d3466f4d5017cdac6973aa4852fb7c9ba453d5",
+  "archive": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\planning\\.Archive\\ROADMAP_snapshot_2026-11-02.md",
+  "archiveSha256": "83be303aefc816e7a5e96d7c0889cefc2179e8ce958ea4f909b1a0c302f3cab6",
+  "removedActiveIds": [
+    "AGENT-PROTOCOL-CONSOLIDATION-1"
+  ],
+  "completionLedgerChanged": false,
+  "liveRegisterMutations": 0,
+  "primaryCheckoutModified": false
+}

@@ -1,0 +1,50 @@
+{
+  "id": "20261104T020519Z-external-create-item-NARRATE-SAVE-AS-YOU-GO-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-SAVE-AS-YOU-GO-1",
+  "created": "2026-11-04T02:05:19Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-SAVE-AS-YOU-GO-1",
+      "title": "Narrate saves your place every few seconds while playing, so a crash reopens within a few words",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "TTS / Narration Engine",
+      "spec_link": "ROADMAP.md#narrate-save-as-you-go-1",
+      "prerequisites": [
+        "CFI-POSITION-CONSISTENCY-1"
+      ],
+      "description": "Narrate saves progress during playback only when the page moves. Add a mode-local save on cursor-word advance at the same cadence as Focus (RSVP\\_PROGRESS\\_SAVE\\_INTERVAL\\_MS) plus pause and stop, with an explicit null cfi under CFI-POSITION-CONSISTENCY-1's contract. Restart still begins at the saved word's sentence (O3).",
+      "notes": "origin: owner ruling O5, 2026-11-03 (Findings F-016): Flow and Narrate save as they go, like Focus under O4. Sequenced after CFI-POSITION-CONSISTENCY-1, reusing its cadence and null-cfi rule. Stub; spec to follow.",
+      "sequence": 97.7
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-04T01:46:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SAVE-AS-YOU-GO-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-SAVE-AS-YOU-GO-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SAVE-AS-YOU-GO-1",
+      "actualRevision": "",
+      "recoveryId": "20261104T020519Z-external-create-item-NARRATE-SAVE-AS-YOU-GO-1",
+      "detail": {},
+      "providerItemId": "40e7c96c-c31e-81db-b2a9-c3fb976a92b9",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-04T02:06:02Z",
+  "outcome": "succeeded"
+}

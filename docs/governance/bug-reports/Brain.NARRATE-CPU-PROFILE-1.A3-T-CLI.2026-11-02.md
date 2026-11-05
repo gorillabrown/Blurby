@@ -1,0 +1,13 @@
+# CPU transport runner CLI exit and NUL qualification
+
+Actual complete messages read from Blurby.Brain tool arguments; preserved verbatim. These close prospective source/control semantics only and grant no execution allowance. Literal OS argv cannot contain U+0000; defensive source coverage is not an executed CLI result.
+
+## Actual message `exec-4c145c70-e240-436a-9379-7fdccec8ed4d`
+
+Confirmed: new T runner invalid CLI exits EXACTLY 2, before helper import, receipt write or case I/O. Unknown, duplicate, missing, relative, NUL and forbidden same-name inputs print only a fixed usage line to stderr; stdout is empty. The outer admitted driver retains that refusal and raw exit. Valid CLI with a failed control or runner/import harness failure exits1 and persists the safely owned failure receipt; all required controls pass =>0. This applies to NEW T runners only; preserve original P214 runner bytes and its --module CLI unchanged.
+
+Root's completed P2 inspection closes that input gate. No additional P execution/courier is needed. B0 read-only delivery is now closed5/6, receipt1284b583358a216f8f3ccb0f194d8114f1fe06ee50fb00755b9564dfe11e8f5b; the prior human-steered read-only accounting remains explicitly UNRECONCILED. Root read the full retained diagnosis and actual code and has now admitted NARRATE-PAUSED-CLICK-1-B0-FIX-COMPLETE-20261102, fresh<=45m40: only three diagnosed [void] suppressions, original expected directory/data unchanged, new fix-output root, independent re-review/freeze, all six parity controls plus malformed-argument calibration, both stage review pairs and exact local commits. No old source clock, native authority or parity PASS inferred. Awaiting actual consumed start. IC-T read-only inputs/parser/Python qualification runs independently on Business coordinator against accepted W a5d22. No source I-C grant yet.
+
+## Actual message `exec-56b16a37-f21d-4923-b347-8c16f881d03d`
+
+T CLI precision for truthful controls: an actual U+0000 cannot be delivered as an operating-system argv entry. Keep its defensive validation in the parser, but qualify that branch by source/static review and label the native-CLI NUL case NOT REPRESENTABLE, not an executed exit2 PASS. Do not pass literal backslash-zero and call it NUL, mutate process.argv, or count an outer spawn rejection as the runner's exit. Unknown/duplicate/missing/relative/same-name cases are actual CLI controls with exact exit2; in-process malformed-data checks, if any, must have a separately explicit detector seam without modifying the accepted runner. This does not reopen the exit convention or add a helper/test hook.

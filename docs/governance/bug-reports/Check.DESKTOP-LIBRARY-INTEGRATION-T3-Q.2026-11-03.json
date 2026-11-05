@@ -1,0 +1,251 @@
+{
+  "item": "FOLIATE-DISPLAY-LIFETIME-1",
+  "phase": "DESKTOP-LIBRARY-T3-Q",
+  "scope": "prospective actual harness mock controls only; accepted T3-A parent WAIT; no native admission",
+  "observedAt": "2026-11-03T08:24:10.8523141Z",
+  "spec": "docs/governance/bug-reports/Draft.DESKTOP-LIBRARY-INTEGRATION-T3-Q.2026-11-03.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "596b3d9fc499fcc587890357fac27cf253a4919bcdf523517968ed16c03c55b8"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.DESKTOP-LIBRARY-INTEGRATION-T3-Q.2026-11-03.md",
+      "sha256": "e8f46ff17376dd3e606692d4d89639c612c184a70c117c3ab09a5fb823360e02"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (FOLIATE-DISPLAY-LIFETIME-1): PASS",
+    "  cited: LL-134, LL-165, LL-169, LL-176, LL-177, LL-178, LL-179",
+    "  [info] lessons-not-cited: 118 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Fresh actualA/tool/custody/static-effects review hash binding/controlmanifest/outerrecorder freeze and substantivepreinvoke review [calculable] @control-entry \u2014 3m (median of 71 runs)",
+    "2. ONE actualbytechild and ONE built-in serialtestbatch exercise allfiniteH01\u2013H15 cases [frontier] @harness-controls \u2014 15m (timeboxed)",
+    "3. Samefrozenactualsource/control/receipts independentcomplianceFIRSTquality, externalMarcus/finalheldreceipt [calculable] @control-closeout \u2014 3m (median of 71 runs)",
+    "Total: chain 6m \u00b7 sum 6m + 1 timeboxed \u226415m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+  "sha256Domain": "working-tree raw; prior published-base raw to be separately annotated",
+  "publishedProtectedReadback": [
+    {
+      "path": "AGENTS.md",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "matchesWorkingRaw": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "matchesWorkingRaw": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+      "matchesWorkingRaw": true
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "596b3d9fc499fcc587890357fac27cf253a4919bcdf523517968ed16c03c55b8",
+      "matchesWorkingRaw": true
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "matchesWorkingRaw": true
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "commit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "matchesWorkingRaw": true
+    }
+  ],
+  "preservedEarlierChecks": [
+    {
+      "rootLocalOptionalPath": "C:\\Projects\\Blurby-artifacts\\roadmap-u10-first-attempts-20261103\\Check.DESKTOP-LIBRARY-INTEGRATION-T3-Q.first-U10-timebox-grammar.2026-11-03.json",
+      "bytes": 2667,
+      "sha256": "b0346f7e962216d0f0a137e57b7c0b6787522d21c51d9e5cfdfee3381fe9b34a",
+      "completeRecord": {
+        "item": "FOLIATE-DISPLAY-LIFETIME-1",
+        "phase": "DESKTOP-LIBRARY-T3-Q",
+        "scope": "prospective actual harness mock controls only; accepted T3-A parent WAIT; no native admission",
+        "observedAt": "2026-11-03T08:23:45.0480523Z",
+        "spec": "docs/governance/bug-reports/Draft.DESKTOP-LIBRARY-INTEGRATION-T3-Q.2026-11-03.md",
+        "hashes": [
+          {
+            "path": "AGENTS.md",
+            "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+          },
+          {
+            "path": "CLAUDE.md",
+            "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+          },
+          {
+            "path": "ROADMAP.md",
+            "sha256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590"
+          },
+          {
+            "path": "docs/governance/LESSONS_LEARNED.md",
+            "sha256": "596b3d9fc499fcc587890357fac27cf253a4919bcdf523517968ed16c03c55b8"
+          },
+          {
+            "path": "Virtuoso/workspace-layout.json",
+            "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+          },
+          {
+            "path": "Virtuoso/work-register.snapshot.json",
+            "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b"
+          },
+          {
+            "path": "docs/governance/bug-reports/Draft.DESKTOP-LIBRARY-INTEGRATION-T3-Q.2026-11-03.md",
+            "sha256": "06a95b9278a3e66d4f41ee819cd232abd38361fd77a25dc0ebdffcc714561eee"
+          }
+        ],
+        "u9Exit": 0,
+        "u9Output": [
+          "U9 lessons applied (FOLIATE-DISPLAY-LIFETIME-1): PASS",
+          "  cited: LL-134, LL-165, LL-167, LL-169, LL-176, LL-177, LL-178, LL-179",
+          "  [warning] lesson-closed-cited: LL-167 is Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23); cite what it became instead",
+          "  [info] lessons-not-cited: 118 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026",
+          "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+        ],
+        "u10Exit": 1,
+        "u10Output": [
+          "task list: NOT READY \u2014 task 2: a Timebox reads \"\u22642h \u2014 <the action when it is reached>\", not '\u226415m inclusivebatch/drain; retainNOT_RUNafterfailure'"
+        ],
+        "protectedUnchanged": true,
+        "gitStatusUnchanged": true,
+        "publishedBaseCommit": "26e7a6b58abef2488f791b37c44c19ee4e905cd3",
+        "sha256Domain": "working-tree raw; prior published-base raw to be separately annotated"
+      },
+      "quietPrerequisite": false
+    }
+  ],
+  "liveProviderReadback": {
+    "source": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
+    "queriedThisTurn": true,
+    "capturedForRecordAt": "2026-11-03T08:25:59.064670+00:00",
+    "mode": "sql",
+    "data": {
+      "results": [
+        {
+          "Sprint Code": "FOLIATE-OBSERVER-LEAK-1",
+          "Seq": 67,
+          "Status": "In Flight",
+          "Spec State": "Full Spec",
+          "Prerequisites": null,
+          "Spec Reference": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#foliate-observer-leak-1",
+          "Branch": "eb/foliate-observer-leak-1",
+          "url": "https://app.notion.com/4027c96cc31e810f816fdc1d0bd16e6e"
+        },
+        {
+          "Sprint Code": "FOLIATE-DISPLAY-LIFETIME-1",
+          "Seq": 68,
+          "Status": "In Flight",
+          "Spec State": "Full Spec",
+          "Prerequisites": "FOLIATE-OBSERVER-LEAK-1",
+          "Spec Reference": "ROADMAP.md#foliate-display-lifetime-1",
+          "Branch": "eb/foliate-display-lifetime-1",
+          "url": "https://app.notion.com/4057c96cc31e81469399c4a0739493c4"
+        },
+        {
+          "Sprint Code": "LIBRARY-WRITE-RACE-3",
+          "Seq": 89,
+          "Status": "Queued",
+          "Spec State": "Full Spec",
+          "Prerequisites": "LIBRARY-WRITE-RACE-2; APP-TABS-1",
+          "Spec Reference": "ROADMAP.md#library-write-race-3",
+          "Branch": "eb/library-write-race-3",
+          "url": "https://app.notion.com/4057c96cc31e819f9655c23d0f41dce9"
+        },
+        {
+          "Sprint Code": "NARRATE-ARROW-PAUSE-1",
+          "Seq": 99,
+          "Status": "Queued",
+          "Spec State": "Full Spec",
+          "Prerequisites": "READER-ARROW-GUARD-1",
+          "Spec Reference": "ROADMAP.md#narrate-arrow-pause-1",
+          "Branch": "eb/narrate-arrow-pause-1",
+          "url": "https://app.notion.com/4057c96cc31e81ffa0edd9a1ca705083"
+        },
+        {
+          "Sprint Code": "LIBRARY-COMPLETION-VISIBILITY-1",
+          "Seq": 116,
+          "Status": "In Flight",
+          "Spec State": "Full Spec",
+          "Prerequisites": "FOLIATE-OBSERVER-LEAK-1",
+          "Spec Reference": "ROADMAP.md#library-completion-visibility-1",
+          "Branch": "eb/library-completion-visibility-1",
+          "url": "https://app.notion.com/4057c96cc31e81a2a666c329943a6ff8"
+        },
+        {
+          "Sprint Code": "NARRATE-PAUSED-CLICK-1",
+          "Seq": 117,
+          "Status": "Queued",
+          "Spec State": "Full Spec",
+          "Prerequisites": "NARRATE-SENTENCE-RESUME-1",
+          "Spec Reference": "ROADMAP.md#narrate-paused-click-1",
+          "Branch": "eb/narrate-paused-click-1",
+          "url": "https://app.notion.com/4057c96cc31e81999adee42f6ec5efd1"
+        },
+        {
+          "Sprint Code": "FOCUS-WORD-ONLY-1",
+          "Seq": 123,
+          "Status": "Queued",
+          "Spec State": "Full Spec",
+          "Prerequisites": "BAND-ALIGN-2",
+          "Spec Reference": "ROADMAP.md#focus-word-only-1",
+          "Branch": "eb/focus-word-only-1",
+          "url": "https://app.notion.com/4057c96cc31e812394acc7149e97d9af"
+        }
+      ],
+      "has_more": false,
+      "data_source_ids": [
+        "3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c"
+      ]
+    },
+    "mutation": false
+  },
+  "specifiedQueuedDepth": {
+    "atLeast": 3,
+    "items": [
+      "LIBRARY-WRITE-RACE-3",
+      "NARRATE-ARROW-PAUSE-1",
+      "NARRATE-PAUSED-CLICK-1"
+    ],
+    "proof": "fresh SQL Queued/Full Spec plus retained independent full semantic specification reads on unchanged roadmap bodies",
+    "notBlanketDispatchReady": true
+  },
+  "pricingLimit": "Mechanical historical task-kind medians are not written prospective estimates, phase caps, workload measurements or ETA.",
+  "firstFailureDisposition": "Earlier complete records retained without relabeling; final grammar/lesson-section changes separately reviewed. No helper/source/runtime failure is inferred."
+}

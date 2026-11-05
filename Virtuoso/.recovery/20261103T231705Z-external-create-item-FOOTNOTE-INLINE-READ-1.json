@@ -1,0 +1,50 @@
+{
+  "id": "20261103T231705Z-external-create-item-FOOTNOTE-INLINE-READ-1",
+  "operation": "external-create-item",
+  "item_id": "FOOTNOTE-INLINE-READ-1",
+  "created": "2026-11-03T23:17:05Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "FOOTNOTE-INLINE-READ-1",
+      "title": "Narrate can read a footnote where it is referenced",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "M",
+      "workstream": "TTS / Narration Engine",
+      "spec_link": "ROADMAP.md#footnote-inline-read-1",
+      "description": "Owner request 2026-11-03: a Narrate setting, \"Read footnotes where they're referenced\", off by default. On reaching a note marker (\"blah blah 1\"), Narrate says \"Footnote 1:\" and reads the note text, then carries on from the word after the marker. The cursor stays exact-word (owner ruling #31).",
+      "notes": "origin: owner answer to BLOCK-TEXT-ORDER-1 OQ2, 2026-11-03 (docs/planning/roadmap-reviews/2026-11-03-block-text-order-contracts.md). Needs BLOCK-TEXT-ORDER-1's note-target identification. Stub; design and technical spec to follow.",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "sequence": 141.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T23:00:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOOTNOTE-INLINE-READ-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOOTNOTE-INLINE-READ-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOOTNOTE-INLINE-READ-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T231705Z-external-create-item-FOOTNOTE-INLINE-READ-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-811b-8f19-c047945bdba6",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T23:17:30Z",
+  "outcome": "succeeded"
+}

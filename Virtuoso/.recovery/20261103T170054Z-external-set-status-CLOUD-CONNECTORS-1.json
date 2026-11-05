@@ -1,0 +1,34 @@
+{
+  "id": "20261103T170054Z-external-set-status-CLOUD-CONNECTORS-1",
+  "operation": "external-set-status",
+  "item_id": "CLOUD-CONNECTORS-1",
+  "created": "2026-11-03T17:00:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 153
+    },
+    "expectedRevision": "5f4031089c2f8b9897905cae7e9da7e6eca954dbd42f69040f1bf806f8e8db5e",
+    "idempotencyKey": "set-status:CLOUD-CONNECTORS-1:[('sequence', 153)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CLOUD-CONNECTORS-1",
+      "idempotencyKey": "set-status:CLOUD-CONNECTORS-1:[('sequence', 153)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T170054Z-external-set-status-CLOUD-CONNECTORS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:01:37Z",
+  "outcome": "succeeded"
+}

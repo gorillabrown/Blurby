@@ -1,0 +1,49 @@
+{
+  "id": "20261103T173530Z-external-create-item-BLURBY-SITE-1",
+  "operation": "external-create-item",
+  "item_id": "BLURBY-SITE-1",
+  "created": "2026-11-03T17:35:30Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "BLURBY-SITE-1",
+      "title": "Blurby website with downloads",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "L",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#blurby-site-1",
+      "branch": "eb/blurby-site-1",
+      "description": "One landing page at `blrby.app` on Cloudflare Pages: the Windows download (x64 or ARM64, chosen automatically, from the latest GitHub release), Google Play open-testing, Chrome Web Store and Firefox Add-ons links, privacy policy and terms, and the sign-in pages the server needs. The Windows installer is signed with Azure Trusted Signing. The download may go live right after the Stage 8 Windows release; sign-in pages follow BLURBY-SERVER-1 phase 2, and each store link is added as its listing goes live.",
+      "notes": "origin: held plan 2026-11-03-first-finish-line (website draft stub; absorbed by roadmap review 2026-11-03-2). Stub; needs /write-plan before dispatch. Owner accounts needed: Azure Trusted Signing (identity validation), Cloudflare Pages.",
+      "sequence": 142.5,
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T17:32:31Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLURBY-SITE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BLURBY-SITE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLURBY-SITE-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T173530Z-external-create-item-BLURBY-SITE-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-8120-9a43-f10f92bd2a8a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T17:36:23Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,35 @@
+{
+  "id": "20261103T224748Z-external-set-status-AUTO-ARCHIVE-1",
+  "operation": "external-set-status",
+  "item_id": "AUTO-ARCHIVE-1",
+  "created": "2026-11-03T22:47:48Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "PAGE-PAGES-READ-1; LIBRARY-DELETE-SAFE-1",
+      "sequence": 113.5
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:AUTO-ARCHIVE-1:[('prerequisites', 'PAGE-PAGES-READ-1; LIBRARY-DELETE-SAFE-1'), ('sequence', 113.5)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "AUTO-ARCHIVE-1",
+      "idempotencyKey": "set-status:AUTO-ARCHIVE-1:[('prerequisites', 'PAGE-PAGES-READ-1; LIBRARY-DELETE-SAFE-1'), ('sequence', 113.5)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T224748Z-external-set-status-AUTO-ARCHIVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T22:48:44Z",
+  "outcome": "succeeded"
+}

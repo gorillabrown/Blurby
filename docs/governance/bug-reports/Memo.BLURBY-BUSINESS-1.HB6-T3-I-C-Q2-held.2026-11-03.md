@@ -1,0 +1,17 @@
+# Business HB6 T3 I-C — Q2 held checkpoint
+
+2026-11-03. **PARTIAL/HOLD / SOURCE UNCHANGED / TESTS NOT ACCEPTED.** Component evidence only; no whole-epic or terminal closeout, new source acceptance, provider/status/Seq mutation, cleanup29/I-D or merge/package/native elevation.
+
+Root read COMPLETE actual Q2 green stdout/stderr and GREEN_RECEIPT from quiet Business chat01a19e5f-a0f9-7831-ab5a-c864e33a3a30 turn01a1a017-8e81-7771-ae60-c8e7709ae51b command exec-bf83b3c3-4b5f-49fc-bff3-67087455239f (9103character output), plus complete checkpoint projection exec-55d8799a-671c-432a-8226-362dfd50f8a5 and final accounting exec-72ffb897-85b1-47e2-a3f4-1d4bedb822ab. Root has NOT read the full920657-byte control-receipt.json.
+
+Actual suite:27passed/1failed. Frozen bc06 “one-MiB edge and oversize are distinct” timed out at10000ms (reported elapsed13773ms), testline385. Full suite duration14.52s. This establishes a failure, not its cause. Other27case pass lines are present exactly once; they cannot substitute for bc06 or cleanup29.
+
+Green command retained pinned Node/Vitest run tests/businessRead.test.js --maxWorkers=1 --reporter=verbose; one worker/child old-space2048MiB, ownedTEMP/TMP. Started06:38:08.856459Z, ended06:38:24.334124Z, actualexit1. Rawstdout4431bytes/SHA3aa0533c56a3e7b9d667212e820d62dc884b97083095f66a189a6cf755578699; rawstderr730bytes/SHAd89b48ddb304dfed10040fc6aad19d02089a43cb2f2a696d71b2ff95d4490f81. Structured green classification HARNESS_OR_CONTROL_FAILURE is a collector label, not proof whether the root cause is production, frozen-test cost, scheduler or transport.
+
+Checkpoint projection reports same nested binary/exit7/strictjournal calibration PASS and bothsyntax exit0 PASS; ALL_EIGHT_DIRECT_CHILDREN_CLOSED_PIPES_COMPLETE, slotreleased, zero production corrections/protecteddrift/oldartifactchanges/source-refdelta. Those all-eight preservation/closure facts are attributed to the complete projection; Root did not newly inspect every raw child receipt. No child restart/retry or test-timeout enlargement is authorized here.
+
+Source identity remains HEAD9b0f29d48c5df2eb66b9458e87da2d8ce7549293 and uncommitted read.js8509/SHA d6c157f99fc8da0e82768b52200e2d65792eb5b4a2d04d930b5602ba899e65aa; constants14972/SHA d1d685abb97ed51a55a48871381770c9b67a3fef9f60667567c0399b3cd1e653; frozen test41366/SHA6c06052105e813bbfe3df4b675c7a68d9af8e6e90d800506f22806520c47f38b. Rawsource equality is reported by the actual receipts, not a new Root quiet filesystem probe. Existing source, test, failed artifacts and previous Q/Q2 history remain preserved.
+
+Full receipt: C:/Projects/Blurby-artifacts/business-hb6-t3-i-c-q-qualify2-20261102/control-receipt.json920657bytes/SHA6074c1ed00c6533d99e658dc0443ccefc25b7d3f31c6423dcb45e4e1a6c7d5ce. It was published at38calls; TWO subsequent final accounting/readback calls make actual40/40. Supplement logs/admission-accounting.jsonl SHA66dc617fdb1f917b5c357934146becb76bd3cdb883f1d145841e939591cbb4b3. Do not relabel the immutable38call publication as final accounting or reopen original06:18:56Z–07:03:56Z allowance.
+
+Next admissible planning action: inspect exact frozen bc06/controller/fake filesystem and actual failure evidence; route a source-bound technical diagnosis/measurement proposal to Brain. No blind retry, source correction, oracle weakening, timeout increase or completion claim follows from27passes. Brain remains sole execution coordinator; design/functionality authority remains the owner.

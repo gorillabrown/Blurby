@@ -1,0 +1,34 @@
+{
+  "id": "20261103T224751Z-external-set-status-EINK-NARRATE-VIEWPORT-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-NARRATE-VIEWPORT-1",
+  "created": "2026-11-03T22:47:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "NARRATE-SELECTION-START-1; EINK-CONTROLS-1; EINK-VIEW-REFRESH-1; EINK-FLOW-VIEWPORT-1"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:EINK-NARRATE-VIEWPORT-1:[('prerequisites', 'NARRATE-SELECTION-START-1; EINK-CONTROLS-1; EINK-VIEW-REFRESH-1; EINK-FLOW-VIEWPORT-1')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-NARRATE-VIEWPORT-1",
+      "idempotencyKey": "set-status:EINK-NARRATE-VIEWPORT-1:[('prerequisites', 'NARRATE-SELECTION-START-1; EINK-CONTROLS-1; EINK-VIEW-REFRESH-1; EINK-FLOW-VIEWPORT-1')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T224751Z-external-set-status-EINK-NARRATE-VIEWPORT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T22:48:46Z",
+  "outcome": "succeeded"
+}

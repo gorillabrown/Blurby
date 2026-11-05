@@ -1,0 +1,34 @@
+{
+  "id": "20261103T165207Z-external-store-spec-link-FOLDER-NOTICE-2",
+  "operation": "external-store-spec-link",
+  "item_id": "FOLDER-NOTICE-2",
+  "created": "2026-11-03T16:52:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/.Archive/ROADMAP_snapshot_2026-11-03.md#folder-notice-2"
+    },
+    "expectedRevision": "277d5fc50832cde537e91ef0612a56cd099d080ec0174662bad362d0eac1ee75",
+    "idempotencyKey": "store-spec-link:FOLDER-NOTICE-2:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-11-03.md#folder-notice-2')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "FOLDER-NOTICE-2",
+      "idempotencyKey": "store-spec-link:FOLDER-NOTICE-2:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-11-03.md#folder-notice-2')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T165207Z-external-store-spec-link-FOLDER-NOTICE-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T16:52:38Z",
+  "outcome": "succeeded"
+}

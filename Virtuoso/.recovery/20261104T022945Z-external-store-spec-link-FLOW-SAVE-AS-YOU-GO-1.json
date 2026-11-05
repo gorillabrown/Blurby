@@ -1,0 +1,35 @@
+{
+  "id": "20261104T022945Z-external-store-spec-link-FLOW-SAVE-AS-YOU-GO-1",
+  "operation": "external-store-spec-link",
+  "item_id": "FLOW-SAVE-AS-YOU-GO-1",
+  "created": "2026-11-04T02:29:45Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/specs/2026-11-03/FLOW-SAVE-AS-YOU-GO-1.md",
+      "written_status": "Full Spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "store-spec-link:FLOW-SAVE-AS-YOU-GO-1:[('spec_link', 'docs/planning/specs/2026-11-03/FLOW-SAVE-AS-YOU-GO-1.md'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "FLOW-SAVE-AS-YOU-GO-1",
+      "idempotencyKey": "store-spec-link:FLOW-SAVE-AS-YOU-GO-1:[('spec_link', 'docs/planning/specs/2026-11-03/FLOW-SAVE-AS-YOU-GO-1.md'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T022945Z-external-store-spec-link-FLOW-SAVE-AS-YOU-GO-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T02:30:21Z",
+  "outcome": "succeeded"
+}

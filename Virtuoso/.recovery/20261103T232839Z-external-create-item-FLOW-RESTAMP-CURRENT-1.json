@@ -1,0 +1,49 @@
+{
+  "id": "20261103T232839Z-external-create-item-FLOW-RESTAMP-CURRENT-1",
+  "operation": "external-create-item",
+  "item_id": "FLOW-RESTAMP-CURRENT-1",
+  "created": "2026-11-03T23:28:39Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "FLOW-RESTAMP-CURRENT-1",
+      "title": "Flow's word renumbering never runs over a section that is still being numbered",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "spec_link": "docs/planning/specs/2026-11-03/FLOW-RESTAMP-CURRENT-1.md",
+      "branch": "eb/flow-restamp-current-1",
+      "description": "Flow's re-stamp effect, which renumbers a section's word spans when the book's word list arrives, does not wait for a wrap already in progress, does not register its own wrap, and checks for cancellation only after the loop. Page's re-stamp has all three guards. Reproduce first with a deterministic test, then add the same three guards inside Flow's own FoliateView, or close as not reachable.",
+      "notes": "origin: Blurby.Brain1 ruling TQ-B3 on BLOCK-TEXT-ORDER-1, 2026-11-03 (one item per mode runtime); Findings F-013. Not a release gate; no shared core.",
+      "sequence": 111,
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T23:25:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-RESTAMP-CURRENT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FLOW-RESTAMP-CURRENT-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-RESTAMP-CURRENT-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T232839Z-external-create-item-FLOW-RESTAMP-CURRENT-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-81a5-996d-c6dea0985156",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T23:29:09Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,1264 @@
+{
+  "schemaVersion": "blurby.instruction-acquisition-A.capacity.planning.v1",
+  "status": "COMPLETE_INERT_SOURCE_AUTHORED_NOT_READY;ENCODED_COMMAND_REJECTED;FINAL_AVAILABLE_TRANSPORT_AND_STDOUT_ERROR_CUSTODY_PENDING;NO_FIT_OR_ADMISSION",
+  "sourceCommit": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+  "quietActor": "01a19d76-0837-7a43-a18d-8a40494879b8",
+  "recipe": {
+    "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-acquisition-A.2026-11-03.md",
+    "bytes": 38506,
+    "sha256": "836fe9522ee5ba20d3310fee41fda1bc63c269e3a643693c96e45fe37e45f184",
+    "frames": [
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10002,
+        "sha256": "2876260e455647e41e603f6c173cc5db31f43a6304b48d57b7aa803dd69e8096",
+        "offset": 0,
+        "end": 9495
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10012,
+        "sha256": "c1f729e2356edf3f3fd50f22754d4780495378e3aee34b04f01f56544faae548",
+        "offset": 9495,
+        "end": 19013
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10000,
+        "sha256": "5f25c9cd1117df74e29fdb242caa8fb38af09f5746f79dd1559b394dfcf7a668",
+        "offset": 19013,
+        "end": 28418
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10000,
+        "sha256": "11427ff952f2f950411373071ffda565f42143b610137ac118432cb1cebb9609",
+        "offset": 28418,
+        "end": 37774
+      },
+      {
+        "charactersIncludingCRLF": 1207,
+        "utf8Bytes": 1207,
+        "sha256": "f49d737c4669ec0f6e53de27eb0cb9375f27f9ab5aced64f4124f45d8d370e48",
+        "offset": 37774,
+        "end": 38506
+      }
+    ],
+    "fullByteReconstructionVerified": true
+  },
+  "measurementDomain": "ACTUAL_LOCAL_JSON_DATA_SERIALIZATION_ONLY_NOT_QUIET_EXECUTION",
+  "serializer": {
+    "pythonPath": "C:/Python314/python.exe",
+    "bytes": 106328,
+    "sha256": "cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b",
+    "json": "json.dumps(value,ensure_ascii=False,separators=(comma,colon))",
+    "lineEnding": "CRLF included in10000characters",
+    "unicodeCharacterMetric": "Python Unicode-codepoint length of entire emitted compact JSON plus CRLF; actual quiet wrapper must be qualified and remeasured",
+    "maxCharacters": 10000,
+    "binarySearch": "longest Unicode-codepoint prefix fitting complete ordered envelope, adjacent source rows permitted, all offsets UTF8 bytes",
+    "outerKeys": [
+      "schemaVersion",
+      "frame",
+      "parts"
+    ],
+    "partKeys": [
+      "rowId",
+      "sourceFullSHA256",
+      "selectionSHA256",
+      "offset",
+      "end",
+      "pieceSHA256",
+      "text"
+    ]
+  },
+  "carriedTen": [
+    {
+      "rowId": "AGENTS.md",
+      "rawBytes": 30850,
+      "rawSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "semanticDomain": [
+        0,
+        30850
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+      "rawBytes": 1822,
+      "rawSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+      "semanticDomain": [
+        0,
+        1822
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+      "rawBytes": 1029,
+      "rawSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+      "semanticDomain": [
+        0,
+        1029
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+      "rawBytes": 997,
+      "rawSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+      "semanticDomain": [
+        0,
+        997
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Plato.md",
+      "rawBytes": 629,
+      "rawSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+      "semanticDomain": [
+        0,
+        629
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md"
+    },
+    {
+      "rowId": "skills/virtuoso/SKILL.md",
+      "rawBytes": 93324,
+      "rawSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+      "semanticDomain": [
+        0,
+        93324
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md"
+    },
+    {
+      "rowId": "skills/virtuoso/references/zeus.md",
+      "rawBytes": 30766,
+      "rawSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+      "semanticDomain": [
+        0,
+        30766
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md"
+    },
+    {
+      "rowId": "agents/MarcusAurelius.md",
+      "rawBytes": 13714,
+      "rawSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+      "semanticDomain": [
+        0,
+        13714
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md"
+    },
+    {
+      "rowId": "agents/Plato.md",
+      "rawBytes": 13843,
+      "rawSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+      "semanticDomain": [
+        0,
+        13843
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md"
+    },
+    {
+      "rowId": "agents/Hippocrates.md",
+      "rawBytes": 11318,
+      "rawSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+      "semanticDomain": [
+        0,
+        11318
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md"
+    }
+  ],
+  "fivePayloads": [
+    {
+      "rowId": "CLAUDE.md",
+      "rawBytes": 30743,
+      "rawSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "selectedBytes": 30743,
+      "selectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30743
+        }
+      ]
+    },
+    {
+      "rowId": "ROADMAP.md",
+      "rawBytes": 356715,
+      "rawSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+      "selectedBytes": 67713,
+      "selectedSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+      "ranges": [
+        {
+          "sourceByteOffset": 0,
+          "endLine": 218,
+          "bytes": 57232,
+          "startLine": 1
+        },
+        {
+          "sourceByteOffset": 282888,
+          "endLine": 1625,
+          "bytes": 3281,
+          "startLine": 1608
+        },
+        {
+          "sourceByteOffset": 323704,
+          "endLine": 1859,
+          "bytes": 7200,
+          "startLine": 1835
+        }
+      ]
+    },
+    {
+      "rowId": "docs/governance/LESSONS_LEARNED.md",
+      "rawBytes": 336116,
+      "rawSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+      "selectedBytes": 46818,
+      "selectedSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+      "ranges": [
+        {
+          "sourceByteOffset": 149541,
+          "endLine": 1739,
+          "bytes": 568,
+          "lessonId": "LL-002",
+          "startLine": 1731
+        },
+        {
+          "sourceByteOffset": 150109,
+          "endLine": 1748,
+          "bytes": 908,
+          "lessonId": "LL-003",
+          "startLine": 1740
+        },
+        {
+          "sourceByteOffset": 151017,
+          "endLine": 1757,
+          "bytes": 634,
+          "lessonId": "LL-004",
+          "startLine": 1749
+        },
+        {
+          "sourceByteOffset": 152301,
+          "endLine": 1775,
+          "bytes": 693,
+          "lessonId": "LL-006",
+          "startLine": 1767
+        },
+        {
+          "sourceByteOffset": 176643,
+          "endLine": 2045,
+          "bytes": 962,
+          "lessonId": "LL-063",
+          "startLine": 2037
+        },
+        {
+          "sourceByteOffset": 178418,
+          "endLine": 2063,
+          "bytes": 855,
+          "lessonId": "LL-066",
+          "startLine": 2055
+        },
+        {
+          "sourceByteOffset": 180160,
+          "endLine": 2081,
+          "bytes": 1153,
+          "lessonId": "LL-068",
+          "startLine": 2073
+        },
+        {
+          "sourceByteOffset": 203460,
+          "endLine": 2279,
+          "bytes": 982,
+          "lessonId": "LL-090",
+          "startLine": 2271
+        },
+        {
+          "sourceByteOffset": 205423,
+          "endLine": 2297,
+          "bytes": 998,
+          "lessonId": "LL-128",
+          "startLine": 2289
+        },
+        {
+          "sourceByteOffset": 211309,
+          "endLine": 2351,
+          "bytes": 881,
+          "lessonId": "LL-097",
+          "startLine": 2343
+        },
+        {
+          "sourceByteOffset": 212190,
+          "endLine": 2360,
+          "bytes": 935,
+          "lessonId": "LL-098",
+          "startLine": 2352
+        },
+        {
+          "sourceByteOffset": 247545,
+          "endLine": 2669,
+          "bytes": 782,
+          "lessonId": "LL-134",
+          "startLine": 2662
+        },
+        {
+          "sourceByteOffset": 250432,
+          "endLine": 2699,
+          "bytes": 869,
+          "lessonId": "LL-137",
+          "startLine": 2692
+        },
+        {
+          "sourceByteOffset": 257627,
+          "endLine": 2763,
+          "bytes": 3933,
+          "lessonId": "LL-142",
+          "startLine": 2755
+        },
+        {
+          "sourceByteOffset": 261560,
+          "endLine": 2772,
+          "bytes": 3071,
+          "lessonId": "LL-143",
+          "startLine": 2764
+        },
+        {
+          "sourceByteOffset": 264631,
+          "endLine": 2780,
+          "bytes": 2618,
+          "lessonId": "LL-144",
+          "startLine": 2773
+        },
+        {
+          "sourceByteOffset": 267249,
+          "endLine": 2796,
+          "bytes": 1882,
+          "lessonId": "LL-145",
+          "startLine": 2781
+        },
+        {
+          "sourceByteOffset": 274200,
+          "endLine": 2827,
+          "bytes": 499,
+          "lessonId": "LL-143",
+          "startLine": 2825
+        },
+        {
+          "sourceByteOffset": 282453,
+          "endLine": 2871,
+          "bytes": 547,
+          "lessonId": "LL-143",
+          "startLine": 2869
+        },
+        {
+          "sourceByteOffset": 283000,
+          "endLine": 2874,
+          "bytes": 243,
+          "lessonId": "LL-144",
+          "startLine": 2872
+        },
+        {
+          "sourceByteOffset": 284023,
+          "endLine": 2887,
+          "bytes": 319,
+          "lessonId": "LL-068",
+          "startLine": 2885
+        },
+        {
+          "sourceByteOffset": 284536,
+          "endLine": 2896,
+          "bytes": 97,
+          "lessonId": "LL-143",
+          "startLine": 2894
+        },
+        {
+          "sourceByteOffset": 286700,
+          "endLine": 2913,
+          "bytes": 229,
+          "lessonId": "LL-137",
+          "startLine": 2911
+        },
+        {
+          "sourceByteOffset": 294284,
+          "endLine": 2974,
+          "bytes": 502,
+          "lessonId": "LL-143",
+          "startLine": 2972
+        },
+        {
+          "sourceByteOffset": 305696,
+          "endLine": 3049,
+          "bytes": 1838,
+          "lessonId": "LL-165",
+          "startLine": 3042
+        },
+        {
+          "sourceByteOffset": 309456,
+          "endLine": 3071,
+          "bytes": 1623,
+          "lessonId": "LL-167",
+          "startLine": 3064
+        },
+        {
+          "sourceByteOffset": 312843,
+          "endLine": 3098,
+          "bytes": 1274,
+          "lessonId": "LL-169",
+          "startLine": 3091
+        },
+        {
+          "sourceByteOffset": 314117,
+          "endLine": 3102,
+          "bytes": 667,
+          "lessonId": "LL-165",
+          "startLine": 3099
+        },
+        {
+          "sourceByteOffset": 318570,
+          "endLine": 3129,
+          "bytes": 1522,
+          "lessonId": "LL-172",
+          "startLine": 3122
+        },
+        {
+          "sourceByteOffset": 320092,
+          "endLine": 3132,
+          "bytes": 425,
+          "lessonId": "LL-143",
+          "startLine": 3130
+        },
+        {
+          "sourceByteOffset": 320517,
+          "endLine": 3140,
+          "bytes": 1324,
+          "lessonId": "LL-173",
+          "startLine": 3133
+        },
+        {
+          "sourceByteOffset": 321841,
+          "endLine": 3148,
+          "bytes": 1189,
+          "lessonId": "LL-174",
+          "startLine": 3141
+        },
+        {
+          "sourceByteOffset": 323030,
+          "endLine": 3151,
+          "bytes": 380,
+          "lessonId": "LL-143",
+          "startLine": 3149
+        },
+        {
+          "sourceByteOffset": 324700,
+          "endLine": 3165,
+          "bytes": 2080,
+          "lessonId": "LL-176",
+          "startLine": 3159
+        },
+        {
+          "sourceByteOffset": 326780,
+          "endLine": 3172,
+          "bytes": 2055,
+          "lessonId": "LL-177",
+          "startLine": 3166
+        },
+        {
+          "sourceByteOffset": 328835,
+          "endLine": 3179,
+          "bytes": 2497,
+          "lessonId": "LL-178",
+          "startLine": 3173
+        },
+        {
+          "sourceByteOffset": 331332,
+          "endLine": 3186,
+          "bytes": 2139,
+          "lessonId": "LL-179",
+          "startLine": 3180
+        },
+        {
+          "sourceByteOffset": 333471,
+          "endLine": 3192,
+          "bytes": 2645,
+          "lessonId": "LL-180",
+          "startLine": 3187
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/workspace-layout.json",
+      "rawBytes": 19955,
+      "rawSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "selectedBytes": 19955,
+      "selectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 19955
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/work-register.snapshot.json",
+      "rawBytes": 449596,
+      "rawSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "selectedBytes": 46344,
+      "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+      "ranges": [
+        {
+          "jsonPointers": [
+            "/snapshotVersion",
+            "/takenAt",
+            "/provider",
+            "/source",
+            "/fields",
+            "/headers"
+          ],
+          "selectedStableIds": [
+            "BAND-ALIGN-1",
+            "BAND-ALIGN-2",
+            "BLURBY-BUSINESS-1",
+            "FLOW-KEYS-FIX-1",
+            "FOCUS-KEYS-FIX-1",
+            "FOCUS-WORD-ONLY-1",
+            "FOLIATE-DISPLAY-LIFETIME-1",
+            "FOLIATE-OBSERVER-LEAK-1",
+            "LIBRARY-COMPLETION-VISIBILITY-1",
+            "NARRATE-CPU-PROFILE-1",
+            "NARRATE-HARNESS-COLDCLICK-1",
+            "NARRATE-REBUILD-1",
+            "NARRATE-REMOVE-1"
+          ],
+          "representation": "complete selected JSON-native values; source raw pin separate"
+        }
+      ]
+    }
+  ],
+  "reviewerDelivery": [
+    {
+      "role": "MarcusAurelius",
+      "completeRoleAndOverlayBytes": 14711,
+      "newActorNoSemanticCarry": true,
+      "frames": [
+        {
+          "charactersIncludingCRLF": 10000,
+          "utf8Bytes": 10058,
+          "sha256": "ccc637db30ed56a0e8f37aa0a6ca383ea5eba619a2c8bdbaf2dd3031e0633462",
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 0,
+              "end": 9229,
+              "pieceSHA256": "1acdd088799238dba3f469ff876c86160a1193d0f50b39cb612b286d7a626d8f"
+            }
+          ]
+        },
+        {
+          "charactersIncludingCRLF": 6421,
+          "utf8Bytes": 6441,
+          "sha256": "28b407f683a15b0662fa1b30de54ad93237200082c635da6416e59f63fd0b772",
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 9229,
+              "end": 13714,
+              "pieceSHA256": "d4f31ffd5210ee555dc86eb33fc17cddfc88abb62ae6ffcbba97e0c624e9d786"
+            },
+            {
+              "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+              "sourceFullSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+              "selectionSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+              "offset": 0,
+              "end": 997,
+              "pieceSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "Plato",
+      "completeRoleAndOverlayBytes": 14472,
+      "newActorNoSemanticCarry": true,
+      "frames": [
+        {
+          "charactersIncludingCRLF": 10000,
+          "utf8Bytes": 10024,
+          "sha256": "1e7686819d91c40ee93b01a4c08d208d5b4f1e6cfe255b5b5775463b4fcef1b9",
+          "parts": [
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 0,
+              "end": 9118,
+              "pieceSHA256": "afc48d0b8926473f6c1b876cc5871e804d93197f8f2dc584f0e2bebceccd2e3f"
+            }
+          ]
+        },
+        {
+          "charactersIncludingCRLF": 6274,
+          "utf8Bytes": 6308,
+          "sha256": "43edcfa0d713bd6aad7cb894b00efec0e760cf4b3e246f43f9c19612f64001a5",
+          "parts": [
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 9118,
+              "end": 13843,
+              "pieceSHA256": "c51c2ea45f8dae1f29c7219bfd2e3c0cf278fadfbbdb5ff4f12663adeed6d2fb"
+            },
+            {
+              "rowId": "Virtuoso/overlays/agents/Plato.md",
+              "sourceFullSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+              "selectionSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+              "offset": 0,
+              "end": 629,
+              "pieceSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stdoutSizing": {
+    "domain": "PROSPECTIVE_BOUNDED_SCHEMA_SPECIMEN_NOT_ACTUAL_RECEIPT_OR_PASS",
+    "payloadBytes": 15059,
+    "payloadSHA256": "9f2c49e3a4b73d68508929186e7cf63abdedca9f60277b2634421a479f01b97d",
+    "specimen": {
+      "schemaVersion": "blurby.instruction-acquisition-A.receipt.v1",
+      "phase": "INSTRUCTION-ACQUISITION-A",
+      "actor": {
+        "chatId": "01a19d76-0837-7a43-a18d-8a40494879b8",
+        "turnId": "ffffffffffffffffffffffffffffffffffff"
+      },
+      "clock": {
+        "startedUtc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "workDeadlineUtc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "hardDeadlineUtc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "finishedUtc": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "accounting": {
+        "toolCalls": 999999999,
+        "nativeCalls": 999999999,
+        "wrappers": 999999999,
+        "delegates": 999999999,
+        "waits": 999999999,
+        "polls": 999999999,
+        "commands": [
+          {
+            "id": "00000000",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000001",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000002",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000003",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000004",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000005",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000006",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000007",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000008",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000009",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000010",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000011",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          },
+          {
+            "id": "00000012",
+            "exitCode": -999999999,
+            "stdoutBytes": 999999999,
+            "stdoutSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "stderrBytes": 999999999,
+            "stderrSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            "started": false,
+            "closed": false
+          }
+        ]
+      },
+      "source": {
+        "commit": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repository": "C:/Users/estra/Projects/Blurby",
+        "commonGit": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "origin": "https://github.com/gorillabrown/Blurby.git",
+        "nonShallow": false,
+        "gitSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "pythonSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "namespace": {
+        "root": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+        "ancestorsOrdinary": false,
+        "rootInitiallyAbsent": false,
+        "createdPaths": [
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/docs",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/docs/governance",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/Virtuoso",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/CLAUDE.md",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/ROADMAP.md",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/docs/governance/LESSONS_LEARNED.md",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/Virtuoso/workspace-layout.json",
+          "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/Virtuoso/work-register.snapshot.json"
+        ],
+        "receiptAbsent": false
+      },
+      "payloads": [
+        {
+          "path": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/CLAUDE.md",
+          "expectedBytes": 30743,
+          "expectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "objectReadCount": 999999999,
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "strictUtf8": false,
+          "exclusiveCreated": false,
+          "ordinaryRereadBytes": 999999999,
+          "ordinaryRereadSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "finalBytes": 999999999,
+          "finalSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/ROADMAP.md",
+          "expectedBytes": 356715,
+          "expectedSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "objectReadCount": 999999999,
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "strictUtf8": false,
+          "exclusiveCreated": false,
+          "ordinaryRereadBytes": 999999999,
+          "ordinaryRereadSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "finalBytes": 999999999,
+          "finalSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/docs/governance/LESSONS_LEARNED.md",
+          "expectedBytes": 336116,
+          "expectedSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "objectReadCount": 999999999,
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "strictUtf8": false,
+          "exclusiveCreated": false,
+          "ordinaryRereadBytes": 999999999,
+          "ordinaryRereadSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "finalBytes": 999999999,
+          "finalSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/Virtuoso/workspace-layout.json",
+          "expectedBytes": 19955,
+          "expectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "objectReadCount": 999999999,
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "strictUtf8": false,
+          "exclusiveCreated": false,
+          "ordinaryRereadBytes": 999999999,
+          "ordinaryRereadSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "finalBytes": 999999999,
+          "finalSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/Virtuoso/work-register.snapshot.json",
+          "expectedBytes": 449596,
+          "expectedSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "objectReadCount": 999999999,
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "strictUtf8": false,
+          "exclusiveCreated": false,
+          "ordinaryRereadBytes": 999999999,
+          "ordinaryRereadSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "finalBytes": 999999999,
+          "finalSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      ],
+      "carriedInputs": [
+        {
+          "path": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md",
+          "expectedBytes": 30850,
+          "expectedSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md",
+          "expectedBytes": 1822,
+          "expectedSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md",
+          "expectedBytes": 1029,
+          "expectedSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md",
+          "expectedBytes": 997,
+          "expectedSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md",
+          "expectedBytes": 629,
+          "expectedSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md",
+          "expectedBytes": 93324,
+          "expectedSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md",
+          "expectedBytes": 30766,
+          "expectedSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md",
+          "expectedBytes": 13714,
+          "expectedSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md",
+          "expectedBytes": 13843,
+          "expectedSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        },
+        {
+          "path": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md",
+          "expectedBytes": 11318,
+          "expectedSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+          "actualBytes": 999999999,
+          "actualSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "ordinary": false,
+          "accessible": false,
+          "sameActorReceipt": false,
+          "consistent": false
+        }
+      ],
+      "preservation": {
+        "refsBeforeSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "refsAfterSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "indexBeforeSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "indexAfterSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "configBeforeSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "configAfterSHA256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "headBefore": "ffffffffffffffffffffffffffffffffffffffff",
+        "headAfter": "ffffffffffffffffffffffffffffffffffffffff",
+        "sourceMutationObserved": false,
+        "receiptAbsent": false
+      },
+      "failures": [
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      ],
+      "limitations": [
+        "fresh-five semantics not performed",
+        "no role activation",
+        "direct-child closure only",
+        "no global preservation proof",
+        "B not admitted"
+      ],
+      "disposition": "ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING"
+    },
+    "frames": [
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10000,
+        "sha256": "8b04f96b0da95a4431f848f6b0ea0c32b00b4fac9ed65e09deb6d422cfe84ee4",
+        "offset": 0,
+        "end": 9118
+      },
+      {
+        "charactersIncludingCRLF": 6561,
+        "utf8Bytes": 6561,
+        "sha256": "5e2fe7e14518cc8aa6be5c655bb2f54804c3e9d1b95c4dc7a1c18476d18b4962",
+        "offset": 9118,
+        "end": 15059
+      }
+    ],
+    "reconstructionVerified": true,
+    "allEnvelopeCRLFIncluded": true,
+    "bounds": "13commands/10carried/5payloads/9createdpaths/2failures; nonliteral serialized strings<=512/timestamps32/commandIDs8; integerdigits<=9 except signedexit; actualoverflow=>HOLD nevertruncate",
+    "enforcedSuccessBound": {
+      "maxPayloadUtf8Bytes": 20000,
+      "maxCompleteFrames": 3,
+      "maxSerializedCharactersIncludingCRLFTotal": 30000,
+      "maxSerializedCharactersPerFrame": 10000,
+      "enforcement": "completeactualserialization+framing BEFORE emission; overflowHOLD notsuccessfulA; nofieldomission/truncation",
+      "specimenNotUniversalTwoFrameProof": true
+    }
+  },
+  "accounting": {
+    "actualToolWrapperBudget": {
+      "firstClockEntryTenChecks": 1,
+      "recipeFullDelivery": 5,
+      "newReviewerRoleOverlayDelivery": 4,
+      "inlineCodeFreezeDelivery": 1,
+      "preinvokeReviewDelegatesWaits": 4,
+      "fixedAcquisitionInvocation": 1,
+      "independentOrdinaryReread": 1,
+      "finalReviewDelegatesWaits": 4,
+      "stdoutReceiptFrames": 3,
+      "pollReserve": 1,
+      "failureClosureReserve": 2
+    },
+    "wrapperTotal": 27,
+    "missingBranchNativeGit": 13,
+    "existingBranchNativeGit": 11,
+    "wrapperPlusGitMissing": 40,
+    "wrapperPlusGitExisting": 38,
+    "pythonInterpreterStartsExplicit": 16,
+    "ifEachInterpreterAlsoAdditiveMissing": 56,
+    "ifEachInterpreterAlsoAdditiveExisting": 54,
+    "ceiling": 40,
+    "allCountsProspectiveNotObserved": true,
+    "noHiddenNativeBatch": "ONEephemeralfixedprogramwrapperPLUS13literalGitinvocationspriced separately",
+    "actualExtraCalls": "Stopbeforelaunch ifrequiredcount>40; reservesnotborrowable scope",
+    "proposedMinutes": 45,
+    "admittedMinutes": null,
+    "admission": false,
+    "completeFinalFitClaim": false,
+    "missingActualProgramAndTransportMustBeAdded": false,
+    "actualTransportStillUnqualified": true
+  },
+  "authorityBindings": [
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.remaining-route-selection.2026-11-03.md",
+      "bytes": 3011,
+      "sha256": "349b840fc3c35204e353041b64e1e2891dd5528717feb743d68c93d556f4618b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.same-CPU-seven-receipt.2026-11-03.md",
+      "bytes": 5016,
+      "sha256": "afe8e22409f95360e55b89bf4bd6839994c682b67e9d4ccdb1ad3a854f070a7b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.five-document-cache.2026-11-03.md",
+      "bytes": 3445,
+      "sha256": "52a53b845683b72268e584b4cc9ab2a68a755e2ef3f152196ea953274573d530",
+      "fullSemanticReadByPlanner": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.two-deliverable-split.2026-11-03.md",
+      "sha256": "068b327de0759b52202e9476d0045fb81fb4df753aefa391706b349e4ac4293a",
+      "fullRead": true
+    }
+  ],
+  "writeFence": {
+    "root": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+    "AOnlyFiles": [
+      "CLAUDE.md",
+      "ROADMAP.md",
+      "docs/governance/LESSONS_LEARNED.md",
+      "Virtuoso/workspace-layout.json",
+      "Virtuoso/work-register.snapshot.json"
+    ],
+    "receiptJson": "MUST_REMAIN_ABSENT",
+    "additionalFiles": [],
+    "partialOutputs": "PRESERVE_NO_OVERWRITE_RETRY_OR_CLEANUP"
+  },
+  "AToB": {
+    "schemaVersion": "blurby.instruction-acquisition-A.receipt.v1",
+    "topLevelKeys": [
+      "schemaVersion",
+      "phase",
+      "actor",
+      "clock",
+      "accounting",
+      "source",
+      "namespace",
+      "payloads",
+      "carriedInputs",
+      "preservation",
+      "failures",
+      "limitations",
+      "disposition"
+    ],
+    "requiredRootActions": [
+      "fullyconsumeactualcompletequietstdout",
+      "independentlyverifyrawpayloadandorderedframecoverage",
+      "preserveexactRootsidecapsulewithtrueprovenance/hash",
+      "explicitlyACKscopedAacceptance"
+    ],
+    "BAdmission": "SEPARATE_NOAUTOCONTINUATION",
+    "maximumDisposition": "ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING"
+  },
+  "technicalPending": [
+    "independentFULL static/effectsreview of actualprogram and actualcommand specimens",
+    "Brain selectactuallyavailable bounded source transport; directargvfitting doesnotprove toolavailability; encodedPScandidateREJECTED",
+    "Brain selectboundedmultiresponse stdoutdelivery for2â€“3frames withoutseventhquietfile/persistentreader/newAPIguess",
+    "Brain reconcile rawchildstderr/errorcustody with fixedreceiptkeyset/20kpayload and10000totalresponse ceiling",
+    "actualquietconfigapproval/input/tool/namespacecustodyandconservativepreconsumptionanchor",
+    "whole final route counts mustfit40 after actual transport choices; no extra phases or clocks admitted"
+  ],
+  "historical51And49": "UNCHANGED_NOT_FEASIBLE_NOT_REWRITTEN",
+  "noQuietActions": true,
+  "captureImplementationSelection": "ONE finite ephemeral inline Python acquisition program PROPOSED; exactcode/config/countpolicy Brain technical disposition pending; no retainedhelper/persistentreader/sourceoperation",
+  "transportMeasurement": {
+    "domain": "ACTUAL_LOCAL_COMPLETE_PROPOSED_COMMAND_SPECIMENS_NOT_QUIET_TOOL_QUALIFICATION",
+    "bindingSpecimen": {
+      "phaseId": "INSTRUCTION-ACQUISITION-A",
+      "turnId": "00000000-0000-0000-0000-000000000000",
+      "phaseStartUtc": "2026-11-03T00:00:00.000000Z",
+      "workDeadlineUtc": "2026-11-03T00:44:00.000000Z",
+      "hardDeadlineUtc": "2026-11-03T00:45:00.000000Z",
+      "approvedConfigSHA256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "callsBefore": 13,
+      "reservedAfterCalls": 11,
+      "stdoutTransportQualified": false
+    },
+    "bindingSpecimenIsActualAdmission": false,
+    "directWindowsArgv": [
+      "C:/Python314/python.exe",
+      "-I",
+      "-S",
+      "-B",
+      "-c",
+      "import time\nRECORDED_START = time.time()\nRECORDED_MONO = time.monotonic()\nimport sys, os, json, hashlib, pathlib, stat, subprocess, threading\n\nGIT = 'C:/Program Files/Git/cmd/git.exe'\nPYTHON = 'C:/Python314/python.exe'\nREPO = pathlib.Path('C:/Users/estra/Projects/Blurby')\nROOT = pathlib.Path('C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103')\nCOMMIT = '3afcf8789be0d7fa3bdf27235597606da022c93c'\nORIGIN = 'https://github.com/gorillabrown/Blurby.git'\nGIT_HASH = '37c5725818d602e951ba2563b870d62763322956b73373da4c33a0b566a80bc9'\nPY_HASH = 'cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b'\nPAYLOADS = [\n ('CLAUDE.md',30743,'87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65'),\n ('ROADMAP.md',356715,'1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590'),\n ('docs/governance/LESSONS_LEARNED.md',336116,'8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28'),\n ('Virtuoso/workspace-layout.json',19955,'f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc'),\n ('Virtuoso/work-register.snapshot.json',449596,'fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b')]\nA = 'C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/'\nP = 'C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/'\nCARRIED = [\n (A+'AGENTS.md',30850,'aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654'),\n (A+'overlay.virtuoso.SKILL.md',1822,'3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8'),\n (A+'overlay.agents.Hippocrates.md',1029,'6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132'),\n (A+'overlay.agents.Plato.md',629,'36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b'),\n (A+'overlay.agents.MarcusAurelius.md',997,'c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b'),\n (P+'skills/virtuoso/SKILL.md',93324,'c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc'),\n (P+'skills/virtuoso/references/zeus.md',30766,'6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc'),\n (P+'agents/MarcusAurelius.md',13714,'8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d'),\n (P+'agents/Plato.md',13843,'a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77'),\n (P+'agents/Hippocrates.md',11318,'c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3')]\nINPUT_KEYS = {'phaseId','turnId','phaseStartUtc','workDeadlineUtc','hardDeadlineUtc',\n 'approvedConfigSHA256','callsBefore','reservedAfterCalls','stdoutTransportQualified'}\ncaptured_stderr = []\ncommands, created, carried_rows, payload_rows = [], [], [], []\nbefore, after = {}, {}\nparams = None\nwork_end = hard_end = 0.0\nnative_count = 0\nrefs_before = refs_after = b''\ncommon = None\nfailure = None\n\nclass Hold(Exception):\n pass\n\ndef require(value, code):\n if not value:\n  raise Hold(code)\n\ndef digest(data):\n return hashlib.sha256(data).hexdigest()\n\ndef ordinary(path, directory=False):\n path = pathlib.Path(path)\n for ancestor in reversed(path.parents):\n  s = ancestor.lstat()\n  require(stat.S_ISDIR(s.st_mode) and not (s.st_file_attributes & 0x400), 'ANCESTOR_NOT_ORDINARY')\n s = path.lstat()\n require(not (s.st_file_attributes & 0x400), 'REPARSE_POINT')\n require(stat.S_ISDIR(s.st_mode) if directory else stat.S_ISREG(s.st_mode), 'WRONG_FILE_KIND')\n return s\n\ndef raw(path, cap):\n s = ordinary(path)\n require(s.st_size <= cap, 'FILE_BOUND')\n with open(path, 'rb') as stream:\n  value = stream.read(cap+1)\n e = ordinary(path)\n require(len(value) <= cap and (s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns) ==\n  (e.st_dev,e.st_ino,e.st_size,e.st_mtime_ns), 'FILE_CHANGED_DURING_READ')\n return value\n\ndef checked_raw(path, size, expected):\n value = raw(path, size)\n require(len(value) == size and digest(value) == expected, 'RAW_PIN_MISMATCH')\n return value\n\ndef moment(value):\n require(type(value) is str and len(value) <= 32, 'CLOCK_SHAPE')\n require(value.endswith('Z') or value.endswith('+00:00'), 'CLOCK_UTC')\n from datetime import datetime\n return datetime.fromisoformat(value.replace('Z','+00:00')).timestamp()\n\ndef utc(value):\n from datetime import datetime, timezone\n return datetime.fromtimestamp(value,timezone.utc).isoformat().replace('+00:00','Z')\n\ndef remaining():\n require(time.monotonic() < work_end, 'WORK_DEADLINE')\n require(params['callsBefore'] + 1 + native_count + params['reservedAfterCalls'] <= 40, 'CALL_BUDGET')\n\ndef child(identifier, args, out_cap=65536, timeout=30):\n global native_count\n remaining()\n require(params['callsBefore'] + 1 + native_count + 1 + params['reservedAfterCalls'] <= 40, 'CALL_BUDGET')\n native_count += 1\n rec = dict(id=identifier,exitCode=None,stdoutBytes=0,stdoutSHA256=digest(b''),\n  stderrBytes=0,stderrSHA256=digest(b''),started=False,closed=False)\n commands.append(rec)\n buffers = [bytearray(),bytearray()]\n errors = []\n eof = [False,False]\n overflow = threading.Event()\n handle = subprocess.Popen([GIT]+args,cwd=str(REPO),stdin=subprocess.DEVNULL,\n  stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=False,creationflags=0x08000000)\n rec['started'] = True\n def drain(index, stream, cap):\n  try:\n   while True:\n    piece = stream.read1(16384)\n    if not piece:\n     eof[index] = True\n     return\n    available = cap-len(buffers[index])\n    buffers[index].extend(piece[:max(0,available)])\n    if len(piece) > available:\n     overflow.set()\n     return\n  except BaseException as error:\n   errors.append(type(error).__name__)\n workers = [threading.Thread(target=drain,args=(0,handle.stdout,out_cap),daemon=True),\n  threading.Thread(target=drain,args=(1,handle.stderr,8192),daemon=True)]\n for worker in workers:\n  worker.start()\n deadline = min(work_end,time.monotonic()+timeout)\n killed = False\n while handle.poll() is None and time.monotonic() < deadline and not overflow.is_set() and not errors:\n  time.sleep(min(0.01,max(0,deadline-time.monotonic())))\n if handle.poll() is None:\n  handle.kill()\n  killed = True\n drain_end = min(hard_end,time.monotonic()+2)\n try:\n  handle.wait(timeout=max(0.001,drain_end-time.monotonic()))\n except subprocess.TimeoutExpired:\n  pass\n for worker in workers:\n  worker.join(timeout=max(0,drain_end-time.monotonic()))\n out, err = bytes(buffers[0]), bytes(buffers[1])\n captured_stderr.append(err)\n rec.update(exitCode=handle.poll(),stdoutBytes=len(out),stdoutSHA256=digest(out),\n  stderrBytes=len(err),stderrSHA256=digest(err),closed=handle.poll() is not None and all(eof))\n require(rec['closed'], 'CHILD_CLOSURE_UNKNOWN')\n require(not killed and not overflow.is_set() and not errors, 'CHILD_TIMEOUT_OR_DRAIN_FAILURE')\n return rec['exitCode'],out,err\n\ndef ok(identifier,args,cap=65536,timeout=30):\n code,out,err = child(identifier,args,cap,timeout)\n require(code == 0, identifier+'_FAILED')\n return out\n\ndef snapshot(paths):\n result = {}\n for path in paths:\n  if path.exists():\n   result[str(path)] = digest(raw(path,524288))\n  else:\n   require(not path.is_symlink(), 'ABSENT_PATH_REPARSE')\n   result[str(path)] = None\n return result\n\ndef encode(value):\n return json.dumps(value,ensure_ascii=False,separators=(',',':'))\n\ndef closed_pairs(pairs):\n value = {}\n for key,item in pairs:\n  require(key not in value, 'DUPLICATE_JSON_KEY')\n  value[key] = item\n return value\n\ndef frames(payload):\n encoded = encode(payload).encode('utf-8')\n require(len(encoded) <= 20000, 'RECEIPT_PAYLOAD_BOUND')\n text = encoded.decode('utf-8')\n total = 1\n while True:\n  result = []\n  at = offset = 0\n  while at < len(text):\n   def make(n):\n    piece = text[at:at+n]\n    data = piece.encode('utf-8')\n    return encode(dict(schemaVersion='blurby.instruction-acquisition-A.stdout-frame.v1',\n     frame=len(result)+1,totalFrames=total,offset=offset,end=offset+len(data),\n     payloadBytes=len(encoded),payloadSHA256=digest(encoded),pieceSHA256=digest(data),text=piece))+'\\r\\n'\n   lo,hi = 0,len(text)-at\n   while lo < hi:\n    mid = (lo+hi+1)//2\n    if len(make(mid)) <= 10000:\n     lo = mid\n    else:\n     hi = mid-1\n   require(lo > 0, 'FRAME_BOUND')\n   result.append(make(lo))\n   offset += len(text[at:at+lo].encode('utf-8'))\n   at += lo\n  if len(result) == total:\n   break\n  total = len(result)\n require(len(result) <= 3 and sum(map(len,result)) <= 30000, 'RECEIPT_FRAME_BOUND')\n return result\n\ntry:\n require(len(sys.argv) == 2, 'ARGUMENT_COUNT')\n params = json.loads(sys.argv[1],object_pairs_hook=closed_pairs)\n require(type(params) is dict and set(params) == INPUT_KEYS, 'INPUT_KEYS')\n require(type(params['callsBefore']) is int and type(params['reservedAfterCalls']) is int and\n  0 <= params['callsBefore'] <= 39 and 0 <= params['reservedAfterCalls'] <= 39, 'CALL_INPUT')\n require(type(params['stdoutTransportQualified']) is bool and params['stdoutTransportQualified'], 'STDOUT_TRANSPORT_UNQUALIFIED')\n require(type(params['phaseId']) is str and len(params['phaseId']) <= 128 and\n  type(params['turnId']) is str and len(params['turnId']) == 36, 'ACTOR_INPUT')\n require(type(params['approvedConfigSHA256']) is str and len(params['approvedConfigSHA256']) == 64 and\n  all(c in '0123456789abcdef' for c in params['approvedConfigSHA256']), 'CONFIG_INPUT')\n start,work,hard = [moment(params[k]) for k in ['phaseStartUtc','workDeadlineUtc','hardDeadlineUtc']]\n require(start <= RECORDED_START <= time.time() < work < hard and hard-start <= 2700 and hard-work >= 60, 'CLOCK_BOUNDS')\n work_end = RECORDED_MONO+(work-RECORDED_START)\n hard_end = RECORDED_MONO+(hard-RECORDED_START)\n checked_raw(GIT,46464,GIT_HASH)\n checked_raw(PYTHON,106328,PY_HASH)\n ordinary(REPO,True)\n ordinary(ROOT.parent,True)\n require(not ROOT.exists() and not ROOT.is_symlink(), 'ROOT_EXISTS')\n for path,size,expected in CARRIED:\n  value = checked_raw(path,size,expected)\n  carried_rows.append(dict(path=path,expectedBytes=size,expectedSHA256=expected,actualBytes=len(value),\n   actualSHA256=digest(value),ordinary=True,accessible=True,sameActorReceipt=True,consistent=True))\n  del value\n lines = ok('g01',['rev-parse','--path-format=absolute','--show-toplevel','--git-common-dir','--is-shallow-repository']).decode('utf-8','strict').splitlines()\n require(len(lines)==3 and pathlib.Path(lines[0])==REPO and lines[2]=='false', 'REPOSITORY_IDENTITY')\n common = pathlib.Path(lines[1])\n require(common == REPO/'.git', 'COMMON_GIT_IDENTITY')\n ordinary(common,True)\n origin = ok('g02',['config','--get-all','remote.origin.url']).decode('utf-8','strict').splitlines()\n require(origin == [ORIGIN], 'ORIGIN_IDENTITY')\n config = ok('g03',['config','--show-origin','--show-scope','--list','-z'])\n require(digest(config)==params['approvedConfigSHA256'], 'UNAPPROVED_CONFIG')\n del config\n tracked = [common/'index',common/'config',common/'HEAD',common/'FETCH_HEAD']+[REPO/p for p,n,h in PAYLOADS]\n before = snapshot(tracked)\n refs_before = ok('g04',['for-each-ref','--format=%(refname) %(objectname)','refs/heads','refs/remotes','refs/tags'])\n code,presence,presence_err = child('g05',['cat-file','-e',COMMIT+'^{commit}'])\n if code != 0:\n  require(code==128 and b'Not a valid object name' in presence_err and not presence, 'PRESENCE_ERROR_NOT_MISSING')\n  ok('g06',['-c','gc.auto=0','-c','maintenance.auto=false','fetch','--no-tags','--no-write-fetch-head',\n   '--no-recurse-submodules','--no-auto-maintenance','--no-write-commit-graph','--no-prune',\n   '--no-prune-tags','--refmap=','--no-progress','origin',COMMIT],65536,180)\n  ok('g07',['cat-file','-e',COMMIT+'^{commit}'])\n ROOT.mkdir()\n created.append(str(ROOT))\n for relative in ['docs','docs/governance','Virtuoso']:\n  path = ROOT/relative\n  ordinary(path.parent,True)\n  path.mkdir()\n  created.append(str(path))\n for i,(relative,size,expected) in enumerate(PAYLOADS,8):\n  remaining()\n  data = ok('g'+str(i).zfill(2),['--no-pager','show',COMMIT+':'+relative],size+1)\n  require(len(data)==size and digest(data)==expected, 'OBJECT_PIN_MISMATCH')\n  data.decode('utf-8','strict')\n  target = ROOT/relative\n  ordinary(target.parent,True)\n  with open(target,'xb') as stream:\n   created.append(str(target))\n   require(stream.write(data)==len(data), 'SHORT_WRITE')\n   stream.flush()\n  actual_length, actual_hash = len(data), digest(data)\n  del data\n  reread = checked_raw(target,size,expected)\n  payload_rows.append(dict(path=str(target),expectedBytes=size,expectedSHA256=expected,objectReadCount=1,\n   actualBytes=actual_length,actualSHA256=actual_hash,strictUtf8=True,exclusiveCreated=True,\n   ordinaryRereadBytes=len(reread),ordinaryRereadSHA256=digest(reread),finalBytes=0,finalSHA256=''))\n  del reread\n refs_after = ok('g13',['for-each-ref','--format=%(refname) %(objectname)','refs/heads','refs/remotes','refs/tags'])\n after = snapshot(tracked)\n require(before==after and refs_before==refs_after, 'PRESERVATION_DIFFERENCE')\n for row,(relative,size,expected) in zip(payload_rows,PAYLOADS):\n  value = checked_raw(ROOT/relative,size,expected)\n  row.update(finalBytes=len(value),finalSHA256=digest(value))\n  del value\n require(not (ROOT/'receipt.json').exists() and not (ROOT/'receipt.json').is_symlink(), 'RECEIPT_EXISTS')\n remaining()\nexcept BaseException as error:\n failure = str(error) if isinstance(error,Hold) else type(error).__name__\n\ndef state_hash(mapping, suffix):\n for path,value in mapping.items():\n  if path.endswith(suffix):\n   return value\n return None\n\nreceipt = dict(schemaVersion='blurby.instruction-acquisition-A.receipt.v1',phase='INSTRUCTION-ACQUISITION-A',\n actor=dict(chatId='01a19d76-0837-7a43-a18d-8a40494879b8',turnId=params.get('turnId','') if params else ''),\n clock=dict(startedUtc=params.get('phaseStartUtc','') if params else '',\n  workDeadlineUtc=params.get('workDeadlineUtc','') if params else '',hardDeadlineUtc=params.get('hardDeadlineUtc','') if params else '',finishedUtc=utc(time.time())),\n accounting=dict(toolCalls=(params.get('callsBefore',0)+1 if params else 1),nativeCalls=native_count,\n  wrappers=1,delegates=0,waits=0,polls=0,commands=commands),\n source=dict(commit=COMMIT,repository=str(REPO),commonGit=str(common) if common else '',origin=ORIGIN,\n  nonShallow=common is not None,gitSHA256=GIT_HASH,pythonSHA256=PY_HASH),\n namespace=dict(root=str(ROOT),ancestorsOrdinary=bool(created),rootInitiallyAbsent=bool(created),\n  createdPaths=created,receiptAbsent=not (ROOT/'receipt.json').exists()),payloads=payload_rows,\n carriedInputs=carried_rows,preservation=dict(refsBeforeSHA256=digest(refs_before),refsAfterSHA256=digest(refs_after),\n  indexBeforeSHA256=state_hash(before,'index'),indexAfterSHA256=state_hash(after,'index'),\n  configBeforeSHA256=state_hash(before,'config'),configAfterSHA256=state_hash(after,'config'),\n  headBefore=state_hash(before,'HEAD'),headAfter=state_hash(after,'HEAD'),\n  sourceMutationObserved=bool(before and after and before!=after),receiptAbsent=not (ROOT/'receipt.json').exists()),\n failures=[failure] if failure else [],limitations=['fresh-five semantics not performed','no role activation',\n  'direct-child closure only','no global preservation proof','B not admitted'],\n disposition='HOLD/PARTIAL' if failure else 'ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING')\ntry:\n output = frames(receipt)\n require(params is not None and params.get('stdoutTransportQualified') is True, 'STDOUT_TRANSPORT_UNQUALIFIED')\n if failure:\n  for error_bytes in captured_stderr:\n   sys.stderr.buffer.write(error_bytes)\n  sys.stderr.buffer.flush()\n for item in output:\n  sys.stdout.buffer.write(item.encode('utf-8'))\n  sys.stdout.buffer.flush()\nexcept BaseException:\n sys.stderr.buffer.write(b'ACQUISITION_A_PUBLICATION_HOLD\\n')\n sys.stderr.buffer.flush()\n raise SystemExit(2)\nraise SystemExit(1 if failure else 0)\n",
+      "{\"phaseId\":\"INSTRUCTION-ACQUISITION-A\",\"turnId\":\"00000000-0000-0000-0000-000000000000\",\"phaseStartUtc\":\"2026-11-03T00:00:00.000000Z\",\"workDeadlineUtc\":\"2026-11-03T00:44:00.000000Z\",\"hardDeadlineUtc\":\"2026-11-03T00:45:00.000000Z\",\"approvedConfigSHA256\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"callsBefore\":13,\"reservedAfterCalls\":11,\"stdoutTransportQualified\":false}"
+    ],
+    "directWindowsCommandLine": "C:/Python314/python.exe -I -S -B -c \"import time\nRECORDED_START = time.time()\nRECORDED_MONO = time.monotonic()\nimport sys, os, json, hashlib, pathlib, stat, subprocess, threading\n\nGIT = 'C:/Program Files/Git/cmd/git.exe'\nPYTHON = 'C:/Python314/python.exe'\nREPO = pathlib.Path('C:/Users/estra/Projects/Blurby')\nROOT = pathlib.Path('C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103')\nCOMMIT = '3afcf8789be0d7fa3bdf27235597606da022c93c'\nORIGIN = 'https://github.com/gorillabrown/Blurby.git'\nGIT_HASH = '37c5725818d602e951ba2563b870d62763322956b73373da4c33a0b566a80bc9'\nPY_HASH = 'cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b'\nPAYLOADS = [\n ('CLAUDE.md',30743,'87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65'),\n ('ROADMAP.md',356715,'1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590'),\n ('docs/governance/LESSONS_LEARNED.md',336116,'8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28'),\n ('Virtuoso/workspace-layout.json',19955,'f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc'),\n ('Virtuoso/work-register.snapshot.json',449596,'fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b')]\nA = 'C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/'\nP = 'C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/'\nCARRIED = [\n (A+'AGENTS.md',30850,'aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654'),\n (A+'overlay.virtuoso.SKILL.md',1822,'3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8'),\n (A+'overlay.agents.Hippocrates.md',1029,'6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132'),\n (A+'overlay.agents.Plato.md',629,'36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b'),\n (A+'overlay.agents.MarcusAurelius.md',997,'c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b'),\n (P+'skills/virtuoso/SKILL.md',93324,'c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc'),\n (P+'skills/virtuoso/references/zeus.md',30766,'6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc'),\n (P+'agents/MarcusAurelius.md',13714,'8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d'),\n (P+'agents/Plato.md',13843,'a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77'),\n (P+'agents/Hippocrates.md',11318,'c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3')]\nINPUT_KEYS = {'phaseId','turnId','phaseStartUtc','workDeadlineUtc','hardDeadlineUtc',\n 'approvedConfigSHA256','callsBefore','reservedAfterCalls','stdoutTransportQualified'}\ncaptured_stderr = []\ncommands, created, carried_rows, payload_rows = [], [], [], []\nbefore, after = {}, {}\nparams = None\nwork_end = hard_end = 0.0\nnative_count = 0\nrefs_before = refs_after = b''\ncommon = None\nfailure = None\n\nclass Hold(Exception):\n pass\n\ndef require(value, code):\n if not value:\n  raise Hold(code)\n\ndef digest(data):\n return hashlib.sha256(data).hexdigest()\n\ndef ordinary(path, directory=False):\n path = pathlib.Path(path)\n for ancestor in reversed(path.parents):\n  s = ancestor.lstat()\n  require(stat.S_ISDIR(s.st_mode) and not (s.st_file_attributes & 0x400), 'ANCESTOR_NOT_ORDINARY')\n s = path.lstat()\n require(not (s.st_file_attributes & 0x400), 'REPARSE_POINT')\n require(stat.S_ISDIR(s.st_mode) if directory else stat.S_ISREG(s.st_mode), 'WRONG_FILE_KIND')\n return s\n\ndef raw(path, cap):\n s = ordinary(path)\n require(s.st_size <= cap, 'FILE_BOUND')\n with open(path, 'rb') as stream:\n  value = stream.read(cap+1)\n e = ordinary(path)\n require(len(value) <= cap and (s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns) ==\n  (e.st_dev,e.st_ino,e.st_size,e.st_mtime_ns), 'FILE_CHANGED_DURING_READ')\n return value\n\ndef checked_raw(path, size, expected):\n value = raw(path, size)\n require(len(value) == size and digest(value) == expected, 'RAW_PIN_MISMATCH')\n return value\n\ndef moment(value):\n require(type(value) is str and len(value) <= 32, 'CLOCK_SHAPE')\n require(value.endswith('Z') or value.endswith('+00:00'), 'CLOCK_UTC')\n from datetime import datetime\n return datetime.fromisoformat(value.replace('Z','+00:00')).timestamp()\n\ndef utc(value):\n from datetime import datetime, timezone\n return datetime.fromtimestamp(value,timezone.utc).isoformat().replace('+00:00','Z')\n\ndef remaining():\n require(time.monotonic() < work_end, 'WORK_DEADLINE')\n require(params['callsBefore'] + 1 + native_count + params['reservedAfterCalls'] <= 40, 'CALL_BUDGET')\n\ndef child(identifier, args, out_cap=65536, timeout=30):\n global native_count\n remaining()\n require(params['callsBefore'] + 1 + native_count + 1 + params['reservedAfterCalls'] <= 40, 'CALL_BUDGET')\n native_count += 1\n rec = dict(id=identifier,exitCode=None,stdoutBytes=0,stdoutSHA256=digest(b''),\n  stderrBytes=0,stderrSHA256=digest(b''),started=False,closed=False)\n commands.append(rec)\n buffers = [bytearray(),bytearray()]\n errors = []\n eof = [False,False]\n overflow = threading.Event()\n handle = subprocess.Popen([GIT]+args,cwd=str(REPO),stdin=subprocess.DEVNULL,\n  stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=False,creationflags=0x08000000)\n rec['started'] = True\n def drain(index, stream, cap):\n  try:\n   while True:\n    piece = stream.read1(16384)\n    if not piece:\n     eof[index] = True\n     return\n    available = cap-len(buffers[index])\n    buffers[index].extend(piece[:max(0,available)])\n    if len(piece) > available:\n     overflow.set()\n     return\n  except BaseException as error:\n   errors.append(type(error).__name__)\n workers = [threading.Thread(target=drain,args=(0,handle.stdout,out_cap),daemon=True),\n  threading.Thread(target=drain,args=(1,handle.stderr,8192),daemon=True)]\n for worker in workers:\n  worker.start()\n deadline = min(work_end,time.monotonic()+timeout)\n killed = False\n while handle.poll() is None and time.monotonic() < deadline and not overflow.is_set() and not errors:\n  time.sleep(min(0.01,max(0,deadline-time.monotonic())))\n if handle.poll() is None:\n  handle.kill()\n  killed = True\n drain_end = min(hard_end,time.monotonic()+2)\n try:\n  handle.wait(timeout=max(0.001,drain_end-time.monotonic()))\n except subprocess.TimeoutExpired:\n  pass\n for worker in workers:\n  worker.join(timeout=max(0,drain_end-time.monotonic()))\n out, err = bytes(buffers[0]), bytes(buffers[1])\n captured_stderr.append(err)\n rec.update(exitCode=handle.poll(),stdoutBytes=len(out),stdoutSHA256=digest(out),\n  stderrBytes=len(err),stderrSHA256=digest(err),closed=handle.poll() is not None and all(eof))\n require(rec['closed'], 'CHILD_CLOSURE_UNKNOWN')\n require(not killed and not overflow.is_set() and not errors, 'CHILD_TIMEOUT_OR_DRAIN_FAILURE')\n return rec['exitCode'],out,err\n\ndef ok(identifier,args,cap=65536,timeout=30):\n code,out,err = child(identifier,args,cap,timeout)\n require(code == 0, identifier+'_FAILED')\n return out\n\ndef snapshot(paths):\n result = {}\n for path in paths:\n  if path.exists():\n   result[str(path)] = digest(raw(path,524288))\n  else:\n   require(not path.is_symlink(), 'ABSENT_PATH_REPARSE')\n   result[str(path)] = None\n return result\n\ndef encode(value):\n return json.dumps(value,ensure_ascii=False,separators=(',',':'))\n\ndef closed_pairs(pairs):\n value = {}\n for key,item in pairs:\n  require(key not in value, 'DUPLICATE_JSON_KEY')\n  value[key] = item\n return value\n\ndef frames(payload):\n encoded = encode(payload).encode('utf-8')\n require(len(encoded) <= 20000, 'RECEIPT_PAYLOAD_BOUND')\n text = encoded.decode('utf-8')\n total = 1\n while True:\n  result = []\n  at = offset = 0\n  while at < len(text):\n   def make(n):\n    piece = text[at:at+n]\n    data = piece.encode('utf-8')\n    return encode(dict(schemaVersion='blurby.instruction-acquisition-A.stdout-frame.v1',\n     frame=len(result)+1,totalFrames=total,offset=offset,end=offset+len(data),\n     payloadBytes=len(encoded),payloadSHA256=digest(encoded),pieceSHA256=digest(data),text=piece))+'\\r\\n'\n   lo,hi = 0,len(text)-at\n   while lo < hi:\n    mid = (lo+hi+1)//2\n    if len(make(mid)) <= 10000:\n     lo = mid\n    else:\n     hi = mid-1\n   require(lo > 0, 'FRAME_BOUND')\n   result.append(make(lo))\n   offset += len(text[at:at+lo].encode('utf-8'))\n   at += lo\n  if len(result) == total:\n   break\n  total = len(result)\n require(len(result) <= 3 and sum(map(len,result)) <= 30000, 'RECEIPT_FRAME_BOUND')\n return result\n\ntry:\n require(len(sys.argv) == 2, 'ARGUMENT_COUNT')\n params = json.loads(sys.argv[1],object_pairs_hook=closed_pairs)\n require(type(params) is dict and set(params) == INPUT_KEYS, 'INPUT_KEYS')\n require(type(params['callsBefore']) is int and type(params['reservedAfterCalls']) is int and\n  0 <= params['callsBefore'] <= 39 and 0 <= params['reservedAfterCalls'] <= 39, 'CALL_INPUT')\n require(type(params['stdoutTransportQualified']) is bool and params['stdoutTransportQualified'], 'STDOUT_TRANSPORT_UNQUALIFIED')\n require(type(params['phaseId']) is str and len(params['phaseId']) <= 128 and\n  type(params['turnId']) is str and len(params['turnId']) == 36, 'ACTOR_INPUT')\n require(type(params['approvedConfigSHA256']) is str and len(params['approvedConfigSHA256']) == 64 and\n  all(c in '0123456789abcdef' for c in params['approvedConfigSHA256']), 'CONFIG_INPUT')\n start,work,hard = [moment(params[k]) for k in ['phaseStartUtc','workDeadlineUtc','hardDeadlineUtc']]\n require(start <= RECORDED_START <= time.time() < work < hard and hard-start <= 2700 and hard-work >= 60, 'CLOCK_BOUNDS')\n work_end = RECORDED_MONO+(work-RECORDED_START)\n hard_end = RECORDED_MONO+(hard-RECORDED_START)\n checked_raw(GIT,46464,GIT_HASH)\n checked_raw(PYTHON,106328,PY_HASH)\n ordinary(REPO,True)\n ordinary(ROOT.parent,True)\n require(not ROOT.exists() and not ROOT.is_symlink(), 'ROOT_EXISTS')\n for path,size,expected in CARRIED:\n  value = checked_raw(path,size,expected)\n  carried_rows.append(dict(path=path,expectedBytes=size,expectedSHA256=expected,actualBytes=len(value),\n   actualSHA256=digest(value),ordinary=True,accessible=True,sameActorReceipt=True,consistent=True))\n  del value\n lines = ok('g01',['rev-parse','--path-format=absolute','--show-toplevel','--git-common-dir','--is-shallow-repository']).decode('utf-8','strict').splitlines()\n require(len(lines)==3 and pathlib.Path(lines[0])==REPO and lines[2]=='false', 'REPOSITORY_IDENTITY')\n common = pathlib.Path(lines[1])\n require(common == REPO/'.git', 'COMMON_GIT_IDENTITY')\n ordinary(common,True)\n origin = ok('g02',['config','--get-all','remote.origin.url']).decode('utf-8','strict').splitlines()\n require(origin == [ORIGIN], 'ORIGIN_IDENTITY')\n config = ok('g03',['config','--show-origin','--show-scope','--list','-z'])\n require(digest(config)==params['approvedConfigSHA256'], 'UNAPPROVED_CONFIG')\n del config\n tracked = [common/'index',common/'config',common/'HEAD',common/'FETCH_HEAD']+[REPO/p for p,n,h in PAYLOADS]\n before = snapshot(tracked)\n refs_before = ok('g04',['for-each-ref','--format=%(refname) %(objectname)','refs/heads','refs/remotes','refs/tags'])\n code,presence,presence_err = child('g05',['cat-file','-e',COMMIT+'^{commit}'])\n if code != 0:\n  require(code==128 and b'Not a valid object name' in presence_err and not presence, 'PRESENCE_ERROR_NOT_MISSING')\n  ok('g06',['-c','gc.auto=0','-c','maintenance.auto=false','fetch','--no-tags','--no-write-fetch-head',\n   '--no-recurse-submodules','--no-auto-maintenance','--no-write-commit-graph','--no-prune',\n   '--no-prune-tags','--refmap=','--no-progress','origin',COMMIT],65536,180)\n  ok('g07',['cat-file','-e',COMMIT+'^{commit}'])\n ROOT.mkdir()\n created.append(str(ROOT))\n for relative in ['docs','docs/governance','Virtuoso']:\n  path = ROOT/relative\n  ordinary(path.parent,True)\n  path.mkdir()\n  created.append(str(path))\n for i,(relative,size,expected) in enumerate(PAYLOADS,8):\n  remaining()\n  data = ok('g'+str(i).zfill(2),['--no-pager','show',COMMIT+':'+relative],size+1)\n  require(len(data)==size and digest(data)==expected, 'OBJECT_PIN_MISMATCH')\n  data.decode('utf-8','strict')\n  target = ROOT/relative\n  ordinary(target.parent,True)\n  with open(target,'xb') as stream:\n   created.append(str(target))\n   require(stream.write(data)==len(data), 'SHORT_WRITE')\n   stream.flush()\n  actual_length, actual_hash = len(data), digest(data)\n  del data\n  reread = checked_raw(target,size,expected)\n  payload_rows.append(dict(path=str(target),expectedBytes=size,expectedSHA256=expected,objectReadCount=1,\n   actualBytes=actual_length,actualSHA256=actual_hash,strictUtf8=True,exclusiveCreated=True,\n   ordinaryRereadBytes=len(reread),ordinaryRereadSHA256=digest(reread),finalBytes=0,finalSHA256=''))\n  del reread\n refs_after = ok('g13',['for-each-ref','--format=%(refname) %(objectname)','refs/heads','refs/remotes','refs/tags'])\n after = snapshot(tracked)\n require(before==after and refs_before==refs_after, 'PRESERVATION_DIFFERENCE')\n for row,(relative,size,expected) in zip(payload_rows,PAYLOADS):\n  value = checked_raw(ROOT/relative,size,expected)\n  row.update(finalBytes=len(value),finalSHA256=digest(value))\n  del value\n require(not (ROOT/'receipt.json').exists() and not (ROOT/'receipt.json').is_symlink(), 'RECEIPT_EXISTS')\n remaining()\nexcept BaseException as error:\n failure = str(error) if isinstance(error,Hold) else type(error).__name__\n\ndef state_hash(mapping, suffix):\n for path,value in mapping.items():\n  if path.endswith(suffix):\n   return value\n return None\n\nreceipt = dict(schemaVersion='blurby.instruction-acquisition-A.receipt.v1',phase='INSTRUCTION-ACQUISITION-A',\n actor=dict(chatId='01a19d76-0837-7a43-a18d-8a40494879b8',turnId=params.get('turnId','') if params else ''),\n clock=dict(startedUtc=params.get('phaseStartUtc','') if params else '',\n  workDeadlineUtc=params.get('workDeadlineUtc','') if params else '',hardDeadlineUtc=params.get('hardDeadlineUtc','') if params else '',finishedUtc=utc(time.time())),\n accounting=dict(toolCalls=(params.get('callsBefore',0)+1 if params else 1),nativeCalls=native_count,\n  wrappers=1,delegates=0,waits=0,polls=0,commands=commands),\n source=dict(commit=COMMIT,repository=str(REPO),commonGit=str(common) if common else '',origin=ORIGIN,\n  nonShallow=common is not None,gitSHA256=GIT_HASH,pythonSHA256=PY_HASH),\n namespace=dict(root=str(ROOT),ancestorsOrdinary=bool(created),rootInitiallyAbsent=bool(created),\n  createdPaths=created,receiptAbsent=not (ROOT/'receipt.json').exists()),payloads=payload_rows,\n carriedInputs=carried_rows,preservation=dict(refsBeforeSHA256=digest(refs_before),refsAfterSHA256=digest(refs_after),\n  indexBeforeSHA256=state_hash(before,'index'),indexAfterSHA256=state_hash(after,'index'),\n  configBeforeSHA256=state_hash(before,'config'),configAfterSHA256=state_hash(after,'config'),\n  headBefore=state_hash(before,'HEAD'),headAfter=state_hash(after,'HEAD'),\n  sourceMutationObserved=bool(before and after and before!=after),receiptAbsent=not (ROOT/'receipt.json').exists()),\n failures=[failure] if failure else [],limitations=['fresh-five semantics not performed','no role activation',\n  'direct-child closure only','no global preservation proof','B not admitted'],\n disposition='HOLD/PARTIAL' if failure else 'ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING')\ntry:\n output = frames(receipt)\n require(params is not None and params.get('stdoutTransportQualified') is True, 'STDOUT_TRANSPORT_UNQUALIFIED')\n if failure:\n  for error_bytes in captured_stderr:\n   sys.stderr.buffer.write(error_bytes)\n  sys.stderr.buffer.flush()\n for item in output:\n  sys.stdout.buffer.write(item.encode('utf-8'))\n  sys.stdout.buffer.flush()\nexcept BaseException:\n sys.stderr.buffer.write(b'ACQUISITION_A_PUBLICATION_HOLD\\n')\n sys.stderr.buffer.flush()\n raise SystemExit(2)\nraise SystemExit(1 if failure else 0)\n\" {\\\"phaseId\\\":\\\"INSTRUCTION-ACQUISITION-A\\\",\\\"turnId\\\":\\\"00000000-0000-0000-0000-000000000000\\\",\\\"phaseStartUtc\\\":\\\"2026-11-03T00:00:00.000000Z\\\",\\\"workDeadlineUtc\\\":\\\"2026-11-03T00:44:00.000000Z\\\",\\\"hardDeadlineUtc\\\":\\\"2026-11-03T00:45:00.000000Z\\\",\\\"approvedConfigSHA256\\\":\\\"0000000000000000000000000000000000000000000000000000000000000000\\\",\\\"callsBefore\\\":13,\\\"reservedAfterCalls\\\":11,\\\"stdoutTransportQualified\\\":false}",
+    "directWindowsCharactersIncludingTerminatingNUL": 15958,
+    "directWindowsUtf16LEBytesIncludingNUL": 31916,
+    "directWindowsLineSHA256Utf8": "24c7e4d264c49c3bc223ce19c2cf80981322021f13972ca6e063ef1f87c21d2c",
+    "powershellLiteralCommand": "& 'C:/Python314/python.exe' -I -S -B -c 'import time\nRECORDED_START = time.time()\nRECORDED_MONO = time.monotonic()\nimport sys, os, json, hashlib, pathlib, stat, subprocess, threading\n\nGIT = ''C:/Program Files/Git/cmd/git.exe''\nPYTHON = ''C:/Python314/python.exe''\nREPO = pathlib.Path(''C:/Users/estra/Projects/Blurby'')\nROOT = pathlib.Path(''C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103'')\nCOMMIT = ''3afcf8789be0d7fa3bdf27235597606da022c93c''\nORIGIN = ''https://github.com/gorillabrown/Blurby.git''\nGIT_HASH = ''37c5725818d602e951ba2563b870d62763322956b73373da4c33a0b566a80bc9''\nPY_HASH = ''cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b''\nPAYLOADS = [\n (''CLAUDE.md'',30743,''87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65''),\n (''ROADMAP.md'',356715,''1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590''),\n (''docs/governance/LESSONS_LEARNED.md'',336116,''8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28''),\n (''Virtuoso/workspace-layout.json'',19955,''f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc''),\n (''Virtuoso/work-register.snapshot.json'',449596,''fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b'')]\nA = ''C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/''\nP = ''C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/''\nCARRIED = [\n (A+''AGENTS.md'',30850,''aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654''),\n (A+''overlay.virtuoso.SKILL.md'',1822,''3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8''),\n (A+''overlay.agents.Hippocrates.md'',1029,''6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132''),\n (A+''overlay.agents.Plato.md'',629,''36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b''),\n (A+''overlay.agents.MarcusAurelius.md'',997,''c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b''),\n (P+''skills/virtuoso/SKILL.md'',93324,''c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc''),\n (P+''skills/virtuoso/references/zeus.md'',30766,''6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc''),\n (P+''agents/MarcusAurelius.md'',13714,''8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d''),\n (P+''agents/Plato.md'',13843,''a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77''),\n (P+''agents/Hippocrates.md'',11318,''c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3'')]\nINPUT_KEYS = {''phaseId'',''turnId'',''phaseStartUtc'',''workDeadlineUtc'',''hardDeadlineUtc'',\n ''approvedConfigSHA256'',''callsBefore'',''reservedAfterCalls'',''stdoutTransportQualified''}\ncaptured_stderr = []\ncommands, created, carried_rows, payload_rows = [], [], [], []\nbefore, after = {}, {}\nparams = None\nwork_end = hard_end = 0.0\nnative_count = 0\nrefs_before = refs_after = b''''\ncommon = None\nfailure = None\n\nclass Hold(Exception):\n pass\n\ndef require(value, code):\n if not value:\n  raise Hold(code)\n\ndef digest(data):\n return hashlib.sha256(data).hexdigest()\n\ndef ordinary(path, directory=False):\n path = pathlib.Path(path)\n for ancestor in reversed(path.parents):\n  s = ancestor.lstat()\n  require(stat.S_ISDIR(s.st_mode) and not (s.st_file_attributes & 0x400), ''ANCESTOR_NOT_ORDINARY'')\n s = path.lstat()\n require(not (s.st_file_attributes & 0x400), ''REPARSE_POINT'')\n require(stat.S_ISDIR(s.st_mode) if directory else stat.S_ISREG(s.st_mode), ''WRONG_FILE_KIND'')\n return s\n\ndef raw(path, cap):\n s = ordinary(path)\n require(s.st_size <= cap, ''FILE_BOUND'')\n with open(path, ''rb'') as stream:\n  value = stream.read(cap+1)\n e = ordinary(path)\n require(len(value) <= cap and (s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns) ==\n  (e.st_dev,e.st_ino,e.st_size,e.st_mtime_ns), ''FILE_CHANGED_DURING_READ'')\n return value\n\ndef checked_raw(path, size, expected):\n value = raw(path, size)\n require(len(value) == size and digest(value) == expected, ''RAW_PIN_MISMATCH'')\n return value\n\ndef moment(value):\n require(type(value) is str and len(value) <= 32, ''CLOCK_SHAPE'')\n require(value.endswith(''Z'') or value.endswith(''+00:00''), ''CLOCK_UTC'')\n from datetime import datetime\n return datetime.fromisoformat(value.replace(''Z'',''+00:00'')).timestamp()\n\ndef utc(value):\n from datetime import datetime, timezone\n return datetime.fromtimestamp(value,timezone.utc).isoformat().replace(''+00:00'',''Z'')\n\ndef remaining():\n require(time.monotonic() < work_end, ''WORK_DEADLINE'')\n require(params[''callsBefore''] + 1 + native_count + params[''reservedAfterCalls''] <= 40, ''CALL_BUDGET'')\n\ndef child(identifier, args, out_cap=65536, timeout=30):\n global native_count\n remaining()\n require(params[''callsBefore''] + 1 + native_count + 1 + params[''reservedAfterCalls''] <= 40, ''CALL_BUDGET'')\n native_count += 1\n rec = dict(id=identifier,exitCode=None,stdoutBytes=0,stdoutSHA256=digest(b''''),\n  stderrBytes=0,stderrSHA256=digest(b''''),started=False,closed=False)\n commands.append(rec)\n buffers = [bytearray(),bytearray()]\n errors = []\n eof = [False,False]\n overflow = threading.Event()\n handle = subprocess.Popen([GIT]+args,cwd=str(REPO),stdin=subprocess.DEVNULL,\n  stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=False,creationflags=0x08000000)\n rec[''started''] = True\n def drain(index, stream, cap):\n  try:\n   while True:\n    piece = stream.read1(16384)\n    if not piece:\n     eof[index] = True\n     return\n    available = cap-len(buffers[index])\n    buffers[index].extend(piece[:max(0,available)])\n    if len(piece) > available:\n     overflow.set()\n     return\n  except BaseException as error:\n   errors.append(type(error).__name__)\n workers = [threading.Thread(target=drain,args=(0,handle.stdout,out_cap),daemon=True),\n  threading.Thread(target=drain,args=(1,handle.stderr,8192),daemon=True)]\n for worker in workers:\n  worker.start()\n deadline = min(work_end,time.monotonic()+timeout)\n killed = False\n while handle.poll() is None and time.monotonic() < deadline and not overflow.is_set() and not errors:\n  time.sleep(min(0.01,max(0,deadline-time.monotonic())))\n if handle.poll() is None:\n  handle.kill()\n  killed = True\n drain_end = min(hard_end,time.monotonic()+2)\n try:\n  handle.wait(timeout=max(0.001,drain_end-time.monotonic()))\n except subprocess.TimeoutExpired:\n  pass\n for worker in workers:\n  worker.join(timeout=max(0,drain_end-time.monotonic()))\n out, err = bytes(buffers[0]), bytes(buffers[1])\n captured_stderr.append(err)\n rec.update(exitCode=handle.poll(),stdoutBytes=len(out),stdoutSHA256=digest(out),\n  stderrBytes=len(err),stderrSHA256=digest(err),closed=handle.poll() is not None and all(eof))\n require(rec[''closed''], ''CHILD_CLOSURE_UNKNOWN'')\n require(not killed and not overflow.is_set() and not errors, ''CHILD_TIMEOUT_OR_DRAIN_FAILURE'')\n return rec[''exitCode''],out,err\n\ndef ok(identifier,args,cap=65536,timeout=30):\n code,out,err = child(identifier,args,cap,timeout)\n require(code == 0, identifier+''_FAILED'')\n return out\n\ndef snapshot(paths):\n result = {}\n for path in paths:\n  if path.exists():\n   result[str(path)] = digest(raw(path,524288))\n  else:\n   require(not path.is_symlink(), ''ABSENT_PATH_REPARSE'')\n   result[str(path)] = None\n return result\n\ndef encode(value):\n return json.dumps(value,ensure_ascii=False,separators=('','','':''))\n\ndef closed_pairs(pairs):\n value = {}\n for key,item in pairs:\n  require(key not in value, ''DUPLICATE_JSON_KEY'')\n  value[key] = item\n return value\n\ndef frames(payload):\n encoded = encode(payload).encode(''utf-8'')\n require(len(encoded) <= 20000, ''RECEIPT_PAYLOAD_BOUND'')\n text = encoded.decode(''utf-8'')\n total = 1\n while True:\n  result = []\n  at = offset = 0\n  while at < len(text):\n   def make(n):\n    piece = text[at:at+n]\n    data = piece.encode(''utf-8'')\n    return encode(dict(schemaVersion=''blurby.instruction-acquisition-A.stdout-frame.v1'',\n     frame=len(result)+1,totalFrames=total,offset=offset,end=offset+len(data),\n     payloadBytes=len(encoded),payloadSHA256=digest(encoded),pieceSHA256=digest(data),text=piece))+''\\r\\n''\n   lo,hi = 0,len(text)-at\n   while lo < hi:\n    mid = (lo+hi+1)//2\n    if len(make(mid)) <= 10000:\n     lo = mid\n    else:\n     hi = mid-1\n   require(lo > 0, ''FRAME_BOUND'')\n   result.append(make(lo))\n   offset += len(text[at:at+lo].encode(''utf-8''))\n   at += lo\n  if len(result) == total:\n   break\n  total = len(result)\n require(len(result) <= 3 and sum(map(len,result)) <= 30000, ''RECEIPT_FRAME_BOUND'')\n return result\n\ntry:\n require(len(sys.argv) == 2, ''ARGUMENT_COUNT'')\n params = json.loads(sys.argv[1],object_pairs_hook=closed_pairs)\n require(type(params) is dict and set(params) == INPUT_KEYS, ''INPUT_KEYS'')\n require(type(params[''callsBefore'']) is int and type(params[''reservedAfterCalls'']) is int and\n  0 <= params[''callsBefore''] <= 39 and 0 <= params[''reservedAfterCalls''] <= 39, ''CALL_INPUT'')\n require(type(params[''stdoutTransportQualified'']) is bool and params[''stdoutTransportQualified''], ''STDOUT_TRANSPORT_UNQUALIFIED'')\n require(type(params[''phaseId'']) is str and len(params[''phaseId'']) <= 128 and\n  type(params[''turnId'']) is str and len(params[''turnId'']) == 36, ''ACTOR_INPUT'')\n require(type(params[''approvedConfigSHA256'']) is str and len(params[''approvedConfigSHA256'']) == 64 and\n  all(c in ''0123456789abcdef'' for c in params[''approvedConfigSHA256'']), ''CONFIG_INPUT'')\n start,work,hard = [moment(params[k]) for k in [''phaseStartUtc'',''workDeadlineUtc'',''hardDeadlineUtc'']]\n require(start <= RECORDED_START <= time.time() < work < hard and hard-start <= 2700 and hard-work >= 60, ''CLOCK_BOUNDS'')\n work_end = RECORDED_MONO+(work-RECORDED_START)\n hard_end = RECORDED_MONO+(hard-RECORDED_START)\n checked_raw(GIT,46464,GIT_HASH)\n checked_raw(PYTHON,106328,PY_HASH)\n ordinary(REPO,True)\n ordinary(ROOT.parent,True)\n require(not ROOT.exists() and not ROOT.is_symlink(), ''ROOT_EXISTS'')\n for path,size,expected in CARRIED:\n  value = checked_raw(path,size,expected)\n  carried_rows.append(dict(path=path,expectedBytes=size,expectedSHA256=expected,actualBytes=len(value),\n   actualSHA256=digest(value),ordinary=True,accessible=True,sameActorReceipt=True,consistent=True))\n  del value\n lines = ok(''g01'',[''rev-parse'',''--path-format=absolute'',''--show-toplevel'',''--git-common-dir'',''--is-shallow-repository'']).decode(''utf-8'',''strict'').splitlines()\n require(len(lines)==3 and pathlib.Path(lines[0])==REPO and lines[2]==''false'', ''REPOSITORY_IDENTITY'')\n common = pathlib.Path(lines[1])\n require(common == REPO/''.git'', ''COMMON_GIT_IDENTITY'')\n ordinary(common,True)\n origin = ok(''g02'',[''config'',''--get-all'',''remote.origin.url'']).decode(''utf-8'',''strict'').splitlines()\n require(origin == [ORIGIN], ''ORIGIN_IDENTITY'')\n config = ok(''g03'',[''config'',''--show-origin'',''--show-scope'',''--list'',''-z''])\n require(digest(config)==params[''approvedConfigSHA256''], ''UNAPPROVED_CONFIG'')\n del config\n tracked = [common/''index'',common/''config'',common/''HEAD'',common/''FETCH_HEAD'']+[REPO/p for p,n,h in PAYLOADS]\n before = snapshot(tracked)\n refs_before = ok(''g04'',[''for-each-ref'',''--format=%(refname) %(objectname)'',''refs/heads'',''refs/remotes'',''refs/tags''])\n code,presence,presence_err = child(''g05'',[''cat-file'',''-e'',COMMIT+''^{commit}''])\n if code != 0:\n  require(code==128 and b''Not a valid object name'' in presence_err and not presence, ''PRESENCE_ERROR_NOT_MISSING'')\n  ok(''g06'',[''-c'',''gc.auto=0'',''-c'',''maintenance.auto=false'',''fetch'',''--no-tags'',''--no-write-fetch-head'',\n   ''--no-recurse-submodules'',''--no-auto-maintenance'',''--no-write-commit-graph'',''--no-prune'',\n   ''--no-prune-tags'',''--refmap='',''--no-progress'',''origin'',COMMIT],65536,180)\n  ok(''g07'',[''cat-file'',''-e'',COMMIT+''^{commit}''])\n ROOT.mkdir()\n created.append(str(ROOT))\n for relative in [''docs'',''docs/governance'',''Virtuoso'']:\n  path = ROOT/relative\n  ordinary(path.parent,True)\n  path.mkdir()\n  created.append(str(path))\n for i,(relative,size,expected) in enumerate(PAYLOADS,8):\n  remaining()\n  data = ok(''g''+str(i).zfill(2),[''--no-pager'',''show'',COMMIT+'':''+relative],size+1)\n  require(len(data)==size and digest(data)==expected, ''OBJECT_PIN_MISMATCH'')\n  data.decode(''utf-8'',''strict'')\n  target = ROOT/relative\n  ordinary(target.parent,True)\n  with open(target,''xb'') as stream:\n   created.append(str(target))\n   require(stream.write(data)==len(data), ''SHORT_WRITE'')\n   stream.flush()\n  actual_length, actual_hash = len(data), digest(data)\n  del data\n  reread = checked_raw(target,size,expected)\n  payload_rows.append(dict(path=str(target),expectedBytes=size,expectedSHA256=expected,objectReadCount=1,\n   actualBytes=actual_length,actualSHA256=actual_hash,strictUtf8=True,exclusiveCreated=True,\n   ordinaryRereadBytes=len(reread),ordinaryRereadSHA256=digest(reread),finalBytes=0,finalSHA256=''''))\n  del reread\n refs_after = ok(''g13'',[''for-each-ref'',''--format=%(refname) %(objectname)'',''refs/heads'',''refs/remotes'',''refs/tags''])\n after = snapshot(tracked)\n require(before==after and refs_before==refs_after, ''PRESERVATION_DIFFERENCE'')\n for row,(relative,size,expected) in zip(payload_rows,PAYLOADS):\n  value = checked_raw(ROOT/relative,size,expected)\n  row.update(finalBytes=len(value),finalSHA256=digest(value))\n  del value\n require(not (ROOT/''receipt.json'').exists() and not (ROOT/''receipt.json'').is_symlink(), ''RECEIPT_EXISTS'')\n remaining()\nexcept BaseException as error:\n failure = str(error) if isinstance(error,Hold) else type(error).__name__\n\ndef state_hash(mapping, suffix):\n for path,value in mapping.items():\n  if path.endswith(suffix):\n   return value\n return None\n\nreceipt = dict(schemaVersion=''blurby.instruction-acquisition-A.receipt.v1'',phase=''INSTRUCTION-ACQUISITION-A'',\n actor=dict(chatId=''01a19d76-0837-7a43-a18d-8a40494879b8'',turnId=params.get(''turnId'','''') if params else ''''),\n clock=dict(startedUtc=params.get(''phaseStartUtc'','''') if params else '''',\n  workDeadlineUtc=params.get(''workDeadlineUtc'','''') if params else '''',hardDeadlineUtc=params.get(''hardDeadlineUtc'','''') if params else '''',finishedUtc=utc(time.time())),\n accounting=dict(toolCalls=(params.get(''callsBefore'',0)+1 if params else 1),nativeCalls=native_count,\n  wrappers=1,delegates=0,waits=0,polls=0,commands=commands),\n source=dict(commit=COMMIT,repository=str(REPO),commonGit=str(common) if common else '''',origin=ORIGIN,\n  nonShallow=common is not None,gitSHA256=GIT_HASH,pythonSHA256=PY_HASH),\n namespace=dict(root=str(ROOT),ancestorsOrdinary=bool(created),rootInitiallyAbsent=bool(created),\n  createdPaths=created,receiptAbsent=not (ROOT/''receipt.json'').exists()),payloads=payload_rows,\n carriedInputs=carried_rows,preservation=dict(refsBeforeSHA256=digest(refs_before),refsAfterSHA256=digest(refs_after),\n  indexBeforeSHA256=state_hash(before,''index''),indexAfterSHA256=state_hash(after,''index''),\n  configBeforeSHA256=state_hash(before,''config''),configAfterSHA256=state_hash(after,''config''),\n  headBefore=state_hash(before,''HEAD''),headAfter=state_hash(after,''HEAD''),\n  sourceMutationObserved=bool(before and after and before!=after),receiptAbsent=not (ROOT/''receipt.json'').exists()),\n failures=[failure] if failure else [],limitations=[''fresh-five semantics not performed'',''no role activation'',\n  ''direct-child closure only'',''no global preservation proof'',''B not admitted''],\n disposition=''HOLD/PARTIAL'' if failure else ''ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING'')\ntry:\n output = frames(receipt)\n require(params is not None and params.get(''stdoutTransportQualified'') is True, ''STDOUT_TRANSPORT_UNQUALIFIED'')\n if failure:\n  for error_bytes in captured_stderr:\n   sys.stderr.buffer.write(error_bytes)\n  sys.stderr.buffer.flush()\n for item in output:\n  sys.stdout.buffer.write(item.encode(''utf-8''))\n  sys.stdout.buffer.flush()\nexcept BaseException:\n sys.stderr.buffer.write(b''ACQUISITION_A_PUBLICATION_HOLD\\n'')\n sys.stderr.buffer.flush()\n raise SystemExit(2)\nraise SystemExit(1 if failure else 0)\n' '{\"phaseId\":\"INSTRUCTION-ACQUISITION-A\",\"turnId\":\"00000000-0000-0000-0000-000000000000\",\"phaseStartUtc\":\"2026-11-03T00:00:00.000000Z\",\"workDeadlineUtc\":\"2026-11-03T00:44:00.000000Z\",\"hardDeadlineUtc\":\"2026-11-03T00:45:00.000000Z\",\"approvedConfigSHA256\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"callsBefore\":13,\"reservedAfterCalls\":11,\"stdoutTransportQualified\":false}'",
+    "powershellLiteralCommandCharacters": 16413,
+    "toolRequestSerializedJSON": "{\"cmd\":\"& 'C:/Python314/python.exe' -I -S -B -c 'import time\\nRECORDED_START = time.time()\\nRECORDED_MONO = time.monotonic()\\nimport sys, os, json, hashlib, pathlib, stat, subprocess, threading\\n\\nGIT = ''C:/Program Files/Git/cmd/git.exe''\\nPYTHON = ''C:/Python314/python.exe''\\nREPO = pathlib.Path(''C:/Users/estra/Projects/Blurby'')\\nROOT = pathlib.Path(''C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103'')\\nCOMMIT = ''3afcf8789be0d7fa3bdf27235597606da022c93c''\\nORIGIN = ''https://github.com/gorillabrown/Blurby.git''\\nGIT_HASH = ''37c5725818d602e951ba2563b870d62763322956b73373da4c33a0b566a80bc9''\\nPY_HASH = ''cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b''\\nPAYLOADS = [\\n (''CLAUDE.md'',30743,''87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65''),\\n (''ROADMAP.md'',356715,''1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590''),\\n (''docs/governance/LESSONS_LEARNED.md'',336116,''8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28''),\\n (''Virtuoso/workspace-layout.json'',19955,''f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc''),\\n (''Virtuoso/work-register.snapshot.json'',449596,''fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b'')]\\nA = ''C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/''\\nP = ''C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/''\\nCARRIED = [\\n (A+''AGENTS.md'',30850,''aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654''),\\n (A+''overlay.virtuoso.SKILL.md'',1822,''3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8''),\\n (A+''overlay.agents.Hippocrates.md'',1029,''6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132''),\\n (A+''overlay.agents.Plato.md'',629,''36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b''),\\n (A+''overlay.agents.MarcusAurelius.md'',997,''c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b''),\\n (P+''skills/virtuoso/SKILL.md'',93324,''c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc''),\\n (P+''skills/virtuoso/references/zeus.md'',30766,''6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc''),\\n (P+''agents/MarcusAurelius.md'',13714,''8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d''),\\n (P+''agents/Plato.md'',13843,''a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77''),\\n (P+''agents/Hippocrates.md'',11318,''c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3'')]\\nINPUT_KEYS = {''phaseId'',''turnId'',''phaseStartUtc'',''workDeadlineUtc'',''hardDeadlineUtc'',\\n ''approvedConfigSHA256'',''callsBefore'',''reservedAfterCalls'',''stdoutTransportQualified''}\\ncaptured_stderr = []\\ncommands, created, carried_rows, payload_rows = [], [], [], []\\nbefore, after = {}, {}\\nparams = None\\nwork_end = hard_end = 0.0\\nnative_count = 0\\nrefs_before = refs_after = b''''\\ncommon = None\\nfailure = None\\n\\nclass Hold(Exception):\\n pass\\n\\ndef require(value, code):\\n if not value:\\n  raise Hold(code)\\n\\ndef digest(data):\\n return hashlib.sha256(data).hexdigest()\\n\\ndef ordinary(path, directory=False):\\n path = pathlib.Path(path)\\n for ancestor in reversed(path.parents):\\n  s = ancestor.lstat()\\n  require(stat.S_ISDIR(s.st_mode) and not (s.st_file_attributes & 0x400), ''ANCESTOR_NOT_ORDINARY'')\\n s = path.lstat()\\n require(not (s.st_file_attributes & 0x400), ''REPARSE_POINT'')\\n require(stat.S_ISDIR(s.st_mode) if directory else stat.S_ISREG(s.st_mode), ''WRONG_FILE_KIND'')\\n return s\\n\\ndef raw(path, cap):\\n s = ordinary(path)\\n require(s.st_size <= cap, ''FILE_BOUND'')\\n with open(path, ''rb'') as stream:\\n  value = stream.read(cap+1)\\n e = ordinary(path)\\n require(len(value) <= cap and (s.st_dev,s.st_ino,s.st_size,s.st_mtime_ns) ==\\n  (e.st_dev,e.st_ino,e.st_size,e.st_mtime_ns), ''FILE_CHANGED_DURING_READ'')\\n return value\\n\\ndef checked_raw(path, size, expected):\\n value = raw(path, size)\\n require(len(value) == size and digest(value) == expected, ''RAW_PIN_MISMATCH'')\\n return value\\n\\ndef moment(value):\\n require(type(value) is str and len(value) <= 32, ''CLOCK_SHAPE'')\\n require(value.endswith(''Z'') or value.endswith(''+00:00''), ''CLOCK_UTC'')\\n from datetime import datetime\\n return datetime.fromisoformat(value.replace(''Z'',''+00:00'')).timestamp()\\n\\ndef utc(value):\\n from datetime import datetime, timezone\\n return datetime.fromtimestamp(value,timezone.utc).isoformat().replace(''+00:00'',''Z'')\\n\\ndef remaining():\\n require(time.monotonic() < work_end, ''WORK_DEADLINE'')\\n require(params[''callsBefore''] + 1 + native_count + params[''reservedAfterCalls''] <= 40, ''CALL_BUDGET'')\\n\\ndef child(identifier, args, out_cap=65536, timeout=30):\\n global native_count\\n remaining()\\n require(params[''callsBefore''] + 1 + native_count + 1 + params[''reservedAfterCalls''] <= 40, ''CALL_BUDGET'')\\n native_count += 1\\n rec = dict(id=identifier,exitCode=None,stdoutBytes=0,stdoutSHA256=digest(b''''),\\n  stderrBytes=0,stderrSHA256=digest(b''''),started=False,closed=False)\\n commands.append(rec)\\n buffers = [bytearray(),bytearray()]\\n errors = []\\n eof = [False,False]\\n overflow = threading.Event()\\n handle = subprocess.Popen([GIT]+args,cwd=str(REPO),stdin=subprocess.DEVNULL,\\n  stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=False,creationflags=0x08000000)\\n rec[''started''] = True\\n def drain(index, stream, cap):\\n  try:\\n   while True:\\n    piece = stream.read1(16384)\\n    if not piece:\\n     eof[index] = True\\n     return\\n    available = cap-len(buffers[index])\\n    buffers[index].extend(piece[:max(0,available)])\\n    if len(piece) > available:\\n     overflow.set()\\n     return\\n  except BaseException as error:\\n   errors.append(type(error).__name__)\\n workers = [threading.Thread(target=drain,args=(0,handle.stdout,out_cap),daemon=True),\\n  threading.Thread(target=drain,args=(1,handle.stderr,8192),daemon=True)]\\n for worker in workers:\\n  worker.start()\\n deadline = min(work_end,time.monotonic()+timeout)\\n killed = False\\n while handle.poll() is None and time.monotonic() < deadline and not overflow.is_set() and not errors:\\n  time.sleep(min(0.01,max(0,deadline-time.monotonic())))\\n if handle.poll() is None:\\n  handle.kill()\\n  killed = True\\n drain_end = min(hard_end,time.monotonic()+2)\\n try:\\n  handle.wait(timeout=max(0.001,drain_end-time.monotonic()))\\n except subprocess.TimeoutExpired:\\n  pass\\n for worker in workers:\\n  worker.join(timeout=max(0,drain_end-time.monotonic()))\\n out, err = bytes(buffers[0]), bytes(buffers[1])\\n captured_stderr.append(err)\\n rec.update(exitCode=handle.poll(),stdoutBytes=len(out),stdoutSHA256=digest(out),\\n  stderrBytes=len(err),stderrSHA256=digest(err),closed=handle.poll() is not None and all(eof))\\n require(rec[''closed''], ''CHILD_CLOSURE_UNKNOWN'')\\n require(not killed and not overflow.is_set() and not errors, ''CHILD_TIMEOUT_OR_DRAIN_FAILURE'')\\n return rec[''exitCode''],out,err\\n\\ndef ok(identifier,args,cap=65536,timeout=30):\\n code,out,err = child(identifier,args,cap,timeout)\\n require(code == 0, identifier+''_FAILED'')\\n return out\\n\\ndef snapshot(paths):\\n result = {}\\n for path in paths:\\n  if path.exists():\\n   result[str(path)] = digest(raw(path,524288))\\n  else:\\n   require(not path.is_symlink(), ''ABSENT_PATH_REPARSE'')\\n   result[str(path)] = None\\n return result\\n\\ndef encode(value):\\n return json.dumps(value,ensure_ascii=False,separators=('','','':''))\\n\\ndef closed_pairs(pairs):\\n value = {}\\n for key,item in pairs:\\n  require(key not in value, ''DUPLICATE_JSON_KEY'')\\n  value[key] = item\\n return value\\n\\ndef frames(payload):\\n encoded = encode(payload).encode(''utf-8'')\\n require(len(encoded) <= 20000, ''RECEIPT_PAYLOAD_BOUND'')\\n text = encoded.decode(''utf-8'')\\n total = 1\\n while True:\\n  result = []\\n  at = offset = 0\\n  while at < len(text):\\n   def make(n):\\n    piece = text[at:at+n]\\n    data = piece.encode(''utf-8'')\\n    return encode(dict(schemaVersion=''blurby.instruction-acquisition-A.stdout-frame.v1'',\\n     frame=len(result)+1,totalFrames=total,offset=offset,end=offset+len(data),\\n     payloadBytes=len(encoded),payloadSHA256=digest(encoded),pieceSHA256=digest(data),text=piece))+''\\\\r\\\\n''\\n   lo,hi = 0,len(text)-at\\n   while lo < hi:\\n    mid = (lo+hi+1)//2\\n    if len(make(mid)) <= 10000:\\n     lo = mid\\n    else:\\n     hi = mid-1\\n   require(lo > 0, ''FRAME_BOUND'')\\n   result.append(make(lo))\\n   offset += len(text[at:at+lo].encode(''utf-8''))\\n   at += lo\\n  if len(result) == total:\\n   break\\n  total = len(result)\\n require(len(result) <= 3 and sum(map(len,result)) <= 30000, ''RECEIPT_FRAME_BOUND'')\\n return result\\n\\ntry:\\n require(len(sys.argv) == 2, ''ARGUMENT_COUNT'')\\n params = json.loads(sys.argv[1],object_pairs_hook=closed_pairs)\\n require(type(params) is dict and set(params) == INPUT_KEYS, ''INPUT_KEYS'')\\n require(type(params[''callsBefore'']) is int and type(params[''reservedAfterCalls'']) is int and\\n  0 <= params[''callsBefore''] <= 39 and 0 <= params[''reservedAfterCalls''] <= 39, ''CALL_INPUT'')\\n require(type(params[''stdoutTransportQualified'']) is bool and params[''stdoutTransportQualified''], ''STDOUT_TRANSPORT_UNQUALIFIED'')\\n require(type(params[''phaseId'']) is str and len(params[''phaseId'']) <= 128 and\\n  type(params[''turnId'']) is str and len(params[''turnId'']) == 36, ''ACTOR_INPUT'')\\n require(type(params[''approvedConfigSHA256'']) is str and len(params[''approvedConfigSHA256'']) == 64 and\\n  all(c in ''0123456789abcdef'' for c in params[''approvedConfigSHA256'']), ''CONFIG_INPUT'')\\n start,work,hard = [moment(params[k]) for k in [''phaseStartUtc'',''workDeadlineUtc'',''hardDeadlineUtc'']]\\n require(start <= RECORDED_START <= time.time() < work < hard and hard-start <= 2700 and hard-work >= 60, ''CLOCK_BOUNDS'')\\n work_end = RECORDED_MONO+(work-RECORDED_START)\\n hard_end = RECORDED_MONO+(hard-RECORDED_START)\\n checked_raw(GIT,46464,GIT_HASH)\\n checked_raw(PYTHON,106328,PY_HASH)\\n ordinary(REPO,True)\\n ordinary(ROOT.parent,True)\\n require(not ROOT.exists() and not ROOT.is_symlink(), ''ROOT_EXISTS'')\\n for path,size,expected in CARRIED:\\n  value = checked_raw(path,size,expected)\\n  carried_rows.append(dict(path=path,expectedBytes=size,expectedSHA256=expected,actualBytes=len(value),\\n   actualSHA256=digest(value),ordinary=True,accessible=True,sameActorReceipt=True,consistent=True))\\n  del value\\n lines = ok(''g01'',[''rev-parse'',''--path-format=absolute'',''--show-toplevel'',''--git-common-dir'',''--is-shallow-repository'']).decode(''utf-8'',''strict'').splitlines()\\n require(len(lines)==3 and pathlib.Path(lines[0])==REPO and lines[2]==''false'', ''REPOSITORY_IDENTITY'')\\n common = pathlib.Path(lines[1])\\n require(common == REPO/''.git'', ''COMMON_GIT_IDENTITY'')\\n ordinary(common,True)\\n origin = ok(''g02'',[''config'',''--get-all'',''remote.origin.url'']).decode(''utf-8'',''strict'').splitlines()\\n require(origin == [ORIGIN], ''ORIGIN_IDENTITY'')\\n config = ok(''g03'',[''config'',''--show-origin'',''--show-scope'',''--list'',''-z''])\\n require(digest(config)==params[''approvedConfigSHA256''], ''UNAPPROVED_CONFIG'')\\n del config\\n tracked = [common/''index'',common/''config'',common/''HEAD'',common/''FETCH_HEAD'']+[REPO/p for p,n,h in PAYLOADS]\\n before = snapshot(tracked)\\n refs_before = ok(''g04'',[''for-each-ref'',''--format=%(refname) %(objectname)'',''refs/heads'',''refs/remotes'',''refs/tags''])\\n code,presence,presence_err = child(''g05'',[''cat-file'',''-e'',COMMIT+''^{commit}''])\\n if code != 0:\\n  require(code==128 and b''Not a valid object name'' in presence_err and not presence, ''PRESENCE_ERROR_NOT_MISSING'')\\n  ok(''g06'',[''-c'',''gc.auto=0'',''-c'',''maintenance.auto=false'',''fetch'',''--no-tags'',''--no-write-fetch-head'',\\n   ''--no-recurse-submodules'',''--no-auto-maintenance'',''--no-write-commit-graph'',''--no-prune'',\\n   ''--no-prune-tags'',''--refmap='',''--no-progress'',''origin'',COMMIT],65536,180)\\n  ok(''g07'',[''cat-file'',''-e'',COMMIT+''^{commit}''])\\n ROOT.mkdir()\\n created.append(str(ROOT))\\n for relative in [''docs'',''docs/governance'',''Virtuoso'']:\\n  path = ROOT/relative\\n  ordinary(path.parent,True)\\n  path.mkdir()\\n  created.append(str(path))\\n for i,(relative,size,expected) in enumerate(PAYLOADS,8):\\n  remaining()\\n  data = ok(''g''+str(i).zfill(2),[''--no-pager'',''show'',COMMIT+'':''+relative],size+1)\\n  require(len(data)==size and digest(data)==expected, ''OBJECT_PIN_MISMATCH'')\\n  data.decode(''utf-8'',''strict'')\\n  target = ROOT/relative\\n  ordinary(target.parent,True)\\n  with open(target,''xb'') as stream:\\n   created.append(str(target))\\n   require(stream.write(data)==len(data), ''SHORT_WRITE'')\\n   stream.flush()\\n  actual_length, actual_hash = len(data), digest(data)\\n  del data\\n  reread = checked_raw(target,size,expected)\\n  payload_rows.append(dict(path=str(target),expectedBytes=size,expectedSHA256=expected,objectReadCount=1,\\n   actualBytes=actual_length,actualSHA256=actual_hash,strictUtf8=True,exclusiveCreated=True,\\n   ordinaryRereadBytes=len(reread),ordinaryRereadSHA256=digest(reread),finalBytes=0,finalSHA256=''''))\\n  del reread\\n refs_after = ok(''g13'',[''for-each-ref'',''--format=%(refname) %(objectname)'',''refs/heads'',''refs/remotes'',''refs/tags''])\\n after = snapshot(tracked)\\n require(before==after and refs_before==refs_after, ''PRESERVATION_DIFFERENCE'')\\n for row,(relative,size,expected) in zip(payload_rows,PAYLOADS):\\n  value = checked_raw(ROOT/relative,size,expected)\\n  row.update(finalBytes=len(value),finalSHA256=digest(value))\\n  del value\\n require(not (ROOT/''receipt.json'').exists() and not (ROOT/''receipt.json'').is_symlink(), ''RECEIPT_EXISTS'')\\n remaining()\\nexcept BaseException as error:\\n failure = str(error) if isinstance(error,Hold) else type(error).__name__\\n\\ndef state_hash(mapping, suffix):\\n for path,value in mapping.items():\\n  if path.endswith(suffix):\\n   return value\\n return None\\n\\nreceipt = dict(schemaVersion=''blurby.instruction-acquisition-A.receipt.v1'',phase=''INSTRUCTION-ACQUISITION-A'',\\n actor=dict(chatId=''01a19d76-0837-7a43-a18d-8a40494879b8'',turnId=params.get(''turnId'','''') if params else ''''),\\n clock=dict(startedUtc=params.get(''phaseStartUtc'','''') if params else '''',\\n  workDeadlineUtc=params.get(''workDeadlineUtc'','''') if params else '''',hardDeadlineUtc=params.get(''hardDeadlineUtc'','''') if params else '''',finishedUtc=utc(time.time())),\\n accounting=dict(toolCalls=(params.get(''callsBefore'',0)+1 if params else 1),nativeCalls=native_count,\\n  wrappers=1,delegates=0,waits=0,polls=0,commands=commands),\\n source=dict(commit=COMMIT,repository=str(REPO),commonGit=str(common) if common else '''',origin=ORIGIN,\\n  nonShallow=common is not None,gitSHA256=GIT_HASH,pythonSHA256=PY_HASH),\\n namespace=dict(root=str(ROOT),ancestorsOrdinary=bool(created),rootInitiallyAbsent=bool(created),\\n  createdPaths=created,receiptAbsent=not (ROOT/''receipt.json'').exists()),payloads=payload_rows,\\n carriedInputs=carried_rows,preservation=dict(refsBeforeSHA256=digest(refs_before),refsAfterSHA256=digest(refs_after),\\n  indexBeforeSHA256=state_hash(before,''index''),indexAfterSHA256=state_hash(after,''index''),\\n  configBeforeSHA256=state_hash(before,''config''),configAfterSHA256=state_hash(after,''config''),\\n  headBefore=state_hash(before,''HEAD''),headAfter=state_hash(after,''HEAD''),\\n  sourceMutationObserved=bool(before and after and before!=after),receiptAbsent=not (ROOT/''receipt.json'').exists()),\\n failures=[failure] if failure else [],limitations=[''fresh-five semantics not performed'',''no role activation'',\\n  ''direct-child closure only'',''no global preservation proof'',''B not admitted''],\\n disposition=''HOLD/PARTIAL'' if failure else ''ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING'')\\ntry:\\n output = frames(receipt)\\n require(params is not None and params.get(''stdoutTransportQualified'') is True, ''STDOUT_TRANSPORT_UNQUALIFIED'')\\n if failure:\\n  for error_bytes in captured_stderr:\\n   sys.stderr.buffer.write(error_bytes)\\n  sys.stderr.buffer.flush()\\n for item in output:\\n  sys.stdout.buffer.write(item.encode(''utf-8''))\\n  sys.stdout.buffer.flush()\\nexcept BaseException:\\n sys.stderr.buffer.write(b''ACQUISITION_A_PUBLICATION_HOLD\\\\n'')\\n sys.stderr.buffer.flush()\\n raise SystemExit(2)\\nraise SystemExit(1 if failure else 0)\\n' '{\\\"phaseId\\\":\\\"INSTRUCTION-ACQUISITION-A\\\",\\\"turnId\\\":\\\"00000000-0000-0000-0000-000000000000\\\",\\\"phaseStartUtc\\\":\\\"2026-11-03T00:00:00.000000Z\\\",\\\"workDeadlineUtc\\\":\\\"2026-11-03T00:44:00.000000Z\\\",\\\"hardDeadlineUtc\\\":\\\"2026-11-03T00:45:00.000000Z\\\",\\\"approvedConfigSHA256\\\":\\\"0000000000000000000000000000000000000000000000000000000000000000\\\",\\\"callsBefore\\\":13,\\\"reservedAfterCalls\\\":11,\\\"stdoutTransportQualified\\\":false}'\",\"login\":false,\"max_output_tokens\":3000}",
+    "toolRequestSerializedCharacters": 16821,
+    "toolRequestUTF8Bytes": 16821,
+    "toolRequestSHA256": "4ec63b667cbee1bd5c04ea1363e5243a64ee252ddb4225b582398bce935499c6",
+    "encodedPowerShellConstructor": "[candidate C:/Program Files/PowerShell/7/pwsh.exe,-NoProfile,-NonInteractive,-EncodedCommand,base64(UTF16LE(powershellLiteralCommand))], quoted by local Python subprocess.list2cmdline; NOT a known qualified quiet exe",
+    "encodedPowerShellCharactersIncludingNUL": 43853,
+    "encodedPowerShellLineSHA256UTF8": "49cb93a20e38b3dfca4e5b9d97f9ac59b18c0ca4f18eaeea55d33879d09303c0",
+    "encodedPowerShellExceeds32767": true,
+    "encodedPowerShellDisposition": "REJECTED_NO_PROBE",
+    "actualQuietDirectArgvOrStdinTool": "NOT_SELECTED_OR_PROVEN_AVAILABLE",
+    "actualToolOuterWrapper": "MUST_BE_BOUND_NOT_ASSUMED_FROM_SPECIMENS",
+    "actualBindingFreeze": "futureactualbinding must be fully remeasured beforeentry; specimenfalseguarddoesnotadmitrun",
+    "observedOS206Avoidance": false
+  },
+  "clockContract": {
+    "firstExecutableStatement": "import built-in time, immediately RECORDED_START=time.time(), BEFOREallfile/path/hash/packing; interpreter/bootstrap startup must be covered by explicit Brain earlieranchor",
+    "recipeDeliveryCovered": "requiresBrainexplicitconservativeactualpreconsumptionanchorifearlierthanfirstexecutableclock",
+    "suppliedAnchor": null,
+    "lateClockFallback": "FORBIDDEN_HOLD",
+    "newClockSelected": false,
+    "sourceAnchorPair": "RECORDED_START=time.time(), immediately RECORDED_MONO=time.monotonic(); deadlines translated once fromsamepair, no UTC reanchoring; earlierBrainanchorstillrequired"
+  },
+  "history": [
+    {
+      "draftBytes": 20320,
+      "draftSHA256": "e111b524c7f5fcf52df3459b486a524bca3d67138aec976ad205c6496e9c8785",
+      "capacityBytes": 45688,
+      "capacitySHA256": "4c12476e11436cedbf5d746b5bed94786d67aa993fafcca9858d541a60a861f1",
+      "recipeFrames": 3,
+      "wrapperPlusGitMissing": 38,
+      "interpreterAdditiveMissing": 52,
+      "scope": "SOURCE_PROGRAM_UNAUTHORED_PARTIAL_ROUTE_NOTFIT; immutablehistoricalobservationnotactualexecution"
+    },
+    {
+      "draftBytes": 38018,
+      "draftSHA256": "28dc9b4483171d29aabf8954fcc1cbfdc0bca2c0b62bc9fa302b761ced21d89f",
+      "capacityBytes": 114716,
+      "capacitySHA256": "f6998150c8cdeaecaeec63baf74b1f715cb1cbbec8898741601d2b16ae62f035",
+      "programBytes": 15213,
+      "programSHA256": "6bdc160a65388a65594f1e3d8b0f32f7c5bf6cdcded3c397ed79af0726055a4e",
+      "scope": "FIRST_COMPLETE_INERT_SOURCE; observed40wrapperPlusGit/56interpreterAdditive; noqualification"
+    }
+  ],
+  "program": {
+    "sourceLocation": "The sole ```python fenced block in current recipe, bytes from first character following LF after opening fence through LF immediately before closing fence",
+    "bytes": 15495,
+    "sha256": "606180cba5bbfa8d330a13f275634eda8b67420e6a729d4ae0428a518d7c0621",
+    "asciiOnly": true,
+    "actualCodeFullyAuthored": true,
+    "syntaxCompileImportExecution": "NONE_PERFORMED",
+    "sourceEffectsReview": "PENDING_INDEPENDENT_FULL_SOURCE_REVIEW",
+    "retainedQuietFile": false,
+    "objectAcquisitionChildrenMaxMissing": 13,
+    "objectAcquisitionChildrenPresent": 11,
+    "lines": 326,
+    "staticAuthorCorrections": [
+      "pairedwall/monotonic anchors capturedbeforefile/hash/packing; no laterclockreadextendsdeadline",
+      "UTCinputrequired",
+      "duplicateinputJSONkeysrejected",
+      "exclusivecreatedpathrecordedbeforepossiblepartialwritefailure",
+      "filebodiesreleasedbetweenone-fileoperations"
+    ]
+  },
+  "nextProposalIfOverBudget": "boundedLOCALsource/transportauthoring+deliverycontract only for Brainreview; preserveexactsource+historicalcounts; no newquietallowance/files/retroactiveadmission"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "20261105T180323Z-external-create-item-PAGE-LINK-HELD-TURN-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-LINK-HELD-TURN-1",
+  "created": "2026-11-05T18:03:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "PAGE-LINK-HELD-TURN-1",
+      "title": "A link that never lands keeps the page the reader turned to",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#page-link-held-turn-1",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "description": "Page reading only. The held-turn cancel moves from the start of a jump to its landing: a jump that never lands leaves the held turn to save, a jump that lands saves the landing, and a blank edge landing never saves the older turn.",
+      "notes": "origin: PAGE-SAVE-RESTAMP-3 Wave B, split by Blurby.Brain1 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1b; Findings F-028). After BLOCK-TEXT-ORDER-1, which edits the same file. Not a release gate.",
+      "sequence": 97.8
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-04T21:41:05Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-LINK-HELD-TURN-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-LINK-HELD-TURN-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-LINK-HELD-TURN-1",
+      "actualRevision": "",
+      "recoveryId": "20261105T180323Z-external-create-item-PAGE-LINK-HELD-TURN-1",
+      "detail": {},
+      "providerItemId": "40f7c96c-c31e-8108-9ab7-fcf157b26626",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-05T18:04:20Z",
+  "outcome": "succeeded"
+}

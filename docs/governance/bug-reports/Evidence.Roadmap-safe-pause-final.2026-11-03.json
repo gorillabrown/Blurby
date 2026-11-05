@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "blurby.roadmap-safe-pause-final.v1",
+  "scope": "OWNER_AUTHORIZED_PRESERVATION_COMPLETE_WITHIN_NAMED_SCOPE_NOT_PRODUCT_COMPLETION",
+  "recordedAt": "2026-11-03T13:01:33.8869948Z",
+  "broaderGoal": "PAUSED",
+  "planningCheckpoint": {
+    "host": "RODNEY",
+    "branch": "eb/roadmap-review-20261102",
+    "commit": "1115432692ad7a55a531259c8aa7c2a9f8a5436e",
+    "workingTreeCleanAtCheckpoint": true,
+    "originalArtifacts": 9,
+    "allOriginalRawHashesAndBackupsVerified": true,
+    "backupRoot": "C:\\Projects\\Blurby-artifacts\\roadmap-pause-checkpoint-20261103T123122Z",
+    "manifest": "docs/governance/bug-reports/Evidence.Roadmap-pause-checkpoint.2026-11-03.json"
+  },
+  "cpuAndFocus": {
+    "host": "RODNEYSR",
+    "hostId": "remote-control:env_e_6ad10d73d698832184c47d5c34280e22",
+    "sourceChat": "01a19d76-0837-7a43-a18d-8a40494879b8",
+    "actualTurn": "01a1a169-d7ff-7f63-8df5-6ad00c79fc87",
+    "actualCommand": "exec-bc9ed819-7f2e-4b37-af15-38b9b2c1eaaa",
+    "sourceResultUntruncated": true,
+    "rootValidation": "Complete returned manifest/note UTF8 bytes independently rehashed and matched both raw pins; not a second remote filesystem read.",
+    "actualReceipt": {
+      "chargedActions": 19,
+      "originalStartUTC": "2026-11-03T12:34:15.072933+00:00",
+      "deadlineUTC": "2026-11-03T12:44:15.072933+00:00",
+      "endUTC": "2026-11-03T12:37:22.101545+00:00",
+      "strictJSON": "PASS: duplicate/nonfinite/trailing non-whitespace rejected",
+      "records": [
+        {
+          "path": "C:\\Projects\\Blurby-artifacts\\owner-pause-cpu-closeout-20261103\\manifest.json",
+          "bytes": 3189,
+          "sha256": "5c0042035a2185dfe161c00aed95f5827008102ba0cdc15b6d92cf796701a10f",
+          "completeText": "{\n  \"task\": \"OWNER-AUTHORIZED SAFE-STOP CHECKPOINT ONLY\",\n  \"startUTC\": \"2026-11-03T12:34:15.072933+00:00\",\n  \"deadlineUTC\": \"2026-11-03T12:44:15.072933+00:00\",\n  \"observationEndUTC\": \"2026-11-03T12:34:48.358012+00:00\",\n  \"chargedActions\": 18,\n  \"accounting\": {\n    \"execCommandCalls\": 2,\n    \"gitChildren\": 16,\n    \"workers\": 0,\n    \"network\": 0\n  },\n  \"beforeExpected\": {\n    \"cpu\": {\n      \"headTree\": [\n        \"270bf721eaf31006998c7972d73c984b3b21a7be\",\n        \"894dfbe13909fb5625ee565c59e4e8421e9b4d35\"\n      ],\n      \"branch\": \"eb/narrate-cpu-profile-1\",\n      \"indexBytes\": 295045,\n      \"indexSHA\": \"fa5be9e4ed588ed48305f02294c1bcfad974d5ebab0a4ba939a5fa37956cffb9\"\n    },\n    \"focus\": {\n      \"headTree\": [\n        \"8810511e0e47a004f1b561fb5b72128daefd5b7b\",\n        \"ef592b5704ecfa1b717c7df2312860c7aa014752\"\n      ],\n      \"branch\": \"eb/focus-word-only-1\",\n      \"indexBytes\": 340237,\n      \"indexSHA\": \"03a195409e8eff1485fbb36d6e88ba4fab0a2ab334b951d7e32d7357006f5d70\"\n    }\n  },\n  \"after\": [\n    {\n      \"checkout\": \"cpu\",\n      \"path\": \"C:\\\\Projects\\\\wt-narrate-cpu-profile-1-a1\",\n      \"headTree\": [\n        \"270bf721eaf31006998c7972d73c984b3b21a7be\",\n        \"894dfbe13909fb5625ee565c59e4e8421e9b4d35\"\n      ],\n      \"branch\": \"eb/narrate-cpu-profile-1\",\n      \"scopedStatus\": \"\",\n      \"namedLocalRefs\": \"refs/heads/eb/narrate-cpu-profile-1 270bf721eaf31006998c7972d73c984b3b21a7be\\n\",\n      \"index\": {\n        \"path\": \"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\worktrees\\\\wt-narrate-cpu-profile-1-a1\\\\index\",\n        \"bytes\": 295045,\n        \"sha256\": \"fa5be9e4ed588ed48305f02294c1bcfad974d5ebab0a4ba939a5fa37956cffb9\"\n      }\n    },\n    {\n      \"checkout\": \"focus\",\n      \"path\": \"C:\\\\Projects\\\\wt-focus-word-only-1\",\n      \"headTree\": [\n        \"8810511e0e47a004f1b561fb5b72128daefd5b7b\",\n        \"ef592b5704ecfa1b717c7df2312860c7aa014752\"\n      ],\n      \"branch\": \"eb/focus-word-only-1\",\n      \"scopedStatus\": \"\",\n      \"namedLocalRefs\": \"refs/heads/eb/focus-word-only-1 8810511e0e47a004f1b561fb5b72128daefd5b7b\\n\",\n      \"index\": {\n        \"path\": \"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\worktrees\\\\wt-focus-word-only-1\\\\index\",\n        \"bytes\": 340237,\n        \"sha256\": \"03a195409e8eff1485fbb36d6e88ba4fab0a2ab334b951d7e32d7357006f5d70\"\n      }\n    }\n  ],\n  \"sourceCopyList\": [],\n  \"backups\": [],\n  \"checkpointNote\": {\n    \"path\": \"C:\\\\Projects\\\\Blurby-artifacts\\\\owner-pause-cpu-closeout-20261103\\\\checkpoint.md\",\n    \"bytes\": 1398,\n    \"sha256\": \"f4140714a237eb1d3eece1c8a6b4e75fc23830bbfcff25b6740ea8ed96870753\"\n  },\n  \"preservation\": \"Exact observed HEAD/tree/branch/named-local-ref/index identities and empty scoped statuses unchanged across two observations\",\n  \"limits\": [\n    \"No ignored artifact or dependency inventory\",\n    \"No host-wide process absence claim\",\n    \"Historical receipts referenced, not freshly hashed\",\n    \"No unsupported transactional or global preservation claim\"\n  ],\n  \"operationReconciliation\": \"Historical CPU non-acquisition and Focus closed recovery attributed to existing records; all current checkpoint tool commands terminal; no known owned live operation\",\n  \"disposition\": \"SCOPED_CHECKPOINT_RECORDED_REMAIN_PAUSED\"\n}\n"
+        },
+        {
+          "path": "C:\\Projects\\Blurby-artifacts\\owner-pause-cpu-closeout-20261103\\checkpoint.md",
+          "bytes": 1398,
+          "sha256": "f4140714a237eb1d3eece1c8a6b4e75fc23830bbfcff25b6740ea8ed96870753",
+          "completeText": "# Owner pause checkpoint — CPU and Focus\nBroader work remains PAUSED. Safe-stop preservation only.\nFresh scoped status showed no tracked changes or non-ignored untracked files in either owned checkout; exact finite source-copy list is empty. Ignored dependencies/artifacts were not inventoried or backed up.\nOriginal source/local commits and existing immutable artifacts remain in place. No source or Git write, cleanup, operational probe, runtime child, or process termination was performed.\nCPU COMPLETE3 remains PARTIAL_INTERRUPTED/UNQUALIFIED. Brain subsequently reported complete actual launch-history review established non-acquisition and released only its administrative reservation. That historical attribution is not a new process observation or host-wide clearance.\nFocus Q2 is historically closed by recovery receipt SHA256 321aee8a992b65228aec54152da4712f0b1c2012da917741cf171fe325a166d1. No Focus startup was authorized. This checkpoint does not freshly rehash that receipt.\nThe Q3 DATA entry and role-only preparation tools returned terminal exit results; role-only preparation wrote no files. No known live operation is retained by this chat, and no host process census was made.\nResume requires explicit owner instruction and fresh applicable admission/ownership, scope, clock and budget checks. Native, Business quality, Focus authoring and A/B-READ/C remain paused/unadmitted.\n"
+        }
+      ],
+      "state": "REMAIN_PAUSED"
+    }
+  },
+  "business": {
+    "host": "RODNEYSR",
+    "hostId": "remote-control:env_e_6ad10d73d698832184c47d5c34280e22",
+    "executingChat": "01a19d76-0837-7a43-a18d-8a40494879b8",
+    "actualTurn": "01a1a17b-a8aa-7422-b51c-cca81f8cab11",
+    "actualCommand": "exec-e03abf7b-4082-4c8b-8988-1b4fffd519d0",
+    "sourceResultUntruncated": true,
+    "rootValidation": "Complete returned manifest/note UTF8 bytes independently rehashed. Three named raw source pins/lengths and reported complete-byte equality matched; five named metadata observations conserved. Not a second remote filesystem read.",
+    "actualReceipt": {
+      "outcome": "VERIFIED_THREE_FILE_RAW_BACKUP_REMAIN_PAUSED",
+      "chargedActions": 1,
+      "endUTC": "2026-11-03T12:57:23.810838+00:00",
+      "records": [
+        {
+          "path": "C:\\Projects\\Blurby-artifacts\\owner-pause-business-rawbackup-20261103\\manifest.json",
+          "bytes": 4339,
+          "sha256": "ffe747c98ffac78a63ba10e2ec66ad032891306a2a94710c28fae4f5985e7541",
+          "completeText": "{\"outcome\":\"VERIFIED_THREE_FILE_RAW_BACKUP_REMAIN_PAUSED\",\"startUTC\":\"2026-11-03T12:57:23.713822+00:00\",\"deadlineUTC\":\"2026-11-03T13:02:23.713822+00:00\",\"verifiedUTC\":\"2026-11-03T12:57:23.797938+00:00\",\"chargedActions\":1,\"gitChildren\":0,\"copies\":[{\"relativePath\":\"main/constants.js\",\"source\":\"C:\\\\Projects\\\\bb-business\\\\main\\\\constants.js\",\"backup\":\"C:\\\\Projects\\\\Blurby-artifacts\\\\owner-pause-business-rawbackup-20261103\\\\files\\\\business\\\\main\\\\constants.js\",\"raw\":{\"bytes\":14972,\"sha256\":\"d1d685abb97ed51a55a48871381770c9b67a3fef9f60667567c0399b3cd1e653\"},\"sourceIdentityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"844424931752238\",\"st_size\":\"14972\",\"st_mtime_ns\":\"1793682485562682800\",\"st_nlink\":\"1\"},\"backupIdentity\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"77687093572155541\",\"st_size\":\"14972\",\"st_mtime_ns\":\"1793710643725059600\",\"st_nlink\":\"1\"},\"completeRawEquality\":true},{\"relativePath\":\"tests/businessRead.test.js\",\"source\":\"C:\\\\Projects\\\\bb-business\\\\tests\\\\businessRead.test.js\",\"backup\":\"C:\\\\Projects\\\\Blurby-artifacts\\\\owner-pause-business-rawbackup-20261103\\\\files\\\\business\\\\tests\\\\businessRead.test.js\",\"raw\":{\"bytes\":41428,\"sha256\":\"f263631a4105d6f41200497a00f3d49a3a3cb14e47b902c3733833a48907ec10\"},\"sourceIdentityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"1125899908537704\",\"st_size\":\"41428\",\"st_mtime_ns\":\"1793693967519698100\",\"st_nlink\":\"1\"},\"backupIdentity\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"65020719620176029\",\"st_size\":\"41428\",\"st_mtime_ns\":\"1793710643743483200\",\"st_nlink\":\"1\"},\"completeRawEquality\":true},{\"relativePath\":\"main/business/read.js\",\"source\":\"C:\\\\Projects\\\\bb-business\\\\main\\\\business\\\\read.js\",\"backup\":\"C:\\\\Projects\\\\Blurby-artifacts\\\\owner-pause-business-rawbackup-20261103\\\\files\\\\business\\\\main\\\\business\\\\read.js\",\"raw\":{\"bytes\":8509,\"sha256\":\"d6c157f99fc8da0e82768b52200e2d65792eb5b4a2d04d930b5602ba899e65aa\"},\"sourceIdentityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"562949955121093\",\"st_size\":\"8509\",\"st_mtime_ns\":\"1793682485561672900\",\"st_nlink\":\"1\"},\"backupIdentity\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"631911322715445105\",\"st_size\":\"8509\",\"st_mtime_ns\":\"1793710643764803400\",\"st_nlink\":\"1\"},\"completeRawEquality\":true}],\"metadata\":[{\"path\":\"C:\\\\Projects\\\\bb-business\\\\.git\",\"raw\":{\"bytes\":66,\"sha256\":\"90d9d536d441fa3e7d40538fa804e8c9d8dc50d0421f393d5e603ce8f44f0831\"},\"identityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"844424931750124\",\"st_size\":\"66\",\"st_mtime_ns\":\"1793659785484813300\",\"st_nlink\":\"1\"},\"unchanged\":true},{\"path\":\"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\worktrees\\\\bb-business\\\\HEAD\",\"raw\":{\"bytes\":37,\"sha256\":\"851258dfc454265859aa810dde528e8090037ca5b77f66f8878aeeef51553e2c\"},\"identityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"844424931750127\",\"st_size\":\"37\",\"st_mtime_ns\":\"1793659785486810800\",\"st_nlink\":\"1\"},\"unchanged\":true},{\"path\":\"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\worktrees\\\\bb-business\\\\index\",\"raw\":{\"bytes\":337150,\"sha256\":\"2d4fdc649c68b6169a80c8645f4cac55d682cf6371a20d5c7fb91b07d48b628d\"},\"identityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"1970324838669231\",\"st_size\":\"337150\",\"st_mtime_ns\":\"1793679534763644500\",\"st_nlink\":\"1\"},\"unchanged\":true},{\"path\":\"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\config\",\"raw\":{\"bytes\":857,\"sha256\":\"792bbec7e0d317c550e6fed6f459ecc0da5c6d4fd5ce7795bff14e78315f00d2\"},\"identityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"3096224744762677\",\"st_size\":\"857\",\"st_mtime_ns\":\"1793379914037275800\",\"st_nlink\":\"1\"},\"unchanged\":true},{\"path\":\"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\\\\.git\\\\refs\\\\heads\\\\eb\\\\blurby-business-1\",\"raw\":{\"bytes\":41,\"sha256\":\"9f2f109a6ec15b20c4bd7e88b834073b7eb0764e8a3689e17a87b7d4feb22f9c\"},\"identityBeforeAfter\":{\"st_dev\":\"4794174405118012579\",\"st_ino\":\"562949955120943\",\"st_size\":\"41\",\"st_mtime_ns\":\"1793679534785692900\",\"st_nlink\":\"1\"},\"unchanged\":true}],\"namedRef\":{\"domain\":\"loose\",\"name\":\"refs/heads/eb/blurby-business-1\",\"commit\":\"9b0f29d48c5df2eb66b9458e87da2d8ce7549293\",\"looseAbsentBeforeAfter\":false},\"note\":{\"bytes\":784,\"sha256\":\"8a729c24a4d7004023bbad4d6d977957a145c3ac6cbbced7fcb9566c976981a9\"},\"limits\":[\"Only exact three files backed up\",\"Historical status/tree only, no fresh Git status/tree\",\"No global/process clearance\",\"No earlier failure repaired\"],\"state\":\"REMAIN_PAUSED\"}\n"
+        },
+        {
+          "path": "C:\\Projects\\Blurby-artifacts\\owner-pause-business-rawbackup-20261103\\checkpoint.md",
+          "bytes": 784,
+          "sha256": "8a729c24a4d7004023bbad4d6d977957a145c3ac6cbbced7fcb9566c976981a9",
+          "completeText": "# Business safe-stop raw backup\nOnly the three explicitly owned source/test files were copied as inert raw bytes. Complete byte equality, pinned hashes and source/metadata identity conservation were verified. No Git command, source execution, repair, cleanup, test or process census occurred.\nPrior Business preservation-program guard failures and their roots remain untouched; this checkpoint does not repair or qualify them. Prior status/tree provenance is turn01a1a166-ced9-77f3-8349-c92b8e6ca203 /exec-c3db056b, treea6299d79d5a008ab761bc917a62eba44458499b5; it is not a fresh Git observation.\nApplication work, Native, reviews and release remain paused. Resume requires explicit owner instruction and applicable fresh admission. No global preservation or process-clearance claim.\n"
+        }
+      ]
+    }
+  },
+  "native": {
+    "host": "RODNEY",
+    "hostId": "local",
+    "rootIndependentValidation": {
+      "verifiedAt": "2026-11-03T12:59:04.2953718Z",
+      "root": "C:/Projects/Blurby-artifacts/owner-pause-native-closeout-20261103",
+      "manifestBytes": 7525,
+      "manifestSHA256": "8e2541d023956a6531df5d17cc45a07d5f427e15c524a93f7f2720a237a4e545",
+      "noteBytes": 1229,
+      "noteSHA256": "bc2c98c8a389989c97155ef42b01ee6425f66663c71e07e74c7f4e680e822038",
+      "files": [
+        {
+          "path": "scripts/native-path-attestation/README.md",
+          "bytes": 41416,
+          "sha256": "0be4f45e31841128a7d64a0a1e645676c0c3388114b5345576935f72b5eabdc6",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/bundle-manifest.json",
+          "bytes": 14332,
+          "sha256": "7590e1595ef05d3ccf1cd1ed94d085063b8b6e078797ad6aed7ae592ae70969d",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/collector.mjs",
+          "bytes": 56814,
+          "sha256": "350945e10a22f58b34f0f5e457fd8a7196ad16dfd2094637d03a83bdddbf37c8",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/driver.mjs",
+          "bytes": 199169,
+          "sha256": "246e863813d99f108b45dc8f2b738015ca188b8e3e37799bd0af17628ae5d87e",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixture-entry.cjs",
+          "bytes": 19939,
+          "sha256": "92e2d8e607bf8d0c38e9094f0479fa1af9f0c66c843fadd31fb395135066f4f1",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixtures/dummy.cjs",
+          "bytes": 152,
+          "sha256": "88a45b1ece7abee95599703e2d7bb8b2ab4d5f4626464e24f17d32fc79a8e520",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixtures/engine.cjs",
+          "bytes": 1454,
+          "sha256": "fe1fa1d38efeef1db4f526d14ab271502f7274355f3aa431fdc3ace150778cee",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixtures/foreign.cjs",
+          "bytes": 247,
+          "sha256": "ee7dbcbf5decafed8846eb897138a7e3f06a4d1332ba538aeea2ac8dbf4b263a",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixtures/main.cjs",
+          "bytes": 1137,
+          "sha256": "af146ece37fefa9c4d56de058b190e90c26a674767a14dbda60200541a1c05f8",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/fixtures/queue.cjs",
+          "bytes": 1043,
+          "sha256": "c4d4958e2436ea7b2d103fb01265aef0c48912e04590dc7b782b0953e36d4788",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/result.schema.json",
+          "bytes": 173699,
+          "sha256": "1727ea0628c423a39513ae4a48277d1062ac23054a28aa4cede8406a21b407cf",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/runtime-client.mjs",
+          "bytes": 18297,
+          "sha256": "b99f6505fe3156b4d683885cb10e5e4e456ccd151dd5369d5ee025511ced4f91",
+          "completeByteEquality": true
+        },
+        {
+          "path": "scripts/native-path-attestation/static-controls.mjs",
+          "bytes": 38620,
+          "sha256": "d83155907175ce3cad75541caf0c44a0aacc9c170c977624b06ed5d07c8c9403",
+          "completeByteEquality": true
+        }
+      ],
+      "scope": "ROOT_READONLY_FULL_SOURCE_COPY_BYTE_COMPARISON_NO_CODE_EXECUTION_OR_GIT"
+    },
+    "sourceGitStateAtPreservation": {
+      "head": "9264c9b325016ad113bd673014a07856f6a0ba7b",
+      "tree": "69893a0ca6d1f90691eb41001bbfe9867e2b5f98",
+      "modifiedFiles": 7,
+      "preserved": true,
+      "evidenceDomain": "Backup manifest and Brain preservation observations; Root independently compared the thirteen complete source/copy byte pairs."
+    },
+    "limitations": [
+      "Two preliminary metadata failures preserved; initial exact UTC unqualified.",
+      "Corrected backup window recorded separately; no retroactive native/runtime/source qualification.",
+      "Original Native chat remains archived."
+    ]
+  },
+  "brainFinalAcceptance": {
+    "sourceChat": "01a179e8-7a40-75c0-93f4-d3045ad99027",
+    "actualToolItem": "exec-bbe6f2fd-e11f-4e6c-ba65-4694d6fa68db",
+    "actualMessage": "EXECUTOR PRESERVATION NOW COMPLETE within stated scope. Business raw backups actually succeeded via quiet CPU (not Business/connectivity final): actual turn01a1a17b-a8aa-7422-b51c-cca81f8cab11, sole command exec-e03abf7b-4082-4c8b-8988-1b4fffd519d0 completedexit0, full7578-char program and6359-char untruncated output inspected. Exact3files copied/reopened/COMPLETEbyte-compared to exactpins; source identities and literal .git/HEAD/index/config/namedref rawbytes unchanged. Device/inode/ns fields canonical strings, NO Git child/sourcecode/network/processprobe. 1/8executionactions; actualDATAclock12:57:23.713822→12:57:23.810838UTC, deadline13:02:23.713822; entire appturn12:56:38→12:57:29 also inside5m conservative bound.\n\nRodneySR outputs C:/Projects/Blurby-artifacts/owner-pause-business-rawbackup-20261103/manifest.json4339/SHAffe747c98ffac78a63ba10e2ec66ad032891306a2a94710c28fae4f5985e7541; checkpoint.md784/SHA8a729c24a4d7004023bbad4d6d977957a145c3ac6cbbced7fcb9566c976981a9. BOTHCOMPLETEactualtexts read; I independently recomputed their UTF8length/SHA using Root-only builtincryptoDATA, bothmatch. Actualsource3pins: constants14972/d1d685…, test41428/f26363…, read8509/d6c157…. Backup paths files/business/<exactsourceRelative>. Qualifiedno-Gitphysicalref9b0f29d4; priorGit tree/status explicitlyhistorical, no freshstatus/globalabsenceclaim. Old guard-failure receipts/roots untouched, not acceptance. CPUactor isidle and saysREMAIN_PAUSED; no further executor checks needed.\n\nNative13-copy checkpoint independently verified locally by Brain full source/copybytes+manifest/note actualhashes (earlier report); CPU/Focus complete receipt independentlyverified; your planning9 artifacts11154326 alreadycheckpointed. All localBrainworkers completed; none operational. All SOURCE/rawbackup claims scoped; ignoredartifactinventory/globalprocess/unknownhandle proof not asserted. No known owned operational handle requires action from existingterminal/nonacquisition receipts; don't turn this into hostwideclearance.\n\nPlease independently inspect actual Business returned complete records as you did CPU, then finish the owner-requested durable scoped safe-pause closeout only. Include sourcebackup physicalHOSTmapping and failed-preservation limitations. Broader project/Native/A-BREAD-C/application gates remainPAUSED/held; no implementation, tests, cleanup, statuscompletion or new executor action is authorized. No need to restart/check anything to 'make it complete'."
+  },
+  "failurePreservation": [
+    "Business first attempt rejected rounded filesystem identity before copying; failed root/manifest/note preserved.",
+    "Business next attempt rejected an overbroad tool link-count check before copying; no output root created.",
+    "Business prescribed subsequent attempt rejected an unidentified pre-Git assertion; zero copies/root, source untouched; unrelated connectivity final was not accepted as a backup receipt.",
+    "Successful Business preservation used a separately admitted minimal no-Git DATA route; earlier failures were not rewritten as passes."
+  ],
+  "finalBoundaries": {
+    "applicationMain": "ac19ea60b6cd8b4fff3e5413b111925b7ef78485",
+    "implementationResumed": false,
+    "newTestsOrRuntime": false,
+    "sourceOrPackageAccepted": false,
+    "registerStatusSeqChanged": false,
+    "terminalCompletionOrSuccessorElevation": false,
+    "cleanupResetDelete": false,
+    "knownOwnedOperationalHandleRequiringAction": false,
+    "processScope": "Known-owner terminal/nonacquisition records only; no global process/ignored artifact inventory or unknown-handle clearance.",
+    "resumption": "Explicit owner resume plus fresh applicable admissions required. No automatic restoration, replay, source repair or budget/clock reuse."
+  }
+}
+

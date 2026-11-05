@@ -1,0 +1,34 @@
+{
+  "id": "20261103T170027Z-external-set-status-IOS-APP-1",
+  "operation": "external-set-status",
+  "item_id": "IOS-APP-1",
+  "created": "2026-11-03T17:00:27Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 154
+    },
+    "expectedRevision": "6402d06c2030d8b32b56d4dab3af284fafec1dd36602ba0fd2455f929fb2a160",
+    "idempotencyKey": "set-status:IOS-APP-1:[('sequence', 154)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "IOS-APP-1",
+      "idempotencyKey": "set-status:IOS-APP-1:[('sequence', 154)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T170027Z-external-set-status-IOS-APP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:01:34Z",
+  "outcome": "succeeded"
+}

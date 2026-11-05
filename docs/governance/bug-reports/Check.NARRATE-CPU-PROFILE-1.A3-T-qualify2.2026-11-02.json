@@ -1,0 +1,78 @@
+{
+  "item": "NARRATE-CPU-PROFILE-1",
+  "phase": "T-QUALIFY2",
+  "scope": "prospective retained control qualification only; no source or helper grant",
+  "observedAt": "2026-11-03T05:22:35.3654865Z",
+  "spec": "docs/governance/bug-reports/Check.NARRATE-CPU-PROFILE-1.A3-T-qualify2-ready.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "7de1ac17e3842e2c71af18e2fbada47516257da574ca679a6c4d5e76a1b07a80",
+      "publishedBaseSHA256": "7de1ac17e3842e2c71af18e2fbada47516257da574ca679a6c4d5e76a1b07a80",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd54e0aea17a77a09e3819fbf3b2fbda64ea96eb8236c2f2e70f47141b0f8343",
+      "publishedBaseSHA256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "matchesPublishedBase": false,
+      "changedInPacket": true
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Check.NARRATE-CPU-PROFILE-1.A3-T-qualify2-ready.2026-11-02.md",
+      "sha256": "5cc97eddd241d5149426de80380cae492ca6aaaef84339040facdec9caf71b63",
+      "publishedBaseSHA256": null,
+      "matchesPublishedBase": null,
+      "newInPacket": true
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (NARRATE-CPU-PROFILE-1): PASS",
+    "  cited: LL-176, LL-177",
+    "  [info] lessons-not-cited: 121 live lesson(s) not cited \u2014 confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u2026",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Current custody, retained three-runner inputs, successor inline mapping and complete case/argv freeze receive substantive preinvoke review [calculable] @control-preparation \u2014 0m (median of 6 runs)",
+    "2. Same recorder, CLI and existing-P baseline yield complete35-command/100+40-case receipts with honest NOT_RUN labels [calculable] @qualification \u2014 0m (median of 6 runs)",
+    "3. Same-byte compliance-first quality reviews and external held receipt preserve all failed history and later gates [calculable] @review-checkpoint \u2014 3m (median of 71 runs)",
+    "Total: chain 3m \u00b7 sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "0c61401a644297e98ff5984f553153ae63f329ec",
+  "sha256Domain": "working-tree raw; prior published-base raw separately recorded; LL177 additive append and new addendum are prospective packet changes, not mutated historical source/fixtures",
+  "priorFailedCheck": {
+    "path": "C:/Projects/Blurby-artifacts/cpu-newline-layer-planning-20261102/Check.before-item-heading-fix.json",
+    "sha256": "481498d21a2522f5b38b59c67338c85c72138205972a05094d82c2f35badd6cf",
+    "u9Exit": 1,
+    "u10Exit": 1,
+    "disposition": "Sprint Code absent from first heading; one title correction only; final actual0/0 is separate rerun, not old result relabeled"
+  }
+}

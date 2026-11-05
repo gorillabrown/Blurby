@@ -1,0 +1,57 @@
+{
+  "item": "NARRATE-CPU-PROFILE-1",
+  "phase": "NARRATE-CPU-PROFILE-1.A3-T",
+  "scope": "prospective phase planning qualification only; no source/control/runtime admission",
+  "observedAt": "2026-11-03T02:57:05.5843537Z",
+  "spec": "docs/governance/bug-reports/Draft.NARRATE-CPU-PROFILE-1.A3-T.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "022253f56437951472c9069cf1f09edf613249508f312c08a392c39479f3c4ac"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.NARRATE-CPU-PROFILE-1.A3-T.2026-11-02.md",
+      "sha256": "c726bc53f9d81685e2722ebd95f35514e8e2f52436cc682efef014ecb65732fc"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (NARRATE-CPU-PROFILE-1): PASS",
+    "  cited: LL-176, LL-002, LL-003, LL-090, LL-118, LL-006, LL-063, LL-066, LL-068, LL-096, LL-097, LL-113, LL-128, LL-134, LL-137, LL-142, LL-143, LL-144, LL-162, LL-172, LL-174",
+    "  [info] lessons-not-cited: 101 live lesson(s) not cited — confirm none applies: LL-004 (infrastructure, quality), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures), LL-018 (reader, flow mode, performance), LL-019 (renderer, pagination), LL-020 (renderer, pagination, CSS)…",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. CONTROL-AUTHOR consumes qualified exact P/helper/runner/support inputs and owns fresh external targets [calculable] @preflight — 3m (median of 71 runs)",
+    "2. CONTROL-AUTHOR freezes three external runners, literal synthetic fixtures, CLI refusal and opposing detectors [calculable] @positive-control — 4m (median of 20 runs)",
+    "3. CONTROL-AUTHOR records causal missing-T-API baseline, parallel reviews and retained external held receipt [calculable] @review-checkpoint — 3m (median of 71 runs)",
+    "4. FULL implements all three additive APIs atomically in accepted helper while preserving P policy [calculable] @feature — 9m (median of 3 runs)",
+    "5. FULL runs every frozen T control, unchanged P214, new import guard and syntax on exact candidate [calculable] @qualification — 0m (median of 6 runs)",
+    "6. FULL accepts same-byte parallel review gates, external Marcus receipt and local helper-only checkpoint [calculable] @source-review-closeout — 3m (median of 71 runs)",
+    "Total: chain 22m · sum 22m; 6 of 6 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "priorCheck": "Historical f446 input retained unchanged in Git"
+}

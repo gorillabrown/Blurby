@@ -1,0 +1,34 @@
+{
+  "id": "20261103T223119Z-external-set-status-FURTHEST-PERSIST-1",
+  "operation": "external-set-status",
+  "item_id": "FURTHEST-PERSIST-1",
+  "created": "2026-11-03T22:31:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "PAGE-PAGES-READ-1; LIBRARY-WRITE-RACE-3"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FURTHEST-PERSIST-1:[('prerequisites', 'PAGE-PAGES-READ-1; LIBRARY-WRITE-RACE-3')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FURTHEST-PERSIST-1",
+      "idempotencyKey": "set-status:FURTHEST-PERSIST-1:[('prerequisites', 'PAGE-PAGES-READ-1; LIBRARY-WRITE-RACE-3')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T223119Z-external-set-status-FURTHEST-PERSIST-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T22:32:18Z",
+  "outcome": "succeeded"
+}

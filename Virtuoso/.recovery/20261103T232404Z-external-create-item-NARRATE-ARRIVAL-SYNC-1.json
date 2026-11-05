@@ -1,0 +1,49 @@
+{
+  "id": "20261103T232404Z-external-create-item-NARRATE-ARRIVAL-SYNC-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-ARRIVAL-SYNC-1",
+  "created": "2026-11-03T23:24:04Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-ARRIVAL-SYNC-1",
+      "title": "Narrate shows the saved place when you switch to it, so Play starts there",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "TTS / Narration Engine",
+      "spec_link": "docs/planning/specs/2026-11-03/NARRATE-ARRIVAL-SYNC-1.md",
+      "branch": "eb/narrate-arrival-sync-1",
+      "description": "After switching into Narrate at a saved place, the view moves to that place's section once the section map loads, so Play starts at the saved word's sentence instead of the title page. Play-first-text never judges a view that has not yet been moved. Change in `narrate/ModeRuntime.ts` plus harness hardening in `main/narrate/trial.js`.",
+      "notes": "origin: release gate (1) run 5 RED (D6 warm trial), 2026-11-03; Aristotle diagnosis on RodneySr; fix ruling by Blurby.Brain1 2026-11-03 (Brain1.NARRATE-ARRIVAL-SYNC-1.2026-11-03.md). Release-candidate hotfix ahead of every post-RC item; rule 53 pair and gate (1) run 6 on RodneySr; the 21 RC close-outs wait for run 6.",
+      "sequence": 88.5,
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T23:18:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-ARRIVAL-SYNC-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-ARRIVAL-SYNC-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-ARRIVAL-SYNC-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T232404Z-external-create-item-NARRATE-ARRIVAL-SYNC-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-8189-975c-d9bd2c10e4a5",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T23:24:50Z",
+  "outcome": "succeeded"
+}

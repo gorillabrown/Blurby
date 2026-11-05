@@ -3146,6 +3146,51 @@ Related: LL-142, LL-152; NARRATE-GAP-PAUSE-1.
 **Status:** Observation
 Related: LL-139, LL-143.
 
+### LL-143 — status (2026-11-02, 2026-11-02)
+**Status:** Observation - revised at roadmap review 2026-11-02: standing rule 44 now requires exact committed-command base/prescribed/wrong-variant receipts with input identity, output and exit code; planner-surrogate and base-only checks do not qualify. Retain the lesson and earlier history; no duplicate promotion or retirement.
+
+### LL-175 — Preserve format-required PDF cross-reference separators (Business HB6 Task2, 2026-11-02)
+**Verdict:** A text whitespace warning does not justify changing generated PDF bytes. Fixed-width cross-reference records may require a trailing separator before the line ending.
+**Evidence:** Accepted fixture checkpoint1bcceb0e has startxref3936 and31 cross-reference rows of20bytes including LF; Roadmap independently checked every in-use object offset from the published raw blob. Brain's BB-HB6-T2-PDF-XREF-20261102 disposition preserves those bytes and permits a command-local PDF-path-only blank-at-eol exception, while ordinary text-file checks remain strict. Component checkpoint and receipt provenance: `docs/governance/close-outs/Memo.BLURBY-BUSINESS-1.HB6-T2-held.2026-11-02.md`.
+**Recommendation:** Inspect the actual format and validate offsets/widths before interpreting generated-file whitespace as corruption. Any exception must be separately scoped to the exact format/path and command; do not alter global Git config, attributes, hooks or unrelated text checks. Never regenerate or trim an accepted PDF to satisfy a generic text checker.
+**Applies to:** generated PDF fixtures and format-aware Git verification; not general source whitespace.
+**Status:** Observation
+
+### LL-176 — Suppress PowerShell completion objects in binary evidence collectors (B0, 2026-11-02)
+**Verdict:** A bare asynchronous copy completion can emit a completion object into PowerShell's success stream and contaminate a function intended to return only bytes. Static approval alone did not detect this defect.
+**Evidence:** In the pinned PowerShell7.6.9 B0 collector, the checker’s bare `CopyToAsync(...).GetAwaiter().GetResult()` emitted `System.Threading.Tasks.VoidTaskResult`; two outer-driver copy completions had the same leak. The first wrong-subject control returned HARNESS_ERROR2 instead of the required parity-negative1. The bounded repair suppressed only those three completion values with `[void](...)`. Brain subsequently accepted the seven structured controls: malformed input2; four ordinary parity negatives1; I1/I2 canonical0; zero incidental objects. Brain read complete compact projections and reviewer reports, not all209387 embedded receipt bytes. Accepted local I2 is `63f5b1f7555e3c8b5b748d6024219cbff190ae9e`; final receipt SHA256 `cbb92982cc89e759647542a93a27bd202a37ae842f1398c218d11fe85da2c941`, compact projection `c616b879ae7de984a3e09789fceab85b7994b5e583ee94774c88e19545432ca4`. Historical interrupted read-only accounting remains UNRECONCILED.
+**Recommendation:** Explicitly discard completion-only return values at each collector layer. Preserve real byte-array returns, stderr text, exception propagation and exit-code checks. Qualify the actual structured stdout and exact positive/negative exits before trusting the collector; do not suppress every output or convert a harness failure into a successful negative control.
+**Applies to:** prospective PowerShell subprocess/binary evidence collectors, especially asynchronous stream copies. This lesson does not authorize changing the qualified registry helper, global PowerShell settings, closed inputs or accepted historical receipts. Node/Python recorders still require their own output-integrity controls; the PowerShell-specific cast is not a substitute.
+**Status:** Observation
+
+### LL-177 — Distinguish source, representation and child-output escaping (CPU T controls, 2026-11-02)
+**Verdict:** A displayed representation of a generated child program is not its eventual output. Interpret each language/serialization boundary exactly once before diagnosing or changing an escape sequence.
+**Evidence:** CPU control qualification stopped PARTIAL30/30 with zero Node children after a preinvoke finding alleged malformed newline literals. Actual V3 static output `exec-d0dd6313-4b49-4f9c-ab68-f9dbd9545e7c` shows Python source `[92,92,110]` becoming Node source `[92,110]`, whose JavaScript string denotes LF `[10]`; durable JSON's Python delimiter already denotes LF `[10]`. Root independently decoded the reported representations as data. Brain's `CPU-T-ESCAPING-INTERPRETATION-20261102` confirms no literal repair; reducing the escape would instead introduce invalid JavaScript source. The earlier reviewer HOLD and receipt `24d05360b94d1b2ee4419a06af1399ba83c24fdc8a1d6a6fc962c05816e010af` remain unchanged. Correcting the diagnosis does not qualify the 35 unrun commands or backfill runtime evidence. Exact disposition: `docs/governance/bug-reports/Brain.NARRATE-CPU-PROFILE-1.A3-T-qualify2.2026-11-02.md`.
+**Recommendation:** Bind raw bytes/hashes, identify every source-string and JSON/repr layer, and inspect the derived child argv/codepoints before proposing a literal edit. Preserve contradictory findings and append the corrected interpretation. Actual calibration still belongs inside its separately admitted phase; do not add an unadmitted probe, reopen a closed clock, or treat a static correction as execution PASS. A zero-byte placeholder with observed=false/complete=false/null byte count is not captured empty output; honor the accompanying observation/closure flags.
+**Applies to:** prospective nested Python/JavaScript/PowerShell recorders, generated commands and evidence projections. This adds no source/helper/runtime authority and does not rewrite frozen historical inputs or receipts.
+**Status:** Observation
+
+### LL-178 — Compare evidence in its declared path and data-type domain (CPU/Business preparation, 2026-11-02)
+**Verdict:** A valid comparison needs the right source authority, byte representation and JSON-native types. A failed comparison alone does not identify source drift or defective program text.
+**Evidence:** Brain's CPU provenance reconciliation4/6 resolved all13 pointers: unchanged sourceP lesson bytes belonged to its Git/source census, while the later published lesson/frozen fixture belonged to a different root; resolving every relative path at sourceP produced a false mismatch. Business input12/12 also stopped on application-owned bookkeeping refs; Brain accepted only the specifically observed Codex ref/cache changes as nongates, preserving source/test/index/worktree protection and the failed observation. In Business Q32/40, the actual calibration child returned exit7/correct raw bytes, but strict journal readback failed because parentEnvironmentBefore held Python tuples and JSON returned lists. Exact V2 body1790f9... needs native lists at construction and comparison, not relaxed whole-record equality. Its UTF8 green-regex glyphs were valid despite a cp1252 display failure. Actual repair and read limits: `docs/governance/bug-reports/Brain.BLURBY-BUSINESS-1.HB6-T3-I-C-Q-qualify2.2026-11-02.md`; full Q receipt b62095186c0235776d4576ce49fb65a9824fc20f1001d93a50486f593a5e5470 remains unread in full by Root.
+**Recommendation:** Bind each hash/path to its named source commit, published snapshot or evidence root. Construct structured records from JSON-native lists/scalars before serialization and retain strict decoded-record equality. Read source as explicit UTF8/raw bytes; apply LL-177 to representation hops. Classify actual application metadata changes separately only under a scoped ruling; never turn this into a blanket ref exception, cleanup permission or source-baseline change. Apply LL-169's retained-handle/bounded-drain obligation at BOTH recorder and outer-launcher boundaries: a timeout argument alone is not proof of bounded post-kill draining or descendant closure.
+**Applies to:** future provenance collectors and nested command receipts. Preserve failed observations, partials and immutable admitted/closed input hashes; publish a new canonical lesson hash for future admissions rather than substituting it into old records. This lesson supplies no runtime, source, Git, process-sweep, native or publication authority.
+**Status:** Observation
+
+### LL-179 — Qualify Windows authoring transport before combining authoring and execution (2026-11-03)
+**Verdict:** An authoring command can fail before acquiring any operational child. Treat transport, display, model-capacity and product outcomes as different evidence domains; a failed author window does not establish an npm or application defect.
+**Evidence:** Focus D0 QUALIFY2 stopped after a parent model-capacity error. Brain recovered the completed author's actual records: a cp1252 display failure, Windows os206 before an oversized author program launched, a short stdin writer exiting1 on empty JSON, and final DATA observations showing no amended recorder/freeze/control/calibration/npm. Current dependencies were absent. Recovery preserved reported lower-bound18 with exact aggregate uncertified, rather than inventing40/40. Roadmap read the complete recovery compact, not the full6339-byte final receipt or full author chat. Exact scopes/identities: docs/governance/close-outs/Memo.FOCUS-WORD-ONLY-1.D0-qualify2-held.2026-11-03.md.
+**Recommendation:** Before a future admitted authoring cut, verify the actual host's purpose-built file-writing capability or specify a finite bounded chunk transport, exact output names/chunk lengths/order/hashes and final complete-byte readback. Do not place an arbitrarily large generated program in a Windows command line or execute generated DATA merely to write it. Preserve partials and actual failed acquisition/exit records; distinguish a process that never launched from an actual exited writer and an unknown/live handle. Model error or free capacity does not restart the clock, certify a slot or authorize retries, alternate roots, cleanup, changed models or new helpers.
+**Applies to:** future Windows source/recorder/manifest authoring and CLI handoffs. Transport must stay inside its exact admitted file/process fence; no generic utility, runtime qualification or budget grant follows. This append applies prospectively: do not repin active/closed Source-S, Business, Focus or CPU publication/source/fixture hashes to the new canonical lesson bytes.
+**Status:** Observation
+
+### LL-180 — Close operative inputs before starting an authoring or review clock (2026-11-03)
+**Verdict:** A published packet is not executable merely because its immediate files match their hashes. Every required instruction and uniquely binding predecessor clause must be available and covered before its timed authoring or review phase.
+**Evidence:** Focus AUTHOR3 reached an input-access hold after its current packet and recorder were read: predecessor documents existed as pinned Git objects but were not checked-out files or permitted reads. A narrow three-document exception still exposed another required ancestor. Brain ordered closure, preserving 12/25 calls with 13 unused and no authoring output, rather than treating unused capacity as a new admission. Business Q3 review entry separately stopped before completing custody checks and establishing predecessor coverage. Neither observation establishes an application or npm defect. Exact prospective disposition: `docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.2026-11-03.md` (actual Brain message `exec-1d725f02-c180-4d43-9f65-39d71163cce7`); Focus final closure was reported by Brain from turn `01a1a0b3-5a3c-7cb2-a0ce-60cd8908238d`, preservation command `exec-a6befca1-e4b5-4619-8d6e-4643d424bab6`.
+**Recommendation:** Before Ready/admission, freeze a closed reachable input manifest: exact source kind, role, path, immutable commit where applicable, raw length/hash, required semantic ranges and permitted access. Distinguish Git-object existence, filesystem availability and permission to read. Prefer one self-contained operative contract; reconcile every uniquely binding predecessor clause through independent clause-by-clause parity review before classifying superseded plans, Ready files and checks as hashed provenance only. Carry semantic coverage only for the actual same bytes and complete required ranges; a hash match or summary alone does not prove a complete read. Account for finite input displays, transport, authoring, independent reviews and preservation within the proposed limits before launch. Missing inputs stop readiness; do not discover recursive read dependencies inside an implementation budget or silently omit requirements.
+**Applies to:** prospective dispatch development, authoring and review admissions. Preserve failed observations, unused budgets and qualified evidence boundaries. This lesson grants no new read exception, process, budget, runtime, publication or completion authority; never substitute its new canonical hash into active or closed Source-S, Business, Focus or CPU admissions and receipts.
+**Status:** Observation
+
 ### LL-181 — Governed worktrees live in one place, and packed eb/ refs break lowercase HEADs (Codex handback, 2026-11-03)
 **Verdict:** Work kept in a tool-private worktree is invisible to other services, and on this Windows clone a worktree whose HEAD names `refs/heads/eb/<name>` resolves only while the ref is a loose file under `refs/heads/EB/`.
 **Evidence:** Codex ran Blurby's planning from `~/.codex/worktrees/blurby-roadmap-review-20261102/Blurby` and `~/.codex/worktrees/local-folder-profile-planning-20261027/Blurby`; on the handback to Claude both had to be found through `git worktree list` and moved. One `git fetch` packed the case-folded refs, and ten worktrees (both Codex ones and eight under `.worktrees/`) then showed "No commits yet" with every file staged as added. `git symbolic-ref HEAD refs/heads/EB/<name>` restored each, with its working tree and uncommitted work unchanged. `git worktree move` of a worktree still open in the Codex app failed with "Permission denied" and left the source intact.
@@ -3153,3 +3198,115 @@ Related: LL-139, LL-143.
 **Applies to:** every service (Claude, Codex, cloud) and every `eb/` worktree on this clone.
 **Status:** Rule
 Related: standing rule 10.
+
+### LL-182 — A size-based no-regression argument must use what the code reads, not what the file contains (ZIP-READ-FOLLOWUPS-1, 2026-11-04)
+**Verdict:** "Larger than the read cap, so it cannot be read today" assumed every archive entry is read. No parser reads every entry, so large archives with unread media open today, and a cap set from file size alone would have refused files that work.
+**Evidence:** ZIP-READ-FOLLOWUPS-1's memo (S1): extractWords reads the container, the OPF and the spine, not the cover or the media. Testing the no-regression claim by reading the parsers, instead of accepting the specification's argument, found it. Blurby.Brain ruled the cap `ZIP_FILE_MAX_BYTES = 2 GiB - 1` (tier 1, 2026-10-23), where Node's whole-file read already fails, so the cap only turns that throw into an early, clean refusal. Test (r) admits a 700 MiB archive (size stubbed through `fs/promises.stat`) and refuses cap + 1; with the cap back at 512 MiB, (r) fails. The memory bounds are the 64 MiB entry cap and the 512 MiB operation cap.
+**Recommendation:** Before a spec calls a limit a "no-regression bound", read the code to learn which parts of the input it consumes, and add a test with an input above the limit that the code still reads today. State the bound in terms of what is read.
+**Applies to:** size, count and time caps on file, archive and network inputs.
+**Status:** Observation
+Related: LL-142.
+
+### LL-183 — A test of error text must keep the input out of the text it checks (ZIP-READ-FOLLOWUPS-1, 2026-11-04)
+**Verdict:** When a test matches an error message, any part of the test's own input that the message echoes can satisfy the match, so the test passes on the broken code.
+**Evidence:** ZIP-READ-FOLLOWUPS-1's memo: the first missing-path test used a temp folder named `zip-entry-cap-…`. An error message that contained the path matched "zip", and the test passed on the broken code. The positive-control run (red first) is what exposed it.
+**Recommendation:** Name test paths and inputs so that no fragment of them can match the asserted text (or assert the error's type or exact full text), and see the test fail on the base before trusting it.
+**Applies to:** tests that match on error messages, log lines or toasts, especially with paths, file names or user text in the message.
+**Status:** Observation
+Related: LL-151.
+
+### LL-184 — Module-level breaker state shared across tests in one file needs a clearing path (LARGE-FOLDER-SYNC-3, 2026-11-04)
+**Verdict:** A circuit breaker held in module scope persists from one test to the next in the same file, so a breaker tripped by one test changes the next test's result. It needs a way to clear that production code also uses.
+**Evidence:** LARGE-FOLDER-SYNC-3's memo: the per-folder breaker (`FOLDER_ROOT_BREAKER_MS`) is module state. A listing that answers clears it, which keeps the tests isolated without a test-only API; each breaker test's `finally` clears it with a forced listing (W3c asserts the constant instead of a `?? 60000` default).
+**Recommendation:** Give breaker, cache and timer state a clearing path that real use takes (a successful answer resets it), and have each test that trips it clear it in a `finally`. Do not add a test-only reset export when production already has one.
+**Applies to:** module-level state in `main/` (folder watcher, sync, retry and backoff state) and the tests that exercise it.
+**Status:** Observation
+Related: standing rule 50.
+
+### LL-185 — A chunk-bound diff with a "diverged region must contain a flipped verdict" check explains every moved bound mechanically (NARRATE-SENTENCE-INITIALS-1, 2026-11-04)
+**Verdict:** Comparing the chunk bounds before and after a sentence-rule change, and requiring every diverged region to contain at least one flipped sentence-end verdict, accounts for each moved bound by mechanism. It found the "B. C." regression that the fail-closed counts could not show.
+**Evidence:** NARRATE-SENTENCE-INITIALS-1's memo: the fail-closed counts were 3 of 11,318 against 3 of 11,258 on the base, with the same classes (0 class E, 3 ruled residual, 0 other), so they showed no change. The bound diff found 158 diverged regions, 0 without a flipped verdict, and exposed the "B. C." era regression, which got a red test. 47 of the 65 flips in *Meditations* are Roman numerals (a resume inside a numbered paragraph now starts at its numeral).
+**Recommendation:** For any change to sentence or chunk boundary rules, publish a per-book table of moved bounds, assert that each diverged region holds a flipped verdict, and read a sample of the flips by hand. Do not rely on fail-closed counts alone.
+**Applies to:** `chunkPlan.ts` and any rule that decides where chunks or sentences start; the reconcile sweep.
+**Status:** Observation
+Related: LL-142, LL-162.
+
+### LL-186 — XHTML pages report lowercase tagName; match with localName (FOCUS-KEYS-FIX-1, 2026-11-04)
+**Verdict:** An EPUB section is `application/xhtml+xml`, so its elements report lowercase `tagName` (`p`, `div`). An uppercase set checked with `tagName`, or `localName.toUpperCase()`, is the wrong test; match `localName` case-insensitively.
+**Evidence:** FOCUS-KEYS-FIX-1's memo (amendment): the first probe used a CSS selector (`querySelectorAll("p, h1, …")`), which matches case-insensitively, and so found the blocks that the code missed. BLOCK-TAG-CASE-1 later measured the effect of the same cause across five copies of `BLOCK_TAGS`: *Meditations* blocks and paragraph breaks went 18 → 1,185 after the fix. The same cause was BUG-240 in Flow (FLOW-PARA-KEYS-1) and is BUG-241.
+**Recommendation:** Compare tag names through `localName` with one case, in a single shared form; when a probe finds elements the code does not, check the probe's selector for case-insensitivity before trusting it. Add a test with an `application/xhtml+xml` document and a `text/html` control.
+**Applies to:** every tag check on foliate section documents in Page, Focus, Flow and Narrate.
+**Status:** Observation
+Related: LL-166.
+
+### LL-187 — A renderer's paragraph breaks are indices into what is loaded; map them from what is rendered (FOCUS-KEYS-FIX-1, 2026-11-04)
+**Verdict:** The paragraph breaks a surface reports are indices into the words it has loaded, not into the book. Mapping them to book-wide words by matching word counts per section is wrong, because the counts can differ.
+**Evidence:** FOCUS-KEYS-FIX-1's live run: Shift+Right from word 187 went to 5290. Flow showed the same jump (187 → 5290 → 80492, BUG-240). The fix (Blurby.Brain ruling A, `findBookParagraphStart` in `src/utils/text.ts`) maps the rendered block starts of book-stamped sections, plus the book's section starts, to book-wide words; live, 187 → 188 → 572 → 610 and back, each the DOM's next or previous block start. LL-081 covers "do not mix slice and global indices" but not this mapping rule.
+**Recommendation:** Derive book-wide paragraph targets from the rendered blocks (their stamped word indices), never from per-section word counts or from the loaded-slice breaks. Test with a book whose loaded slice does not start at word 0.
+**Applies to:** paragraph and sentence key handling and paragraph pauses in Focus, Flow and Page.
+**Status:** Observation
+Related: LL-081.
+
+### LL-188 — A mode with two pacers needs navigation to move both, and a test must read each pacer's own position (FLOW-KEYS-FIX-1, 2026-11-04)
+**Verdict:** Flow has a word timer and a line pacer. A navigation command that moves only one is overwritten by the other; the published word cannot tell which pacer moved.
+**Evidence:** FLOW-KEYS-FIX-1's memo: the playing failure was the word timer overwriting the line pacer. The fix moves both. Live k2, while playing: the arrows keep playing and change speed by 25, Ctrl+Down continues, PageDown pauses and turns the page; the control build stops at 192.
+**Recommendation:** A navigation command in a mode with more than one pacer moves every pacer. Tests read each pacer's own position, not only the published word.
+**Applies to:** Flow (word timer and line pacer) and any mode that gains a second clock; BAND-ALIGN-2's single Flow clock.
+**Status:** Observation
+Related: LL-142.
+
+### LL-189 — CDP Page.reload no longer re-runs addScriptToEvaluateOnNewDocument scripts on the packaged build (FOLIATE-OBSERVER-LEAK-1, 2026-11-04)
+**Verdict:** On this packaged build, CDP `Page.reload` does not re-run scripts registered with `addScriptToEvaluateOnNewDocument`. A wrapper installed that way is missing after a reload.
+**Evidence:** FOLIATE-OBSERVER-LEAK-1's memo: the observer wrapper was evaluated in the running page instead, because `Page.reload` no longer re-injected it on this build. With the wrapper in place the packaged session logged 0 `ResizeObserver loop` lines (the base logged 14,428).
+**Recommendation:** In a live driver, inject instrumentation by evaluating it in the running page after load, and confirm it is present before taking a measurement; do not rely on re-injection across a reload.
+**Applies to:** CDP drivers and probes for live checks on packaged builds.
+**Status:** Observation
+Related: LL-166.
+
+### LL-190 — A decision rule's clauses are applied as written; reachability arguments go to the planner (RESTAMP-RERUN-RACE-1, 2026-11-04)
+**Verdict:** The builder took "not reachable" for a red rr4 by arguing that its fixture shape cannot occur, and replaced the red fixture with a green variant. The spec's rule tied branch (A) to two checkable clauses, and both held. Spec review sent it back, and the rebuild cost one extra commit cycle.
+**Evidence:** RESTAMP-RERUN-RACE-1's memo (Deviation 1) and Solon's review: rr4 red on the base (`o7 section 1 start: expected +0 to be 5`), rr2 red; red first `dd0b8524`, fix `b1f7097c`, decision taken: branch (A), fix.
+**Recommendation:** When a spec's decision rule names observable conditions, apply them literally. Put a reachability argument in the evidence file and the report for the planner to rule on. Never use it to swap a red fixture for a green one.
+**Applies to:** reproduce-then-decide items (repro harnesses, "fix or close as not reachable").
+**Status:** Observation
+Related: LL-142, standing rule 43.
+
+### LL-191 — Under React StrictMode in vitest, a concurrent first dynamic import can miss vi.mock (RESTAMP-RERUN-RACE-1, 2026-11-04)
+**Verdict:** StrictMode's second open effect imported `foliate-js/view.js` while the first import was pending. That import evaluated the real module despite `vi.mock`, and its `customElements.define` threw. Warming the import from the test did not help.
+**Evidence:** RESTAMP-RERUN-RACE-1's evidence file, harness note (rr5): the double run was proved by counting a side effect; the `mount({strict})` option and the neutralised side effect (restored in `finally`) made rr5 stable.
+**Recommendation:** Prove the double run (count a side effect), and neutralise the real module's side effect for the mount, restoring it in `finally`. Do not read the failure as app behaviour.
+**Applies to:** StrictMode mounts of views that dynamically import ESM side-effect modules in tests.
+**Status:** Observation
+Related: LL-152.
+
+### LL-192 — An attached debugger holds Electron's quit; detach before quitting in a live driver (JUMP-LANDING-SAVE-1, 2026-11-04)
+**Verdict:** With CDP and `--inspect` clients attached, `app.quit()` evaluated over the inspector never exited within 20 s, so every driver killed the app and could not prove the quit flush.
+**Evidence:** JUMP-LANDING-SAVE-1's memo, live finding 1 (`rec-control-1`, `rec-fixed-1` against `rec-fixed-2..8`); PAGE-SAVE-RESTAMP-3's A-6. Scheduling the quit (`setTimeout(() => app.quit(), 2000)`) and then closing both sockets exited cleanly in 2.2-3.1 s on 7 of 7 runs.
+**Recommendation:** A driver that checks quit or reopen behaviour schedules the quit, detaches every debugger client, then waits for the process exit and reads its code. Never count a kill as a quit.
+**Applies to:** CDP and inspector drivers for live checks, UI sweeps and release smoke harnesses.
+**Status:** Observation
+Related: LL-165, NARRATE-QUIT-LINGER-1.
+
+### LL-193 — In foliate's paginated view, read the page from lastLocation.range, not from screen geometry (JUMP-LANDING-SAVE-1, 2026-11-04)
+**Verdict:** In the paginated view, a rectangle test on word spans picks the wrong page: with the iframe's column layout, off-page spans pass it.
+**Evidence:** JUMP-LANDING-SAVE-1's memo (live-check probe note; `rec-control-1`, both probes): a probe that took the first word span whose centre fell inside the view's rectangle read word 18 while the page shown started at word 136. The probe that took the first span intersecting `foliate-view.lastLocation.range` matched the app's own saves exactly.
+**Recommendation:** Probes and drivers read the page from `lastLocation.range` (and its document), and compute a word's cfi with `getCFI(index, selectNodeContents(span))`, as `reportFirstWordOnPage` does.
+**Applies to:** CDP probes of Page, Focus or Flow foliate views.
+**Status:** Observation
+Related: LL-166.
+
+### LL-194 — A single-copy check searches every place a later merge can add a copy, and stays as a test (ERROR-LOG-CAP-1, 2026-11-05)
+**Verdict:** The RC window's check that one `logToFile` remained searched `main/ipc`, the directory that held the known copies. `main/library-write.js`, merged from another branch, kept a private appender outside that search, so the cap was bypassed while the check stayed green.
+**Evidence:** F-027; the check `git grep -n "async function logToFile" -- main/ipc`; `tests/errorLogSingleAppender.test.js` row (a), red in `5fd9c0e5` on `14ce3d24`.
+**Recommendation:** When a change makes one module the only owner of something, check the whole tree that could hold a copy, after the last merge, and keep that check as a test so a later branch cannot add a copy unseen. Do not scope it to where the copies are known to be.
+**Applies to:** single-owner refactors, integration windows and merge-time grep checks.
+**Status:** Observation
+Related: standing rule 44, F-027.
+
+### LL-195 — A measurement must prove its precondition held, or it proves nothing (NARRATE-FRAME-GATE-1, 2026-11-05)
+**Verdict:** RodneySr's display was off through gate (1) run 6's D3 1.00x session and the sessions after it. Chromium fell back to timer frames, so the checker read results that looked real, and D3 1.00x passed. Nothing in the session could tell a sleeping panel from good frames, and the same fault read as a product defect until a blank-window control separated host from code.
+**Evidence:** F-036; Rodney's blank window ran 3,599 frames in 60 s against RodneySr's 1 in 65 s; the Kernel-Power log puts run 6's 1.00x session in Modern Standby; `--break` with a never-shown window read "visible" with the display off, so Chromium's own view can't be the only check.
+**Recommendation:** Before a timing or frame result counts, prove the condition it depends on, at the start and the end, with a check independent of the thing measured. A failed precondition makes the run invalid, never failed. Give the check a positive control, and take one predicate from outside the tool being judged.
+**Applies to:** timed gates, frame and latency checks, anything run on an unattended host.
+**Status:** Observation
+Related: standing rule 55, rule 6c, F-036, LL-165.

@@ -1,0 +1,56 @@
+{
+  "item": "FOCUS-WORD-ONLY-1",
+  "phase": "FOCUS-WORD-ONLY-1.F0",
+  "scope": "prospective phase planning qualification only; no source/control/runtime admission",
+  "observedAt": "2026-11-03T02:57:07.5432054Z",
+  "spec": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.F0.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "022253f56437951472c9069cf1f09edf613249508f312c08a392c39479f3c4ac"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.F0.2026-11-02.md",
+      "sha256": "6ff986fd01103c1de9c559c921737bc5e8967a53b3ae65d5132c15c4c1f20b43"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (FOCUS-WORD-ONLY-1): PASS",
+    "  cited: LL-176, LL-002, LL-006, LL-066, LL-090, LL-113, LL-142, LL-172, LL-174, LL-175, LL-120, LL-139, LL-150, LL-160, LL-165, LL-168, LL-169, LL-170, LL-171, LL-173",
+    "  [info] lessons-not-cited: 102 live lesson(s) not cited — confirm none applies: LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures), LL-018 (reader, flow mode, performance), LL-019 (renderer, pagination)…",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Fresh new-target/custody/input/object/raw-witness checks and external accounting qualify entry [calculable] @source-preflight — 3m (median of 71 runs)",
+    "2. Exact normal merge and full automatic inventory identify only admitted NQ3 conflict hunks [calculable] @baseline-integration — 3m (median of 71 runs)",
+    "3. NQ3 hunk resolution and full staged-tree/raw manifest preserve thirteen witnesses [calculable] @governance-resolution — 3m (median of 71 runs)",
+    "4. Same-tree independent parallel review pair passes with compliance accepted first [calculable] @review-checkpoint — 3m (median of 71 runs)",
+    "5. Marcus external records, local two-parent commit/readback and immutable receipt close held base [calculable] @held-checkpoint — 3m (median of 71 runs)",
+    "Total: chain 15m · sum 15m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "priorCheck": "Historical f446 input retained unchanged in Git"
+}

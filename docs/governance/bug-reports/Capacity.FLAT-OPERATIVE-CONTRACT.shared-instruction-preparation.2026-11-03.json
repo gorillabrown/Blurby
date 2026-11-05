@@ -1,0 +1,3412 @@
+{
+  "schemaVersion": "blurby.shared-instruction.capacity.planning.v1",
+  "status": "FULL_ROSTER_NOT_SELECTED_NOT_READY_NO_FULL_ROSTER_ADMISSION",
+  "sourceDomain": "ACTUAL_LOCAL_RAW_READ_AND_SERIALIZATION_COUNTS_NOT_QUIET_READ_PROOF",
+  "serializer": "PowerShell ConvertTo-Json -Compress -Depth20; exact returned JSON text.Length; UTF8 byte hashes; longest fitting surrogate-safe text prefix",
+  "maxSerializedCharactersPerInvocation": 10000,
+  "envelopeFields": [
+    "rowId",
+    "path",
+    "sourceSHA256",
+    "selectionSHA256",
+    "selectionMapSHA256",
+    "totalSelectedBytes",
+    "offset",
+    "bytes",
+    "chunkSHA256",
+    "data"
+  ],
+  "notes": [
+    "Future actual tool wrapper/escaping overhead must fit total10000; these counts are exact local envelope text, not remote transport proof",
+    "Full current15 Root raw rows verified locally; unknown quiet reviewer paths are candidate addresses only",
+    "Parity ledger bodies and unique flat contracts excluded from shared semantic instructions; their own separate phase fit remains mandatory",
+    "Selected lesson IDs are actual explicit LL-NNN union in three actual flat files; all repeated status headings through next LL heading included",
+    "Lesson ID extraction uses literal LL-NNN matches even when adjacent to a word; includes promoted LL-167 and its status occurrences, not word-boundary omissions",
+    "Cross-row frames are actual complete local serialized ConvertTo-Json envelopes, <=10000 characters each; all selected raw-derived rows were reconstructed and full byte equality compared, not hash-only",
+    "Per-row baseline55+9=64 and hypothetical7carry32+9=41 retained; cross-row cold45+9=54 and hypothetical7carry28+9=37 use identical selected instruction semantics and same9reserves",
+    "Conditional packed carry is NOT READY until Brain approves actor/role-bound use of seven historical prior-FULL-reuse reports and actual quiet path/access/current identity/carry scope",
+    "No cap is admitted. Candidate <=60m/40calls exists only for approved packed seven-carry case; cold case still exceeds40 and needs separately authorized split/carry decision",
+    "All parity ledgers are planner evidence; unique three flat contract bodies excluded and must independently fit each own future phase",
+    "Current amended proposal recipe27145bytes/f99feee60ae024f9907345d11513c31ab34bb56374be59c98e3de905824edee2 still requires3 measured complete serialized recipe frames; old57/40 observation preserved and current serialized-frame arithmetic remains57/40, actual quiet-route overhead UNKNOWN",
+    "Source paths added in this external planning manifest are historical observations or literal candidate addresses ONLY; they were not accessed on quiet, and no shared-phase Git permission is inherited",
+    "Full capacity JSON and parity bodies are PLANNER_ONLY; executor consumes operative proposal plus closed row manifest, not this computation artifact",
+    "All alternative source choices and actor/role carry must be technically selected before launch; no conditional capacity result is an admission or current path/read proof",
+    "Brain selected a DISTINCT narrow10m6 three-reviewer-definition prerequisite; this full15-row preparation is NOT SELECTED/NOT ADMITTED and takes NO credit without actual consumed/result receipt and actor-role range acceptance",
+    "Independent reviewer requested explicit snapshot wrapper constructor, stale size-label removal and exhaustive native/wrapper/delegate/wait/closure accounting; current proposal adds these without changing any15 instruction selections",
+    "Re-read/rehashed all15 local raw identities after amendment, reconstructed every selected row and all55 baseline pieces and73 cross-row envelopes; complete actual reserialization and full per-row byte comparison all matched prior ledgers",
+    "No credit for the distinct narrow three-definition phase is recomputed or granted in this correction; its actual receipt/clock/same-actor assessment remains separate",
+    "Actor-specific ruling permits only actual same-actor complete unchanged semantic carry with exact receipt/fresh identity; raw qualification is transferable provenance only. Conditional7-report scenario remains hypothetical, not an actual accepted carry plan"
+  ],
+  "flatInputs": [
+    {
+      "excludedFromSharedInstructions": true,
+      "path": "Draft.FOCUS-WORD-ONLY-1.D0-flat-operative.2026-11-03.md",
+      "sha256": "6cd20c8f5a2c64835be340aca209142636445bcc577000117a7e882a968f9d2d",
+      "bytes": 76569
+    },
+    {
+      "excludedFromSharedInstructions": true,
+      "path": "Draft.BLURBY-BUSINESS-1.HB6-T3-I-C-Q3-review-flat.2026-11-03.md",
+      "sha256": "2a90f2a36bd364d3cc8a4de99f34f0a37a7a742b58e6a511a502fcba3bf8d9f8",
+      "bytes": 80339
+    },
+    {
+      "excludedFromSharedInstructions": true,
+      "path": "Draft.DESKTOP-LIBRARY-INTEGRATION-source-S-tooling-flat.2026-11-03.md",
+      "sha256": "429b6e3f7594b60eb6c5149ebf4b46b424b2b04c15da2caec093bed736ef61f5",
+      "bytes": 38293
+    }
+  ],
+  "lessonIds": [
+    "LL-002",
+    "LL-003",
+    "LL-004",
+    "LL-006",
+    "LL-063",
+    "LL-066",
+    "LL-068",
+    "LL-090",
+    "LL-097",
+    "LL-098",
+    "LL-128",
+    "LL-134",
+    "LL-137",
+    "LL-142",
+    "LL-143",
+    "LL-144",
+    "LL-145",
+    "LL-165",
+    "LL-167",
+    "LL-169",
+    "LL-172",
+    "LL-173",
+    "LL-174",
+    "LL-176",
+    "LL-177",
+    "LL-178",
+    "LL-179",
+    "LL-180"
+  ],
+  "lessonEntryOccurrences": 38,
+  "cachedStableIds": [
+    "BAND-ALIGN-1",
+    "BAND-ALIGN-2",
+    "BLURBY-BUSINESS-1",
+    "FLOW-KEYS-FIX-1",
+    "FOCUS-KEYS-FIX-1",
+    "FOCUS-WORD-ONLY-1",
+    "FOLIATE-DISPLAY-LIFETIME-1",
+    "FOLIATE-OBSERVER-LEAK-1",
+    "LIBRARY-COMPLETION-VISIBILITY-1",
+    "NARRATE-CPU-PROFILE-1",
+    "NARRATE-HARNESS-COLDCLICK-1",
+    "NARRATE-REBUILD-1",
+    "NARRATE-REMOVE-1"
+  ],
+  "cachedFacts": [
+    {
+      "id": "BAND-ALIGN-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 66,
+      "prerequisites": [],
+      "revision": "b18588126b739404a17dac6eafe7be95d26e928da493cb4b2e5222d987674169"
+    },
+    {
+      "id": "BAND-ALIGN-2",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 83,
+      "prerequisites": [
+        "BAND-ALIGN-1",
+        "FOCUS-KEYS-FIX-1",
+        "FLOW-KEYS-FIX-1"
+      ],
+      "revision": "be25b0cc78ad076db4c85de05dc910b7ce9676989525d8016e65dcb727823241"
+    },
+    {
+      "id": "BLURBY-BUSINESS-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 100.5,
+      "prerequisites": [],
+      "revision": "45ab4289ad65a2260f511d47ce123b0eac948ee12f2e4805c23960710ca1d666"
+    },
+    {
+      "id": "FLOW-KEYS-FIX-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 77,
+      "prerequisites": [],
+      "revision": "3fc406e500e75e66d38c0586b68e3905f10e236a5fba8db3dfad1d9893518191"
+    },
+    {
+      "id": "FOCUS-KEYS-FIX-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 76,
+      "prerequisites": [],
+      "revision": "04530b4a24062c6aa1121dc5f43298ccc4e848f7ed3de3b8b47ea0a14d6ddf1a"
+    },
+    {
+      "id": "FOCUS-WORD-ONLY-1",
+      "status": "queued",
+      "raw_status": "Queued",
+      "sequence": 123,
+      "prerequisites": [
+        "BAND-ALIGN-2"
+      ],
+      "revision": "1658a647d31febbe1c4485a8a8b5906ac907d7929dca54b0fcd6cdf5f4d4b741"
+    },
+    {
+      "id": "FOLIATE-DISPLAY-LIFETIME-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 68,
+      "prerequisites": [
+        "FOLIATE-OBSERVER-LEAK-1"
+      ],
+      "revision": "91bcd4e980d4821b067c084da9770fa1a9ef0394d463a2c21878677bee159e23"
+    },
+    {
+      "id": "FOLIATE-OBSERVER-LEAK-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 67,
+      "prerequisites": [],
+      "revision": "f07b309b1f0426e1e479bb35c055ea62ce58596d15813fa5efd49cbff2c37924"
+    },
+    {
+      "id": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 116,
+      "prerequisites": [
+        "FOLIATE-OBSERVER-LEAK-1"
+      ],
+      "revision": "95a7abee1ff8d69ecfc20c8d910490e02174e7eca20a2c26313963b83ac9b5a7"
+    },
+    {
+      "id": "NARRATE-CPU-PROFILE-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 95,
+      "prerequisites": [
+        "NARRATE-REBUILD-1",
+        "NARRATE-HARNESS-COLDCLICK-1"
+      ],
+      "revision": "22b14223fa8a378d93d65c92980efb4aa77ac43f0d2a239d5fa5c9b5f7aa5efd"
+    },
+    {
+      "id": "NARRATE-HARNESS-COLDCLICK-1",
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "sequence": 94,
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "revision": "b8361bd419f831259dcd96b2e45f07c51eb8c1956f79a0c859d12a4cce35e013"
+    },
+    {
+      "id": "NARRATE-REBUILD-1",
+      "status": "completed",
+      "raw_status": "Completed",
+      "sequence": null,
+      "prerequisites": [
+        "NARRATE-REMOVE-1"
+      ],
+      "revision": "b1c7e0aa6387d2fe7d424bc56f5e5e79db922c220e457f7cdedb92a33d2eadbc"
+    },
+    {
+      "id": "NARRATE-REMOVE-1",
+      "status": "completed",
+      "raw_status": "Completed",
+      "sequence": null,
+      "prerequisites": [
+        "TEST-TIMEOUT-HEADROOM-1",
+        "LIBRARY-SETTINGS-FIX-1",
+        "EINK-HOVER-FIX-1"
+      ],
+      "revision": "1e3e3a1abf7c54f90c534cb899f03c1dfc6f30153eddeca6c08b01b852ce6a69"
+    }
+  ],
+  "rows": [
+    {
+      "rowId": "AGENTS.md",
+      "singleEnvelopeCharacters": 31493,
+      "selectedBytes": 30850,
+      "pieces": [
+        {
+          "chunkSHA256": "10e16c880d4fe8fd48055da6821fb438e4895e4a17f63aa07e3f8db039fe8f44",
+          "characters": 9491,
+          "bytes": 9527,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "463eaa73cd4ff233e4c92fa61cf84d7ddba8c28c08cf9f716aef6cd98394e195",
+          "characters": 9428,
+          "bytes": 9468,
+          "offset": 9527,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "d0084108b09dc91571a8d9cdf4eadc9b325e334de96a21c8eac9e39ba6cde362",
+          "characters": 9444,
+          "bytes": 9498,
+          "offset": 18995,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "039311849515cc06c502e221e5f41ecb2330da2b0173e6c404af5b87a612a844",
+          "characters": 2353,
+          "bytes": 2357,
+          "offset": 28493,
+          "serializedCharacters": 2814
+        }
+      ],
+      "displayCalls": 4,
+      "actorCarryAccepted": false,
+      "rawSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\AGENTS.md",
+      "selectedCharacters": 30716,
+      "rawBytes": 30850,
+      "selectionMapSHA256": "8c2bb299398900e652055c158a8fccd26788291c9260c2962852cef3dd1c709e",
+      "selectedSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30850
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "CLAUDE.md",
+      "singleEnvelopeCharacters": 31386,
+      "selectedBytes": 30743,
+      "pieces": [
+        {
+          "chunkSHA256": "055e39cc554949c961f60afdf18b18dd65fc665b18c5f841f2b45d5810fd7dfd",
+          "characters": 9491,
+          "bytes": 9525,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "decfdd55a56cc2d47a29e8aeb46cf0600939238451cbfa219310c742b25eddd7",
+          "characters": 9426,
+          "bytes": 9468,
+          "offset": 9525,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "dfd58f65cee03cd3ca970e20ec6853e6e9a95d1b438e6d74eb1cd84767d09189",
+          "characters": 9445,
+          "bytes": 9499,
+          "offset": 18993,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "95a74a5183c5cbfaa70ca5ec83495b5c147920b8eebd16036506ecb11bd22bcd",
+          "characters": 2247,
+          "bytes": 2251,
+          "offset": 28492,
+          "serializedCharacters": 2707
+        }
+      ],
+      "displayCalls": 4,
+      "actorCarryAccepted": false,
+      "rawSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\CLAUDE.md",
+      "selectedCharacters": 30609,
+      "rawBytes": 30743,
+      "selectionMapSHA256": "d2da673fd9dc30cf85280f001cf5fa54f8b12ff3ba62367de92d71a54cae32c0",
+      "selectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30743
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "EXPECTED_REPOSITORY_ORDINARY_PATH_OR_EXPLICITLY_AUTHORIZED_GITBLOB",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/Projects/Blurby/CLAUDE.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED",
+      "proposedGitRoute": {
+        "requiresSeparateBrainAuthorization": true,
+        "requiresQuietExistingObject": true,
+        "pinnedGit": "C:/Program Files/Git/cmd/git.exe",
+        "cwd": "C:/Users/estra/Projects/Blurby",
+        "immutableCommitCandidate": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repositoryPath": "CLAUDE.md",
+        "argv": [
+          "C:/Program Files/Git/cmd/git.exe",
+          "--no-pager",
+          "show",
+          "3afcf8789be0d7fa3bdf27235597606da022c93c:CLAUDE.md"
+        ],
+        "noFetchNoFallback": true
+      }
+    },
+    {
+      "rowId": "ROADMAP.md",
+      "singleEnvelopeCharacters": 68227,
+      "selectedBytes": 67713,
+      "pieces": [
+        {
+          "chunkSHA256": "c3f31eab59fa6a91c1b0710abf629f8bd3070845b9da6b68f6135e33a6aa53a5",
+          "characters": 9530,
+          "bytes": 9554,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "a54e72ca794e2c8875eb8a2299b0969854bcb9230a39b82ea37da37ee9b5e037",
+          "characters": 9498,
+          "bytes": 9526,
+          "offset": 9554,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "543c60d9ceeda6c918ed118b19a674eec8a49bf7af6decff09deb19d667b5c89",
+          "characters": 9527,
+          "bytes": 9549,
+          "offset": 19080,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "59210a53876c19a05c5feba3c5be1e322751672c7118dbda3f99a46e0315675e",
+          "characters": 9487,
+          "bytes": 9545,
+          "offset": 28629,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "ea0a0d05b2be8d695dfd292df03f5a7c94ff5442a000b4c3d8e056ff08af5f17",
+          "characters": 9524,
+          "bytes": 9564,
+          "offset": 38174,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "1c335e1b1cbfa340a10b3f767b1ed0c857ff932d02e644defc89e8fd22079922",
+          "characters": 9514,
+          "bytes": 9542,
+          "offset": 47738,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "c1712efd3a8b27bc152fed08b71148be1f63bdfdced7f179e604d787e401717e",
+          "characters": 9509,
+          "bytes": 9551,
+          "offset": 57280,
+          "serializedCharacters": 9999
+        },
+        {
+          "chunkSHA256": "41c7b1812602a2f4f27b4b28b41c6519355f1ba1c323a5f726cb8d4f662e4261",
+          "characters": 880,
+          "bytes": 882,
+          "offset": 66831,
+          "serializedCharacters": 1326
+        }
+      ],
+      "displayCalls": 8,
+      "actorCarryAccepted": false,
+      "rawSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\ROADMAP.md",
+      "selectedCharacters": 67469,
+      "rawBytes": 356715,
+      "selectionMapSHA256": "46ae9a48ad46b058845b12fdc764c214d06046fe37f8cd92f3465bb845228f82",
+      "selectedSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+      "ranges": [
+        {
+          "sourceByteOffset": 0,
+          "endLine": 218,
+          "bytes": 57232,
+          "startLine": 1
+        },
+        {
+          "sourceByteOffset": 282888,
+          "endLine": 1625,
+          "bytes": 3281,
+          "startLine": 1608
+        },
+        {
+          "sourceByteOffset": 323704,
+          "endLine": 1859,
+          "bytes": 7200,
+          "startLine": 1835
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "EXPECTED_REPOSITORY_ORDINARY_PATH_OR_EXPLICITLY_AUTHORIZED_GITBLOB",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/Projects/Blurby/ROADMAP.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED",
+      "proposedGitRoute": {
+        "requiresSeparateBrainAuthorization": true,
+        "requiresQuietExistingObject": true,
+        "pinnedGit": "C:/Program Files/Git/cmd/git.exe",
+        "cwd": "C:/Users/estra/Projects/Blurby",
+        "immutableCommitCandidate": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repositoryPath": "ROADMAP.md",
+        "argv": [
+          "C:/Program Files/Git/cmd/git.exe",
+          "--no-pager",
+          "show",
+          "3afcf8789be0d7fa3bdf27235597606da022c93c:ROADMAP.md"
+        ],
+        "noFetchNoFallback": true
+      }
+    },
+    {
+      "pieces": [
+        {
+          "chunkSHA256": "d69dbf43e9aa608c36d9f371d6105cc512797add2998cc4a49b6c849a7f8c79e",
+          "serializedCharacters": 10000,
+          "bytes": 9444,
+          "offset": 0,
+          "characters": 9376
+        },
+        {
+          "chunkSHA256": "d717b6af3d06cda39fa11636a53c54b2016c92e4c6a8936191e13bd55075c297",
+          "serializedCharacters": 10000,
+          "bytes": 9475,
+          "offset": 9444,
+          "characters": 9457
+        },
+        {
+          "chunkSHA256": "ea801dc0c40c3bb66e7d9620df3a787207dfe951a08ba1126aa53b5e1252d579",
+          "serializedCharacters": 10000,
+          "bytes": 9488,
+          "offset": 18919,
+          "characters": 9439
+        },
+        {
+          "chunkSHA256": "80845ef14863f05e1075745f20217ab6ca7bcbc541aa9f345b7e1998c0215bc2",
+          "serializedCharacters": 10000,
+          "bytes": 9476,
+          "offset": 28407,
+          "characters": 9454
+        },
+        {
+          "chunkSHA256": "ec7be310b88d987ebf214c32edc479a2578d3e39c8322155cb84ee7aa99e52a2",
+          "serializedCharacters": 9445,
+          "bytes": 8935,
+          "offset": 37883,
+          "characters": 8929
+        }
+      ],
+      "selectedBytes": 46818,
+      "selectedCharacters": 46655,
+      "actorCarryAccepted": false,
+      "rawSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\LESSONS_LEARNED.md",
+      "quietCurrentAvailable": "UNKNOWN",
+      "selectedSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+      "ranges": [
+        {
+          "sourceByteOffset": 149541,
+          "endLine": 1739,
+          "bytes": 568,
+          "lessonId": "LL-002",
+          "startLine": 1731
+        },
+        {
+          "sourceByteOffset": 150109,
+          "endLine": 1748,
+          "bytes": 908,
+          "lessonId": "LL-003",
+          "startLine": 1740
+        },
+        {
+          "sourceByteOffset": 151017,
+          "endLine": 1757,
+          "bytes": 634,
+          "lessonId": "LL-004",
+          "startLine": 1749
+        },
+        {
+          "sourceByteOffset": 152301,
+          "endLine": 1775,
+          "bytes": 693,
+          "lessonId": "LL-006",
+          "startLine": 1767
+        },
+        {
+          "sourceByteOffset": 176643,
+          "endLine": 2045,
+          "bytes": 962,
+          "lessonId": "LL-063",
+          "startLine": 2037
+        },
+        {
+          "sourceByteOffset": 178418,
+          "endLine": 2063,
+          "bytes": 855,
+          "lessonId": "LL-066",
+          "startLine": 2055
+        },
+        {
+          "sourceByteOffset": 180160,
+          "endLine": 2081,
+          "bytes": 1153,
+          "lessonId": "LL-068",
+          "startLine": 2073
+        },
+        {
+          "sourceByteOffset": 203460,
+          "endLine": 2279,
+          "bytes": 982,
+          "lessonId": "LL-090",
+          "startLine": 2271
+        },
+        {
+          "sourceByteOffset": 205423,
+          "endLine": 2297,
+          "bytes": 998,
+          "lessonId": "LL-128",
+          "startLine": 2289
+        },
+        {
+          "sourceByteOffset": 211309,
+          "endLine": 2351,
+          "bytes": 881,
+          "lessonId": "LL-097",
+          "startLine": 2343
+        },
+        {
+          "sourceByteOffset": 212190,
+          "endLine": 2360,
+          "bytes": 935,
+          "lessonId": "LL-098",
+          "startLine": 2352
+        },
+        {
+          "sourceByteOffset": 247545,
+          "endLine": 2669,
+          "bytes": 782,
+          "lessonId": "LL-134",
+          "startLine": 2662
+        },
+        {
+          "sourceByteOffset": 250432,
+          "endLine": 2699,
+          "bytes": 869,
+          "lessonId": "LL-137",
+          "startLine": 2692
+        },
+        {
+          "sourceByteOffset": 257627,
+          "endLine": 2763,
+          "bytes": 3933,
+          "lessonId": "LL-142",
+          "startLine": 2755
+        },
+        {
+          "sourceByteOffset": 261560,
+          "endLine": 2772,
+          "bytes": 3071,
+          "lessonId": "LL-143",
+          "startLine": 2764
+        },
+        {
+          "sourceByteOffset": 264631,
+          "endLine": 2780,
+          "bytes": 2618,
+          "lessonId": "LL-144",
+          "startLine": 2773
+        },
+        {
+          "sourceByteOffset": 267249,
+          "endLine": 2796,
+          "bytes": 1882,
+          "lessonId": "LL-145",
+          "startLine": 2781
+        },
+        {
+          "sourceByteOffset": 274200,
+          "endLine": 2827,
+          "bytes": 499,
+          "lessonId": "LL-143",
+          "startLine": 2825
+        },
+        {
+          "sourceByteOffset": 282453,
+          "endLine": 2871,
+          "bytes": 547,
+          "lessonId": "LL-143",
+          "startLine": 2869
+        },
+        {
+          "sourceByteOffset": 283000,
+          "endLine": 2874,
+          "bytes": 243,
+          "lessonId": "LL-144",
+          "startLine": 2872
+        },
+        {
+          "sourceByteOffset": 284023,
+          "endLine": 2887,
+          "bytes": 319,
+          "lessonId": "LL-068",
+          "startLine": 2885
+        },
+        {
+          "sourceByteOffset": 284536,
+          "endLine": 2896,
+          "bytes": 97,
+          "lessonId": "LL-143",
+          "startLine": 2894
+        },
+        {
+          "sourceByteOffset": 286700,
+          "endLine": 2913,
+          "bytes": 229,
+          "lessonId": "LL-137",
+          "startLine": 2911
+        },
+        {
+          "sourceByteOffset": 294284,
+          "endLine": 2974,
+          "bytes": 502,
+          "lessonId": "LL-143",
+          "startLine": 2972
+        },
+        {
+          "sourceByteOffset": 305696,
+          "endLine": 3049,
+          "bytes": 1838,
+          "lessonId": "LL-165",
+          "startLine": 3042
+        },
+        {
+          "sourceByteOffset": 309456,
+          "endLine": 3071,
+          "bytes": 1623,
+          "lessonId": "LL-167",
+          "startLine": 3064
+        },
+        {
+          "sourceByteOffset": 312843,
+          "endLine": 3098,
+          "bytes": 1274,
+          "lessonId": "LL-169",
+          "startLine": 3091
+        },
+        {
+          "sourceByteOffset": 314117,
+          "endLine": 3102,
+          "bytes": 667,
+          "lessonId": "LL-165",
+          "startLine": 3099
+        },
+        {
+          "sourceByteOffset": 318570,
+          "endLine": 3129,
+          "bytes": 1522,
+          "lessonId": "LL-172",
+          "startLine": 3122
+        },
+        {
+          "sourceByteOffset": 320092,
+          "endLine": 3132,
+          "bytes": 425,
+          "lessonId": "LL-143",
+          "startLine": 3130
+        },
+        {
+          "sourceByteOffset": 320517,
+          "endLine": 3140,
+          "bytes": 1324,
+          "lessonId": "LL-173",
+          "startLine": 3133
+        },
+        {
+          "sourceByteOffset": 321841,
+          "endLine": 3148,
+          "bytes": 1189,
+          "lessonId": "LL-174",
+          "startLine": 3141
+        },
+        {
+          "sourceByteOffset": 323030,
+          "endLine": 3151,
+          "bytes": 380,
+          "lessonId": "LL-143",
+          "startLine": 3149
+        },
+        {
+          "sourceByteOffset": 324700,
+          "endLine": 3165,
+          "bytes": 2080,
+          "lessonId": "LL-176",
+          "startLine": 3159
+        },
+        {
+          "sourceByteOffset": 326780,
+          "endLine": 3172,
+          "bytes": 2055,
+          "lessonId": "LL-177",
+          "startLine": 3166
+        },
+        {
+          "sourceByteOffset": 328835,
+          "endLine": 3179,
+          "bytes": 2497,
+          "lessonId": "LL-178",
+          "startLine": 3173
+        },
+        {
+          "sourceByteOffset": 331332,
+          "endLine": 3186,
+          "bytes": 2139,
+          "lessonId": "LL-179",
+          "startLine": 3180
+        },
+        {
+          "sourceByteOffset": 333471,
+          "endLine": 3192,
+          "bytes": 2645,
+          "lessonId": "LL-180",
+          "startLine": 3187
+        }
+      ],
+      "rawBytes": 336116,
+      "rowId": "docs/governance/LESSONS_LEARNED.md",
+      "historicalPriorFullReuseReported": false,
+      "selectionMapSHA256": "bf1534b861ff4637b5e00af613153c253f64085cb3ca341f65f73f74ddcc9df3",
+      "displayCalls": 5,
+      "singleEnvelopeCharacters": 47483,
+      "proposedSourceKind": "EXPECTED_REPOSITORY_ORDINARY_PATH_OR_EXPLICITLY_AUTHORIZED_GITBLOB",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/Projects/Blurby/docs/governance/LESSONS_LEARNED.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED",
+      "proposedGitRoute": {
+        "requiresSeparateBrainAuthorization": true,
+        "requiresQuietExistingObject": true,
+        "pinnedGit": "C:/Program Files/Git/cmd/git.exe",
+        "cwd": "C:/Users/estra/Projects/Blurby",
+        "immutableCommitCandidate": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repositoryPath": "docs/governance/LESSONS_LEARNED.md",
+        "argv": [
+          "C:/Program Files/Git/cmd/git.exe",
+          "--no-pager",
+          "show",
+          "3afcf8789be0d7fa3bdf27235597606da022c93c:docs/governance/LESSONS_LEARNED.md"
+        ],
+        "noFetchNoFallback": true
+      }
+    },
+    {
+      "rowId": "Virtuoso/workspace-layout.json",
+      "singleEnvelopeCharacters": 22958,
+      "selectedBytes": 19955,
+      "pieces": [
+        {
+          "chunkSHA256": "1f8f9c407c3e132e222151cdb8f3a3c671b4d72844365cd97cf2a215f833b1af",
+          "characters": 8441,
+          "bytes": 8441,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "c0a473505f097f414f33a9eeb6b7c522480c63bda1a4893dcb53008e1ad5537d",
+          "characters": 8367,
+          "bytes": 8369,
+          "offset": 8441,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "7afe72562153f1a08d1d6faac2bbd0162c8a0915c7113599b941afccc807dd53",
+          "characters": 3145,
+          "bytes": 3145,
+          "offset": 16810,
+          "serializedCharacters": 3922
+        }
+      ],
+      "displayCalls": 3,
+      "actorCarryAccepted": false,
+      "rawSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\workspace-layout.json",
+      "selectedCharacters": 19953,
+      "rawBytes": 19955,
+      "selectionMapSHA256": "26f3621b34a401e503952597fced80978029f43cfc2a91ccc6ea9b356cac362e",
+      "selectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 19955
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "EXPECTED_REPOSITORY_ORDINARY_PATH_OR_EXPLICITLY_AUTHORIZED_GITBLOB",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/Projects/Blurby/Virtuoso/workspace-layout.json",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED",
+      "proposedGitRoute": {
+        "requiresSeparateBrainAuthorization": true,
+        "requiresQuietExistingObject": true,
+        "pinnedGit": "C:/Program Files/Git/cmd/git.exe",
+        "cwd": "C:/Users/estra/Projects/Blurby",
+        "immutableCommitCandidate": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repositoryPath": "Virtuoso/workspace-layout.json",
+        "argv": [
+          "C:/Program Files/Git/cmd/git.exe",
+          "--no-pager",
+          "show",
+          "3afcf8789be0d7fa3bdf27235597606da022c93c:Virtuoso/workspace-layout.json"
+        ],
+        "noFetchNoFallback": true
+      }
+    },
+    {
+      "rowId": "Virtuoso/work-register.snapshot.json",
+      "singleEnvelopeCharacters": 48704,
+      "selectedBytes": 46344,
+      "pieces": [
+        {
+          "chunkSHA256": "c16a2f25da6f33db851555403d66ec2388b1335610e49bc21adfb56cc2468895",
+          "characters": 9046,
+          "bytes": 9056,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "74e3968012f13bae7209c8f6d15daf89d40a6eae57bb09b502072015bc4f8287",
+          "characters": 8986,
+          "bytes": 9006,
+          "offset": 9056,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "0e9e21e7f1ee5345f36a08517495e9ff1bfbbb574e0e42495f8f361bc5729714",
+          "characters": 9309,
+          "bytes": 9311,
+          "offset": 18062,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "d9e14833d72e27f20ef72fc3e561e2366afb11cd8943b3a1cb422db0475160ce",
+          "characters": 9263,
+          "bytes": 9263,
+          "offset": 27373,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "a83ba60c47060de9bb9843f159c4a48662dc284f3e143952bd0ef8ccfaff6124",
+          "characters": 9089,
+          "bytes": 9091,
+          "offset": 36636,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "4809eb466d5f774c3bf54822c0100ed894154757a7ac96365cb781f3fef7ccaf",
+          "characters": 617,
+          "bytes": 617,
+          "offset": 45727,
+          "serializedCharacters": 1176
+        }
+      ],
+      "displayCalls": 6,
+      "actorCarryAccepted": false,
+      "rawSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\work-register.snapshot.json",
+      "selectedCharacters": 46310,
+      "rawBytes": 449596,
+      "selectionMapSHA256": "8d38dfb8c2e391a0776ee1792ef5e3d35318a207f193ac0b6abd80a50c0cd216",
+      "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+      "ranges": [
+        {
+          "jsonPointers": [
+            "/snapshotVersion",
+            "/takenAt",
+            "/provider",
+            "/source",
+            "/fields",
+            "/headers"
+          ],
+          "selectedStableIds": [
+            "BAND-ALIGN-1",
+            "BAND-ALIGN-2",
+            "BLURBY-BUSINESS-1",
+            "FLOW-KEYS-FIX-1",
+            "FOCUS-KEYS-FIX-1",
+            "FOCUS-WORD-ONLY-1",
+            "FOLIATE-DISPLAY-LIFETIME-1",
+            "FOLIATE-OBSERVER-LEAK-1",
+            "LIBRARY-COMPLETION-VISIBILITY-1",
+            "NARRATE-CPU-PROFILE-1",
+            "NARRATE-HARNESS-COLDCLICK-1",
+            "NARRATE-REBUILD-1",
+            "NARRATE-REMOVE-1"
+          ],
+          "representation": "complete selected JSON-native values; source raw pin separate"
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "EXPECTED_REPOSITORY_ORDINARY_PATH_OR_EXPLICITLY_AUTHORIZED_GITBLOB",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/Projects/Blurby/Virtuoso/work-register.snapshot.json",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED",
+      "proposedGitRoute": {
+        "requiresSeparateBrainAuthorization": true,
+        "requiresQuietExistingObject": true,
+        "pinnedGit": "C:/Program Files/Git/cmd/git.exe",
+        "cwd": "C:/Users/estra/Projects/Blurby",
+        "immutableCommitCandidate": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+        "repositoryPath": "Virtuoso/work-register.snapshot.json",
+        "argv": [
+          "C:/Program Files/Git/cmd/git.exe",
+          "--no-pager",
+          "show",
+          "3afcf8789be0d7fa3bdf27235597606da022c93c:Virtuoso/work-register.snapshot.json"
+        ],
+        "noFetchNoFallback": true
+      }
+    },
+    {
+      "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+      "singleEnvelopeCharacters": 2359,
+      "selectedBytes": 1822,
+      "pieces": [
+        {
+          "chunkSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+          "characters": 1818,
+          "bytes": 1822,
+          "offset": 0,
+          "serializedCharacters": 2359
+        }
+      ],
+      "displayCalls": 1,
+      "actorCarryAccepted": false,
+      "rawSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\skills\\virtuoso\\SKILL.md",
+      "selectedCharacters": 1818,
+      "rawBytes": 1822,
+      "selectionMapSHA256": "85cc354c703f35fae38d7dff499cbfdb5313d84ab5120156897384c0b8d16ad2",
+      "selectedSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 1822
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+      "singleEnvelopeCharacters": 1545,
+      "selectedBytes": 1029,
+      "pieces": [
+        {
+          "chunkSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+          "characters": 1025,
+          "bytes": 1029,
+          "offset": 0,
+          "serializedCharacters": 1545
+        }
+      ],
+      "displayCalls": 1,
+      "actorCarryAccepted": false,
+      "rawSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\agents\\Hippocrates.md",
+      "selectedCharacters": 1025,
+      "rawBytes": 1029,
+      "selectionMapSHA256": "64e02f675658e938da21d3401ddc652d52f4bb54af5221ef85bf6cbd43aa5cfc",
+      "selectedSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 1029
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+      "singleEnvelopeCharacters": 1515,
+      "selectedBytes": 997,
+      "pieces": [
+        {
+          "chunkSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+          "characters": 989,
+          "bytes": 997,
+          "offset": 0,
+          "serializedCharacters": 1515
+        }
+      ],
+      "displayCalls": 1,
+      "actorCarryAccepted": false,
+      "rawSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\agents\\MarcusAurelius.md",
+      "selectedCharacters": 989,
+      "rawBytes": 997,
+      "selectionMapSHA256": "71dd0c10c2f914a7801745df414cff3db088acd086f6dd030d317eb4476d9a80",
+      "selectedSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 997
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Plato.md",
+      "singleEnvelopeCharacters": 1122,
+      "selectedBytes": 629,
+      "pieces": [
+        {
+          "chunkSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+          "characters": 625,
+          "bytes": 629,
+          "offset": 0,
+          "serializedCharacters": 1122
+        }
+      ],
+      "displayCalls": 1,
+      "actorCarryAccepted": false,
+      "rawSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\Virtuoso\\overlays\\agents\\Plato.md",
+      "selectedCharacters": 625,
+      "rawBytes": 629,
+      "selectionMapSHA256": "970abde78a10379304240ab2f1f66d7a18cdc55222db98f1ce0e15f78472359c",
+      "selectedSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 629
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "skills/virtuoso/SKILL.md",
+      "singleEnvelopeCharacters": 95854,
+      "selectedBytes": 93324,
+      "pieces": [
+        {
+          "chunkSHA256": "394657886aa2c96ebbf3ac1923c86a9df1a85628ef499d5672c7dadf9c8799d9",
+          "characters": 9185,
+          "bytes": 9228,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "978eca103d8fe3eb189ef3db35f1da7e242ce4e7845baa2b4afa1324aea5c23a",
+          "characters": 9170,
+          "bytes": 9226,
+          "offset": 9228,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "cd9fb6e67cd3151d832f5e8c9ea64f70306fb50dfc8724e8aa464d54c087c1e2",
+          "characters": 9093,
+          "bytes": 9135,
+          "offset": 18454,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "881c3ff038c93ecb45161a8217ec71233685d1fed23f341645a2f7d76f6bec34",
+          "characters": 9169,
+          "bytes": 9282,
+          "offset": 27589,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "12cc69e782c08e364d9c250dc439aa5616ee2969c6d40df406c2e271daa87e4f",
+          "characters": 9093,
+          "bytes": 9231,
+          "offset": 36871,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "5fa31e15d85535c93b9d2741783f1f920357359ce5a60655efdd69a528eebc5d",
+          "characters": 9151,
+          "bytes": 9193,
+          "offset": 46102,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "a93c95b7300460a152d9b7843504529bb2c54b6e4e6968ff773dba68ba472652",
+          "characters": 9111,
+          "bytes": 9261,
+          "offset": 55295,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "c39361599ed1f7721756489dc91caa0ba336452e8e1d77cd3773d2e111e58f71",
+          "characters": 9135,
+          "bytes": 9757,
+          "offset": 64556,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "f5790a196f683744b4caf72874c9ca52f45eab5cdbc428c64fe1b80b02cc8d5c",
+          "characters": 9123,
+          "bytes": 9155,
+          "offset": 74313,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "9596f12eb56bf35d1311209927e674a38016613f6144b66fffbcdcf57767619c",
+          "characters": 9081,
+          "bytes": 9123,
+          "offset": 83468,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "7baffb384d5fae8db7cb30c3c33acf9673c046bc20afe8617aa4abdff9100df5",
+          "characters": 733,
+          "bytes": 733,
+          "offset": 92591,
+          "serializedCharacters": 1301
+        }
+      ],
+      "displayCalls": 11,
+      "actorCarryAccepted": false,
+      "rawSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\skills\\virtuoso\\SKILL.md",
+      "selectedCharacters": 92044,
+      "rawBytes": 93324,
+      "selectionMapSHA256": "9df964f818460b6b7a1583ce413f180c1835658f22aa2318e990a29b16f5c3f7",
+      "selectedSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 93324
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "skills/virtuoso/references/zeus.md",
+      "singleEnvelopeCharacters": 32494,
+      "selectedBytes": 30766,
+      "pieces": [
+        {
+          "chunkSHA256": "7c281e8630563d464affe967dbd73eeb152a02d768e6d526e289c2ea83adeb00",
+          "characters": 9085,
+          "bytes": 9217,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "0c7bac012f23362c8d65734ded5b3526ebe513db4c51faedea01358394e6b240",
+          "characters": 9006,
+          "bytes": 9054,
+          "offset": 9217,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "be2871f5f5c8f19aad5ff846704a2fc41c3b0b175837c5ad1fa87908709923a6",
+          "characters": 8871,
+          "bytes": 8965,
+          "offset": 18271,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "c3d21471ddf0f94b2a8e0c6a125486280a7131c1a9647ee7bceba53c168dba75",
+          "characters": 3488,
+          "bytes": 3530,
+          "offset": 27236,
+          "serializedCharacters": 4187
+        }
+      ],
+      "displayCalls": 4,
+      "actorCarryAccepted": false,
+      "rawSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\skills\\virtuoso\\references\\zeus.md",
+      "selectedCharacters": 30450,
+      "rawBytes": 30766,
+      "selectionMapSHA256": "8b7ede9192d68c8fb7c7ae7756fec65e03bbf3ee4f12da4c27926b515dc68b70",
+      "selectedSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30766
+        }
+      ],
+      "historicalPriorFullReuseReported": true,
+      "proposedSourceKind": "HISTORICALLY_OBSERVED_ORDINARY_SOURCE_CURRENT_UNKNOWN",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "ALL_THREE_TASK_SHARED_INSTRUCTION_MEANING_WITH_APPROPRIATE_ACTOR_COVERAGE",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "INDIVIDUAL_PRIOR_FULL_REUSE_REPORTED_NOT_FIRST_FULL_RANGE_RECONSTRUCTION"
+    },
+    {
+      "rowId": "agents/MarcusAurelius.md",
+      "singleEnvelopeCharacters": 14796,
+      "selectedBytes": 13714,
+      "pieces": [
+        {
+          "chunkSHA256": "a0f836cb5651fedbfe322544a11a686f0735a0580b8865a0ab689de39028466f",
+          "characters": 9039,
+          "bytes": 9095,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "f8cb37cde6a7ebf41e750fa1b0fe22bd56c3a459e712f4b57fe7a7df855ce82f",
+          "characters": 4605,
+          "bytes": 4619,
+          "offset": 9095,
+          "serializedCharacters": 5339
+        }
+      ],
+      "displayCalls": 2,
+      "actorCarryAccepted": false,
+      "rawSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\MarcusAurelius.md",
+      "selectedCharacters": 13644,
+      "rawBytes": 13714,
+      "selectionMapSHA256": "838bf126d24bb101a336c94a62071f9a2bcd387b3398768f627b4370156d8620",
+      "selectedSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 13714
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "LITERAL_CANDIDATE_ORDINARY_PATH_FOR_BRAIN_SELECTION_ONLY",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "FULL_UNIQUE_STANDARD_ROLE_DEFINITION_FOR_THE_BOUND_ROLE_ACTOR",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED"
+    },
+    {
+      "rowId": "agents/Plato.md",
+      "singleEnvelopeCharacters": 15033,
+      "selectedBytes": 13843,
+      "pieces": [
+        {
+          "chunkSHA256": "b9ecda9d0d1f78274a7ced1aabc255bd46f1d837fce6a6c4384eba10894f1f48",
+          "characters": 8977,
+          "bytes": 9001,
+          "offset": 0,
+          "serializedCharacters": 10000
+        },
+        {
+          "chunkSHA256": "60c1deb16313948271df79830387c9da7edff105ee85b6e0cf592a1d1a90a9ed",
+          "characters": 4812,
+          "bytes": 4842,
+          "offset": 9001,
+          "serializedCharacters": 5558
+        }
+      ],
+      "displayCalls": 2,
+      "actorCarryAccepted": false,
+      "rawSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Plato.md",
+      "selectedCharacters": 13789,
+      "rawBytes": 13843,
+      "selectionMapSHA256": "e8a65d6bcd3eaa2553ed09ff439c6ea680b7bd73bad02e49017892adc015e70e",
+      "selectedSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 13843
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "LITERAL_CANDIDATE_ORDINARY_PATH_FOR_BRAIN_SELECTION_ONLY",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "FULL_UNIQUE_STANDARD_ROLE_DEFINITION_FOR_THE_BOUND_ROLE_ACTOR",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED"
+    },
+    {
+      "rowId": "agents/Hippocrates.md",
+      "singleEnvelopeCharacters": 12524,
+      "selectedBytes": 11318,
+      "pieces": [
+        {
+          "chunkSHA256": "517aeb94f6125ac28e8283c6a97d099891a97aa0d3258f0a71529ba68299f360",
+          "characters": 8910,
+          "bytes": 8931,
+          "offset": 0,
+          "serializedCharacters": 9999
+        },
+        {
+          "chunkSHA256": "c8ac304cea21f0d3a39f229ca78b84c735a304e8748403d5a8571e677c670e2c",
+          "characters": 2380,
+          "bytes": 2387,
+          "offset": 8931,
+          "serializedCharacters": 3062
+        }
+      ],
+      "displayCalls": 2,
+      "actorCarryAccepted": false,
+      "rawSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+      "quietCurrentAvailable": "UNKNOWN",
+      "localReadPath": "C:\\Users\\estra\\.codex\\plugins\\cache\\virtuoso-marketplace\\virtuoso\\1.16.2\\agents\\Hippocrates.md",
+      "selectedCharacters": 11290,
+      "rawBytes": 11318,
+      "selectionMapSHA256": "240cf3a7fdd071fb210df3fb34ea84ee6fcfcac05c921cf2b266e949e1311065",
+      "selectedSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 11318
+        }
+      ],
+      "historicalPriorFullReuseReported": false,
+      "proposedSourceKind": "LITERAL_CANDIDATE_ORDINARY_PATH_FOR_BRAIN_SELECTION_ONLY",
+      "quietHistoricalOrCandidatePath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md",
+      "pathCurrentlyObserved": false,
+      "requiredRoleScope": "FULL_UNIQUE_STANDARD_ROLE_DEFINITION_FOR_THE_BOUND_ROLE_ACTOR",
+      "permittedAccessCurrentlyGranted": false,
+      "newIndependentOriginalRangeHistoryVerified": false,
+      "historicalReadEvidence": "NO_MATCHING_QUIET_CURRENT_ROW_CLOSED"
+    }
+  ],
+  "scenarios": [
+    {
+      "semanticCarryAssumption": "NONE",
+      "reservedTotal": 9,
+      "semanticDisplayCalls": 55,
+      "reservedCalls": {
+        "preservationAndFinal": 2,
+        "independentComplianceAndQuality": 2,
+        "metadataAndRawQualification": 3,
+        "entryAndCustody": 2
+      },
+      "name": "COLD_ALL_SELECTED_RANGES",
+      "fitsForty": false,
+      "minimumAggregateCalls": 64
+    },
+    {
+      "semanticCarryAssumption": "UNAPPROVED technical decision: per-row prior FULL reuse report is not reconstructed original ranges and is not automatically another actor read",
+      "reservedTotal": 9,
+      "semanticDisplayCalls": 32,
+      "reservedCalls": {
+        "preservationAndFinal": 2,
+        "independentComplianceAndQuality": 2,
+        "metadataAndRawQualification": 3,
+        "entryAndCustody": 2
+      },
+      "name": "POTENTIAL_SEVEN_REPORTS_ACCEPTED_FOR_SAME_ACTOR_ROLE_AND_BYTES",
+      "fitsForty": false,
+      "minimumAggregateCalls": 41
+    }
+  ],
+  "admittedCapMinutes": null,
+  "admittedCapCalls": null,
+  "packing": {
+    "pieceFields": [
+      "rowId",
+      "sourceFullSHA256",
+      "selectionSHA256",
+      "offset",
+      "end",
+      "pieceSHA256",
+      "text"
+    ],
+    "outerFields": [
+      "schemaVersion",
+      "frame",
+      "parts"
+    ],
+    "order": "Root index15roworder; same selected values/ranges; adjacentrow boundaries pack without omitted bytes",
+    "maximumTotalSerializedCharacters": 10000
+  },
+  "packedScenarios": [
+    {
+      "fitsForty": false,
+      "maxSerializedCharacters": 10000,
+      "reservedCalls": 9,
+      "reassembledRows": [
+        {
+          "fullActualByteEquality": true,
+          "bytes": 30850,
+          "rowId": "AGENTS.md",
+          "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 30743,
+          "rowId": "CLAUDE.md",
+          "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 67713,
+          "rowId": "ROADMAP.md",
+          "sha256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 46818,
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sha256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 19955,
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 46344,
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sha256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 1822,
+          "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+          "sha256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 1029,
+          "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+          "sha256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 997,
+          "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+          "sha256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 629,
+          "rowId": "Virtuoso/overlays/agents/Plato.md",
+          "sha256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 93324,
+          "rowId": "skills/virtuoso/SKILL.md",
+          "sha256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 30766,
+          "rowId": "skills/virtuoso/references/zeus.md",
+          "sha256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 13714,
+          "rowId": "agents/MarcusAurelius.md",
+          "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 13843,
+          "rowId": "agents/Plato.md",
+          "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 11318,
+          "rowId": "agents/Hippocrates.md",
+          "sha256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3"
+        }
+      ],
+      "name": "COLD_ALL",
+      "semanticDisplayCalls": 45,
+      "frames": [
+        {
+          "envelopeSHA256": "2b95968b7f2b996a208b78301376111ac8cc16d27b603c01821db3d737aa3146",
+          "serializedUTF8Bytes": 10038,
+          "frame": 0,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "AGENTS.md",
+              "sourceFullSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "selectionSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "offset": 0,
+              "end": 9580,
+              "pieceSHA256": "5b90602248dc1540e527bbebca871404ed946b068c5cc441773c3273b0acdcaa",
+              "textCharacters": 9542
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "4b68d8f99767afe64997c3d7201a93a1e628a0b9d15a28f0df306836008fdc08",
+          "serializedUTF8Bytes": 10038,
+          "frame": 1,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "AGENTS.md",
+              "sourceFullSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "selectionSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "offset": 9580,
+              "end": 19096,
+              "pieceSHA256": "23d858b1de4db42d3b8bddec0540e9a124be9bd672917e2bea550ba16b04f3a2",
+              "textCharacters": 9478
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "188ce4dcf399c8b96d09ca8fbb8e7605fbb98103cce2204105ca536afc144706",
+          "serializedUTF8Bytes": 10054,
+          "frame": 2,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "AGENTS.md",
+              "sourceFullSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "selectionSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "offset": 19096,
+              "end": 28646,
+              "pieceSHA256": "9360b51e0f32a9a6b197f0027ecbcff6550cdfdd8e6d26fd25f6c5929bbde4f0",
+              "textCharacters": 9496
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "2477a867d745614fc55c3b2948c6863e0b3626b971c9846e5384576a7c695335",
+          "serializedUTF8Bytes": 10032,
+          "frame": 3,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "AGENTS.md",
+              "sourceFullSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "selectionSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+              "offset": 28646,
+              "end": 30850,
+              "pieceSHA256": "f0fda9b3afea41b055688d8249f3da707a99f541dcac281f874d0098a3370f25",
+              "textCharacters": 2200
+            },
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 0,
+              "end": 7064,
+              "pieceSHA256": "8fe8cd9fc511fd0cf6e519188a91902439364e503bf36e66e7067e3662428144",
+              "textCharacters": 7036
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "94006ade137f6eda01feb1fc20714fd3f9f38f969157aee79db90404c9b70417",
+          "serializedUTF8Bytes": 10040,
+          "frame": 4,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 7064,
+              "end": 16590,
+              "pieceSHA256": "edaf79c81db5c3163f60e1ddc7303c835eb5d9f0c2620396fa2be72ab1be80d5",
+              "textCharacters": 9486
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "89e7c8c49baf910ffbe6d02f3c3e7a7558dcd301343e9f97df1da852f6928c14",
+          "serializedUTF8Bytes": 10052,
+          "frame": 5,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 16590,
+              "end": 26125,
+              "pieceSHA256": "2bb39d864e29efa50833d88d3abaa263381be29b9d6b7c8263ea7a1d55e449af",
+              "textCharacters": 9483
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "9c3da4adf3a1698f239843fa59cefc76595c6f82034e148057635c841e65534b",
+          "serializedUTF8Bytes": 10028,
+          "frame": 6,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 26125,
+              "end": 30743,
+              "pieceSHA256": "269b8fb1f475bb2cf89d626fbc331200be0efd3f9a91da4b0333c63d294da2d4",
+              "textCharacters": 4604
+            },
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 0,
+              "end": 4657,
+              "pieceSHA256": "c7c3cfd9e0a0d4cad5cf6cee4a73d1656da1de3c4ee6cece022c358ec790cd80",
+              "textCharacters": 4643
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "460b1b9106f48c987b55b2aa36bdce0a51c94725660749723540338f5b929cb9",
+          "serializedUTF8Bytes": 10020,
+          "frame": 7,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 4657,
+              "end": 14236,
+              "pieceSHA256": "9a5ed61a0effa926cc0078099d70b57a9286ceedca61687dd8d40f3a886f3773",
+              "textCharacters": 9559
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "c85f89cb5e03ef24f0a243122fb93a0eb731ccebe95c83023947ddcc58eba70d",
+          "serializedUTF8Bytes": 10030,
+          "frame": 8,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 14236,
+              "end": 23838,
+              "pieceSHA256": "96b313679bff9a968279d7f76813c879af659d560ac574e6881327a1c5f9cecc",
+              "textCharacters": 9572
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "edc8e9af8ad22af8c37a8cc5537b3d09687e8bfdb5ec21828f3a9e02ed2869bf",
+          "serializedUTF8Bytes": 10054,
+          "frame": 9,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 23838,
+              "end": 33451,
+              "pieceSHA256": "f99c1cb3af586c9b1aa95e74b689c8bd5fe988df28e81b712d8aee21a8480509",
+              "textCharacters": 9559
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "c8320374f20b5269e34093df88ab929772fec623fa4fa9378a154da3ff1fa248",
+          "serializedUTF8Bytes": 10036,
+          "frame": 10,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 33451,
+              "end": 43051,
+              "pieceSHA256": "da2a3d3f95bc4ea3e549c16df6cfe9a242184ac01f92141396e1822430f073ca",
+              "textCharacters": 9564
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "209688b65802fa8391f24bf98fa9546fdaaa55b3141f408b541c46c964d9e989",
+          "serializedUTF8Bytes": 10034,
+          "frame": 11,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 43051,
+              "end": 52647,
+              "pieceSHA256": "81e0efd75d734527232a2e010ab52eb18d3b014491a3bcc31aafe7321bf221f0",
+              "textCharacters": 9562
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "3af3b222a7bcc299d78eec2364e2c0b3908af4a22237688f9b94c3f6feb1cadb",
+          "serializedUTF8Bytes": 10038,
+          "frame": 12,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 52647,
+              "end": 62247,
+              "pieceSHA256": "a8ecdb457c12af17a2800eeb27a0af4ace4f405d3d163586021ea94ea9649db2",
+              "textCharacters": 9562
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "2764162f043fd1abf95f1a65eeccd466a4212c84cdd0995e1d98ca923f3c09f8",
+          "serializedUTF8Bytes": 10037,
+          "frame": 13,
+          "serializedCharacters": 9999,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 62247,
+              "end": 67713,
+              "pieceSHA256": "f7908482f269d8a1f71ab2c842f6e5d8dcffde33b95e90efc219990a9723d53c",
+              "textCharacters": 5448
+            },
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 0,
+              "end": 3762,
+              "pieceSHA256": "6d12280637022c90bfbb915fe5c71c0d038100c59dbc101f6a20ad749b9e5cf6",
+              "textCharacters": 3742
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "1a65a0e2e07d6a1689095805c1d3f724c7da69b3ae8c633255e78343f221f72c",
+          "serializedUTF8Bytes": 10062,
+          "frame": 14,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 3762,
+              "end": 13307,
+              "pieceSHA256": "d8322dae7f06f2ae2ab2a972749f01a6ea51b0549ef5244c79156336a622844b",
+              "textCharacters": 9483
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "bb401384e320641740431aeafd0c88eafff53d7b876d14e8cae874537e26c553",
+          "serializedUTF8Bytes": 10017,
+          "frame": 15,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 13307,
+              "end": 22854,
+              "pieceSHA256": "fe07b682e33e8aa5bed86d349edde78d8db5929fbccc6b74c5d5746b8c0e757b",
+              "textCharacters": 9530
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "16a3f7bd0affda8b7feaa81c30c7166ea533791829b69d40bad851719c9e6d22",
+          "serializedUTF8Bytes": 10046,
+          "frame": 16,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 22854,
+              "end": 32415,
+              "pieceSHA256": "9c34cbcf10846d9a24ffc81ad4aa259002c6284e83dc59d5dbff842403b9e91c",
+              "textCharacters": 9515
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "96d852f4fd70bc560cfb221fb6ab3fa58bf7b64c8453c0b65f2e760b893aa7fc",
+          "serializedUTF8Bytes": 10014,
+          "frame": 17,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 32415,
+              "end": 41974,
+              "pieceSHA256": "8f1cf09842bdaa56d099e574af9ba0cfcfd96945e682b4105a1ab810a3e4dec0",
+              "textCharacters": 9545
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "47bfe1a4eeeb176763f66e99f70fd21d1a388db24476140f741c301fb06979e2",
+          "serializedUTF8Bytes": 10004,
+          "frame": 18,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 41974,
+              "end": 46818,
+              "pieceSHA256": "b98dd287b61f10d9602d6c99abff0ed31fbbb9eb0c3fe2b27cedaf244ec8588d",
+              "textCharacters": 4840
+            },
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 0,
+              "end": 3931,
+              "pieceSHA256": "1a2b0c7c85d7a54e1b8652e6dcc669a761acd8d80fceb5b426bf0a3ec3221e9e",
+              "textCharacters": 3931
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "ba02172048553bc4a68309ed5ca8c9d59461a8198cbe5e94336e16554cd56c58",
+          "serializedUTF8Bytes": 10001,
+          "frame": 19,
+          "serializedCharacters": 9999,
+          "parts": [
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 3931,
+              "end": 12377,
+              "pieceSHA256": "e2890fdde1764d7b79f0cacf5f5b37031188b373c56a0a8bea370745d48e45c7",
+              "textCharacters": 8444
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "7d12523c7eb7efe904aff39396d94ef906db234239058529d5d9d72be7df6869",
+          "serializedUTF8Bytes": 10000,
+          "frame": 20,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 12377,
+              "end": 19955,
+              "pieceSHA256": "537432f54f3452f4abbafec7c455033f7f47fbe5ac93224b7686f3084ed58c52",
+              "textCharacters": 7578
+            },
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 0,
+              "end": 657,
+              "pieceSHA256": "586d3a58935518517ac99b2492745fc1003d9aed7ae022385f1d061c186cd91c",
+              "textCharacters": 657
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "1562661b40116dfce7ce7ff8d115be841b8d6cd565e6b56f81706436e3211d26",
+          "serializedUTF8Bytes": 10010,
+          "frame": 21,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 657,
+              "end": 9897,
+              "pieceSHA256": "c28b0f5ab51450c04836e64da4f525def30328e6f191c9cb5e99d722bd6731c9",
+              "textCharacters": 9230
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "7dc9497dd7f5ce251e19e5048264455069f56d472fd937c212c57f624dc859ef",
+          "serializedUTF8Bytes": 10020,
+          "frame": 22,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 9897,
+              "end": 18974,
+              "pieceSHA256": "8741cf8cc408c499fecdfe9de3b11c8dd37ddd213de1fc2e5f49983b042dacb1",
+              "textCharacters": 9057
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "89cbbb5bb8f2f810dcb4dc4822935c941497a299f0bbcda7a94433a4e883a0eb",
+          "serializedUTF8Bytes": 10002,
+          "frame": 23,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 18974,
+              "end": 28314,
+              "pieceSHA256": "6b09d0bc6ec9212a4c0351e89c985ae7f23857a531b73ef0b8cd83af7d612c1b",
+              "textCharacters": 9338
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "e37f96696ec725263915993d86b2f1fa8b160f3e60d6b53a11c3932289da1315",
+          "serializedUTF8Bytes": 10000,
+          "frame": 24,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 28314,
+              "end": 37708,
+              "pieceSHA256": "cf7d6e5833b9c5a6bb267b39d65d2ea9796c79aaa577d2e1b19a7a35d21949ee",
+              "textCharacters": 9394
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "8096684a2e571feef8d7dc508cdc6cc28bb7dad2f550abb5f9f20424fe4509f7",
+          "serializedUTF8Bytes": 10002,
+          "frame": 25,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 37708,
+              "end": 46344,
+              "pieceSHA256": "a920af72014c7955313b3c89e3a2545ae4ce6e6b6e88441a37524b3fe212e568",
+              "textCharacters": 8634
+            },
+            {
+              "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+              "selectionSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+              "offset": 0,
+              "end": 130,
+              "pieceSHA256": "f7745c61db9b379511d766994fcb4f33d00c0f359a4068f1652058a3b3fe54cb",
+              "textCharacters": 130
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "cc3a393069ef29a44316eb2f3d7b886baf4add829a3037fc14d38cf3784d6bc8",
+          "serializedUTF8Bytes": 10044,
+          "frame": 26,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+              "selectionSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+              "offset": 130,
+              "end": 1822,
+              "pieceSHA256": "c3d8d82a8756ac03aaedc32e7a9d02ac5259a282082e4606cb481469f96c296c",
+              "textCharacters": 1688
+            },
+            {
+              "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+              "sourceFullSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+              "selectionSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+              "offset": 0,
+              "end": 1029,
+              "pieceSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+              "textCharacters": 1025
+            },
+            {
+              "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+              "sourceFullSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+              "selectionSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+              "offset": 0,
+              "end": 997,
+              "pieceSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+              "textCharacters": 989
+            },
+            {
+              "rowId": "Virtuoso/overlays/agents/Plato.md",
+              "sourceFullSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+              "selectionSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+              "offset": 0,
+              "end": 629,
+              "pieceSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+              "textCharacters": 625
+            },
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 0,
+              "end": 3773,
+              "pieceSHA256": "f89e1e8ac3fdee3bbe5bc1d00dc3410cf658b25876ccfb47139f5b0f3a40c126",
+              "textCharacters": 3749
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "94ffd3d04f131e6d0d403b6b47ef1b82d53da162bb80f6129b1d707f5d4f8f65",
+          "serializedUTF8Bytes": 10039,
+          "frame": 27,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 3773,
+              "end": 13079,
+              "pieceSHA256": "ed8c89b276e12a618a5e2d540a5113967cfc640a27b6641bd9c303f29f3fb7e7",
+              "textCharacters": 9267
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "04d8947c131fd30bbc1828c8c9da57f71892a48d71866cce2afdb7554495d558",
+          "serializedUTF8Bytes": 10054,
+          "frame": 28,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 13079,
+              "end": 22427,
+              "pieceSHA256": "8217846a6e82bda991985ca12e6fd17937221623184aab187e0e0ceff90a720e",
+              "textCharacters": 9294
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "a5b5b77d8b09af51753fe2eed573ec264a7dfa3669a1519450caadfeecefa975",
+          "serializedUTF8Bytes": 10044,
+          "frame": 29,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 22427,
+              "end": 31725,
+              "pieceSHA256": "a80ac2a6d4e071604250d7ab9e6f95a8ab1e6afcfc28c222dbf5b6e06cb8e77e",
+              "textCharacters": 9254
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "756d04ee5488c2701f94bc465de56421e0276a7959c7f3443b5de882194c7b51",
+          "serializedUTF8Bytes": 10159,
+          "frame": 30,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 31725,
+              "end": 41156,
+              "pieceSHA256": "2d4a6830c179809112244d23a2c7ad4035f15a0906989ce4fd15b8e2a75c0393",
+              "textCharacters": 9272
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "a1bf48f14f9471ba1c8816bf27fd6749efa9f34220ca3b9a03488a995f1b2714",
+          "serializedUTF8Bytes": 10094,
+          "frame": 31,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 41156,
+              "end": 50492,
+              "pieceSHA256": "46075aa260cfb2f144094036ec8cae610548616ddfc9a4298e99e4830f0c467a",
+              "textCharacters": 9242
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "a9ff77b1ca7e6298c519a36e3c0f401a33ed485a00e094142f38ab95540241f0",
+          "serializedUTF8Bytes": 10045,
+          "frame": 32,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 50492,
+              "end": 59797,
+              "pieceSHA256": "f6b907191e47dacea66b152b91687a1462625329ba186bebb11104ce605a0f18",
+              "textCharacters": 9260
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "24e04dbbdd261d26e6f070315758c5eb9754ef940a1e04f5b85d2acf4ceaecaa",
+          "serializedUTF8Bytes": 10155,
+          "frame": 33,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 59797,
+              "end": 69206,
+              "pieceSHA256": "8ebfa0824fe88bbbde9a06ebe9942db0c7e6435846dc97cc5b405f24e04468a8",
+              "textCharacters": 9254
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "c39f1fef8322330e762beb5694820759e2680f2b83efc139195186ee3684a51f",
+          "serializedUTF8Bytes": 10614,
+          "frame": 34,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 69206,
+              "end": 79096,
+              "pieceSHA256": "35d9d795b12ea9cfdc24d656c37036a425e2b1f2b8c5073358ed755a5f74962a",
+              "textCharacters": 9276
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "71c2a8d95bf47b0206c881ff1aa202f830a36df0f3db4886e44d89ca6d72c6aa",
+          "serializedUTF8Bytes": 10032,
+          "frame": 35,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 79096,
+              "end": 88358,
+              "pieceSHA256": "0f9c25ee185e2f0ac0fb22baf92b194fe37bf27e810ff1eb86bbfd2c4d608c48",
+              "textCharacters": 9230
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "55e60d6e46fc88fa2ad10a5ad90de6dd621619eb678f75415d554cb90e155ebd",
+          "serializedUTF8Bytes": 10102,
+          "frame": 36,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/SKILL.md",
+              "sourceFullSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "selectionSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+              "offset": 88358,
+              "end": 93324,
+              "pieceSHA256": "dab8797f8ffa93430b81165e44b6d384c2fadca4c65d4641ec25d473f0a12de0",
+              "textCharacters": 4946
+            },
+            {
+              "rowId": "skills/virtuoso/references/zeus.md",
+              "sourceFullSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "selectionSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "offset": 0,
+              "end": 4041,
+              "pieceSHA256": "ce50c075ad3f367386b8a1bad15810235b34af1977745633c1158eb428aa1ec0",
+              "textCharacters": 3959
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "d38d28788ab72af27851fc91448620490d0aa826420ab6d0a5019422a2def5f8",
+          "serializedUTF8Bytes": 10076,
+          "frame": 37,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/references/zeus.md",
+              "sourceFullSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "selectionSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "offset": 4041,
+              "end": 13340,
+              "pieceSHA256": "a422f6cde759c70d62f97d6bd9d6bc74fd4f85389f783c3b21a1c5085e6245d0",
+              "textCharacters": 9223
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "b93375244eb50315a413340d7be80e8ba31ea35e5451f4cff1f5d46bfdc4806a",
+          "serializedUTF8Bytes": 10043,
+          "frame": 38,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/references/zeus.md",
+              "sourceFullSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "selectionSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "offset": 13340,
+              "end": 22409,
+              "pieceSHA256": "ff05203829bab2e52d4866431a62b66525c0a8253ec2fa246183876ae95f8daa",
+              "textCharacters": 9026
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "d433d6d9f53f89b26ebd102aaebbc7d7c57908f471d68052800f7b52c70e572f",
+          "serializedUTF8Bytes": 10119,
+          "frame": 39,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "skills/virtuoso/references/zeus.md",
+              "sourceFullSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "selectionSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+              "offset": 22409,
+              "end": 30766,
+              "pieceSHA256": "24f8462b770b497351de87ab970504c39864f73b19d0dc867cd3e9501614914e",
+              "textCharacters": 8242
+            },
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 0,
+              "end": 604,
+              "pieceSHA256": "8cb88e5401ce300d85d9a579306cbc177639714a81ada60439daa206cf9d7db7",
+              "textCharacters": 600
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "3bebc481cc7a9024c3dace849c7336559d1e6593ef1930d2a1d4c1349d48a659",
+          "serializedUTF8Bytes": 10054,
+          "frame": 40,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 604,
+              "end": 9827,
+              "pieceSHA256": "5a7c0741b2d2f38dfee2349e1a2889384350d466c30ff1f27b08cf1d465e3718",
+              "textCharacters": 9169
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "0d062c9ff4eb053c502cfcc9a8be2e4f0c1d65cad2d270dbad9becc1ef4e6b5b",
+          "serializedUTF8Bytes": 10024,
+          "frame": 41,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 9827,
+              "end": 13714,
+              "pieceSHA256": "0e78cb71bd4e63daba7fd9f0e2a349c12a82bd993b4466618a756f4e0c6be5f1",
+              "textCharacters": 3875
+            },
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 0,
+              "end": 4992,
+              "pieceSHA256": "b04fe5694ab3348e4adae4758cc07171f267c092fa109e6c3ca932b6aa1e580b",
+              "textCharacters": 4980
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "e43237b4e45a1c25f6c9c4015d525fb62c9f22084c48708bf2fecd49a525800a",
+          "serializedUTF8Bytes": 10042,
+          "frame": 42,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 4992,
+              "end": 13843,
+              "pieceSHA256": "179fa8c05f882c06f2ef5826dd75e75422532b9182b43543be7a86db18b01a03",
+              "textCharacters": 8809
+            },
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 0,
+              "end": 25,
+              "pieceSHA256": "58749ff631fd0781ee3028ba82bddbabafa34e493ef1bde21094ef9d93167335",
+              "textCharacters": 25
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "1f7fab6af0867269a31c92df1658ab92abf4aedbbd70aa2f3b194abe5f7322e5",
+          "serializedUTF8Bytes": 10023,
+          "frame": 43,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 25,
+              "end": 9083,
+              "pieceSHA256": "c8b1c5f205fae4e6a4b05a139a5122a1629a44fd588981dae9ce82a752a6a237",
+              "textCharacters": 9035
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "ac239884edf080615e9102f50bf6aafebcf2ade06564ee6a25f61ea7ea2c4090",
+          "serializedUTF8Bytes": 2765,
+          "frame": 44,
+          "serializedCharacters": 2760,
+          "parts": [
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 9083,
+              "end": 11318,
+              "pieceSHA256": "c6b75f7fb5fa7b1d756dd19aac87a454d5725df5babf40fe6d407b3473986a91",
+              "textCharacters": 2230
+            }
+          ]
+        }
+      ],
+      "newActorRoleCarryApproved": false,
+      "minimumAggregateCalls": 54,
+      "fullRecipeReadCalls": 3,
+      "totalIncludingFullRecipe": 57,
+      "fitsFortyIncludingFullRecipe": false,
+      "unallocatedCallsWithinForty": 0,
+      "accountingForActualSelectedQuietRouteComplete": false
+    },
+    {
+      "fitsForty": true,
+      "maxSerializedCharacters": 10000,
+      "reservedCalls": 9,
+      "reassembledRows": [
+        {
+          "fullActualByteEquality": true,
+          "bytes": 30743,
+          "rowId": "CLAUDE.md",
+          "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 67713,
+          "rowId": "ROADMAP.md",
+          "sha256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 46818,
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sha256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 19955,
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 46344,
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sha256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 13714,
+          "rowId": "agents/MarcusAurelius.md",
+          "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 13843,
+          "rowId": "agents/Plato.md",
+          "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77"
+        },
+        {
+          "fullActualByteEquality": true,
+          "bytes": 11318,
+          "rowId": "agents/Hippocrates.md",
+          "sha256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3"
+        }
+      ],
+      "name": "POTENTIAL_SEVEN_REPORT_CARRY",
+      "semanticDisplayCalls": 28,
+      "frames": [
+        {
+          "envelopeSHA256": "ae3a21363c7fa49c1d3ffaf2f5d02e935177529f123afb0924eca753aa22c35b",
+          "serializedUTF8Bytes": 10036,
+          "frame": 0,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 0,
+              "end": 9579,
+              "pieceSHA256": "356108990199b841445ac5fcde1e8cb5e6eeb615f7e12a57373eb9a94a78f9d2",
+              "textCharacters": 9543
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "c1a3803f6a1da57fc4836f91accc12394aa8ca6756dafaf7baef292722ec2093",
+          "serializedUTF8Bytes": 10040,
+          "frame": 1,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 9579,
+              "end": 19094,
+              "pieceSHA256": "e36236f3ee3085ddd2e48761e66e2a2c0706d7fcd2e7a4da7d2e59fc4767a53a",
+              "textCharacters": 9475
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "a9472a77f4f64b17212166aab39a1c74730f230c1d3acdeaa8977c1345331fd0",
+          "serializedUTF8Bytes": 10054,
+          "frame": 2,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 19094,
+              "end": 28645,
+              "pieceSHA256": "9fd42acb8adb921fd3bf8c676c4b7121726492e7a98f29a2f583f1747fe1b7ad",
+              "textCharacters": 9497
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "0415050ad32d5d03d4471be9967fe89fd7d9f2725e0d41c51ea36f3c9341895b",
+          "serializedUTF8Bytes": 10024,
+          "frame": 3,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "CLAUDE.md",
+              "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+              "offset": 28645,
+              "end": 30743,
+              "pieceSHA256": "6c6d22ee5ef7131dbb163a727a11ca3d88d873a4bcc73f8c0f80ab9f8ee0d9be",
+              "textCharacters": 2094
+            },
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 0,
+              "end": 7193,
+              "pieceSHA256": "498cb85170890facc3589f6ae973fb0ab55ff2990163f1898ffa03889008ba87",
+              "textCharacters": 7173
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "bb8f0322aecbda6d0505fa809989f438305562911545ecdb3f1130d354d99e7a",
+          "serializedUTF8Bytes": 10026,
+          "frame": 4,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 7193,
+              "end": 16766,
+              "pieceSHA256": "5fa36a1ad460d640d2a54a394922cdc12cb079a4f4350db37db5dee8c768c757",
+              "textCharacters": 9547
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "76b79b3a6261140da4d07772f7175a1bf19568827c5e4d23a6656d025c821a4e",
+          "serializedUTF8Bytes": 10020,
+          "frame": 5,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 16766,
+              "end": 26361,
+              "pieceSHA256": "87b2ccfc21e8754c2953f52991564dbd292a99b95907f4ef4a6fbc65816c9da2",
+              "textCharacters": 9575
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "2f36a320f15deeab275d7c982947b3a201d680ccafc0894a300f838f1af37c10",
+          "serializedUTF8Bytes": 10056,
+          "frame": 6,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 26361,
+              "end": 35963,
+              "pieceSHA256": "c4b287477c42fae6bd7272801df2691e5895c771cf44c0314a302795712b3b3a",
+              "textCharacters": 9546
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "7ce28398408fe646cc7fecc27779e5897e6803da757da7e626f7ac30496105c5",
+          "serializedUTF8Bytes": 10044,
+          "frame": 7,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 35963,
+              "end": 45580,
+              "pieceSHA256": "5882e1e7f9b91cb74abc8504cf1adbc5fe2dbc4cef061c6760d9863ed7b68d90",
+              "textCharacters": 9573
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "17a8622c71bd3703d307ea834be1bd706053982fe640d89634949a1ae053dc08",
+          "serializedUTF8Bytes": 10028,
+          "frame": 8,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 45580,
+              "end": 55175,
+              "pieceSHA256": "82ff03362c56c4bf840a78e4ad49e62ba73236696cf5766910004ec70aeec3b6",
+              "textCharacters": 9567
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "9005c90651c1024c56c32fd2ca509aa9be284af22b50d5e87597fb0e2636b1c8",
+          "serializedUTF8Bytes": 10042,
+          "frame": 9,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 55175,
+              "end": 64779,
+              "pieceSHA256": "b518ae8b88550e59e58d14e60b6a64e41da5689d175a5d119f273e14e686d5e6",
+              "textCharacters": 9562
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "09309c04dab783a394034190b8901b3aba3d103682bf7301341200ba27174818",
+          "serializedUTF8Bytes": 10050,
+          "frame": 10,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "ROADMAP.md",
+              "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+              "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+              "offset": 64779,
+              "end": 67713,
+              "pieceSHA256": "d63cb906303fb19fab5589c7103c3b59bf951f62a631109a9a81ef167f9651d2",
+              "textCharacters": 2926
+            },
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 0,
+              "end": 6289,
+              "pieceSHA256": "baa61010bbd8c2761047c11af2d07e1f9445516d2a8a500cc3bf923a374e5b56",
+              "textCharacters": 6247
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "6cfceb62f2e24c087d56669c2c43d6437118a494e517424cb74a18ef75f39527",
+          "serializedUTF8Bytes": 10042,
+          "frame": 11,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 6289,
+              "end": 15829,
+              "pieceSHA256": "f48a1e9d3d80d54910953a8b3666576eb218b23780d32b9d3e1bcec893f403a2",
+              "textCharacters": 9498
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "50493132d1c88e6df174ed2b4e39a56f6faa48dc0b55b989aecadaff973bc989",
+          "serializedUTF8Bytes": 10043,
+          "frame": 12,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 15829,
+              "end": 25393,
+              "pieceSHA256": "43b6a4f533b6b6ff90b5c6180c13ca9b01152aa51d17d4853f220c89302f26c1",
+              "textCharacters": 9521
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "d6ed541499b75e007c3c2b7e66fd7a87045d2908035c4860e34f58e2811190f6",
+          "serializedUTF8Bytes": 10022,
+          "frame": 13,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 25393,
+              "end": 34939,
+              "pieceSHA256": "34bb11a3fc9d36ea685c189ff2d4913f3e7d93d053099b760d8717d39a03b5bd",
+              "textCharacters": 9524
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "ea399bd08f6b8b215c7894ceba8705c01e4ca2b136985617572c735e61c72ac4",
+          "serializedUTF8Bytes": 10014,
+          "frame": 14,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 34939,
+              "end": 44501,
+              "pieceSHA256": "51055a6c5a246b2ff42e671cd581c170a36c84f32deee75068629162abd2cd50",
+              "textCharacters": 9548
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "df17d2a7b40fe6400d8b117e7a0006123bf63b3c5bfc0b137848882b1665f41f",
+          "serializedUTF8Bytes": 10000,
+          "frame": 15,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "docs/governance/LESSONS_LEARNED.md",
+              "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+              "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+              "offset": 44501,
+              "end": 46818,
+              "pieceSHA256": "118f3cc185f243ea0744f6af34d212ac7936418a6d84c4c8630120c603abce4e",
+              "textCharacters": 2317
+            },
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 0,
+              "end": 6156,
+              "pieceSHA256": "1d80745a38698254e0f3ffbaf667c60638b01780261f7e8da47693fe6d8a6766",
+              "textCharacters": 6156
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "f65ee781fe2a196f755d8acd49622fec5a2d5223a2c7cd15fdeff787e275a21f",
+          "serializedUTF8Bytes": 10002,
+          "frame": 16,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 6156,
+              "end": 14600,
+              "pieceSHA256": "fe0fbb574b61bee27782321219739cef97f5f8102b9872c09bb4953ef1f7d347",
+              "textCharacters": 8442
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "dbd94bf9d4c7754454ed73619f82d2b131bb3b10bfe9c506a2c0b03e5bedef34",
+          "serializedUTF8Bytes": 10002,
+          "frame": 17,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/workspace-layout.json",
+              "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+              "offset": 14600,
+              "end": 19955,
+              "pieceSHA256": "339bd45f56927bb016ac76eed7dddf50d2315651d685de65b58a0b25e59c0625",
+              "textCharacters": 5355
+            },
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 0,
+              "end": 3018,
+              "pieceSHA256": "8a5b8d35121f798bc22509c9420c4bcbb83cbe8eee04a00c3de3ddefe489b13f",
+              "textCharacters": 3016
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "f848246ff03d20925eb31af185a708fc191b1eba6e831dd298e14b9bdac01f97",
+          "serializedUTF8Bytes": 10022,
+          "frame": 18,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 3018,
+              "end": 12317,
+              "pieceSHA256": "8003eeaab143a977417c9d4167b0dc872abafef18caf38d0613242446cad19cf",
+              "textCharacters": 9277
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "a2d38b71905cbd8fce1c69c07b93e6f64b1a5783bf3dc0a55baf1385c23e87ae",
+          "serializedUTF8Bytes": 10008,
+          "frame": 19,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 12317,
+              "end": 21503,
+              "pieceSHA256": "7fd572e357d6a0c642d4cadb1073bc2aa7a7be7ee8062f25856a678861960db6",
+              "textCharacters": 9178
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "f0ef96c2dafdf6adb01816788b9f3736416e004fec025cab3a0a7032d51429dc",
+          "serializedUTF8Bytes": 10000,
+          "frame": 20,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 21503,
+              "end": 30803,
+              "pieceSHA256": "9cd83d4fc5d63d7ffff77035170b84e927095c04425a88cf884c3d84e842cb42",
+              "textCharacters": 9300
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "8633f966a7bc1445bbf370ec3485860bc4e1d910d024f97d83db2ba305041cde",
+          "serializedUTF8Bytes": 10002,
+          "frame": 21,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 30803,
+              "end": 40135,
+              "pieceSHA256": "d349da42337d9ebe2b0481074c3d13f1f2c77ee3ce58807b651cdcf454182b41",
+              "textCharacters": 9330
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "62454e8ef74031bb0bdfff810fe615d3ee610fc02e7b96cd6a5e5a43f4657298",
+          "serializedUTF8Bytes": 10011,
+          "frame": 22,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "Virtuoso/work-register.snapshot.json",
+              "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+              "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+              "offset": 40135,
+              "end": 46344,
+              "pieceSHA256": "99c33e8760c706c1adce2bc145ac98f32c569d24f8a5476c99af1a1a630c8555",
+              "textCharacters": 6209
+            },
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 0,
+              "end": 2582,
+              "pieceSHA256": "d15b443e4a686cf06f143584f91c9793818ba337fbf7bbce0b7bda9875b546a1",
+              "textCharacters": 2571
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "f4146e247896cc44b99810fc80457db0e5c9e805e74606533dd9f9171f16e371",
+          "serializedUTF8Bytes": 10053,
+          "frame": 23,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 2582,
+              "end": 11802,
+              "pieceSHA256": "3c6e4059ac3dce2e58cee93c8e8e7d4f3985a899bf2f7db3461593cc7c728005",
+              "textCharacters": 9167
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "67cbf2875fb59acfa63c2d69d41fb4ddfa08650fcaf6d1d882e3078799a84e1c",
+          "serializedUTF8Bytes": 10018,
+          "frame": 24,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/MarcusAurelius.md",
+              "sourceFullSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "selectionSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+              "offset": 11802,
+              "end": 13714,
+              "pieceSHA256": "e19b4551bc5656869f06f4644402826dd38875f2b0163aeb33f8408479e8115c",
+              "textCharacters": 1906
+            },
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 0,
+              "end": 6920,
+              "pieceSHA256": "fc6567d7e4567007fe2dea352efe3d696d458bea9db48914a58e9c6cb38d43ef",
+              "textCharacters": 6908
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "e2b819093f0a984984738995a2d9e0c5a0d520292beb091501c5b6e00cb73291",
+          "serializedUTF8Bytes": 10052,
+          "frame": 25,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/Plato.md",
+              "sourceFullSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "selectionSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+              "offset": 6920,
+              "end": 13843,
+              "pieceSHA256": "d80605dad3e3c9b0595e80c0157638bc6725e5877041d8ece1856a7480caadb7",
+              "textCharacters": 6881
+            },
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 0,
+              "end": 1997,
+              "pieceSHA256": "14c6ccd672bfb53658edbdf37e12f07203e5dfb802fdaf78815e23c33ec11c73",
+              "textCharacters": 1987
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "fcf8f2a396cdfd06a0b1469543b781f7a0a81056369b228c4e28e15bc65970a5",
+          "serializedUTF8Bytes": 10016,
+          "frame": 26,
+          "serializedCharacters": 10000,
+          "parts": [
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 1997,
+              "end": 11015,
+              "pieceSHA256": "5dfea4b629e9bba0c210dc28efe082fffc673841394400d16362751d3b3a6312",
+              "textCharacters": 9002
+            }
+          ]
+        },
+        {
+          "envelopeSHA256": "67310554abc6b7b97a8b352f3133448807f081aba9b919d2361a12779aea7736",
+          "serializedUTF8Bytes": 716,
+          "frame": 27,
+          "serializedCharacters": 714,
+          "parts": [
+            {
+              "rowId": "agents/Hippocrates.md",
+              "sourceFullSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "selectionSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+              "offset": 11015,
+              "end": 11318,
+              "pieceSHA256": "58365c9b93c7199d312dc3ff2d6fb8dc5d4bc621226677aecd5aca50a88b94b9",
+              "textCharacters": 301
+            }
+          ]
+        }
+      ],
+      "newActorRoleCarryApproved": false,
+      "minimumAggregateCalls": 37,
+      "fullRecipeReadCalls": 3,
+      "totalIncludingFullRecipe": 40,
+      "fitsFortyIncludingFullRecipe": true,
+      "unallocatedCallsWithinForty": 0,
+      "accountingForActualSelectedQuietRouteComplete": false
+    }
+  ],
+  "preparationScope": "SINGLE_SHARED_INSTRUCTION_QUALIFICATION_ONLY_FOR_THREE_FLAT_CONTRACTS",
+  "initialPerRowBaselinePreserved": true,
+  "reservedCallPlan": {
+    "metadataAndRawQualification": 3,
+    "entryAndCustody": 2,
+    "preservationAndFinal": 2,
+    "independentComplianceAndQuality": 2,
+    "total": 9,
+    "failureHeadroomWithinFortyForPackedCarry": 0,
+    "allActualWorkerWaitFailurePublicationCallsCount": true
+  },
+  "prospectiveBound": {
+    "coldCase": "NOT_FEASIBLE_IN_ONE_LE40_CALL_WAVE",
+    "packedSevenCarryCase": "CONDITIONAL_ONLY_28_FRAMES_PLUS_9_RESERVED_PLUS_3_RECIPE_EQUALS40_NO_ERROR_HEADROOM; requires Brain actor/role carry, source/access/serializer and finite walltime ruling",
+    "plannerEstimateMinutes": 54,
+    "calibratedTasks": 0,
+    "admitted": false
+  },
+  "recipeInstruction": {
+    "capacityFilePlannerOnlyNotExecutorRead": true,
+    "localPowerShellVersion": "7.6.0",
+    "localDotNetVersion": "10.0.5",
+    "requiredFullRecipeReadCalls": 3,
+    "pieces": [
+      {
+        "end": 9674,
+        "offset": 0,
+        "pieceSHA256": "4c708472a1e1128793023c87709a83ac734b6adc87cba582dbe1895d6899d835",
+        "serializedCharacters": 10000
+      },
+      {
+        "end": 19344,
+        "offset": 9674,
+        "pieceSHA256": "a49ca8f4e8ab1eb1d5774b2f2924263c5cb72b4cc9414c37e75256a9c68155d5",
+        "serializedCharacters": 10000
+      },
+      {
+        "end": 27145,
+        "offset": 19344,
+        "pieceSHA256": "96d1a4c3ec3eba82d7202b63084262daf8eb178e99d56e147ee8b1da9ecd8dc9",
+        "serializedCharacters": 8096
+      }
+    ],
+    "bytes": 27145,
+    "path": "C:\\Users\\estra\\.codex\\worktrees\\blurby-roadmap-review-20261102\\Blurby\\docs\\governance\\bug-reports\\Draft.FLAT-OPERATIVE-CONTRACT.shared-instruction-preparation.2026-11-03.md",
+    "sha256": "f99feee60ae024f9907345d11513c31ab34bb56374be59c98e3de905824edee2"
+  },
+  "localMeasurementRuntime": {
+    "PowerShell": "7.6.0",
+    "DotNet": "10.0.5",
+    "notQuietToolQualification": true
+  },
+  "narrowReviewerPrerequisite": {
+    "classification": "SEPARATE_BRAIN_SELECTED_AND_ISSUED_ADMISSION_NOT_THIS_FULL_ROSTER",
+    "phase": "SHARED-REVIEWER-INSTRUCTION-PREP-20261103",
+    "technicalRuling": {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.reviewer-preparation.2026-11-03.md",
+      "sha256": "c445174ab4d815446d78d72f11cc192e52c57247dec2f4dcdbff2b5ba43cf9a5",
+      "message": "exec-9b015cb4-6b90-45bd-89ea-88f8ade64066"
+    },
+    "admission": {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.reviewer-preparation-admission.2026-11-03.md",
+      "sha256": "71b80f3f58b3827b59bacb36be2af76627ef1797c4ea50b5cae70cdee93bd58d",
+      "message": "exec-6d02329d-225d-4d8a-8bf2-f8fa57df9caf"
+    },
+    "minutes": 10,
+    "calls": 6,
+    "scopeOnly": [
+      "agents/MarcusAurelius.md",
+      "agents/Plato.md",
+      "agents/Hippocrates.md"
+    ],
+    "metadataCalls": 1,
+    "completeBodyDisplayGroups": 5,
+    "selectedTargetsNotQualification": true,
+    "actualConsumedStartVerifiedByThisProposal": false,
+    "actualResultReceiptVerifiedByThisProposal": false,
+    "coverageCreditTaken": false,
+    "futureCreditRequires": [
+      "actual matching raw identity",
+      "complete actual same-actor semantic ranges",
+      "technical role-specific acceptance"
+    ],
+    "otherTwelveRowsRemainUnqualified": true,
+    "doesNotAdmitFullRosterOrThreeContracts": true
+  },
+  "historicalFrozenObservation": {
+    "proposal": {
+      "bytes": 24084,
+      "sha256": "c34f9568f199d776653fdc68e19cd3553a7d657762c1b0e418020c099a61257f",
+      "requiredRecipeReadCalls": 3
+    },
+    "capacity": {
+      "bytes": 127606,
+      "sha256": "9ed8fdbd6822c11c2ddef33573057e916ae50dca24c5932ed318363087a947b2"
+    },
+    "coldIncludingRecipe": 57,
+    "hypotheticalSevenReportCarryIncludingRecipe": 40,
+    "observationNotAdmission": true
+  },
+  "snapshotSelectedObjectConstructor": {
+    "source": "Exact actual original LOCAL PowerShell constructor, not a quiet tool authorization",
+    "orderedWrapperKeys": [
+      "snapshotVersion",
+      "takenAt",
+      "provider",
+      "source",
+      "fields",
+      "headers",
+      "items",
+      "cacheOnly"
+    ],
+    "itemsSelection": "@($snapshot.items | Where-Object { $allCacheIds -contains $_.id } | Sort-Object id)",
+    "itemValueCoverage": "COMPLETE actual PSCustomObject values in original per-item property order, no description/notes/extra-field omission",
+    "cacheOnly": true,
+    "serializer": "$cacheContext | ConvertTo-Json -Depth 100 -Compress",
+    "sourceData": "$selectedCache = @($snapshot.items | Where-Object { $allCacheIds -contains $_.id } | Sort-Object id)\n$cacheContext = [ordered]@{snapshotVersion=$snapshot.snapshotVersion;takenAt=$snapshot.takenAt;provider=$snapshot.provider;source=$snapshot.source;fields=$snapshot.fields;headers=$snapshot.headers;items=$selectedCache;cacheOnly=$true}\n$selected = $cacheContext | ConvertTo-Json -Depth 100 -Compress",
+    "selectedStableIds": [
+      "BAND-ALIGN-1",
+      "BAND-ALIGN-2",
+      "BLURBY-BUSINESS-1",
+      "FLOW-KEYS-FIX-1",
+      "FOCUS-KEYS-FIX-1",
+      "FOCUS-WORD-ONLY-1",
+      "FOLIATE-DISPLAY-LIFETIME-1",
+      "FOLIATE-OBSERVER-LEAK-1",
+      "LIBRARY-COMPLETION-VISIBILITY-1",
+      "NARRATE-CPU-PROFILE-1",
+      "NARRATE-HARNESS-COLDCLICK-1",
+      "NARRATE-REBUILD-1",
+      "NARRATE-REMOVE-1"
+    ],
+    "selectedBytes": 46344,
+    "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0"
+  },
+  "accountingRoute": {
+    "selection": "UNKNOWN_NOT_QUALIFIED",
+    "allActualNativeGitshowAndRetrievalInvocationsEnumerated": true,
+    "containingToolWrapperCallsCount": true,
+    "metadataDelegateWaitClosureAndFailedCallsCount": true,
+    "underlyingNativeExecutionsRecordedSeparately": true,
+    "hiddenBatchingAllowed": false,
+    "unknownAdditionalInvocationIncludedInNineReserves": false,
+    "fiveGitshowsProvenToFitThreeMetadataCalls": false,
+    "extraActualCallMakesFortyCaseHoldUnlessAlreadyExplicitlyAccountedAndIndependentlyQualified": true,
+    "noReserveShavingNoBorrowNoImplicitPermission": true
+  },
+  "actorSemanticCarryRuling": {
+    "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.actor-read-carry.2026-11-03.md",
+    "sha256": "c0415e0b5644e1cbcfed327e18474de84cb8af467a7524fc958c982628bff0f7",
+    "message": "exec-945f0581-7e6a-40a1-9a4c-730708a18651",
+    "rawBytePathQualificationCitableByOtherActor": true,
+    "semanticCarryOnlySameActualActorCompleteUnchangedOwnRead": true,
+    "requiresExactPriorTurnAndRangeReceipt": true,
+    "requiresFreshIdentityInsideLaterAllowance": true,
+    "roleNameNotActorIdentity": true,
+    "replacementOrForkIsNewReviewer": true,
+    "newActorMustReceiveCompleteOperativeRoleAndMatchingOverlay": true,
+    "acceptedDeliveryKinds": [
+      "demonstrably inherited full text",
+      "complete bounded display"
+    ],
+    "hashSummaryRoleLabelOrAnotherActorReadInsufficient": true,
+    "compactionSummaryNotFullTextTransfer": true,
+    "changedOrNewlyApplicableClausesRequireCoverage": true,
+    "dataQualificationActivatesNoRole": true,
+    "automaticFullRereadOfSameActorUnchangedBytesNotRequired": true,
+    "sevenHistoricalReportScenarioStillHypothetical": true,
+    "narrowThreeDefinitionCreditRecomputed": false
+  },
+  "postCorrectionLocalVerification": {
+    "PowerShellVersion": "7.6.0",
+    "localOnly": true,
+    "baselinePiecesReserialized": 55,
+    "quietActorCreditGranted": false,
+    "rawSelectedRows": [
+      {
+        "selectedBytes": 30850,
+        "selectedSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+        "rawBytes": 30850,
+        "rawSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+        "rowId": "AGENTS.md"
+      },
+      {
+        "selectedBytes": 30743,
+        "selectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+        "rawBytes": 30743,
+        "rawSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+        "rowId": "CLAUDE.md"
+      },
+      {
+        "selectedBytes": 67713,
+        "selectedSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+        "rawBytes": 356715,
+        "rawSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+        "rowId": "ROADMAP.md"
+      },
+      {
+        "selectedBytes": 46818,
+        "selectedSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+        "rawBytes": 336116,
+        "rawSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+        "rowId": "docs/governance/LESSONS_LEARNED.md"
+      },
+      {
+        "selectedBytes": 19955,
+        "selectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+        "rawBytes": 19955,
+        "rawSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+        "rowId": "Virtuoso/workspace-layout.json"
+      },
+      {
+        "selectedBytes": 46344,
+        "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+        "rawBytes": 449596,
+        "rawSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+        "rowId": "Virtuoso/work-register.snapshot.json"
+      },
+      {
+        "selectedBytes": 1822,
+        "selectedSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+        "rawBytes": 1822,
+        "rawSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+        "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md"
+      },
+      {
+        "selectedBytes": 1029,
+        "selectedSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+        "rawBytes": 1029,
+        "rawSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+        "rowId": "Virtuoso/overlays/agents/Hippocrates.md"
+      },
+      {
+        "selectedBytes": 997,
+        "selectedSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+        "rawBytes": 997,
+        "rawSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+        "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md"
+      },
+      {
+        "selectedBytes": 629,
+        "selectedSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+        "rawBytes": 629,
+        "rawSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+        "rowId": "Virtuoso/overlays/agents/Plato.md"
+      },
+      {
+        "selectedBytes": 93324,
+        "selectedSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+        "rawBytes": 93324,
+        "rawSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+        "rowId": "skills/virtuoso/SKILL.md"
+      },
+      {
+        "selectedBytes": 30766,
+        "selectedSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+        "rawBytes": 30766,
+        "rawSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+        "rowId": "skills/virtuoso/references/zeus.md"
+      },
+      {
+        "selectedBytes": 13714,
+        "selectedSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+        "rawBytes": 13714,
+        "rawSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+        "rowId": "agents/MarcusAurelius.md"
+      },
+      {
+        "selectedBytes": 13843,
+        "selectedSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+        "rawBytes": 13843,
+        "rawSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+        "rowId": "agents/Plato.md"
+      },
+      {
+        "selectedBytes": 11318,
+        "selectedSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+        "rawBytes": 11318,
+        "rawSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+        "rowId": "agents/Hippocrates.md"
+      }
+    ],
+    "newNativeRetrievalCostKnown": false,
+    "DotNetVersion": "10.0.5",
+    "packedScenarioVerification": [
+      {
+        "framesReserialized": 45,
+        "name": "COLD_ALL",
+        "noOmittedSelectedBytes": true,
+        "completeRowsComparedByteByByte": 15,
+        "allFrameIdentitiesMatch": true
+      },
+      {
+        "framesReserialized": 28,
+        "name": "POTENTIAL_SEVEN_REPORT_CARRY",
+        "noOmittedSelectedBytes": true,
+        "completeRowsComparedByteByByte": 8,
+        "allFrameIdentitiesMatch": true
+      }
+    ]
+  }
+}

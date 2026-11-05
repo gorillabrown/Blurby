@@ -1,0 +1,78 @@
+{
+  "item": "BLURBY-BUSINESS-1",
+  "phase": "HB6-T3-I-C-Q-QUALIFY2",
+  "scope": "prospective same-collector Business qualification; no execution admission",
+  "observedAt": "2026-11-03T06:09:58.3914407Z",
+  "spec": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C-Q-qualify2.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "8e25d0d629da1d0de317ee5184c8c7d434b94110ea9e06d07219e54d762ddc95",
+      "publishedBaseSha256": "7de1ac17e3842e2c71af18e2fbada47516257da574ca679a6c4d5e76a1b07a80",
+      "publishedBaseDisposition": "intentional pending governance delta; not a historical source repin"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "7ce8dd161f1a984842a5b90e06604a606d20c4fbfbbc11e7bccdf2bc12ec173e",
+      "publishedBaseSha256": "fd54e0aea17a77a09e3819fbf3b2fbda64ea96eb8236c2f2e70f47141b0f8343",
+      "publishedBaseDisposition": "intentional pending governance delta; not a historical source repin"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C-Q-qualify2.2026-11-02.md",
+      "sha256": "760e05fb664adcfd7e0e33c1fe5ab07949d8cc54feacafe07b353968cfcba0e0",
+      "publishedBaseSha256": null,
+      "publishedBaseDisposition": "new packet file"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (BLURBY-BUSINESS-1): PASS",
+    "  cited: LL-090, LL-098, LL-169, LL-178",
+    "  [info] lessons-not-cited: 120 live lesson(s) not cited \u00e2\u20ac\u201d confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u00e2\u20ac\u00a6",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Exact two JSON snapshots and both bounded capture sites/source-root bindings are frozen and substantively preinvoke-reviewed [calculable] @recorder-qualification \u00e2\u20ac\u201d 0m (median of 6 runs)",
+    "2. Same nestedcollector calibration7, two syntax and completefrozen28/opponents qualify retainedsource [calculable] @qualification \u00e2\u20ac\u201d 0m (median of 6 runs)",
+    "3. SamebytecomplianceFIRSTquality and external uncommitted-candidate closeout retain allcleanup/latergates [calculable] @review-checkpoint \u00e2\u20ac\u201d 3m (median of 71 runs)",
+    "Total: chain 3m \u00c2\u00b7 sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "32c80958d02e9194431ffa43f4cebeb2a0b006c5",
+  "sha256Domain": "working-tree raw protected hashes; published-base raw separately identified; ROADMAP milestone correction and LL178 prospective append are intentional pending governance changes",
+  "liveProviderObservedAt": "2026-11-03T06:07Z",
+  "liveProviderResult": {
+    "item": "BLURBY-BUSINESS-1",
+    "Status": "In Flight",
+    "Seq": 100.5,
+    "Prerequisites": null,
+    "url": "https://app.notion.com/4097c96cc31e816d95efd6fa5243812b",
+    "Spec Reference": "docs/planning/epics/2026-10-30-blurby-business/charter.md"
+  }
+}

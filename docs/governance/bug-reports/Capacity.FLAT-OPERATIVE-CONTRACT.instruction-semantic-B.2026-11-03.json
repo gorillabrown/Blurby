@@ -1,0 +1,1139 @@
+{
+  "schemaVersion": "blurby.instruction-semantic-B.capacity.planning.v1",
+  "status": "EXPLICIT_DIRECT_ROUTE41_BEFORE_RESERVE_EXCEEDS40_AND_CAPABILITY_PAYLOAD_HOLD_NOT_READY",
+  "domain": "ROOT_LOCAL_DATA_ONLY_NOT_QUIET_EXECUTION",
+  "sourceCommit": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+  "sameActor": "01a19d76-0837-7a43-a18d-8a40494879b8",
+  "fiveFullRawAndSelectedDomains": [
+    {
+      "rowId": "CLAUDE.md",
+      "rawBytes": 30743,
+      "rawSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "selectedBytes": 30743,
+      "selectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30743
+        }
+      ]
+    },
+    {
+      "rowId": "ROADMAP.md",
+      "rawBytes": 356715,
+      "rawSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+      "selectedBytes": 67713,
+      "selectedSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+      "ranges": [
+        {
+          "sourceByteOffset": 0,
+          "endLine": 218,
+          "bytes": 57232,
+          "startLine": 1
+        },
+        {
+          "sourceByteOffset": 282888,
+          "endLine": 1625,
+          "bytes": 3281,
+          "startLine": 1608
+        },
+        {
+          "sourceByteOffset": 323704,
+          "endLine": 1859,
+          "bytes": 7200,
+          "startLine": 1835
+        }
+      ]
+    },
+    {
+      "rowId": "docs/governance/LESSONS_LEARNED.md",
+      "rawBytes": 336116,
+      "rawSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+      "selectedBytes": 46818,
+      "selectedSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+      "ranges": [
+        {
+          "sourceByteOffset": 149541,
+          "endLine": 1739,
+          "bytes": 568,
+          "lessonId": "LL-002",
+          "startLine": 1731
+        },
+        {
+          "sourceByteOffset": 150109,
+          "endLine": 1748,
+          "bytes": 908,
+          "lessonId": "LL-003",
+          "startLine": 1740
+        },
+        {
+          "sourceByteOffset": 151017,
+          "endLine": 1757,
+          "bytes": 634,
+          "lessonId": "LL-004",
+          "startLine": 1749
+        },
+        {
+          "sourceByteOffset": 152301,
+          "endLine": 1775,
+          "bytes": 693,
+          "lessonId": "LL-006",
+          "startLine": 1767
+        },
+        {
+          "sourceByteOffset": 176643,
+          "endLine": 2045,
+          "bytes": 962,
+          "lessonId": "LL-063",
+          "startLine": 2037
+        },
+        {
+          "sourceByteOffset": 178418,
+          "endLine": 2063,
+          "bytes": 855,
+          "lessonId": "LL-066",
+          "startLine": 2055
+        },
+        {
+          "sourceByteOffset": 180160,
+          "endLine": 2081,
+          "bytes": 1153,
+          "lessonId": "LL-068",
+          "startLine": 2073
+        },
+        {
+          "sourceByteOffset": 203460,
+          "endLine": 2279,
+          "bytes": 982,
+          "lessonId": "LL-090",
+          "startLine": 2271
+        },
+        {
+          "sourceByteOffset": 205423,
+          "endLine": 2297,
+          "bytes": 998,
+          "lessonId": "LL-128",
+          "startLine": 2289
+        },
+        {
+          "sourceByteOffset": 211309,
+          "endLine": 2351,
+          "bytes": 881,
+          "lessonId": "LL-097",
+          "startLine": 2343
+        },
+        {
+          "sourceByteOffset": 212190,
+          "endLine": 2360,
+          "bytes": 935,
+          "lessonId": "LL-098",
+          "startLine": 2352
+        },
+        {
+          "sourceByteOffset": 247545,
+          "endLine": 2669,
+          "bytes": 782,
+          "lessonId": "LL-134",
+          "startLine": 2662
+        },
+        {
+          "sourceByteOffset": 250432,
+          "endLine": 2699,
+          "bytes": 869,
+          "lessonId": "LL-137",
+          "startLine": 2692
+        },
+        {
+          "sourceByteOffset": 257627,
+          "endLine": 2763,
+          "bytes": 3933,
+          "lessonId": "LL-142",
+          "startLine": 2755
+        },
+        {
+          "sourceByteOffset": 261560,
+          "endLine": 2772,
+          "bytes": 3071,
+          "lessonId": "LL-143",
+          "startLine": 2764
+        },
+        {
+          "sourceByteOffset": 264631,
+          "endLine": 2780,
+          "bytes": 2618,
+          "lessonId": "LL-144",
+          "startLine": 2773
+        },
+        {
+          "sourceByteOffset": 267249,
+          "endLine": 2796,
+          "bytes": 1882,
+          "lessonId": "LL-145",
+          "startLine": 2781
+        },
+        {
+          "sourceByteOffset": 274200,
+          "endLine": 2827,
+          "bytes": 499,
+          "lessonId": "LL-143",
+          "startLine": 2825
+        },
+        {
+          "sourceByteOffset": 282453,
+          "endLine": 2871,
+          "bytes": 547,
+          "lessonId": "LL-143",
+          "startLine": 2869
+        },
+        {
+          "sourceByteOffset": 283000,
+          "endLine": 2874,
+          "bytes": 243,
+          "lessonId": "LL-144",
+          "startLine": 2872
+        },
+        {
+          "sourceByteOffset": 284023,
+          "endLine": 2887,
+          "bytes": 319,
+          "lessonId": "LL-068",
+          "startLine": 2885
+        },
+        {
+          "sourceByteOffset": 284536,
+          "endLine": 2896,
+          "bytes": 97,
+          "lessonId": "LL-143",
+          "startLine": 2894
+        },
+        {
+          "sourceByteOffset": 286700,
+          "endLine": 2913,
+          "bytes": 229,
+          "lessonId": "LL-137",
+          "startLine": 2911
+        },
+        {
+          "sourceByteOffset": 294284,
+          "endLine": 2974,
+          "bytes": 502,
+          "lessonId": "LL-143",
+          "startLine": 2972
+        },
+        {
+          "sourceByteOffset": 305696,
+          "endLine": 3049,
+          "bytes": 1838,
+          "lessonId": "LL-165",
+          "startLine": 3042
+        },
+        {
+          "sourceByteOffset": 309456,
+          "endLine": 3071,
+          "bytes": 1623,
+          "lessonId": "LL-167",
+          "startLine": 3064
+        },
+        {
+          "sourceByteOffset": 312843,
+          "endLine": 3098,
+          "bytes": 1274,
+          "lessonId": "LL-169",
+          "startLine": 3091
+        },
+        {
+          "sourceByteOffset": 314117,
+          "endLine": 3102,
+          "bytes": 667,
+          "lessonId": "LL-165",
+          "startLine": 3099
+        },
+        {
+          "sourceByteOffset": 318570,
+          "endLine": 3129,
+          "bytes": 1522,
+          "lessonId": "LL-172",
+          "startLine": 3122
+        },
+        {
+          "sourceByteOffset": 320092,
+          "endLine": 3132,
+          "bytes": 425,
+          "lessonId": "LL-143",
+          "startLine": 3130
+        },
+        {
+          "sourceByteOffset": 320517,
+          "endLine": 3140,
+          "bytes": 1324,
+          "lessonId": "LL-173",
+          "startLine": 3133
+        },
+        {
+          "sourceByteOffset": 321841,
+          "endLine": 3148,
+          "bytes": 1189,
+          "lessonId": "LL-174",
+          "startLine": 3141
+        },
+        {
+          "sourceByteOffset": 323030,
+          "endLine": 3151,
+          "bytes": 380,
+          "lessonId": "LL-143",
+          "startLine": 3149
+        },
+        {
+          "sourceByteOffset": 324700,
+          "endLine": 3165,
+          "bytes": 2080,
+          "lessonId": "LL-176",
+          "startLine": 3159
+        },
+        {
+          "sourceByteOffset": 326780,
+          "endLine": 3172,
+          "bytes": 2055,
+          "lessonId": "LL-177",
+          "startLine": 3166
+        },
+        {
+          "sourceByteOffset": 328835,
+          "endLine": 3179,
+          "bytes": 2497,
+          "lessonId": "LL-178",
+          "startLine": 3173
+        },
+        {
+          "sourceByteOffset": 331332,
+          "endLine": 3186,
+          "bytes": 2139,
+          "lessonId": "LL-179",
+          "startLine": 3180
+        },
+        {
+          "sourceByteOffset": 333471,
+          "endLine": 3192,
+          "bytes": 2645,
+          "lessonId": "LL-180",
+          "startLine": 3187
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/workspace-layout.json",
+      "rawBytes": 19955,
+      "rawSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "selectedBytes": 19955,
+      "selectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 19955
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/work-register.snapshot.json",
+      "rawBytes": 449596,
+      "rawSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "selectedBytes": 46344,
+      "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+      "ranges": [
+        {
+          "jsonPointers": [
+            "/snapshotVersion",
+            "/takenAt",
+            "/provider",
+            "/source",
+            "/fields",
+            "/headers"
+          ],
+          "selectedStableIds": [
+            "BAND-ALIGN-1",
+            "BAND-ALIGN-2",
+            "BLURBY-BUSINESS-1",
+            "FLOW-KEYS-FIX-1",
+            "FOCUS-KEYS-FIX-1",
+            "FOCUS-WORD-ONLY-1",
+            "FOLIATE-DISPLAY-LIFETIME-1",
+            "FOLIATE-OBSERVER-LEAK-1",
+            "LIBRARY-COMPLETION-VISIBILITY-1",
+            "NARRATE-CPU-PROFILE-1",
+            "NARRATE-HARNESS-COLDCLICK-1",
+            "NARRATE-REBUILD-1",
+            "NARRATE-REMOVE-1"
+          ],
+          "representation": "complete selected JSON-native values; source raw pin separate"
+        }
+      ]
+    }
+  ],
+  "selectedFiveBytes": 211573,
+  "selectedFiveFrames": [
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10036,
+      "sha256": "78539e2153bbb937e7f5dad34513feea6447f1dca8c0d27de8645d3d75e5c0a8",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 0,
+          "end": 9574,
+          "pieceSHA256": "f2ef43e0d513058bbbc785cd424e69e67eacc32f4e81a4a137af0ef803552416"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10040,
+      "sha256": "3f7dc6d55ffaa6cf13a691d1a05d0189e239b85ccc08dffa42a05c753658bb54",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 9574,
+          "end": 19084,
+          "pieceSHA256": "10c52e1e071ad2519a8f6a73067b8f40c8976c1665d46552cdc05d7a949cb7d5"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10054,
+      "sha256": "4c8436186c41050bca023c708531d9d11f390d2e7772a6fbafacedaaa80364f4",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 19084,
+          "end": 28630,
+          "pieceSHA256": "049c2fcca40d11a73cd238ec5a8927aada10c3aabd7aa005a83fa3c00e6f9b6a"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10024,
+      "sha256": "84b9ede1b582009a5c8fcb83a79f0cef73d671f734f07ac5dbda2be62a7e98c2",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 28630,
+          "end": 30743,
+          "pieceSHA256": "73101660d248eede61b6779f3c0069c2436948889f78c5a94dd285d21e33f3ae"
+        },
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 0,
+          "end": 7173,
+          "pieceSHA256": "efb567fe151bfceaf0050cb979e3033821be2998c7c0f78fce5dbc5947ee93ba"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10026,
+      "sha256": "32912ab875d8c0903c3f6bcb8ba0d9f0cf1df8f459bebfb0ec9a28d50b2e75c1",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 7173,
+          "end": 16741,
+          "pieceSHA256": "2e196955ec94857676f2dcc55744c595540dc075511c0e5bf4307b6f9df6da5b"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10020,
+      "sha256": "06032a829263b570d365eb8607e07d2b6d9f3c750efae686849937a022c72506",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 16741,
+          "end": 26331,
+          "pieceSHA256": "88ff016b3beb649a5a7bb3d1f77308c73c29a29884aba9e345bd2173105bf10d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10056,
+      "sha256": "31381984f00c37060a5db381203781bc26e8a06b122ec1ebf258b82ce9a5f16f",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 26331,
+          "end": 35928,
+          "pieceSHA256": "dc5c2f6a50c5f50c9fc6b822afcab2f5e16143893b1d789e224609b01ef12c0e"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10044,
+      "sha256": "29aec6595013e3c610556cc0109ecacae0f564e3201615cf857a51e1f507b5e4",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 35928,
+          "end": 45540,
+          "pieceSHA256": "339abe48d7da4be18fab16c9fbf8f093f0882aa1260e818225be09b850e71c29"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10028,
+      "sha256": "5969c768f8f630d8abb758d09aa0c8358fb8a6aa8cb797e031c0499d18de2f31",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 45540,
+          "end": 55131,
+          "pieceSHA256": "19d87389ef4dfa863df22f881bdc81dbd66861413cae283b3f099c3ca5a09d7d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10042,
+      "sha256": "cae7a3c1d712394575896c40bbf8fcabf21726e4795ab40c0f238ff3fd245b99",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 55131,
+          "end": 64728,
+          "pieceSHA256": "193bdd04b29b30ee6d83d21d6bbcf6172b6b1b85672e1cbf9ba68d81827c842b"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10048,
+      "sha256": "db598f0f2b6737b20cbff17a3755376c913f2701fb0e24ababec1550d7fd0af7",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 64728,
+          "end": 67713,
+          "pieceSHA256": "8adbfeccc252ad0b882bf078567c1dd37508724d01c939a15b302f7a7453af39"
+        },
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 0,
+          "end": 6231,
+          "pieceSHA256": "40e18063f141855d8bc81804e39c3554295eb377f53882111fbf8b8516acc217"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10044,
+      "sha256": "972afbcbd588253e6bb06e6993b662d849305e3a330dfa62d6e9b67ec6d2d4c0",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 6231,
+          "end": 15770,
+          "pieceSHA256": "b5b738b3f09c127fe209270e45f9a42295dce2d53999bc99dc75df1c23a91062"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10043,
+      "sha256": "96ce709e201d525776e1da4438ee7a8c251909e212945993388bd7989a1202b6",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 15770,
+          "end": 25327,
+          "pieceSHA256": "beff016cf204a15419ab526e9f5c465c12bdbfb454f8d5dfebe7d4e3b1485fd8"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10022,
+      "sha256": "b0938db26cc7848f62858ca848712644d9cf9f9e159b25a19a9f904509427a52",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 25327,
+          "end": 34868,
+          "pieceSHA256": "404385187caa86ba38410979a3a7bdeed21d5624f6cbb399d3faf7fc21697784"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10014,
+      "sha256": "205249582f9a42be7ae85cf681422d7f31efb18658ed061cfc5b7cb0ae12a7cc",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 34868,
+          "end": 44425,
+          "pieceSHA256": "eec4ae17caee5e06980fcab964ef115a5bb476baf8404a4e0d9b89d021c79f7d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "1ad9656f06906bf976f0a1332c1e87b24ff70a3d8613fd035de53ce7e52326ed",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 44425,
+          "end": 46818,
+          "pieceSHA256": "34e68a4685a41523fdd14adf94023f9b8f1c2a5fd50425388cad0b16b11dee48"
+        },
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 0,
+          "end": 6081,
+          "pieceSHA256": "1ccb83de27a8cfde992cad72813164c16afe4fc4878f5025c18d77ea5cfed6b1"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10002,
+      "sha256": "c6c673575a56e03f0d2bac053e644565976c348fa3e75c07e2eacb2d2ca229fa",
+      "parts": [
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 6081,
+          "end": 14526,
+          "pieceSHA256": "eb5ce8a9c4ca6dc693261f0dfe76aa49b56bc1dfe20808c0120f6034608b0cad"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10002,
+      "sha256": "6d6cb1f79711b7436666e18abd9e2dbe57d2da5e24f991f518654fa13dd35bd0",
+      "parts": [
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 14526,
+          "end": 19955,
+          "pieceSHA256": "b82bfd05b46a79bf55df6d1216c6695d4fdb22ebbbec5883e04a3de624a5f522"
+        },
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 0,
+          "end": 2927,
+          "pieceSHA256": "f05253da36fcbd8f2e38517b38b16aff5976cc8b5ad8d9c5e0037a3db2cde727"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10022,
+      "sha256": "c2ee1999943fc7df13c133316f577cedbcde1da71ddb75e175bfc063d2010f22",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 2927,
+          "end": 12221,
+          "pieceSHA256": "438591ff30290bf3996f605f8390e5593a522c2a3a4114c779d89bf4dd5dbcb3"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10008,
+      "sha256": "652d22be7bc50b3e64b011263337bf3666b45ae3647e42e4c7e89846e70ba773",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 12221,
+          "end": 21402,
+          "pieceSHA256": "22ba7c16a4323fb84e6893bd4fae7f36bc5f6cd57d141a40992f0374dee9c1e9"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "c441cc06c27a0ec280b455dd7dae1427e705d25094f2b1ca7cf02b93af6862e4",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 21402,
+          "end": 30699,
+          "pieceSHA256": "3c2986ef006df64580b46644fe1871402734122ad12c01684bc3f772111210b6"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "d7ba02a47c838ae7ec47b74b57de867ee65666164e7a715591e603bc1c1954a8",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 30699,
+          "end": 40022,
+          "pieceSHA256": "b93e57f85378db9ec84332cfbaa1b41646fab948609c21017bf5b74345ed9e1a"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 7116,
+      "utf8Bytes": 7118,
+      "sha256": "a672cb6456232af5766b4a3f5b14d4ed6693acef3675dd6c0c57dd8a426c7957",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 40022,
+          "end": 46344,
+          "pieceSHA256": "ed6a759b41cc4b50e1a50285819aa8b6bcb75e9e5823a43d8deed1dc32fd8358"
+        }
+      ]
+    }
+  ],
+  "selectedFiveByteReconstructionAndPriorExactFrameParity": true,
+  "carriedTenFreshRequalificationRequired": [
+    {
+      "rowId": "AGENTS.md",
+      "rawBytes": 30850,
+      "rawSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "semanticDomain": [
+        0,
+        30850
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+      "rawBytes": 1822,
+      "rawSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+      "semanticDomain": [
+        0,
+        1822
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+      "rawBytes": 1029,
+      "rawSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+      "semanticDomain": [
+        0,
+        1029
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+      "rawBytes": 997,
+      "rawSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+      "semanticDomain": [
+        0,
+        997
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Plato.md",
+      "rawBytes": 629,
+      "rawSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+      "semanticDomain": [
+        0,
+        629
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md"
+    },
+    {
+      "rowId": "skills/virtuoso/SKILL.md",
+      "rawBytes": 93324,
+      "rawSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+      "semanticDomain": [
+        0,
+        93324
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md"
+    },
+    {
+      "rowId": "skills/virtuoso/references/zeus.md",
+      "rawBytes": 30766,
+      "rawSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+      "semanticDomain": [
+        0,
+        30766
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md"
+    },
+    {
+      "rowId": "agents/MarcusAurelius.md",
+      "rawBytes": 13714,
+      "rawSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+      "semanticDomain": [
+        0,
+        13714
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md"
+    },
+    {
+      "rowId": "agents/Plato.md",
+      "rawBytes": 13843,
+      "rawSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+      "semanticDomain": [
+        0,
+        13843
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md"
+    },
+    {
+      "rowId": "agents/Hippocrates.md",
+      "rawBytes": 11318,
+      "rawSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+      "semanticDomain": [
+        0,
+        11318
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md"
+    }
+  ],
+  "recipe": {
+    "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+    "bytes": 24309,
+    "sha256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+    "frames": [
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10008,
+        "sha256": "af2775f6b3bdc770766ef268bbf9396246791e46dedf096e9844bf37449a7612",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+            "sourceFullSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "selectionSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "offset": 0,
+            "end": 9504,
+            "pieceSHA256": "ba578ec74425bb2a85afb05e6245fb0d39c53c9e4648892701f4072e50884355"
+          }
+        ]
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10002,
+        "sha256": "e6d94e0d60fc1e59902840820245aec929f9519ca579f19b0a35ce80eb0c0193",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+            "sourceFullSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "selectionSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "offset": 9504,
+            "end": 19019,
+            "pieceSHA256": "0a93c25841be7c83cc4e4ddf3239b297786fd397ae2067d04a785a73ee0b6534"
+          }
+        ]
+      },
+      {
+        "charactersIncludingCRLF": 5753,
+        "utf8Bytes": 5767,
+        "sha256": "d75139d0d73628f08951e3aa05659a78f633d288b880675c9f10d97d6e9ce53d",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+            "sourceFullSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "selectionSHA256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+            "offset": 19019,
+            "end": 24309,
+            "pieceSHA256": "0c9c2122293e5b95ee6c2106f5c644177fd624f870ce2fe24529f4c2b793005e"
+          }
+        ]
+      }
+    ],
+    "completeByteReconstruction": true,
+    "actualToolWrapperBeyondCompactJSONCRLF": "UNKNOWN_NOT_ASSUMED_ZERO"
+  },
+  "reviewerDeliveriesKnownLowerBound": [
+    {
+      "role": "MarcusAurelius",
+      "actor": "FUTURE_NOT_SELECTED",
+      "transportSelected": "DIRECT_STRUCTURED_TASK_MESSAGE_FORK_NONE",
+      "limitEntireUTF8MessageBytes": 65536,
+      "actualStaticEnvelopeBytes": 48618,
+      "actualStaticEnvelopeSHA256": "765d4f2c92b0a09fac30d3123fefecd80840c008d65f630ea3eb75439061689f",
+      "sourceFields": [
+        {
+          "section": "ROLE",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "C:/Users/estra/.codex/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md",
+          "bytes": 13714,
+          "sha256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+          "start": 1499,
+          "end": 15213
+        },
+        {
+          "section": "OVERLAY",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "Virtuoso/overlays/agents/MarcusAurelius.md",
+          "bytes": 997,
+          "sha256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+          "start": 15230,
+          "end": 16227
+        },
+        {
+          "section": "BRECIPE",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+          "bytes": 24309,
+          "sha256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+          "start": 16244,
+          "end": 40553
+        },
+        {
+          "section": "SUBJECT_RULING",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+          "bytes": 3542,
+          "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+          "start": 40577,
+          "end": 44119
+        },
+        {
+          "section": "TRANSPORT_RULING",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.A-receipt-B-reviewer-input.2026-11-03.md",
+          "bytes": 4472,
+          "sha256": "4048f447fe4248fb5cd06d7a083cd3ac4292b186a94aba67385b57720c70dda2",
+          "start": 44145,
+          "end": 48617
+        }
+      ],
+      "rawSourceSumBytes": 47034,
+      "futureAReservedMaximumBytes": 10000,
+      "remainderAfterStaticEnvelopeAndARecord": 6918,
+      "remainderIsNotCompleteBProofBound": true,
+      "missing": [
+        "actual complete A/Root capsule binding/ACK beyond record",
+        "actual complete B proof/code/effects/equality maps",
+        "actual destination task envelope if additional",
+        "complete actual sent-argument and recipient-body accessibility/mechanical comparison"
+      ],
+      "actualWholeFutureMessageMeasured": false,
+      "qualified": false
+    },
+    {
+      "role": "Plato",
+      "actor": "FUTURE_NOT_SELECTED",
+      "transportSelected": "DIRECT_STRUCTURED_TASK_MESSAGE_FORK_NONE",
+      "limitEntireUTF8MessageBytes": 65536,
+      "actualStaticEnvelopeBytes": 48361,
+      "actualStaticEnvelopeSHA256": "7783494d2ec1dcadb6fa6ca008e65f4f1d06ed01a7cd34ef11dbf859bf7660f5",
+      "sourceFields": [
+        {
+          "section": "ROLE",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "C:/Users/estra/.codex/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md",
+          "bytes": 13843,
+          "sha256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+          "start": 1481,
+          "end": 15324
+        },
+        {
+          "section": "OVERLAY",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "Virtuoso/overlays/agents/Plato.md",
+          "bytes": 629,
+          "sha256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+          "start": 15341,
+          "end": 15970
+        },
+        {
+          "section": "BRECIPE",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md",
+          "bytes": 24309,
+          "sha256": "b51cd173d1ec4f861001f4a9a534f9cddf4714f76c90bb94fdb210e5f32d0d32",
+          "start": 15987,
+          "end": 40296
+        },
+        {
+          "section": "SUBJECT_RULING",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+          "bytes": 3542,
+          "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+          "start": 40320,
+          "end": 43862
+        },
+        {
+          "section": "TRANSPORT_RULING",
+          "sourceKind": "ROOT_LOCAL_RAW_SIZING_ONLY",
+          "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.A-receipt-B-reviewer-input.2026-11-03.md",
+          "bytes": 4472,
+          "sha256": "4048f447fe4248fb5cd06d7a083cd3ac4292b186a94aba67385b57720c70dda2",
+          "start": 43888,
+          "end": 48360
+        }
+      ],
+      "rawSourceSumBytes": 46795,
+      "futureAReservedMaximumBytes": 10000,
+      "remainderAfterStaticEnvelopeAndARecord": 7175,
+      "remainderIsNotCompleteBProofBound": true,
+      "missing": [
+        "actual complete A/Root capsule binding/ACK beyond record",
+        "actual complete B proof/code/effects/equality maps",
+        "actual destination task envelope if additional",
+        "complete actual sent-argument and recipient-body accessibility/mechanical comparison"
+      ],
+      "actualWholeFutureMessageMeasured": false,
+      "qualified": false
+    }
+  ],
+  "aDeliveredBinding": {
+    "actualFutureBinding": null,
+    "selectedSuccessRecordMaximumTotalCharactersIncludingFraming": 10000,
+    "ASCIIRequiredFor10000ByteBound": true,
+    "oldThreeFrameBound": "HISTORICAL_SUPERSEDED",
+    "actualSchemaAndQuotedToolEnvelope": "PENDING_A_AUTHOR_FINAL_AND_QUALIFICATION"
+  },
+  "accounting": {
+    "explicitWrapperRouteCounts": {
+      "firstClockFresh15NamespacePacking": 2,
+      "completeCPURecipeBootstrap": 3,
+      "actualCompleteAIntakeSelectedUpperBound": 1,
+      "fiveCompleteSemanticDomainFrames": 23,
+      "wholeBothMessagesConstructionReadsSizing": 1,
+      "directDispatches": 2,
+      "actualSourceFrameAndArgumentRetrieval": 2,
+      "independentMechanicalComparatorEffectAndEvidenceActions": 2,
+      "waitResultsActualActorReceipts": 2,
+      "actualSentFrozenReceivedComparison": 1,
+      "finalConservationSolePublishReadbackClosure": 2
+    },
+    "explicitWrapperRouteCalls": 41,
+    "failureReviewReserve": 2,
+    "withReserve": 43,
+    "ceilingCalls": 40,
+    "maximumMinutes": 60,
+    "narrowerTimeboxSelected": null,
+    "uncalibratedPlannerMinutes": 52,
+    "fit": false,
+    "nativeNestedAdditionalCalls": "ADDITIONAL_NOT_EXEMPT_UNKNOWN_CAN_ONLY_INCREASE",
+    "noBudgetBorrowing": true,
+    "actualWholeProgramToolRequestUnmeasured": true,
+    "unbuiltOneCallAssertionsAreNotQualification": true
+  },
+  "pendingTechnicalDecisions": [
+    "Exact actual quiet reviewer tool capability and finite full message support; local message:string schema is not proof.",
+    "Exact permitted retrieval of ACTUAL sent task argument, recipient body and returned source frame bytes for independent comparison; no invented private transcript/store.",
+    "Complete full actual B evidence/equality implementation/provenance/source-field map must fit EACH message; residual is not a proved upper bound.",
+    "Current explicit41-call route plus2reserve exceeds40: any safe coalescing/new selected route requires Brain decision and remeasurement; no automatic cap increase.",
+    "A actual final compact schema/quoted tool request/full failure specimen bounds pending.",
+    "Final direct-exclusive no-temp receipt publication remains proposed pending technical publication check/admission."
+  ],
+  "historicalObservationsImmutable": {
+    "oldFullRosterCold": 57,
+    "oldConditional": 40,
+    "rejectedSingleRouteMissing": 51,
+    "rejectedSingleRoutePresent": 49
+  },
+  "oneBWriteProposedOnly": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/receipt.json",
+  "tmpFilesSelected": [],
+  "noActions": {
+    "quietExecution": false,
+    "sourceChanges": false,
+    "runtimeOrImports": false,
+    "gitProviderMutation": false,
+    "newReviewerDispatched": false,
+    "AorBAdmitted": false
+  },
+  "noSelfHashCycle": "Recipe hash only in this external capacity file; this file has no own hash",
+  "preservedHistorical44and47": {
+    "recipeRawBytes": 28388,
+    "recipeRawSHA256": "bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d",
+    "completeRecipeUTF8": "# FLAT-OPERATIVE-CONTRACT — instruction semantic coverage B\n\n2026-11-03. **PLANNING ONLY / MEASURED KNOWN MINIMUM EXCEEDS40 / NOT READY / NO B ADMISSION / NO A EXECUTION GO.** Recommendation: evaluate this COMPLETE semantic/reviewer delivery route before admitting acquisition A. No five-document selection, reviewer role clause, preservation check or actual call may be removed to make the budget fit. If the measured whole B route exceeds40calls/60minutes, report NOT FEASIBLE before A's execution gate; Brain must select any changed finite scope or architecture. Planning estimates do not grant a clock.\n\n## B0 — Authority, actor and A dependency\n\nActual Brain INSTRUCTION-PREP-TWO-DELIVERABLE-SPLIT-20261103, exec-7f8053f3-befd-48c5-adc8-3eeb6fead522, complete persisted3715bytes/SHA256068b327de0759b52202e9476d0045fb81fb4df753aefa391706b349e4ac4293a, selects separate A acquisition and B semantic coverage under the SAME six-file fence. It does not admit either. Original remaining-route51/49 and earlier57cold/40conditional observations stay immutable history, not current feasibility or available calls. The complete full15-row meanings remain selected: TEN same-actor historical coverage credits plus FIVE fresh domains below, no reduction to fit.\n\nB actor ONLY actual quiet CPU coordinator chat01a19d76-0837-7a43-a18d-8a40494879b8 on RODNEYSR. Seven same-chat FULL-file credits use actual turn01a19f47-cb42-7c60-998c-53ad350179c6/exec-f845547d-8eff-46c1-b043-3b689b74c737, accepted by Brain SAME-CPU-SEVEN-RECEIPT-ACCEPTANCE-20261103/exec-f8cddb75-02af-4a4b-b43d-9a56f06d5e72. This credits that actor's retained complete-consumption declaration, not reconstructed first displays or full562174-byte custody.manifest read. Three definitions use actual gap-free turn01a1a0e5-ed5c-7c20-bc17-63c5192d7157 and Brain's conservative clock disposition: late first timestamp remains a documented defect, not reused clock. New actors/Business do not inherit these ten semantic credits. Any unavailable/changed/freshly applicable clause invalidates affected carry and requires BEFORE-launch remeasurement, no silent added read.\n\nB admission is forbidden UNTIL actual A complete bounded stdout receipt exists, Root has fully consumed every ordered frame, independently reconstructed/hashed its complete payload into a truthful Root-side evidence capsule, and sent an actual scoped ACK accepting A. A may create ONLY the five raw governance copies below and necessary exact directories; receipt.json must remain ABSENT. Its maximal disposition is ACQUISITION_DATA_QUALIFIED/SEMANTIC_COVERAGE_PENDING, never authority for B. No A root/current receipt/hash/ACK is invented here. No unused A calls/time or automatic continuation transfers.\n\nFuture B admission must carry an ACTUAL external `aDeliveredBinding` with schemaVersion `blurby.instruction-acquisition-A.receipt.v1`, exact A actorChatId/actorTurnId/phase, full payloadBytes/payloadSHA256, ordered actual stdout source tool/event IDs and frame offsets/end/frameSHA256, Root capsule absolute path/bytes/SHA256 and Root ACK messageId/actor/UTC/acceptedPayloadSHA256/scoped disposition. Every value must be actual, no placeholder hash/default/null PASS. Root capsule is a ROOT copy of existing quiet stdout, never a new quiet file. Hashes/Root ACK go in this external admission, not recursively inside a capsule that purports to hash itself.\n\nThe complete A payload keyset in order is schemaVersion,phase,actor,clock,accounting,source,namespace,payloads,carriedInputs,preservation,failures,limitations,disposition. Five payload rows in fixed order each contain path,expectedBytes,expectedSHA256,objectReadCount,actualBytes,actualSHA256,strictUtf8,exclusiveCreated,ordinaryRereadBytes,ordinaryRereadSHA256,finalBytes,finalSHA256. Namespace contains root,ancestorsOrdinary,rootInitiallyAbsent,createdPaths,receiptAbsent. A author fixes receipt success payload<=20000UTF8bytes and at most3 complete stdout frames, each<=10000serialized characters includingCRLF and total<=30000characters, all checked BEFORE emission; overflow is HOLD, never trimmed success. Price the enforced3-frame maximum, not the current sizing specimen2frames/15059bytes (which is planning DATA only). Frame envelope keys are schemaVersion,frame,totalFrames,offset,end,payloadBytes,payloadSHA256,pieceSHA256,text; version blurby.instruction-acquisition-A.stdout-frame.v1, UTF8byte offsets/wholepayload identity and strict codepoint-safe pieces. A author freezes exact remaining types/framing and actual full payload; B verifies them strictly, not chooses a schema during execution. A disposition must be qualified, receiptAbsent true, exactly five expected raw copies/one object read each, actual accounting closed and every failure/unknown explicitly absent or independently resolved by Root. Missing A type/bound/actual evidence is a pre-admission HOLD, not B investigation.\n\n## B1 — Closed source, root, tools and current checks\n\nImmutable source commit3afcf8789be0d7fa3bdf27235597606da022c93c. ONLY existing A-owned quiet root `C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/`, containing exact five raw files at the repository-relative paths below. B reads those copies; **NO Git, fetch, reacquisition, source working-tree read/substitution, network, new root or rewrite**. Verify A ownership/ordinary nonalias root/ancestors and exact createdPaths against the actual accepted capsule, not generic directory listing/discovery. Existing receipt.json or alias => HOLD BEFORE writes. Do not require root absent again after A created it; require the same owned existing root and final receipt absent.\n\nOnly pinned Python `C:/Python314/python.exe`,106328bytes/SHA256cce21c0e8710e304273e98ac4b2b0f5aceb639acbcd2343cbaa5c4e81619c45b, via finite INLINE standard-library DATA argv `[PYTHON,-I,-S,-B,-c,LITERAL_DATA_RECIPE]` is proposed. No saved helper, subprocess inside the DATA recipe, code/module import from read files, exec/eval/compile, Node/test/runtime/native/model/process query or heavy slot. Actual tool identity/read permission still needs Brain selection/admission; this proposal launches none. Every actual Python native execution and its wrapper are explicitly recorded; no nested work hides in a frame. UTC+monotonic phase anchors are captured at the FIRST instruction of the first admitted metadata script, BEFORE ANY identity/read/packing work. Exact consumed turn/clock/calls are shared across all workers/deliveries/waits/preservation; no late timestamp substitution, per-worker clock or reset.\n\nAt actual entry, freshly read/validate ALL ten carried inputs and ALL five raw copies, every fixed path/ancestor ordinary/no symlink/reparse/alias/containment, actual lengths/hash/strict UTF8/read access and applicable-clause consistency. Handle one raw document at a time (largest449596bytes), chunks<=65536, bounded current buffers; do not materialize an unbounded tree or launch a process census. Missing/changed copy or carry stops before partial semantic display. Independently re-open/read each accepted copy, not a hash-only comparison of prior A claims. Keep all read bytes and actual observed flags distinct from expected pins. At end, repeat exact ten+five identity/ordinary comparisons and require five copies unchanged, original source/old roots untouched by this read-only recipe. No universal host absence/write-confinement claim.\n\n## B2 — Ten exact historical carry inputs (current requalification mandatory)\n\nEach entire semantic domain is [0,bytes), accepted ONLY for the same CPU actor above. These are literal quiet paths, not .codex fallback candidates; retired zeus.toml is historical provenance only, never an operative replacement.\n\n|Exact quiet path|Bytes|SHA256|\n|---|---:|---|\n|`C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md`|30850|`aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654`|\n|`C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md`|1822|`3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8`|\n|`C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md`|1029|`6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132`|\n|`C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md`|997|`c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b`|\n|`C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md`|629|`36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b`|\n|`C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md`|93324|`c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc`|\n|`C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md`|30766|`6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc`|\n|`C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md`|13714|`8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d`|\n|`C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md`|13843|`a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77`|\n|`C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md`|11318|`c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3`|\n\n## B3 — Five full raw copies and exact semantic domains\n\n|Repository-relative copy path under A root|Full raw bytes|Full raw SHA256|Selected semantic bytes|Selected SHA256|\n|---|---:|---|---:|---|\n|`CLAUDE.md`|30743|`87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65`|30743|`87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65`|\n|`ROADMAP.md`|356715|`1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590`|67713|`dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd`|\n|`docs/governance/LESSONS_LEARNED.md`|336116|`8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28`|46818|`388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7`|\n|`Virtuoso/workspace-layout.json`|19955|`f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc`|19955|`f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc`|\n|`Virtuoso/work-register.snapshot.json`|449596|`fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b`|46344|`5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0`|\n\nCLAUDE and workspace-layout are FULL; source path/role/raw hash do not substitute for semantics. ROADMAP inclusive lines1–218,1608–1625,1835–1859 correspond exactly to raw half-open byte intervals[0,57232),[282888,286169),[323704,330904), concatenated in order with NO inserted separator. Preserve release/standing rules and selected Business/Focus cards; do not call these67713bytes a full356715-byte semantic read.\n\nLessons include complete applicable union LL-002, LL-003, LL-004, LL-006, LL-063, LL-066, LL-068, LL-090, LL-097, LL-098, LL-128, LL-134, LL-137, LL-142, LL-143, LL-144, LL-145, LL-165, LL-167, LL-169, LL-172, LL-173, LL-174, LL-176, LL-177, LL-178, LL-179, LL-180; every repeated status/promotion amendment in original source order through the next LL heading. Exact38 half-open raw byte intervals are:\n\n`149541:150109;150109:151017;151017:151651;152301:152994;176643:177605;178418:179273;180160:181313;203460:204442;205423:206421;211309:212190;212190:213125;247545:248327;250432:251301;257627:261560;261560:264631;264631:267249;267249:269131;274200:274699;282453:283000;283000:283243;284023:284342;284536:284633;286700:286929;294284:294786;305696:307534;309456:311079;312843:314117;314117:314784;318570:320092;320092:320517;320517:321841;321841:323030;323030:323410;324700:326780;326780:328835;328835:331332;331332:333471;333471:336116`.\n\nConcatenate without separators. The46818-byte selected hash above must match. Newly applicable existing clauses are not silently covered by listing IDs; changed applicability or missing clause => STOP and remeasure BEFORE admission. LL-167 remains promoted standing rule53, not reset to a live lesson. Old through-LL175 read cannot cover LL176–LL180.\n\nSnapshot: parse complete449596-byte raw JSON with strict UTF8 and duplicate/nonfinite rejection while preserving member/item-property order. Build wrapper keys EXACT in order snapshotVersion,takenAt,provider,source,fields,headers,items,cacheOnly. Copy the first six values unchanged; items selects COMPLETE objects (all notes/description/extra fields retained) for the following literal13 IDs sorted ordinal by id, no recursive discovery; cacheOnly=true. Python `json.dumps(value,ensure_ascii=False,separators=(',',':'))`, UTF8/no BOM/no newline, must equal the46344-byte selected hash above. No normalizing/field pruning/other serializer without exact byte proof and remeasurement.\n\nBAND-ALIGN-1, BAND-ALIGN-2, BLURBY-BUSINESS-1, FLOW-KEYS-FIX-1, FOCUS-KEYS-FIX-1, FOCUS-WORD-ONLY-1, FOLIATE-DISPLAY-LIFETIME-1, FOLIATE-OBSERVER-LEAK-1, LIBRARY-COMPLETION-VISIBILITY-1, NARRATE-CPU-PROFILE-1, NARRATE-HARNESS-COLDCLICK-1, NARRATE-REBUILD-1, NARRATE-REMOVE-1.\n\nSnapshot takenAt2026-11-03T01:47:43Z/status/Seq/prereqs/revisions are CACHE ONLY, never current work-register authority. Root supplies actual current SQL/queue/prerequisite facts independently before an application dispatch; B performs no provider read/write or status change.\n\n## B4 — Complete deterministic output and semantic read ledger\n\nUse compact UTF8 JSON frames with ordered keys schemaVersion,frame,parts; schemaVersion `blurby.remaining-instruction.read-frame.v1`, frame integer1..N. Parts keys exactly rowId,sourceFullSHA256,selectionSHA256,offset,end,pieceSHA256,text. Offset/end are SELECTED UTF8 BYTE offsets, not source raw line offsets or normalized text. Iterate fixed row order CLAUDE,ROADMAP,lessons,registry,snapshot and full selected bytes within each row. Greedily binary-search longest positive Unicode-boundary prefix such that COMPLETE `json.dumps(...ensure_ascii=False,separators=(',',':'))` PLUS literal CRLF and ANY actual tool wrapper is<=10000Unicode characters. Adjacent fixed row tail/head may share a frame, no reorder/omission. Preserve each actual full output hash/length, part ranges/hash and row reassembly equality. Unknown wrappers/unsafe partial/invalidUTF8 => HOLD before display; do not trim content or change framing to fit.\n\nActual LOCAL baseline211573selectedbytes requires23 frames (22of10000characters, final7116 includingCRLF). Recompute the WHOLE actual plan from fresh matching A copies BEFORE partial display, require identical selected bytes/piece mappings and measured actual total output; local metadata is not a quiet PASS. If source/selection/wrapper/frame count differs, STOP rather than claim the old measurement or quietly allocate extra calls. Each complete emitted frame is actually received/read by the SAME CPU actor, not merely hashed. Ledger must give actorChatId/turn, each actual tool/event ID, source/raw/selection identities, exact part ranges, received character lengths/hash, semanticRead=true only after real complete consumption, full row reconstruction/equality and any NOT_READ/UNKNOWN. Hashing, reassembly or an automated read does not alone prove semantic consumption.\n\n## B5 — New reviewer delivery and independent review (scope decision pending)\n\nEvery NEW compliance reviewer receives/reads COMPLETE shipped MarcusAurelius definition13714/8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d AND matching997/c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b overlay. Every NEW quality reviewer receives COMPLETE Plato13843/a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77 AND629/36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b overlay. Actual ordinary source paths are the exact ten-input table; no role/protocol project copies added. CPU's read, a label/hash, fork assertion or compaction summary does not deliver operative text to a different actual worker. Demonstrated complete full-text inheritance may count only if its ACTUAL content/ranges/actor proof exists; this proposal assumes NONE and prices bounded complete new delivery.\n\nEach new reviewer also needs THIS complete B recipe, actual A binding/capsule/ACK, exact fresh15-input/namespace observations, actual full semantic-delivery ledger/frame/byte mappings, any literal DATA collector/call-boundary source/effect clauses, final conservation/clock/accounting facts and failures. Their actual body delivery, delegate, waits, result consumption and any worker tools count in B's aggregate. Frozen byte identity alone is not instruction meaning or source/collector review. No generic semantic credit from CPU or the Root planner.\n\nThe precise reviewer SUBJECT coverage (complete five selected domain texts versus complete receipt/call/metadata/coverage/meaning proof with CPU alone reading all five domains) is an explicit technical HOLD routed by Root to Brain; no reduced subject or invented carry is selected here. Capacity records both honest scenarios. If Brain requires both NEW reviewers to receive all211573selectedbytes independently, that adds46 measured frames BEFORE their role/recipe/evidence deliveries, making a40call B impossible. If a narrower proof subject is ruled, it must still cover every required code/effect/instruction-meaning clause with exact bounded delivery; expected future evidence size/type/complete coverage cannot be hidden.\n\nCompliance verdict assessed/consumed FIRST; quality may inspect concurrently under the accepted policy but is accepted only after actual compliance PASS on IDENTICAL subject/coverage/evidence bytes. Any changed/missing/unread clause, insufficient review delivery or false complete flag => HOLD; no final acceptance from earlier planning reviews. Reviewer identities actual chat/worker and delivered text/hash/range receipts must be recorded. DATA qualification never activates test/build/governance/Git commands inside a role definition or authorizes application code quality/native acceptance.\n\n## B6 — Sole final receipt, preservation and failure\n\nThe ONLY proposed B write is `C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/receipt.json`, initially ABSENT. No receipt.tmp, receipt.json.tmp, helper, log, sidecar, new root or payload overwrite is selected. The proposed finite publication is DIRECT exclusive `xb`, UTF8 JSON-native scalars/lists, incremental<=65536-byte write/flush/fsync/one close, then independent full ordinary readback/length/hash/strict decoded-record equality against the exact intended complete record. This does NOT claim atomic crash-safe publication. Brain must approve this explicit no-temp recipe before execution; if another durability filename is needed, name it in a new finite proposal BEFORE selection, never silently add a seventh file.\n\nConstruct the receipt in bounded memory from actual finite facts ONLY after independent compliance then quality and final five/ten conservation checks. Capture actual consumed-start UTC+monotonic bound BEFORE ANY work; reserve final review/publication time inside one approved phase deadline. Recheck receipt absence immediately before exclusive open, then verify the same owned output after creation (not absence again). Any collision/write/fsync/close/readback/schema failure preserves partial receipt and all five copies; no overwrite, unlink, retry-close, rename, hardlink fallback, second root or second receipt. Keep primary/secondary errors; emit only a bounded truthful stdout HOLD/UNKNOWN with observed partial identity if safely possible within original budget. Do not use a pretty finalizer/retraversal after cutoff.\n\nProposed exact top-level receipt keys: schemaVersion,phase,actor,admission,aProvenance,inputs,coverage,reviewers,preservation,accounting,failures,limitations,disposition. schemaVersion `blurby.instruction-semantic-B.receipt.v1`; phase is actual separately named B admission, actor exact same CPU chat/actual turn. Admission contains actual root/startUTC/monotonic anchor/deadlineUTC/capMinutes/capCalls/consumed event and no selfhash. aProvenance is the actual external aDeliveredBinding plus verified A disposition/schema/namespace/source/call/complete-row matching, never fabricated future A values. Inputs has exact ten carried and five payload ordered expected/actual raw pins/ordinary/access/source-domain/read timestamps. Coverage has five exact source-range/selected domains, every actual frame/part receipt and semantic reader identity/complete flags; no all([]) success. Reviewers has two actual role+overlay/body deliveries, subject byte/range bindings, actual compliance-first acceptance order, source/effect/meaning coverage, verdict/failures. Preservation has before/after ten+five exact identities, copy-only immutable scopes and receipt output state; no wholehost guarantee. Accounting contains EVERY bootstrap/read/Python native/wrapper/delegate/delivery/wait/failure/review/publication/closeout call, used/cap and unknowns, no borrowed A allowance. Counts are nonnegative JSON integers (not booleans), SHA64lowerhex, UTF8 paths/strings, bools actual; unknowns remain null/UNKNOWN and prevent qualified disposition.\n\nQualified final disposition ONLY `SCOPED_INSTRUCTION_SEMANTIC_COVERAGE_QUALIFIED` for this same CPU actor with specifically accepted reviewer/proof coverage, otherwise `HOLD/PARTIAL`; this names proposed output semantics, not an actual accepted status. Every qualified fact must be backed by actual15 matching inputs, complete5domain semantic reads, accepted A provenance, ordered complete reviews, unchanged5copies and accepted receipt readback/clock/call accounting. No application Ready/codequality/native/wholeitem or role execution grant. Final stdout<=10000TOTAL contains actual receipt path/bytes/hash, scoped disposition/end/calls/preservation and every held boundary, never receipt selfhash inside itself.\n\n## B7 — Readiness, capacity and STOP\n\nBefore ANY A execution gate: independently verify the COMPLETE measured B route includes its own bootstrap, A actual-stdout intake/capsule/ACK delivery, fresh15-input checks,23 full semantic frames, EVERY new reviewer ROLE+overlay+Brecipe+subject/evidence delivery, delegate/wait/result actions, actual collector source clauses, final conservation/exclusive publication/readback and reserve/failures. Unknown future A/subject size cannot be priced zero. An actually demonstrated full inherited body may alter counts only through a new exact actor/range proof, not assumption. If whole B exceeds40calls or60minutes, report NOT FEASIBLE to Brain before A executes; do not shrink selections or spend A anyway. No narrower B timebox is selected while this fit/reviewer/durability gate is unresolved; uncalibrated planner estimates below are not a cap or throughput proof.\n\n### Actual local known-route measurement — NOT FEASIBLE\n\nThe complete current B recipe is independently framed as CPU bootstrap, and combined with each NEW reviewer's complete role+overlay for that actor's own delivery. This is actual local DATA sizing, not quiet execution or hypothetical inherited context. All five selected domains reassemble byte-for-byte and reproduce the prior23 frame records exactly; selections remain211573bytes.\n\n|Necessary activity|Actually measured/proposed wrapper calls|\n|---|---:|\n|First clock before all work; exact fresh15input/namespace/packing observations|2|\n|CPU receives complete operative B recipe|3|\n|CPU consumes complete five domains|23|\n|New Marcus receives complete role+overlay+B recipe, no inherited text assumed|5|\n|New Plato receives complete role+overlay+B recipe, no inherited text assumed|5|\n|Independent delegate/wait/result coordination minimum|4|\n|Final conservation and sole receipt exclusive publication/readback/closure|2|\n|KNOWN MINIMUM BEFORE ANY A INTAKE OR REVIEW-EVIDENCE DELIVERY|44|\n|A success receipt intake enforced maximum, actual receipt remains future|+3|\n|Current counted route with that full A intake bound, STILL BEFORE reviewer A/proof/context delivery|47|\n\nThe known44 already exceeds40 even if A intake were free; actual future A/evidence overhead cannot improve it. Additional reviewer proof/collector/metadata/codeclause/instruction-meaning subject delivery is REQUIRED but not yet fully byte-bound, so its cost is UNKNOWN/POSITIVE, not zero. If both new reviewers must cold-read all five domains, add46 measured frames: at least90 before A intake/proof (93 with the enforced3-frame intake). A narrower technically ruled proof subject still does not by itself erase complete role/overlay/recipe delivery costs. Demonstrably inherited complete actual text could change a later measured route only with real actor/range proof, not an assumed fork or role label. No whole-route feasibility claimed from this lower bound.\n\nPython native executions are tracked separately from their containing wrapper calls; conservative separately charged native+wrapper accounting can only increase this failed result. No uncounted Git/native subprocess batch is hidden. No narrower B wall timebox is selected while call fit already fails, regardless of the52m uncalibrated planner sum. Brain must select a concrete changed finite route BEFORE A executes; this proposal does not grant one.\n\n##### Task list\n\n| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |\n|---|---|---|---|---|---|---|---|---|\n|1|Verify actual accepted A stdout/Root capsule/ACK and fresh exact15inputs/namespace; freeze complete measured read/delivery plan|calculable|instruction-qualification-entry|bounded|high|8m (prospective uncalibrated complete entry allowance)|—|—|\n|2|Actually consume all five unchanged semantic domains with complete23frame raw/ranged ledger|calculable|semantic-instruction-read|bounded|high|25m (prospective uncalibrated semantic reading allowance)|—|—|\n|3|Fully deliver/review required new reviewer subjects, compliance FIRST quality; conserve copies and publish/readback sole receipt|calculable|instruction-review-closeout|bounded|high|19m (prospective uncalibrated review/delivery14m and closure5m)|—|—|\n\nTotal chain52m/sum52m;0of3calibrated. This is not proof of fitting40/60, no proposed active bound or ETA. Root history pricing/mechanical checks and current SQL/queue-depth are separately owned; B calls no registry/helper/provider/timing and cannot change Status/Seq/completion. No new work item or successor. Preserve all old source/receipt/clock/publication hashes,51/49 and57/40 observations. Existing application/source/native/package/release holds and CPU's closed source/control result stay unchanged.\n\n##### Lessons applied\n\nLL-002, LL-063, LL-068, LL-090 and LL-137 require unchanged source/evidence domains and exact scoped inputs; LL-006, LL-066, LL-097, LL-098 require explicit primary/secondary I/O errors and truthful exclusive partial receipt, no helper fallback. LL-128 ordinary owned namespace and receipt absence; LL-134 all workers/deliveries and actual finite cap/reserve; LL-169 actual command boundary/closure distinct from deadline status, no process query. LL-172/standing rule41 external accounting/no timing spill. LL-176 raw stdout/exit integrity; LL-177 and LL-178 exact representation/UTF8/JSON-native equality/path domains; LL-179 finite feasible transfer; LL-180 complete reachable actor-specific operative coverage BEFORE clocks. Standing rule53 package/native remains a later source-code gate, never qualified by DATA reads. All28 selected lesson clauses/status amendments remain COMPLETE as B3, not only these citations.\n\nFive findings remain distinct: **Specification NOT READY** pending Brain reviewer-subject/durability selection and independently verified actual whole-route fit; **Prerequisites** actual accepted A capsule/ACK not yet exist, no invented future binding; **Repository** existing A root/5copies/10inputs fresh validation required/no Git/source/reacquisition; **External register** current facts Root-owned, cache neverauthority/no mutation; **Environment** same actual CPU actor/access/operative bootstrap/reviewer delivery plus separate Brain B admission pending. Only this local draft and its capacity JSON are authored; no quiet/executor/Brain message, process/module/source/helper/provider/Git/runtime action.\n",
+    "capacityRawBytes": 43957,
+    "capacityRawSHA256": "10cfa6366cd55477067ccd33a918190ff01f67017c862b33a95ef9c8f542a4eb",
+    "completeCapacityUTF8": "{\n  \"schemaVersion\": \"blurby.instruction-semantic-B.capacity.planning.v1\",\n  \"status\": \"MEASURED_KNOWN44_MINIMUM_EXCEEDS40_NOT_READY_NO_ADMISSION\",\n  \"domain\": \"ROOT_LOCAL_DATA_ONLY_NOT_QUIET_EXECUTION\",\n  \"sourceCommit\": \"3afcf8789be0d7fa3bdf27235597606da022c93c\",\n  \"sameActor\": \"01a19d76-0837-7a43-a18d-8a40494879b8\",\n  \"fiveFullRawAndSelectedDomains\": [\n    {\n      \"rowId\": \"CLAUDE.md\",\n      \"rawBytes\": 30743,\n      \"rawSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n      \"selectedBytes\": 30743,\n      \"selectedSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n      \"ranges\": [\n        {\n          \"scope\": \"FULL\",\n          \"sourceByteOffset\": 0,\n          \"bytes\": 30743\n        }\n      ]\n    },\n    {\n      \"rowId\": \"ROADMAP.md\",\n      \"rawBytes\": 356715,\n      \"rawSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n      \"selectedBytes\": 67713,\n      \"selectedSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n      \"ranges\": [\n        {\n          \"sourceByteOffset\": 0,\n          \"endLine\": 218,\n          \"bytes\": 57232,\n          \"startLine\": 1\n        },\n        {\n          \"sourceByteOffset\": 282888,\n          \"endLine\": 1625,\n          \"bytes\": 3281,\n          \"startLine\": 1608\n        },\n        {\n          \"sourceByteOffset\": 323704,\n          \"endLine\": 1859,\n          \"bytes\": 7200,\n          \"startLine\": 1835\n        }\n      ]\n    },\n    {\n      \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n      \"rawBytes\": 336116,\n      \"rawSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n      \"selectedBytes\": 46818,\n      \"selectedSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n      \"ranges\": [\n        {\n          \"sourceByteOffset\": 149541,\n          \"endLine\": 1739,\n          \"bytes\": 568,\n          \"lessonId\": \"LL-002\",\n          \"startLine\": 1731\n        },\n        {\n          \"sourceByteOffset\": 150109,\n          \"endLine\": 1748,\n          \"bytes\": 908,\n          \"lessonId\": \"LL-003\",\n          \"startLine\": 1740\n        },\n        {\n          \"sourceByteOffset\": 151017,\n          \"endLine\": 1757,\n          \"bytes\": 634,\n          \"lessonId\": \"LL-004\",\n          \"startLine\": 1749\n        },\n        {\n          \"sourceByteOffset\": 152301,\n          \"endLine\": 1775,\n          \"bytes\": 693,\n          \"lessonId\": \"LL-006\",\n          \"startLine\": 1767\n        },\n        {\n          \"sourceByteOffset\": 176643,\n          \"endLine\": 2045,\n          \"bytes\": 962,\n          \"lessonId\": \"LL-063\",\n          \"startLine\": 2037\n        },\n        {\n          \"sourceByteOffset\": 178418,\n          \"endLine\": 2063,\n          \"bytes\": 855,\n          \"lessonId\": \"LL-066\",\n          \"startLine\": 2055\n        },\n        {\n          \"sourceByteOffset\": 180160,\n          \"endLine\": 2081,\n          \"bytes\": 1153,\n          \"lessonId\": \"LL-068\",\n          \"startLine\": 2073\n        },\n        {\n          \"sourceByteOffset\": 203460,\n          \"endLine\": 2279,\n          \"bytes\": 982,\n          \"lessonId\": \"LL-090\",\n          \"startLine\": 2271\n        },\n        {\n          \"sourceByteOffset\": 205423,\n          \"endLine\": 2297,\n          \"bytes\": 998,\n          \"lessonId\": \"LL-128\",\n          \"startLine\": 2289\n        },\n        {\n          \"sourceByteOffset\": 211309,\n          \"endLine\": 2351,\n          \"bytes\": 881,\n          \"lessonId\": \"LL-097\",\n          \"startLine\": 2343\n        },\n        {\n          \"sourceByteOffset\": 212190,\n          \"endLine\": 2360,\n          \"bytes\": 935,\n          \"lessonId\": \"LL-098\",\n          \"startLine\": 2352\n        },\n        {\n          \"sourceByteOffset\": 247545,\n          \"endLine\": 2669,\n          \"bytes\": 782,\n          \"lessonId\": \"LL-134\",\n          \"startLine\": 2662\n        },\n        {\n          \"sourceByteOffset\": 250432,\n          \"endLine\": 2699,\n          \"bytes\": 869,\n          \"lessonId\": \"LL-137\",\n          \"startLine\": 2692\n        },\n        {\n          \"sourceByteOffset\": 257627,\n          \"endLine\": 2763,\n          \"bytes\": 3933,\n          \"lessonId\": \"LL-142\",\n          \"startLine\": 2755\n        },\n        {\n          \"sourceByteOffset\": 261560,\n          \"endLine\": 2772,\n          \"bytes\": 3071,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 2764\n        },\n        {\n          \"sourceByteOffset\": 264631,\n          \"endLine\": 2780,\n          \"bytes\": 2618,\n          \"lessonId\": \"LL-144\",\n          \"startLine\": 2773\n        },\n        {\n          \"sourceByteOffset\": 267249,\n          \"endLine\": 2796,\n          \"bytes\": 1882,\n          \"lessonId\": \"LL-145\",\n          \"startLine\": 2781\n        },\n        {\n          \"sourceByteOffset\": 274200,\n          \"endLine\": 2827,\n          \"bytes\": 499,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 2825\n        },\n        {\n          \"sourceByteOffset\": 282453,\n          \"endLine\": 2871,\n          \"bytes\": 547,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 2869\n        },\n        {\n          \"sourceByteOffset\": 283000,\n          \"endLine\": 2874,\n          \"bytes\": 243,\n          \"lessonId\": \"LL-144\",\n          \"startLine\": 2872\n        },\n        {\n          \"sourceByteOffset\": 284023,\n          \"endLine\": 2887,\n          \"bytes\": 319,\n          \"lessonId\": \"LL-068\",\n          \"startLine\": 2885\n        },\n        {\n          \"sourceByteOffset\": 284536,\n          \"endLine\": 2896,\n          \"bytes\": 97,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 2894\n        },\n        {\n          \"sourceByteOffset\": 286700,\n          \"endLine\": 2913,\n          \"bytes\": 229,\n          \"lessonId\": \"LL-137\",\n          \"startLine\": 2911\n        },\n        {\n          \"sourceByteOffset\": 294284,\n          \"endLine\": 2974,\n          \"bytes\": 502,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 2972\n        },\n        {\n          \"sourceByteOffset\": 305696,\n          \"endLine\": 3049,\n          \"bytes\": 1838,\n          \"lessonId\": \"LL-165\",\n          \"startLine\": 3042\n        },\n        {\n          \"sourceByteOffset\": 309456,\n          \"endLine\": 3071,\n          \"bytes\": 1623,\n          \"lessonId\": \"LL-167\",\n          \"startLine\": 3064\n        },\n        {\n          \"sourceByteOffset\": 312843,\n          \"endLine\": 3098,\n          \"bytes\": 1274,\n          \"lessonId\": \"LL-169\",\n          \"startLine\": 3091\n        },\n        {\n          \"sourceByteOffset\": 314117,\n          \"endLine\": 3102,\n          \"bytes\": 667,\n          \"lessonId\": \"LL-165\",\n          \"startLine\": 3099\n        },\n        {\n          \"sourceByteOffset\": 318570,\n          \"endLine\": 3129,\n          \"bytes\": 1522,\n          \"lessonId\": \"LL-172\",\n          \"startLine\": 3122\n        },\n        {\n          \"sourceByteOffset\": 320092,\n          \"endLine\": 3132,\n          \"bytes\": 425,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 3130\n        },\n        {\n          \"sourceByteOffset\": 320517,\n          \"endLine\": 3140,\n          \"bytes\": 1324,\n          \"lessonId\": \"LL-173\",\n          \"startLine\": 3133\n        },\n        {\n          \"sourceByteOffset\": 321841,\n          \"endLine\": 3148,\n          \"bytes\": 1189,\n          \"lessonId\": \"LL-174\",\n          \"startLine\": 3141\n        },\n        {\n          \"sourceByteOffset\": 323030,\n          \"endLine\": 3151,\n          \"bytes\": 380,\n          \"lessonId\": \"LL-143\",\n          \"startLine\": 3149\n        },\n        {\n          \"sourceByteOffset\": 324700,\n          \"endLine\": 3165,\n          \"bytes\": 2080,\n          \"lessonId\": \"LL-176\",\n          \"startLine\": 3159\n        },\n        {\n          \"sourceByteOffset\": 326780,\n          \"endLine\": 3172,\n          \"bytes\": 2055,\n          \"lessonId\": \"LL-177\",\n          \"startLine\": 3166\n        },\n        {\n          \"sourceByteOffset\": 328835,\n          \"endLine\": 3179,\n          \"bytes\": 2497,\n          \"lessonId\": \"LL-178\",\n          \"startLine\": 3173\n        },\n        {\n          \"sourceByteOffset\": 331332,\n          \"endLine\": 3186,\n          \"bytes\": 2139,\n          \"lessonId\": \"LL-179\",\n          \"startLine\": 3180\n        },\n        {\n          \"sourceByteOffset\": 333471,\n          \"endLine\": 3192,\n          \"bytes\": 2645,\n          \"lessonId\": \"LL-180\",\n          \"startLine\": 3187\n        }\n      ]\n    },\n    {\n      \"rowId\": \"Virtuoso/workspace-layout.json\",\n      \"rawBytes\": 19955,\n      \"rawSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n      \"selectedBytes\": 19955,\n      \"selectedSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n      \"ranges\": [\n        {\n          \"scope\": \"FULL\",\n          \"sourceByteOffset\": 0,\n          \"bytes\": 19955\n        }\n      ]\n    },\n    {\n      \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n      \"rawBytes\": 449596,\n      \"rawSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n      \"selectedBytes\": 46344,\n      \"selectedSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n      \"ranges\": [\n        {\n          \"jsonPointers\": [\n            \"/snapshotVersion\",\n            \"/takenAt\",\n            \"/provider\",\n            \"/source\",\n            \"/fields\",\n            \"/headers\"\n          ],\n          \"selectedStableIds\": [\n            \"BAND-ALIGN-1\",\n            \"BAND-ALIGN-2\",\n            \"BLURBY-BUSINESS-1\",\n            \"FLOW-KEYS-FIX-1\",\n            \"FOCUS-KEYS-FIX-1\",\n            \"FOCUS-WORD-ONLY-1\",\n            \"FOLIATE-DISPLAY-LIFETIME-1\",\n            \"FOLIATE-OBSERVER-LEAK-1\",\n            \"LIBRARY-COMPLETION-VISIBILITY-1\",\n            \"NARRATE-CPU-PROFILE-1\",\n            \"NARRATE-HARNESS-COLDCLICK-1\",\n            \"NARRATE-REBUILD-1\",\n            \"NARRATE-REMOVE-1\"\n          ],\n          \"representation\": \"complete selected JSON-native values; source raw pin separate\"\n        }\n      ]\n    }\n  ],\n  \"selectedFiveBytes\": 211573,\n  \"selectedFiveFrames\": [\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10036,\n      \"sha256\": \"78539e2153bbb937e7f5dad34513feea6447f1dca8c0d27de8645d3d75e5c0a8\",\n      \"parts\": [\n        {\n          \"rowId\": \"CLAUDE.md\",\n          \"sourceFullSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"selectionSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"offset\": 0,\n          \"end\": 9574,\n          \"pieceSHA256\": \"f2ef43e0d513058bbbc785cd424e69e67eacc32f4e81a4a137af0ef803552416\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10040,\n      \"sha256\": \"3f7dc6d55ffaa6cf13a691d1a05d0189e239b85ccc08dffa42a05c753658bb54\",\n      \"parts\": [\n        {\n          \"rowId\": \"CLAUDE.md\",\n          \"sourceFullSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"selectionSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"offset\": 9574,\n          \"end\": 19084,\n          \"pieceSHA256\": \"10c52e1e071ad2519a8f6a73067b8f40c8976c1665d46552cdc05d7a949cb7d5\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10054,\n      \"sha256\": \"4c8436186c41050bca023c708531d9d11f390d2e7772a6fbafacedaaa80364f4\",\n      \"parts\": [\n        {\n          \"rowId\": \"CLAUDE.md\",\n          \"sourceFullSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"selectionSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"offset\": 19084,\n          \"end\": 28630,\n          \"pieceSHA256\": \"049c2fcca40d11a73cd238ec5a8927aada10c3aabd7aa005a83fa3c00e6f9b6a\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10024,\n      \"sha256\": \"84b9ede1b582009a5c8fcb83a79f0cef73d671f734f07ac5dbda2be62a7e98c2\",\n      \"parts\": [\n        {\n          \"rowId\": \"CLAUDE.md\",\n          \"sourceFullSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"selectionSHA256\": \"87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65\",\n          \"offset\": 28630,\n          \"end\": 30743,\n          \"pieceSHA256\": \"73101660d248eede61b6779f3c0069c2436948889f78c5a94dd285d21e33f3ae\"\n        },\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 0,\n          \"end\": 7173,\n          \"pieceSHA256\": \"efb567fe151bfceaf0050cb979e3033821be2998c7c0f78fce5dbc5947ee93ba\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10026,\n      \"sha256\": \"32912ab875d8c0903c3f6bcb8ba0d9f0cf1df8f459bebfb0ec9a28d50b2e75c1\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 7173,\n          \"end\": 16741,\n          \"pieceSHA256\": \"2e196955ec94857676f2dcc55744c595540dc075511c0e5bf4307b6f9df6da5b\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10020,\n      \"sha256\": \"06032a829263b570d365eb8607e07d2b6d9f3c750efae686849937a022c72506\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 16741,\n          \"end\": 26331,\n          \"pieceSHA256\": \"88ff016b3beb649a5a7bb3d1f77308c73c29a29884aba9e345bd2173105bf10d\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10056,\n      \"sha256\": \"31381984f00c37060a5db381203781bc26e8a06b122ec1ebf258b82ce9a5f16f\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 26331,\n          \"end\": 35928,\n          \"pieceSHA256\": \"dc5c2f6a50c5f50c9fc6b822afcab2f5e16143893b1d789e224609b01ef12c0e\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10044,\n      \"sha256\": \"29aec6595013e3c610556cc0109ecacae0f564e3201615cf857a51e1f507b5e4\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 35928,\n          \"end\": 45540,\n          \"pieceSHA256\": \"339abe48d7da4be18fab16c9fbf8f093f0882aa1260e818225be09b850e71c29\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10028,\n      \"sha256\": \"5969c768f8f630d8abb758d09aa0c8358fb8a6aa8cb797e031c0499d18de2f31\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 45540,\n          \"end\": 55131,\n          \"pieceSHA256\": \"19d87389ef4dfa863df22f881bdc81dbd66861413cae283b3f099c3ca5a09d7d\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10042,\n      \"sha256\": \"cae7a3c1d712394575896c40bbf8fcabf21726e4795ab40c0f238ff3fd245b99\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 55131,\n          \"end\": 64728,\n          \"pieceSHA256\": \"193bdd04b29b30ee6d83d21d6bbcf6172b6b1b85672e1cbf9ba68d81827c842b\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10048,\n      \"sha256\": \"db598f0f2b6737b20cbff17a3755376c913f2701fb0e24ababec1550d7fd0af7\",\n      \"parts\": [\n        {\n          \"rowId\": \"ROADMAP.md\",\n          \"sourceFullSHA256\": \"1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590\",\n          \"selectionSHA256\": \"dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd\",\n          \"offset\": 64728,\n          \"end\": 67713,\n          \"pieceSHA256\": \"8adbfeccc252ad0b882bf078567c1dd37508724d01c939a15b302f7a7453af39\"\n        },\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 0,\n          \"end\": 6231,\n          \"pieceSHA256\": \"40e18063f141855d8bc81804e39c3554295eb377f53882111fbf8b8516acc217\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10044,\n      \"sha256\": \"972afbcbd588253e6bb06e6993b662d849305e3a330dfa62d6e9b67ec6d2d4c0\",\n      \"parts\": [\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 6231,\n          \"end\": 15770,\n          \"pieceSHA256\": \"b5b738b3f09c127fe209270e45f9a42295dce2d53999bc99dc75df1c23a91062\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10043,\n      \"sha256\": \"96ce709e201d525776e1da4438ee7a8c251909e212945993388bd7989a1202b6\",\n      \"parts\": [\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 15770,\n          \"end\": 25327,\n          \"pieceSHA256\": \"beff016cf204a15419ab526e9f5c465c12bdbfb454f8d5dfebe7d4e3b1485fd8\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10022,\n      \"sha256\": \"b0938db26cc7848f62858ca848712644d9cf9f9e159b25a19a9f904509427a52\",\n      \"parts\": [\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 25327,\n          \"end\": 34868,\n          \"pieceSHA256\": \"404385187caa86ba38410979a3a7bdeed21d5624f6cbb399d3faf7fc21697784\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10014,\n      \"sha256\": \"205249582f9a42be7ae85cf681422d7f31efb18658ed061cfc5b7cb0ae12a7cc\",\n      \"parts\": [\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 34868,\n          \"end\": 44425,\n          \"pieceSHA256\": \"eec4ae17caee5e06980fcab964ef115a5bb476baf8404a4e0d9b89d021c79f7d\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10000,\n      \"sha256\": \"1ad9656f06906bf976f0a1332c1e87b24ff70a3d8613fd035de53ce7e52326ed\",\n      \"parts\": [\n        {\n          \"rowId\": \"docs/governance/LESSONS_LEARNED.md\",\n          \"sourceFullSHA256\": \"8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28\",\n          \"selectionSHA256\": \"388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7\",\n          \"offset\": 44425,\n          \"end\": 46818,\n          \"pieceSHA256\": \"34e68a4685a41523fdd14adf94023f9b8f1c2a5fd50425388cad0b16b11dee48\"\n        },\n        {\n          \"rowId\": \"Virtuoso/workspace-layout.json\",\n          \"sourceFullSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"selectionSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"offset\": 0,\n          \"end\": 6081,\n          \"pieceSHA256\": \"1ccb83de27a8cfde992cad72813164c16afe4fc4878f5025c18d77ea5cfed6b1\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10002,\n      \"sha256\": \"c6c673575a56e03f0d2bac053e644565976c348fa3e75c07e2eacb2d2ca229fa\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/workspace-layout.json\",\n          \"sourceFullSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"selectionSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"offset\": 6081,\n          \"end\": 14526,\n          \"pieceSHA256\": \"eb5ce8a9c4ca6dc693261f0dfe76aa49b56bc1dfe20808c0120f6034608b0cad\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10002,\n      \"sha256\": \"6d6cb1f79711b7436666e18abd9e2dbe57d2da5e24f991f518654fa13dd35bd0\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/workspace-layout.json\",\n          \"sourceFullSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"selectionSHA256\": \"f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc\",\n          \"offset\": 14526,\n          \"end\": 19955,\n          \"pieceSHA256\": \"b82bfd05b46a79bf55df6d1216c6695d4fdb22ebbbec5883e04a3de624a5f522\"\n        },\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 0,\n          \"end\": 2927,\n          \"pieceSHA256\": \"f05253da36fcbd8f2e38517b38b16aff5976cc8b5ad8d9c5e0037a3db2cde727\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10022,\n      \"sha256\": \"c2ee1999943fc7df13c133316f577cedbcde1da71ddb75e175bfc063d2010f22\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 2927,\n          \"end\": 12221,\n          \"pieceSHA256\": \"438591ff30290bf3996f605f8390e5593a522c2a3a4114c779d89bf4dd5dbcb3\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10008,\n      \"sha256\": \"652d22be7bc50b3e64b011263337bf3666b45ae3647e42e4c7e89846e70ba773\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 12221,\n          \"end\": 21402,\n          \"pieceSHA256\": \"22ba7c16a4323fb84e6893bd4fae7f36bc5f6cd57d141a40992f0374dee9c1e9\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10000,\n      \"sha256\": \"c441cc06c27a0ec280b455dd7dae1427e705d25094f2b1ca7cf02b93af6862e4\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 21402,\n          \"end\": 30699,\n          \"pieceSHA256\": \"3c2986ef006df64580b46644fe1871402734122ad12c01684bc3f772111210b6\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 10000,\n      \"utf8Bytes\": 10000,\n      \"sha256\": \"d7ba02a47c838ae7ec47b74b57de867ee65666164e7a715591e603bc1c1954a8\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 30699,\n          \"end\": 40022,\n          \"pieceSHA256\": \"b93e57f85378db9ec84332cfbaa1b41646fab948609c21017bf5b74345ed9e1a\"\n        }\n      ]\n    },\n    {\n      \"charactersIncludingCRLF\": 7116,\n      \"utf8Bytes\": 7118,\n      \"sha256\": \"a672cb6456232af5766b4a3f5b14d4ed6693acef3675dd6c0c57dd8a426c7957\",\n      \"parts\": [\n        {\n          \"rowId\": \"Virtuoso/work-register.snapshot.json\",\n          \"sourceFullSHA256\": \"fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b\",\n          \"selectionSHA256\": \"5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0\",\n          \"offset\": 40022,\n          \"end\": 46344,\n          \"pieceSHA256\": \"ed6a759b41cc4b50e1a50285819aa8b6bcb75e9e5823a43d8deed1dc32fd8358\"\n        }\n      ]\n    }\n  ],\n  \"selectedFiveByteReconstructionAndPriorExactFrameParity\": true,\n  \"carriedTenFreshRequalificationRequired\": [\n    {\n      \"rowId\": \"AGENTS.md\",\n      \"rawBytes\": 30850,\n      \"rawSHA256\": \"aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654\",\n      \"semanticDomain\": [\n        0,\n        30850\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md\"\n    },\n    {\n      \"rowId\": \"Virtuoso/overlays/skills/virtuoso/SKILL.md\",\n      \"rawBytes\": 1822,\n      \"rawSHA256\": \"3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8\",\n      \"semanticDomain\": [\n        0,\n        1822\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md\"\n    },\n    {\n      \"rowId\": \"Virtuoso/overlays/agents/Hippocrates.md\",\n      \"rawBytes\": 1029,\n      \"rawSHA256\": \"6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132\",\n      \"semanticDomain\": [\n        0,\n        1029\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md\"\n    },\n    {\n      \"rowId\": \"Virtuoso/overlays/agents/MarcusAurelius.md\",\n      \"rawBytes\": 997,\n      \"rawSHA256\": \"c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b\",\n      \"semanticDomain\": [\n        0,\n        997\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md\"\n    },\n    {\n      \"rowId\": \"Virtuoso/overlays/agents/Plato.md\",\n      \"rawBytes\": 629,\n      \"rawSHA256\": \"36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b\",\n      \"semanticDomain\": [\n        0,\n        629\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md\"\n    },\n    {\n      \"rowId\": \"skills/virtuoso/SKILL.md\",\n      \"rawBytes\": 93324,\n      \"rawSHA256\": \"c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc\",\n      \"semanticDomain\": [\n        0,\n        93324\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md\"\n    },\n    {\n      \"rowId\": \"skills/virtuoso/references/zeus.md\",\n      \"rawBytes\": 30766,\n      \"rawSHA256\": \"6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc\",\n      \"semanticDomain\": [\n        0,\n        30766\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md\"\n    },\n    {\n      \"rowId\": \"agents/MarcusAurelius.md\",\n      \"rawBytes\": 13714,\n      \"rawSHA256\": \"8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d\",\n      \"semanticDomain\": [\n        0,\n        13714\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md\"\n    },\n    {\n      \"rowId\": \"agents/Plato.md\",\n      \"rawBytes\": 13843,\n      \"rawSHA256\": \"a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77\",\n      \"semanticDomain\": [\n        0,\n        13843\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md\"\n    },\n    {\n      \"rowId\": \"agents/Hippocrates.md\",\n      \"rawBytes\": 11318,\n      \"rawSHA256\": \"c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3\",\n      \"semanticDomain\": [\n        0,\n        11318\n      ],\n      \"currentQuietIdentity\": \"MUST_RECHECK_NOT_CLAIMED\",\n      \"quietExactPath\": \"C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md\"\n    }\n  ],\n  \"recipe\": {\n    \"path\": \"docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n    \"bytes\": 28388,\n    \"sha256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n    \"frames\": [\n      {\n        \"charactersIncludingCRLF\": 10000,\n        \"utf8Bytes\": 10010,\n        \"sha256\": \"6793e06c1df445fb5a78c252e29e79296aa16a331a734010cfcb07f342cf9ac6\",\n        \"parts\": [\n          {\n            \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n            \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"offset\": 0,\n            \"end\": 9520,\n            \"pieceSHA256\": \"cf63811631eea3cad42f4bd03d096ef47b39a3023bd1d7479a622513d539d729\"\n          }\n        ]\n      },\n      {\n        \"charactersIncludingCRLF\": 10000,\n        \"utf8Bytes\": 10014,\n        \"sha256\": \"60f1675f433e6f14c9d9a0f975041080db0898edc282a3a347de79de3bf3254f\",\n        \"parts\": [\n          {\n            \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n            \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"offset\": 9520,\n            \"end\": 19041,\n            \"pieceSHA256\": \"c1f28538a1d0da0d535acd13bfa2d41cb6c342e00c5cfa9590e2331c4ad158ed\"\n          }\n        ]\n      },\n      {\n        \"charactersIncludingCRLF\": 9829,\n        \"utf8Bytes\": 9845,\n        \"sha256\": \"bd34b7b27f3d6d823c6efc9086858f672bea8c180b4862eee20ef3807dd62d9b\",\n        \"parts\": [\n          {\n            \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n            \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n            \"offset\": 19041,\n            \"end\": 28388,\n            \"pieceSHA256\": \"3136bbbf61addac3b3b3e9c1571a603de7c339a3c59506a12233bef5ffbced99\"\n          }\n        ]\n      }\n    ],\n    \"completeByteReconstruction\": true\n  },\n  \"reviewerDeliveriesKnownLowerBound\": [\n    {\n      \"role\": \"MarcusAurelius\",\n      \"actor\": \"NEW_ACTUAL_REVIEWER_NOT_SELECTED\",\n      \"inheritedFullTextAssumed\": false,\n      \"fullRoleOverlayRecipeBytes\": 43099,\n      \"frames\": [\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10058,\n          \"sha256\": \"ccc637db30ed56a0e8f37aa0a6ca383ea5eba619a2c8bdbaf2dd3031e0633462\",\n          \"parts\": [\n            {\n              \"rowId\": \"agents/MarcusAurelius.md\",\n              \"sourceFullSHA256\": \"8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d\",\n              \"selectionSHA256\": \"8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d\",\n              \"offset\": 0,\n              \"end\": 9229,\n              \"pieceSHA256\": \"1acdd088799238dba3f469ff876c86160a1193d0f50b39cb612b286d7a626d8f\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10024,\n          \"sha256\": \"9e77234d111ccf35834a014a5fb16afed5b2d110cd11a92ebda8a8d7a29c72e6\",\n          \"parts\": [\n            {\n              \"rowId\": \"agents/MarcusAurelius.md\",\n              \"sourceFullSHA256\": \"8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d\",\n              \"selectionSHA256\": \"8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d\",\n              \"offset\": 9229,\n              \"end\": 13714,\n              \"pieceSHA256\": \"d4f31ffd5210ee555dc86eb33fc17cddfc88abb62ae6ffcbba97e0c624e9d786\"\n            },\n            {\n              \"rowId\": \"Virtuoso/overlays/agents/MarcusAurelius.md\",\n              \"sourceFullSHA256\": \"c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b\",\n              \"selectionSHA256\": \"c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b\",\n              \"offset\": 0,\n              \"end\": 997,\n              \"pieceSHA256\": \"c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b\"\n            },\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 0,\n              \"end\": 3208,\n              \"pieceSHA256\": \"6cec4e4f3ea3e3ee9bf3149170a667bf8049032f31fc4b2ad96287afe0d30383\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10014,\n          \"sha256\": \"d992fa7d82b85ff1652cef5c567a5f640c21fb740df35d5e73588a29a75a9573\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 3208,\n              \"end\": 12724,\n              \"pieceSHA256\": \"9e6fd592a1dd707734dc56b93fc63f00eed60386e7e8990df32826dc3d37d94e\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10008,\n          \"sha256\": \"a311dbe05d3395e7f6e8493c2e940b5672c1188cef2e5d9c92f126d5c6dddf4f\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 12724,\n              \"end\": 22246,\n              \"pieceSHA256\": \"0ba542d0d854d66a928c2db91f51efc3fe4bfacfa78a77f1046a791b181e3098\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 6618,\n          \"utf8Bytes\": 6632,\n          \"sha256\": \"fb736cafeb35b0971a59290dcab1e1eecbf6bfc49af3838d1f28a1489063276c\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 22246,\n              \"end\": 28388,\n              \"pieceSHA256\": \"86e9a23dd7926478f5140ff0ce875f5d999a098f3fd835e4c1d45696adf50557\"\n            }\n          ]\n        }\n      ],\n      \"actualFutureAReceiptAndProofIncluded\": false,\n      \"incompleteProofLowerBoundOnly\": true\n    },\n    {\n      \"role\": \"Plato\",\n      \"actor\": \"NEW_ACTUAL_REVIEWER_NOT_SELECTED\",\n      \"inheritedFullTextAssumed\": false,\n      \"fullRoleOverlayRecipeBytes\": 42860,\n      \"frames\": [\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10024,\n          \"sha256\": \"1e7686819d91c40ee93b01a4c08d208d5b4f1e6cfe255b5b5775463b4fcef1b9\",\n          \"parts\": [\n            {\n              \"rowId\": \"agents/Plato.md\",\n              \"sourceFullSHA256\": \"a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77\",\n              \"selectionSHA256\": \"a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77\",\n              \"offset\": 0,\n              \"end\": 9118,\n              \"pieceSHA256\": \"afc48d0b8926473f6c1b876cc5871e804d93197f8f2dc584f0e2bebceccd2e3f\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10038,\n          \"sha256\": \"9b4038e72be5b64c51987d2fa0bd95feacea947ef00fdfec2b9f895cc98f20f6\",\n          \"parts\": [\n            {\n              \"rowId\": \"agents/Plato.md\",\n              \"sourceFullSHA256\": \"a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77\",\n              \"selectionSHA256\": \"a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77\",\n              \"offset\": 9118,\n              \"end\": 13843,\n              \"pieceSHA256\": \"c51c2ea45f8dae1f29c7219bfd2e3c0cf278fadfbbdb5ff4f12663adeed6d2fb\"\n            },\n            {\n              \"rowId\": \"Virtuoso/overlays/agents/Plato.md\",\n              \"sourceFullSHA256\": \"36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b\",\n              \"selectionSHA256\": \"36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b\",\n              \"offset\": 0,\n              \"end\": 629,\n              \"pieceSHA256\": \"36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b\"\n            },\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 0,\n              \"end\": 3355,\n              \"pieceSHA256\": \"dcffe08b3167ffd06a1664da173063ea569c2c652ee788d9f07437102c3fb127\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10014,\n          \"sha256\": \"56838dd2973ce2149dc42f88d825c50bfac262829411cc63d4ca8346ebaff08f\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 3355,\n              \"end\": 12871,\n              \"pieceSHA256\": \"58ae16a3657c07edef54688de43b2e607e2ac741e5df79d062ef2b8a513547e8\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 10000,\n          \"utf8Bytes\": 10008,\n          \"sha256\": \"b1b8d26dcef302605dbb4c782eae4da29ebe84bdf568ae225528e015aee21461\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 12871,\n              \"end\": 22393,\n              \"pieceSHA256\": \"8137b13b29a89bf18213505cc84e050200e447c3b4d4403ce88042c1fd43cf71\"\n            }\n          ]\n        },\n        {\n          \"charactersIncludingCRLF\": 6471,\n          \"utf8Bytes\": 6485,\n          \"sha256\": \"4a7ee2f4e37f78ac6a6326054ff56f905f06441faa7f3291f3fde23245df643f\",\n          \"parts\": [\n            {\n              \"rowId\": \"Draft.FLAT-OPERATIVE-CONTRACT.instruction-semantic-B.2026-11-03.md\",\n              \"sourceFullSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"selectionSHA256\": \"bca9fd92ff5f7cb199b5fb642e2cd4ce6c9667a224db5fe6ecc0030d31244b2d\",\n              \"offset\": 22393,\n              \"end\": 28388,\n              \"pieceSHA256\": \"88293b68b1e15193a52ee0761ed8c1cd46ca16e50b2620afe7a671a2700b6e91\"\n            }\n          ]\n        }\n      ],\n      \"actualFutureAReceiptAndProofIncluded\": false,\n      \"incompleteProofLowerBoundOnly\": true\n    }\n  ],\n  \"aDeliveredBinding\": {\n    \"actualReceiptAvailable\": false,\n    \"actualRootCapsuleAvailable\": false,\n    \"actualRootACKAvailable\": false,\n    \"source\": \"FUTURE_ACTUAL_EXTERNAL_ADMISSION_FIELDS_ONLY\",\n    \"successReceiptPayloadUTF8ByteMaximum\": 20000,\n    \"stdoutFrameMaximum\": 3,\n    \"eachFrameTotalCharacterMaximumIncludingCRLF\": 10000,\n    \"maxTotalOutputCharacters\": 30000,\n    \"actualHashInvented\": false,\n    \"boundSource\": \"A author phase_d_readiness_review explicit interface message; Root independent acceptance/admission pending\",\n    \"enforcedBoundsBeforeEmission\": true,\n    \"actualSpecimen15059Bytes2FramesIsNotBound\": true\n  },\n  \"accounting\": {\n    \"countedWrapperToolCalls\": {\n      \"firstClockFresh15InputNamespaceChecks\": 2,\n      \"completeCPURecipeBootstrap\": 3,\n      \"acceptedAFutureCapsuleIntakeEnforcedUpperBound\": 3,\n      \"fiveCompleteSemanticDomainFrames\": 23,\n      \"newReviewerRoleOverlayRecipeFrames\": 10,\n      \"reviewDelegateWaitResultMinimum\": 4,\n      \"endConservationExclusiveReceiptPublicationReadback\": 2\n    },\n    \"knownRouteCallsIncludingEnforcedAFutureIntakeBound\": 47,\n    \"additionalReviewerAReceiptAndActualProofDelivery\": \"UNMEASURED_REQUIRED_POSITIVE_COST_NOT_ZERO\",\n    \"additionalFullFiveReviewerSemanticsIfBrainRequires\": 46,\n    \"fullFiveReviewerScenarioLowerBound\": 93,\n    \"ceilingCalls\": 40,\n    \"capMinutesMaximum\": 60,\n    \"narrowerTimeboxSelected\": null,\n    \"uncalibratedPlannerMinutes\": 52,\n    \"firstClockBeforeAnyWorkRequired\": true,\n    \"nativePythonDATAExecutionsSeparatelyRecorded\": \"At least semantic23+metadata2+closure2; recipe/newreviewer deliveries may additionally use admitted DATA commands. No Git. Conservative separate native+wrapper cost cannot improve the failed wrapper-only result.\",\n    \"allPollsFailuresWorkersCount\": true,\n    \"fit\": false,\n    \"noBudgetBorrowing\": true,\n    \"knownMinimumExcludingAnyAIntakeOrReviewerProofDelivery\": 44,\n    \"fullFiveReviewerScenarioMinimumBeforeAnyAOrProof\": 90,\n    \"actualNarrowerWallTimeboxSelected\": false,\n    \"additionalUnpricedCostIsNotFitClaim\": \"All actual reviewer A/bounded receipt/collector/meaning proof delivery must still be measured before execution. Forty-four known calls already disprove the40 ceiling, so unknowns cannot rescue it.\"\n  },\n  \"pendingTechnicalDecisions\": [\n    \"Brain reviewer subject coverage decision\",\n    \"explicit no-temp direct exclusive receipt publication selection\",\n    \"exact A receipt schema types/actual accepted Root capsule/ACK\",\n    \"complete future review evidence payload sizing; cannot be charged zero\",\n    \"independent full recipe/capacity review and current protected checks\"\n  ],\n  \"historicalObservationsImmutable\": {\n    \"oldFullRosterCold\": 57,\n    \"oldConditional\": 40,\n    \"rejectedSingleRouteMissing\": 51,\n    \"rejectedSingleRoutePresent\": 49\n  },\n  \"oneBWriteProposedOnly\": \"C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/receipt.json\",\n  \"tmpFilesSelected\": [],\n  \"noActions\": \"Only these two new Root planning files; no quiet/process/Git/provider/runtime/module/source operations\",\n  \"noSelfHashCycle\": \"Recipe hash only in this external capacity file; this file has no own hash\"\n}\n",
+    "disposition": "Historical measured stdout-frame delivery route44knownminimum/47withthen3frameA; unchanged evidence, superseded ONLY by actuald08a/4048 subject/direct-input transport selection"
+  },
+  "currentRulings": [
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.semantic-review-subject.2026-11-03.md",
+      "bytes": 3542,
+      "sha256": "d08a4617900aac65ab7cf203ce0f91bd3615491d1338ef1106b8374cbc4686b2",
+      "readScope": "FULL_ACTUAL_PRESERVED_RULING"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.A-receipt-B-reviewer-input.2026-11-03.md",
+      "bytes": 4472,
+      "sha256": "4048f447fe4248fb5cd06d7a083cd3ac4292b186a94aba67385b57720c70dda2",
+      "readScope": "FULL_ACTUAL_PRESERVED_RULING"
+    }
+  ]
+}

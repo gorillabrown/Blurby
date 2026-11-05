@@ -1,0 +1,41 @@
+{
+  "id": "20261102T174123Z-external-set-status-NARRATE-CPU-PROFILE-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-CPU-PROFILE-1",
+  "created": "2026-11-02T17:41:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": [
+        "NARRATE-REBUILD-1",
+        "NARRATE-HARNESS-COLDCLICK-1"
+      ],
+      "notes": "Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.\n\nNext-dispatch reconciliation 2026-11-02: Brain1 rulings R-2026-11-02-CPU-1/2 received and acknowledged; exact source is `docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md`. Source Wave A may build on the In Flight, built/package-verified harness at `c90d9e08acfc356ca76941df063a0941ab488a94`; it does not need to be merged first. This exception is phase-specific, not terminal completion or a runtime admission. Each wave needs separate admission. NOT READY: source scope has 140m of existing estimates versus the 60m cap; retain partial-stop semantics until feasible decomposition is resolved, plus measurement hard-stop, U10 helper, host/input and custody gates. Adding the actual harness identity to canonical Prerequisites intentionally makes the terminal-only automatic selector skip this item while the harness remains In Flight; no Status/Seq/effort or helper semantics changed."
+    },
+    "expectedRevision": "c250b9d9c5d44cc1e74e48a430c05eaede671165d3b7fb552a13c1d64b6c9bb6",
+    "idempotencyKey": "set-status:NARRATE-CPU-PROFILE-1:[('notes', 'Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.\\n\\nNext-dispatch reconciliation 2026-11-02: Brain1 rulings R-2026-11-02-CPU-1/2 received and acknowledged; exact source is `docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md`. Source Wave A may build on the In Flight, built/package-verified harness at `c90d9e08acfc356ca76941df063a0941ab488a94`; it does not need to be merged first. This exception is phase-specific, not terminal completion or a runtime admission. Each wave needs separate admission. NOT READY: source scope has 140m of existing estimates versus the 60m cap; retain partial-stop semantics until feasible decomposition is resolved, plus measurement hard-stop, U10 helper, host/input and custody gates. Adding the actual harness identity to canonical Prerequisites intentionally makes the terminal-only automatic selector skip this item while the harness remains In Flight; no Status/Seq/effort or helper semantics changed.'), ('prerequisites', ['NARRATE-REBUILD-1', 'NARRATE-HARNESS-COLDCLICK-1'])]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-CPU-PROFILE-1",
+      "idempotencyKey": "set-status:NARRATE-CPU-PROFILE-1:[('notes', 'Created by roadmap review 2026-10-15 from NARRATE-REBUILD-1 (warm requests saturate a 4-core CPU). Full Spec 2026-10-23 (roadmap review 2026-10-23-5): measurement item, thread sweep on the quiet machine, stacked on NARRATE-HARNESS-COLDCLICK-1. Notes corrected 2026-10-23: they previously carried gate (11) crash text by mistake. Not a release gate.\\n\\nNext-dispatch reconciliation 2026-11-02: Brain1 rulings R-2026-11-02-CPU-1/2 received and acknowledged; exact source is `docs/governance/bug-reports/Brain1.NARRATE-CPU-PROFILE-1.rulings.2026-11-02.md`. Source Wave A may build on the In Flight, built/package-verified harness at `c90d9e08acfc356ca76941df063a0941ab488a94`; it does not need to be merged first. This exception is phase-specific, not terminal completion or a runtime admission. Each wave needs separate admission. NOT READY: source scope has 140m of existing estimates versus the 60m cap; retain partial-stop semantics until feasible decomposition is resolved, plus measurement hard-stop, U10 helper, host/input and custody gates. Adding the actual harness identity to canonical Prerequisites intentionally makes the terminal-only automatic selector skip this item while the harness remains In Flight; no Status/Seq/effort or helper semantics changed.'), ('prerequisites', ['NARRATE-REBUILD-1', 'NARRATE-HARNESS-COLDCLICK-1'])]",
+      "actualRevision": "",
+      "recoveryId": "20261102T174123Z-external-set-status-NARRATE-CPU-PROFILE-1",
+      "detail": {
+        "readback": "Fresh Notion SQL row verified; Prerequisites exact identifiers and original Notes prefix preserved. SQL projects inline-code spans without their four backtick delimiters; all other Notes characters exact. Status Queued and Seq95 unchanged.",
+        "normalization": "Only four inline-code delimiters removed by SQL plain-text projection; not missing text."
+      }
+    }
+  },
+  "resolved": "2026-11-02T17:42:29Z",
+  "outcome": "succeeded"
+}

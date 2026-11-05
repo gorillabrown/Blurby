@@ -1,0 +1,50 @@
+{
+  "id": "20261105T180325Z-external-create-item-DEPS-REFRESH-1",
+  "operation": "external-create-item",
+  "item_id": "DEPS-REFRESH-1",
+  "created": "2026-11-05T18:03:25Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "DEPS-REFRESH-1",
+      "title": "Refresh the dependency advisories before the final test pass",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#deps-refresh-1",
+      "prerequisites": [
+        "BLOCK-TEXT-ORDER-1"
+      ],
+      "description": "Release-gate rider, merges before gate (1). Take the advisory fixes that need no force flag, leave the Kokoro pins alone, and re-date and correct the advisories document. Rule 53 applies, because the lockfile ships.",
+      "notes": "origin: Blurby.Brain1 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c; Findings F-032). Spec written; one Blurby.Brain1 question open, because `npm audit fix` also moves `electron-builder` 26.15.3 to 26.18.1.",
+      "sequence": 87.6
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-04T21:41:05Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:DEPS-REFRESH-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "DEPS-REFRESH-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:DEPS-REFRESH-1",
+      "actualRevision": "",
+      "recoveryId": "20261105T180325Z-external-create-item-DEPS-REFRESH-1",
+      "detail": {},
+      "providerItemId": "40f7c96c-c31e-8183-a6be-f5986e9258ea",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-05T18:04:21Z",
+  "outcome": "succeeded"
+}

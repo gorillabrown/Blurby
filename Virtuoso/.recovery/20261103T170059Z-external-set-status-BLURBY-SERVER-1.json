@@ -1,0 +1,34 @@
+{
+  "id": "20261103T170059Z-external-set-status-BLURBY-SERVER-1",
+  "operation": "external-set-status",
+  "item_id": "BLURBY-SERVER-1",
+  "created": "2026-11-03T17:00:59Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 143
+    },
+    "expectedRevision": "fe933c10c11c03dd6a0c626b7548c9569cefe4802e41bed9006594ae482af597",
+    "idempotencyKey": "set-status:BLURBY-SERVER-1:[('sequence', 143)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLURBY-SERVER-1",
+      "idempotencyKey": "set-status:BLURBY-SERVER-1:[('sequence', 143)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T170059Z-external-set-status-BLURBY-SERVER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:01:41Z",
+  "outcome": "succeeded"
+}

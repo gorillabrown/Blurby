@@ -1,0 +1,51 @@
+{
+  "id": "20261103T224741Z-external-create-item-PAGE-SENTENCE-KEYS-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-SENTENCE-KEYS-1",
+  "created": "2026-11-03T22:47:41Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "PAGE-SENTENCE-KEYS-1",
+      "title": "Page's sentence keys move to a real sentence start",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "spec_link": "docs/planning/specs/2026-11-03/PAGE-SENTENCE-KEYS-1.md",
+      "branch": "eb/page-sentence-keys-1",
+      "description": "On an EPUB, Page's Ctrl+Up/Down read an empty word list and jump to word 0. The sentence branch reads the book-wide word table in the highlight's own index space, and does nothing until book words are known.",
+      "notes": "origin: Blurby.Brain1 ruling R-B (a), 2026-11-03, split from PAGE-PARA-KEYS-1. Seq 115.5 (116 is held by LIBRARY-COMPLETION-VISIBILITY-1). No ReaderContainer edit.",
+      "prerequisites": [
+        "PAGE-PARA-KEYS-1"
+      ],
+      "sequence": 115.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T22:33:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SENTENCE-KEYS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-SENTENCE-KEYS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SENTENCE-KEYS-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T224741Z-external-create-item-PAGE-SENTENCE-KEYS-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-81da-b056-c25c93b978a2",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T22:48:36Z",
+  "outcome": "succeeded"
+}

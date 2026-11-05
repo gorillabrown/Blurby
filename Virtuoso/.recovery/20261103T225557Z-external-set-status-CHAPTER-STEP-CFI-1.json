@@ -1,0 +1,35 @@
+{
+  "id": "20261103T225557Z-external-set-status-CHAPTER-STEP-CFI-1",
+  "operation": "external-set-status",
+  "item_id": "CHAPTER-STEP-CFI-1",
+  "created": "2026-11-03T22:55:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "Queued",
+      "branch": "eb/chapter-step-cfi-1-r2"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:CHAPTER-STEP-CFI-1:[('branch', 'eb/chapter-step-cfi-1-r2'), ('status', 'Queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CHAPTER-STEP-CFI-1",
+      "idempotencyKey": "set-status:CHAPTER-STEP-CFI-1:[('branch', 'eb/chapter-step-cfi-1-r2'), ('status', 'Queued')]",
+      "actualRevision": "",
+      "recoveryId": "20261103T225557Z-external-set-status-CHAPTER-STEP-CFI-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T22:56:50Z",
+  "outcome": "succeeded"
+}

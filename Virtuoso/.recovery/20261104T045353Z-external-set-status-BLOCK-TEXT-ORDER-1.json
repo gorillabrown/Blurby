@@ -1,0 +1,36 @@
+{
+  "id": "20261104T045353Z-external-set-status-BLOCK-TEXT-ORDER-1",
+  "operation": "external-set-status",
+  "item_id": "BLOCK-TEXT-ORDER-1",
+  "created": "2026-11-04T04:53:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "branch": "eb/block-text-order-1",
+      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built at tip 1a1c3845 (base 14ce3d24). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the B7 origin/main half (disk space) and the D3 1.00x boundary session (quiet window). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BLOCK-TEXT-ORDER-1:[('branch', 'eb/block-text-order-1'), ('notes', 'In Flight 2026-11-03 on RodneySr: Waves A and B built at tip 1a1c3845 (base 14ce3d24). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the B7 origin/main half (disk space) and the D3 1.00x boundary session (quiet window). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main.'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLOCK-TEXT-ORDER-1",
+      "idempotencyKey": "set-status:BLOCK-TEXT-ORDER-1:[('branch', 'eb/block-text-order-1'), ('notes', 'In Flight 2026-11-03 on RodneySr: Waves A and B built at tip 1a1c3845 (base 14ce3d24). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the B7 origin/main half (disk space) and the D3 1.00x boundary session (quiet window). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main.'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261104T045353Z-external-set-status-BLOCK-TEXT-ORDER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-04T04:54:23Z",
+  "outcome": "succeeded"
+}

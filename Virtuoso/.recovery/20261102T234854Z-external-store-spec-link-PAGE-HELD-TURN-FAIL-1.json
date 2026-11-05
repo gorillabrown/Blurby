@@ -1,0 +1,34 @@
+{
+  "id": "20261102T234854Z-external-store-spec-link-PAGE-HELD-TURN-FAIL-1",
+  "operation": "external-store-spec-link",
+  "item_id": "PAGE-HELD-TURN-FAIL-1",
+  "created": "2026-11-02T23:48:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "store-spec-link",
+    "fields": {
+      "spec_link": "docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#page-held-turn-fail-1"
+    },
+    "expectedRevision": "73a15faf626100f3802b0d2e9a4a4a7a6d6a92fa861b2c7232162cbedead765e",
+    "idempotencyKey": "store-spec-link:PAGE-HELD-TURN-FAIL-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#page-held-turn-fail-1')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "store-spec-link",
+      "itemId": "PAGE-HELD-TURN-FAIL-1",
+      "idempotencyKey": "store-spec-link:PAGE-HELD-TURN-FAIL-1:[('spec_link', 'docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#page-held-turn-fail-1')]",
+      "actualRevision": "",
+      "recoveryId": "20261102T234854Z-external-store-spec-link-PAGE-HELD-TURN-FAIL-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-02T23:48:58Z",
+  "outcome": "succeeded"
+}

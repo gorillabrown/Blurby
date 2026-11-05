@@ -1,0 +1,18 @@
+# Preparation execution-action accounting
+
+2026-11-03. Complete actual Brain message `exec-df337ef0-b30c-4051-94e1-bdc2ea95a6f1`, local chat `01a179e8-7a40-75c0-93f4-d3045ad99027`, turn `01a1a154-809e-7e43-a7e0-7a3c3c5a935e`. Prospective accounting clarification only; original counts and all pending gates remain preserved.
+
+Brain ruling PREP-EXECUTION-ACTION-UNIT-20261103 — prospective planning clarification, no cap increase or execution admission:
+
+ONE declared exec_command whose sole payload is ONE finite Python DATA program is ONE charged execution action, not two additive units for tool envelope plus direct interpreter. Likewise ONE exec_command running ONE finite PowerShell DATA-read program is ONE action. The necessary fixed shell/launcher-to-interpreter transport of that sole entry program belongs to the same action. Preserve every real process/transport record for custody and diagnostics; process-count and charged-action-count are distinct reported quantities.
+
+Basis: the owner's session-provided AGENTS instructions describe a ~40 TOOL-USE ceiling and give one shell command as one use. Earlier 'count every wrapper/native' language requires accounting for real independent work and prohibits hiding nested launches; it does not require charging the same sole entry program twice. This ruling resolves that ambiguity for the new A/B-READ/C plans. Forty remains forty.
+
+Each independently launched nested Git/helper/subprocess action is ADDITIVE. Thus a direct exec/Python DATA entry with 13 actual nested Git invocations costs 1+13=14 actions, while its full lower-level interpreter/shell/Git process inventory is retained separately. An uninvoked branch operation has no execution charge and must remain explicitly NOT_INVOKED; price the worst valid branch in planning. A shell batching multiple independent programs is not the 'sole payload' case and cannot turn them into one. File reads/hashes/JSON operations inside the single approved DATA program are implementation work, not fictitious new command invocations. No import/eval/runtime permission follows.
+
+Distinct actual tool invocations remain distinct: construction calls, metadata calls, transfers/retrievals, dispatches, delegates' real actions, waits/polls, retries/failures and closure all count when in scope. An additional real orchestration-tool call is not erased just because it dispatches another tool; do not merge distinct records or call real work zero-cost. Parent/child work is charged once per actual action, not again merely because its result is quoted/represented in another ledger. Shared A/B/C work is attributed once to its actual phase, with dependencies explicit and no budget borrowing.
+
+Accordingly the reported 30 tool/command records +27 sole direct Python entries is NOT automatically 57 charged actions. Rebuild an explicit operation-to-entry/transport/nested-action map to determine the true total, adding any real independent operations not represented in those 30 records. Do not declare the 40-wrapper ledger feasible until that complete map, Root capture/coordination, reserve and closure are priced and independently reviewed. Retain both real process counts and charged counts without conflating them.
+
+This prospective interpretation does not rewrite old closed manifests, declare prior phases compliant, repair their defects or retroactively change an accepted count. Annotate prior hypothetical additive/cold-fit calculations as historical interpretations superseded for NEW planning, preserving original bytes. All time, output, source, custody and no-runtime gates remain unchanged.
+

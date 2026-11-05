@@ -1,0 +1,80 @@
+{
+  "item": "FOCUS-WORD-ONLY-1",
+  "phase": "D0-QUALIFY2",
+  "scope": "prospective bounded finalizer and first scripts-skipped extraction only; no runtime admission",
+  "observedAt": "2026-11-03T06:43:23.2602795Z",
+  "spec": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.D0-qualify2.2026-11-03.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "8e25d0d629da1d0de317ee5184c8c7d434b94110ea9e06d07219e54d762ddc95",
+      "publishedBaseSha256": "8e25d0d629da1d0de317ee5184c8c7d434b94110ea9e06d07219e54d762ddc95",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "7ce8dd161f1a984842a5b90e06604a606d20c4fbfbbc11e7bccdf2bc12ec173e",
+      "publishedBaseSha256": "7ce8dd161f1a984842a5b90e06604a606d20c4fbfbbc11e7bccdf2bc12ec173e",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseDisposition": "matching"
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.FOCUS-WORD-ONLY-1.D0-qualify2.2026-11-03.md",
+      "sha256": "43966329d0acfeebd92f359520cdc51d1b2d5929aa2bd2e1d0ea4fb2ace94dcf",
+      "publishedBaseSha256": null,
+      "publishedBaseDisposition": "new packet file"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (FOCUS-WORD-ONLY-1): PASS",
+    "  cited: LL-063, LL-066, LL-128, LL-134, LL-142, LL-144, LL-169, LL-172, LL-176, LL-177, LL-178",
+    "  [info] lessons-not-cited: 113 live lesson(s) not cited \u00e2\u20ac\u201d confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)\u00e2\u20ac\u00a6",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Fresh exact inputs and corrected actual helper/finalizer/schema/control bytes are frozen and independently preinvoke-reviewed [calculable] @dependency-preparation-entry \u00e2\u20ac\u201d 0m (median of 6 runs)",
+    "2. Five in-process helpers plus SAME three child calibrations qualify the actual amended boundary [calculable] @recorder-qualification \u00e2\u20ac\u201d 0m (median of 6 runs)",
+    "3. FIRST one scripts-skipped extraction and bounded complete finalizer yield qualified or honestly partial manifests [frontier] @dependency-extraction \u00e2\u20ac\u201d 16m (timeboxed)",
+    "4. Same-byte compliance FIRST quality and compact held receipt preserve sources/failures/later gates [calculable] @held-evidence-review \u00e2\u20ac\u201d 3m (median of 71 runs)",
+    "Total: chain 3m \u00c2\u00b7 sum 3m + 1 timeboxed \u00e2\u2030\u00a416m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "publishedBaseCommit": "bb16e3336220c6388963e9e41ef1724dd1c31993",
+  "sha256Domain": "working-tree raw; published-base raw separately annotated; six existing protected file hashes match bb16, new draft absent in prior commit",
+  "liveProviderObservedAt": "2026-11-03T06:43Z",
+  "liveProviderResult": {
+    "item": "FOCUS-WORD-ONLY-1",
+    "Status": "Queued",
+    "Seq": 123,
+    "Prerequisites": "BAND-ALIGN-2",
+    "bandStatus": "In Flight",
+    "bandSeq": 83,
+    "url": "https://app.notion.com/4057c96cc31e812394acc7149e97d9af"
+  }
+}

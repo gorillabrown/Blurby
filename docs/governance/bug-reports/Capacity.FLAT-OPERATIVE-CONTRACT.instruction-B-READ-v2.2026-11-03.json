@@ -1,0 +1,2809 @@
+{
+  "schemaVersion": "blurby.instruction-B-READ-v2.capacity.planning.v1",
+  "status": "METADATA_BOUND_MEASURED_FULL_ROUTE41_BEFORE_EXTRA_ORCHESTRATION_NOT_FEASIBLE_NOT_READY",
+  "recipe": {
+    "path": "docs/governance/bug-reports/Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+    "bytes": 34067,
+    "sha256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+    "bootstrapFrames": [
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10000,
+        "sha256": "68fcfe5f0cffe54678cb99071d2df28ef0132021247aa6b7a7d5bc279a72059b",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+            "sourceFullSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "selectionSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "offset": 0,
+            "end": 9501,
+            "pieceSHA256": "8a7f32309aef1c61e2f519166d99a7a7550feab5e79699a984e3d19c3aae1924"
+          }
+        ]
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10004,
+        "sha256": "232991e02d1fc51ae44f9cd03263db9365a9047653e474f6000efe5a4ea617fb",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+            "sourceFullSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "selectionSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "offset": 9501,
+            "end": 19020,
+            "pieceSHA256": "a105fef958a274a210048e4930ca28b12fd24c166bc0b8f56fe0d47a107aec63"
+          }
+        ]
+      },
+      {
+        "charactersIncludingCRLF": 10000,
+        "utf8Bytes": 10000,
+        "sha256": "57c3971cb7437b00acd98709a4b496db8f540207eb5258b3085904f4f1a49aff",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+            "sourceFullSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "selectionSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "offset": 19020,
+            "end": 28512,
+            "pieceSHA256": "4f42acbe99008daf24c4b24f485c1bf7c0eed39e5e94446216acd7cb2ea9a1ea"
+          }
+        ]
+      },
+      {
+        "charactersIncludingCRLF": 6052,
+        "utf8Bytes": 6056,
+        "sha256": "4b2a3f76c757bae9e39681ae6a8ce6181c9cf5072ba62c2947e1652548443ccc",
+        "parts": [
+          {
+            "rowId": "Draft.FLAT-OPERATIVE-CONTRACT.instruction-B-READ-v2.2026-11-03.md",
+            "sourceFullSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "selectionSHA256": "a7dfad5ac0e92cd79e130963112173891c3a154801b47d3c4e24db5abbf2b331",
+            "offset": 28512,
+            "end": 34067,
+            "pieceSHA256": "d962f6c6b2366ea820876905d7d0955360ffb98e9a087a543b866051e2b416f5"
+          }
+        ]
+      }
+    ],
+    "reconstructionVerified": true,
+    "actualAdditionalFraming": "UNKNOWN_HOLD"
+  },
+  "authority": [
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.three-deliverable-route.2026-11-03.md",
+      "bytes": 5275,
+      "sha256": "a592de6f6d47adcc0e9dc7bc358371920846464c66764ec8ecc0e23dcc4ebf1c",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.A-observation-clock-correction.2026-11-03.md",
+      "bytes": 2000,
+      "sha256": "13cb7cec76909443c0f7370d092edf81a920eb58fd5649f8f70d87fa3dba6e8d",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.B-READ-compact-references.2026-11-03.md",
+      "bytes": 3352,
+      "sha256": "f8311836171c9a010e695a4bae6c9a28ac1a943ab7d23f2667cc6ac75e53eb4a",
+      "readScope": "FULL_ACTUAL_RULING"
+    },
+    {
+      "path": "docs/governance/bug-reports/Brain.FLAT-OPERATIVE-CONTRACT.execution-action-unit.2026-11-03.md",
+      "bytes": 3612,
+      "sha256": "1a5082a933ddc7b98cf3f98da1b81eb0e1c15bd1ea96b8a7b825da011a4b0240",
+      "readScope": "FULL_ACTUAL_RULING"
+    }
+  ],
+  "preservedOriginals": {
+    "draftBytes": 23996,
+    "draftSHA256": "1e37c9944c82e227f1e87819cc3433494c595ef45ef7e22c25c2f275f1791b5b",
+    "capacityBytes": 37133,
+    "capacitySHA256": "7d1a2ac359ac7d4071b9d6ddd3f373f39f205532076a5c8e106a31012e5e256f",
+    "originalCoverageV1FramesOnlyChars": 11966,
+    "originalFailurePreserved": true
+  },
+  "sourceCommit": "3afcf8789be0d7fa3bdf27235597606da022c93c",
+  "sameActor": "01a19d76-0837-7a43-a18d-8a40494879b8",
+  "fiveFullRawAndSelectedDomains": [
+    {
+      "rowId": "CLAUDE.md",
+      "rawBytes": 30743,
+      "rawSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "selectedBytes": 30743,
+      "selectedSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 30743
+        }
+      ]
+    },
+    {
+      "rowId": "ROADMAP.md",
+      "rawBytes": 356715,
+      "rawSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+      "selectedBytes": 67713,
+      "selectedSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+      "ranges": [
+        {
+          "sourceByteOffset": 0,
+          "endLine": 218,
+          "bytes": 57232,
+          "startLine": 1
+        },
+        {
+          "sourceByteOffset": 282888,
+          "endLine": 1625,
+          "bytes": 3281,
+          "startLine": 1608
+        },
+        {
+          "sourceByteOffset": 323704,
+          "endLine": 1859,
+          "bytes": 7200,
+          "startLine": 1835
+        }
+      ]
+    },
+    {
+      "rowId": "docs/governance/LESSONS_LEARNED.md",
+      "rawBytes": 336116,
+      "rawSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+      "selectedBytes": 46818,
+      "selectedSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+      "ranges": [
+        {
+          "sourceByteOffset": 149541,
+          "endLine": 1739,
+          "bytes": 568,
+          "lessonId": "LL-002",
+          "startLine": 1731
+        },
+        {
+          "sourceByteOffset": 150109,
+          "endLine": 1748,
+          "bytes": 908,
+          "lessonId": "LL-003",
+          "startLine": 1740
+        },
+        {
+          "sourceByteOffset": 151017,
+          "endLine": 1757,
+          "bytes": 634,
+          "lessonId": "LL-004",
+          "startLine": 1749
+        },
+        {
+          "sourceByteOffset": 152301,
+          "endLine": 1775,
+          "bytes": 693,
+          "lessonId": "LL-006",
+          "startLine": 1767
+        },
+        {
+          "sourceByteOffset": 176643,
+          "endLine": 2045,
+          "bytes": 962,
+          "lessonId": "LL-063",
+          "startLine": 2037
+        },
+        {
+          "sourceByteOffset": 178418,
+          "endLine": 2063,
+          "bytes": 855,
+          "lessonId": "LL-066",
+          "startLine": 2055
+        },
+        {
+          "sourceByteOffset": 180160,
+          "endLine": 2081,
+          "bytes": 1153,
+          "lessonId": "LL-068",
+          "startLine": 2073
+        },
+        {
+          "sourceByteOffset": 203460,
+          "endLine": 2279,
+          "bytes": 982,
+          "lessonId": "LL-090",
+          "startLine": 2271
+        },
+        {
+          "sourceByteOffset": 205423,
+          "endLine": 2297,
+          "bytes": 998,
+          "lessonId": "LL-128",
+          "startLine": 2289
+        },
+        {
+          "sourceByteOffset": 211309,
+          "endLine": 2351,
+          "bytes": 881,
+          "lessonId": "LL-097",
+          "startLine": 2343
+        },
+        {
+          "sourceByteOffset": 212190,
+          "endLine": 2360,
+          "bytes": 935,
+          "lessonId": "LL-098",
+          "startLine": 2352
+        },
+        {
+          "sourceByteOffset": 247545,
+          "endLine": 2669,
+          "bytes": 782,
+          "lessonId": "LL-134",
+          "startLine": 2662
+        },
+        {
+          "sourceByteOffset": 250432,
+          "endLine": 2699,
+          "bytes": 869,
+          "lessonId": "LL-137",
+          "startLine": 2692
+        },
+        {
+          "sourceByteOffset": 257627,
+          "endLine": 2763,
+          "bytes": 3933,
+          "lessonId": "LL-142",
+          "startLine": 2755
+        },
+        {
+          "sourceByteOffset": 261560,
+          "endLine": 2772,
+          "bytes": 3071,
+          "lessonId": "LL-143",
+          "startLine": 2764
+        },
+        {
+          "sourceByteOffset": 264631,
+          "endLine": 2780,
+          "bytes": 2618,
+          "lessonId": "LL-144",
+          "startLine": 2773
+        },
+        {
+          "sourceByteOffset": 267249,
+          "endLine": 2796,
+          "bytes": 1882,
+          "lessonId": "LL-145",
+          "startLine": 2781
+        },
+        {
+          "sourceByteOffset": 274200,
+          "endLine": 2827,
+          "bytes": 499,
+          "lessonId": "LL-143",
+          "startLine": 2825
+        },
+        {
+          "sourceByteOffset": 282453,
+          "endLine": 2871,
+          "bytes": 547,
+          "lessonId": "LL-143",
+          "startLine": 2869
+        },
+        {
+          "sourceByteOffset": 283000,
+          "endLine": 2874,
+          "bytes": 243,
+          "lessonId": "LL-144",
+          "startLine": 2872
+        },
+        {
+          "sourceByteOffset": 284023,
+          "endLine": 2887,
+          "bytes": 319,
+          "lessonId": "LL-068",
+          "startLine": 2885
+        },
+        {
+          "sourceByteOffset": 284536,
+          "endLine": 2896,
+          "bytes": 97,
+          "lessonId": "LL-143",
+          "startLine": 2894
+        },
+        {
+          "sourceByteOffset": 286700,
+          "endLine": 2913,
+          "bytes": 229,
+          "lessonId": "LL-137",
+          "startLine": 2911
+        },
+        {
+          "sourceByteOffset": 294284,
+          "endLine": 2974,
+          "bytes": 502,
+          "lessonId": "LL-143",
+          "startLine": 2972
+        },
+        {
+          "sourceByteOffset": 305696,
+          "endLine": 3049,
+          "bytes": 1838,
+          "lessonId": "LL-165",
+          "startLine": 3042
+        },
+        {
+          "sourceByteOffset": 309456,
+          "endLine": 3071,
+          "bytes": 1623,
+          "lessonId": "LL-167",
+          "startLine": 3064
+        },
+        {
+          "sourceByteOffset": 312843,
+          "endLine": 3098,
+          "bytes": 1274,
+          "lessonId": "LL-169",
+          "startLine": 3091
+        },
+        {
+          "sourceByteOffset": 314117,
+          "endLine": 3102,
+          "bytes": 667,
+          "lessonId": "LL-165",
+          "startLine": 3099
+        },
+        {
+          "sourceByteOffset": 318570,
+          "endLine": 3129,
+          "bytes": 1522,
+          "lessonId": "LL-172",
+          "startLine": 3122
+        },
+        {
+          "sourceByteOffset": 320092,
+          "endLine": 3132,
+          "bytes": 425,
+          "lessonId": "LL-143",
+          "startLine": 3130
+        },
+        {
+          "sourceByteOffset": 320517,
+          "endLine": 3140,
+          "bytes": 1324,
+          "lessonId": "LL-173",
+          "startLine": 3133
+        },
+        {
+          "sourceByteOffset": 321841,
+          "endLine": 3148,
+          "bytes": 1189,
+          "lessonId": "LL-174",
+          "startLine": 3141
+        },
+        {
+          "sourceByteOffset": 323030,
+          "endLine": 3151,
+          "bytes": 380,
+          "lessonId": "LL-143",
+          "startLine": 3149
+        },
+        {
+          "sourceByteOffset": 324700,
+          "endLine": 3165,
+          "bytes": 2080,
+          "lessonId": "LL-176",
+          "startLine": 3159
+        },
+        {
+          "sourceByteOffset": 326780,
+          "endLine": 3172,
+          "bytes": 2055,
+          "lessonId": "LL-177",
+          "startLine": 3166
+        },
+        {
+          "sourceByteOffset": 328835,
+          "endLine": 3179,
+          "bytes": 2497,
+          "lessonId": "LL-178",
+          "startLine": 3173
+        },
+        {
+          "sourceByteOffset": 331332,
+          "endLine": 3186,
+          "bytes": 2139,
+          "lessonId": "LL-179",
+          "startLine": 3180
+        },
+        {
+          "sourceByteOffset": 333471,
+          "endLine": 3192,
+          "bytes": 2645,
+          "lessonId": "LL-180",
+          "startLine": 3187
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/workspace-layout.json",
+      "rawBytes": 19955,
+      "rawSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "selectedBytes": 19955,
+      "selectedSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "ranges": [
+        {
+          "scope": "FULL",
+          "sourceByteOffset": 0,
+          "bytes": 19955
+        }
+      ]
+    },
+    {
+      "rowId": "Virtuoso/work-register.snapshot.json",
+      "rawBytes": 449596,
+      "rawSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "selectedBytes": 46344,
+      "selectedSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+      "ranges": [
+        {
+          "jsonPointers": [
+            "/snapshotVersion",
+            "/takenAt",
+            "/provider",
+            "/source",
+            "/fields",
+            "/headers"
+          ],
+          "selectedStableIds": [
+            "BAND-ALIGN-1",
+            "BAND-ALIGN-2",
+            "BLURBY-BUSINESS-1",
+            "FLOW-KEYS-FIX-1",
+            "FOCUS-KEYS-FIX-1",
+            "FOCUS-WORD-ONLY-1",
+            "FOLIATE-DISPLAY-LIFETIME-1",
+            "FOLIATE-OBSERVER-LEAK-1",
+            "LIBRARY-COMPLETION-VISIBILITY-1",
+            "NARRATE-CPU-PROFILE-1",
+            "NARRATE-HARNESS-COLDCLICK-1",
+            "NARRATE-REBUILD-1",
+            "NARRATE-REMOVE-1"
+          ],
+          "representation": "complete selected JSON-native values; source raw pin separate"
+        }
+      ]
+    }
+  ],
+  "carriedTenFreshRequalificationRequired": [
+    {
+      "rowId": "AGENTS.md",
+      "rawBytes": 30850,
+      "rawSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "semanticDomain": [
+        0,
+        30850
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/AGENTS.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/skills/virtuoso/SKILL.md",
+      "rawBytes": 1822,
+      "rawSHA256": "3bbeab804531db0217cd444eff444f0b159d1237ac10952953baad1cc15368a8",
+      "semanticDomain": [
+        0,
+        1822
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.virtuoso.SKILL.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Hippocrates.md",
+      "rawBytes": 1029,
+      "rawSHA256": "6eefdd497c5cbacf4b713484d78e1cb160e2ea5872ccd63d1e5ea38b6bdc0132",
+      "semanticDomain": [
+        0,
+        1029
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Hippocrates.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/MarcusAurelius.md",
+      "rawBytes": 997,
+      "rawSHA256": "c17b5d2b2d9d86b023f779ee9e02347d6d1b4b2fcf55057aa8ccbbcf0636a74b",
+      "semanticDomain": [
+        0,
+        997
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.MarcusAurelius.md"
+    },
+    {
+      "rowId": "Virtuoso/overlays/agents/Plato.md",
+      "rawBytes": 629,
+      "rawSHA256": "36ca86a64eae4dd17a067a7085a32cd4b710658ae5ce2f4b5ea3c20ce833cd3b",
+      "semanticDomain": [
+        0,
+        629
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Projects/Blurby-artifacts/cpu-a3-p-inputs-20261102/overlay.agents.Plato.md"
+    },
+    {
+      "rowId": "skills/virtuoso/SKILL.md",
+      "rawBytes": 93324,
+      "rawSHA256": "c0b02ac0a5dbb69cb20fe83a4c909ea062c136b83be542748719f6f56886c8fc",
+      "semanticDomain": [
+        0,
+        93324
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/SKILL.md"
+    },
+    {
+      "rowId": "skills/virtuoso/references/zeus.md",
+      "rawBytes": 30766,
+      "rawSHA256": "6e22c90128adca6dd6b98253feb0c9b1784aaf84232b8e28dce094e1505e49dc",
+      "semanticDomain": [
+        0,
+        30766
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/skills/virtuoso/references/zeus.md"
+    },
+    {
+      "rowId": "agents/MarcusAurelius.md",
+      "rawBytes": 13714,
+      "rawSHA256": "8e3d3dce58e3d9a107e22bac354260b61bdeb2b21d35129a0f6057b71a38976d",
+      "semanticDomain": [
+        0,
+        13714
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/MarcusAurelius.md"
+    },
+    {
+      "rowId": "agents/Plato.md",
+      "rawBytes": 13843,
+      "rawSHA256": "a1056615312b7a6e3ae550b197e2f4c907bd4054d4fba40216124050446ddc77",
+      "semanticDomain": [
+        0,
+        13843
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Plato.md"
+    },
+    {
+      "rowId": "agents/Hippocrates.md",
+      "rawBytes": 11318,
+      "rawSHA256": "c010ad7ee11d5df0bfd457e5602c839dde5b25f0130ea1ddd9ba5a0881664ae3",
+      "semanticDomain": [
+        0,
+        11318
+      ],
+      "currentQuietIdentity": "MUST_RECHECK_NOT_CLAIMED",
+      "quietExactPath": "C:/Users/estra/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.16.2/agents/Hippocrates.md"
+    }
+  ],
+  "selectedFiveBytes": 211573,
+  "selectedFiveFrames": [
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10036,
+      "sha256": "78539e2153bbb937e7f5dad34513feea6447f1dca8c0d27de8645d3d75e5c0a8",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 0,
+          "end": 9574,
+          "pieceSHA256": "f2ef43e0d513058bbbc785cd424e69e67eacc32f4e81a4a137af0ef803552416"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10040,
+      "sha256": "3f7dc6d55ffaa6cf13a691d1a05d0189e239b85ccc08dffa42a05c753658bb54",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 9574,
+          "end": 19084,
+          "pieceSHA256": "10c52e1e071ad2519a8f6a73067b8f40c8976c1665d46552cdc05d7a949cb7d5"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10054,
+      "sha256": "4c8436186c41050bca023c708531d9d11f390d2e7772a6fbafacedaaa80364f4",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 19084,
+          "end": 28630,
+          "pieceSHA256": "049c2fcca40d11a73cd238ec5a8927aada10c3aabd7aa005a83fa3c00e6f9b6a"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10024,
+      "sha256": "84b9ede1b582009a5c8fcb83a79f0cef73d671f734f07ac5dbda2be62a7e98c2",
+      "parts": [
+        {
+          "rowId": "CLAUDE.md",
+          "sourceFullSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "selectionSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+          "offset": 28630,
+          "end": 30743,
+          "pieceSHA256": "73101660d248eede61b6779f3c0069c2436948889f78c5a94dd285d21e33f3ae"
+        },
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 0,
+          "end": 7173,
+          "pieceSHA256": "efb567fe151bfceaf0050cb979e3033821be2998c7c0f78fce5dbc5947ee93ba"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10026,
+      "sha256": "32912ab875d8c0903c3f6bcb8ba0d9f0cf1df8f459bebfb0ec9a28d50b2e75c1",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 7173,
+          "end": 16741,
+          "pieceSHA256": "2e196955ec94857676f2dcc55744c595540dc075511c0e5bf4307b6f9df6da5b"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10020,
+      "sha256": "06032a829263b570d365eb8607e07d2b6d9f3c750efae686849937a022c72506",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 16741,
+          "end": 26331,
+          "pieceSHA256": "88ff016b3beb649a5a7bb3d1f77308c73c29a29884aba9e345bd2173105bf10d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10056,
+      "sha256": "31381984f00c37060a5db381203781bc26e8a06b122ec1ebf258b82ce9a5f16f",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 26331,
+          "end": 35928,
+          "pieceSHA256": "dc5c2f6a50c5f50c9fc6b822afcab2f5e16143893b1d789e224609b01ef12c0e"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10044,
+      "sha256": "29aec6595013e3c610556cc0109ecacae0f564e3201615cf857a51e1f507b5e4",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 35928,
+          "end": 45540,
+          "pieceSHA256": "339abe48d7da4be18fab16c9fbf8f093f0882aa1260e818225be09b850e71c29"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10028,
+      "sha256": "5969c768f8f630d8abb758d09aa0c8358fb8a6aa8cb797e031c0499d18de2f31",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 45540,
+          "end": 55131,
+          "pieceSHA256": "19d87389ef4dfa863df22f881bdc81dbd66861413cae283b3f099c3ca5a09d7d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10042,
+      "sha256": "cae7a3c1d712394575896c40bbf8fcabf21726e4795ab40c0f238ff3fd245b99",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 55131,
+          "end": 64728,
+          "pieceSHA256": "193bdd04b29b30ee6d83d21d6bbcf6172b6b1b85672e1cbf9ba68d81827c842b"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10048,
+      "sha256": "db598f0f2b6737b20cbff17a3755376c913f2701fb0e24ababec1550d7fd0af7",
+      "parts": [
+        {
+          "rowId": "ROADMAP.md",
+          "sourceFullSHA256": "1e028c5acd74bf8504c304a90081dd9e0759a49dfe99dadbc2f1549155e2e590",
+          "selectionSHA256": "dbd756e9d433c303f11d87cddfe6cf2561abd681258163a20e4d196c12bd29fd",
+          "offset": 64728,
+          "end": 67713,
+          "pieceSHA256": "8adbfeccc252ad0b882bf078567c1dd37508724d01c939a15b302f7a7453af39"
+        },
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 0,
+          "end": 6231,
+          "pieceSHA256": "40e18063f141855d8bc81804e39c3554295eb377f53882111fbf8b8516acc217"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10044,
+      "sha256": "972afbcbd588253e6bb06e6993b662d849305e3a330dfa62d6e9b67ec6d2d4c0",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 6231,
+          "end": 15770,
+          "pieceSHA256": "b5b738b3f09c127fe209270e45f9a42295dce2d53999bc99dc75df1c23a91062"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10043,
+      "sha256": "96ce709e201d525776e1da4438ee7a8c251909e212945993388bd7989a1202b6",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 15770,
+          "end": 25327,
+          "pieceSHA256": "beff016cf204a15419ab526e9f5c465c12bdbfb454f8d5dfebe7d4e3b1485fd8"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10022,
+      "sha256": "b0938db26cc7848f62858ca848712644d9cf9f9e159b25a19a9f904509427a52",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 25327,
+          "end": 34868,
+          "pieceSHA256": "404385187caa86ba38410979a3a7bdeed21d5624f6cbb399d3faf7fc21697784"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10014,
+      "sha256": "205249582f9a42be7ae85cf681422d7f31efb18658ed061cfc5b7cb0ae12a7cc",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 34868,
+          "end": 44425,
+          "pieceSHA256": "eec4ae17caee5e06980fcab964ef115a5bb476baf8404a4e0d9b89d021c79f7d"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "1ad9656f06906bf976f0a1332c1e87b24ff70a3d8613fd035de53ce7e52326ed",
+      "parts": [
+        {
+          "rowId": "docs/governance/LESSONS_LEARNED.md",
+          "sourceFullSHA256": "8dd7f59afbedf633d01bf004d851993f031f2ccb8dd4fda1818ceef325a6ba28",
+          "selectionSHA256": "388f18d75850e3bb66306956c6d934b85cf79e2092df629e31acf507bddb92b7",
+          "offset": 44425,
+          "end": 46818,
+          "pieceSHA256": "34e68a4685a41523fdd14adf94023f9b8f1c2a5fd50425388cad0b16b11dee48"
+        },
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 0,
+          "end": 6081,
+          "pieceSHA256": "1ccb83de27a8cfde992cad72813164c16afe4fc4878f5025c18d77ea5cfed6b1"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10002,
+      "sha256": "c6c673575a56e03f0d2bac053e644565976c348fa3e75c07e2eacb2d2ca229fa",
+      "parts": [
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 6081,
+          "end": 14526,
+          "pieceSHA256": "eb5ce8a9c4ca6dc693261f0dfe76aa49b56bc1dfe20808c0120f6034608b0cad"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10002,
+      "sha256": "6d6cb1f79711b7436666e18abd9e2dbe57d2da5e24f991f518654fa13dd35bd0",
+      "parts": [
+        {
+          "rowId": "Virtuoso/workspace-layout.json",
+          "sourceFullSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "selectionSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+          "offset": 14526,
+          "end": 19955,
+          "pieceSHA256": "b82bfd05b46a79bf55df6d1216c6695d4fdb22ebbbec5883e04a3de624a5f522"
+        },
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 0,
+          "end": 2927,
+          "pieceSHA256": "f05253da36fcbd8f2e38517b38b16aff5976cc8b5ad8d9c5e0037a3db2cde727"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10022,
+      "sha256": "c2ee1999943fc7df13c133316f577cedbcde1da71ddb75e175bfc063d2010f22",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 2927,
+          "end": 12221,
+          "pieceSHA256": "438591ff30290bf3996f605f8390e5593a522c2a3a4114c779d89bf4dd5dbcb3"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10008,
+      "sha256": "652d22be7bc50b3e64b011263337bf3666b45ae3647e42e4c7e89846e70ba773",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 12221,
+          "end": 21402,
+          "pieceSHA256": "22ba7c16a4323fb84e6893bd4fae7f36bc5f6cd57d141a40992f0374dee9c1e9"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "c441cc06c27a0ec280b455dd7dae1427e705d25094f2b1ca7cf02b93af6862e4",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 21402,
+          "end": 30699,
+          "pieceSHA256": "3c2986ef006df64580b46644fe1871402734122ad12c01684bc3f772111210b6"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 10000,
+      "utf8Bytes": 10000,
+      "sha256": "d7ba02a47c838ae7ec47b74b57de867ee65666164e7a715591e603bc1c1954a8",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 30699,
+          "end": 40022,
+          "pieceSHA256": "b93e57f85378db9ec84332cfbaa1b41646fab948609c21017bf5b74345ed9e1a"
+        }
+      ]
+    },
+    {
+      "charactersIncludingCRLF": 7116,
+      "utf8Bytes": 7118,
+      "sha256": "a672cb6456232af5766b4a3f5b14d4ed6693acef3675dd6c0c57dd8a426c7957",
+      "parts": [
+        {
+          "rowId": "Virtuoso/work-register.snapshot.json",
+          "sourceFullSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+          "selectionSHA256": "5fe7aa240304b1e928c5568e7936b5ef6a2b99071ef53df950484635f6e482e0",
+          "offset": 40022,
+          "end": 46344,
+          "pieceSHA256": "ed6a759b41cc4b50e1a50285819aa8b6bcb75e9e5823a43d8deed1dc32fd8358"
+        }
+      ]
+    }
+  ],
+  "newClosedMetadataFullSizing": [
+    {
+      "case": "coverageSuccessFull",
+      "completeRecord": {
+        "schemaVersion": "blurby.instruction-B-READ.coverage.v2",
+        "phase": "B-READ",
+        "actor": {
+          "chatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "turnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "host": "RODNEYSR"
+        },
+        "aRef": [
+          "b-a-intake",
+          10000,
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "clock": {
+          "phaseClock": {
+            "startEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "elapsedMs": 999999999,
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          },
+          "internalClock": {
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "startMonoNs": "99999999999999999999",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endMonoNs": "99999999999999999999",
+            "elapsedNs": "99999999999999999999",
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          }
+        },
+        "inputRows": [
+          [
+            1,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            2,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            3,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            4,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            5,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            6,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            7,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            8,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            9,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            10,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            11,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            12,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            13,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            14,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            15,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ]
+        ],
+        "frameRefs": [
+          [
+            1,
+            "b-frame01",
+            10036,
+            "78539e2153bbb937e7f5dad34513feea6447f1dca8c0d27de8645d3d75e5c0a8",
+            "f01"
+          ],
+          [
+            2,
+            "b-frame02",
+            10040,
+            "3f7dc6d55ffaa6cf13a691d1a05d0189e239b85ccc08dffa42a05c753658bb54",
+            "f02"
+          ],
+          [
+            3,
+            "b-frame03",
+            10054,
+            "4c8436186c41050bca023c708531d9d11f390d2e7772a6fbafacedaaa80364f4",
+            "f03"
+          ],
+          [
+            4,
+            "b-frame04",
+            10024,
+            "84b9ede1b582009a5c8fcb83a79f0cef73d671f734f07ac5dbda2be62a7e98c2",
+            "f04"
+          ],
+          [
+            5,
+            "b-frame05",
+            10026,
+            "32912ab875d8c0903c3f6bcb8ba0d9f0cf1df8f459bebfb0ec9a28d50b2e75c1",
+            "f05"
+          ],
+          [
+            6,
+            "b-frame06",
+            10020,
+            "06032a829263b570d365eb8607e07d2b6d9f3c750efae686849937a022c72506",
+            "f06"
+          ],
+          [
+            7,
+            "b-frame07",
+            10056,
+            "31381984f00c37060a5db381203781bc26e8a06b122ec1ebf258b82ce9a5f16f",
+            "f07"
+          ],
+          [
+            8,
+            "b-frame08",
+            10044,
+            "29aec6595013e3c610556cc0109ecacae0f564e3201615cf857a51e1f507b5e4",
+            "f08"
+          ],
+          [
+            9,
+            "b-frame09",
+            10028,
+            "5969c768f8f630d8abb758d09aa0c8358fb8a6aa8cb797e031c0499d18de2f31",
+            "f09"
+          ],
+          [
+            10,
+            "b-frame10",
+            10042,
+            "cae7a3c1d712394575896c40bbf8fcabf21726e4795ab40c0f238ff3fd245b99",
+            "f10"
+          ],
+          [
+            11,
+            "b-frame11",
+            10048,
+            "db598f0f2b6737b20cbff17a3755376c913f2701fb0e24ababec1550d7fd0af7",
+            "f11"
+          ],
+          [
+            12,
+            "b-frame12",
+            10044,
+            "972afbcbd588253e6bb06e6993b662d849305e3a330dfa62d6e9b67ec6d2d4c0",
+            "f12"
+          ],
+          [
+            13,
+            "b-frame13",
+            10043,
+            "96ce709e201d525776e1da4438ee7a8c251909e212945993388bd7989a1202b6",
+            "f13"
+          ],
+          [
+            14,
+            "b-frame14",
+            10022,
+            "b0938db26cc7848f62858ca848712644d9cf9f9e159b25a19a9f904509427a52",
+            "f14"
+          ],
+          [
+            15,
+            "b-frame15",
+            10014,
+            "205249582f9a42be7ae85cf681422d7f31efb18658ed061cfc5b7cb0ae12a7cc",
+            "f15"
+          ],
+          [
+            16,
+            "b-frame16",
+            10000,
+            "1ad9656f06906bf976f0a1332c1e87b24ff70a3d8613fd035de53ce7e52326ed",
+            "f16"
+          ],
+          [
+            17,
+            "b-frame17",
+            10002,
+            "c6c673575a56e03f0d2bac053e644565976c348fa3e75c07e2eacb2d2ca229fa",
+            "f17"
+          ],
+          [
+            18,
+            "b-frame18",
+            10002,
+            "6d6cb1f79711b7436666e18abd9e2dbe57d2da5e24f991f518654fa13dd35bd0",
+            "f18"
+          ],
+          [
+            19,
+            "b-frame19",
+            10022,
+            "c2ee1999943fc7df13c133316f577cedbcde1da71ddb75e175bfc063d2010f22",
+            "f19"
+          ],
+          [
+            20,
+            "b-frame20",
+            10008,
+            "652d22be7bc50b3e64b011263337bf3666b45ae3647e42e4c7e89846e70ba773",
+            "f20"
+          ],
+          [
+            21,
+            "b-frame21",
+            10000,
+            "c441cc06c27a0ec280b455dd7dae1427e705d25094f2b1ca7cf02b93af6862e4",
+            "f21"
+          ],
+          [
+            22,
+            "b-frame22",
+            10000,
+            "d7ba02a47c838ae7ec47b74b57de867ee65666164e7a715591e603bc1c1954a8",
+            "f22"
+          ],
+          [
+            23,
+            "b-frame23",
+            7118,
+            "a672cb6456232af5766b4a3f5b14d4ed6693acef3675dd6c0c57dd8a426c7957",
+            "f23"
+          ]
+        ],
+        "observations": {
+          "entryRefs": [
+            [
+              "b-entry1",
+              10000,
+              "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            [
+              "b-entry2",
+              10000,
+              "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ]
+          ],
+          "semanticConsumption": {
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorTurnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actuallyReadFrameNumbers": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23
+            ],
+            "missingFrameNumbers": [],
+            "truncatedFrameNumbers": [],
+            "statement": "SAME_ACTOR_FULL_SELECTED_DOMAINS_READ",
+            "attestationEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+          },
+          "platformBinding": "DEFERRED_ROOT_POST_RETURN"
+        },
+        "preservation": {
+          "fiveCopiesUnchanged": true,
+          "tenCarriedUnchanged": true,
+          "receiptAbsent": true,
+          "scope": "NAMED15_PATHS_ONLY"
+        },
+        "accounting": {
+          "operationIds": [
+            "b-bootstrap1",
+            "b-bootstrap2",
+            "b-bootstrap3",
+            "b-bootstrap4",
+            "b-a-intake",
+            "b-entry1",
+            "b-entry2",
+            "b-frame01",
+            "b-frame02",
+            "b-frame03",
+            "b-frame04",
+            "b-frame05",
+            "b-frame06",
+            "b-frame07",
+            "b-frame08",
+            "b-frame09",
+            "b-frame10",
+            "b-frame11",
+            "b-frame12",
+            "b-frame13",
+            "b-frame14",
+            "b-frame15",
+            "b-frame16",
+            "b-frame17",
+            "b-frame18",
+            "b-frame19",
+            "b-frame20",
+            "b-frame21",
+            "b-frame22",
+            "b-frame23",
+            "b-close"
+          ],
+          "producerReportedCalls": 999999999,
+          "nativeOperations": 999999999,
+          "wrapperOperations": 999999999,
+          "rootCaptureStatus": "DEFERRED_ROOT_POST_RETURN",
+          "unknowns": [
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+          ]
+        },
+        "failures": [],
+        "limitations": [
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+        ],
+        "disposition": "SEMANTIC_COVERAGE_RECORDED/INDEPENDENT_REVIEW_PENDING"
+      },
+      "producerUTF8Bytes": 7379,
+      "charactersIncludingCRLF": 7379,
+      "producerSHA256": "f30b64b8228efad81852bd84d8bbde6d3dfec38c7c098f0eae32a4e96cbbd8df",
+      "maximumDeclaredAdditionalWrapperCharacters": 256,
+      "wholeCharactersWithWrapperBound": 7635,
+      "fitDeclaredMetadataOutputBound": true,
+      "domain": "BOUNDED_PLANNING_SIZING_DATA_NOT_ACTUAL_FUTURE_OBSERVATION"
+    },
+    {
+      "case": "entrySuccessFull",
+      "completeRecord": {
+        "schemaVersion": "blurby.instruction-B-READ.entry.v2",
+        "phase": "B-READ",
+        "actor": {
+          "chatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "turnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "host": "RODNEYSR"
+        },
+        "clock": {
+          "phaseClock": {
+            "startEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "elapsedMs": 999999999,
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          },
+          "internalClock": {
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "startMonoNs": "99999999999999999999",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endMonoNs": "99999999999999999999",
+            "elapsedNs": "99999999999999999999",
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          }
+        },
+        "aRef": [
+          "b-a-intake",
+          10000,
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "inputRows": [
+          [
+            1,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            2,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            3,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            4,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            5,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            6,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            7,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            8,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            9,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            10,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            11,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            12,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            13,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            14,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            15,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ]
+        ],
+        "namespace": {
+          "root": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+          "sameAOwnershipBinding": {
+            "eventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "authority": "Brain",
+            "domain": "FIXED15_INPUTS"
+          },
+          "ordinaryAncestors": [
+            [
+              1,
+              true
+            ],
+            [
+              2,
+              true
+            ],
+            [
+              3,
+              true
+            ],
+            [
+              4,
+              true
+            ]
+          ],
+          "receiptAbsent": true
+        },
+        "plan": {
+          "selectedBytes": 211573,
+          "frameCount": 23,
+          "rawMapsVerified": true,
+          "selectionMapsVerified": true,
+          "reassemblyVerified": true,
+          "actualActorApplicabilityBinding": {
+            "eventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "authority": "Brain",
+            "domain": "FIXED15_INPUTS"
+          }
+        },
+        "accounting": {
+          "operationIds": [
+            "b-bootstrap1",
+            "b-bootstrap2",
+            "b-bootstrap3",
+            "b-bootstrap4",
+            "b-a-intake",
+            "b-entry1",
+            "b-entry2",
+            "b-frame01",
+            "b-frame02",
+            "b-frame03",
+            "b-frame04",
+            "b-frame05",
+            "b-frame06",
+            "b-frame07",
+            "b-frame08",
+            "b-frame09",
+            "b-frame10",
+            "b-frame11",
+            "b-frame12",
+            "b-frame13",
+            "b-frame14",
+            "b-frame15",
+            "b-frame16",
+            "b-frame17",
+            "b-frame18",
+            "b-frame19",
+            "b-frame20",
+            "b-frame21",
+            "b-frame22",
+            "b-frame23",
+            "b-close"
+          ],
+          "producerReportedCalls": 999999999,
+          "nativeOperations": 999999999,
+          "wrapperOperations": 999999999,
+          "rootCaptureStatus": "DEFERRED_ROOT_POST_RETURN",
+          "unknowns": [
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+          ]
+        },
+        "failures": [],
+        "disposition": "ENTRY_RECORDED"
+      },
+      "producerUTF8Bytes": 4487,
+      "charactersIncludingCRLF": 4487,
+      "producerSHA256": "59b3026a14f4242178350d83202d1d962ca601d6af8e26130b885e735c5ac577",
+      "maximumDeclaredAdditionalWrapperCharacters": 256,
+      "wholeCharactersWithWrapperBound": 4743,
+      "fitDeclaredMetadataOutputBound": true,
+      "domain": "BOUNDED_PLANNING_SIZING_DATA_NOT_ACTUAL_FUTURE_OBSERVATION"
+    },
+    {
+      "case": "coverageWorstEscapingFailureFull",
+      "completeRecord": {
+        "schemaVersion": "blurby.instruction-B-READ.coverage.v2",
+        "phase": "B-READ",
+        "actor": {
+          "chatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "turnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "host": "RODNEYSR"
+        },
+        "aRef": [
+          "b-a-intake",
+          10000,
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "clock": {
+          "phaseClock": {
+            "startEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "elapsedMs": 999999999,
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          },
+          "internalClock": {
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "startMonoNs": "99999999999999999999",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endMonoNs": "99999999999999999999",
+            "elapsedNs": "99999999999999999999",
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          }
+        },
+        "inputRows": [
+          [
+            1,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            2,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            3,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            4,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            5,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            6,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            7,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            8,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            9,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            10,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            11,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            12,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            13,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            14,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            15,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ]
+        ],
+        "frameRefs": [
+          [
+            1,
+            "b-frame01",
+            10036,
+            "78539e2153bbb937e7f5dad34513feea6447f1dca8c0d27de8645d3d75e5c0a8",
+            "f01"
+          ],
+          [
+            2,
+            "b-frame02",
+            10040,
+            "3f7dc6d55ffaa6cf13a691d1a05d0189e239b85ccc08dffa42a05c753658bb54",
+            "f02"
+          ],
+          [
+            3,
+            "b-frame03",
+            10054,
+            "4c8436186c41050bca023c708531d9d11f390d2e7772a6fbafacedaaa80364f4",
+            "f03"
+          ],
+          [
+            4,
+            "b-frame04",
+            10024,
+            "84b9ede1b582009a5c8fcb83a79f0cef73d671f734f07ac5dbda2be62a7e98c2",
+            "f04"
+          ],
+          [
+            5,
+            "b-frame05",
+            10026,
+            "32912ab875d8c0903c3f6bcb8ba0d9f0cf1df8f459bebfb0ec9a28d50b2e75c1",
+            "f05"
+          ],
+          [
+            6,
+            "b-frame06",
+            10020,
+            "06032a829263b570d365eb8607e07d2b6d9f3c750efae686849937a022c72506",
+            "f06"
+          ],
+          [
+            7,
+            "b-frame07",
+            10056,
+            "31381984f00c37060a5db381203781bc26e8a06b122ec1ebf258b82ce9a5f16f",
+            "f07"
+          ],
+          [
+            8,
+            "b-frame08",
+            10044,
+            "29aec6595013e3c610556cc0109ecacae0f564e3201615cf857a51e1f507b5e4",
+            "f08"
+          ],
+          [
+            9,
+            "b-frame09",
+            10028,
+            "5969c768f8f630d8abb758d09aa0c8358fb8a6aa8cb797e031c0499d18de2f31",
+            "f09"
+          ],
+          [
+            10,
+            "b-frame10",
+            10042,
+            "cae7a3c1d712394575896c40bbf8fcabf21726e4795ab40c0f238ff3fd245b99",
+            "f10"
+          ],
+          [
+            11,
+            "b-frame11",
+            10048,
+            "db598f0f2b6737b20cbff17a3755376c913f2701fb0e24ababec1550d7fd0af7",
+            "f11"
+          ],
+          [
+            12,
+            "b-frame12",
+            10044,
+            "972afbcbd588253e6bb06e6993b662d849305e3a330dfa62d6e9b67ec6d2d4c0",
+            "f12"
+          ],
+          [
+            13,
+            "b-frame13",
+            10043,
+            "96ce709e201d525776e1da4438ee7a8c251909e212945993388bd7989a1202b6",
+            "f13"
+          ],
+          [
+            14,
+            "b-frame14",
+            10022,
+            "b0938db26cc7848f62858ca848712644d9cf9f9e159b25a19a9f904509427a52",
+            "f14"
+          ],
+          [
+            15,
+            "b-frame15",
+            10014,
+            "205249582f9a42be7ae85cf681422d7f31efb18658ed061cfc5b7cb0ae12a7cc",
+            "f15"
+          ],
+          [
+            16,
+            "b-frame16",
+            10000,
+            "1ad9656f06906bf976f0a1332c1e87b24ff70a3d8613fd035de53ce7e52326ed",
+            "f16"
+          ],
+          [
+            17,
+            "b-frame17",
+            10002,
+            "c6c673575a56e03f0d2bac053e644565976c348fa3e75c07e2eacb2d2ca229fa",
+            "f17"
+          ],
+          [
+            18,
+            "b-frame18",
+            10002,
+            "6d6cb1f79711b7436666e18abd9e2dbe57d2da5e24f991f518654fa13dd35bd0",
+            "f18"
+          ],
+          [
+            19,
+            "b-frame19",
+            10022,
+            "c2ee1999943fc7df13c133316f577cedbcde1da71ddb75e175bfc063d2010f22",
+            "f19"
+          ],
+          [
+            20,
+            "b-frame20",
+            10008,
+            "652d22be7bc50b3e64b011263337bf3666b45ae3647e42e4c7e89846e70ba773",
+            "f20"
+          ],
+          [
+            21,
+            "b-frame21",
+            10000,
+            "c441cc06c27a0ec280b455dd7dae1427e705d25094f2b1ca7cf02b93af6862e4",
+            "f21"
+          ],
+          [
+            22,
+            "b-frame22",
+            10000,
+            "d7ba02a47c838ae7ec47b74b57de867ee65666164e7a715591e603bc1c1954a8",
+            "f22"
+          ],
+          [
+            23,
+            "b-frame23",
+            7118,
+            "a672cb6456232af5766b4a3f5b14d4ed6693acef3675dd6c0c57dd8a426c7957",
+            "f23"
+          ]
+        ],
+        "observations": {
+          "entryRefs": [
+            [
+              "b-entry1",
+              10000,
+              "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            [
+              "b-entry2",
+              10000,
+              "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ]
+          ],
+          "semanticConsumption": {
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorTurnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actuallyReadFrameNumbers": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23
+            ],
+            "missingFrameNumbers": [],
+            "truncatedFrameNumbers": [],
+            "statement": "SAME_ACTOR_FULL_SELECTED_DOMAINS_READ",
+            "attestationEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff"
+          },
+          "platformBinding": "DEFERRED_ROOT_POST_RETURN"
+        },
+        "preservation": {
+          "fiveCopiesUnchanged": true,
+          "tenCarriedUnchanged": true,
+          "receiptAbsent": true,
+          "scope": "NAMED15_PATHS_ONLY"
+        },
+        "accounting": {
+          "operationIds": [
+            "b-bootstrap1",
+            "b-bootstrap2",
+            "b-bootstrap3",
+            "b-bootstrap4",
+            "b-a-intake",
+            "b-entry1",
+            "b-entry2",
+            "b-frame01",
+            "b-frame02",
+            "b-frame03",
+            "b-frame04",
+            "b-frame05",
+            "b-frame06",
+            "b-frame07",
+            "b-frame08",
+            "b-frame09",
+            "b-frame10",
+            "b-frame11",
+            "b-frame12",
+            "b-frame13",
+            "b-frame14",
+            "b-frame15",
+            "b-frame16",
+            "b-frame17",
+            "b-frame18",
+            "b-frame19",
+            "b-frame20",
+            "b-frame21",
+            "b-frame22",
+            "b-frame23",
+            "b-close"
+          ],
+          "producerReportedCalls": 999999999,
+          "nativeOperations": 999999999,
+          "wrapperOperations": 999999999,
+          "rootCaptureStatus": "DEFERRED_ROOT_POST_RETURN",
+          "unknowns": [
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+          ]
+        },
+        "failures": [
+          [
+            "b-close",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "WFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWA==",
+            "WVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWQ==",
+            256,
+            256,
+            true,
+            true,
+            false,
+            false,
+            null,
+            "OBSERVED_DISCARDED"
+          ],
+          [
+            "b-close",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "WFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWA==",
+            "WVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWQ==",
+            256,
+            256,
+            true,
+            true,
+            false,
+            false,
+            null,
+            "OBSERVED_DISCARDED"
+          ]
+        ],
+        "limitations": [
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+          "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+        ],
+        "disposition": "HOLD/PARTIAL"
+      },
+      "producerUTF8Bytes": 9193,
+      "charactersIncludingCRLF": 9193,
+      "producerSHA256": "c49a69d701681d07ec4a83f0a9560e1177e324487a4b0feb8ab390ec96a0150b",
+      "maximumDeclaredAdditionalWrapperCharacters": 256,
+      "wholeCharactersWithWrapperBound": 9449,
+      "fitDeclaredMetadataOutputBound": true,
+      "domain": "BOUNDED_PLANNING_SIZING_DATA_NOT_ACTUAL_FUTURE_OBSERVATION"
+    },
+    {
+      "case": "entryWorstEscapingFailureFull",
+      "completeRecord": {
+        "schemaVersion": "blurby.instruction-B-READ.entry.v2",
+        "phase": "B-READ",
+        "actor": {
+          "chatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "turnId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+          "host": "RODNEYSR"
+        },
+        "clock": {
+          "phaseClock": {
+            "startEventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "elapsedMs": 999999999,
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          },
+          "internalClock": {
+            "startUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "startMonoNs": "99999999999999999999",
+            "endUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "endMonoNs": "99999999999999999999",
+            "elapsedNs": "99999999999999999999",
+            "hardDeadlineUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "workCutoffUTC": "2026-11-03T23:59:59.9999999+00:00",
+            "lateReturn": false
+          }
+        },
+        "aRef": [
+          "b-a-intake",
+          10000,
+          "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        ],
+        "inputRows": [
+          [
+            1,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            2,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            3,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            4,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            5,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            6,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            7,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            8,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            9,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            10,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            11,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            12,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            13,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            14,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ],
+          [
+            15,
+            999999999,
+            "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            true,
+            true,
+            true,
+            "2026-11-03T23:59:59.9999999+00:00"
+          ]
+        ],
+        "namespace": {
+          "root": "C:/Projects/Blurby-artifacts/shared-instruction-3af-inputs-20261103/",
+          "sameAOwnershipBinding": {
+            "eventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "authority": "Brain",
+            "domain": "FIXED15_INPUTS"
+          },
+          "ordinaryAncestors": [
+            [
+              1,
+              true
+            ],
+            [
+              2,
+              true
+            ],
+            [
+              3,
+              true
+            ],
+            [
+              4,
+              true
+            ]
+          ],
+          "receiptAbsent": true
+        },
+        "plan": {
+          "selectedBytes": 211573,
+          "frameCount": 23,
+          "rawMapsVerified": true,
+          "selectionMapsVerified": true,
+          "reassemblyVerified": true,
+          "actualActorApplicabilityBinding": {
+            "eventId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "actorChatId": "ffffffff-ffff-ffff-ffff-ffffffffffff",
+            "authority": "Brain",
+            "domain": "FIXED15_INPUTS"
+          }
+        },
+        "accounting": {
+          "operationIds": [
+            "b-bootstrap1",
+            "b-bootstrap2",
+            "b-bootstrap3",
+            "b-bootstrap4",
+            "b-a-intake",
+            "b-entry1",
+            "b-entry2",
+            "b-frame01",
+            "b-frame02",
+            "b-frame03",
+            "b-frame04",
+            "b-frame05",
+            "b-frame06",
+            "b-frame07",
+            "b-frame08",
+            "b-frame09",
+            "b-frame10",
+            "b-frame11",
+            "b-frame12",
+            "b-frame13",
+            "b-frame14",
+            "b-frame15",
+            "b-frame16",
+            "b-frame17",
+            "b-frame18",
+            "b-frame19",
+            "b-frame20",
+            "b-frame21",
+            "b-frame22",
+            "b-frame23",
+            "b-close"
+          ],
+          "producerReportedCalls": 999999999,
+          "nativeOperations": 999999999,
+          "wrapperOperations": 999999999,
+          "rootCaptureStatus": "DEFERRED_ROOT_POST_RETURN",
+          "unknowns": [
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+          ]
+        },
+        "failures": [
+          [
+            "b-close",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "WFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWA==",
+            "WVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWQ==",
+            256,
+            256,
+            true,
+            true,
+            false,
+            false,
+            null,
+            "OBSERVED_DISCARDED"
+          ],
+          [
+            "b-close",
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\",
+            "WFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWA==",
+            "WVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWVlZWQ==",
+            256,
+            256,
+            true,
+            true,
+            false,
+            false,
+            null,
+            "OBSERVED_DISCARDED"
+          ]
+        ],
+        "disposition": "HOLD/PARTIAL"
+      },
+      "producerUTF8Bytes": 6340,
+      "charactersIncludingCRLF": 6340,
+      "producerSHA256": "50b322bcff16c9b4c75c3b459824f877e6b191fd2dad445a5b6f209faed41348",
+      "maximumDeclaredAdditionalWrapperCharacters": 256,
+      "wholeCharactersWithWrapperBound": 6596,
+      "fitDeclaredMetadataOutputBound": true,
+      "domain": "BOUNDED_PLANNING_SIZING_DATA_NOT_ACTUAL_FUTURE_OBSERVATION"
+    }
+  ],
+  "proposedDiagnosticCaptureBOnly": {
+    "maxPrefixRawBytesPerStream": 256,
+    "withinExisting512Ceiling": true,
+    "AUnchanged": true,
+    "lossFlagsMandatory": true,
+    "newProposalNotRuntimeQualified": true
+  },
+  "inertCodeMeasurements": [
+    {
+      "block": 1,
+      "bytes": 1411,
+      "sha256": "73ca324796d2da9964d7dd72fbb1b42e4a25c5ca811bd90105963057959f57e1",
+      "sourceUTF8": "import json,hashlib\nH=lambda b:hashlib.sha256(b).hexdigest()\ndef encode(record):\n    b=(json.dumps(record,ensure_ascii=False,separators=(',',':'))+'\\r\\n').encode('utf-8')\n    if len(b.decode('utf-8'))>9744: raise ValueError('OUTPUT_BOUND')\n    return b\ndef resolve(refs,actual,frozen,sources):\n    out={k:bytearray() for k in sources}\n    if len(refs)!=23: raise ValueError('COUNT')\n    for i,(n,op,size,sha,mid) in enumerate(refs,1):\n        if type(n)is not int or (n,op,mid)!=(i,f'b-frame{i:02d}',f'f{i:02d}'): raise ValueError('REF')\n        raw=actual[op] # ACTUAL complete producer bytes, boundary separately proven\n        f=frozen[i-1]\n        if len(raw)!=size or H(raw)!=sha or size!=f['utf8Bytes'] or sha!=f['sha256']: raise ValueError('PIN')\n        v=strict_json(raw) # closed duplicate/nonfinite/type-rejecting decoder required\n        if v['frame']!=i or len(v['parts'])!=len(f['parts']): raise ValueError('PARTS')\n        for a,p in zip(v['parts'],f['parts']):\n            if {k:a[k] for k in p}!=p: raise ValueError('MAP')\n            k=a['rowId'];x=a['offset'];y=a['end'];b=a['text'].encode('utf-8')\n            if type(x)is not int or type(y)is not int or x!=len(out[k]) or y-x!=len(b) or H(b)!=a['pieceSHA256'] or sources[k][x:y]!=b: raise ValueError('SOURCE')\n            out[k].extend(b)\n    if any(bytes(out[k])!=sources[k] for k in sources): raise ValueError('COVERAGE')\n    return True\n",
+      "readAsDataOnly": true,
+      "notImportedCompiledOrExecuted": true
+    },
+    {
+      "block": 2,
+      "bytes": 2176,
+      "sha256": "3f6190da9ab1dbf0370bda010578436b613f7572bab899ed94b7a0b0b4b6ea8c",
+      "sourceUTF8": "def strict_json(raw):\n    def pairs(items):\n        d={}\n        for k,v in items:\n            if k in d: raise ValueError('DUPLICATE_KEY')\n            d[k]=v\n        return d\n    def bad(v): raise ValueError('NONFINITE')\n    return json.loads(raw.decode('utf-8',errors='strict'),object_pairs_hook=pairs,parse_constant=bad)\ndef select_history(mcp,chat,turn,expected_commands):\n    if mcp.get('isError') or len(mcp['content'])!=1 or mcp['content'][0]['type']!='text': raise ValueError('MCP')\n    raw=mcp['content'][0]['text'].encode('utf-8',errors='strict')\n    v=strict_json(raw)\n    if v['thread']['id']!=chat: raise ValueError('CHAT')\n    ts=[t for t in v['turns'] if t['id']==turn]\n    if len(ts)!=1: raise ValueError('SELECTED_TURN')\n    t=ts[0]\n    if t['status']!='completed' or t['error'] is not None: raise ValueError('TURN_NOT_CLOSED')\n    cmds=[a for a in t['items'] if a['type']=='commandExecution']\n    if len(cmds)!=len(expected_commands): raise ValueError('OPERATION_COUNT')\n    seen=set();out={}\n    for op,expected,a in zip(expected_commands,expected_commands.values(),cmds):\n        if set(a)!=set(('type','id','command','cwd','status','exitCode','durationMs','output')): raise ValueError('ACTUAL_FIELDS')\n        if set(a['output'])!=set(('text','truncated')): raise ValueError('OUTPUT_FIELDS')\n        if a['id'] in seen or not a['id'] or a['output']['truncated'] is not False: raise ValueError('INCOMPLETE')\n        seen.add(a['id'])\n        if a['command']!=expected or len(a['command'])>20000: raise ValueError('ACTUAL_COMMAND_DIFFERENCE')\n        if a['status']!='completed' or type(a['exitCode'])is not int or a['exitCode']!=0: raise ValueError('EXECUTION_FAILED')\n        txt=a['output']['text'];bb=txt.encode('utf-8',errors='strict')\n        if len(txt)>10000: raise ValueError('OUTPUT_LIMIT')\n        out[op]={'actual':a,'returnedTextBytes':len(bb),'returnedTextSHA256':H(bb),'actorChatId':chat,'actorTurnId':turn}\n    # Older-turn pagination does not negate complete selected-turn records.\n    return {'rawReplyUTF8':raw.decode('utf-8'),'rawReplyBytes':len(raw),'rawReplySHA256':H(raw),'selectedTurn':t,'operations':out,'olderTurnsPage':v['page']}\n",
+      "readAsDataOnly": true,
+      "notImportedCompiledOrExecuted": true
+    }
+  ],
+  "F2Correction": "Older-turn page.hasMore not HOLD by itself; exact selected-turn expected31records/fullactualrequests/outputs and truncation/preview check determine complete recovery. Missing selected records still HOLD.",
+  "F3Correction": "Externally actual admission/app-turn event beforebootstrap/Aintake covers WHOLEphase; later internalPythonentrymonotonic is separatelysampled and neverbackdated.",
+  "quietOperationCount": 31,
+  "quietOperationMap": [
+    {
+      "logicalId": "b-bootstrap1",
+      "entry": "bounded complete recipe delivery; actual transport pending",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-bootstrap2",
+      "entry": "bounded complete recipe delivery; actual transport pending",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-bootstrap3",
+      "entry": "bounded complete recipe delivery; actual transport pending",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-bootstrap4",
+      "entry": "bounded complete recipe delivery; actual transport pending",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-a-intake",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-entry1",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-entry2",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame01",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame02",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame03",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame04",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame05",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame06",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame07",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame08",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame09",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame10",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame11",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame12",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame13",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame14",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame15",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame16",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame17",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame18",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame19",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame20",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame21",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame22",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-frame23",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    },
+    {
+      "logicalId": "b-close",
+      "entry": "sole exec_command -> finite direct Python DATA",
+      "chargedSoleEntryActions": 1,
+      "independentNestedActions": 0,
+      "actualExtraOrchestratorActions": "PENDING_ROUTE_MAP_NOT_FREE",
+      "processInventorySeparate": true
+    }
+  ],
+  "accounting": {
+    "rulingSoleExecPlusDirectInterpreterOneAction": true,
+    "counts": {
+      "quietEntryFresh15WholePlan": 2,
+      "actualCompleteAIntake": 1,
+      "completeCPURecipeBootstrap": 4,
+      "semanticFrames": 23,
+      "quietConservationCoverage": 1,
+      "RootHistoryCaptureAllowanceUnproven": 4,
+      "RootParseReconstructSerialize": 1,
+      "RootApplyPatch": 1,
+      "RootOrdinaryReadbackHash": 1,
+      "RootACKClockClosure": 1,
+      "reserve": 2
+    },
+    "conditionalSoleEntryRouteIncludingReserve": 41,
+    "aggregateCap": 40,
+    "fit": false,
+    "extraActualFunctionsExecOrOtherOrchestratorCallsAdditive": true,
+    "nestedIndependentProgramsAdditive": true,
+    "nativeProcessesNotDoubleChargedSameSoleEntry": true,
+    "historicalAdditive57InterpretationNotRepinned": true,
+    "rootCapturePerFrameScenario": 60,
+    "proposedNarrowMinutes": 45,
+    "workCutoffMinutes": 39,
+    "reserveMinutes": 6,
+    "uncalibratedPlannerMinutes": 33,
+    "noAdmissionOrBorrowing": true
+  },
+  "rootCapsule": {
+    "path": "C:/Projects/Blurby-artifacts/shared-instruction-C-review-20261103/B-READ.capsule.json",
+    "schemaVersion": "blurby.instruction-B-READ.root-capsule.v1",
+    "operations": 31,
+    "fullRawHistoryAndAllActualCommandsFramesMetadataRequired": true,
+    "actualFutureHash": null,
+    "historical6RecordResultSupportsNotGuaranteesFuture31": "ROOT_OBSERVED_ACTUAL_STRUCTURAL_PROJECTION",
+    "captureAllowance": 4,
+    "fullActualAccessBoundaryPatchReadbackUnqualified": true
+  },
+  "remainingExactPieces": [
+    "Complete finite quiet emitter/entry/closure constructors, strict closed-shape validation and actualcontext/namespace/sourceaccess/clock/errorhandling per op; literal core is not wholecollector. This CAN be authored as inert proposal but increases requiredbootstrap and needs remeasurement, not Ready.",
+    "Actual full Root history selection/source boundary adapter composition and quotedwriter/readback requests; structuralselector supplied, actual per-command expectedquotedstrings depend on full emitter.",
+    "Actual supported31recordwhole-turn capture/<=20kactualcommands/<=10koutputs and complete Rootpatchrequest acceptance; historical6records is not guarantee.",
+    "Exact operation-to-functions.exec/transport/nestedaction accounting; minimum41 alreadyfails40; Brain must choose another bounded preparation/delivery decomposition, no silentcoalescing/caprise.",
+    "Actual A binding/current15/phaseevent/sourceinputs, allthreewave independentchecks/admissions."
+  ],
+  "scope": {
+    "quietWrites": 0,
+    "receiptAbsent": true,
+    "noReviewers": true,
+    "maximumDisposition": "SEMANTIC_COVERAGE_RECORDED/INDEPENDENT_REVIEW_PENDING",
+    "actualRootBindingDeferred": true,
+    "sourceRuntimeProviderGitActions": false,
+    "oldFilesUnchanged": true
+  }
+}

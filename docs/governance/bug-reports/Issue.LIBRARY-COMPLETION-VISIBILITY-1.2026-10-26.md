@@ -48,3 +48,14 @@ The [completed investigation](../../studies/investigations/FOLIATE-STYLE-NULL.20
 Brain independently verified the raw traces, all indexed hashes, owned PID shutdown and unchanged normal profile. The proposed readiness-only guard is STOPPED. Brain authorizes a revised specification covering readiness plus lifetime/ownership fencing across pending display/load callbacks, awaits and state writes. Source implementation is not admitted. Generic helper null guards, error suppression, timers, sibling-runtime changes and a late-assignment-only check are outside that direction.
 
 Final diagnostic index: `C:/Projects/Blurby-artifacts/parallel-style-diagnosis-20261026/precise-continuation-control/receipt-index.json`, SHA256 `fcb4f33637aeecce2e4471529f4fdeabd9808140ea7f94e3c96114fb5fb7b853`. Diagnostic route failure and induced errors remain retained; they are not clean package qualification. Combined held tip `4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7` has unchanged shipping inputs and executable/ASAR relative to its packaged source, independently confirmed by Brain. Package verdict remains WITHHOLD.
+
+## Decision
+
+**Blurby.Brain1, 2026-11-05: accepted; the WITHHOLD of 2026-10-26 is superseded.**
+
+- The 2026-10-26 WITHHOLD rested on BUG-222 (one style-null TypeError in the four-mode check). FOLIATE-DISPLAY-LIFETIME-1 fixed that cause, and BUG-222 is resolved.
+- The 2026-10-30 pass on the combined candidate `2d5772d3` meets the item's Done-when 4 under rule 53: Grid and List show `owned-complete` in All and `owned-archive` in Archive, against the defect control on `36ac7466`; the reader opens 91 words from All and from Archive; no error.log lines; no crash dumps; 0 style-null lines. Record: `docs/studies/investigations/LIBRARY-COMPLETION-VISIBILITY-1.package.2026-10-30.md`.
+- The four harness failures in that record were read as harness failures, with the cause named.
+- The fix merged in the RC integration `c5bb507f`.
+
+Close the issue. Any owner check for the item stays on the gate (2) list.

@@ -1,0 +1,36 @@
+{
+  "id": "20261103T173553Z-external-set-status-BROWSER-EXT-FINALIZE-1",
+  "operation": "external-set-status",
+  "item_id": "BROWSER-EXT-FINALIZE-1",
+  "created": "2026-11-03T17:35:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": "APP-TABS-1; BLURBY-SERVER-1",
+      "description": "Save pages, selections and links to the Blurby account from Chrome and Firefox (owner design 2026-11-03): sign in from the extension; a pop-up on selected text prompts to save, and right-click saving stays; a Saved to your library notice opens the item in Blurby; desktop pairing stays as the fallback. Firefox port; listed on the Chrome Web Store and Firefox Add-ons. Saved articles land in Newsroom (APP-TABS-1). Supersedes the deferred Track B lane (EXT-ENR-C and beyond); reading inside the browser is out of scope.",
+      "sequence": 143
+    },
+    "expectedRevision": "eb5a5f7858cfa0072978861a0db8d4d9b56fa3d4035cd0a09fdb3be946685008",
+    "idempotencyKey": "set-status:BROWSER-EXT-FINALIZE-1:[('description', 'Save pages, selections and links to the Blurby account from Chrome and Firefox (owner design 2026-11-03): sign in from the extension; a pop-up on selected text prompts to save, and right-click saving stays; a Saved to your library notice opens the item in Blurby; desktop pairing stays as the fallback. Firefox port; listed on the Chrome Web Store and Firefox Add-ons. Saved articles land in Newsroom (APP-TABS-1). Supersedes the deferred Track B lane (EXT-ENR-C and beyond); reading inside the browser is out of scope.'), ('prerequisites', 'APP-TABS-1; BLURBY-SERVER-1'), ('sequence', 143)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BROWSER-EXT-FINALIZE-1",
+      "idempotencyKey": "set-status:BROWSER-EXT-FINALIZE-1:[('description', 'Save pages, selections and links to the Blurby account from Chrome and Firefox (owner design 2026-11-03): sign in from the extension; a pop-up on selected text prompts to save, and right-click saving stays; a Saved to your library notice opens the item in Blurby; desktop pairing stays as the fallback. Firefox port; listed on the Chrome Web Store and Firefox Add-ons. Saved articles land in Newsroom (APP-TABS-1). Supersedes the deferred Track B lane (EXT-ENR-C and beyond); reading inside the browser is out of scope.'), ('prerequisites', 'APP-TABS-1; BLURBY-SERVER-1'), ('sequence', 143)]",
+      "actualRevision": "",
+      "recoveryId": "20261103T173553Z-external-set-status-BROWSER-EXT-FINALIZE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-03T17:36:25Z",
+  "outcome": "succeeded"
+}

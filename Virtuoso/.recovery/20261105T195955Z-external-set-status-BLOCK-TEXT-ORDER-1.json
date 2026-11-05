@@ -1,0 +1,35 @@
+{
+  "id": "20261105T195955Z-external-set-status-BLOCK-TEXT-ORDER-1",
+  "operation": "external-set-status",
+  "item_id": "BLOCK-TEXT-ORDER-1",
+  "created": "2026-11-05T19:59:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main. 2026-11-05: d3184d0b not confirmed: section 17's certified wrap blocks for about 258 ms. Amendment 1 (`docs/planning/specs/2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md`): the certified stamp yields, and a superseded run stops."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BLOCK-TEXT-ORDER-1:[('notes', \"In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main. 2026-11-05: d3184d0b not confirmed: section 17's certified wrap blocks for about 258 ms. Amendment 1 (`docs/planning/specs/2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md`): the certified stamp yields, and a superseded run stops.\"), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLOCK-TEXT-ORDER-1",
+      "idempotencyKey": "set-status:BLOCK-TEXT-ORDER-1:[('notes', \"In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main. 2026-11-05: d3184d0b not confirmed: section 17's certified wrap blocks for about 258 ms. Amendment 1 (`docs/planning/specs/2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md`): the certified stamp yields, and a superseded run stops.\"), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261105T195955Z-external-set-status-BLOCK-TEXT-ORDER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-05T20:00:18Z",
+  "outcome": "succeeded"
+}

@@ -13,11 +13,12 @@
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
 6b. **Long-running dispatches use the quiet machine (owner ruling 2026-10-28).** During dispatch development, place sustained implementation, builds, test matrices and other long-running execution on the quiet machine. Use the owner's everyday computer for coordination, reviews and brief checks. Each such specification and CLI handoff must name the execution host, required repository/artifact transfer and host prerequisites; verify that the quiet machine has the required inputs and access before launch. If its identity, availability or required capability is unresolved, resolve placement before launch rather than silently running the workload on the everyday computer. Any exception requires the owner's explicit direction. This rule governs future dispatch placement; it does not authorize moving an active run or changing its admissions, budgets or custody.
+6c. **Fix the cause, not the symptom (owner ruling 2026-11-03).** Every bug, finding, STOP or odd result is diagnosed to its root cause before a remedy is chosen. Ask why the symptom happens until the cause is named with evidence (file:line, a reproduction or a measurement). Then prefer the fix that removes or mitigates that cause. A guard, fallback or workaround that only hides a symptom is acceptable only as a stated safety net beside a cause fix, or when the cause is proven unfixable or out of reach. In that case the spec names the cause, why it is not fixed, and the item or finding that owns it. Every spec's Why section states the root cause, not just the symptom.
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
 8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the Notion item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
-11. **Decision authority (owner ruling2026-10-26; authority moved to Blurby.Brain1 by owner direction 2026-10-30).** All technical questions go to Blurby.Brain1 (Claude session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582`), which has the owner's delegated authority to make technical decisions. Design and functionality questions remain the owner's to answer. Mixed questions separate the technical ruling from the design/functionality choice; technical delegation never substitutes for owner design approval. Existing package, source-freeze and release gates remain unless explicitly changed by an authorized ruling.
+11. **Decision authority (owner ruling 2026-10-26; routing returned to Claude 2026-11-03).** New technical questions go to Claude Blurby.Brain1 (Claude Code session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582`), which holds the owner's delegated technical authority again. From 2026-11-02 to the 2026-11-03 safe pause, the owner had routed them to Codex Blurby.Brain (local chat `01a179e8-7a40-75c0-93f4-d3045ad99027`) while Brain1 was out of usage; those written Codex rulings, like earlier Brain1 rulings, remain inputs unless Brain1 supersedes them. This routing change does not resume parked work, admit execution or extend an admission. Design and functionality questions remain the owner's to answer. Mixed questions separate the technical ruling from the design/functionality choice; technical delegation never substitutes for owner design approval. Existing package, source-freeze and release gates remain unless explicitly changed by an authorized ruling.
 11a. **Registry helper guard (2026-10-27).** Installed Virtuoso1.16.1 truncates fractional Seq. Before registry, snapshot-import or board commands, follow the pinned-root/hash/import checks and process-local override in `docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md` and its qualified-helper manifest. Use the retained managed fix or HOLD; never allow launcher fallback, round67.5/87.5 or change global install settings. This tooling correction grants no WORD/GROUP/native implementation or release authority.
 
 ---
@@ -124,7 +125,7 @@ Zeus routes and orders work as the plugin's `skills/virtuoso/references/zeus.md`
 
 #### Agent Scope Labels (Reference)
 
-**Code scope labels** (applied to doer agent tasks):
+**Code scope labels** (applied to implementation tasks):
 
 | Label | Scope | Files |
 |-------|-------|-------|
@@ -148,7 +149,7 @@ Before committing, verify ALL of these:
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
-Documentation runs as *Document Lifecycle* states, with Blurby's documentation facts in `Virtuoso/overlays/agents/MarcusAurelius.md`.
+After EVERY sprint completion, hotfixes included, no exceptions, the plugin's MarcusAurelius runs the *Document Lifecycle* steps, plus `docs/governance/LESSONS_LEARNED.md` on a non-trivial discovery, `docs/governance/BUG_REPORT.md` for fixed bugs, and `docs/governance/TECHNICAL_REFERENCE.md` for architecture changes, as `Virtuoso/overlays/agents/MarcusAurelius.md` lists them.
 
 ### Standing Rules
 

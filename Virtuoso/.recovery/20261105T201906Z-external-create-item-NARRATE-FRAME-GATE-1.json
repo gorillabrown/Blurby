@@ -1,0 +1,48 @@
+{
+  "id": "20261105T201906Z-external-create-item-NARRATE-FRAME-GATE-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-FRAME-GATE-1",
+  "created": "2026-11-05T20:19:06Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-FRAME-GATE-1",
+      "title": "A frame measurement counts only when the display was on",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#narrate-frame-gate-1",
+      "prerequisites": [],
+      "description": "Scripts only, package unchanged. A blank-window probe before and after every frame-sensitive session makes a sleeping panel invalid rather than failed, and the D5 check gains a long-frame row. Lands before the next frame-sensitive session counts.",
+      "notes": "origin: Blurby.Brain1 2026-11-05 (`Brain1.F-036.D5-ruling.2026-11-05.md`; Findings F-036). Root cause: RodneySr's display was off. Merges ahead of BLOCK-TEXT-ORDER-1, whose C7 and C8 sessions count only under this item. Spec: `docs/planning/specs/2026-11-05/NARRATE-FRAME-GATE-1.md`.",
+      "sequence": 87.4
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-04T21:41:05Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-FRAME-GATE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-FRAME-GATE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-FRAME-GATE-1",
+      "actualRevision": "",
+      "recoveryId": "20261105T201906Z-external-create-item-NARRATE-FRAME-GATE-1",
+      "detail": {},
+      "providerItemId": "40f7c96c-c31e-81c8-bccf-c8d58c16e9af",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-05T20:19:53Z",
+  "outcome": "succeeded"
+}

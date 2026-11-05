@@ -1,0 +1,49 @@
+{
+  "id": "20261103T224740Z-external-create-item-LIBRARY-DELETE-SAFE-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-DELETE-SAFE-1",
+  "created": "2026-11-03T22:47:40Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "LIBRARY-DELETE-SAFE-1",
+      "title": "Deleting a book never erases your own file",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "M",
+      "workstream": "Library & Content",
+      "spec_link": "docs/planning/specs/2026-11-03/LIBRARY-DELETE-SAFE-1.md",
+      "branch": "eb/library-delete-safe-1",
+      "description": "Fixes BUG-238 (HIGH): `delete-doc` hard-unlinks the user's own file. Delete never unlinks: Blurby sends to the Recycle Bin only files it owns in its own data directory, and a book whose file lives in the user's folder loses its library entry only, with the file untouched (owner ruling #31, 2026-11-03). A removed folder book stays removed across rescans and tombstone purge.",
+      "notes": "origin: BUG-238 (Blurby.Brain1 trace, 2026-11-03); owner ruling #31 \"Only remove from Blurby\"; Brain1 technical ruling: `shell.trashItem` only, never unlink. Open for Brain1: the persisted-exclusion mechanism (spec recommends a device-local main-only settings key). Seq 89.5 by planner (data loss, risk first). Lands before LIBRARY-CONTENT-DEDUP-1 and AUTO-ARCHIVE-1 wave B.",
+      "sequence": 89.5,
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-03T22:33:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-DELETE-SAFE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-DELETE-SAFE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-DELETE-SAFE-1",
+      "actualRevision": "",
+      "recoveryId": "20261103T224740Z-external-create-item-LIBRARY-DELETE-SAFE-1",
+      "detail": {},
+      "providerItemId": "40d7c96c-c31e-817b-8d8d-c961f17741eb",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-03T22:48:35Z",
+  "outcome": "succeeded"
+}

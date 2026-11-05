@@ -1,0 +1,73 @@
+{
+  "item": "BLURBY-BUSINESS-1",
+  "phase": "IC-T-REPAIR-1",
+  "scope": "prospective test-only repair planning; no source/runtime admission",
+  "observedAt": "2026-11-03T03:30:51.1529574Z",
+  "spec": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C-repair1.2026-11-02.md",
+  "hashes": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "publishedBaseSHA256": "aab44ee1b4492355ade1115129ad8ad44c0e11c932306caf226d8d438a0aa654",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "publishedBaseSHA256": "87839e5175495d2c753d8585d6595069ba838539c15c849b96ccdb79266b4e65",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "ROADMAP.md",
+      "sha256": "2a467e74f41f82b0b5eb67759065616ed2092ba4148e630786c148824f7760e8",
+      "publishedBaseSHA256": "2a467e74f41f82b0b5eb67759065616ed2092ba4148e630786c148824f7760e8",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "sha256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "publishedBaseSHA256": "fd20e4bfa1fe6900cd57ddd4fcf993d833e53b01b5acf7f92901ba46062c5590",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/workspace-layout.json",
+      "sha256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "publishedBaseSHA256": "f3a1d33c5f2ee362622b8f7b46ccf60bd6f18f61e7e67cb80800e8355db331fc",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "sha256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "publishedBaseSHA256": "fdc4ffb0c711a3c945474e98def9b4ded251e36850709a36ccf4582398c9330b",
+      "matchesPublishedBase": true
+    },
+    {
+      "path": "docs/governance/bug-reports/Draft.BLURBY-BUSINESS-1.HB6-T3-I-C-repair1.2026-11-02.md",
+      "sha256": "8941b93fc1c48dee04c99ac98c94948802048050c33d31604ecc6cf6bfcf9861",
+      "publishedBaseSHA256": null,
+      "matchesPublishedBase": null,
+      "publishedBaseAbsence": "New untracked planning draft, no prior Gitblob; final packet index/raw comparison required"
+    }
+  ],
+  "u9Exit": 0,
+  "u9Output": [
+    "U9 lessons applied (BLURBY-BUSINESS-1): PASS",
+    "  cited: LL-176, LL-031, LL-063, LL-087, LL-096, LL-118, LL-134, LL-142, LL-144, LL-162, LL-172, LL-175",
+    "  [info] lessons-not-cited: 110 live lesson(s) not cited â€” confirm none applies: LL-002 (process, git hygiene), LL-003 (architecture, maintainability), LL-004 (infrastructure, quality), LL-006 (data integrity, file I/O), LL-007 (security, Electron), LL-008 (React architecture, renderer), LL-014 (rendering, animation, flow cursor), LL-015 (animation, CSS), LL-016 (renderer, React state, effects), LL-017 (renderer, imperative code, closures)â€¦",
+    "  lessons: docs/governance/LESSONS_LEARNED.md (prefix LL)"
+  ],
+  "u10Exit": 0,
+  "u10Output": [
+    "1. Bind fresh host/source/untracked-test/recorder inputs and create owned evidence root after consumed admission [calculable] @custody â€” 3m (median of 71 runs)",
+    "2. Apply exactly R1/R2/R3 and freeze full before/after test/diff [calculable] @test-only â€” 0m (median of 6 runs)",
+    "3. Consume V2 or preserve permitted V3, review side effects, qualify actual binary/exits, record exact28-case red [calculable] @controls â€” 0m (median of 6 runs)",
+    "4. Independently review same frozen test/recorder/receipts; accept compliance before quality [calculable] @compliance-quality â€” 0m (median of 6 runs)",
+    "5. External Marcus intent, exact-path local checkpoint and complete preserved receipt after returned resource windows [calculable] @checkpoint â€” 3m (median of 71 runs)",
+    "Total: chain 6m Â· sum 6m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)"
+  ],
+  "protectedUnchanged": true,
+  "gitStatusUnchanged": true,
+  "priorMechanicalFailure": "Initial U9 exit1 lessons-section-missing; heading corrected before final checks, no helper/global waiver. Initial U10 exit0 mechanical6m.",
+  "publishedBaseCommit": "47f0dea438581fe6363ee3378664503b0cb8618e",
+  "sha256Domain": "working-tree raw bytes; published-base SHA256 explicitly separate; new draft has no prior blob"
+}

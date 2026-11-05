@@ -17,7 +17,7 @@
 8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the Notion item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
-11. **Decision authority (owner ruling2026-10-26; authority moved to Blurby.Brain1 by owner direction 2026-10-30).** All technical questions go to Blurby.Brain1 (Claude session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582`), which has the owner's delegated authority to make technical decisions. Design and functionality questions remain the owner's to answer. Mixed questions separate the technical ruling from the design/functionality choice; technical delegation never substitutes for owner design approval. Existing package, source-freeze and release gates remain unless explicitly changed by an authorized ruling.
+11. **Decision authority (owner ruling 2026-10-26; routing returned to Claude 2026-11-03).** New technical questions go to Claude Blurby.Brain1 (Claude Code session `local_3dfa75ff-41e8-4d54-872c-3a2c333ca582`), which holds the owner's delegated technical authority again. From 2026-11-02 to the 2026-11-03 safe pause, the owner had routed them to Codex Blurby.Brain (local chat `01a179e8-7a40-75c0-93f4-d3045ad99027`) while Brain1 was out of usage; those written Codex rulings, like earlier Brain1 rulings, remain inputs unless Brain1 supersedes them. This routing change does not resume parked work, admit execution or extend an admission. Design and functionality questions remain the owner's to answer. Mixed questions separate the technical ruling from the design/functionality choice; technical delegation never substitutes for owner design approval. Existing package, source-freeze and release gates remain unless explicitly changed by an authorized ruling.
 11a. **Registry helper guard (2026-10-27).** Installed Virtuoso1.16.1 truncates fractional Seq. Before registry, snapshot-import or board commands, follow the pinned-root/hash/import checks and process-local override in `docs/planning/roadmap-reviews/2026-10-27-registry-helper-repair.md` and its qualified-helper manifest. Use the retained managed fix or HOLD; never allow launcher fallback, round67.5/87.5 or change global install settings. This tooling correction grants no WORD/GROUP/native implementation or release authority.
 
 ---
@@ -124,7 +124,7 @@ Zeus routes and orders work as the plugin's `skills/virtuoso/references/zeus.md`
 
 #### Agent Scope Labels (Reference)
 
-**Code scope labels** (applied to doer agent tasks):
+**Code scope labels** (applied to implementation tasks):
 
 | Label | Scope | Files |
 |-------|-------|-------|
@@ -148,7 +148,7 @@ Before committing, verify ALL of these:
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
-Documentation runs as *Document Lifecycle* states, with Blurby's documentation facts in `Virtuoso/overlays/agents/MarcusAurelius.md`.
+After EVERY sprint completion, hotfixes included, no exceptions, the plugin's MarcusAurelius runs the *Document Lifecycle* steps, plus `docs/governance/LESSONS_LEARNED.md` on a non-trivial discovery, `docs/governance/BUG_REPORT.md` for fixed bugs, and `docs/governance/TECHNICAL_REFERENCE.md` for architecture changes, as `Virtuoso/overlays/agents/MarcusAurelius.md` lists them.
 
 ### Standing Rules
 
