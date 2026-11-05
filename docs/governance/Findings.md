@@ -565,13 +565,13 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Severity:** medium (custody: several closing items cite this evidence as their package or suite proof)
 
-**Where:** `docs/governance/close-outs/` holds only `Gate1.STAGE8-RUN4.2026-10-23.md`. The RC window's "Package verification" record (the arm64 and x64 pair for the merge `c5bb507f`) and gate (1) run 6's record (3,048 passed, 0 failed, typecheck 0; PARTIAL: D6 cold, D3 2.00x, Q3 session 2 and D6 warm 2.00x play not judged) are in Blurby.Brain1's messages and on RodneySr. On Rodney, `C:\Projects\Blurby-artifacts\rc-merge-20261103\` (`launch25-arm64.json`, `asar-list-arm64.txt`) corroborates the arm64 launch but was built from a later tree than `c5bb507f`.
+**Where:** `docs/governance/close-outs/` holds only `Gate1.STAGE8-RUN4.2026-10-23.md`. The RC window's "Package verification" record (the arm64 and x64 pair for the merge `c5bb507f`) and gate (1) run 6's record (3,048 passed, 0 failed, typecheck 0; PARTIAL: D6 cold, D3 2.00x, Q3 session 2 and D6 warm 2.00x play not judged) are in Blurby.Brain1's messages and on RodneySr. On Rodney, `C:\Projects\Blurby-artifacts\rc-merge-20261103\` (`launch25-arm64.json`, `asar-list-arm64.txt`) corroborates the arm64 launch. *Corrected 2026-11-05: this note first said the folder was built from a later tree. It was built from `c5bb507f`, tree `761c315a`, the same tree as `70d64237`: the worktree's reflog, the files' dates (12:15 to 12:17) and the asar list all show it.*
 
 **Finding:** the close-outs cite Brain1's written verdict for run 6 and per-item memos for package evidence, because the RC pair's own record was not found in the repo. Several raw evidence folders (for example FOLIATE-DISPLAY-LIFETIME-1's, PLAY-FIRST-TEXT-1's, BAND-ALIGN-2 R8's) are on RodneySr only.
 
 **Accountable role / next action:** Blurby.Brain1: commit both records (run 6's table and the RC "Package verification" section) to `docs/governance/close-outs/`, or name their exact location for the close-outs to cite.
 
-**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md`). Blurby.Brain1 owns it: RodneySr drafts both records on `eb/gov-rc-evidence-records`.
+**Disposition:** resolved 2026-11-05. Both records are on `main` at merge `7eaec14b` (`Gate1.STAGE8-RUN6.2026-11-03.md`, verdict PARTIAL, and `PackageVerification.RC-WINDOW.2026-11-03.md`, both halves passing), reviewed by Blurby.Roadmap. Ruled the same day (`Brain1.post-halt-rulings.2026-11-05.md`): Blurby.Brain1 owned it and RodneySr drafted both on `eb/gov-rc-evidence-records`. The raw evidence folders stay on their hosts, uncommitted.
 
 ### F-036 — Long frames in recorded Narrate sessions, which the D5 check cannot see (BTO D3 read-out, 2026-11-05)
 
