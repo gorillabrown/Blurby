@@ -897,8 +897,13 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     const certifyingSectionWords = (i: number) => (i === 3 ? longWords : undefined);
     const spansOf = (doc: Document) => Array.from(doc.querySelectorAll("span.page-word")) as HTMLElement[];
     const indexOf = (span: Element) => Number(span.getAttribute("data-word-index"));
-    const fakeTimeouts = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    afterEach(() => { vi.useRealTimers(); }); // a failed check before drain() must not leave fake timers on
+    // BLOCK-TEXT-ORDER-1 amendment 1 (setup, not a rule-50 change): with setTimeout faked, performance.now() is pinned, so a
+    // slow machine cannot make the certified stamp yield where a row does not ask for it.
+    const fakeTimeouts = () => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      vi.spyOn(performance, "now").mockReturnValue(0);
+    };
+    afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); }); // a failed check before drain() must not leave fake timers on
     const drain = async () => {
       await act(async () => { await vi.runAllTimersAsync(); });
       vi.useRealTimers();
@@ -1015,7 +1020,9 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       expectNoIndexDuplicates(fake);
     });
 
-    it("(rr-c) control: on a certifying slice the rerun during the wrap stamps each run's 160 spans once, in turn, and saves once", async () => {
+    // BLOCK-TEXT-ORDER-1 amendment 1 (Job 2c; named rule-50 exception (rr-c)): the certified wrap now yields by time, so a
+    // clock that passes WRAP_STAMP_SLICE_MS on every read parks run 1 after its first node, and run 2 stamps the 160.
+    it("(rr-c) control: on a certifying slice the rerun during the yielding wrap ends with each of the 160 spans once, and saves once", async () => {
       const mounted = await mount();
       const { fake, view, renderer, render } = mounted;
       const doc = longDoc();
@@ -1041,16 +1048,19 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       const observer = new MutationObserver(collect);
       observer.observe(doc.body, { childList: true, subtree: true });
       fakeTimeouts();
+      let t = 0;
+      const clock = vi.spyOn(performance, "now").mockImplementation(() => (t += 100));
       await render({ bookWordSections: S1, getCanonicalSectionWords: certifyingSectionWords });
-      expect(spansOf(doc).length, "run 1 is not parked: the certified wrap makes no yield").toBe(LONG);
+      expect(spansOf(doc).length, "run 1 is parked at its first yield, after one node").toBe(1);
       spansOf(doc)[0].setAttribute("data-rr-probe", "run-1");
       await render({ bookWordSections: structuredClone(S1), getCanonicalSectionWords: certifyingSectionWords });
       await drain();
+      clock.mockRestore();
       expect(doc.querySelector("[data-rr-probe]"), "run 2 ran on the document").toBeNull();
       collect(observer.takeRecords());
       observer.disconnect();
       const run = Array.from({ length: LONG }, (_, i) => 20 + i);
-      expect(stamped, "each run stamps its 160 spans exactly once, one run after the other").toEqual([...run, ...run]);
+      expect(stamped, "run 1 stamps its first span, then run 2 stamps the 160 exactly once").toEqual([20, ...run]);
       expectBookNumbering(doc, 20);
       expectNoIndexDuplicates(fake);
       expect.soft(saves(fake).map((e) => e.args), "saved once, with the word index").toEqual([["doc-1", 22, "cfi:3:Word2"]]);

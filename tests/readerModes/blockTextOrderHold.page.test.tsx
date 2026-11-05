@@ -300,4 +300,124 @@ describe("BLOCK-TEXT-ORDER-1 hold: Page", () => {
     expect(calls.wordClick).not.toHaveBeenCalled();
     expect(saves(fake)).toEqual([["doc-1", -1, "cfi:3:b"]]);
   });
+  // BLOCK-TEXT-ORDER-1 amendment 1 (Job 2c, row 3): a clock that passes WRAP_STAMP_SLICE_MS on every read makes the
+  // certified restamp yield after each node; a new identity reruns it mid-wrap.
+  it("(y3a) a certified run superseded mid-yield by a rerun: the final spans match the slice one to one, no duplicates", async () => {
+    const N = 20;
+    const words = Array.from({ length: N }, (_, i) => `Word${i}`);
+    const body = words.map((w) => `<p>${w}</p>`).join("");
+    const sections = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 20 + N, wordCount: N }];
+    const slice = (i: number) => (i === 3 ? words : undefined);
+    const { doc, render, calls } = await loaded({}, body);
+    let t = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => (t += 100));
+    try {
+      await render({ bookWordSections: sections, getCanonicalSectionWords: slice });
+      const parked = doc.querySelectorAll("[data-word-index]").length;
+      await render({ bookWordSections: structuredClone(sections), getCanonicalSectionWords: slice });
+      for (let i = 0; i < 10; i++) await settle();
+      const spans = Array.from(doc.querySelectorAll("[data-word-index]"));
+      expect(parked, "the wrap yielded before finishing").toBeLessThan(2 * N);
+      expect(doc.querySelectorAll("[data-word-index] [data-word-index]")).toHaveLength(0);
+      expect(spans.map((s) => [Number(s.getAttribute("data-word-index")), s.textContent])).toEqual(words.map((w, i) => [20 + i, w]));
+    } finally {
+      clock.mockRestore();
+    }
+    await clickWord(doc, 20 + N - 1);
+    expect(calls.wordClick, "certified: a click commits its word").toHaveBeenCalledTimes(1);
+  });
+  // BLOCK-TEXT-ORDER-1 amendment 1 (Job 2c, row 4): while the certified load wrap is parked at a yield, a turn onto a
+  // page of unstamped text holds and then saves the right word; a click on unstamped text does nothing.
+  it("(y4) a turn onto an unstamped page holds, then saves the right word; a click on unstamped text does nothing", async () => {
+    const N = 20;
+    const words = Array.from({ length: N }, (_, i) => `Word${i}`);
+    const sections = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 20 + N, wordCount: N }];
+    const m = await mount({ bookWordSections: sections, getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined) });
+    const doc = sectionDoc(words.map((w) => `<p>${w}</p>`).join(""));
+    m.renderer.contents = [{ doc, index: 3 }];
+    let t = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => (t += 100));
+    try {
+      await act(async () => { m.view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); });
+      const last = doc.querySelectorAll("p")[N - 1];
+      expect(last.querySelector("[data-word-index]"), "the last paragraph is not stamped yet").toBeNull();
+      await act(async () => { (last as HTMLElement).click(); });
+      expect(m.calls.wordClick).not.toHaveBeenCalled();
+      expect(m.calls.heldWordClick).not.toHaveBeenCalled();
+      expect(saves(m.fake), "a click on unstamped text saves nothing").toEqual([]);
+      const range = doc.createRange();
+      range.selectNodeContents(last.firstChild!);
+      m.renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+      await turnButton("Next page");
+      expect(saves(m.fake), "held while the page is unstamped").toEqual([]);
+      for (let i = 0; i < 10; i++) await settle();
+      expect(span(doc, 20 + N - 1).textContent).toBe(`Word${N - 1}`);
+      expect(saves(m.fake)).toEqual([["doc-1", 20 + N - 1, `cfi:3:Word${N - 1}`]]);
+      expect(diagnosed(m.fake, "page-turn-lost")).toEqual([]);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+  it("(y3b) a legacy load wrap superseded mid-yield by a certified restamp: spans match the slice one to one, certified", async () => {
+    const N = 120; // > WRAP_BATCH_SIZE: the legacy load wrap yields after 50 groups
+    const words = Array.from({ length: N }, (_, i) => `Word${i}`);
+    const sections = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 20 + N, wordCount: N }];
+    const slice = (i: number) => (i === 3 ? words : undefined);
+    const { view, render, calls } = await loaded({}, "<p>z</p>");
+    const doc = sectionDoc(words.map((w) => `<p>${w}</p>`).join(""));
+    view.renderer.contents = [{ doc, index: 3 }];
+    let t = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => (t += 100));
+    try {
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); });
+      const parked = doc.querySelectorAll("[data-word-index]").length;
+      await render({ bookWordSections: sections, getCanonicalSectionWords: slice });
+      for (let i = 0; i < 20; i++) await settle();
+      expect(parked, "the load wrap was parked mid-yield").toBeLessThan(N);
+      const spans = Array.from(doc.querySelectorAll("[data-word-index]"));
+      expect(doc.querySelectorAll("[data-word-index] [data-word-index]")).toHaveLength(0);
+      expect(spans.map((s) => [Number(s.getAttribute("data-word-index")), s.textContent])).toEqual(words.map((w, i) => [20 + i, w]));
+    } finally {
+      clock.mockRestore();
+    }
+    await clickWord(doc, 20 + N - 1);
+    expect(calls.wordClick, "certified: a click commits its word").toHaveBeenCalledTimes(1);
+  });
+  // BLOCK-TEXT-ORDER-1 amendment 1 (Job 2c, row 3 case (c)): two loaded documents, a rerun while the first restamp is
+  // parked mid-yield on document 1. Document 2 ends with the live numbering, and the stale loop wraps nothing further.
+  it("(y3c) two documents, rerun mid-yield: document 2 has the live numbering and the stale loop makes no further wrap", async () => {
+    const N = 20;
+    const w1 = Array.from({ length: N }, (_, i) => `Word${i}`);
+    const w2 = Array.from({ length: N }, (_, i) => `Next${i}`);
+    const stale = [
+      { sectionIndex: 3, startWordIdx: 20, endWordIdx: 20 + N, wordCount: N },
+      { sectionIndex: 4, startWordIdx: 20 + N, endWordIdx: 20 + 2 * N, wordCount: N },
+    ];
+    const live = [stale[0], { sectionIndex: 4, startWordIdx: 100, endWordIdx: 100 + N, wordCount: N }];
+    const slice = (i: number) => (i === 3 ? w1 : i === 4 ? w2 : undefined);
+    const { view, render } = await loaded({}, "<p>z</p>");
+    const doc1 = sectionDoc(w1.map((w) => `<p>${w}</p>`).join(""));
+    const doc2 = sectionDoc(w2.map((w) => `<p>${w}</p>`).join(""));
+    view.renderer.contents = [{ doc: doc1, index: 3 }, { doc: doc2, index: 4 }];
+    for (const [doc, index] of [[doc1, 3], [doc2, 4]] as const) {
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index } })); });
+      await settle();
+    }
+    const before = wrapReports.length;
+    let t = 0;
+    const clock = vi.spyOn(performance, "now").mockImplementation(() => (t += 100));
+    try {
+      await render({ bookWordSections: stale, getCanonicalSectionWords: slice });
+      expect(doc1.querySelectorAll("[data-word-index]").length, "the stale restamp is parked on document 1").toBeLessThan(N);
+      await render({ bookWordSections: live, getCanonicalSectionWords: slice });
+      for (let i = 0; i < 20; i++) await settle();
+    } finally {
+      clock.mockRestore();
+    }
+    expect(wrapReports.length - before, "stale: document 1 only; live: documents 1 and 2").toBe(3);
+    const numbering = (doc: Document) =>
+      Array.from(doc.querySelectorAll("[data-word-index]")).map((s) => [Number(s.getAttribute("data-word-index")), s.textContent]);
+    expect(numbering(doc1)).toEqual(w1.map((w, i) => [20 + i, w]));
+    expect(numbering(doc2), "document 2 has the live numbering").toEqual(w2.map((w, i) => [100 + i, w]));
+  });
 });
