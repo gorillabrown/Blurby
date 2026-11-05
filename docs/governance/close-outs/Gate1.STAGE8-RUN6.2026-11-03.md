@@ -29,8 +29,8 @@
 ## Notes
 
 - **D3 1.00x is withdrawn as frame evidence (F-036).** RodneySr's display state wasn't checked during this run. F-036 found that, with the display off, frame timing on this host is not measured at all: a shown window reads hidden, gets about one rAF a minute, and has no GPU context. A measure that cannot tell display-off from good frames can't pass a frame row. NARRATE-FRAME-GATE-1's long-frame row (commits with frame time over 100 ms; limit max(1, floor(minutes)) per run) reads this run's traces as follows:
-  - 1.00x: 130 commits over 100 ms in 5.03 min (25.8 per minute; limit 5): FAIL.
-  - 2.00x: 7 in 5.06 min (1.4 per minute; limit 5): FAIL.
+  - 1.00x: 130 commits over 100 ms in 5.03 min (25.8 per minute), against a limit of 5 in the session: FAIL.
+  - 2.00x: 7 commits over 100 ms in 5.06 min (1.4 per minute), against a limit of 5 in the session: FAIL.
   - These counts come from the checker at `eb/narrate-frame-gate-1` `956eacea` (`p5-recorded-output-check.mjs`), run on `traces/session-1-00.trace.json` and `traces/session-2-00.trace.json`.
   - Brain1's figure for 1.00x was 25.9 per minute; dividing 130 by 5.03 min gives 25.8.
   - The rerun after the last merge measures D3 with NARRATE-FRAME-GATE-1's display probes before and after each session.
@@ -47,3 +47,4 @@
 
 - The gate (1) rerun after the last merge, with display probes: owed.
 - D6 cold and 2.00x warm play on a quiet window (foreign CPU at or under 25 %): owed with that rerun.
+- D6 warm at both rates with the display on: owed with that rerun, as Blurby.Brain1 ruled for F-036. The warm results above hold for this run only.

@@ -2,7 +2,7 @@
 
 **Scope:** the release-candidate integration merged to main as `c5bb507f` (2026-11-03), with parents `3526795a` and `70d64237`. Its tree is identical to `70d64237`, the RC branch's final tip, so the packages built from `70d64237` are the packages of `c5bb507f`.
 
-**Status:** x64 half complete (RodneySr, 2026-11-03). The arm64 half is below, left for Blurby.Brain1 to fill in.
+**Status:** complete. x64 half by RodneySr and arm64 half by Blurby.Brain1, both 2026-11-03; recorded 2026-11-05.
 
 Drafted by Blurby.RodneySR Executor for Blurby.Brain1, 2026-11-05. Evidence is in `.worktrees/rc-evidence-20261103/rule53/` on RodneySr (`SUMMARY.md` is the run record) and in `C:\Projects\Blurby-artifacts\rc-gate1-run5-20261103\` for the asar side item. Neither is committed.
 
@@ -39,10 +39,23 @@ The four x64-only entries are:
 
 `build.files` packs `node_modules/@napi-rs/**`, and `main/pdf-text.js` loads canvas optionally, with polyfills as the fallback. That behaviour predates the RC. Lists: `C:\Projects\Blurby-artifacts\rc-gate1-run5-20261103\asar-70d64237-x64-list.txt` and `asar-70d64237-x64-packages.txt`.
 
-## arm64 half (Rodney) — FOR BRAIN1
+## arm64 half (Rodney)
 
-<!-- BRAIN1: fill in. The arm64 launch ran at merge time on Rodney. Rows to match the x64 half: build, 25 s scratch launch with LL-165 proof, live profile, and any probes run. -->
+Run by Blurby.Brain1 on 2026-11-03, native arm64, in the detached worktree `.worktrees/rc-merge-20261103`. Evidence is in `C:\Projects\Blurby-artifacts\rc-merge-20261103\` on Rodney and is not committed.
+
+**Which tree this is.** The package was built from `c5bb507f` itself, tree `761c315a`, the same tree as `70d64237`. Three things show it, and F-035's note that this folder came from a later tree does not hold:
+- The worktree's reflog has it at `c5bb507f` from 12:14:32 until 19:27:00 on 2026-11-03, when `14ce3d24` was merged.
+- Every file in the folder is dated in that window, from 12:15 to 12:17.
+- The asar list matches x64's from `70d64237` on all 11,575 shared entries, including the content-hashed bundle names. `nas1-merge-20261103`, the later `14ce3d24` build, has different names (`App-C6zGHjar.js` against `App-BYPYVERQ.js`).
 
 | Check | Result | Evidence |
 |---|---|---|
-| | | |
+| Build | `npm ci`, `npm run build` and `npx electron-builder --win --dir --arm64 --publish never`; the package log ends at the asar integrity update and signing | `npm-ci.log`, `build.log`, `pkg-arm64.log` |
+| asar contents | 11,583 entries. Without the host-specific entries, the 11,575 left match x64 exactly: sha256 `73b71415…5ba8`, recomputed for this record (side item above) | `asar-list-arm64.txt` |
+| 25 s scratch launch (LL-165) | `Blurby.exe` with `--inspect` and `--user-data-dir=<scratch>` plus `BLURBY_USER_DATA_DIR`, APPDATA and LOCALAPPDATA redirected. The inspector read-back of `app.getPath('userData')` equals the scratch path at 387 ms. Alive at 25 s; no `error.log`; no dumps; no flagged lines | `launch25-arm64.json` |
+| Live profile | `%APPDATA%\blurby`, 17,396 files hashed before and after: same hash, `3f2691f6…a95c` | `launch25-arm64.json` |
+| P1 to P4 | Not run on arm64. They ran on the x64 half, from the same tree | — |
+
+One stderr line in the launch reads `Backup failed … library.json: ENOENT`. A fresh profile has no library to back up, and later clean launches log the same line.
+
+**Rule 53 close for the RC window:** both halves pass (Blurby.Brain1, 2026-11-05).
