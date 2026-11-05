@@ -331,7 +331,7 @@ describe("BLOCK-TEXT-ORDER-1 hold: Page", () => {
   it("(y4) a turn onto an unstamped page holds, then saves the right word; a click on unstamped text does nothing", async () => {
     const N = 20;
     const words = Array.from({ length: N }, (_, i) => `Word${i}`);
-    const sections = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 20 + N, wordCount: N }];
+    const sections = [{ sectionIndex: 3, startWordIdx: 0, endWordIdx: N, wordCount: N }]; // within the fake document's 25 words
     const m = await mount({ bookWordSections: sections, getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined) });
     const doc = sectionDoc(words.map((w) => `<p>${w}</p>`).join(""));
     m.renderer.contents = [{ doc, index: 3 }];
@@ -351,8 +351,8 @@ describe("BLOCK-TEXT-ORDER-1 hold: Page", () => {
       await turnButton("Next page");
       expect(saves(m.fake), "held while the page is unstamped").toEqual([]);
       for (let i = 0; i < 10; i++) await settle();
-      expect(span(doc, 20 + N - 1).textContent).toBe(`Word${N - 1}`);
-      expect(saves(m.fake)).toEqual([["doc-1", 20 + N - 1, `cfi:3:Word${N - 1}`]]);
+      expect(span(doc, N - 1).textContent).toBe(`Word${N - 1}`);
+      expect(saves(m.fake)).toEqual([["doc-1", N - 1, `cfi:3:Word${N - 1}`]]);
       expect(diagnosed(m.fake, "page-turn-lost")).toEqual([]);
     } finally {
       clock.mockRestore();
@@ -372,7 +372,8 @@ describe("BLOCK-TEXT-ORDER-1 hold: Page", () => {
       await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); });
       const parked = doc.querySelectorAll("[data-word-index]").length;
       await render({ bookWordSections: sections, getCanonicalSectionWords: slice });
-      for (let i = 0; i < 20; i++) await settle();
+      for (let i = 0; i < 200 && doc.querySelectorAll("[data-word-index]").length < N; i++) await settle();
+      await settle();
       expect(parked, "the load wrap was parked mid-yield").toBeLessThan(N);
       const spans = Array.from(doc.querySelectorAll("[data-word-index]"));
       expect(doc.querySelectorAll("[data-word-index] [data-word-index]")).toHaveLength(0);

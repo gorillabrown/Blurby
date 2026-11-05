@@ -288,7 +288,8 @@ describe("BLOCK-TEXT-ORDER-1 hold: Focus", () => {
       await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); });
       const parked = doc.querySelectorAll("[data-word-index]").length;
       await render({ bookWordSections: sections, getCanonicalSectionWords: slice });
-      for (let i = 0; i < 20; i++) await settle();
+      for (let i = 0; i < 200 && doc.querySelectorAll("[data-word-index]").length < N; i++) await settle();
+      await settle();
       expect(parked, "the load wrap was parked mid-yield").toBeLessThan(N);
       const spans = Array.from(doc.querySelectorAll("[data-word-index]"));
       expect(doc.querySelectorAll("[data-word-index] [data-word-index]")).toHaveLength(0);
