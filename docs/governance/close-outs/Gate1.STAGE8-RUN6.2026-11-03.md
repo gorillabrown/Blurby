@@ -28,7 +28,7 @@
 
 ## Notes
 
-- **D3 1.00x is withdrawn as frame evidence (F-036).** RodneySr's display state wasn't checked during this run. F-036 found that, with the display off, frame timing on this host is not measured at all: a shown window reads hidden, gets about one rAF a minute, and has no GPU context. A measure that cannot tell display-off from good frames can't pass a frame row. NARRATE-FRAME-GATE-1's long-frame row (commits with frame time over 100 ms; limit max(1, floor(minutes)) per run) reads this run's traces as follows:
+- **D3 1.00x is withdrawn as frame evidence (F-036).** The display wasn't checked during the run, but the Kernel-Power log gives the host's standby state. The 1.00x session (19:31:18 to 19:36:40 local) was in Modern Standby for all but its last 23 s. The 2.00x session (19:36:41 to 19:42:04) was out of standby throughout, as were both run 5 sessions; leaving standby is evidence of a lit panel, not proof. F-036 found that, with the display off, frame timing on this host is not measured at all: a shown window reads hidden, gets about one rAF a minute, and has no GPU context. A measure that cannot tell display-off from good frames can't pass a frame row. NARRATE-FRAME-GATE-1's long-frame row (commits with frame time over 100 ms; limit max(1, floor(minutes)) per run) reads this run's traces as follows:
   - 1.00x: 130 commits over 100 ms in 5.03 min (25.8 per minute), against a limit of 5 in the session: FAIL.
   - 2.00x: 7 commits over 100 ms in 5.06 min (1.4 per minute), against a limit of 5 in the session: FAIL.
   - These counts come from the checker at `eb/narrate-frame-gate-1` `956eacea` (`p5-recorded-output-check.mjs`), run on `traces/session-1-00.trace.json` and `traces/session-2-00.trace.json`.
