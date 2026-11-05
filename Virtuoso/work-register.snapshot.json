@@ -7504,8 +7504,8 @@
       "completed": "",
       "evidence": "docs/planning/roadmap-reviews/2026-10-27-group-source-trace.md; docs/governance/bug-reports/Issue.BLOCK-TEXT-ORDER-1.2026-10-27.md",
       "description": "",
-      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main.",
-      "revision": "7cdaf59eec1f1d2a161b1428cde1dd4665eeed8c3dde023e1ea7f4142835964d",
+      "notes": "In Flight 2026-11-03 on RodneySr: Waves A and B built (base 14ce3d24); tip d3184d0b adds the B7 origin/main package half (package, launch, runtime proof). Blurby.Brain1 code review passes (Brain1.BLOCK-TEXT-ORDER-1.review.2026-11-03.md); package confirmation pending the D3 1.00x boundary session (RodneySr quiet window, owner). Planner check: 31-file fence, no shared core, four wrapping copies blob-identical, merge-tree clean against origin/main. 2026-11-05: d3184d0b not confirmed: section 17's certified wrap blocks for about 258 ms. Amendment 1 (docs/planning/specs/2026-11-05/BLOCK-TEXT-ORDER-1.amendment-1.md): the certified stamp yields, and a superseded run stops.",
+      "revision": "932771cb9b7fab04d00e2bbdba9bc4f747a1858926475c4999d7b58073f2fc1f",
       "extra": {
         "id": "4067c96c-c31e-81a6-8f0a-e776b050f662",
         "url": "https://app.notion.com/4067c96cc31e81a68f0ae776b050f662",
