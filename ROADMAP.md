@@ -148,6 +148,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | JUMP-LANDING-SAVE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. Link, footnote and chapter jumps in Page mode save the page they land on (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.JUMP-LANDING-SAVE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.JUMP-LANDING-SAVE-1.2026-11-04.md) |
 | PAGE-HELD-TURN-FAIL-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. A held page turn the word count cannot place is reported, not dropped (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.PAGE-HELD-TURN-FAIL-1.2026-11-04.md](docs/governance/close-outs/CloseOut.PAGE-HELD-TURN-FAIL-1.2026-11-04.md) |
 | TOC-JUMP-SAVE-1 | 2026-11-04 | ✅ COMPLETED 2026-11-04. A contents-list jump in Page mode saves the page it lands on (merged in the RC window, merge `c5bb507f`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.TOC-JUMP-SAVE-1.2026-11-04.md](docs/governance/close-outs/CloseOut.TOC-JUMP-SAVE-1.2026-11-04.md) |
+| ERROR-LOG-CAP-1 | 2026-11-05 | ✅ COMPLETED 2026-11-05. error.log is size-capped and rotated, through one appender (merged in the RC window, merge `7bd61fce`; F-027's fix merged as `c630f9a4`; spec archived to `docs/planning/.Archive/ROADMAP_legacy.md`) | [CloseOut.ERROR-LOG-CAP-1.2026-11-05.md](docs/governance/close-outs/CloseOut.ERROR-LOG-CAP-1.2026-11-05.md) |
 
 **Superseded work:**
 - `NARRATE-HEARD-CURSOR-1`, `NARRATE-APPLYRATECHANGE-COLLAPSE-1`, `NARRATE-SUBSCRIBER-CURSOR-1` — superseded 2026-10-11 by the Narrate rebuild (NARRATE-REBUILD-1; owner ruling #31). Stubs archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [review](docs/planning/roadmap-reviews/2026-10-11-plan.md).
@@ -1188,12 +1189,6 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#narrate-start-stack-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="ui-sweep-triage-1"></a>
-
-#### ERROR-LOG-CAP-1 — error.log is size-capped and rotated *(built `ae17d903` on `eb/error-log-cap-1`; In Flight, merge held for the Stage 8 freeze)*
-
-- **State:** built and pushed at `ae17d903` on `eb/error-log-cap-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#error-log-cap-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="book-type-scale-1"></a>
 

@@ -459,7 +459,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1 rules; RodneySr builds. Fix: in `main/library-write.js` replace the local `logToFile` with `const { logToFile } = require("./error-log");` (the helper keeps the two-argument signature), then re-run Done-when 4 over all of `main` and add a standing grep for any later appender. Needs a build, so it waits for the halt to lift.
 
-**Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1a). RodneySr builds the fix plus a guard test on `eb/error-log-cap-fix`; closes when that merges and ERROR-LOG-CAP-1 re-verifies.
+**Disposition:** resolved 2026-11-05. The fix and its guard test merged as `c630f9a4`, and ERROR-LOG-CAP-1 re-verified on that commit and closed (`CloseOut.ERROR-LOG-CAP-1.2026-11-05.md`).
 
 ### F-028 — PAGE-SAVE-RESTAMP-3 Wave B was never built (close-out review, 2026-11-04)
 

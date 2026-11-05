@@ -3294,3 +3294,11 @@ Related: LL-165, NARRATE-QUIT-LINGER-1.
 **Applies to:** CDP probes of Page, Focus or Flow foliate views.
 **Status:** Observation
 Related: LL-166.
+
+### LL-194 — A single-copy check searches every place a later merge can add a copy, and stays as a test (ERROR-LOG-CAP-1, 2026-11-05)
+**Verdict:** The RC window's check that one `logToFile` remained searched `main/ipc`, the directory that held the known copies. `main/library-write.js`, merged from another branch, kept a private appender outside that search, so the cap was bypassed while the check stayed green.
+**Evidence:** F-027; the check `git grep -n "async function logToFile" -- main/ipc`; `tests/errorLogSingleAppender.test.js` row (a), red in `5fd9c0e5` on `14ce3d24`.
+**Recommendation:** When a change makes one module the only owner of something, check the whole tree that could hold a copy, after the last merge, and keep that check as a test so a later branch cannot add a copy unseen. Do not scope it to where the copies are known to be.
+**Applies to:** single-owner refactors, integration windows and merge-time grep checks.
+**Status:** Observation
+Related: standing rule 44, F-027.
