@@ -144,7 +144,11 @@ app.whenReady().then(async () => {
     });
     const same = (v) => v && v.electron === result.electron && v.icu === result.icu;
     if (!same(packaged) || !same(r.versions)) return emit({ ...result, versionMismatch: true }, 3);
-    const ok = MODES.every((m) => r.certified[m] === sections.length);
+    // BLOCK-TEXT-ORDER-1 amendment 1 (addendum 4): every copy must also stamp the largest section in full and report
+    // exactly [{ok:true}] for it.
+    const fullStamp = (m) => r.stampedSpans[m] === largest.slice.length
+      && JSON.stringify(r.stampReports[m]) === JSON.stringify([{ ok: true }]);
+    const ok = MODES.every((m) => r.certified[m] === sections.length && fullStamp(m));
     emit(result, ok ? 0 : 1);
   } catch (err) {
     emit({ ...result, error: String((err && err.stack) || err) }, 2);
