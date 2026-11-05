@@ -4535,8 +4535,8 @@
       "completed": "",
       "evidence": "",
       "description": "The double-wrap race in long sections, and any failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate.",
-      "revision": "ace6209ed3c9ff2de4bd5552828447702abb32e7961d96610f5588544b8fea52",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate. Split 2026-11-05 (Blurby.Brain1, Findings F-028): this item ends at Wave A, merged at c3510303, and closes once A-6's owner smoke passes at gate (2). Wave B is now PAGE-LINK-HELD-TURN-1.",
+      "revision": "e7c5884f99bf6cea4a9e66774263eb1f438ad31dcc14992f29078733af56511a",
       "extra": {
         "id": "3fa7c96c-c31e-81e3-875d-d04caf2b297f",
         "url": "https://app.notion.com/3fa7c96cc31e81e3875dd04caf2b297f",
