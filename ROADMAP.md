@@ -22,6 +22,12 @@ The line has no dated deadline. Blurby Business, server payments and server narr
 
 ---
 
+### Paused 2026-11-05 (owner)
+
+**The owner stopped this work on 2026-11-05: "Let's stop this work for now. Record all work completed thus far."** No item changed status, and all rulings and gates stand. Record: `docs/governance/close-outs/CloseOut.RODNEYSR-DISPATCH-PAUSE.2026-11-05.md`. Nothing dispatches until the owner resumes it.
+
+**To resume:** restore the RodneySr session (gone from about 15:48 on 2026-11-05, cause unknown) and wake its display. Blurby.Brain1 then resends DEPS-REFRESH-1, which was never dispatched. NARRATE-FRAME-GATE-1's display-on rows run next.
+
 ### Held dispatch update - 2026-10-27
 
 **Update 2026-11-04:** FOLIATE-DISPLAY-LIFETIME-1 and FOLIATE-OBSERVER-LEAK-1 merged in the RC window (`c5bb507f`) and are closed (spec sections archived to `docs/planning/.Archive/ROADMAP_legacy.md`; Completed Work Summary). LIBRARY-COMPLETION-VISIBILITY-1, named in the merge stack below, waits on gate (2) row (iii); Blurby.Brain1's `## Decision` block is in its issue file (Findings F-030, 2026-11-05). The text below is the 2026-10-27 to 2026-10-30 record, kept as history.

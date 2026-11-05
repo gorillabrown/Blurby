@@ -769,3 +769,19 @@ The grep was only as reliable as the codebase grep'd. Verifying claims-against-c
 **Applies to:** `/write-plan` and `/roadmap-review` scope fences on refactor or consolidation items; known-flaky waivers (KF-n) whose subject file is being rewritten.
 **Related:** LL-006 (atomic write-then-rename); KF-2 (separation Decision #25).
 **Status:** Promotion candidate (single occurrence).
+
+### SRL-096 — Test a limit's unit against a known event before relying on it (NARRATE-FRAME-GATE-1, 2026-11-05)
+**Verdict:** The long-frame row counted commits. One 761.5 ms stall committed six words, so a session with 2 long frames read 7, over a limit of 5. The threshold was right and the unit was wrong, which made the row depend on speed and chunk shape. It cost a held rerun list and a ruling.
+**Evidence:** `Brain1.long-frame-row.count-frames.2026-11-05.md`; RodneySr's `longcommit-analysis.txt`; `narrateEngine.ts:338`, `:346`.
+**Recommendation:** When a spec sets a limit on a count, name the event being counted and walk one real instance through the counter. If one event can count more than once, the unit is wrong. A unit changed after seeing data re-reads every control.
+**Applies to:** `/write-plan` and `/roadmap-review` on acceptance rows with a count limit.
+**Related:** LL-195, F-036.
+**Status:** Promotion candidate (single occurrence).
+
+### SRL-097 — Read every acceptance row before saying evidence is complete (BLOCK-TAG-CASE-1, 2026-11-05)
+**Verdict:** Blurby.Roadmap told the owner the item's last missing evidence had landed, on the strength of the plan's note that only the performance row was open. Done-when 6's live checks had never run. The same pass found a task list carrying F-028 and F-030 as open after both had resolved.
+**Evidence:** F-037; `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md`, BLOCK-TAG-CASE-1 rows 5 to 8; the memo's row "5–7: Not run".
+**Recommendation:** A summary of what's open is a pointer, not evidence. Read the specification's rows before reporting that an item can close, and read each finding's disposition before listing it as owed.
+**Applies to:** `/dispatch-closeout` Wave 1 and owner status updates.
+**Related:** F-029, F-037.
+**Status:** Promotion candidate (single occurrence).

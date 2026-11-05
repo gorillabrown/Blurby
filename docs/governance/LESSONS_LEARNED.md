@@ -3302,3 +3302,11 @@ Related: LL-166.
 **Applies to:** single-owner refactors, integration windows and merge-time grep checks.
 **Status:** Observation
 Related: standing rule 44, F-027.
+
+### LL-195 — A measurement must prove its precondition held, or it proves nothing (NARRATE-FRAME-GATE-1, 2026-11-05)
+**Verdict:** RodneySr's display was off through gate (1) run 6's D3 1.00x session and the sessions after it. Chromium fell back to timer frames, so the checker read results that looked real, and D3 1.00x passed. Nothing in the session could tell a sleeping panel from good frames, and the same fault read as a product defect until a blank-window control separated host from code.
+**Evidence:** F-036; Rodney's blank window ran 3,599 frames in 60 s against RodneySr's 1 in 65 s; the Kernel-Power log puts run 6's 1.00x session in Modern Standby; `--break` with a never-shown window read "visible" with the display off, so Chromium's own view can't be the only check.
+**Recommendation:** Before a timing or frame result counts, prove the condition it depends on, at the start and the end, with a check independent of the thing measured. A failed precondition makes the run invalid, never failed. Give the check a positive control, and take one predicate from outside the tool being judged.
+**Applies to:** timed gates, frame and latency checks, anything run on an unattended host.
+**Status:** Observation
+Related: standing rule 55, rule 6c, F-036, LL-165.
