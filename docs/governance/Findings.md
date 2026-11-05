@@ -529,7 +529,7 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 
 **Accountable role / next action:** Blurby.Brain1 rules whether Done-when 4 and 5 are merge-time (point-in-time) checks; planner files a dependency-refresh item for `undici`, `follow-redirects` and `joi` or Brain runs the non-major fix; the advisories document is re-dated at that refresh.
 
-**Disposition:** resolved 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c). Done-when 4 and 5 are merge-time checks. The drift moves to DEPS-REFRESH-1; DEPS-AUDIT-1 stays open for its Q3.
+**Disposition:** resolved 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md` 1c). Done-when 4 and 5 are merge-time checks. The drift moves to DEPS-REFRESH-1 (scoped update) and BUILD-CHAIN-REFRESH-1 (after the release); DEPS-AUDIT-1 stays open for its Q3.
 
 ### F-033 — The 4.25:1 light-theme link accent is tracked nowhere, and BOOK-TEXT-COLOUR-1's contrast script is outside the repo (close-out review, 2026-11-04)
 

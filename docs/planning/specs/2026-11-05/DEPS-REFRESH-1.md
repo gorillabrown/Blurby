@@ -1,9 +1,10 @@
 #### DEPS-REFRESH-1 — Refresh the dependency advisories before the final test pass *(Seq 87.6; Full Spec 2026-11-05, measured against `origin/main` `14ce3d24`; Platform & Maintenance; release-gate rider, merges before gate (1); ruled by Blurby.Brain1 2026-11-05; rule 53 applies, because the lockfile ships)* <a id="deps-refresh-1"></a>
 
-- **What:** take the advisory fixes that need no `--force`, and bring `docs/governance/DEPENDENCY_ADVISORIES.md` back to the truth.
+- **What:** update `undici`, `follow-redirects` and `joi`, and bring `docs/governance/DEPENDENCY_ADVISORIES.md` back to the truth.
   - **Outcome:** on the release line, `npm audit --omit=dev` reports nothing fixable without `--force`, and every high advisory has a current row in the advisories document.
   - **Out of scope:**
-    - `npm audit fix --force`, and any major version bump (`adm-zip`, `exceljs`, `@azure/msal-node`);
+    - `npm audit fix` in any form, and any major version bump (`adm-zip`, `exceljs`, `@azure/msal-node`);
+    - moving the build chain, which is BUILD-CHAIN-REFRESH-1, after the release;
     - moving `kokoro-js`, `onnxruntime-node` or `@huggingface/transformers`;
     - reopening DEPS-AUDIT-1, whose Done-when 4 and 5 are merge-time checks (Brain1, 2026-11-05);
     - any product code change.
@@ -13,28 +14,28 @@
 ##### Measured by the planner (2026-11-05, read-only, on a scratch copy of `14ce3d24`'s `package.json` and lockfile)
 
 - **Before:** `npm audit --omit=dev` reports 9 (6 high, 3 moderate). All packages: 21 (8 high, 13 moderate).
-- **`npm audit fix` changes 35 lockfile entries. One is production:** `undici` 7.30.0 to 7.30.2.
-- **The 34 dev entries include the build chain:** `electron-builder`, `app-builder-lib`, `builder-util`, `dmg-builder` and `electron-publish` 26.15.3 to 26.18.1, plus `vitest` 4.1.11 to 4.1.12 and `vite` 6.4.4 to 6.4.5.
-- **The Kokoro pins and `electron` do not move.**
-- **After:** `npm audit --omit=dev` reports 8 (5 high, 3 moderate), with nothing fixable. All packages: 14 (5 high, 9 moderate), with `electron-builder-squirrel-windows` still fixable.
+- **`npm audit fix`, rejected:** it changes 35 lockfile entries, of which one is production (`undici` 7.30.0 to 7.30.2). The rest include `electron-builder`, `app-builder-lib`, `builder-util`, `dmg-builder` and `electron-publish` 26.15.3 to 26.18.1, plus `vitest` and `vite`.
+- **`npm update undici follow-redirects joi`, the ruled command, changes exactly four entries:**
+  - `node_modules/undici` 7.30.0 to 7.30.2 (production);
+  - `node_modules/node-gyp/node_modules/undici` 6.29.0 to 6.29.1 (dev);
+  - `node_modules/follow-redirects` 1.16.1 to 1.16.2 (dev);
+  - `node_modules/joi` 18.2.9 to 18.3.2 (dev).
+- **After it:** `package.json` is unchanged. `npm audit --omit=dev` reports 8 (5 high, 3 moderate), with nothing fixable. All packages: 18 (5 high, 13 moderate), with these fixable: `@vitest/mocker`, `electron-builder-squirrel-windows`, `fast-uri`, `vite` and `vitest`, all moderate and all dev or build chain.
 
 ##### Design decisions
 
-- **`npm audit fix`, never `--force`** (Brain1, 2026-11-05).
-- **Package checks cover the installer, not only the app.** The fix moves the build chain, and `ELECTRON_BUILDER_7Z_FILTER=BCJ` for the ARM64 installer was proven against 26.15.3. See Blurby.Brain1 question Q1.
-
-##### Blurby.Brain1 question Q1 (open; the item is not dispatch-ready until it is ruled)
-
-Your ruling measured `fixable=1`. The trial shows `npm audit fix` also moves `electron-builder` by three minor versions on the release line. Either accept that with a re-proof of the ARM64 installer (681 of 681 files by path, `0xAA64`, native launch), or scope the fix to `npm update undici follow-redirects joi`, which takes the three named packages and leaves the build chain alone. **Planner recommendation:** the scoped update. It meets the ruling's purpose, and it costs no re-proof of a filter that took a diagnosis to find.
+- **The scoped update, never `--force`** (Blurby.Brain1, 2026-11-05, replacing "`npm audit fix`" in section 1c). `ELECTRON_BUILDER_7Z_FILTER=BCJ` for the ARM64 installer was proven on `electron-builder` 26.15.3 and cost a three-reproduction diagnosis. Moving that chain buys no production safety and would put the proof at risk just before release.
+- **The deferred half has an owner:** BUILD-CHAIN-REFRESH-1, after the release, with the ARM64 installer re-proof.
 
 ##### Edit sites
 
-- `package-lock.json`: only as the ruled command writes it. `package.json` does not change.
+- `package-lock.json`: only as `npm update undici follow-redirects joi` writes it. `package.json` does not change.
 - `docs/governance/DEPENDENCY_ADVISORIES.md`:
   - the base line (`:3`): new sha and audit date;
   - the result table: new counts;
   - `electron` row (`:45`): correct `41.10.7` to the shipped 42.11.18;
-  - `undici` row (`:43`), `follow-redirects` row (`:50`), and a new `joi` row: each with its class and a reachability note. Reachability: `undici` is production, under `cheerio`; the `node-gyp` copy is install time; `follow-redirects` is dev, through `axios`; `joi` is dev.
+  - `undici` row (`:43`), `follow-redirects` row (`:50`), and a new `joi` row: each with its class and a reachability note. Reachability: `undici` is production, under `cheerio`; the `node-gyp` copy is install time; `follow-redirects` is dev, through `axios`; `joi` is dev;
+  - a row or note for each entry still fixable in the all-dependency audit, with its reachability.
 
 ##### Done when
 
@@ -42,24 +43,27 @@ Your ruling measured `fixable=1`. The trial shows `npm audit fix` also moves `el
 |---|---|---|
 | 1 | The Kokoro pins and `electron` are unchanged | `git diff <base>...HEAD -- package-lock.json` has no hunk under `node_modules/kokoro-js`, `node_modules/onnxruntime-node`, `node_modules/@huggingface/transformers` or `node_modules/electron"` |
 | 2 | `package.json` is unchanged | `git diff --quiet <base>...HEAD -- package.json` exits 0 |
+| 2a | The lockfile moves only the three named packages, plus anything they strictly need, each named in the memo | Comparing `version` per path in `package-lock.json` between base and `HEAD` lists the four entries above, and any extra entry is named in the memo with the reason |
+| 2b | The build chain does not move | `git diff <base>...HEAD -- package-lock.json` has no hunk under `electron-builder`, `app-builder-lib`, `builder-util`, `dmg-builder`, `electron-publish`, `vitest` or `vite` |
 | 3 | No production advisory is fixable without `--force` | `npm audit --omit=dev --json`: no entry has `fixAvailable` equal to `true` |
+| 3a | Anything left fixable in the all-dependency audit is dev or build chain, with a reachability note | Every name with `fixAvailable` equal to `true` in `npm audit --json` appears in `DEPENDENCY_ADVISORIES.md` |
 | 4 | Every high advisory has a row | Every name `npm audit --omit=dev --json` reports at high severity appears in `DEPENDENCY_ADVISORIES.md` |
 | 5 | The document is re-dated and its Electron row is true | `git grep -n "42.11.18" -- docs/governance/DEPENDENCY_ADVISORIES.md` prints the row; `git grep -n "41.10.7" -- docs/governance/DEPENDENCY_ADVISORIES.md` prints nothing |
 | 6 | Suite, typecheck and build pass | `npm test`, `npm run typecheck` and `npm run build` each exit 0 |
 | 7 | Fence held | `git diff --name-only <base>...HEAD` lists only `package-lock.json`, the advisories document, the memo and the time log |
-| 8 | Rule 53 package verification | The memo's "Package verification" section, with Blurby.Brain1's confirmation. If the build chain moved, it includes the ARM64 installer re-proof named in Q1 |
+| 8 | Rule 53 package verification | The memo's "Package verification" section, with Blurby.Brain1's confirmation |
 
 ##### Failure handling
 
-- **If a Kokoro pin or `electron` moves:** stop, do not commit, and report to Blurby.Brain1.
+- **If a Kokoro pin, `electron` or the build chain moves:** stop, do not commit, and report to Blurby.Brain1.
 - **If a test or the package fails after the fix:** stop and report the failing package. Do not pin around it.
-- **If a new high advisory appears between this spec and the run:** classify it in the document. A new production fixable entry takes the same command.
+- **If a new high advisory appears between this spec and the run:** classify it in the document. A new production fixable entry is a STOP to Blurby.Brain1, because the command names its packages.
 - **Retry ceiling:** one run. A second attempt needs Blurby.Brain1's ruling.
 - **Rollback:** `git revert -m 1 <merge>`.
 
 ##### Repository plan and host (rule 6b)
 
-- **Host:** RodneySr, in `<clone>\.worktrees\deps-refresh-1`, with `npm ci`. Brain1 confirms the host's inputs before launch. An ARM64 installer re-proof, if ruled, needs Rodney.
+- **Host:** RodneySr, in `<clone>\.worktrees\deps-refresh-1`, with `npm ci`. Brain1 confirms the host's inputs before launch.
 - **Branch:** `eb/deps-refresh-1` from `refs/remotes/origin/main` after BLOCK-TEXT-ORDER-1 merges (Brain1's merge order). Push with `HEAD:refs/heads/eb/deps-refresh-1`.
 - **Staging:** exact paths: `package-lock.json`, `docs/governance/DEPENDENCY_ADVISORIES.md`, `docs/governance/close-outs/Memo.DEPS-REFRESH-1.GovernanceStaging.<date>.md` and `docs/governance/close-outs/Timing.DEPS-REFRESH-1.jsonl`. Never stage `tests/perf-baseline-results.json`.
 - **Merge:** `--no-ff`, on Blurby.Brain1's package confirmation and Blurby.Roadmap's merge go.
@@ -69,7 +73,7 @@ Your ruling measured `fixable=1`. The trial shows `npm audit fix` also moves `el
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Advisory fix applied under the ruled command, pins unchanged | calculable | dependency-refresh | mechanical | low | 10m | — | — |
+| 1 | Scoped update applied, pins and build chain unchanged | calculable | dependency-refresh | mechanical | low | 10m | — | — |
 | 2 | Advisories document re-dated and classified | calculable | governance-doc | bounded | medium | 20m | — | — |
 | 3 | Suite, typecheck and build pass | calculable | verify-gate | mechanical | low | 10m | — | — |
 | 4 | Package verified | calculable | live-check | bounded | medium | 20m | — | — |
@@ -80,4 +84,4 @@ Your ruling measured `fixable=1`. The trial shows `npm audit fix` also moves `el
 ##### Lessons applied
 
 - **Standing rule 53:** the lockfile ships, so the item carries a package check.
-- **LL-142:** the counts above were measured on a real run of the command, not taken from the ruling's figure.
+- **LL-142:** the counts above were measured on a real run of each command, which is how the build-chain move was found.
