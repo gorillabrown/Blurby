@@ -2,7 +2,7 @@
 
 *Planner: Blurby.Roadmap, 2026-11-05. This amends [the full specification](../2026-11-03/BLOCK-TEXT-ORDER-1.md). It supersedes TQ-B3's "no yield" and the sentences of The change that repeat it; everything else in the specification stands. Ruling: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.BLOCK-TEXT-ORDER-1.amendment-1.2026-11-05.md` (Blurby.Brain1, CLAUDE.md rule 11). Evidence, on RodneySr: `C:\Projects\Blurby-artifacts\block-text-order-1\` (`D3-boundary`, `J1c`, `J1d`, `J1e`).*
 
-**State: dispatch-ready.** Blurby.Brain1's two addenda (2026-11-05) ruled the rerun question and the book-stamped window the planner raised, and both are folded in below.
+**State: dispatch-ready.** Blurby.Brain1's three addenda (2026-11-05) ruled the rerun question, the book-stamped window and the stale restamp loop the planner raised, and all three are folded in below.
 
 ## What the evidence proved
 
@@ -31,6 +31,8 @@ In all four `src/reader/modes/<mode>/helpers/foliateWordWrapping.ts` copies, whi
    - **Settling (addendum 2):** a superseded run's promise settles only when the live run does, so every caller's code after its `await` still runs on a finished document, with no view edit. The token holds the run's promise (for example `{ settled: Promise<number> | null }`), and `wrapWordsInSpans` registers its own run. A run that finds itself replaced returns the current token's `settled`. `unwrapWordSpans(doc)` installs a token with `settled: null`, so a run superseded by an unwrap with no new wrap returns at once. Runs only ever wait on newer runs, so there is no cycle.
    - **Return value:** a superseded run's return value is not used for numbering. The live run's completion is what counts. The memo confirms that the callers in the four views ignore it.
 
+8. **A stale restamp loop stops (addendum 3).** The yield widens a race the legacy path already had: Flow's, Focus's and Narrate's restamp loops read `cancelled` only after the loop, so a stale loop that resumes moves on to the next document and renumbers it with its old section start. `if (cancelled) return;` becomes the first statement of the restamp loop body in `flow`, `focus` and `narrate` `FoliateView.tsx`. The effect's cleanup sets `cancelled` before the new run starts, so a stale loop stops at its next document. These three lines are the only view edit this amendment allows. Page already has the guard.
+
 **Rejected:** hoisting the Segmenter (not in the profile), and stamping a detached clone or replacing a parent's subtree (it replaces nodes foliate holds, just before release).
 
 ## Done when
@@ -41,7 +43,7 @@ New rows are red first on `d3184d0b`.
 |---|---|---|
 | C1 | **Yields.** With a clock that passes the budget on each node, after the report and a microtask flush some nodes are unstamped; after timers, all are | Test in each helper copy's suite, red on `d3184d0b` |
 | C2 | **Mid-yield change.** A text node changes during a real yield: `dom-changed` comes second, stamping stops, and no span sits at a stale offset | Same suite |
-| C3 | **Rerun during a yielding wrap, in Page, Flow, Focus and Narrate.** Two cases: (a) a certified run superseded mid-yield, and (b) a legacy load wrap superseded mid-yield by a certified restamp. Both end with spans 1 to 1 with the slice, none duplicated, and the document certified | Each mode's runtime test |
+| C3 | **Rerun during a yielding wrap, in Page, Flow, Focus and Narrate.** (a) A certified run superseded mid-yield, and (b) a legacy load wrap superseded mid-yield by a certified restamp: both end with spans 1 to 1 with the slice, none duplicated, and the document certified. (c) In Flow, Focus and Narrate, two loaded documents with a rerun mid-yield: document 2 ends with the live numbering, and the stale loop makes no further unwrap or wrap | Each mode's runtime test |
 | C4 | **Page turn and word click during a yield.** A turn onto an unstamped page holds and then saves the right word; a click on unstamped text does nothing | Page runtime test |
 | C4a | A superseded run makes no report, of either kind | Test in each helper copy's suite |
 | C4b | **Book-stamped window, in Flow and Focus.** With a superseded load wrap, the document is not in `bookStampedDocsRef` until the live run ends, and its paragraph starts are complete afterwards | Each mode's runtime test |
@@ -60,10 +62,10 @@ New rows are red first on `d3184d0b`.
 
 ## Fence, host and order
 
-- **Fence:** the specification's fence stands. The constant and the token live in the helper files already in it. No new sibling import and no shared core. If a view needs an edit, STOP to Blurby.Brain1 with the lines.
+- **Fence:** the specification's fence stands. The constant and the token live in the helper files already in it. No new sibling import and no shared core. The fence gains three named lines, the loop guard in `flow`, `focus` and `narrate` `FoliateView.tsx` (design item 8). Any other view edit is a STOP to Blurby.Brain1 with the lines.
 - **Census:** the policy allows a module singleton in a mode directory only when `allowedModuleSingletons` lists it, and the new `setTimeout` sits in a new function. Expect `tests/readerModeOwnership.test.ts` to fail on the four tokens and the four `setTimeout` sites. That is the fence's conditional `boundary-policy.json` path: record the failure first, then add exactly those entries, and list them in the memo.
 - **Review focus:** Flow's and Focus's `bookStampedDocsRef.current.add(doc)` follow the `await` directly (on `d3184d0b`: Flow lines 927-929, 955-957 and 1408-1413; Focus lines 846-848 and 1296-1301), and `collectParagraphStartWordIndexes` reads that set. The settling rule keeps those lines on a finished document, and C4b pins it. Any other caller that depends on the run having finished is a STOP to Blurby.Brain1 with the lines.
-- **After this lands:** the planner re-reads FLOW-RESTAMP-CURRENT-1, FOCUS-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1, because the token closes part of their race. All three stay registered.
+- **After this lands:** the planner re-reads FLOW-RESTAMP-CURRENT-1, FOCUS-RESTAMP-CURRENT-1 and NARRATE-RESTAMP-CURRENT-1, because the token and the loop guard close part of their race. All three stay registered.
 - **Host:** RodneySr, in its `.worktrees\block-text-order-1`; arm64 B8 on Rodney (rule 6b). Its disk was freed on the owner's approval, and Blurby.Brain1 confirms the free space before launch.
 - **Order:** after Job 2b and ahead of Jobs 3 and 4 (Blurby.Brain1, 2026-11-05).
 - **Branch:** `eb/block-text-order-1`. Push with `HEAD:refs/heads/eb/block-text-order-1`.
@@ -71,7 +73,7 @@ New rows are red first on `d3184d0b`.
 
 ## Failure handling
 
-- **A row needs a view edit:** STOP to Blurby.Brain1 with the lines.
+- **A row needs a view edit beyond the three loop guards:** STOP to Blurby.Brain1 with the lines.
 - **C7 finds a wrap task over 50 ms:** STOP. Do not lower the budget without a ruling.
 - **Any section reports `ok:false` in B5:** STOP to Blurby.Brain1, as the specification says.
 - **Rollback:** nothing is merged until the merge go.
@@ -81,7 +83,7 @@ New rows are red first on `d3184d0b`.
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Red rows C1 to C4b, committed alone | calculable | positive-control | bounded | medium | 30m | — | C |
-| 2 | Yielding stamp and supersede token in the four helper copies; `(rr-c)` and census entries updated | calculable | implementation | cross-cutting | high | 30m | — | C |
+| 2 | Yielding stamp and supersede token in the four helper copies; the three restamp loop guards; `(rr-c)` and census entries updated | calculable | implementation | cross-cutting | high | 30m | — | C |
 | 3 | Suite, typecheck, build, B5 | calculable | verify | bounded | low | 20m | — | C |
 | 4 | Trace C7 in Narrate and Page | calculable | live-check | bounded | medium | 30m | — | C |
 | 5 | Three D3 sessions | calculable | live-check | bounded | low | 25m | — | C |
