@@ -1271,6 +1271,7 @@ export default function NarrateFoliateView({
       const view = viewRef.current;
       const contents = view?.renderer?.getContents?.() ?? [];
       for (const { doc, index } of contents) {
+        if (cancelled) return;
         if (!doc?.body) continue;
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;

@@ -462,6 +462,22 @@
   ],
   "allowedModuleSingletons": [
     {
+      "file": "src/reader/modes/page/helpers/foliateWordWrapping.ts",
+      "symbol": "wrapTokens"
+    },
+    {
+      "file": "src/reader/modes/focus/helpers/foliateWordWrapping.ts",
+      "symbol": "wrapTokens"
+    },
+    {
+      "file": "src/reader/modes/flow/helpers/foliateWordWrapping.ts",
+      "symbol": "wrapTokens"
+    },
+    {
+      "file": "src/reader/modes/narrate/helpers/foliateWordWrapping.ts",
+      "symbol": "wrapTokens"
+    },
+    {
       "file": "src/reader/modes/page/helpers/foliateHelpers.ts",
       "symbol": "BLOCK_TAGS"
     },

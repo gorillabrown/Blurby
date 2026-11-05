@@ -11,7 +11,22 @@ import {
  *  processed before yielding to the event loop via setTimeout(0). */
 const WRAP_BATCH_SIZE = 50;
 
+/** BLOCK-TEXT-ORDER-1 amendment 1: time budget (ms) for one slice of the certified stamp. After a node, once a slice has
+ *  run this long and placements remain, the stamp yields via setTimeout(0) and starts a new slice. */
+const WRAP_STAMP_SLICE_MS = 8;
+
 const MAX_PEEK_AHEAD = 8;
+
+/** BLOCK-TEXT-ORDER-1 amendment 1: the latest run per document. `wrapWordsInSpans` and `unwrapWordSpans` each replace
+ *  it. A run whose token was replaced stops at its next check with no report and returns the current token's `settled`,
+ *  so its caller resumes only when the live run ends; `unwrapWordSpans` installs `settled: null`, so a run superseded by
+ *  an unwrap alone returns at once. Runs only wait on newer runs, so there is no cycle. */
+type WrapToken = { settled: Promise<number> | null };
+const wrapTokens = new WeakMap<Document, WrapToken>();
+/** What a superseded run returns: the live run's completion, or `fallback` at once when no run is live. */
+function liveRunOf(doc: Document, fallback: number): Promise<number> | number {
+  return wrapTokens.get(doc)?.settled ?? fallback;
+}
 
 type WrappedWordSpan = SegmentedWordSpan & { globalIndex: number; tokenId: string };
 
@@ -140,11 +155,12 @@ export function certifyCanonicalAlignment(
 }
 
 /**
- * The certified branch (TQ-B3): wraps every placement synchronously, with no yield, node by node in DOM order. Before
- * each node is wrapped its text is re-checked against the text certified (Q4, always present); on a mismatch stamping
- * stops, so no span sits at a stale offset, and `dom-changed` is reported as a second result.
+ * The certified branch (TQ-B3, amendment 1): wraps the placements node by node in DOM order, in time slices. After a
+ * node, once the slice has run `WRAP_STAMP_SLICE_MS` and placements remain, it yields via setTimeout(0). Before each node
+ * is wrapped its text is re-checked against the text certified (Q4, always present); on a mismatch, including a change
+ * made during a yield, stamping stops, so no span sits at a stale offset, and `dom-changed` is reported as a second result.
  */
-function stampCertifiedPlacements(
+async function stampCertifiedPlacements(
   doc: Document,
   nodes: readonly Text[],
   canonical: readonly string[],
@@ -153,10 +169,12 @@ function stampCertifiedPlacements(
   globalOffset: number,
   onCertification: ((result: CertificationResult) => void) | undefined,
   betweenNodes: ((k: number) => void) | undefined,
-): void {
+  token: WrapToken,
+): Promise<"done" | "superseded"> {
   const capturedText = nodes.map((node) => node.data);
   const tokenPartById = new Map<string, number>();
   let p = 0;
+  let sliceStart = performance.now();
   while (p < placements.length) {
     const k = placements[p].node;
     const wordSpans: WrappedWordSpan[] = [];
@@ -164,21 +182,30 @@ function stampCertifiedPlacements(
       const { i, start, end } = placements[p];
       wordSpans.push({ word: canonical[i], start, end, globalIndex: globalOffset + i, tokenId: makeFoliateTokenId(sectionIndex, i) });
     }
+    if (wrapTokens.get(doc) !== token) return "superseded"; // stop with no report
     const node = nodes[k];
     const parent = node.parentNode;
     if (!node.isConnected || node.data !== capturedText[k] || !parent) {
       onCertification?.({ ok: false, reason: "dom-changed" });
-      return;
+      return "done";
     }
     const frag = buildWrappedFragmentForNode(doc, node.data, 0, wordSpans, tokenPartById);
     if (frag) parent.replaceChild(frag, node);
-    if (p < placements.length) betweenNodes?.(k);
+    if (p < placements.length) {
+      betweenNodes?.(k);
+      if (performance.now() - sliceStart >= WRAP_STAMP_SLICE_MS) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        sliceStart = performance.now();
+      }
+    }
   }
+  return "done";
 }
 
 /** Remove all .page-word wrapper spans and restore their text as plain text nodes.
  *  Used by HOTFIX-10 to re-stamp sections with corrected global indices. */
 export function unwrapWordSpans(doc: Document): void {
+  wrapTokens.set(doc, { settled: null }); // amendment 1: supersedes any run on this document
   const spans = doc.querySelectorAll("span.page-word");
   for (const span of spans) {
     const parent = span.parentNode;
@@ -201,12 +228,12 @@ export function unwrapWordSpans(doc: Document): void {
  *  STAB-1A (BUG-162b): async batching keeps UI responsive during large section wraps.
  *
  *  BLOCK-TEXT-ORDER-1 (contract B.2): with a canonical slice, the section is first certified against its main-accepted
- *  text. A certified section is stamped on the certified source occurrences, synchronously; an uncertified one runs the
+ *  text. A certified section is stamped on the certified source occurrences, in time slices; an uncertified one runs the
  *  legacy content-align path unchanged. `onCertification` is called exactly once, synchronously, before the first
  *  await: `{ok:false, reason:"no-canonical-slice"}` with no slice, `{ok:true}`, or the certifier's failure. A certified
  *  wrap whose DOM changed mid-stamp reports `{ok:false, reason:"dom-changed"}` second. `__testBetweenNodes` is a test
  *  hook run between the certified nodes; production never passes it. */
-export async function wrapWordsInSpans(
+export function wrapWordsInSpans(
   doc: Document,
   sectionIndex: number,
   globalOffset: number,
@@ -215,6 +242,22 @@ export async function wrapWordsInSpans(
   onCertification?: (result: CertificationResult) => void,
   options: { __testBetweenNodes?: (k: number) => void } = {},
 ): Promise<number> {
+  const token: WrapToken = { settled: null };
+  wrapTokens.set(doc, token); // amendment 1: supersedes any earlier run on this document
+  token.settled = wrapRun(doc, sectionIndex, globalOffset, sectionWords, canonicalWords, onCertification, options, token);
+  return token.settled;
+}
+
+async function wrapRun(
+  doc: Document,
+  sectionIndex: number,
+  globalOffset: number,
+  sectionWords: FoliateWord[],
+  canonicalWords: string[] | undefined,
+  onCertification: ((result: CertificationResult) => void) | undefined,
+  options: { __testBetweenNodes?: (k: number) => void },
+  token: WrapToken,
+): Promise<number> {
   if (canonicalWords == null || canonicalWords.length === 0) {
     onCertification?.({ ok: false, reason: "no-canonical-slice" });
   } else {
@@ -222,7 +265,8 @@ export async function wrapWordsInSpans(
     const certified = certifyCanonicalAlignment(nodes, canonicalWords);
     if (certified.ok) {
       onCertification?.({ ok: true });
-      stampCertifiedPlacements(doc, nodes, canonicalWords, certified.placements, sectionIndex, globalOffset, onCertification, options.__testBetweenNodes);
+      const stamped = await stampCertifiedPlacements(doc, nodes, canonicalWords, certified.placements, sectionIndex, globalOffset, onCertification, options.__testBetweenNodes, token);
+      if (stamped === "superseded") return liveRunOf(doc, globalOffset + canonicalWords.length);
       return globalOffset + canonicalWords.length;
     }
     onCertification?.(certified);
@@ -275,6 +319,7 @@ export async function wrapWordsInSpans(
 
     if ((i + 1) % WRAP_BATCH_SIZE === 0 && i + 1 < groups.length) {
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      if (wrapTokens.get(doc) !== token) return liveRunOf(doc, useContentAlign ? globalOffset + canonicalCursor : globalIndex); // amendment 1: superseded, stop with no report
     }
   }
 
