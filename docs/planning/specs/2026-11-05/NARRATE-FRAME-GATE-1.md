@@ -22,7 +22,12 @@
 - **Allowed count:** `Math.max(1, Math.floor(stats.minutes))`. `analyze` already holds a session shorter than `minMinutes`, so a counted 5-minute session allows 5.
 - **Count every long commit, with no upper filter.** The filter `x < 1000` at the refresh median exists for that median. A 1,200 ms frame must count here. A pause cannot inflate the count, because the engine clears `lastTickPerf` on pause and stop (`narrateEngine.ts:218`, `:542`), so the first commit after one has `frameDt` null.
 - **Commits, as ruled, not distinct frames.** A long frame that commits two words counts twice (`narrateEngine.ts:346`).
-- **Precondition:** `visibilityState` "visible", and p90 of the frame intervals within 1.5 times the display's refresh, taken from `screen.getPrimaryDisplay().displayFrequency`.
+- **Precondition:** three predicates, and any one failing makes the probe invalid:
+  - `visibilityState` "visible";
+  - p90 of the frame intervals within 1.5 times the display's refresh, taken from `screen.getPrimaryDisplay().displayFrequency`;
+  - `modernStandby.lastEvent` is not 506 (added by Blurby.Brain1's addendum, 2026-11-05).
+- **Why a check that isn't Chromium's:** the first two are Chromium's view of the window, and that view can be wrong. On RodneySr's row 6 run, with the display off, a never-shown window in a `windowsHide` spawn read "visible" with timer frames at p90 18.5 ms against a 25 ms limit, so it passed and the session launched. A timer fallback on an idle host looks like vsync. Why that window differs from the probe's hidden read is not known. A null Modern Standby read does not invalidate on its own, so hosts without these events keep working.
+- **One recipe (LL-152):** `displayProbe` spawns with `windowsHide: false`, because the spawn context changed what the probe read and the hand recipe has no such flag. A GUI-subsystem exe has no console to hide. `launch()` does not change.
 - **Which launches are frame-sensitive:** `session` and `warm`, each with its own pair. The `cold` block gets one pair around the whole block, because its figures are on the playback clock and it runs many short processes.
 - **Same Electron by construction:** the launcher runs the probe with the same `ELECTRON` binary as the session.
 - **Exit codes:** 0 pass, 1 fail, 7 invalid. 3, 4 and 5 keep their meanings (`app-node.ps1`, `lib/app-icu-guard.mjs`). The probe exits 0 or 7, and 8 when it could not run. A probe that could not run is invalid too.
@@ -34,16 +39,16 @@
 - `scripts/narrate-rebuild/display-probe.cjs` (new): an Electron main script. `electron display-probe.cjs --out <file> [--break]`.
   - It opens a visible `BrowserWindow` with `alwaysOnTop: true`, so another window cannot occlude it, loading an inline blank page.
   - For 5 s it records `requestAnimationFrame` intervals and `document.visibilityState`.
-  - It writes `{ at, electron, displayFrequency, visibilityState, frames, p50, p90, max, limitMs, valid, modernStandby }`.
+  - It writes `{ at, electron, displayFrequency, visibilityState, frames, p50, p90, max, limitMs, valid, invalidReasons, modernStandby }`. `invalidReasons` holds any of `not-visible`, `p90-over-limit` and `modern-standby`, so a failure says which predicate fired.
   - `modernStandby` is the latest Microsoft-Windows-Kernel-Power event 506 (entered) or 507 (left) from the System log, with its time, read through `pwsh`. A failed read records null with its error, and does not by itself invalidate the probe.
-  - `--break` creates the window with `show: false`, so `visibilityState` is "hidden". It must exit 7 (standing rule 55).
+  - `--break` shows the window as the real probe does, then forces it non-visible with `w.minimize()`, awaiting its event, before measuring, and records `break: "minimized"`. If that reads "visible" with the panel on, it uses `w.hide()` and records `break: "hidden"`. It must exit 7 (standing rule 55).
 - `scripts/narrate-rebuild/display-hold.ps1` (new): `Add-Type` a P/Invoke of `kernel32!SetThreadExecutionState`, call it with `ES_CONTINUOUS | ES_DISPLAY_REQUIRED`, then sleep in a loop until killed. It changes no setting, and the request ends with the process.
 - `scripts/narrate-rebuild/p5-recorded-output-check.mjs`:
   - new exports `LONG_COMMIT_MS = 100` and `LONG_COMMITS_PER_MINUTE = 1`, beside `MIN_COMMITS`;
   - in `analyze`, `stats.longCommits` and `stats.longCommitLimit`, then a `failures` entry reading `${n} commits over 100 ms (limit ${allowed} in ${minutes} min)`;
   - the header comment gains the row. `--break` and `:84-100` do not change.
 - `scripts/narrate-rebuild/p5-latency-e2e.mjs`:
-  - a `displayProbe(path)` helper. It must drop `ELECTRON_RUN_AS_NODE` from the child's environment, as `launch()` does at `:98`, or the probe runs as Node;
+  - a `displayProbe(path)` helper, spawned with `windowsHide: false`. It must drop `ELECTRON_RUN_AS_NODE` from the child's environment, as `launch()` does at `:98`, or the probe runs as Node;
   - in `launch()`, for `session` and `warm`: the before probe, then the launch, then the after probe, written to `<out>/display/<label>.before.json` and `.after.json`. A failed before probe launches nothing;
   - one pair around the `cold` block;
   - `displayBefore`, `displayAfter` and `gpuHost3dPct` on each run record, with the existing `foreignCpuPct`;
@@ -73,9 +78,10 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 | 1 | **Row, positive control.** The checker fails a display-off session on the new row | `p5-recorded-output-check.mjs <Job 2b arm A trace> --min-minutes 0` under `app-node.ps1` exits 1, and its output has `commits over 100 ms`, with `longCommits` at 13.5 or more per minute |
 | 2 | **Row, negative.** A session with few long commits passes the row | Run 5's trace, if still held. If not, the memo says so and Blurby.Brain1 reads the first display-on session |
 | 3 | **Allowance unchanged.** Only the row changes a verdict | `git diff` of `p5-recorded-output-check.mjs` shows no change at `:84-100`, and `--break` still exits 1 |
-| 4 | **Probe, positive control** | `display-probe.cjs --out x --break` exits 7, with `visibilityState` "hidden" and `valid` false |
-| 5 | **Probe, panel on** | Exit 0, `visibilityState` "visible", p90 within `limitMs`, and every field present |
-| 6 | **A failed before probe launches nothing** | `p5-latency-e2e.mjs --only session --minutes 1 --rates 1.0 --break-display before` exits 7 with no trace written, and `failures` empty |
+| 4 | **Probe, positive control, panel on** | `display-probe.cjs --out x --break` exits 7, with `valid` false and `invalidReasons` exactly `["not-visible"]` |
+| 4a | **Third predicate, positive control, panel off, before the new `--break` is made** | Row 6's recipe with the old never-shown `--break`: invalid, with `invalidReasons` exactly `["modern-standby"]`. It can only be taken while the panel is off. Rows 4 and 6 are also run once each with the panel off, which is not proof of the break |
+| 5 | **Probe, panel on, direct and through the launcher** | Exit 0, `visibilityState` "visible", p90 within `limitMs`, `invalidReasons` empty, `modernStandby.lastEvent` 507, and every field present |
+| 6 | **A failed before probe launches nothing, panel on** | `p5-latency-e2e.mjs --only session --minutes 1 --rates 1.0 --break-display before` exits 7 with no trace written, `failures` empty, and `invalidReasons` exactly `["not-visible"]` |
 | 7 | **A failed after probe invalidates** | The same with `--break-display after`: exits 7, the trace is kept, the session is `INVALID`, and `failures` is empty |
 | 7a | **Warm and cold invalidate too, and never fail** | `--only warm --warm 1 --rates 1.0 --break-display before` exits 7 with `failures` empty. The same with `--only cold --cold 1 --break-display after` |
 | 8 | **Old evidence cannot pass** | `--analyze-only` on an `--out` with no `display` folder exits 7 for each of `--only session`, `--only warm` and `--only cold` |
@@ -98,12 +104,12 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 - **Row 5 fails with the panel on:** STOP to Blurby.Brain1 with the probe file. Do not loosen 1.5 times.
 - **Row 2's trace shows more than the limit:** STOP. The threshold was set before the data, and only Blurby.Brain1 can move it.
 - **A row needs a path outside the fence:** STOP to Blurby.Brain1.
-- **Retry ceiling:** one run of each row. A second attempt needs Blurby.Brain1's ruling.
+- **Retry ceiling:** one run of each row, beyond the controls Blurby.Brain1's addendum lists. A further attempt needs its ruling.
 - **Rollback:** `git revert -m 1 <merge>`.
 
 ##### Repository plan and host (rule 6b)
 
-- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, and rows 5, 7, 7a, 9 and 10 need its panel on (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
+- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, rows 4, 5, 6, 7, 7a, 9 and 10 need its panel on, and row 4a needs it off, so 4a goes first (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
 - **Branch:** `eb/narrate-frame-gate-1` from `refs/remotes/origin/main` at `c630f9a4` or later. Push with `HEAD:refs/heads/eb/narrate-frame-gate-1`.
 - **Staging:** exact paths: the four scripts, `docs/governance/close-outs/Memo.NARRATE-FRAME-GATE-1.GovernanceStaging.<date>.md` and `docs/governance/close-outs/Timing.NARRATE-FRAME-GATE-1.jsonl`. Never stage `tests/perf-baseline-results.json`.
 - **Merge:** `--no-ff`, on Blurby.Brain1's confirmation and Blurby.Roadmap's merge go.
@@ -114,7 +120,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
 | 1 | Long-frame row in the checker; rows 1 to 3 | calculable | implementation | bounded | low | 20m | — | C |
-| 2 | Probe and hold scripts; rows 4, 5 and 10 | calculable | implementation | bounded | medium | 30m | — | C |
+| 2 | Probe and hold scripts; rows 4, 4a, 5 and 10 | calculable | implementation | bounded | medium | 30m | — | C |
 | 3 | Launcher precondition, record and exit 7; rows 6 to 9, with 7a | calculable | implementation | bounded | medium | 30m | — | C |
 | 4 | Suite, typecheck, fence and package-unchanged record | calculable | verify | bounded | low | 15m | — | C |
 | 5 | Memo, time log, push, Blurby.Brain1's confirmation | calculable | docs | bounded | low | 10m | — | C |
