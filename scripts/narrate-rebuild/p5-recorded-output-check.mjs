@@ -6,9 +6,12 @@
 // mapping must hold to MAPPING_LIMIT_MS over the session (a straight line, drift allowed), else the file is
 // INCONCLUSIVE, never a pass. The schedules and stops must describe non-overlapping sounding intervals, and the
 // commits inside every chunk played to its end must name its units once each, in order (no drop, no repeat).
-// NARRATE-FRAME-GATE-1 (F-036): a long-frame row. At most LONG_COMMITS_PER_MINUTE commits over LONG_COMMIT_MS per minute
-// of session (allowed = max(1, floor(minutes))), every long commit counted with no upper filter. A display-off session,
-// whose frames come from a timer fallback with no vsync, fails here even when the own-frame allowance below passes it.
+// NARRATE-FRAME-GATE-1 (F-036): a long-frame row. At most LONG_FRAMES_PER_MINUTE distinct frames over LONG_FRAME_MS per
+// minute of session (allowed = max(1, floor(minutes))), with no upper filter. A frame is one engine tick: tick() stamps one
+// `t` on every commit it makes, so the long frames are the distinct `t` values among commits whose frameDt is over the
+// limit (ruling Brain1.long-frame-row.count-frames.2026-11-05: one stalled frame carrying a whole chunk counts once).
+// stats.longCommits stays as a recorded figure. A display-off session, whose frames come from a timer fallback with no
+// vsync, fails here even when the own-frame allowance below passes it.
 //
 // Usage: node scripts/narrate-rebuild/p5-recorded-output-check.mjs <trace.json ...> [--min-minutes 5] [--break]
 // Exit 0 = PASS on every file; 1 = any FAIL or INCONCLUSIVE. --break plants a late commit in the first file's
@@ -19,8 +22,8 @@ import { createRequire } from "node:module";
 export const FRAME_TOLERANCE_MS = 1;   // measurement slack on either side of the refresh interval
 export const MAPPING_LIMIT_MS = 10;    // D3: clock-mapping uncertainty ceiling
 export const MIN_COMMITS = 100;
-export const LONG_COMMIT_MS = 100;       // NARRATE-FRAME-GATE-1: a commit whose frame ran longer than this is long
-export const LONG_COMMITS_PER_MINUTE = 1; // NARRATE-FRAME-GATE-1: long commits allowed per minute of session
+export const LONG_FRAME_MS = 100;        // NARRATE-FRAME-GATE-1: a frame (one tick) longer than this is long
+export const LONG_FRAMES_PER_MINUTE = 1; // NARRATE-FRAME-GATE-1: long frames allowed per minute of session
 
 const median = (xs) => {
   const s = [...xs].sort((a, b) => a - b);
@@ -111,12 +114,14 @@ export function analyze(events, { minMinutes = 5 } = {}) {
   stats.worstLateMs = worstLateMs === null ? null : +worstLateMs.toFixed(2);
   stats.limitMs = +baseLimit.toFixed(2);
   if (outside.length) failures.push(`${outside.length} commits outside one display frame (worst ${stats.worstLateMs} ms, refresh limit ${stats.limitMs})`);
-  // NARRATE-FRAME-GATE-1 (F-036): the long-frame row. Commits, not distinct frames; no upper filter on frameDt.
-  const longCommits = commits.filter((c) => typeof c.frameDt === "number" && c.frameDt > LONG_COMMIT_MS).length;
-  const allowed = Math.max(1, Math.floor(minutes)) * LONG_COMMITS_PER_MINUTE;
-  stats.longCommits = longCommits;
-  stats.longCommitLimit = allowed;
-  if (longCommits > allowed) failures.push(`${longCommits} commits over ${LONG_COMMIT_MS} ms (limit ${allowed} in ${stats.minutes} min)`);
+  // NARRATE-FRAME-GATE-1 (F-036): the long-frame row. Distinct frames (distinct tick `t`); no upper filter on frameDt.
+  const long = commits.filter((c) => typeof c.frameDt === "number" && c.frameDt > LONG_FRAME_MS);
+  const longFrames = new Set(long.map((c) => c.t)).size;
+  const allowed = Math.max(1, Math.floor(minutes)) * LONG_FRAMES_PER_MINUTE;
+  stats.longCommits = long.length;
+  stats.longFrames = longFrames;
+  stats.longFrameLimit = allowed;
+  if (longFrames > allowed) failures.push(`${longFrames} frames over ${LONG_FRAME_MS} ms (limit ${allowed} in ${stats.minutes} min)`);
   const failed = events.filter((e) => e.kind === "narrate-failure");
   stats.failures = failed.map((e) => ({ reason: e.reason, atWord: e.atWord, detail: e.detail }));
   if (failed.length) failures.push(`${failed.length} chunk failures (F4): ${failed.map((e) => `${e.reason}@${e.atWord}${e.detail ? " " + String(e.detail).slice(0, 80) : ""}`).join("; ")}`);
