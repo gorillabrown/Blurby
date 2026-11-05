@@ -6,7 +6,7 @@
 // display's refresh interval (screen.getPrimaryDisplay().displayFrequency), and the host not in Modern Standby (Brain1
 // addendum, F-036: a never-shown window can read "visible" with ~18 ms timer frames and no display at all). invalidReasons
 // holds any of "not-visible", "p90-over-limit", "modern-standby". Exit 0 valid, 7 invalid, 8 could not run (also invalid).
-// --break creates the window with show:false, so visibilityState is "hidden" and it must exit 7 (standing rule 55).
+// --break shows the window, minimizes it (awaiting the event), then measures; it records break:"minimized" and must exit 7 (standing rule 55).
 // modernStandby is the latest Kernel-Power 506 (entered) or 507 (left) event, read through pwsh. Last event 506 makes the
 // probe invalid; a failed read records null with its error and does not by itself invalidate the probe.
 const { app, BrowserWindow, screen } = require("electron");
