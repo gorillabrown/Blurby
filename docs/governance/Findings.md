@@ -572,3 +572,17 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** Blurby.Brain1: commit both records (run 6's table and the RC "Package verification" section) to `docs/governance/close-outs/`, or name their exact location for the close-outs to cite.
 
 **Disposition:** open; ruled 2026-11-05 (`Brain1.post-halt-rulings.2026-11-05.md`). Blurby.Brain1 owns it: RodneySr drafts both records on `eb/gov-rc-evidence-records`.
+
+### F-036 — Long frames in recorded Narrate sessions, which the D5 check cannot see (BTO D3 read-out, 2026-11-05)
+
+**Source:** Blurby.Brain1's read of RodneySr's BLOCK-TEXT-ORDER-1 D3 1.00x sessions on `d3184d0b` (`C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.rodneysr-dispatch-status.2026-11-05.md`). The figures are Brain1's. The planner checked the code sites below on `origin/main` `14ce3d24`.
+
+**Severity:** medium until the cause is named (it may be a test-harness effect; if it is product behaviour, the cursor stalls for up to half a second and a gate (1) pass did not see it)
+
+**Where:** `scripts/narrate-rebuild/p5-recorded-output-check.mjs:84-100`: `limit = Math.max(baseLimit, frame + FRAME_TOLERANCE_MS)` gives a long frame its own lateness limit. `main/narrate/trial.js:154`, added by NARRATE-ARRIVAL-SYNC-1 (`48ac770d`), sets `BLURBY_DUAL_SOURCE_DIAG` in the trial's scratch profile. That flag switches on `src/utils/dualSourceDiag.ts:62` and its `console.debug` at `:86`, and `trial.js:148` forwards those lines to the main process log.
+
+**Finding:** many commit frames run 300 to 515 ms. Commits over 100 ms number 136, 68 and 145 per session on `d3184d0b`, 130 on `14ce3d24` without BLOCK-TEXT-ORDER-1, and 1 on gate (1) run 5. So BLOCK-TEXT-ORDER-1 is not the source, and the D3 1.00x pass in gate (1) run 6 has the same blind spot. The cause is open (rule 6c). Candidates are the diagnostic flag at `trial.js:154`, which lands between runs 5 and 6, and host state. `windowsHide` is ruled out because it predates run 5. If the flag is the cause, the long frames come from the trial, not the product, because nothing outside `trial.js` sets it on `origin/main`.
+
+**Accountable role / next action:** Blurby.Brain1: RodneySr's three-arm A/B (Job 2b) on `c5bb507f`, `14ce3d24`, and `14ce3d24` without `trial.js:154`. If the frames are real, a long-frame row goes into the D5 check before gate (1), and the planner writes that change as a specification. If the flag is the cause, the fix belongs in `trial.js`, because a diagnostic left on in a measuring harness distorts the measurement.
+
+**Disposition:** open; BLOCK-TEXT-ORDER-1's package confirmation waits on Brain1's read-out of max frameDt and worst-late ms in the 3 s after each crossing.
