@@ -50,7 +50,9 @@
   - `gpuHost3dPct` from a second `pwsh` loop reading `\GPU Engine(*engtype_3D)\Utilization Percentage` every 5 s, reporting mean and maximum;
   - an `invalid` list on the report, apart from `failures`. A run on it is `INVALID` with its reason, is not counted, and adds nothing to `failures`. Exit 7 when the list is not empty and `failures` is empty; exit 1 wins when both hold;
   - `--break-display before|after`, which passes `--break` to that probe (standing rule 55);
-  - `--analyze-only`: a session with either probe file missing or not valid is `INVALID`. So older traces can no longer pass through it;
+  - `--analyze-only`: a session, a warm part or the cold block with either probe file missing or not valid is `INVALID`. So older traces can no longer pass through it;
+  - an invalid warm part makes that rate `INVALID`: `report.warm[r]` holds the reason, and the per-type checks are skipped, because their "only N counting trials" and "over budget" entries would put a display fault in `failures`;
+  - an invalid cold pair drops the cold block's own entries from `failures` in the same way;
   - the hold is started once at the top of a run that launches, and killed in `process.on("exit")`;
   - the header comment gains the precondition and exit 7.
 
@@ -75,7 +77,8 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 | 5 | **Probe, panel on** | Exit 0, `visibilityState` "visible", p90 within `limitMs`, and every field present |
 | 6 | **A failed before probe launches nothing** | `p5-latency-e2e.mjs --only session --minutes 1 --rates 1.0 --break-display before` exits 7 with no trace written, and `failures` empty |
 | 7 | **A failed after probe invalidates** | The same with `--break-display after`: exits 7, the trace is kept, the session is `INVALID`, and `failures` is empty |
-| 8 | **Old evidence cannot pass** | `--only session --analyze-only` on an `--out` with no `display` folder exits 7 |
+| 7a | **Warm and cold invalidate too, and never fail** | `--only warm --warm 1 --rates 1.0 --break-display before` exits 7 with `failures` empty. The same with `--only cold --cold 1 --break-display after` |
+| 8 | **Old evidence cannot pass** | `--analyze-only` on an `--out` with no `display` folder exits 7 for each of `--only session`, `--only warm` and `--only cold` |
 | 9 | **The record** | A display-on run's `recorded-output.json` and `latency-e2e.json` hold `displayBefore`, `displayAfter`, `foreignCpuPct` and `gpuHost3dPct` per run, and each probe file holds `modernStandby` |
 | 10 | **The hold** | `powercfg /requests` lists the hold under DISPLAY during a run and not after it, and `powercfg /query` output is identical before and after |
 | 11 | Suites still pass | `npm test` and `npm run typecheck` exit 0 |
@@ -84,7 +87,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 ##### Review focus
 
-- A failed probe never reaches `failures`, and a passing session with a bad after probe never reads PASS.
+- A failed probe never reaches `failures`, directly or through a later check on the trials it left out, and a passing session with a bad after probe never reads PASS.
 - `displayProbe` drops `ELECTRON_RUN_AS_NODE`. If it doesn't, row 5 fails with no window.
 - `recorded-output.json` and `latency-e2e.json` are tracked study records. Restore them from `HEAD` after runs, as `epic-window.ps1` does; a commit of them is out of the fence.
 - The hold is killed on a thrown error as well as a normal exit, because its request lasts as long as its process.
@@ -100,7 +103,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 ##### Repository plan and host (rule 6b)
 
-- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, and rows 5, 7, 9 and 10 need its panel on (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
+- **Host:** RodneySr, in `<clone>\.worktrees\narrate-frame-gate-1`, with `npm ci`. Its Job 2b traces are row 1's input, and rows 5, 7, 7a, 9 and 10 need its panel on (owner action, Blurby.Brain1 confirms). Blurby.Brain1 confirms the host's inputs before launch.
 - **Branch:** `eb/narrate-frame-gate-1` from `refs/remotes/origin/main` at `c630f9a4` or later. Push with `HEAD:refs/heads/eb/narrate-frame-gate-1`.
 - **Staging:** exact paths: the four scripts, `docs/governance/close-outs/Memo.NARRATE-FRAME-GATE-1.GovernanceStaging.<date>.md` and `docs/governance/close-outs/Timing.NARRATE-FRAME-GATE-1.jsonl`. Never stage `tests/perf-baseline-results.json`.
 - **Merge:** `--no-ff`, on Blurby.Brain1's confirmation and Blurby.Roadmap's merge go.
@@ -112,7 +115,7 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 |---|---|---|---|---|---|---|---|---|
 | 1 | Long-frame row in the checker; rows 1 to 3 | calculable | implementation | bounded | low | 20m | — | C |
 | 2 | Probe and hold scripts; rows 4, 5 and 10 | calculable | implementation | bounded | medium | 30m | — | C |
-| 3 | Launcher precondition, record and exit 7; rows 6 to 9 | calculable | implementation | bounded | medium | 30m | — | C |
+| 3 | Launcher precondition, record and exit 7; rows 6 to 9, with 7a | calculable | implementation | bounded | medium | 30m | — | C |
 | 4 | Suite, typecheck, fence and package-unchanged record | calculable | verify | bounded | low | 15m | — | C |
 | 5 | Memo, time log, push, Blurby.Brain1's confirmation | calculable | docs | bounded | low | 10m | — | C |
 
