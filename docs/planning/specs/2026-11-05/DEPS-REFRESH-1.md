@@ -64,7 +64,7 @@
 ##### Repository plan and host (rule 6b)
 
 - **Host:** RodneySr, in `<clone>\.worktrees\deps-refresh-1`, with `npm ci`. Brain1 confirms the host's inputs before launch.
-- **Branch:** `eb/deps-refresh-1` from `refs/remotes/origin/main` after BLOCK-TEXT-ORDER-1 merges (Brain1's merge order). Push with `HEAD:refs/heads/eb/deps-refresh-1`.
+- **Branch:** `eb/deps-refresh-1` from `refs/remotes/origin/main` now, not after BLOCK-TEXT-ORDER-1 (Blurby.Brain1, 2026-11-05), because the lockfile and advisories document share no files with it. Done-when 1 to 7 run now, and then it holds. Done-when 8 (rule 53) runs on the merged tip after BLOCK-TEXT-ORDER-1. Merge order is unchanged: third. Push with `HEAD:refs/heads/eb/deps-refresh-1`.
 - **Staging:** exact paths: `package-lock.json`, `docs/governance/DEPENDENCY_ADVISORIES.md`, `docs/governance/close-outs/Memo.DEPS-REFRESH-1.GovernanceStaging.<date>.md` and `docs/governance/close-outs/Timing.DEPS-REFRESH-1.jsonl`. Never stage `tests/perf-baseline-results.json`.
 - **Merge:** `--no-ff`, on Blurby.Brain1's package confirmation and Blurby.Roadmap's merge go.
 - **Lane ownership:** surface D. **Forbidden during a parallel run:** every source file. **Shared-core touches:** none. **Merge order:** third in Brain1's release set, after the ERROR-LOG fix and BLOCK-TEXT-ORDER-1.
