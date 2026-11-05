@@ -5,13 +5,7 @@
 "use strict";
 
 const fsPromises = require("fs/promises");
-
-async function logToFile(message, errorLogPath) {
-  try {
-    const timestamp = new Date().toISOString();
-    await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
-  } catch { /* Intentional: error logging should never crash the app */ }
-}
+const { logToFile } = require("./error-log");
 
 /**
  * Write `fields` to the library's live record for `docId`. A field whose value is `undefined` is removed.
