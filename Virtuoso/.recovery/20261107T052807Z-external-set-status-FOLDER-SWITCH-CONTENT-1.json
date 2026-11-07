@@ -1,0 +1,35 @@
+{
+  "id": "20261107T052807Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SWITCH-CONTENT-1",
+  "created": "2026-11-07T05:28:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Queued",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby.Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.\n\nRoadmap review 2026-11-06 (owner approved): back to Queued. The diagnosis finished 2026-10-26 and nothing is running. The fix waits on a technical ruling on the rapid-request contract, then a specification."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOLDER-SWITCH-CONTENT-1:[('notes', 'Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner authorized parallel execution2026-10-26 in Blurby.Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\\n\\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.\\n\\nRoadmap review 2026-11-06 (owner approved): back to Queued. The diagnosis finished 2026-10-26 and nothing is running. The fix waits on a technical ruling on the rapid-request contract, then a specification.'), ('written_status', 'Queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SWITCH-CONTENT-1",
+      "idempotencyKey": "set-status:FOLDER-SWITCH-CONTENT-1:[('notes', 'Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\\n\\nOwner authorized parallel execution2026-10-26 in Blurby.Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\\n\\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.\\n\\nRoadmap review 2026-11-06 (owner approved): back to Queued. The diagnosis finished 2026-10-26 and nothing is running. The fix waits on a technical ruling on the rapid-request contract, then a specification.'), ('written_status', 'Queued')]",
+      "actualRevision": "",
+      "recoveryId": "20261107T052807Z-external-set-status-FOLDER-SWITCH-CONTENT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-07T05:28:41Z",
+  "outcome": "succeeded"
+}

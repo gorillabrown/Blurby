@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-11-07T05:26:55Z",
+  "takenAt": "2026-11-07T05:28:43Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -6436,8 +6436,8 @@
       "id": "PROFILE-QUEUE-ISOLATION-1",
       "title": "Explain the normal-profile sync-queue change during isolated QA",
       "sequence": 121,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "status": "queued",
+      "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [],
@@ -6451,8 +6451,8 @@
       "completed": "",
       "evidence": "",
       "description": "Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json changed. Which process wrote it and whether isolation was breached are unresolved.",
-      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.\n\nR-2026-10-30-1 (2): a diagnosis, not a gate. sync-queue.json follows the overridden userData (main.js setPath before any read; main/sync-queue.js). Leading hypothesis: the owner's installed Blurby (pid 16120, running since 10-22) wrote its own queue during the 10-26 QA; check the 10-26 QA evidence for that process.",
-      "revision": "d59a4dac215ef884b548d5738dd3b1786a621ec20ea836692424333cd223bd1e",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F17. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby.Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: actual save-settings/queue/store scratchcontrol reproduces same-value settings rewrite+queueappend, proving equalbytes do not prove nowrites. Historicalevent narrowed to18:02:22UTC, originalwriterPIDstillunresolved; exactPID/path experiment specified. No productionwrites or speculativefix. Report docs/studies/investigations/PROFILE-QUEUE-ISOLATION-1.2026-10-26.md.\n\nR-2026-10-30-1 (2): a diagnosis, not a gate. sync-queue.json follows the overridden userData (main.js setPath before any read; main/sync-queue.js). Leading hypothesis: the owner's installed Blurby (pid 16120, running since 10-22) wrote its own queue during the 10-26 QA; check the 10-26 QA evidence for that process.\n\nRoadmap review 2026-11-06 (owner approved): back to Queued. The diagnosis finished 2026-10-26 and nothing is running. The writer process is still unresolved.",
+      "revision": "958f0dfcf7b0bf0c22a7637b0bdb98179da27a31d90bb0a10a2925d0fc486f1c",
       "extra": {
         "id": "4057c96c-c31e-8128-bbb6-f504a34e543d",
         "url": "https://app.notion.com/4057c96cc31e8128bbb6f504a34e543d",
@@ -6551,8 +6551,8 @@
       "id": "FOLDER-SWITCH-CONTENT-1",
       "title": "Folder switching shows the correct books promptly",
       "sequence": 120,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "status": "queued",
+      "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -6568,8 +6568,8 @@
       "completed": "",
       "evidence": "",
       "description": "Owner approved 2026-10-26: a selected folder shows explicit loading rather than presenting old-folder cards as its contents; preserve cached/persisted data. Separately instrument scan, cancellation, extraction and batching before performance changes; the observed~93s gap is not entirely attributed to the tested30s old-run wait.",
-      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby. Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.",
-      "revision": "c0eed6626255b9562b568e54fdde8645e63defab35f1631a7ee802d6a60c9877",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F10, F13. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.\n\nOwner authorized parallel execution2026-10-26 in Blurby.Roadmap. Investigation agent traces existing source/evidence and scratch-only positive controls; no production source/profile changes. Diagnosis is not a completed fix.\n\nParallel delivery review2026-10-26: Bounded diagnosis report independently approved: real useLibrary control proves optimisticnewfolder+oldcards+loadingContentfalse. Productionfolder controls prove30sec cancellation budget and interval-throttle behavior. Original93.2sec latency not attributed; rapidrequest contract needs technicaldecision beforefix. No appsource/profilewrites. Report docs/studies/investigations/FOLDER-SWITCH-CONTENT-1.2026-10-26.md.\n\nRoadmap review 2026-11-06 (owner approved): back to Queued. The diagnosis finished 2026-10-26 and nothing is running. The fix waits on a technical ruling on the rapid-request contract, then a specification.",
+      "revision": "a1343e461dd7cdb86b038a3b54ef629d7fd1d12e6330a5a41241d3da19aaddbb",
       "extra": {
         "id": "4057c96c-c31e-8149-85e7-f67c1d8f69a0",
         "url": "https://app.notion.com/4057c96cc31e814985e7f67c1d8f69a0",
