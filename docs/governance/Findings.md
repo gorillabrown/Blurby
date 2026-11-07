@@ -609,3 +609,27 @@ Overlays add facts only and never override the plugin. Evidence: `docs/planning/
 **Accountable role / next action:** placed 2026-11-05 (`Brain1.F-037.placement.2026-11-05.md`): the Shift+Right and pause-length checks run in the gate (1) rerun, on the packaged final tip, with books and tolerance named in ROADMAP.md's rerun list. The Narrate row goes to gate (2) as the check it is, row (w). Whether it stands, or is amended through the planner, the owner and an independent reviewer, follows that sitting.
 
 **Disposition:** open. BLOCK-TAG-CASE-1 stays In Flight, and BUG-241 stays Incomplete, until the row is settled.
+
+### F-002 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open, narrowed. The helper now proposes 2 merges and 62 retirements. The merges were read individually: LL-024 and LL-026 cover the same defect and may merge in a later pass; LL-093 and LL-094 are separate lessons that share tags, so they stay apart. No retirement was applied, because "never applied in a close-out" does not show a guardrail is obsolete. A retirement needs a named reason, such as the code it guards having been deleted. LL-109's code went with Qwen, yet its pattern lives on in standing rule 62. Next action: a reviewed pass of the retirement list. No item owns it yet, and no release depends on it.
+
+### F-031 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open. A count amendment goes through the planner, the owner and an independent reviewer before PAGE-SAVE-RESTAMP-2 and PAGE-SAVE-RESTAMP-GUARD-1 close.
+
+### F-033 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open, owned by LINK-ACCENT-CONTRAST-1 (Seq 136.5, Stub). The owner decides on the accent when the item is specified.
+
+### F-034 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open, owned by FIXED-LAYOUT-RESTAMP-1 (Seq 115.8, Stub). Measure first.
+
+### F-036 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open until NARRATE-FRAME-GATE-1 merges.
+
+### F-037 — disposition (roadmap-review, 2026-11-06)
+
+**Disposition:** open until the gate (1) rerun and smoke row (w).

@@ -1,0 +1,48 @@
+{
+  "id": "20261107T061950Z-external-create-item-LINK-ACCENT-CONTRAST-1",
+  "operation": "external-create-item",
+  "item_id": "LINK-ACCENT-CONTRAST-1",
+  "created": "2026-11-07T06:19:50Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "LINK-ACCENT-CONTRAST-1",
+      "title": "Light-theme links meet the 4.5:1 contrast target",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XS",
+      "workstream": "UX polish",
+      "spec_link": "ROADMAP.md#link-accent-contrast-1",
+      "prerequisites": [],
+      "description": "The owner decides whether to change the light-theme link accent, which measures 4.25:1. Either way the contrast script moves into the repository. Not a release gate.",
+      "notes": "origin: roadmap review 2026-11-06, Findings F-033. Same reading on base and fix, so not a regression. The whether-to-change decision is the owner design call, taken when the item is specified.",
+      "sequence": 136.5
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-07T06:19:45Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LINK-ACCENT-CONTRAST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LINK-ACCENT-CONTRAST-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LINK-ACCENT-CONTRAST-1",
+      "actualRevision": "",
+      "recoveryId": "20261107T061950Z-external-create-item-LINK-ACCENT-CONTRAST-1",
+      "detail": {},
+      "providerItemId": "4117c96c-c31e-8106-8d41-e3312c12028a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-07T06:20:23Z",
+  "outcome": "succeeded"
+}

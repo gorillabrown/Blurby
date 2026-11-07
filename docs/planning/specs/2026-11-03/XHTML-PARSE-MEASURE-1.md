@@ -150,6 +150,20 @@ The planner's earlier recommendation (1 in 10 net, or one whole book) is superse
 - **Shared-core touches:** none.
 - **Merge order:** after BTO. Independent of UNCERTIFIED-ANCHOR-HOLD-1 and of CFI-POSITION-CONSISTENCY-1. If WORD-INDEX-UNIFY-1 is specified before this closes, it waits for the memo.
 
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | The 20-book corpus and its manifest (M1) | calculable | implementation | bounded | low | 20m | — | — |
+| 2 | Checker corpus mode, off by default, with its refused-flag control (M2) | calculable | implementation | bounded | medium | 30m | — | — |
+| 3 | Base run of the corpus (M3) | calculable | verify | bounded | low | 30m | — | — |
+| 4 | Prototype branch and its xml run (M4) | calculable | implementation | bounded | medium | 30m | — | — |
+| 5 | Summary with the computed verdict (M5) | calculable | implementation | bounded | medium | 20m | — | B |
+| 6 | The four trap answers from the corpus (M6) | calculable | verify | bounded | medium | 20m | — | B |
+| 7 | Memo with Blurby.Brain1's read (M7) | calculable | docs | bounded | low | 15m | — | — |
+
+**Total:** chain 15m · sum 17m; 7 of 7 estimated tasks calibrated
+
 ##### Lessons applied
 
 - **LL-142:** the numbering claim is measured by running main's real extractor and the renderer's real certifier on real files, not argued from the parsers' documentation.

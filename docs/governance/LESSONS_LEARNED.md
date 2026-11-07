@@ -3318,3 +3318,51 @@ Related: standing rule 55, rule 6c, F-036, LL-165.
 **Applies to:** `/roadmap-review` Phase A, `/roadmap-status`, and any spec or ruling that places a hold.
 **Status:** Observation
 Related: SRL-097, F-001.
+
+### LL-142 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 56
+
+### LL-137 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 57
+
+### LL-160 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 58
+
+### LL-161 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 58
+
+### LL-165 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 59
+
+### LL-162 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 60
+
+### LL-117 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-129 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-139 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-150 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-029 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-031 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-109 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-006 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 3
+
+### LL-068 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 1
+
+### LL-088 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 37

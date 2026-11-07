@@ -1,0 +1,48 @@
+{
+  "id": "20261107T061948Z-external-create-item-FIXED-LAYOUT-RESTAMP-1",
+  "operation": "external-create-item",
+  "item_id": "FIXED-LAYOUT-RESTAMP-1",
+  "created": "2026-11-07T06:19:48Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "FIXED-LAYOUT-RESTAMP-1",
+      "title": "Page re-stamp numbers fixed-layout pages correctly",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#fixed-layout-restamp-1",
+      "prerequisites": [],
+      "description": "Measure first with a pre-paginated fixture, then fix if the defect is real: each fixed-layout page gets its own word numbers. Not a release gate.",
+      "notes": "origin: roadmap review 2026-11-06, Findings F-034. Unmeasured. foliate fixed-layout getContents() returns no index, so the re-stamp may take the slice start as 0.",
+      "sequence": 115.8
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-11-07T06:19:45Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FIXED-LAYOUT-RESTAMP-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FIXED-LAYOUT-RESTAMP-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FIXED-LAYOUT-RESTAMP-1",
+      "actualRevision": "",
+      "recoveryId": "20261107T061948Z-external-create-item-FIXED-LAYOUT-RESTAMP-1",
+      "detail": {},
+      "providerItemId": "4117c96c-c31e-8140-b1f4-eb6061f89870",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-11-07T06:20:22Z",
+  "outcome": "succeeded"
+}
