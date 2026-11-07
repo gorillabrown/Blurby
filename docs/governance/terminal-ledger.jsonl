@@ -107,3 +107,4 @@
 {"recordId": "TR-107", "itemId": "PAGE-HELD-TURN-FAIL-1", "completed": "2026-11-04", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.PAGE-HELD-TURN-FAIL-1.2026-11-04.md", "corrects": "", "effort": "S"}
 {"recordId": "TR-108", "itemId": "TOC-JUMP-SAVE-1", "completed": "2026-11-04", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.TOC-JUMP-SAVE-1.2026-11-04.md", "corrects": "", "effort": "M"}
 {"recordId": "TR-109", "itemId": "ERROR-LOG-CAP-1", "completed": "2026-11-05", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.ERROR-LOG-CAP-1.2026-11-05.md", "corrects": "", "effort": "XS"}
+{"recordId": "TR-110", "itemId": "GOV-SWEEP-FOLLOWTHROUGH-1", "completed": "2026-11-06", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.GOV-SWEEP-FOLLOWTHROUGH-1.2026-11-06.md", "corrects": "", "effort": "M"}

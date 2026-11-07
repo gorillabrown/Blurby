@@ -3310,3 +3310,59 @@ Related: standing rule 44, F-027.
 **Applies to:** timed gates, frame and latency checks, anything run on an unattended host.
 **Status:** Observation
 Related: standing rule 55, rule 6c, F-036, LL-165.
+
+### LL-196 — In Flight with nothing running hides stalled work (GOV-SWEEP-FOLLOWTHROUGH-1, 2026-11-06)
+**Verdict:** The governance sweep finished and merged on 2026-10-26, then held Seq 0 for 11 days because nothing named who lifts its acceptance hold. Two finished diagnoses sat the same way. In Flight read as active on all three, though no branch existed and no run was going.
+**Evidence:** Roadmap review 2026-11-06 audit: of 53 In Flight items, 46 have merged tips, 4 have unmerged branches and 3 have no branch at all. Those 3 were GOV-SWEEP-FOLLOWTHROUGH-1, FOLDER-SWITCH-CONTENT-1 and PROFILE-QUEUE-ISOLATION-1. Each had its evidence recorded in Notes by 2026-10-26.
+**Recommendation:** When a review reads the register, check each In Flight item against its branch and name what it is waiting for. An item with no branch and no running work is either done (close it) or not started (queue it). When a hold is placed, name who lifts it.
+**Applies to:** `/roadmap-review` Phase A, `/roadmap-status`, and any spec or ruling that places a hold.
+**Status:** Observation
+Related: SRL-097, F-001.
+
+### LL-142 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 56
+
+### LL-137 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 57
+
+### LL-160 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 58
+
+### LL-161 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 58
+
+### LL-165 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 59
+
+### LL-162 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 60
+
+### LL-117 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-129 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-139 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-150 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 61
+
+### LL-029 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-031 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-109 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 62
+
+### LL-006 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 3
+
+### LL-068 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 1
+
+### LL-088 — status (2026-11-06, 2026-11-06)
+**Status:** Promoted -> standing rule 37

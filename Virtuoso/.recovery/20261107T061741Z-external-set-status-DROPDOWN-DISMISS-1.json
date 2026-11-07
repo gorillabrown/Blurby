@@ -1,0 +1,34 @@
+{
+  "id": "20261107T061741Z-external-set-status-DROPDOWN-DISMISS-1",
+  "operation": "external-set-status",
+  "item_id": "DROPDOWN-DISMISS-1",
+  "created": "2026-11-07T06:17:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "effort": "S"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:DROPDOWN-DISMISS-1:[('effort', 'S')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "DROPDOWN-DISMISS-1",
+      "idempotencyKey": "set-status:DROPDOWN-DISMISS-1:[('effort', 'S')]",
+      "actualRevision": "",
+      "recoveryId": "20261107T061741Z-external-set-status-DROPDOWN-DISMISS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-11-07T06:19:29Z",
+  "outcome": "succeeded"
+}

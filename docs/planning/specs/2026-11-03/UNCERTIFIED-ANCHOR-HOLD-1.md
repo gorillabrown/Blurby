@@ -324,6 +324,19 @@ Source: `C:\Projects\Blurby-artifacts\brain1-rulings\Brain1.UNCERTIFIED-ANCHOR-H
 - **Focus's relocate highlight is a fraction estimate.** With no resume anchor, `onRelocate` publishes `approxWordIdx = floor(fraction × wordCount)` (`focus/ModeRuntime.ts:868`, `:877`). Its relocate save then writes `resolveCanonicalWordAnchor(…)` (`:895-903`), whose order puts `focusWordIndex` (`s.displayWordIndex`) before the highlight. The estimate is not a span read and does not depend on certification. Record whether a passive relocate can save it.
 - **Unused `soft-visible` event.** It is declared in the three modes' `helpers/persistentReadingAnchor.ts` and never dispatched. That is a dead-code candidate for a later sweep.
 
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Done-when 0 re-grep on BLOCK-TEXT-ORDER-1's merge, with each output in the memo | calculable | verify | bounded | low | 10m | — | — |
+| 2 | Flow holds its unverified first-visible-word saves and start, red first | calculable | implementation | bounded | medium | 30m | — | A |
+| 3 | Focus holds its unverified first-visible-word saves and start, red first | calculable | implementation | bounded | medium | 30m | — | A |
+| 4 | Narrate holds its unverified first-visible-word saves and start, red first | calculable | implementation | bounded | medium | 30m | — | A |
+| 5 | Suite, typecheck, inherited rows and the package pair with Blurby.Brain1's confirmation | calculable | verify | bounded | medium | 40m | — | — |
+| 6 | Memo, time log and push | calculable | docs | bounded | low | 10m | — | — |
+
+**Total:** chain 9m · sum 15m; 6 of 6 estimated tasks calibrated
+
 ##### Lessons applied
 
 - **LL-170:** an in-range index, a count or `bookStamped` is not a certificate. A held span's index never reaches a start.
