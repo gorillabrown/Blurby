@@ -131,9 +131,9 @@ There are no `tests/` rows, as ruled, so the positive controls are this item's r
 
 ##### Lessons applied
 
-- **LL-142:** the remedy follows measurement. The probe measured what the D3 sessions assumed.
+- **Standing rule 56:** the remedy follows measurement. The probe measured what the D3 sessions assumed.
 - **LL-152:** one recipe for base and tip. Every session runs the same probe on the same Electron.
-- **LL-160:** the checker stays under the app's Electron ICU, through `app-node.ps1`.
+- **Standing rule 58:** the checker stays under the app's Electron ICU, through `app-node.ps1`.
 - **Standing rule 43:** with `tests/` out of the fence, rows 1, 4, 6 and 7 are this item's red.
 - **Standing rule 55:** a check gets a positive control before its pass counts.
 - **Standing rule 53:** the package is recorded unchanged, with Blurby.Brain1's confirmation.
